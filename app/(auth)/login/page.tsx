@@ -2,8 +2,6 @@ import { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
 import { BrandName } from "@/lib/constants"
 import { LoginForm } from "@/components/forms/loginForm"
 
@@ -34,9 +32,9 @@ export default function AuthenticationPage() {
           <div className="relative z-20 mt-auto">
             <blockquote className="space-y-2">
               <p className="text-lg">
-                &ldquo;A Great way to Manage Your Orders.&rdquo;
+                &ldquo;A Great way to Manage Your <b>ExIm Business.</b>&rdquo;
               </p>
-              <footer className="text-sm">Created By Team DesignerDudes</footer>
+              <footer className="text-sm">Created By Team <Link className="underline-offset-4 hover:underline" href="https://designerdudes.in">DesignerDudes</Link></footer>
             </blockquote>
           </div>
         </div>
