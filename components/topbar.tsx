@@ -21,7 +21,7 @@ import Heading from './ui/heading'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
-import { APP_NAME } from '@/lib/constants'
+import { BrandName } from '@/lib/constants'
 import LogoComponent from './logo'
 
 const Topbar = () => {
@@ -39,7 +39,7 @@ const Topbar = () => {
         <div className="flex bg-secondary p-3 px-12 mb-2 justify-between items-center sticky top-0 z-50">
             <div className='flex items-center gap-2'>
                 <LogoComponent width={60} height={40} className='w-8 h-8 object-contain' />
-                <Heading title={APP_NAME} className='text-xl' />
+                <Heading title={BrandName} className='text-xl' />
 
             </div>
             <div className='flex items-center gap-2'>
@@ -54,6 +54,20 @@ const Topbar = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="w-56">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem className='flex items-center gap-2'>
+                                <Avatar className='w-8 h-8'>
+                                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
+                                    <AvatarFallback>CN</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className='font-semibold'>Shad</p>
+                                    <p className='text-xs text-gray-500'>shadcn@incodocs.net</p>
+                                </div>
+
+                            </DropdownMenuItem>
+
+                        </DropdownMenuGroup>
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
