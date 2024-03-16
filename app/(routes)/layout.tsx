@@ -19,8 +19,11 @@ export default function DashboardLayout({
 }: DashboardLayoutProps) {
   return (
     <>
-      <div className='flex flex-row'>
+      <div className='flex flex-row h-screen'>
+
+
         <Sidebar />
+
         <div className='flex w-full flex-col'>
           <TopBar />
           {children}

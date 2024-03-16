@@ -8,22 +8,26 @@ const sidebarTabs = [
     {
         title: 'Home',
         path: '/dashboard',
-        icon: <HomeIcon className="w-4 mr-2" />
+        icon: <HomeIcon className="w-4 mr-2" />,
+        showButton: false
     },
     {
         title: 'Shipment Records',
         path: '/shipment-records',
-        icon: <Sheet className="w-4 mr-2" />
+        icon: <Sheet className="w-4 mr-2" />,
+        showButton: true
     },
     {
         title: 'Settings',
         path: '/settings',
-        icon: <Settings className="w-4 mr-2" />
+        icon: <Settings className="w-4 mr-2" />,
+        showButton: false
     },
     {
         title: 'Help Center',
         path: '/hel[-center',
-        icon: <HelpCircle className="w-4 mr-2" />
+        icon: <HelpCircle className="w-4 mr-2" />,
+        showButton: false
     },
 
 

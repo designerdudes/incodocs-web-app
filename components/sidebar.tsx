@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
-import { BrandName } from '@/lib/constants';
+import sidebarTabs, { BrandName } from '@/lib/constants';
 import { Separator } from './ui/separator';
 
 function Sidebar() {
@@ -16,33 +16,57 @@ function Sidebar() {
         setHoveredItem(null);
     };
 
-    const menuItems = [
-        "Home",
-        "About",
-        "Services",
-        "Contact"
-    ];
 
+    const firstTabs = sidebarTabs.slice(0, 2);
+    const restTabs = sidebarTabs.slice(2);
     return (
-        <div className='w-64 bg-primary h-screen text-white'>
+        <div className='w-64  sticky top-0 h-screen z-50 bg-primary  text-white'>
             <div className='flex items-center justify-start px-4 h-16 bg-primary-dark'>
                 <h1 className='text-2xl font-bold'>{BrandName}</h1>
             </div>
             <Separator className='opacity-[0.2] mb-2' />
-            <div className='flex flex-col gap-4'>
-                {menuItems.map((item, index) => (
-                    <div
-                        key={index}
-                        className={`text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}`}
-                        onMouseEnter={() => handleMouseEnter(index)}
-                        onMouseLeave={handleMouseLeave}
-                    >
-                        <span>{item}</span>
-                        {hoveredItem === index &&
-                            <Plus className='w-6 h-6 p-1 rounded-lg cursor-pointer hover:bg-primary' style={{ opacity: hoveredItem === index ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }} />
-                        }
-                    </div>
-                ))}
+            <div className='flex flex-col justify-between h-[90%]  gap-4'>
+                {/* Render the first two tabs */}
+                <div>
+                    {firstTabs.map((item: any, index: any) => (
+                        <div
+                            key={index}
+                            className={`text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}`}
+                            onMouseEnter={() => handleMouseEnter(index)}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <div className='flex items-center gap-1'>
+                                <span>{item.icon}</span>
+                                <span className='text-sm'>{item.title}</span>
+                            </div>
+                            {item.showButton &&
+                                hoveredItem === index &&
+                                <Plus className='w-6 h-6 p-1 rounded-lg cursor-pointer hover:bg-primary' style={{ opacity: hoveredItem === index ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }} />
+                            }
+                        </div>
+                    ))}
+                </div>
+
+                {/* Render the rest of the tabs */}
+                <div>
+                    {restTabs.map((item, index) => (
+                        <div
+                            key={index + firstTabs.length}
+                            className={`text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index + firstTabs.length ? 'hovered' : ''}`}
+                            onMouseEnter={() => handleMouseEnter(index + firstTabs.length)}
+                            onMouseLeave={handleMouseLeave}
+                        >
+                            <div className='flex items-center gap-1'>
+                                <span>{item.icon}</span>
+                                <span className='text-sm'>{item.title}</span>
+                            </div>
+                            {item.showButton &&
+                                hoveredItem === index + firstTabs.length &&
+                                <Plus className='w-6 h-6 p-1 rounded-lg cursor-pointer hover:bg-primary' style={{ opacity: hoveredItem === index + firstTabs.length ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }} />
+                            }
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
