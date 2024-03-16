@@ -1,7 +1,7 @@
 "use client"
 import { BadgeIndianRupee, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ServerIcon, Settings, Sheet, ShoppingBagIcon, TagIcon, UserCog, Users, } from "lucide-react"
 
-const BrandName = "Incodocs"
+const BrandName = "IncoDocs"
 
 
 const sidebarTabs = [
