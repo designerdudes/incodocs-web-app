@@ -9,10 +9,10 @@ function Sidebar() {
             </div>
             <div className='flex flex-col gap-4'>
 
-                <div className='text-secondary-foreground text-white hover:bg-[#7170e8] py-1 px-4'>Home</div>
-                <div className='text-secondary-foreground text-white hover:bg-[#7170e8] py-1 px-4'>About</div>
-                <div className='text-secondary-foreground text-white hover:bg-[#7170e8] py-1 px-4'>Services</div>
-                <div className='text-secondary-foreground text-white hover:bg-[#7170e8] py-1 px-4'>Contact</div>
+                <div className='text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4'>Home</div>
+                <div className='text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4'>About</div>
+                <div className='text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4'>Services</div>
+                <div className='text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4'>Contact</div>
 
             </div>
 
