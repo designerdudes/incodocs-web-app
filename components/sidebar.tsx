@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
+import { BrandName } from '@/lib/constants';
+import { Separator } from './ui/separator';
 
 function Sidebar() {
     const [hoveredItem, setHoveredItem] = useState(null);
@@ -23,9 +25,10 @@ function Sidebar() {
 
     return (
         <div className='w-64 bg-primary h-screen text-white'>
-            <div className='flex items-center justify-center h-16 bg-primary-dark'>
-                <h1 className='text-2xl font-bold'>Sidebar</h1>
+            <div className='flex items-center justify-start px-4 h-16 bg-primary-dark'>
+                <h1 className='text-2xl font-bold'>{BrandName}</h1>
             </div>
+            <Separator className='opacity-[0.2] mb-2' />
             <div className='flex flex-col gap-4'>
                 {menuItems.map((item, index) => (
                     <div
