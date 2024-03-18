@@ -18,7 +18,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 export function LoginForm() {
-    const [username, setUsername] = useState('')
+    const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState(false)
     const [loading, setLoading] = useState(false)
@@ -27,7 +27,7 @@ export function LoginForm() {
     const router = useRouter()
 
     const user = {
-        username: username,
+        email: email,
         password: password,
     }
     const onSubmit = async () => {
@@ -65,8 +65,8 @@ export function LoginForm() {
             <CardContent className="grid gap-4">
 
                 <div className="grid gap-2">
-                    <Label htmlFor="username">username</Label>
-                    <Input id="username" disabled={loading} value={username} onChange={(e: any) => setUsername(e.target.value)} placeholder="mohammed" />
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" disabled={loading} value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="mohammed@incodocs.net" />
 
                 </div>
                 <div className="grid gap-2">
