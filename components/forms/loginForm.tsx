@@ -60,30 +60,10 @@ export function LoginForm() {
         <Card className=" shadow-sm shadow-[#00000042]  dark:shadow-[#ffffff42]">
             <CardHeader className="space-y-1">
                 <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">Login to your account</CardTitle>
-                <CardDescription>
-                    Enter your email below or continue with Google <br /> to login to your account.
-                </CardDescription>
+
             </CardHeader>
             <CardContent className="grid gap-4">
-                <div className="grid grid-cols-1 gap-6">
-                    <Button disabled={loading} variant="outline">
-                        <Icons.google className="mr-2 h-4 w-4" />
-                        Google
-                        {
-                            loading && <Icons.spinner className="ml-2 w-4 animate-spin" />
-                        }
-                    </Button>
-                </div>
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">
-                            Or continue with
-                        </span>
-                    </div>
-                </div>
+
                 <div className="grid gap-2">
                     <Label htmlFor="username">username</Label>
                     <Input id="username" disabled={loading} value={username} onChange={(e: any) => setUsername(e.target.value)} placeholder="mohammed" />
@@ -96,7 +76,7 @@ export function LoginForm() {
                 </div>
             </CardContent>
             <CardFooter>
-                <Button disabled={loading} onClick={onSubmit} className="w-full" variant="default">
+                <Button disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
                     Continue via Email
                     {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
