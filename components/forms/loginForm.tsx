@@ -31,26 +31,43 @@ export function LoginForm() {
         password: password,
     }
     const onSubmit = async () => {
-        try {
-            setError(false)
-            setLoading(true)
-            const res = await axios.post('/api/auth/login', user)
-            console.log(" login successfull")
-            console.log(res.data)
-
-            router.refresh()
-        } catch (error: any) {
-            setLoading(false)
+        setLoading(true)
+        if (email === "") {
             setError(true)
-            setMessage(error.response.data.error)
-            console.error(error.response.data.error)
-
-
-        } finally {
+            setMessage("Email is required")
             setLoading(false)
-
         }
+        if (password === "") {
+            setError(true)
+            setMessage("Password is required")
+            setLoading(false)
+        }
+        if (email === "" || password === "") {
+            setError(true)
+            setMessage("Email and Password is required")
+            setLoading(false)
+        }
+        else {
+            try {
 
+                setLoading(true)
+                const res = await axios.post('/api/auth/login', user)
+                console.log(" login successfull")
+                console.log(res.data)
+
+                router.refresh()
+            } catch (error: any) {
+                setLoading(false)
+                setError(true)
+                setMessage(error.response.data.error)
+                console.error(error.response.data.error)
+
+
+            } finally {
+                setLoading(false)
+
+            }
+        }
 
     }
 
