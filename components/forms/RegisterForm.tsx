@@ -18,6 +18,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { BrandName } from "@/lib/constants"
 import Link from "next/link"
+import { postData } from "@/axiosUtility/api"
 
 export function RegisterForm() {
     const [fullName, setFullName] = useState('')
@@ -60,9 +61,9 @@ export function RegisterForm() {
             try {
 
                 setLoading(true)
-                const res = await axios.post('/api/auth/login', user)
-                console.log(" login successfull")
-                console.log(res.data)
+                const res = await postData('user/add', user)
+                console.log("Account Created Successfully")
+                console.log(res.token)
 
                 router.refresh()
             } catch (error: any) {
