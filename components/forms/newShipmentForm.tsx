@@ -212,7 +212,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 // className={cn(
                                                 //     "w-[240px] pl-3 text-left font-normal",
                                                 //     !field.value && "text-muted-foreground"
@@ -254,7 +254,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
 
                                                 >
                                                     {field.value ? (
@@ -461,7 +461,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -571,7 +571,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -710,7 +710,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -792,7 +792,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -830,7 +830,7 @@ export function NewShipmentForm() {
                                         <PopoverTrigger asChild>
                                             <FormControl>
                                                 <Button
-                                                    variant={"outline"}
+                                                    size={'lg'} variant={"outline"}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -876,10 +876,10 @@ export function NewShipmentForm() {
                     </div>}
                 <div className='grid grid-cols-4 gap-2'>
 
-                    {currentStep > 1 && <Button disabled={isLoading} type='button' variant="secondary" onClick={() => { setCurrentStep(currentStep - 1) }} > Back {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />} </Button>}
-                    {currentStep < totalSteps && <Button disabled={isLoading} type='button' onClick={() => { setCurrentStep(currentStep + 1) }} >
+                    {currentStep > 1 && <Button disabled={isLoading} type='button' size={'lg'} variant="outline" onClick={() => { setCurrentStep(currentStep - 1) }} > Back {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />} </Button>}
+                    {currentStep < totalSteps && <Button size={'lg'} disabled={isLoading} type='button' onClick={() => { setCurrentStep(currentStep + 1) }} >
                         Next {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />} </Button>}
-                    {currentStep === totalSteps && <Button disabled={isLoading} type='submit' >
+                    {currentStep === totalSteps && <Button size={'lg'} disabled={isLoading} type='submit' >
                         Submit{isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
                     </Button>}
 
