@@ -108,8 +108,8 @@ export function LoginForm() {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
                     }
                 </Button>
-                <Link href="/login">
-                    <Button className="w-full text-sm" variant="link">Already have an account? Login</Button>
+                <Link href="/register">
+                    <Button className="w-full text-sm" variant="link">New to {BrandName}? Create an Account</Button>
                 </Link>
             </CardFooter>
         </Card>

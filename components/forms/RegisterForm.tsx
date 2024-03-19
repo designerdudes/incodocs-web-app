@@ -17,6 +17,7 @@ import axios from "axios"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { BrandName } from "@/lib/constants"
+import Link from "next/link"
 
 export function RegisterForm() {
     const [fullName, setFullName] = useState('')
@@ -104,13 +105,17 @@ export function RegisterForm() {
                     {error && <p className="text-red-500 text-sm">{message}</p>}
                 </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
+
                 <Button size={'lg'} disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
                     Continue via Email
                     {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
                     }
                 </Button>
+                <Link href="/login">
+                    <Button className="w-full text-sm" variant="link">Already have an account? Login</Button>
+                </Link>
             </CardFooter>
         </Card>
     )
