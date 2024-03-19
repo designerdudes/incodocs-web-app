@@ -57,6 +57,52 @@ export function RegisterForm() {
             setMessage("Email and Password is required")
             setLoading(false)
         }
+        if (fullName === "" || email === "" || password === "") {
+            setError(true)
+            setMessage("Full Name, Email and Password is required")
+            setLoading(false)
+        }
+        if (password.length < 6) {
+            setError(true)
+            setMessage("Password should be atleast 6 characters long")
+            setLoading(false)
+        }
+        if (password.includes(" ")) {
+            setError(true)
+            setMessage("Password should not contain spaces")
+            setLoading(false)
+        }
+        if (email.includes(" ")) {
+            setError(true)
+            setMessage("Email should not contain spaces")
+            setLoading(false)
+        }
+        if (email.includes("@") === false) {
+            setError(true)
+            setMessage("Email should contain @")
+            setLoading(false)
+        }
+        if (password.includes("1 2 3 4 5 6 7 8 9 0")) {
+            setError(true)
+            setMessage("Password should contain atleast one number")
+            setLoading(false)
+        }
+        if (password.includes("ABCDEFGHIJKLMNOPQRSTUVWXYZ")) {
+            setError(true)
+            setMessage("Password should contain atleast one uppercase letter")
+            setLoading(false)
+        }
+        if (password.includes("abcdefghijklmnopqrstuvwxyz")) {
+            setError(true)
+            setMessage("Password should contain atleast one lowercase letter")
+            setLoading(false)
+        }
+        if (password.includes("! @ # $ % ^ & * ( ) _ + - = { } [ ] | \\ : ; < > , . ? /")) {
+            setError(true)
+            setMessage("Password should contain atleast one special character")
+            setLoading(false)
+        }
+
         else {
             try {
 
