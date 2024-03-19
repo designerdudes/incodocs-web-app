@@ -6,7 +6,7 @@ const instance = axios.create({
 
 
 export const fetchData = async (endpoint:any, config = {}) => {
-  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
   try {
     const response = await instance.request({
       url: endpoint,
@@ -26,7 +26,7 @@ export const fetchData = async (endpoint:any, config = {}) => {
 };
 
 export const postData = async (endpoint: any, data: any, config = {}) => {
-const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
   try {
     const response = await instance.post(endpoint, data, {
       headers: {
@@ -45,7 +45,7 @@ const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*
 
 
 export const putData = async (endpoint: any, data: any, config = {}) => {
-  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
   try {
       const response = await instance.put(endpoint, data, {
           headers: {
@@ -63,7 +63,7 @@ export const putData = async (endpoint: any, data: any, config = {}) => {
 };
 
 export const deleteData = async (endpoint: string, config = {}) => {
-  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
   try {
     const response = await instance.delete(endpoint, {
       headers: {
@@ -81,7 +81,7 @@ export const deleteData = async (endpoint: string, config = {}) => {
 };
 
 export const deleteAllData = async (endpoint: string, data: any, config = {}) => {
-  const token = document.cookie?.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string | undefined;
+  const token = document.cookie?.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string | undefined;
  
   try {
     const response = await instance.delete(endpoint, {
@@ -106,7 +106,7 @@ export const deleteAllData = async (endpoint: string, data: any, config = {}) =>
 
 
 export const activateCoupon = async (endpoint: any, data: any, config = {}) => {
-  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AplusToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+  const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
     try {
       const response = await instance.put(endpoint, data, {
         headers: {
