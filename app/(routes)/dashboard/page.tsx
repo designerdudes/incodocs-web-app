@@ -29,9 +29,9 @@ export default function Home() {
   useEffect(() => {
     if (currentUserData?.owner.length > 0) {
       // Remove the unnecessary return statement here
-      globalModal.title = 'Welcome, ' + currentUserData?.owner[0]?.name
-      globalModal.description = 'Welcome to the dashboard'
-      globalModal.isDismissable = true
+      globalModal.title = 'Add Organization Details'
+      globalModal.description = 'Please add your organization details to continue'
+      globalModal.isDismissable = false
       globalModal.onOpen()
     }
   }, [currentUserData])
