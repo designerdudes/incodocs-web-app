@@ -93,7 +93,7 @@ export function LoginForm() {
                     <div>
 
                         <Input disabled={loading} id="password" value={password} onChange={(e: any) => setPassword(e.target.value)} type="password" placeholder="******" />
-                        {error && <p className="text-red-500 text-sm">{message}</p>}
+                        {error && <p className="text-red-500 text-xs mt-1">{message}</p>}
                         <Link href="/forgot-password">
                             <Button className="w-fit p-0 m-0 justify-start text-xs" variant="link">Forgot Password?</Button>
                         </Link>
@@ -102,7 +102,7 @@ export function LoginForm() {
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
 
-                <Button disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
+                <Button size={'lg'} disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
                     Continue via Email
                     {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
