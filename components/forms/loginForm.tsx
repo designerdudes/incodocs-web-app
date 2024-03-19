@@ -18,6 +18,9 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { BrandName } from "@/lib/constants"
 import Link from "next/link"
+import { postData } from "@/axiosUtility/api"
+import toast from "react-hot-toast"
+import Cookies from 'js-cookie';
 
 export function LoginForm() {
     const [email, setEmail] = useState('')
@@ -53,9 +56,12 @@ export function LoginForm() {
             try {
 
                 setLoading(true)
-                const res = await axios.post('/api/auth/login', user)
-                console.log(" login successfull")
-                console.log(res.data)
+                const res = await postData('/user/login', user)
+
+                console.log(res.data.token)
+                Cookies.set('AccessToken', res?.data.token, { expires: 7 }); // Set the expiration in days
+                toast.success('Login successful')
+                router.push('/dashboard')
 
                 router.refresh()
             } catch (error: any) {
