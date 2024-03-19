@@ -1,4 +1,4 @@
-import { APP_NAME } from '@/lib/constants';
+import { BrandName } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react';
@@ -14,7 +14,7 @@ const LogoComponent: React.FC<LogoProps> = ({ className, width, height }) => {
         <div className={`logo`}>
             <Image
                 src="/JabalEximCropped.png"
-                alt={APP_NAME}
+                alt={BrandName}
 
                 width={width}
                 className={cn('invert dark:invert-0', className)}

@@ -21,6 +21,7 @@ export default function AuthenticationPage() {
                     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
 
                         <RegisterForm />
+                        <span className="text-xs text-center text-gray-500" >By signing up, you agree to IncoDocs&apos; <a href="" className="cursor-pointer hover:text-gray-900 hover:underline">Terms of Use </a> and <a href="" className="cursor-pointer hover:text-gray-900 hover:underline">Privacy Policy</a>.</span>
 
                     </div>
                 </div>

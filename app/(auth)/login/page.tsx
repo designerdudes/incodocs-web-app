@@ -4,6 +4,7 @@ import Link from "next/link"
 
 import { BrandName } from "@/lib/constants"
 import { LoginForm } from "@/components/forms/loginForm"
+import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
   title: 'Login to Admin Dashboard | Incodocs',
@@ -40,9 +41,7 @@ export default function AuthenticationPage() {
         </div>
         <div className="lg:p-8">
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-
             <LoginForm />
-
           </div>
         </div>
       </div>
