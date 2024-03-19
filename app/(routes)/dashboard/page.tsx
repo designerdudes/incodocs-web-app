@@ -1,5 +1,6 @@
 "use client"
 import { fetchData } from "@/axiosUtility/api";
+import { GetOrganisationDetaisForm } from "@/components/forms/GetOrganisationDetailsForm";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -32,6 +33,7 @@ export default function Home() {
       globalModal.title = 'Add Organization Details'
       globalModal.description = 'Please add your organization details to continue'
       globalModal.isDismissable = false
+      globalModal.children = <GetOrganisationDetaisForm gap={2} />
       globalModal.onOpen()
     }
   }, [currentUserData])
