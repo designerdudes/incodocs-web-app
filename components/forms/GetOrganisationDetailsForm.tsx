@@ -24,19 +24,15 @@ interface GetOrganisationDetaisFormProps extends React.HTMLAttributes<HTMLDivEle
 }
 
 const formSchema = z.object({
-    fullName: z.string().min(2,
-        { message: "Name must be atleast 2 characters long" }
-    ).max(50,
-        { message: "Name must be less than 50 characters long" }
+    organisationName: z.string().min(2,
+        { message: "Organisation Name must be atleast 2 characters long" }
     ),
     email: z.string().email(),
-    mobileNumber: z.string().min(10).max(10),
+    description: z.string().min(10).max(10),
     address: z.string().min(10).max(100),
     city: z.string().min(2).max(50),
-    customerType: z.string().min(2).max(50),
     state: z.string().min(2).max(50),
     pincode: z.string().min(6).max(6),
-    country: z.string().min(2).max(50),
 
 })
 
@@ -48,7 +44,7 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            country: "India",
+
             state: "Andhra Pradesh",
             city: "Ongole",
             customerType: "nonsubscriber",
@@ -112,25 +108,25 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
                     <div className={`grid grid-cols-${gap} gap-3`}>
                         {/* <div className={`grid grid-cols-2 gap-3`}> */}
                         <FormField
-                            name="fullName"
+                            name="organisationName"
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel htmlFor="fullName">Full Name</FormLabel>
+                                    <FormLabel htmlFor="organisationName">Organisation Name</FormLabel>
                                     <FormControl>
                                         <Input
-                                            id="fullName"
+                                            id="organisationName"
                                             placeholder="eg. John Doe"
                                             type="text"
                                             autoCapitalize="none"
-                                            autoComplete="fullName"
+                                            autoComplete="organisationName"
                                             autoCorrect="off"
                                             disabled={isLoading}
                                             {...field}
                                         />
                                     </FormControl>
                                     <FormMessage>
-                                        {form.formState.errors.fullName?.message}
+                                        {form.formState.errors.organisationName?.message}
                                     </FormMessage>
                                 </FormItem>
                             )}
@@ -162,19 +158,19 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
                         />
 
                         <FormField
-                            name="mobileNumber"
+                            name="description"
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel htmlFor="mobileNumber">Mobile No.</FormLabel>
+                                    <FormLabel htmlFor="description">Mobile No.</FormLabel>
                                     <FormControl>
 
                                         <Input
-                                            id="mobileNumber"
+                                            id="description"
                                             placeholder="eg. +91 9876543210"
                                             type="number"
                                             autoCapitalize="none"
-                                            autoComplete="mobileNumber"
+                                            autoComplete="description"
                                             autoCorrect="off"
 
                                             disabled={isLoading}
@@ -182,7 +178,7 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
                                         />
                                     </FormControl>
                                     <FormMessage>
-                                        {form.formState.errors.mobileNumber?.message}
+                                        {form.formState.errors.description?.message}
                                     </FormMessage>
                                 </FormItem>
                             )}
@@ -314,11 +310,11 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
                         />
                     </div>
                     <div className={`${gap === 2 ? 'w-full' : 'grid gap-3 grid-cols-3'}`} >
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button size={"lg"} type="submit" className="w-full" disabled={isLoading}>
                             {isLoading && (
                                 <Icons.spinner className="mr-2 h-4  w-4 animate-spin" />
                             )}
-                            Create
+                            Update Details
                         </Button>
                     </div>
 
