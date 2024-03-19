@@ -84,8 +84,8 @@ export function RegisterForm() {
     return (
         <Card className=" shadow-sm shadow-[#00000042]  dark:shadow-[#ffffff42]">
             <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">Create an Account at {BrandName}</CardTitle>
-
+                <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">Create an Account at <span className="text-primary">{BrandName} </span> </CardTitle>
+                <CardDescription className="text-gray-500">Get started with {BrandName} in seconds</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
                 <div className="grid gap-2">

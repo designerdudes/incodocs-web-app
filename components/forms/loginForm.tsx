@@ -16,6 +16,8 @@ import { ArrowRight } from "lucide-react"
 import axios from "axios"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { BrandName } from "@/lib/constants"
+import Link from "next/link"
 
 export function LoginForm() {
     const [email, setEmail] = useState('')
@@ -76,7 +78,7 @@ export function LoginForm() {
     return (
         <Card className=" shadow-sm shadow-[#00000042]  dark:shadow-[#ffffff42]">
             <CardHeader className="space-y-1">
-                <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">Login to your account</CardTitle>
+                <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">Log in to your <br /> <span className="text-primary">{BrandName}</span> Account</CardTitle>
 
             </CardHeader>
             <CardContent className="grid gap-4">
@@ -88,17 +90,27 @@ export function LoginForm() {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input disabled={loading} id="password" value={password} onChange={(e: any) => setPassword(e.target.value)} type="password" placeholder="******" />
-                    {error && <p className="text-red-500 text-sm">{message}</p>}
+                    <div>
+
+                        <Input disabled={loading} id="password" value={password} onChange={(e: any) => setPassword(e.target.value)} type="password" placeholder="******" />
+                        {error && <p className="text-red-500 text-sm">{message}</p>}
+                        <Link href="/forgot-password">
+                            <Button className="w-fit p-0 m-0 justify-start text-xs" variant="link">Forgot Password?</Button>
+                        </Link>
+                    </div>
                 </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="flex flex-col gap-2">
+
                 <Button disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
                     Continue via Email
                     {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
                     }
                 </Button>
+                <Link href="/login">
+                    <Button className="w-full text-sm" variant="link">Already have an account? Login</Button>
+                </Link>
             </CardFooter>
         </Card>
     )
