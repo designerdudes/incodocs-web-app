@@ -95,7 +95,7 @@ export function RegisterForm() {
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
-                    <Input id="email" disabled={loading} value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="mohammed@incodocs.net" />
+                    <Input id="email" disabled={loading} value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="mohammed@incodocs.in" />
 
                 </div>
                 <div className="grid gap-2">

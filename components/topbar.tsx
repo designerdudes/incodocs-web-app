@@ -61,8 +61,8 @@ const Topbar = () => {
                                     <AvatarFallback>CN</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className='font-semibold'>Shad</p>
-                                    <p className='text-xs text-gray-500'>shadcn@incodocs.net</p>
+                                    <p className='font-semibold'>Mohammed</p>
+                                    <p className='text-xs text-gray-500'>mohammed@incodocs.in</p>
                                 </div>
 
                             </DropdownMenuItem>
