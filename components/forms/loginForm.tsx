@@ -58,8 +58,8 @@ export function LoginForm() {
                 setLoading(true)
                 const res = await postData('/user/login', user)
 
-                console.log(res.data.token)
-                Cookies.set('AccessToken', res?.data.token, { expires: 7 }); // Set the expiration in days
+                console.log(res.token)
+                Cookies.set('AccessToken', res?.token, { expires: 7 }); // Set the expiration in days
                 toast.success('Login successful')
                 router.push('/dashboard')
 
@@ -67,8 +67,8 @@ export function LoginForm() {
             } catch (error: any) {
                 setLoading(false)
                 setError(true)
-                setMessage(error.response.data.error)
-                console.error(error.response.data.error)
+                setMessage(error?.response?.data?.error)
+                console.error(error?.response?.data?.error)
 
 
             } finally {
