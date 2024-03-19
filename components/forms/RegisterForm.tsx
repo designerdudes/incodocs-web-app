@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation"
 import { BrandName } from "@/lib/constants"
 
 export function RegisterForm() {
+    const [fullName, setFullName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState(false)
@@ -28,11 +29,17 @@ export function RegisterForm() {
     const router = useRouter()
 
     const user = {
+        fullName: fullName,
         email: email,
         password: password,
     }
     const onSubmit = async () => {
         setLoading(true)
+        if (fullName === "") {
+            setError(true)
+            setMessage("Full Name is required")
+            setLoading(false)
+        }
         if (email === "") {
             setError(true)
             setMessage("Email is required")
@@ -81,7 +88,11 @@ export function RegisterForm() {
 
             </CardHeader>
             <CardContent className="grid gap-4">
+                <div className="grid gap-2">
+                    <Label htmlFor="fullname">Full Name</Label>
+                    <Input id="fullname" disabled={loading} value={fullName} onChange={(e: any) => setFullName(e.target.value)} placeholder="mohammed" />
 
+                </div>
                 <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
                     <Input id="email" disabled={loading} value={email} onChange={(e: any) => setEmail(e.target.value)} placeholder="mohammed@incodocs.net" />
@@ -94,7 +105,7 @@ export function RegisterForm() {
                 </div>
             </CardContent>
             <CardFooter>
-                <Button disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
+                <Button size={'lg'} disabled={loading} onClick={onSubmit} className="w-full hover:gap-1 transition-all" variant="default">
                     Continue via Email
                     {
                         loading ? <Icons.spinner className="ml-2 w-4 animate-spin" /> : <ArrowRight className="ml-2 w-4" />
