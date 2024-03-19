@@ -6,6 +6,7 @@ interface useGlobalModalProps {
     onOpen: () => void
     onClose: () => void
     title: string
+    isDismissable: boolean
     description: string
     children: React.ReactNode
 
@@ -13,6 +14,7 @@ interface useGlobalModalProps {
 
 export const useGlobalModal = create<useGlobalModalProps>((set) => ({
     isOpen: false,
+    isDismissable: true,
     onOpen: () => set({ isOpen: true }),
     onClose: () => set({ isOpen: false }),
     title: "",
