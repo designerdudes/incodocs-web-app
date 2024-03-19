@@ -82,22 +82,22 @@ export function RegisterForm() {
             setMessage("Email should contain @")
             setLoading(false)
         }
-        if (password.includes("1 2 3 4 5 6 7 8 9 0")) {
+        if (password.includes("1 2 3 4 5 6 7 8 9 0") === false) {
             setError(true)
             setMessage("Password should contain atleast one number")
             setLoading(false)
         }
-        if (password.includes("ABCDEFGHIJKLMNOPQRSTUVWXYZ")) {
+        if (password.includes("ABCDEFGHIJKLMNOPQRSTUVWXYZ") === false) {
             setError(true)
             setMessage("Password should contain atleast one uppercase letter")
             setLoading(false)
         }
-        if (password.includes("abcdefghijklmnopqrstuvwxyz")) {
+        if (password.includes("abcdefghijklmnopqrstuvwxyz") === false) {
             setError(true)
             setMessage("Password should contain atleast one lowercase letter")
             setLoading(false)
         }
-        if (password.includes("! @ # $ % ^ & * ( ) _ + - = { } [ ] | \\ : ; < > , . ? /")) {
+        if (password.includes("! @ # $ % ^ & * ( ) _ + - = { } [ ] | \\ : ; < > , . ? /") === false) {
             setError(true)
             setMessage("Password should contain atleast one special character")
             setLoading(false)
