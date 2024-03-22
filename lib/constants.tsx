@@ -15,7 +15,8 @@ const sidebarTabs = [
         title: 'Shipment Records',
         path: '/shipment-records',
         icon: <Sheet className="w-4 mr-2" />,
-        showButton: true
+        showButton: true,
+        buttonUrl: '/shipment-records/new'
     },
     {
         title: 'Settings',

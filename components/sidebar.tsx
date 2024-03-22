@@ -4,7 +4,7 @@ import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
 import sidebarTabs, { BrandName } from '@/lib/constants';
 import { Separator } from './ui/separator';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 function Sidebar() {
     const [hoveredItem, setHoveredItem] = useState(null);
@@ -18,7 +18,7 @@ function Sidebar() {
     };
 
     const pathname = usePathname()
-
+    const router = useRouter()
     const firstTabs = sidebarTabs.slice(0, 2);
     const restTabs = sidebarTabs.slice(2);
     return (
@@ -33,9 +33,14 @@ function Sidebar() {
                     {firstTabs.map((item: any, index: any) => (
                         <div
                             key={index}
-                            className={pathname.includes(item.path) ? `text-secondary-foreground text-white bg-[#5958cc] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}` : `text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}`}
+                            className={pathname.includes(item.path) ? `text-secondary-foreground text-white cursor-pointer bg-[#5958cc] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}` : `text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex cursor-pointer justify-between ${hoveredItem === index ? 'hovered' : ''}`}
                             onMouseEnter={() => handleMouseEnter(index)}
                             onMouseLeave={handleMouseLeave}
+                            onClick={
+                                () => {
+                                    router.push(item.path)
+                                }
+                            }
                         >
                             <div className='flex items-center gap-1'>
                                 <span>{item.icon}</span>
@@ -43,12 +48,17 @@ function Sidebar() {
                             </div>
                             {item.showButton &&
                                 hoveredItem === index &&
-                                <Plus className='w-6 h-6 p-1 rounded-lg cursor-pointer hover:bg-primary' style={{ opacity: hoveredItem === index ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }} />
+                                <Plus
+                                    onClick={
+                                        () => {
+                                            router.push(item.buttonUrl)
+                                        }
+                                    }
+                                    className='w-6 h-6 p-1 rounded-lg z-50 pointer-events-auto cursor-pointer hover:bg-primary' style={{ opacity: hoveredItem === index ? 1 : 0, transition: 'opacity 0.3s ease-in-out' }} />
                             }
                         </div>
                     ))}
                 </div>
-
                 {/* Render the rest of the tabs */}
                 <div>
                     {restTabs.map((item, index) => (
