@@ -28,7 +28,7 @@ export default function Home() {
 
 
   useEffect(() => {
-    if (currentUserData?.owner.length > 0) {
+    if (currentUserData?.owner.length === 0) {
       // Remove the unnecessary return statement here
       globalModal.title = 'Add Organization Details'
       globalModal.description = 'Please add your organization details to continue'
