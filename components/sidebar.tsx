@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
 import sidebarTabs, { BrandName } from '@/lib/constants';
 import { Separator } from './ui/separator';
+import { usePathname } from 'next/navigation';
 
 function Sidebar() {
     const [hoveredItem, setHoveredItem] = useState(null);
@@ -16,6 +17,7 @@ function Sidebar() {
         setHoveredItem(null);
     };
 
+    const pathname = usePathname()
 
     const firstTabs = sidebarTabs.slice(0, 2);
     const restTabs = sidebarTabs.slice(2);
@@ -31,7 +33,7 @@ function Sidebar() {
                     {firstTabs.map((item: any, index: any) => (
                         <div
                             key={index}
-                            className={`text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}`}
+                            className={pathname.includes(item.path) ? `text-secondary-foreground text-white bg-[#5958cc] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}` : `text-secondary-foreground text-white hover:bg-[#6d6ce3] py-1 px-4 flex justify-between ${hoveredItem === index ? 'hovered' : ''}`}
                             onMouseEnter={() => handleMouseEnter(index)}
                             onMouseLeave={handleMouseLeave}
                         >
