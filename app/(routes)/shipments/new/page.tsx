@@ -3,7 +3,7 @@ import React from 'react'
 
 function Page() {
     return (
-        <div>
+        <div className='flex h-full flex-col p-20'>
             <h1>Shipments</h1>
             <NewShipmentForm />
         </div>

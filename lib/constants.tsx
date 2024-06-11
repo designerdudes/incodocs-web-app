@@ -12,11 +12,11 @@ const sidebarTabs = [
         showButton: false
     },
     {
-        title: 'Shipment Records',
-        path: '/shipment-records',
+        title: 'Shipments',
+        path: '/shipments',
         icon: <Sheet className="w-4 mr-2" />,
         showButton: true,
-        buttonUrl: '/shipment-records/new'
+        buttonUrl: '/shipments/new'
     },
     {
         title: 'Settings',
