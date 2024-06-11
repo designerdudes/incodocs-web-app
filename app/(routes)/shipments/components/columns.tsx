@@ -46,8 +46,83 @@ export const columns: ColumnDef<shipment>[] = [
             return (
                 <div className="flex space-x-2">
 
-                    <span className="max-w-[500px] truncate font-medium">
+                    <span className="truncate font-medium">
                         {row.original.bookingDetails?.containerNumber}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "bookingDetailsSchema.destinationPort",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="Port Of Loading" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className=" truncate font-medium">
+                        {row.original.bookingDetails?.destinationPort}
+                    </span>
+                </div>
+            )
+        },
+    },
+
+    {
+        accessorKey: "bookingDetailsSchema.portOfLoading",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="Port Of Loading" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className=" truncate font-medium">
+                        {row.original.bookingDetails?.portOfLoading}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "bookingDetailsSchema",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="vessel Sailing Date" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className=" truncate font-medium">
+                        {/* {new Date(row.original?.bookingDetails?.vesselSailingDate).toDateString()} */}
+                        {moment(row.original?.bookingDetails?.vesselSailingDate).format('ll')}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "vessel Arriving Date",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="Vessel Arriving Date" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className=" truncate font-medium">
+                        {/* {new Date(row.original?.bookingDetails?.vesselSailingDate).toDateString()} */}
+                        {moment(row.original?.bookingDetails?.vesselArrivingDate).format('ll')}
                     </span>
                 </div>
             )
