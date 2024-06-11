@@ -1,13 +1,19 @@
 import { z } from "zod"
 
 export const shipmentSchema = z.object({
-  containerNumber: z.string().optional(),
-    portOfLoading: z.string().optional(),
-    destinationPort: z.string().optional(),
-    vesselSailingDate: z.date().optional(),
-    vesselArrivingDate: z.date().optional(),
-    truckNumber: z.string().optional(),
-    truckDriverNumber: z.string().optional(),
+  _id:z.string(),
+  bookingDetails:z.object(
+    {
+      containerNumber: z.string().optional(),
+        portOfLoading: z.string().optional(),
+        destinationPort: z.string().optional(),
+        vesselSailingDate: z.date().optional(),
+        vesselArrivingDate: z.date().optional(),
+        truckNumber: z.string().optional(),
+        truckDriverNumber: z.string().optional(),
+
+    }
+  ),
 
     //Shipping Details
     shippingLine: z.string().optional(),
