@@ -54,6 +54,42 @@ export const columns: ColumnDef<shipment>[] = [
         },
     },
     {
+        accessorKey: "Truck Number",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="Truck Number" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className="truncate font-medium">
+                        {row.original.bookingDetails?.truckNumber}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
+        accessorKey: "Truck Driver Number",
+        header: ({ column }) => (
+            <ColumnHeader column={column} title="Truck Driver Number" />
+        ),
+        cell: ({ row }) => {
+
+
+            return (
+                <div className="flex space-x-2">
+
+                    <span className="truncate font-medium">
+                        {row.original.bookingDetails?.truckDriverNumber}
+                    </span>
+                </div>
+            )
+        },
+    },
+    {
         accessorKey: "bookingDetailsSchema.destinationPort",
         header: ({ column }) => (
             <ColumnHeader column={column} title="Port Of Loading" />
@@ -91,9 +127,9 @@ export const columns: ColumnDef<shipment>[] = [
         },
     },
     {
-        accessorKey: "bookingDetailsSchema",
+        accessorKey: "Vessel Sailing Date",
         header: ({ column }) => (
-            <ColumnHeader column={column} title="vessel Sailing Date" />
+            <ColumnHeader column={column} title="Vessel Sailing Date" />
         ),
         cell: ({ row }) => {
 
