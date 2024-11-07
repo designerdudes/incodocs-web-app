@@ -22,10 +22,10 @@ export default function DashboardLayout({
       <div className='flex flex-row h-screen'>
 
 
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         <div className='flex w-full flex-col'>
-          <TopBar />
+          {/* <TopBar /> */}
           {children}
         </div>
       </div>

@@ -5,7 +5,8 @@ import { DataTable } from '@/components/ui/data-table'
 import Heading from '@/components/ui/heading'
 import { Separator } from '@/components/ui/separator'
 import React, { useEffect, useState } from 'react'
-import { columns } from './components/columns'
+// import { columns } from '../components/columns'
+import Link from 'next/link'
 
 function Page() {
     const [shipmentData, setShipmentData] = useState()
@@ -173,13 +174,15 @@ function Page() {
         <div className="flex  flex-col p-6">
             <div className="flex justify-between items-center gap-2">
                 <div className="flex flex-col ">
-                    <Heading className="text-3xl" title="Shipments" />
-                    <p>This is the shipments page</p>
+                    <Heading className="text-3xl" title="Documentation" />
+                    <p>This is the Documentation page</p>
                 </div>
-                <Button className="bg-primary text-white">New Shipment</Button>
+                <Link href={`/shipments/new`}>
+                    <Button className="bg-primary text-white">New document</Button>
+                </Link>
             </div>
             <Separator className="my-2" />
-            <DataTable searchKey='' data={data as any} columns={columns} />
+            {/* <DataTable searchKey='' data={data as any} columns={columns} /> */}
         </div>
 
     )
