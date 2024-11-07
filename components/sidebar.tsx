@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
-import sidebarTabs, { BrandName } from '@/lib/constants';
+import { BrandName, sidebarTabs } from '@/lib/constants';
 import { Separator } from './ui/separator';
 import { usePathname, useRouter } from 'next/navigation';
 
