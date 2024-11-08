@@ -41,8 +41,8 @@ const factoryManagementSidebarTabs = [
         showButton: false
     },
     {
-        title: 'Shipments',
-        path: '/documentation/shipments/dashboard',
+        title: 'Inventory',
+        path: '/factorymanagement/inventory/dashboard',
         icon: <Sheet className="w-4 mr-2" />,
         showButton: true,
         buttonUrl: '/shipments/new'
