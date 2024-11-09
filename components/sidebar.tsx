@@ -97,8 +97,8 @@ function FactoryManagementSidebarTabs() {
 
     const pathname = usePathname()
     const router = useRouter()
-    const firstTabs = factoryManagementSidebarTabs.slice(0, 2);
-    const restTabs = factoryManagementSidebarTabs.slice(2);
+    const firstTabs = factoryManagementSidebarTabs.slice(0, 3);
+    const restTabs = factoryManagementSidebarTabs.slice(3);
     return (
         <div className='w-64  sticky top-0 h-screen z-50 bg-primary  text-white'>
             <div className='flex items-center justify-start px-4 h-16 bg-primary-dark'>

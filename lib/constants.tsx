@@ -1,5 +1,5 @@
 "use client"
-import { BadgeIndianRupee, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ServerIcon, Settings, Sheet, ShoppingBagIcon, TagIcon, UserCog, Users, } from "lucide-react"
+import { BadgeIndianRupee, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ServerIcon, Settings, Sheet, ShoppingBagIcon, TagIcon, User, UserCog, Users, } from "lucide-react"
 
 const BrandName = "IncoDocs"
 
@@ -44,6 +44,13 @@ const factoryManagementSidebarTabs = [
         title: 'Inventory',
         path: '/factorymanagement/inventory/dashboard',
         icon: <Sheet className="w-4 mr-2" />,
+        showButton: true,
+        buttonUrl: '/shipments/new'
+    },
+    {
+        title: 'Team Management',
+        path: '/factorymanagement/team/dashboard',
+        icon: <User className="w-4 mr-2" />,
         showButton: true,
         buttonUrl: '/shipments/new'
     },

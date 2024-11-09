@@ -11,29 +11,29 @@ function page() {
             </div>
 
             <div className="flex flex-row gap-4 mt-10">
-                <Link href="/factorymanagement/dashboard" passHref>
+                <Link href="./rawmaterial" passHref>
                     <div className="cursor-pointer">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Raw Material data</CardTitle>
-                                <CardDescription>Raw Material data Management system</CardDescription>
+                                <CardTitle>Raw Material Inventory</CardTitle>
+                                <CardDescription>Raw Material Inventory Management system</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <p>Raw Material data Content</p>
+                                <p>Raw Material Inventory Content</p>
                             </CardContent>
                         </Card>
                     </div>
                 </Link>
 
-                <Link href="/documentation/dashboard" passHref>
+                <Link href="./finishedmaterial" passHref>
                     <div className="cursor-pointer">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Finished Material data</CardTitle>
-                                <CardDescription>This is the Finished Material data Management system</CardDescription>
+                                <CardTitle>Finished Material Inventory</CardTitle>
+                                <CardDescription>This is the Finished Material Inventory Management</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <p>Finished Material data</p>
+                                <p>Finished Material Inventory Content</p>
                             </CardContent>
                         </Card>
                     </div>
