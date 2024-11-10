@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input"
 import Heading from "@/components/ui/heading"
 import { PlusIcon } from "lucide-react"
 import Link from "next/link"
+import { Icons } from '../ui/icons'
 // Define the schema according to the new structure
 const formSchema = z.object({
     materialName: z.string().min(3, { message: "Material name must be at least 3 characters long" }),
@@ -56,7 +57,8 @@ interface NewFormProps extends React.HTMLAttributes<HTMLDivElement> {
     gap: number;
 }
 
-function RawMaterialCreateNewForm(gap: NewFormProps) {
+function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
+    const [isLoading, setIsLoading] = React.useState<boolean>(false)
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
     })
@@ -69,9 +71,9 @@ function RawMaterialCreateNewForm(gap: NewFormProps) {
         }
     }
     return (
-        <div>
+        <div className={cn("grid gap-6", className)}>
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-w-3xl mx-auto py-10 w-full grid grid-cols-2 gap-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-8">
                     <FormField
                         control={form.control}
                         name="materialName"
@@ -201,7 +203,14 @@ function RawMaterialCreateNewForm(gap: NewFormProps) {
                         )}
                     />
 
-                    <Button type="submit" className="col-span-2">Submit</Button>
+                    <div className={`${gap === 2 ? 'w-full' : 'grid gap-3 grid-cols-3'}`}>
+                        <Button type="submit" className="w-full" disabled={isLoading}>
+                            {isLoading && (
+                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                            )}
+                            Create
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
