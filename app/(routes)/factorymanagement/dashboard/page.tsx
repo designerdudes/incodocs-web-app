@@ -12,15 +12,15 @@ export default function Page() {
     const [shipmentData, setShipmentData] = useState()
 
 
-    useEffect(() => {
-        const getShipmentData = async () => {
-            const data = await fetchData('/shipment/getAll')
-            setShipmentData(data)
-            console.log(shipmentData)
-            console.log(data)
-        }
-        getShipmentData()
-    }, []);
+    // useEffect(() => {
+    //     const getShipmentData = async () => {
+    //         const data = await fetchData('/shipment/getAll')
+    //         setShipmentData(data)
+    //         console.log(shipmentData)
+    //         console.log(data)
+    //     }
+    //     getShipmentData()
+    // },);
 
     const data =
         [
