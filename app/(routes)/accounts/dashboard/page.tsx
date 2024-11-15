@@ -174,8 +174,8 @@ export default function Page() {
         <div className="flex  flex-col p-6">
             <div className="flex justify-between items-center gap-2">
                 <div className="flex flex-col ">
-                    <Heading className="text-3xl" title="Factory Management" />
-                    <p>This is the Inventory Management page</p>
+                    <Heading className="text-3xl" title="Account Management" />
+                    <p>This is the Account Management page</p>
                 </div>
                 <Link href={`/shipments/new`}>
                     <Button className="bg-primary text-white">New Button</Button>
