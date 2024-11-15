@@ -62,7 +62,7 @@ export default async function RawMaterialPage() {
     // const cookieStore = cookies();
     // const token = cookieStore.get('AccessToken')?.value || "";
 
-    // const res = await fetch('https://apis.offersholic.zephyrapps.in/categories/v1/all', {
+    // const res = await fetch('http://localhost:4080/factory-management/inventory/raw/get', {
     //     method: 'GET',
     //     headers: {
     //         'Content-Type': 'application/json',
@@ -70,7 +70,8 @@ export default async function RawMaterialPage() {
     //     }
     // });
 
-    // const categories = await res.json();
+    // const rawmaterial = await res.json();
+    // console.log(rawmaterial);
 
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>

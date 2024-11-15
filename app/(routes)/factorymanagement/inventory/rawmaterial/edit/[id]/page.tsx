@@ -13,6 +13,54 @@ interface Props {
     params: RawMaterial;
 }
 function EditRawMaterialPage({ params }: Props) {
+    const data: RawMaterial[] = [
+        {
+            _id: "65f8fb0fc4417ea5a14fbd82",
+            materialName: "Sample Material 1",
+            materialType: "TypeABC",
+            categoryId: "Category123",
+            isActive: true,
+            createdAt: "2024-03-19T02:40:15.954Z",
+            updatedAt: "2024-03-19T02:40:15.954Z",
+            weight: "1000",
+            height: "54",
+            breadth: "3.2",
+            length: "4.2",
+            volume: "2000",
+            quantity: "120" // Placeholder value
+        },
+        {
+            _id: "65f8fd0ac4417ea5a14fbda1",
+            materialName: "Sample Material 2",
+            materialType: "TypeXYZ",
+            categoryId: "Category456",
+            isActive: true,
+            createdAt: "2024-03-19T02:48:42.837Z",
+            updatedAt: "2024-03-19T02:58:00.445Z",
+            weight: "1200",
+            height: "40",
+            breadth: "2.8",
+            length: "3.5",
+            volume: "1500",
+            quantity: "100"
+        },
+        {
+            _id: "65f8febec4417ea5a14fbdad",
+            materialName: "Sample Material 3",
+            materialType: "TypeDEF",
+            categoryId: "Category789",
+            isActive: true,
+            createdAt: "2024-03-19T02:55:58.275Z",
+            updatedAt: "2024-03-19T02:55:58.275Z",
+            weight: "1100",
+            height: "45",
+            breadth: "3.5",
+            length: "4.5",
+            volume: "1800",
+            quantity: "80"
+        }
+    ];
+
     const RawMaterialData = params;
     return (
         <div>

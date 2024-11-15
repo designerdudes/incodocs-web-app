@@ -1,7 +1,7 @@
 "use client"
 import { BadgeIndianRupee, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ServerIcon, Settings, Sheet, ShoppingBagIcon, TagIcon, User, UserCog, Users, } from "lucide-react"
 
-const BrandName = "IncoDocs"
+const BrandName = "Back"
 
 const sidebarTabs = [
     {
@@ -108,7 +108,7 @@ const accountingSidebarTabs = [
         showButton: false
     },
     {
-        title: 'Shipments',
+        title: 'Invoices',
         path: '/documentation/shipments/dashboard',
         icon: <Sheet className="w-4 mr-2" />,
         showButton: true,

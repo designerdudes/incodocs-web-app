@@ -1,11 +1,9 @@
 "use client"
 import { fetchData } from "@/axiosUtility/api";
 import { GetOrganisationDetaisForm } from "@/components/forms/GetOrganisationDetailsForm";
-import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -67,11 +65,11 @@ export default function Home() {
           <div className="cursor-pointer">
             <Card>
               <CardHeader>
-                <CardTitle>Shipment Management System</CardTitle>
-                <CardDescription>This is the Shipment Management system</CardDescription>
+                <CardTitle>Documentation</CardTitle>
+                <CardDescription>This is the Documentation</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Shipment Content</p>
+                <p>Documentation Content</p>
               </CardContent>
             </Card>
           </div>

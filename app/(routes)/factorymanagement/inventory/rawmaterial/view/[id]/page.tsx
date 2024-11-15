@@ -26,9 +26,9 @@ interface Props {
     }
 }
 function ViewRawMaterialPage({ params }: Props) {
+
     const RawMaterialDataID = params.id;
     const RawMaterialData = params
-    console.log(RawMaterialData)
     return (
         <div>
             <div className='w-full h-full flex flex-col p-8'>
@@ -52,10 +52,10 @@ function ViewRawMaterialPage({ params }: Props) {
                 </div>
 
                 {/* New parent div to hold both sections */}
-                <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
+                <div className="flex flex-col md:flex-row gap-6 lg:gap-6 w-full">
                     <div className="flex-1">
-                        <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-                            <Card x-chunk="dashboard-07-chunk-0">
+                        <div className="grid-cols-2 grid auto-rows-max items-start gap-2 lg:col-span-2 lg:gap-6">
+                            <Card>
                                 <CardHeader>
                                     <CardTitle>Raw Material Details</CardTitle>
                                     <CardDescription>{ }</CardDescription>
@@ -101,6 +101,15 @@ function ViewRawMaterialPage({ params }: Props) {
                                                 <TableCell className="whitespace-nowrap">Quantity</TableCell>
                                                 <TableCell>{RawMaterialData.quantity}</TableCell>
                                             </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                            <Card className='mt-32'>
+                                <CardContent >
+                                    <Table>
+                                        <TableBody>
+
                                             <TableRow>
                                                 <TableCell className="whitespace-nowrap">Status</TableCell>
                                                 <TableCell>{RawMaterialData.isActive ? 'Active' : 'Inactive'}</TableCell>

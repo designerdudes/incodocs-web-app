@@ -53,7 +53,7 @@ function ViewFinishedPage({ params }: Props) {
                 {/* New parent div to hold both sections */}
                 <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
                     <div className="flex-1">
-                        <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+                        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
                             <Card x-chunk="dashboard-07-chunk-0">
                                 <CardHeader>
                                     <CardTitle>Finished Material Details</CardTitle>
@@ -100,6 +100,14 @@ function ViewFinishedPage({ params }: Props) {
                                                 <TableCell className="whitespace-nowrap">Quantity</TableCell>
                                                 <TableCell>{FinishedMaterial.quantity}</TableCell>
                                             </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                            <Card className='mt-32'>
+                                <CardContent >
+                                    <Table>
+                                        <TableBody>
                                             <TableRow>
                                                 <TableCell className="whitespace-nowrap">Status</TableCell>
                                                 <TableCell>{FinishedMaterial.isActive ? 'Active' : 'Inactive'}</TableCell>

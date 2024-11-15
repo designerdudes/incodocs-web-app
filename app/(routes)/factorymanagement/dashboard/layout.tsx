@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import TopBar from '@/components/topbar'
-import { Sidebar, FactoryManagementSidebarTabs } from '@/components/sidebar'
+import { FactoryManagementSidebarTabs } from '@/components/sidebar2'
 
 
 export const metadata: Metadata = {
@@ -19,9 +19,9 @@ export default function DashboardLayout({
     return (
         <>
             <div className='flex flex-row h-screen'>
-                <FactoryManagementSidebarTabs />
+                {/* <FactoryManagementSidebarTabs /> */}
+
                 <div className='flex w-full flex-col'>
-                    <TopBar />
                     {children}
                 </div>
             </div>
