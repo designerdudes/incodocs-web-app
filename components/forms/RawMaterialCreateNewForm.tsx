@@ -166,7 +166,8 @@ function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
                     />
 
                     <FormField
-                        control={form.control}
+      
+    control={form.control}
                         name="breadth.value"
                         render={({ field }) => (
                             <FormItem>
@@ -189,7 +190,7 @@ function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
                         name="height.value"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Height</FormLabel>
+                                <FormLabel>Height </FormLabel>
                                 <FormControl>
                                     <Input
                                         placeholder="Eg: 54"
@@ -208,7 +209,7 @@ function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
                             {isLoading && (
                                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                             )}
-                            Create
+                            Edit
                         </Button>
                     </div>
                 </form>
