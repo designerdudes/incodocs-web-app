@@ -4,14 +4,14 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useGlobalModal } from '@/hooks/GlobalModal';
 import { Edit2, Eye, MoreHorizontal, Trash } from 'lucide-react'
 import React from 'react'
-import { RawMaterial } from './columns'
+import { LotManagement } from './columns'
 import { Alert } from '@/components/forms/Alert';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 
 interface Props {
-    data: RawMaterial
+    data: LotManagement
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
@@ -45,31 +45,33 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                        onSelect={
-                            () => {
-                                router.push(`./rawmaterial/view/${data._id}`)
-                            }
-                        }>
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Raw Material Details</DropdownMenuItem>
+                        // onSelect={
+                        //     () => {
+                        //         router.push(`./rawmaterial/view/${data._id}`)
+                        //     }
+                        // }
+                        >
+                        {/* <Eye className="mr-2 h-4 w-4" /> */}
+                        Cutting</DropdownMenuItem>
                     <DropdownMenuItem
-                        onSelect={
-                            () => {
-                                router.push(`./rawmaterial/edit/${data._id}`)
-                            }
-                        }>
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Raw Material</DropdownMenuItem>
+                        // onSelect={
+                        //     () => {
+                        //         router.push(`./rawmaterial/edit/${data._id}`)
+                        //     }
+                        // }
+                        >
+                        {/* <Edit2 className="mr-2 h-4 w-4" /> */}
+                        Trimming</DropdownMenuItem>
                     <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Delete Raw Material - ${data.materialName}`
-                            GlobalModal.description = "Are you sure you want to delete this Raw Material?"
-                            GlobalModal.children = <Alert onConfirm={deleteRawMaterial} />
-                            GlobalModal.onOpen()
-                        }}
+                        // onSelect={() => {
+                        //     GlobalModal.title = `Delete Raw Material - ${data.materialType}`
+                        //     GlobalModal.description = "Are you sure you want to delete this Raw Material?"
+                        //     GlobalModal.children = <Alert onConfirm={deleteRawMaterial} />
+                        //     GlobalModal.onOpen()
+                        // }}
                         className="focus:bg-destructive focus:text-destructive-foreground">
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete Raw Material</DropdownMenuItem>
+                        {/* <Trash className="mr-2 h-4 w-4" /> */}
+                        Polishing</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
