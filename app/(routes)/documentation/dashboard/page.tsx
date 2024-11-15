@@ -7,6 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import React, { useEffect, useState } from 'react'
 // import { columns } from '../components/columns'
 import Link from 'next/link'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 
 function Page() {
     // const [shipmentData, setShipmentData] = useState()
@@ -175,14 +176,70 @@ function Page() {
             <div className="flex justify-between items-center gap-2">
                 <div className="flex flex-col ">
                     <Heading className="text-3xl" title="Documentation" />
-                    <p>This is the Documentation page</p>
+                    <p>Your hub for creating and managing critical business documents.
+
+                    </p>
                 </div>
                 <Link href={`/shipments/new`}>
-                    <Button className="bg-primary text-white">New document</Button>
+                    <Button className="bg-primary text-white">New Document
+                        (Quickly generate new documents tailored to your business needs.)</Button>
                 </Link>
             </div>
             <Separator className="my-2" />
             {/* <DataTable searchKey='' data={data as any} columns={columns} /> */}
+            <div className="flex flex-row gap-4 mt-10">
+                <Link href="/factorymanagement/inventory/dashboard" passHref>
+                    <div className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Shipments</CardTitle>
+                                <CardDescription>Stay on top of your shipment processes and documentation.
+
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>Track shipments, generate packing lists, and ensure compliance with export regulations.
+
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Link>
+                <Link href="/accounts/dashboard" passHref>
+                    <div className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Export Documents</CardTitle>
+                                <CardDescription>Generate accurate export-related documents in a few clicks.
+
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>Streamline your export processes with pre-filled templates and compliance checks.
+
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Link>
+                <Link href="/accounts/dashboard" passHref>
+                    <div className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Invoices</CardTitle>
+                                <CardDescription>Handle your billing and invoicing with precision.
+
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>Generate, track, and manage invoices for seamless payment processing and record-keeping.
+
+                                </p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Link>
+            </div>
         </div>
 
     )

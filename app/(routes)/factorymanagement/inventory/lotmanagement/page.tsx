@@ -102,11 +102,11 @@ export default async function LotManagement() {
           <Heading className="leading-tight " title="Lot management " />
           <p className="text-muted-foreground text-sm">
             {" "}
-            Lot Management content
+            Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle
           </p>
         </div>
-        <Button asChild>
-          <Link href="lotmanagement/addlot">Add Lot</Link>
+        <Button className="mr-12" asChild>
+          <Link href="lotmanagement/addlot">Create New Lot</Link>
         </Button>
       </div>
       <Separator orientation="horizontal" />

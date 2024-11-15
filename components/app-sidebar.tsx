@@ -70,7 +70,7 @@ const data = {
             items: [
                 {
                     title: "Inventory",
-                    url: "/factorymanagement/dashboard",
+                    url: "/factorymanagement/inventory/dashboard",
                 },
                 {
                     title: "Accounting",

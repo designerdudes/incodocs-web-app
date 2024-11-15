@@ -22,7 +22,7 @@ export default function DashboardLayout({
             <div className='flex flex-row h-screen'>
 
 
-                <FactoryManagementSidebarTabs />
+                {/* <FactoryManagementSidebarTabs /> */}
 
                 <div className='flex w-full flex-col'>
                     {/* <TopBar /> */}

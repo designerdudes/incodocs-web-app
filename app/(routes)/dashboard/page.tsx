@@ -44,6 +44,9 @@ export default function Home() {
     <main className="flex h-full flex-col p-20">
       <div>
         <Heading className="text-4xl" title="Welcome, To IncoDocs" />
+        <p className="text-lg mt-4">Efficiently manage your factory operations and streamline your documentation processes.
+
+        </p>
       </div>
 
       <div className="flex flex-row gap-4 mt-10">
@@ -52,10 +55,12 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <CardTitle>Factory Management </CardTitle>
-                <CardDescription>This is the Factory Management system</CardDescription>
+                <CardDescription>Your complete solution for handling inventory, tracking production, and optimizing operations.
+
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Factory Management Content</p>
+                <p>Monitor raw materials, manage blocks and slabs, and track production phases with real-time insights.</p>
               </CardContent>
             </Card>
           </div>
@@ -66,10 +71,10 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <CardTitle>Documentation</CardTitle>
-                <CardDescription>This is the Documentation</CardDescription>
+                <CardDescription>Simplify and organize your business documentation with ease.</CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Documentation Content</p>
+                <p>Generate, store, and access critical documents such as invoices, export papers, and shipment details.</p>
               </CardContent>
             </Card>
           </div>
@@ -80,10 +85,10 @@ export default function Home() {
             <Card>
               <CardHeader>
                 <CardTitle>Integration</CardTitle>
-                <CardDescription>This is Integration </CardDescription>
+                <CardDescription>Seamlessly connect with other tools and systems for a unified workflow. </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Integration Content</p>
+                <p>Integrate accounting software, shipping services, and more to enhance productivity.</p>
               </CardContent>
             </Card>
           </div>

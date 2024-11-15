@@ -104,7 +104,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                No. of Blocks
+                Total Blocks
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -121,7 +121,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                In Stock
+                Blocks In Stock
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -189,7 +189,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Cutting Stage
+                Blocks in Cutting Phase
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -206,7 +206,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Trimming Stage
+                Blocks in Trimming Phase
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -242,7 +242,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Created At
+                Lot Created Date
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
