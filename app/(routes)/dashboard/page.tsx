@@ -51,7 +51,7 @@ export default function Home() {
           <div className="cursor-pointer">
             <Card>
               <CardHeader>
-                <CardTitle>Factory Management System</CardTitle>
+                <CardTitle>Factory Management </CardTitle>
                 <CardDescription>This is the Factory Management system</CardDescription>
               </CardHeader>
               <CardContent>
@@ -79,11 +79,11 @@ export default function Home() {
           <div className="cursor-pointer">
             <Card>
               <CardHeader>
-                <CardTitle>Account Management System</CardTitle>
-                <CardDescription>This is the Account Management system</CardDescription>
+                <CardTitle>Integration</CardTitle>
+                <CardDescription>This is Integration </CardDescription>
               </CardHeader>
               <CardContent>
-                <p>Account Content</p>
+                <p>Integration Content</p>
               </CardContent>
             </Card>
           </div>

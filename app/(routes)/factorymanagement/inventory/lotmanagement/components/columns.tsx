@@ -6,20 +6,37 @@ import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
 
+export type RawMaterial = {
+    _id: string
+    materialName: string
+    materialType: string
+    categoryId: string
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
+    weight: string
+    height: string
+    breadth: string
+    length: string
+    volume: string
+    quantity: string
+}
+
 export type LotManagement = {
     _id: string
     materialType: string
-    numberofBlocks:string
+    numberofBlocks: string
     categoryId: string
-    instock:"string"
+    instock: string
     createdAt: string
     height: string
     breadth: string
-    lotname:string
+    lotname: string
     intrimming: string
-    incutting:string
+    incutting: string
     length: string
-    completed:string
+    completed: string
+    isActive: boolean
 }
 
 
@@ -172,7 +189,7 @@ export const columns: ColumnDef<LotManagement>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-             Cutting Stage
+                Cutting Stage
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -199,8 +216,8 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-   
-  
+
+
     {
         accessorKey: "completed",
         header: ({ column }) => (
@@ -235,9 +252,9 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-    
+
     {
-        
+
         header: ({ column }) => (
             <Button
                 variant="ghost"

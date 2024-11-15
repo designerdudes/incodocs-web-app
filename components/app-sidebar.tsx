@@ -11,6 +11,7 @@ import {
     FactoryIcon,
     Frame,
     GalleryVerticalEnd,
+    HomeIcon,
     Map,
     PieChart,
     Settings2,
@@ -55,6 +56,12 @@ const data = {
         },
     ],
     navMain: [
+        {
+            title: "Home",
+            url: "/dashboard",
+            icon: HomeIcon,
+            isActive: true,
+        },
         {
             title: "Factory Management",
             url: "/factorymanagement/dashboard",

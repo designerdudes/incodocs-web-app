@@ -4,8 +4,25 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { columns, LotManagement } from "./components/columns";
+import { columns } from "./components/columns";
 import { cookies } from "next/headers";
+
+interface LotManagement {
+  _id: string;
+  materialType: string;
+  numberofBlocks: string;
+  lotname: string;
+  categoryId: string;
+  isActive: boolean;
+  createdAt: string;
+  height: string;
+  breadth: string;
+  intrimming: string;
+  incutting: string;
+  instock: string;
+  completed: string;
+  length: string;
+}
 
 export default async function LotManagement() {
   const data: LotManagement[] = [
@@ -39,6 +56,7 @@ export default async function LotManagement() {
       instock: "8",
       completed: "5",
       length: "4.2",
+      isActive: true,
     },
     {
       _id: "65f8febec4417ea5a14fbdad",
