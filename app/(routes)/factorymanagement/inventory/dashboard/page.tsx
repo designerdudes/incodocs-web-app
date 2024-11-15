@@ -10,7 +10,7 @@ function page() {
                 <Heading className="text-4xl" title="Welcome, To Inventory Management" />
             </div>
 
-            <div className="flex flex-row gap-4 mt-10">
+            <div className="flex flex-row gap-4 mt-10 ">
                 <Link href="./rawmaterial" passHref>
                     <div className="cursor-pointer">
                         <Card>
@@ -34,6 +34,19 @@ function page() {
                             </CardHeader>
                             <CardContent>
                                 <p>Finished Material Inventory Content</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </Link>
+                <Link href="./lotmanagement" passHref>
+                    <div className="cursor-pointer">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Lot Management Page</CardTitle>
+                                <CardDescription>This is the Lot Inventory Management.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p>Lot Material Inventory Content</p>
                             </CardContent>
                         </Card>
                     </div>

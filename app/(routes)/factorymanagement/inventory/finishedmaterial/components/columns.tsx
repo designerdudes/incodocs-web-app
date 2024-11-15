@@ -14,7 +14,7 @@ export type FinishedMaterial = {
     isActive: boolean
     createdAt: string
     updatedAt: string
-    weight: string
+    weight: string  
     height: string
     breadth: string
     quantity: string

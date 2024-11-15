@@ -4,7 +4,7 @@ import Heading from '@/components/ui/heading';
 import { Separator } from '@/components/ui/separator';
 import { ChevronLeft, PlusIcon } from 'lucide-react';
 import Link from 'next/link';
-import { columns, RawMaterial } from './components/columns';
+import { columns, RawMaterial } from '../lotmanagement/components/columns';
 import { cookies } from 'next/headers';
 
 export default async function RawMaterialPage() {

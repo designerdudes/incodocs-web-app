@@ -6,24 +6,24 @@ import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
 
-export type RawMaterial = {
+export type LotManagement = {
     _id: string
-    materialName: string
     materialType: string
+    numberofBlocks:string
     categoryId: string
-    isActive: boolean
+    instock:"string"
     createdAt: string
-    updatedAt: string
-    weight: string
     height: string
     breadth: string
+    lotname:string
+    intrimming: string
+    incutting:string
     length: string
-    volume: string
-    quantity: string
+    completed:string
 }
 
-// Define the columns for the data table
-export const columns: ColumnDef<RawMaterial>[] = [
+
+export const columns: ColumnDef<LotManagement>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -47,19 +47,19 @@ export const columns: ColumnDef<RawMaterial>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "materialName",
+        accessorKey: "lotname",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Material Name
+                Lot Name
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialName}
+                {row.original.lotname}
             </div>
         ),
     },
@@ -70,7 +70,7 @@ export const columns: ColumnDef<RawMaterial>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Type
+                Material Type
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -81,121 +81,140 @@ export const columns: ColumnDef<RawMaterial>[] = [
         ),
     },
     {
-        accessorKey: "weight",
+        accessorKey: "numberofBlocks",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                W
+                No. of Blocks
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.weight}
+                {row.original.numberofBlocks}
             </div>
         ),
     },
     {
-        accessorKey: "height",
+        accessorKey: "instock",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                H
+                In Stock
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.height}
+                {row.original.instock}
             </div>
         ),
     },
+    // {
+    //     accessorKey: "height",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             H
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.height}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "length",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             L
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.length}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "breadth",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             B
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.breadth}
+    //         </div>
+    //     ),
+    // },
     {
-        accessorKey: "breadth",
+        accessorKey: "incutting",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                B
+             Cutting Stage
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.breadth}
+                {row.original.incutting}
             </div>
         ),
     },
     {
-        accessorKey: "length",
+        accessorKey: "intrimming",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                L
+                Trimming Stage
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.length}
+                {row.original.intrimming}
             </div>
         ),
     },
+   
+  
     {
-        accessorKey: "volume",
+        accessorKey: "completed",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Volume
+                Completed
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.volume}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "quantity",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Quantity
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.quantity}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "active",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className={`capitalize w-fit p-2 py-1 rounded-md text-xs ${row.original.isActive ? "bg-green-200 text-green-800 border-green-800" : "bg-red-200 text-red-800 border-red-800"}`}>
-                {row.original.isActive ? "active" : "inactive"}
+                {row.original.completed}
             </div>
         ),
     },
@@ -216,8 +235,9 @@ export const columns: ColumnDef<RawMaterial>[] = [
             </div>
         ),
     },
+    
     {
-        // accessorKey: "adminId",
+        
         header: ({ column }) => (
             <Button
                 variant="ghost"
