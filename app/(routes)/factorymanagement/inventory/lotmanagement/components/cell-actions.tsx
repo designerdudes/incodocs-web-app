@@ -1,115 +1,65 @@
-"use client"
-import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { useGlobalModal } from '@/hooks/GlobalModal';
-import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from 'lucide-react'
-import React, { useState } from 'react'
-import { LotManagement } from './columns'
-import { Alert } from '@/components/forms/Alert';
-import { useRouter } from 'next/navigation';
-import { deleteData } from '@/axiosUtility/api';
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+"use client";
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
-
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon } from "lucide-react";
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface Props {
-    data: LotManagement
+    data: any;
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
+    const router = useRouter();
 
-    const GlobalModal = useGlobalModal();
-    // const deleteLot = async () => {
+    // State for controlling the drawer and managing cutting data
+    const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+    const [cuttingData, setCuttingData] = React.useState({
+        blocks: "",
+        width: "",
+        height: "",
+    });
 
+    // The total number of blocks in stock in the lot (e.g., from the `data` prop)
+    const availableBlocks = data?.stock || 0; // Ensure `data.stock` contains the available blocks
 
-    //     try {
-    //         const result = await deleteData(`/categories/v1/category/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        // Allow only numbers and check if the entered blocks are within the available stock
+        if (id === "blocks" && (parseInt(value) > availableBlocks || parseInt(value) < 0)) {
+            return; // Prevent entering more than available stock
+        }
+        setCuttingData((prevData) => ({ ...prevData, [id]: value }));
+    };
 
-    //         toast.success('Raw Material Deleted Successfully')
-    //         GlobalModal.onClose()
-    //         window.location.reload()
-    //     } catch (error) {
-    //         console.error('Error deleting data:', error);
-    //     }
-
-
-    // }
-    const router = useRouter()
-
-
-    const PopoverDemo = async () => {
-        return (
-            <Popover >
-                <PopoverTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className="hidden" // This hides the default trigger as we are manually controlling the popover
-                    />
-                </PopoverTrigger>
-                <PopoverContent
-                    className="w-80"
-                    onMouseDown={(e) => e.stopPropagation()} // Prevent clicks inside the Popover from closing it
-                >
-                    <div className="grid gap-4">
-                        <div className="space-y-2">
-                            <h4 className="font-medium leading-none">
-                                Send Blocks for Cutting
-                            </h4>
-                            <p className="text-sm text-muted-foreground">
-                                Enter the number of blocks and dimensions for the cutting
-                                process.
-                            </p>
-                        </div>
-                        <div className="grid gap-2">
-                            <div className="grid grid-cols-3 items-center gap-4">
-                                <Label htmlFor="blocks">Blocks</Label>
-                                <Input
-                                    id="blocks"
-                                    type="number"
-                                    placeholder="No. of Blocks"
-                                    className="col-span-2 h-8"
-                                />
-                            </div>
-                            <div className="grid grid-cols-3 items-center gap-4">
-                                <Label htmlFor="width">Width (inches)</Label>
-                                <Input
-                                    id="width"
-                                    type="number"
-                                    placeholder="Width"
-                                    className="col-span-2 h-8"
-                                />
-                            </div>
-                            <div className="grid grid-cols-3 items-center gap-4">
-                                <Label htmlFor="height">Height (inches)</Label>
-                                <Input
-                                    id="height"
-                                    type="number"
-                                    placeholder="Height"
-                                    className="col-span-2 h-8"
-                                />
-                            </div>
-                            <Button
-                                className="w-full"
-                                onClick={() => {
-                                    console.log("Submitted Cutting Data");
-                                }}
-                            >
-                                Submit
-                            </Button>
-                        </div>
-                    </div>
-                </PopoverContent>
-            </Popover>
-        )
-    }
+    const handleSubmit = () => {
+        console.log("Submitted Cutting Data:", cuttingData);
+        // Add logic to process or save the data (e.g., update stock, etc.)
+        setIsDrawerOpen(false); // Close drawer after submission
+    };
 
     return (
         <div>
+            {/* Dropdown Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -120,48 +70,103 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                        onClick={PopoverDemo}
-                    >
+
+                    {/* Send For Cutting */}
+                    <DropdownMenuItem onSelect={() => setIsDrawerOpen(true)}>
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Send For Cutting
                     </DropdownMenuItem>
 
+                    {/* View Lot Details */}
                     <DropdownMenuItem
-                        onSelect={
-                            () => {
-                                router.push(`./lotmanagement/view/${data._id}`)
-                            }
-                        }
+                        onSelect={() => {
+                            router.push(`./lotmanagement/view/${data._id}`);
+                        }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Lot Details
                     </DropdownMenuItem>
+
+                    {/* Edit Lot Details */}
                     <DropdownMenuItem
-                        onSelect={
-                            () => {
-                                router.push(`./lotmanagement/edit/${data._id}`)
-                            }
-                        }
+                        onSelect={() => {
+                            router.push(`./lotmanagement/edit/${data._id}`);
+                        }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Lot Details
                     </DropdownMenuItem>
-                    {/* <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Delete Lot - ${data.materialType}`
-                            GlobalModal.description = "Are you sure you want to delete this Lot?"
-                            // GlobalModal.children = <Alert onConfirm={deleteLot} />
-                            GlobalModal.onOpen()
-                        }}
-                        className="focus:bg-destructive focus:text-destructive-foreground">
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete Lot
-                    </DropdownMenuItem> */}
                 </DropdownMenuContent>
             </DropdownMenu>
-        </div>
-    )
-}
 
-export default CellAction
+            {/* Drawer for Send for Cutting */}
+            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+                <DrawerContent>
+                    <div className="mx-auto w-full max-w-sm">
+                        <DrawerHeader>
+                            <DrawerTitle>Send Blocks for Cutting</DrawerTitle>
+                            <DrawerDescription>
+                                Enter the number of blocks for cutting (within available stock).
+                            </DrawerDescription>
+                        </DrawerHeader>
+                        <div className="p-4 pb-0">
+                            <div className="grid gap-4">
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                    <Label htmlFor="blocks">Blocks in Stock</Label>
+                                    <div className="col-span-2 text-center text-lg font-semibold">
+                                        {availableBlocks} blocks
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                    <Label htmlFor="blocks">Blocks for Cutting</Label>
+                                    <Input
+                                        id="blocks"
+                                        type="number"
+                                        placeholder="No. of Blocks"
+                                        className="col-span-2 h-8"
+                                        value={cuttingData.blocks}
+                                        onChange={handleInputChange}
+                                        max={availableBlocks}
+                                        min={0}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                    <Label htmlFor="width">Width (inches)</Label>
+                                    <Input
+                                        id="width"
+                                        type="number"
+                                        placeholder="Width"
+                                        className="col-span-2 h-8"
+                                        value={cuttingData.width}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-3 items-center gap-4">
+                                    <Label htmlFor="height">Height (inches)</Label>
+                                    <Input
+                                        id="height"
+                                        type="number"
+                                        placeholder="Height"
+                                        className="col-span-2 h-8"
+                                        value={cuttingData.height}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <DrawerFooter>
+                            <Button className="w-full" onClick={handleSubmit}>
+                                Submit
+                            </Button>
+                            <DrawerClose asChild>
+                                <Button variant="outline">Cancel</Button>
+                            </DrawerClose>
+                        </DrawerFooter>
+                    </div>
+                </DrawerContent>
+            </Drawer>
+        </div>
+    );
+};
+
+export default CellAction;
