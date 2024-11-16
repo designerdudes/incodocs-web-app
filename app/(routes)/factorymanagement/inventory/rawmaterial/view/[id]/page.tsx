@@ -6,7 +6,7 @@ import { IconPencil } from "@tabler/icons-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import moment from 'moment';
-import { RawMaterial } from '../../../lotmanagement/components/columns';
+// import { RawMaterial } from '../../../lotmanagement/components/columns';
 
 
 interface Props {

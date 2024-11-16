@@ -4,8 +4,25 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { columns, LotManagement } from "./components/columns";
+import { columns } from "./components/columns";
 import { cookies } from "next/headers";
+
+interface LotManagement {
+  _id: string;
+  materialType: string;
+  numberofBlocks: string;
+  lotname: string;
+  categoryId: string;
+  isActive: boolean;
+  createdAt: string;
+  height: string;
+  breadth: string;
+  intrimming: string;
+  incutting: string;
+  instock: string;
+  completed: string;
+  length: string;
+}
 
 export default async function LotManagement() {
   const data: LotManagement[] = [
@@ -39,6 +56,7 @@ export default async function LotManagement() {
       instock: "8",
       completed: "5",
       length: "4.2",
+      isActive: true,
     },
     {
       _id: "65f8febec4417ea5a14fbdad",
@@ -84,11 +102,11 @@ export default async function LotManagement() {
           <Heading className="leading-tight " title="Lot management " />
           <p className="text-muted-foreground text-sm">
             {" "}
-            Lot Management content
+            Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle
           </p>
         </div>
-        <Button asChild>
-          <Link href="lotmanagement/addlot">Add Lot</Link>
+        <Button className="mr-12" asChild>
+          <Link href="lotmanagement/addlot">Create New Lot</Link>
         </Button>
       </div>
       <Separator orientation="horizontal" />
