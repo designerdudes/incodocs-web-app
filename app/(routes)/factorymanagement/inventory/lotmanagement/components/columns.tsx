@@ -8,6 +8,7 @@ import moment from "moment"
 
 export type RawMaterial = {
     _id: string
+    lotName: string
     materialName: string
     materialType: string
     categoryId: string
@@ -24,6 +25,7 @@ export type RawMaterial = {
 
 export type LotManagement = {
     _id: string
+    lotname: string
     materialType: string
     numberofBlocks: string
     categoryId: string
@@ -31,7 +33,6 @@ export type LotManagement = {
     createdAt: string
     height: string
     breadth: string
-    lotname: string
     intrimming: string
     incutting: string
     length: string
@@ -131,57 +132,6 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-    // {
-    //     accessorKey: "height",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             H
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.height}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "length",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             L
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.length}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "breadth",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             B
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.breadth}
-    //         </div>
-    //     ),
-    // },
     {
         accessorKey: "incutting",
         header: ({ column }) => (
