@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const instance = axios.create({ 
-  baseURL: 'https://incodocs-server.vercel.app', 
+  // baseURL: 'https://incodocs-server.vercel.app', 
+  baseURL: 'http://localhost:4080',
 });
 
 
