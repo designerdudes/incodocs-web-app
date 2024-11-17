@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft, SidebarCloseIcon, XIcon } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
-import CardWithForm from "./components/addlot";
+import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 
 interface LotManagement {
   _id: string;
@@ -25,11 +25,7 @@ interface LotManagement {
   length: string;
 }
 
-interface Props {
-  searchParams: { [key: string]: string | undefined };
-}
-
-export default function LotManagement({ searchParams }: Props) {
+export default function LotManagement() {
   const data: LotManagement[] = [
     {
       _id: "65f8fb0fc4417ea5a14fbd82",
@@ -47,58 +43,7 @@ export default function LotManagement({ searchParams }: Props) {
       completed: "5",
       length: "4.2",
     },
-    {
-      _id: "65f8fb0fc4417ea5a14fbd82",
-      materialType: "Granite",
-      numberofBlocks: "20",
-      lotname: "xyz",
-      categoryId: "Category123",
-      isActive: true,
-      createdAt: "2024-03-19T02:40:15.954Z",
-      height: "54",
-      breadth: "3.2",
-      intrimming: "5",
-      incutting: "7",
-      instock: "8",
-      completed: "5",
-      length: "4.2",
-    },
-    {
-      _id: "65f8fd0ac4417ea5a14fbda1",
-      lotname: "xyz",
-      materialType: "Black Granite",
-      numberofBlocks: "20",
-      categoryId: "Category123",
-      createdAt: "2024-03-19T02:40:15.954Z",
-      height: "54",
-      breadth: "3.2",
-      intrimming: "5",
-      incutting: "7",
-      instock: "8",
-      completed: "5",
-      length: "4.2",
-      isActive: true,
-    },
-    {
-      _id: "65f8febec4417ea5a14fbdad",
-      lotname: "xyz",
-      materialType: "Marble",
-      numberofBlocks: "20",
-      categoryId: "Category123",
-      isActive: true,
-      createdAt: "2024-03-19T02:40:15.954Z",
-      height: "54",
-      breadth: "3.2",
-      intrimming: "5",
-      incutting: "7",
-      instock: "8",
-      completed: "5",
-      length: "4.2",
-    },
   ];
-
-  // Check if the modal should be displayed
-  const showModal = searchParams.modal === "createLot";
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -110,15 +55,13 @@ export default function LotManagement({ searchParams }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight " title="Lot Management" />
+          <Heading className="leading-tight" title="Lot Management" />
           <p className="text-muted-foreground text-sm">
             Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle.
           </p>
         </div>
-        <Button className="mr-12" asChild>
-          <Link href="?modal=createLot">Create New Lot</Link>
-        </Button>
-
+        {/* Move the interactivity to the client-side button component */}
+        <CreateNewLotButton />
       </div>
       <Separator orientation="horizontal" />
       <div className="w-250 container mx-auto py-10">
@@ -133,44 +76,6 @@ export default function LotManagement({ searchParams }: Props) {
           data={data as any}
         />
       </div>
-      {showModal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 50,
-          }}
-        >
-          <div
-            style={{
-              background: "white",
-              padding: "2rem",
-              borderRadius: "8px",
-              width: "90%",
-              maxWidth: "600px",
-              boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            <div style={{ textAlign: "right" }}>
-              <Link href="?">
-                {/* <XIcon className="h-8 w-8" /> */}
-                <Button className="mb-2" variant="outline" >Close</Button>
-              </Link>
-            </div>
-            <CardWithForm />
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
-
-
