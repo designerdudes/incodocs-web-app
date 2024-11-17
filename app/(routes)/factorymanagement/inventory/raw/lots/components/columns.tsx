@@ -11,7 +11,6 @@ export type RawMaterial = {
     lotName: string
     materialName: string
     materialType: string
-    categoryId: string
     isActive: boolean
     createdAt: string
     updatedAt: string
@@ -28,7 +27,6 @@ export type LotManagement = {
     lotname: string
     materialType: string
     numberofBlocks: string
-    categoryId: string
     instock: string
     createdAt: string
     height: string
