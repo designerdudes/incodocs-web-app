@@ -64,12 +64,22 @@ const data = {
         },
         {
             title: "Factory Management",
-            url: "/factorymanagement/dashboard",
+            url: "/factorymanagement",
             icon: FactoryIcon,
             isActive: true,
             items: [
                 {
                     title: "Inventory",
+                    items: [
+                        {
+                            title: "Raw Inventory",
+                            url: "/factorymanagement/inventory/raw",
+                        },
+                        {
+                            title: "Finished Goods",
+                            url: "/factorymanagement/inventory/finished",
+                        },
+                    ],
                     url: "/factorymanagement/inventory/dashboard",
                 },
                 {
