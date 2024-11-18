@@ -11,17 +11,11 @@ import {
     FormLabel,
     FormMessage,
 } from "@/components/ui/form";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
     lotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }),
@@ -30,8 +24,23 @@ const formSchema = z.object({
         .string()
         .min(1, { message: "Quantity must be a positive number" })
         .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
+    weight: z
+        .string()
+        .min(1, { message: "Weight must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
+    height: z
+        .string()
+        .min(1, { message: "Height must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+    length: z
+        .string()
+        .min(1, { message: "Length must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
+    breadth: z
+        .string()
+        .min(1, { message: "Breadth must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
 });
-import { useRouter } from "next/navigation"; // Import useRouter for navigation
 
 function CardWithForm() {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -40,12 +49,11 @@ function CardWithForm() {
     });
 
     const GlobalModal = useGlobalModal();
-    const router = useRouter(); // Router instance for navigation
+    const router = useRouter();
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
-        // Display the modal for confirmation
         GlobalModal.title = "Confirm Lot Creation";
         GlobalModal.description = "Are you sure you want to create this lot?";
         GlobalModal.children = (
@@ -53,30 +61,27 @@ function CardWithForm() {
                 <p>Lot Name: {values.lotName}</p>
                 <p>Material Type: {values.materialType}</p>
                 <p>Quantity: {values.quantity}</p>
+                <p>Weight (tons): {values.weight}</p>
+                <p>Height (inches): {values.height}</p>
+                <p>Length (inches): {values.length}</p>
+                <p>Breadth (inches): {values.breadth}</p>
                 <div className="flex justify-end space-x-2">
-                    {/* Cancel Button */}
                     <Button
                         variant="outline"
                         onClick={() => {
                             GlobalModal.onClose();
-                            setIsLoading(false); // Reset loading state
+                            setIsLoading(false);
                         }}
                     >
                         Cancel
                     </Button>
-                    {/* Confirm Button */}
                     <Button
                         onClick={() => {
-                            // Simulate lot creation or call an API here
                             console.log("Lot Created:", values);
 
-                            // Close the modal
                             GlobalModal.onClose();
-
-                            // Navigate back to the base page (Lot Management page)
                             router.push("./lots");
-
-                            setIsLoading(false); // Reset loading state
+                            setIsLoading(false);
                         }}
                     >
                         Confirm
@@ -88,13 +93,11 @@ function CardWithForm() {
     };
 
     return (
-
         <Form {...form}>
             <form
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="grid gap-4"
             >
-                {/* Lot Name Field */}
                 <FormField
                     control={form.control}
                     name="lotName"
@@ -112,43 +115,114 @@ function CardWithForm() {
                         </FormItem>
                     )}
                 />
-                {/* Material Type Field */}
-                <FormField
-                    control={form.control}
-                    name="materialType"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Material Type</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Eg: Material ABC"
-                                    type="text"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {/* Quantity Field */}
-                <FormField
-                    control={form.control}
-                    name="quantity"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Quantity</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Eg: 20"
-                                    type="number"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {/* Submit Button */}
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="materialType"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Material Type</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: Material ABC"
+                                        type="text"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="quantity"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Quantity</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: 20"
+                                        type="number"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="weight"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Weight (tons)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: 10.5"
+                                        type="number"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="height"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Height (inches)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: 54"
+                                        type="number"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                        control={form.control}
+                        name="length"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Length (inches)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: 120"
+                                        type="number"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="breadth"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Breadth (inches)</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: 60"
+                                        type="number"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                </div>
                 <Button
                     type="submit"
                     disabled={isLoading}
@@ -161,7 +235,6 @@ function CardWithForm() {
                 </Button>
             </form>
         </Form>
-
     );
 }
 

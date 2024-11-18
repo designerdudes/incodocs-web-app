@@ -80,11 +80,11 @@ const data = {
                             url: "/factorymanagement/inventory/finished",
                         },
                     ],
-                    url: "/factorymanagement/inventory/dashboard",
+                    url: "/factorymanagement/inventory",
                 },
                 {
                     title: "Accounting",
-                    url: "/accounts/dashboard",
+                    url: "/factorymanagement/accounts",
                 },
             ],
         },
