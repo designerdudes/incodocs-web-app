@@ -16,8 +16,7 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { LotManagement } from "./columns";
-
-
+import EditLotForm from "./editLotForm";
 
 interface Props {
     data: LotManagement;
@@ -26,6 +25,7 @@ interface Props {
 export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
+    const modal = useGlobalModal(); // Global modal hook
     const deleteLot = async () => {
 
         try {
@@ -38,7 +38,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     }
-
 
     return (
         <div>
@@ -67,7 +66,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./lots/edit/${data._id}`);
+                            modal.title = "Edit New Lot"; // Set the title of the modal
+                            modal.children = <EditLotForm />; // Set the content of the modal
+                            modal.onOpen();
                         }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
