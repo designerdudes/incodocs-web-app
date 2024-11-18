@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import '../globals.css'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import AppSidebar from '@/components/app-sidebar'
+import AppSidebar from '@/components/layout/app-sidebar'
 import { Separator } from '@/components/ui/separator'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
+import BreadCrumb from '@/components/layout/breadCrumb'
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard| APLus Laundry',
@@ -27,19 +27,7 @@ export default function DashboardLayout({
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
                 <Separator orientation="vertical" className="mr-2 h-4" />
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                      <BreadcrumbLink href="#">
-                        Building Your Application
-                      </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
+                <BreadCrumb />
               </div>
             </header>
             {/*   */}

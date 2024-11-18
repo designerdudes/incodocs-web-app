@@ -1,5 +1,5 @@
-"use client"
-import { BadgeIndianRupee, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ServerIcon, Settings, Sheet, ShoppingBagIcon, TagIcon, User, UserCog, Users, } from "lucide-react"
+
+import { BadgeIndianRupee, BlocksIcon, BoxIcon, CogIcon, FrameIcon, GroupIcon, HelpCircle, HomeIcon, IndianRupeeIcon, LayoutDashboardIcon, ScissorsLineDashed, ServerIcon, Settings, Sheet, ShoppingBagIcon, SparkleIcon, TagIcon, User, UserCog, Users, } from "lucide-react"
 
 const BrandName = "IncoDocs"
 
@@ -130,6 +130,36 @@ const accountingSidebarTabs = [
 
 ]
 
+//dashboard cards
 
-export { sidebarTabs, accountingSidebarTabs, documentationSidebarTabs, factoryManagementSidebarTabs }
+//raw inventory cards
+const rawInventoryCards = [
+    {
+        title: 'Total Lots',
+        icon: <BlocksIcon className="w-6 h-6" />,
+        value: 50,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/inventory/raw/lots'
+    },
+    {
+        title: 'Slabs in Cutting',
+        icon: <ScissorsLineDashed className="w-6 h-6" />,
+        value: 40,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/inventory/raw/cutting'
+    },
+    {
+        title: 'Slabs in Polishing',
+        icon: <SparkleIcon className="w-6 h-6" />,
+        value: 20,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/inventory/raw/polishing'
+    },
+]
+
+
+export { sidebarTabs, accountingSidebarTabs, rawInventoryCards, documentationSidebarTabs, factoryManagementSidebarTabs }
 export { BrandName }
