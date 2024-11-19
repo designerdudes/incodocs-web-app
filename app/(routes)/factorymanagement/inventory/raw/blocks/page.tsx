@@ -8,6 +8,7 @@ import Link from "next/link";
 import { columns } from "./components/columns";
 // import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 
+<<<<<<< HEAD
 interface LotManagement {
   _id: string;
   materialType: string;
@@ -16,27 +17,41 @@ interface LotManagement {
   blocknumber: string;
   instock: string;
   
+=======
+interface Blocks {
+  _id: string
+  blocknumber: string
+  materialType: string
+  numberofslabs: string
+  instock: string
+  createdAt: string
+>>>>>>> 23d37a91209c8b6a3cbeb7f80e22115b4561754d
 }
 
-export default function LotManagement() {
-  const data: LotManagement[] = [
+export default function Blocks() {
+  const data: Blocks[] = [
     {
       _id: "65f8fb0fc4417ea5a14fbd82",
       materialType: "type A",
       numberofslabs: "20",
       blocknumber: "123",
+<<<<<<< HEAD
       instock:"20",
       createdAt:"",
     
     
 
+=======
+      instock: "20",
+      createdAt: "9-11-24"
+>>>>>>> 23d37a91209c8b6a3cbeb7f80e22115b4561754d
     },
   ];
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href="./raw">
+        <Link href="../raw">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -45,7 +60,7 @@ export default function LotManagement() {
         <div className="flex-1">
           <Heading className="leading-tight" title="Blocks" />
           <p className="text-muted-foreground text-sm">
-          The tracking of blocks through various stages of production.</p>
+            The tracking of blocks through various stages of production.</p>
         </div>
         {/* Move the interactivity to the client-side button component */}
         {/* <CreateNewLotButton /> */}

@@ -6,34 +6,17 @@ import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
 
-export type RawMaterial = {
-    _id: string
-    blocknumber: string
-    materialName: string
-    materialType: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string
-    height: string
-    breadth: string
-    length: string
-    volume: string
-    quantity: string
-}
 
-export type LotManagement = {
+export type Blocks = {
     _id: string
     blocknumber: string
     materialType: string
     numberofslabs: string
     instock: string
     createdAt: string
-    
+
 }
-
-
-export const columns: ColumnDef<LotManagement>[] = [
+export const columns: ColumnDef<Blocks>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -124,8 +107,8 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-   
-       {
+
+    {
         accessorKey: "createdAt",
         header: ({ column }) => (
             <Button

@@ -42,7 +42,7 @@ const formSchema = z.object({
         .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
 });
 
-function CardWithForm() {
+export default function CardWithForm() {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -238,4 +238,4 @@ function CardWithForm() {
     );
 }
 
-export default CardWithForm;
+
