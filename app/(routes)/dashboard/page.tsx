@@ -50,7 +50,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-row gap-4 mt-10">
-        <Link href="/factorymanagement/dashboard" passHref>
+        <Link href="/factorymanagement" passHref>
           <div className="cursor-pointer">
             <Card>
               <CardHeader>
@@ -66,7 +66,7 @@ export default function Home() {
           </div>
         </Link>
 
-        <Link href="/documentation/dashboard" passHref>
+        <Link href="/documentation" passHref>
           <div className="cursor-pointer">
             <Card>
               <CardHeader>

@@ -18,9 +18,9 @@ import {
     SquareTerminal,
 } from "lucide-react"
 
-import NavMain from "@/components/nav-main"
+import NavMain from "@/components/layout/nav-main"
 import NavProjects from "@/components/nav-projects"
-import NavUser from "@/components/nav-user"
+import NavUser from "@/components/layout/nav-user"
 // import { FactorySwitcher } from "@/components/team-switcher"
 import {
     Sidebar,
@@ -64,17 +64,27 @@ const data = {
         },
         {
             title: "Factory Management",
-            url: "/factorymanagement/dashboard",
+            url: "/factorymanagement",
             icon: FactoryIcon,
             isActive: true,
             items: [
                 {
                     title: "Inventory",
-                    url: "/factorymanagement/inventory/dashboard",
+                    items: [
+                        {
+                            title: "Raw Inventory",
+                            url: "/factorymanagement/inventory/raw",
+                        },
+                        {
+                            title: "Finished Goods",
+                            url: "/factorymanagement/inventory/finished",
+                        },
+                    ],
+                    url: "/factorymanagement/inventory",
                 },
                 {
                     title: "Accounting",
-                    url: "/accounts/dashboard",
+                    url: "/factorymanagement/accounts",
                 },
             ],
         },
