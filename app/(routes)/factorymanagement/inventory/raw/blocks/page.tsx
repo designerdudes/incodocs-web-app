@@ -11,18 +11,11 @@ import { columns } from "./components/columns";
 interface LotManagement {
   _id: string;
   materialType: string;
-  numberofBlocks: string;
-  lotname: string;
-  categoryId: string;
-  isActive: boolean;
+  numberofslabs: string;
   createdAt: string;
-  height: string;
-  breadth: string;
-  intrimming: string;
-  incutting: string;
+  blocknumber: string;
   instock: string;
-  completed: string;
-  length: string;
+  
 }
 
 export default function LotManagement() {
@@ -33,6 +26,7 @@ export default function LotManagement() {
       numberofslabs: "20",
       blocknumber: "123",
       instock:"20",
+      createdAt:"",
     
     
 
