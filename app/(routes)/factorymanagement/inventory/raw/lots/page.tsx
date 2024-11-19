@@ -48,14 +48,14 @@ export default function LotManagement() {
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href="./raw">
+        <Link href="../raw">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Lot Management" />
+          <Heading className="leading-tight" title="Lots Management" />
           <p className="text-muted-foreground text-sm">
             Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle.
           </p>
@@ -67,9 +67,9 @@ export default function LotManagement() {
       <div className="w-250 container mx-auto py-10">
         <DataTable
           bulkDeleteIdName="_id"
-          bulkDeleteTitle="Are you sure you want to delete the selected Raw Material?"
-          bulkDeleteDescription="This will delete all the selected Raw Material, and they will not be recoverable."
-          bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+          bulkDeleteTitle="Are you sure you want to delete the selected Lots?"
+          bulkDeleteDescription="This will delete all the selected Lots, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected lots deleted successfully"
           deleteRoute="/category/ids"
           searchKey="name"
           columns={columns}

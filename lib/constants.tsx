@@ -140,7 +140,7 @@ const rawInventoryCards = [
         value: 50,
         color: 'bg-primary',
         showButton: false,
-        buttonUrl: '/inventory/raw/lots'
+        buttonUrl: '/factorymanagement/inventory/raw/lots'
     },
     {
         title: 'Slabs in Cutting',
@@ -148,7 +148,7 @@ const rawInventoryCards = [
         value: 40,
         color: 'bg-primary',
         showButton: false,
-        buttonUrl: '/inventory/raw/cutting'
+        buttonUrl: '/factorymanagement/inventory/raw/cutting'
     },
     {
         title: 'Slabs in Polishing',
@@ -156,7 +156,7 @@ const rawInventoryCards = [
         value: 20,
         color: 'bg-primary',
         showButton: false,
-        buttonUrl: '/inventory/raw/polishing'
+        buttonUrl: '/factorymanagement/inventory/raw/polishing'
     },
 ]
 

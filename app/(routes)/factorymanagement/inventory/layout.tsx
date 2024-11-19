@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 // import '../../../globals.css'
 import TopBar from '@/components/topbar'
-import { FactoryManagementSidebarTabs } from '@/components/sidebar2'
 
 
 export const metadata: Metadata = {

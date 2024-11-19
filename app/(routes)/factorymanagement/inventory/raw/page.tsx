@@ -1,6 +1,4 @@
 import StatsCard from '@/components/statsCard'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Heading from '@/components/ui/heading'
 import { rawInventoryCards } from '@/lib/constants'
 import Link from 'next/link'
@@ -19,18 +17,18 @@ function page() {
                 </Link> */}
             </div>
             <div className="flex flex-row gap-4 mt-10 ">
-              {
-                rawInventoryCards?.map((card, index) => (
-                    <StatsCard key={index}
-                    title={card.title}
-                    stat={card.value}
-                    icon={card.icon}
-                    desc=""
-                    href={card.buttonUrl}
+                {
+                    rawInventoryCards?.map((card, index) => (
+                        <StatsCard key={index}
+                            title={card.title}
+                            stat={card.value}
+                            icon={card.icon}
+                            desc=""
+                            href={card.buttonUrl}
 
-                    />
-                ))
-              }
+                        />
+                    ))
+                }
             </div>
         </div>
 
