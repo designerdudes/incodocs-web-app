@@ -8,16 +8,7 @@ import Link from "next/link";
 import { columns } from "./components/columns";
 // import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 
-<<<<<<< HEAD
-interface LotManagement {
-  _id: string;
-  materialType: string;
-  numberofslabs: string;
-  createdAt: string;
-  blocknumber: string;
-  instock: string;
-  
-=======
+
 interface Blocks {
   _id: string
   blocknumber: string
@@ -25,7 +16,6 @@ interface Blocks {
   numberofslabs: string
   instock: string
   createdAt: string
->>>>>>> 23d37a91209c8b6a3cbeb7f80e22115b4561754d
 }
 
 export default function Blocks() {
@@ -35,16 +25,10 @@ export default function Blocks() {
       materialType: "type A",
       numberofslabs: "20",
       blocknumber: "123",
-<<<<<<< HEAD
-      instock:"20",
-      createdAt:"",
-    
-    
 
-=======
       instock: "20",
       createdAt: "9-11-24"
->>>>>>> 23d37a91209c8b6a3cbeb7f80e22115b4561754d
+
     },
   ];
 
