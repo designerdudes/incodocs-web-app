@@ -27,13 +27,17 @@ interface MarkCutAndCreateSlabsFormProps extends React.HTMLAttributes<HTMLDivEle
 const formSchema = z.object({
     _id: z.string().optional(),
     blockLotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }),
-    blockNumber: z.string().min(1, { message: "Block number is required" }),
+    blockNumber: z.string().min(3, { message: "Block number is required" }),
     numberofSlabs: z.string().optional(),
     slabs: z
         .array(
             z.object({
-                length: z.string().min(1, { message: "Length is required" }),
-                height: z.string().min(1, { message: "Height is required" }),
+                length: z.string()
+                    .min(1, { message: "Length must be a positive number" })
+                    .refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
+                height: z.string()
+                    .min(1, { message: "Height must be a positive number" })
+                    .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" })
             })
         )
         .optional(),
@@ -167,6 +171,7 @@ export function MarkCutAndcCeateSlabsForm({
                                                         <FormControl>
                                                             <Input
                                                                 placeholder="e.g. 54"
+                                                                type="number"
                                                                 disabled={isLoading}
                                                                 {...field}
                                                             />
@@ -185,6 +190,7 @@ export function MarkCutAndcCeateSlabsForm({
                                                         <FormControl>
                                                             <Input
                                                                 placeholder="e.g. 32"
+                                                                type="number"
                                                                 disabled={isLoading}
                                                                 {...field}
                                                             />
