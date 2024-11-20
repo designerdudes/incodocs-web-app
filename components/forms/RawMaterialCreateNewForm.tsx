@@ -127,7 +127,7 @@ function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
                         )}
                     />
 
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="weight.value"
                         render={({ field }) => (
@@ -202,14 +202,14 @@ function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
 
                     <div className={`${gap === 2 ? 'w-full' : 'grid gap-3 grid-cols-3'}`}>
                         <Button type="submit" className="w-full" disabled={isLoading}>
                             {isLoading && (
                                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                             )}
-                            Edit
+                            Create
                         </Button>
                     </div>
                 </form>

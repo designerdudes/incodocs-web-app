@@ -25,7 +25,6 @@ export default function Blocks() {
       materialType: "type A",
       numberofslabs: "20",
       blocknumber: "123",
-
       instock: "20",
       createdAt: "9-11-24"
 

@@ -31,7 +31,7 @@ export type LotManagement = {
     createdAt: string
     height: string
     breadth: string
-    intrimming: string
+    inpolishing: string
     incutting: string
     length: string
     completed: string
@@ -148,19 +148,19 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
     },
     {
-        accessorKey: "intrimming",
+        accessorKey: "inpolishing",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Blocks in Trimming Phase
+                Blocks in Polishing Phase
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.intrimming}
+                {row.original.inpolishing}
             </div>
         ),
     },

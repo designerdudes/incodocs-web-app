@@ -18,7 +18,7 @@ interface LotManagement {
   createdAt: string;
   height: string;
   breadth: string;
-  intrimming: string;
+  inpolishing: string;
   incutting: string;
   instock: string;
   completed: string;
@@ -37,7 +37,7 @@ export default function LotManagement() {
       createdAt: "2024-03-19T02:40:15.954Z",
       height: "54",
       breadth: "3.2",
-      intrimming: "5",
+      inpolishing: "5",
       incutting: "7",
       instock: "8",
       completed: "5",
@@ -61,7 +61,10 @@ export default function LotManagement() {
           </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
-        <CreateNewLotButton />
+        <Link href='./lots/create-new'> 
+        <Button> Create New Lot</Button>
+        </Link>
+        {/* <CreateNewLotButton /> */}
       </div>
       <Separator orientation="horizontal" />
       <div className="w-250 container mx-auto py-10">
