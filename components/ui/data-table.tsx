@@ -47,8 +47,6 @@ interface DataTableProps<TData, TValue> {
     bulkDeleteDescription?: string;
     bulkDeleteToastMessage?: string;
     deleteRoute?: string
-
-
 }
 
 

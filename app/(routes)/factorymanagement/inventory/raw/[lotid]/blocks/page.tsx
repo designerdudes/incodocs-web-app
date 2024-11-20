@@ -13,6 +13,7 @@ interface Props {
         id: string;
         materialName: string;
         lotname: string;
+        blockNumber: string;
         materialType: string;
         isActive: boolean;
         createdAt: string;
@@ -39,9 +40,9 @@ export default function LotManagement({ params }: Props) {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Block" />
-                    <p className="text-muted-foreground text-sm">
-                        Efficiently track and manage block with detailed insights into their current status and progress through the production cycle.
+                    <Heading className="leading-tight" title={` Details of ${params.lotname}'s Blocks`} />
+                    <p className="text-muted-foreground text-sm mt-2">
+                        Efficiently track and manage Block {`${params.blockNumber}`} with detailed insights into its current status and progress through the production cycle.
                     </p>
                 </div>
                 {/* <CreateNewLotButton /> */}
@@ -50,8 +51,8 @@ export default function LotManagement({ params }: Props) {
             <div className="w-250 container mx-auto py-10">
                 <DataTable
                     bulkDeleteIdName="_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected Raw Material?"
-                    bulkDeleteDescription="This will delete all the selected Raw Material, and they will not be recoverable."
+                    bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+                    bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                     deleteRoute="/category/ids"
                     searchKey="name"
