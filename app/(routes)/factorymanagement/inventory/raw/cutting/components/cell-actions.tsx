@@ -10,36 +10,20 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-<<<<<<< HEAD
-import { Edit, EyeIcon, MoreHorizontal, Trash } from "lucide-react";
-=======
 import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
->>>>>>> 7cfcf61b7cbe42e5606d4dd9e1a4049ebfeaaf71
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-<<<<<<< HEAD
-import { LotManagement } from "../columns";
-import EditLotForm from "./editLotForm";
-
-interface Props {
-    data: LotManagement;
-=======
 import { Block } from "./columns";
 
 interface Props {
     data: Block;
->>>>>>> 7cfcf61b7cbe42e5606d4dd9e1a4049ebfeaaf71
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-<<<<<<< HEAD
-    const modal = useGlobalModal(); // Global modal hook
-=======
->>>>>>> 7cfcf61b7cbe42e5606d4dd9e1a4049ebfeaaf71
     const deleteLot = async () => {
 
         try {
@@ -66,8 +50,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-<<<<<<< HEAD
-=======
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
@@ -77,7 +59,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Mark Cut
                     </DropdownMenuItem>
->>>>>>> 7cfcf61b7cbe42e5606d4dd9e1a4049ebfeaaf71
 
                     {/* View Lot Details */}
                     <DropdownMenuItem
@@ -102,11 +83,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-<<<<<<< HEAD
-                            GlobalModal.title = `Delete Product - ${data.lotname}`
-=======
                             GlobalModal.title = `Delete Product - ${data.blockNumber}`
->>>>>>> 7cfcf61b7cbe42e5606d4dd9e1a4049ebfeaaf71
                             GlobalModal.description = "Are you sure you want to delete this Product?"
                             GlobalModal.children = <Alert onConfirm={deleteLot} />
                             GlobalModal.onOpen()

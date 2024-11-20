@@ -37,7 +37,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         }
     };
 
-    const addLot = () => {
+    const addBlock = () => {
         modal.title = "Add New Lot"; // Set the modal title
         modal.children = (
             <div>
@@ -63,10 +63,10 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
                     {/* Add Lot */}
                     <DropdownMenuItem
-                        onSelect={addLot} // Trigger add lot modal
+                        onSelect={addBlock} // Trigger add lot modal
                     >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Lot
+                        Add Block
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}
