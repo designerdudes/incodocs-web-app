@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
-import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
+// import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 
 interface LotManagement {
   _id: string;
@@ -18,7 +18,7 @@ interface LotManagement {
   createdAt: string;
   height: string;
   breadth: string;
-  inpolishing: string;
+  intrimming: string;
   incutting: string;
   instock: string;
   completed: string;
@@ -37,7 +37,7 @@ export default function LotManagement() {
       createdAt: "2024-03-19T02:40:15.954Z",
       height: "54",
       breadth: "3.2",
-      inpolishing: "5",
+      intrimming: "5",
       incutting: "7",
       instock: "8",
       completed: "5",
@@ -55,15 +55,12 @@ export default function LotManagement() {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Lots Management" />
+          <Heading className="leading-tight" title="Cutting Phase" />
           <p className="text-muted-foreground text-sm">
             Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle.
           </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
-        <Link href='./lots/create-new'> 
-        <Button> Create New Lot</Button>
-        </Link>
         {/* <CreateNewLotButton /> */}
       </div>
       <Separator orientation="horizontal" />

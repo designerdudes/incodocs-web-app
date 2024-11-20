@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import CellAction from "./cell-actions"
+import CellAction from "../components/cell-actions"
 import moment from "moment"
 
 export type RawMaterial = {
@@ -31,7 +31,7 @@ export type LotManagement = {
     createdAt: string
     height: string
     breadth: string
-    inpolishing: string
+    intrimming: string
     incutting: string
     length: string
     completed: string
@@ -148,19 +148,19 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
     },
     {
-        accessorKey: "inpolishing",
+        accessorKey: "intrimming",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Blocks in Polishing Phase
+                Blocks in Trimming Phase
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.inpolishing}
+                {row.original.intrimming}
             </div>
         ),
     },
