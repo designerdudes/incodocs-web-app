@@ -1,8 +1,15 @@
 "use client";
 import * as React from "react";
 import * as z from "zod";
-import { cn } from "@/lib/utils";
-import { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from "../ui/card";
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableRow,
+    TableHead,
+    TableCell,
+    TableFooter,
+} from "../ui/table";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
@@ -79,9 +86,10 @@ export function MarkCutAndcCeateSlabsForm({
     }
 
     return (
-        <div className={cn("grid gap-6", className)} {...props}>
+        <div className="space-y-6">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 gap-3">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    {/* Input Fields */}
                     <div className={`grid grid-cols-${gap} gap-3`}>
                         {/* Lot Name */}
                         <FormField
@@ -117,10 +125,10 @@ export function MarkCutAndcCeateSlabsForm({
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Number of Blocks</FormLabel>
+                                    <FormLabel>Number of Slabs</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter number of blocks"
+                                            placeholder="Enter number of slabs"
                                             type="number"
                                             disabled={isLoading}
                                             onChange={(e) => {
@@ -136,60 +144,65 @@ export function MarkCutAndcCeateSlabsForm({
                         />
                     </div>
 
-                    {/* Dynamic Cards for Slabs */}
+                    {/* Table for Slabs */}
                     {slabsCount > 0 && (
-                        <div className="grid gap-4">
-                            {Array.from({ length: slabsCount }).map((_, index) => (
-                                <Card key={index} className="p-4">
-                                    <CardHeader>
-                                        <CardTitle>Slab {index + 1}</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="grid grid-cols-2 gap-4">
-                                        {/* Length Input */}
-                                        <FormField
-                                            name={`slabs.${index}.length`}
-                                            control={form.control}
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Length (in inches)</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="e.g. 54"
-                                                            disabled={isLoading}
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        {/* Height Input */}
-                                        <FormField
-                                            name={`slabs.${index}.height`}
-                                            control={form.control}
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Height (in inches)</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            placeholder="e.g. 32"
-                                                            disabled={isLoading}
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </CardContent>
-                                    <CardFooter>
-                                        <CardDescription>
-                                            Dimensions for slab {index + 1}
-                                        </CardDescription>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Slab #</TableHead>
+                                    <TableHead>Length (in inches)</TableHead>
+                                    <TableHead>Height (in inches)</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {Array.from({ length: slabsCount }).map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        <TableCell>
+                                            <FormField
+                                                name={`slabs.${index}.length`}
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="e.g. 54"
+                                                                disabled={isLoading}
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <FormField
+                                                name={`slabs.${index}.height`}
+                                                control={form.control}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <Input
+                                                                placeholder="e.g. 32"
+                                                                disabled={isLoading}
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                            <TableFooter>
+                                <TableRow>
+                                    <TableCell colSpan={3}>Total Slabs: {slabsCount}</TableCell>
+                                </TableRow>
+                            </TableFooter>
+                        </Table>
                     )}
 
                     {/* Submit Button */}
