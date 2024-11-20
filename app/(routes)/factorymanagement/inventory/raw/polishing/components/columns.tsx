@@ -4,26 +4,22 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
-import moment from "moment"
 
-export type Block = {
+export type Slabs = {
     _id: string
     blockNumber: string
     blockLotName: string
+    slabId: string
     materialType: string
-    numberofSlabs: string
     isActive: boolean
     createdAt: string
     updatedAt: string
-    weight: string
     height: string
-    breadth: string
     length: string
-    volume: string
     status: string
 }
 
-export const columns: ColumnDef<Block>[] = [
+export const columns: ColumnDef<Slabs>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -47,24 +43,24 @@ export const columns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name",
+        accessorKey: "slabId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Block&apos;s Lot Name
+                Slab Id
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blockLotName}
+                {row.original.slabId}
             </div>
         ),
     },
     {
-        accessorKey: "blockNumber",
+        accessorKey: "name",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -98,30 +94,13 @@ export const columns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "numberofSlabs",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Total Slabs
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.numberofSlabs}
-            </div>
-        ),
-    },
-    {
         accessorKey: "status",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Blocks Status
+                Slab Status
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -131,6 +110,24 @@ export const columns: ColumnDef<Block>[] = [
             </div>
         ),
     },
+    // {
+    //     accessorKey: "createdAt",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Block Created Date
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div>
+    //             {moment(row.original.createdAt).format("DD MMM YYYY")}
+    //         </div>
+    //     ),
+    // },
+
     {
 
         header: ({ column }) => (

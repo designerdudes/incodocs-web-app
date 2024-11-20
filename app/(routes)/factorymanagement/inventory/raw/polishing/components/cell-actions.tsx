@@ -15,10 +15,11 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./columns";
+import { Slabs } from "./columns";
+import CardWithForm from "./addTrimValueForm";
 
 interface Props {
-    data: Block;
+    data: Slabs;
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
@@ -52,12 +53,17 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuSeparator />
                     {/* View Lot Details */}
                     <DropdownMenuItem
+                        // onSelect={() => {
+                        //     router.push(`./polishing/${data._id}/markpolish`);
+                        // }}
                         onSelect={() => {
-                            router.push(`./cutting/${data._id}/markcut`);
+                            GlobalModal.title = `Enter triming Values`
+                            GlobalModal.children = <CardWithForm />
+                            GlobalModal.onOpen()
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Mark Cut
+                        Mark Polish
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}
@@ -67,7 +73,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
-                        View Block Details
+                        View Slab Details
                     </DropdownMenuItem>
 
                     {/* Edit Lot Details */}
@@ -79,18 +85,18 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit Lot Details
+                        Edit Slab Details
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.blockNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Product?"
+                            GlobalModal.title = `Delete Slab - ${data.blockNumber}`
+                            GlobalModal.description = "Are you sure you want to delete this Slab?"
                             GlobalModal.children = <Alert onConfirm={deleteLot} />
                             GlobalModal.onOpen()
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground">
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Product</DropdownMenuItem>
+                        Delete Slab</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

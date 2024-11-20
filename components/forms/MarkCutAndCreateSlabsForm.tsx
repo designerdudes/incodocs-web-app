@@ -43,7 +43,7 @@ const formSchema = z.object({
         .optional(),
 });
 
-export function MarkCutAndcCeateSlabsForm({
+export function MarkCutAndCreateSlabsForm({
     className,
     BlockData,
     gap,

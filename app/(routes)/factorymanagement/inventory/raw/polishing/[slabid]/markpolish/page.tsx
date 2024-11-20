@@ -5,8 +5,9 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { MarkCutAndCreateSlabsForm } from "@/components/forms/MarkCutAndCreateSlabsForm";
-import { Block } from "../../components/columns";
+
+import { Slabs } from "../../components/columns";
+import { MarkPolishForm } from "@/components/forms/MarkPolishForm";
 
 
 // interface Props {
@@ -27,24 +28,21 @@ import { Block } from "../../components/columns";
 //         status: string
 //     }
 // }
-const data: Block = {
+const data: Slabs = {
     _id: "65f8fb0fc4417ea5a14fbd82",
     blockNumber: "12345",
+    slabId: "SLAB-123",
     blockLotName: "LOT 1",
     materialType: "Granite",
-    numberofSlabs: "",
     isActive: true,
     createdAt: "2024-03-19T02:40:15.954Z",
     updatedAt: "",
-    weight: "45",
     height: "54",
-    breadth: "3.2",
     length: "4.2",
-    volume: "785",
-    status: "In Cutting",
+    status: "Ready For Polish",
 };
 
-export default async function MarkCutPage() {
+export default async function MarkPolishPage() {
 
 
     // const BlockId = params._id
@@ -62,26 +60,23 @@ export default async function MarkCutPage() {
     // }).then(response => {
     //     return response.json()
     // })
-    let BlockData = null
-    BlockData = data
+    let SlabData = null
+    SlabData = data
 
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex justify-between items-center">
-                <Link href="/factorymanagement/inventory/raw/cutting/">
+                <Link href="/factorymanagement/inventory/raw/polishing/">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading
-                        className="leading-tight"
-                        title={`Block ${BlockData.blockNumber}: Enter Number of Slabs`}
-                    />
-                    <p className="text-muted-foreground text-sm mt-2">
-                        Enter the total number of slabs for Block {BlockData.blockNumber} and efficiently track its progress in the cutting process.
+                    <Heading className="leading-tight" title="Mark cut and enter number of slabs" />
+                    <p className="text-muted-foreground text-sm">
+                        Efficiently track and manage block with detailed insights into their current status and progress through the production cycle.
                     </p>
                 </div>
                 {/* <CreateNewLotButton /> */}
@@ -90,7 +85,7 @@ export default async function MarkCutPage() {
             <div className="container mx-auto  py-10">
 
                 {data ?
-                    <MarkCutAndCreateSlabsForm gap={3} BlockData={data} />
+                    <MarkPolishForm gap={3} BlockData={data} />
                     :
                     <div className="flex flex-col gap-2 items-center justify-center h-full">
 
