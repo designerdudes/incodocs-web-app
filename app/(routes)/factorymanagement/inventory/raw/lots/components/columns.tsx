@@ -6,21 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
 
-export type RawMaterial = {
-    _id: string
-    lotName: string
-    materialName: string
-    materialType: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string
-    height: string
-    breadth: string
-    length: string
-    volume: string
-    quantity: string
-}
 
 export type LotManagement = {
     _id: string
@@ -63,7 +48,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "lotname",
+        accessorKey: "name", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"

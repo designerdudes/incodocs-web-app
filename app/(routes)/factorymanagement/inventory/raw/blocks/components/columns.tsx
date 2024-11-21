@@ -12,8 +12,9 @@ export type Blocks = {
     blocknumber: string
     materialType: string
     numberofslabs: string
-    instock: string
     createdAt: string
+    status: string
+
 
 }
 export const columns: ColumnDef<Blocks>[] = [
@@ -40,7 +41,7 @@ export const columns: ColumnDef<Blocks>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "blocknumber",
+        accessorKey: "name",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -91,19 +92,19 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
     },
     {
-        accessorKey: "instock",
+        accessorKey: "status",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Status
+                Block Status
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.instock}
+                {row.original.status}
             </div>
         ),
     },
