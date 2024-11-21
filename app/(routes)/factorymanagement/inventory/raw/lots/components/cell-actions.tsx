@@ -16,6 +16,7 @@ import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { LotManagement } from "./columns";
 import EditLotForm from "./editLotForm";
+import AddBlockForm from "./addBlockForm";
 
 interface Props {
     data: LotManagement;
@@ -63,7 +64,11 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
                     {/* Add Lot */}
                     <DropdownMenuItem
-                        onSelect={addBlock} // Trigger add lot modal
+                        onSelect={() => {
+                            GlobalModal.title = `Enter Block Details`
+                            GlobalModal.children = <AddBlockForm />
+                            GlobalModal.onOpen()
+                        }}
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Add Block

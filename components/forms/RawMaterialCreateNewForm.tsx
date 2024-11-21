@@ -35,17 +35,30 @@ const formSchema = z.object({
     entries: z
         .array(
             z.object({
-                weight: z.string().min(1, { message: "Weight is required" }),
-                length: z.string().min(1, { message: "Length is required" }),
-                breadth: z.string().min(1, { message: "Breadth is required" }),
-                height: z.string().min(1, { message: "Height is required" }),
-                volume: z.string().min(1, { message: "Volume is required" }),
-            })
+                weight: z
+                .string()
+                .min(1, { message: "Weight must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
+                length: z
+                .string()
+                .min(1, { message: "Height must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+                breadth: z
+                .string()
+                .min(1, { message: "Breadth must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
+       
+                height: z
+                .string()
+                .min(1, { message: "Height must be a positive number" })
+                 .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+                 volume: z.string().min(1, { message: "Volume is required" })
+})
         )
-        .optional(),
 });
 
-export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
+export function 
+RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [entriesCount, setEntriesCount] = React.useState<number>(0);
@@ -161,7 +174,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>#</TableHead>
-                                    <TableHead>Weight (kg)</TableHead>
+                                    <TableHead>Weight (tons)</TableHead>
                                     <TableHead>Length (inches)</TableHead>
                                     <TableHead>breadth (inches)</TableHead>
                                     <TableHead>Height (inches)</TableHead>
@@ -182,6 +195,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                                             <FormControl>
                                                                 <Input
                                                                     placeholder={`Enter ${field}`}
+                                                                    type="number"
                                                                     disabled={isLoading}
                                                                     {...entryField}
                                                                     onChange={(e) =>
