@@ -1,221 +1,250 @@
-"use client"
-import React from 'react'
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import Heading from "@/components/ui/heading"
-import { PlusIcon } from "lucide-react"
-import Link from "next/link"
-import { Icons } from '../ui/icons'
-// Define the schema according to the new structure
-const formSchema = z.object({
-    materialName: z.string().min(3, { message: "Material name must be at least 3 characters long" }),
-    materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
-    quantity: z.string().min(1, { message: "Quantity must be a positive number" }).refine(val => parseFloat(val) > 0, {
-        message: "Quantity must be greater than zero"
-    }),
-    weight: z.object({
-        value: z.string().min(1, { message: "Weight must be a positive number" }).refine(val => parseFloat(val) > 0, {
-            message: "Weight must be greater than zero"
-        }),
-        unit: z.string().optional(),
-    }),
-    length: z.object({
-        value: z.string().min(1, { message: "Length must be a positive number" }).refine(val => parseFloat(val) > 0, {
-            message: "Length must be greater than zero"
-        }),
-        unit: z.string().optional(),
-    }),
-    breadth: z.object({
-        value: z.string().min(1, { message: "Breadth must be a positive number" }).refine(val => parseFloat(val) > 0, {
-            message: "Breadth must be greater than zero"
-        }),
-        unit: z.string().optional(),
-    }),
-    height: z.object({
-        value: z.string().min(1, { message: "Height must be a positive number" }).refine(val => parseFloat(val) > 0, {
-            message: "Height must be greater than zero"
-        }),
-        unit: z.string().optional(),
-    })
-});
+"use client";
 
-interface NewFormProps extends React.HTMLAttributes<HTMLDivElement> {
+import * as React from "react";
+import * as z from "zod";
+import {
+    Table,
+    TableHeader,
+    TableBody,
+    TableRow,
+    TableHead,
+    TableCell,
+    TableFooter,
+} from "../ui/table";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { useForm } from "react-hook-form";
+import { Form } from "../ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
+
+interface RawMaterialCreateNewFormProps {
     gap: number;
 }
 
-function RawMaterialCreateNewForm({ className, gap }: NewFormProps) {
-    const [isLoading, setIsLoading] = React.useState<boolean>(false)
+const formSchema = z.object({
+    lotName: z.string().min(3, { message: "Material name must be at least 3 characters long" }),
+    batchNumber: z.string().min(1, { message: "Batch number is required" }),
+    materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
+    numberOfblocks: z
+        .string()
+        .min(1, { message: "Quantity must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
+    entries: z.array(
+        z.object({
+            weight: z
+                .string()
+                .min(1, { message: "Weight must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
+            length: z
+                .string()
+                .min(1, { message: "Height must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+            breadth: z
+                .string()
+                .min(1, { message: "Breadth must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
+
+            height: z
+                .string()
+                .min(1, { message: "Height must be a positive number" })
+                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+            volume: z.string().min(1, { message: "Volume is required" }),
+        })
+    ),
+});
+
+export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = React.useState<boolean>(false);
+    const [entries, setEntries] = React.useState<any[]>([]);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
-    })
+    });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        try {
-            console.log(values);
-        } catch (error) {
-            console.error("Form submission error", error);
+    function handleEntriesInputChange(value: string) {
+        const count = parseInt(value, 10);
+        if (!isNaN(count) && count > 0) {
+            const newEntries = Array.from({ length: count }, () => ({
+                weight: "",
+                length: "",
+                breadth: "",
+                height: "",
+                volume: "",
+            }));
+            setEntries(newEntries);
+            form.setValue("entries", newEntries);
+        } else {
+            setEntries([]);
+            form.setValue("entries", []);
         }
     }
+
+    function handleVolumeCalculation(index: number, field: string, value: string) {
+        const updatedEntries = [...entries];
+        updatedEntries[index] = {
+            ...updatedEntries[index],
+            [field]: value,
+        };
+
+        const { length, breadth, height } = updatedEntries[index];
+
+        if (length && breadth && height) {
+            const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
+            updatedEntries[index].volume = volume ? volume.toFixed(2) : "";
+        }
+
+        setEntries(updatedEntries);
+        form.setValue("entries", updatedEntries);
+    }
+
+    function handleDeleteRow(index: number) {
+        const updatedEntries = entries.filter((_, i) => i !== index);
+        setEntries(updatedEntries);
+        form.setValue("entries", updatedEntries);
+    }
+
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsLoading(true);
+
+        // Add your update logic here
+        toast.success("Raw material data updated successfully");
+        setIsLoading(false);
+
+        router.refresh(); // Refresh the current page
+    }
+
     return (
-        <div className={cn("grid gap-6", className)}>
+        <div className="space-y-6">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-8">
-                    <FormField
-                        control={form.control}
-                        name="materialName"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Material Name</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: Blackyard"
-                                        type="text"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="materialType"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Material Type</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: TypeABC"
-                                        type="text"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="quantity"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Quantity</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: 12"
-                                        type="number"
-                                        step="any"
-                                        min="0"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    {/* <FormField
-                        control={form.control}
-                        name="weight.value"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Weight</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: 10.5"
-                                        type="number"
-                                        step="any"
-                                        min="0"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="length.value"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Length</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: 10.5"
-                                        type="number"
-                                        step="any"
-                                        min="0"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-
-                        control={form.control}
-                        name="breadth.value"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Breadth</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: 3.2"
-                                        type="number"
-                                        step="any"
-                                        min="0"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-
-                    <FormField
-                        control={form.control}
-                        name="height.value"
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Height </FormLabel>
-                                <FormControl>
-                                    <Input
-                                        placeholder="Eg: 54"
-                                        type="number"
-                                        step="any"
-                                        min="0"
-                                        {...field} />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-
-                    <div className={`${gap === 2 ? 'w-full' : 'grid gap-3 grid-cols-3'}`}>
-                        <Button type="submit" className="w-full" disabled={isLoading}>
-                            {isLoading && (
-                                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className={`grid grid-cols-${gap} gap-3`}>
+                        <FormField
+                            name="lotName"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Lot Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Xyz" disabled={isLoading} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
-                            Create
-                        </Button>
+                        />
+                        <FormField
+                            name="materialType"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Material Type</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Granite" disabled={isLoading} {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            name="numberOfblocks"
+                            control={form.control}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Number of Blocks</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Enter number of blocks"
+                                            type="number"
+                                            disabled={isLoading}
+                                            onChange={(e) => {
+                                                field.onChange(e);
+                                                handleEntriesInputChange(e.target.value);
+                                            }}
+                                            value={field.value}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </div>
+
+                    {entries.length > 0 && (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>#</TableHead>
+                                    <TableHead>Weight (tons)</TableHead>
+                                    <TableHead>Length (inches)</TableHead>
+                                    <TableHead>Breadth (inches)</TableHead>
+                                    <TableHead>Height (inches)</TableHead>
+                                    <TableHead>Volume (in³)</TableHead>
+                                    <TableHead>Delete</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {entries.map((entry, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>{index + 1}</TableCell>
+                                        {["weight", "length", "breadth", "height"].map((field) => (
+                                            <TableCell key={field}>
+                                                <FormField
+                                                    name={`entries.${index}.${field}`}
+                                                    control={form.control}
+                                                    render={({ field: entryField }) => (
+                                                        <FormItem>
+                                                            <FormControl>
+                                                                <Input
+                                                                    placeholder={`Enter ${field}`}
+                                                                    type="number"
+                                                                    disabled={isLoading}
+                                                                    {...entryField}
+                                                                    onChange={(e) =>
+                                                                        handleVolumeCalculation(index, field, e.target.value)
+                                                                    }
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </TableCell>
+                                        ))}
+                                        <TableCell>
+                                            <Input
+                                                placeholder="Auto-calculated"
+                                                disabled
+                                                value={entry.volume}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isLoading}
+                                                onClick={() => handleDeleteRow(index)}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4" />
+                                                
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                        {isLoading && <span className="mr-2 spinner"></span>}
+                        Update
+                    </Button>
                 </form>
             </Form>
         </div>
-    )
+    );
 }
 
-export default RawMaterialCreateNewForm
+export default RawMaterialCreateNewForm;
