@@ -50,6 +50,7 @@ const CuttingInventoryPage: React.FC = () => {
 
     const inCutting = data.filter((data: any) => data.status === 'in Cutting')
     const readyForPolish = data.filter((data: any) => data.status === 'ready for polish')
+    const inPolishing = data.filter((data: any) => data.status === 'in polishing')
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -61,9 +62,9 @@ const CuttingInventoryPage: React.FC = () => {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Slabs In Cutting Inventory" />
+                    <Heading className="leading-tight" title="Blocks and Slabs In Process" />
                     <p className="text-muted-foreground text-sm mt-2">
-                        Efficiently track and manage slabs in the cutting inventory with detailed insights into their dimensions, weight, and progress through the cutting process.
+                        Efficiently track and manage slabs in process with detailed insights into their dimensions, weight, and progress through the cutting process.
                     </p>
                 </div>
                 {/* Move the interactivity to the client-side button component */}
@@ -75,6 +76,7 @@ const CuttingInventoryPage: React.FC = () => {
                     <TabsList className='gap-3'>
                         <TabsTrigger className='gap-2' value="in Cutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="ready for polish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className='gap-2' value="in polishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
                     </TabsList>
                     <TabsContent value="in Cutting">
                         <DataTable
@@ -87,10 +89,18 @@ const CuttingInventoryPage: React.FC = () => {
                     <TabsContent value="ready for polish">
                         <DataTable
                             bulkDeleteIdName='order_id'
-                            bulkDeleteTitle='Are you sure you want to delete the selected orders?'
-                            bulkDeleteDescription='This will delete the selected orders, and they will not be recoverable.'
-                            bulkDeleteToastMessage='Selected orders deleted successfully'
+                            bulkDeleteTitle='Are you sure you want to delete the selected blocks?'
+                            bulkDeleteDescription='This will delete the selected blocks, and they will not be recoverable.'
+                            bulkDeleteToastMessage='Selected blocks deleted successfully'
                             searchKey='title' columns={columns} data={readyForPolish} />
+                    </TabsContent>
+                    <TabsContent value="in polishing">
+                        <DataTable
+                            bulkDeleteIdName='order_id'
+                            bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                            bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                            bulkDeleteToastMessage='Selected slabs deleted successfully'
+                            searchKey='title' columns={columns} data={inPolishing} />
                     </TabsContent>
                 </Tabs>
             </div>
