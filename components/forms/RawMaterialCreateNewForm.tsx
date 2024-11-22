@@ -19,6 +19,7 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
 
 interface RawMaterialCreateNewFormProps {
     gap: number;
@@ -28,40 +29,38 @@ const formSchema = z.object({
     lotName: z.string().min(3, { message: "Material name must be at least 3 characters long" }),
     batchNumber: z.string().min(1, { message: "Batch number is required" }),
     materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
-    numberOfblocks:  z
-    .string()
-    .min(1, { message: "Quantity must be a positive number" })
-    .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
-    entries: z
-        .array(
-            z.object({
-                weight: z
+    numberOfblocks: z
+        .string()
+        .min(1, { message: "Quantity must be a positive number" })
+        .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
+    entries: z.array(
+        z.object({
+            weight: z
                 .string()
                 .min(1, { message: "Weight must be a positive number" })
                 .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
-                length: z
+            length: z
                 .string()
                 .min(1, { message: "Height must be a positive number" })
                 .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-                breadth: z
+            breadth: z
                 .string()
                 .min(1, { message: "Breadth must be a positive number" })
                 .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
-       
-                height: z
+
+            height: z
                 .string()
                 .min(1, { message: "Height must be a positive number" })
-                 .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-                 volume: z.string().min(1, { message: "Volume is required" })
-})
-        )
+                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+            volume: z.string().min(1, { message: "Volume is required" }),
+        })
+    ),
 });
 
-export function 
-RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [entriesCount, setEntriesCount] = React.useState<number>(0);
+    const [entries, setEntries] = React.useState<any[]>([]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -70,38 +69,43 @@ RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
     function handleEntriesInputChange(value: string) {
         const count = parseInt(value, 10);
         if (!isNaN(count) && count > 0) {
-            setEntriesCount(count);
-            form.setValue(
-                "entries",
-                Array.from({ length: count }, () => ({
-                    weight: "",
-                    length: "",
-                    breadth: "",
-                    height: "",
-                    volume: "",
-                }))
-            );
+            const newEntries = Array.from({ length: count }, () => ({
+                weight: "",
+                length: "",
+                breadth: "",
+                height: "",
+                volume: "",
+            }));
+            setEntries(newEntries);
+            form.setValue("entries", newEntries);
         } else {
-            setEntriesCount(0);
+            setEntries([]);
             form.setValue("entries", []);
         }
     }
 
     function handleVolumeCalculation(index: number, field: string, value: string) {
-        const entries = form.getValues("entries") || [];
-        entries[index] = {
-            ...entries[index],
+        const updatedEntries = [...entries];
+        updatedEntries[index] = {
+            ...updatedEntries[index],
             [field]: value,
         };
 
-        const { length, breadth, height } = entries[index];
+        const { length, breadth, height } = updatedEntries[index];
 
         if (length && breadth && height) {
             const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
-            entries[index].volume = volume ? volume.toFixed(2) : "";
+            updatedEntries[index].volume = volume ? volume.toFixed(2) : "";
         }
 
-        form.setValue("entries", entries);
+        setEntries(updatedEntries);
+        form.setValue("entries", updatedEntries);
+    }
+
+    function handleDeleteRow(index: number) {
+        const updatedEntries = entries.filter((_, i) => i !== index);
+        setEntries(updatedEntries);
+        form.setValue("entries", updatedEntries);
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -169,20 +173,21 @@ RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
                         />
                     </div>
 
-                    {entriesCount > 0 && (
+                    {entries.length > 0 && (
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>#</TableHead>
                                     <TableHead>Weight (tons)</TableHead>
                                     <TableHead>Length (inches)</TableHead>
-                                    <TableHead>breadth (inches)</TableHead>
+                                    <TableHead>Breadth (inches)</TableHead>
                                     <TableHead>Height (inches)</TableHead>
                                     <TableHead>Volume (in³)</TableHead>
+                                    <TableHead>Delete</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {Array.from({ length: entriesCount }).map((_, index) => (
+                                {entries.map((entry, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{index + 1}</TableCell>
                                         {["weight", "length", "breadth", "height"].map((field) => (
@@ -210,18 +215,22 @@ RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
                                             </TableCell>
                                         ))}
                                         <TableCell>
-                                            <FormField
-                                                name={`entries.${index}.volume`}
-                                                control={form.control}
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormControl>
-                                                            <Input placeholder="Auto-calculated" disabled {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
+                                            <Input
+                                                placeholder="Auto-calculated"
+                                                disabled
+                                                value={entry.volume}
                                             />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                disabled={isLoading}
+                                                onClick={() => handleDeleteRow(index)}
+                                            >
+                                                <Trash className="mr-2 h-4 w-4" />
+                                                
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
@@ -237,4 +246,5 @@ RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
         </div>
     );
 }
+
 export default RawMaterialCreateNewForm;
