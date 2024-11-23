@@ -60,11 +60,11 @@ export default function CardWithForm() {
             <div className="space-y-4">
                 <p>Lot Name: {values.lotName}</p>
                 <p>Material Type: {values.materialType}</p>
-                <p>Quantity: {values.quantity}</p>
+                {/* <p>Quantity: {values.quantity}</p>
                 <p>Weight (tons): {values.weight}</p>
                 <p>Height (inches): {values.height}</p>
                 <p>Length (inches): {values.length}</p>
-                <p>Breadth (inches): {values.breadth}</p>
+                <p>Breadth (inches): {values.breadth}</p> */}
                 <div className="flex justify-end space-x-2">
                     <Button
                         variant="outline"
@@ -98,6 +98,8 @@ export default function CardWithForm() {
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="grid gap-4"
             >
+                
+                <div className="grid grid-cols-2 gap-4">
                 <FormField
                     control={form.control}
                     name="lotName"
@@ -115,7 +117,6 @@ export default function CardWithForm() {
                         </FormItem>
                     )}
                 />
-                <div className="grid grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name="materialType"
@@ -133,7 +134,7 @@ export default function CardWithForm() {
                             </FormItem>
                         )}
                     />
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name="quantity"
                         render={({ field }) => (
@@ -221,7 +222,7 @@ export default function CardWithForm() {
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
                 </div>
                 <Button
                     type="submit"
