@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import * as React from "react";
 import * as z from "zod";
 import {
@@ -35,23 +34,10 @@ const formSchema = z.object({
         .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
     entries: z.array(
         z.object({
-            weight: z
-                .string()
-                .min(1, { message: "Weight must be a positive number" })
-                .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
-            length: z
-                .string()
-                .min(1, { message: "Height must be a positive number" })
-                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-            breadth: z
-                .string()
-                .min(1, { message: "Breadth must be a positive number" })
-                .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
-
-            height: z
-                .string()
-                .min(1, { message: "Height must be a positive number" })
-                .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
+            weight: z.string().min(1, { message: "Weight must be a positive number" }),
+            length: z.string().min(1, { message: "Length must be a positive number" }),
+            breadth: z.string().min(1, { message: "Breadth must be a positive number" }),
+            height: z.string().min(1, { message: "Height must be a positive number" }),
             volume: z.string().min(1, { message: "Volume is required" }),
         })
     ),
@@ -61,6 +47,11 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [entries, setEntries] = React.useState<any[]>([]);
+    const [globalWeight, setGlobalWeight] = React.useState<string>("");
+    const [globalLength, setGlobalLength] = React.useState<string>("");
+    const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
+    const [globalHeight, setGlobalHeight] = React.useState<string>("");
+    const [applyToAll, setApplyToAll] = React.useState<boolean>(false); // Track if user wants to apply to all rows
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -102,10 +93,37 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
         form.setValue("entries", updatedEntries);
     }
 
+    // Apply the global data to all rows
+    function applyGlobalDataToAllRows() {
+        if (applyToAll) {
+            const updatedEntries = entries.map((entry) => ({
+                ...entry,
+                weight: globalWeight,
+                length: globalLength,
+                breadth: globalBreadth,
+                height: globalHeight,
+                volume: calculateVolume(globalLength, globalBreadth, globalHeight),
+            }));
+            setEntries(updatedEntries);
+            form.setValue("entries", updatedEntries);
+        }
+    }
+
+    function calculateVolume(length: string, breadth: string, height: string): string {
+        if (length && breadth && height) {
+            const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
+            return volume ? volume.toFixed(2) : "";
+        }
+        return "";
+    }
+
     function handleDeleteRow(index: number) {
         const updatedEntries = entries.filter((_, i) => i !== index);
         setEntries(updatedEntries);
         form.setValue("entries", updatedEntries);
+
+        // After deleting a row, update the number of blocks
+        form.setValue("numberOfblocks", updatedEntries.length.toString());
     }
 
     function onSubmit(values: z.infer<typeof formSchema>) {
@@ -117,6 +135,15 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
 
         router.refresh(); // Refresh the current page
     }
+
+    React.useEffect(() => {
+        applyGlobalDataToAllRows(); // Apply global data to all rows when the option is checked
+    }, [applyToAll, globalWeight, globalLength, globalBreadth, globalHeight]);
+
+    React.useEffect(() => {
+        // Automatically update the "numberOfblocks" field when entries are added or deleted
+        form.setValue("numberOfblocks", entries.length.toString());
+    }, [entries, form]);
 
     return (
         <div className="space-y-6">
@@ -173,78 +200,115 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                         />
                     </div>
 
-                    {entries.length > 0 && (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>#</TableHead>
-                                    <TableHead>Weight (tons)</TableHead>
-                                    <TableHead>Length (inches)</TableHead>
-                                    <TableHead>Breadth (inches)</TableHead>
-                                    <TableHead>Height (inches)</TableHead>
-                                    <TableHead>Volume (in³)</TableHead>
-                                    <TableHead>Delete</TableHead>
+                    {/* Global Inputs */}
+                    <div className="space-y-3">
+                        <div className="grid grid-cols-4 gap-3">
+                            <Input
+                                value={globalWeight}
+                                onChange={(e) => setGlobalWeight(e.target.value)}
+                                placeholder="Weight (tons)"
+                                type="number"
+                                disabled={isLoading}
+                            />
+                            <Input
+                                value={globalLength}
+                                onChange={(e) => setGlobalLength(e.target.value)}
+                                placeholder="Length"
+                                type="number"
+                                disabled={isLoading}
+                            />
+                            <Input
+                                value={globalBreadth}
+                                onChange={(e) => setGlobalBreadth(e.target.value)}
+                                placeholder="Breadth"
+                                type="number"
+                                disabled={isLoading}
+                            />
+                            <Input
+                                value={globalHeight}
+                                onChange={(e) => setGlobalHeight(e.target.value)}
+                                placeholder="Height"
+                                type="number"
+                                disabled={isLoading}
+                            />
+                        </div>
+                        <label>
+                            <input
+                                type="checkbox"
+                                checked={applyToAll}
+                                onChange={(e) => setApplyToAll(e.target.checked)}
+                            />{" "}
+                            Apply to all rows
+                        </label>
+                    </div>
+
+                    {/* Table for Entries */}
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Serial No.</TableHead>
+                                <TableHead>Weight</TableHead>
+                                <TableHead>Length</TableHead>
+                                <TableHead>Breadth</TableHead>
+                                <TableHead>Height</TableHead>
+                                <TableHead>Volume</TableHead>
+                                <TableHead>Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {entries.map((entry, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{index + 1}</TableCell> {/* Serial Number */}
+                                    <TableCell>
+                                        <Input
+                                            value={entry.weight}
+                                            onChange={(e) =>
+                                                handleVolumeCalculation(index, "weight", e.target.value)
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Input
+                                            value={entry.length}
+                                            onChange={(e) =>
+                                                handleVolumeCalculation(index, "length", e.target.value)
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Input
+                                            value={entry.breadth}
+                                            onChange={(e) =>
+                                                handleVolumeCalculation(index, "breadth", e.target.value)
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Input
+                                            value={entry.height}
+                                            onChange={(e) =>
+                                                handleVolumeCalculation(index, "height", e.target.value)
+                                            }
+                                        />
+                                    </TableCell>
+                                    <TableCell>{entry.volume}</TableCell>
+                                    <TableCell>
+                                        <Button onClick={() => handleDeleteRow(index)} variant="destructive">
+                                            <Trash className="h-4 w-4" />
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {entries.map((entry, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{index + 1}</TableCell>
-                                        {["weight", "length", "breadth", "height"].map((field) => (
-                                            <TableCell key={field}>
-                                                <FormField
-                                                    name={`entries.${index}.${field}`}
-                                                    control={form.control}
-                                                    render={({ field: entryField }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                <Input
-                                                                    placeholder={`Enter ${field}`}
-                                                                    type="number"
-                                                                    disabled={isLoading}
-                                                                    {...entryField}
-                                                                    onChange={(e) =>
-                                                                        handleVolumeCalculation(index, field, e.target.value)
-                                                                    }
-                                                                />
-                                                            </FormControl>
-                                                            <FormMessage />
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </TableCell>
-                                        ))}
-                                        <TableCell>
-                                            <Input
-                                                placeholder="Auto-calculated"
-                                                disabled
-                                                value={entry.volume}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                disabled={isLoading}
-                                                onClick={() => handleDeleteRow(index)}
-                                            >
-                                                <Trash className="mr-2 h-4 w-4" />
-                                                
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    )}
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading && <span className="mr-2 spinner"></span>}
-                        Update
-                    </Button>
+                            ))}
+                        </TableBody>
+                    </Table>
+
+                    <div className="flex justify-end">
+                        <Button disabled={isLoading} type="submit">
+                            Submit
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </div>
     );
 }
-
-export default RawMaterialCreateNewForm;
