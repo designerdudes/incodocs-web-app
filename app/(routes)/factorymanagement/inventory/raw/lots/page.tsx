@@ -6,43 +6,41 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
+import { cookies } from "next/headers";
+import { fetchData } from "@/axiosUtility/api";
 
 interface Lots {
   _id: string;
+  lotName: string;
+  factoryId: string;
+  organizationId: string;
   materialType: string;
-  numberofBlocks: string;
-  lotname: string;
-  categoryId: string;
-  isActive: boolean;
+  noOfBlocks: number;
+  blocksId: string[];
   createdAt: string;
-  height: string;
-  breadth: string;
-  inpolishing: string;
-  incutting: string;
-  instock: string;
-  completed: string;
-  length: string;
+  updatedAt: string;
+  __v: number;
 }
 
-export default function LotManagement() {
-  const data: Lots[] = [
-    {
-      _id: "65f8fb0fc4417ea5a14fbd82",
-      materialType: "Granite",
-      numberofBlocks: "20",
-      lotname: "xyz",
-      categoryId: "Category123",
-      isActive: true,
-      createdAt: "2024-03-19T02:40:15.954Z",
-      height: "54",
-      breadth: "3.2",
-      inpolishing: "5",
-      incutting: "7",
-      instock: "8",
-      completed: "5",
-      length: "4.2",
-    },
-  ];
+
+export default async function LotManagement() {
+
+  const cookieStore = cookies();
+  const token = cookieStore.get('AccessToken')?.value || ""
+
+  const res = await fetch('http://localhost:4080/factory-management/inventory/factory-lot/get/673795b841a2d90248a65dea', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  }).then(response => {
+    return response.json()
+  })
+
+  let lotsData
+  lotsData = res
+
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -55,7 +53,7 @@ export default function LotManagement() {
         </Link>
         <div className="flex-1">
           <Heading className="leading-tight" title="Lots Management" />
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm mt-2">
             Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle.
           </p>
         </div>
@@ -75,7 +73,7 @@ export default function LotManagement() {
           deleteRoute="/category/ids"
           searchKey="name"
           columns={columns}
-          data={data as any}
+          data={lotsData as any}
         />
       </div>
     </div>

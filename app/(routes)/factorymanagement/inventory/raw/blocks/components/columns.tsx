@@ -8,15 +8,36 @@ import moment from "moment"
 
 
 export type Blocks = {
-    _id: string
-    blocknumber: string
-    materialType: string
-    numberofslabs: string
-    createdAt: string
-    status: string
-
-
+    dimensions: {
+        weight: {
+            value: number;
+            units: string;
+        };
+        length: {
+            value: number;
+            units: string;
+        };
+        breadth: {
+            value: number;
+            units: string;
+        };
+        height: {
+            value: number;
+            units: string;
+        };
+    };
+    _id: string;
+    lotId: string;
+    blockNumber: number;
+    materialType: string;
+    SlabsId: string[];
+    status: string;
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
 }
+
+
 export const columns: ColumnDef<Blocks>[] = [
     {
         id: "select",
@@ -53,7 +74,7 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blocknumber}
+                {row.original.blockNumber}
             </div>
         ),
     },
@@ -87,7 +108,7 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.numberofslabs}
+                {row.original.SlabsId.length}
             </div>
         ),
     },
