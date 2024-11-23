@@ -69,7 +69,7 @@ export default async function MarkCutPage() {
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex justify-between items-center">
-                <Link href="/factorymanagement/inventory/raw/cutting/">
+                <Link href="/factorymanagement/inventory/raw/processing/">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>

@@ -6,12 +6,13 @@ import Heading from '@/components/ui/heading';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { columns } from './components/columns';
-import { Block } from './components/columns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import columns, { Block } from './components/columns';
+import { inPolishingolumns } from './components/inpolishingcolumns';
 
-const CuttingInventoryPage: React.FC = () => {
+
+const SlabsProcessingPage: React.FC = () => {
 
     const data: Block[] = [
         {
@@ -28,12 +29,31 @@ const CuttingInventoryPage: React.FC = () => {
             updatedAt: '',
             weight: '45',
             volume: '785',
-            status: 'in Cutting'
+            status: 'in Cutting',
+            slabID: 'Slab-9879'
         },
         {
             _id: "65f8fb0fc4417ea5a14fbd82",
-            materialType: "Marble",
+            materialType: "Granite",
             numberofSlabs: "",
+            isActive: true,
+            createdAt: "2024-03-19T02:40:15.954Z",
+            height: "54",
+            breadth: "3.2",
+            length: "4.2",
+            blockNumber: '12345',
+            blockLotName: 'LOT 1',
+            updatedAt: '',
+            weight: '45',
+            volume: '785',
+            status: 'in Cutting',
+            slabID: 'Slab-9879'
+        },
+        {
+            _id: "65f8fb0fc4417ea5a14fbd82",
+            slabID: "SLAB-123",
+            materialType: "Marble",
+            numberofSlabs: "8",
             isActive: true,
             createdAt: "2024-06-19T02:40:15.954Z",
             height: "51",
@@ -45,6 +65,23 @@ const CuttingInventoryPage: React.FC = () => {
             weight: '47',
             volume: '750',
             status: 'ready for polish'
+        },
+        {
+            _id: "65f8fb0fc4417ea5a14fbd82",
+            slabID: "SLAB-123",
+            materialType: "Granite",
+            isActive: true,
+            createdAt: "2024-03-19T02:40:15.954Z",
+            height: "54",
+            length: "4.2",
+            blockNumber: '12345',
+            blockLotName: 'LOT 11',
+            updatedAt: '',
+            status: 'in polishing',
+            numberofSlabs: '6',
+            weight: '',
+            breadth: '',
+            volume: ''
         },
     ];
 
@@ -62,7 +99,7 @@ const CuttingInventoryPage: React.FC = () => {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Slabs In Cutting" />
+                    <Heading className="leading-tight" title="Blocks and Slabs In Process" />
                     <p className="text-muted-foreground text-sm mt-2">
                         Efficiently track and manage slabs in process with detailed insights into their dimensions, weight, and progress through the cutting process.
                     </p>
@@ -76,6 +113,7 @@ const CuttingInventoryPage: React.FC = () => {
                     <TabsList className='gap-3'>
                         <TabsTrigger className='gap-2' value="in Cutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="ready for polish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className='gap-2' value="in polishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
                     </TabsList>
                     <TabsContent value="in Cutting">
                         <DataTable
@@ -93,10 +131,18 @@ const CuttingInventoryPage: React.FC = () => {
                             bulkDeleteToastMessage='Selected blocks deleted successfully'
                             searchKey='title' columns={columns} data={readyForPolish} />
                     </TabsContent>
+                    <TabsContent value="in polishing">
+                        <DataTable
+                            bulkDeleteIdName='order_id'
+                            bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                            bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                            bulkDeleteToastMessage='Selected slabs deleted successfully'
+                            searchKey='title' columns={inPolishingolumns} data={inPolishing} />
+                    </TabsContent>
                 </Tabs>
             </div>
         </div>
     );
 };
 
-export default CuttingInventoryPage;
+export default SlabsProcessingPage;
