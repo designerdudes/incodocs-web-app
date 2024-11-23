@@ -1,7 +1,6 @@
 import { DataTable } from '@/components/ui/data-table';
 import { Separator } from '@/components/ui/separator';
 import React from 'react';
-import CreateNewLotButton from '../lots/components/CreateNewLotButton';
 import Heading from '@/components/ui/heading';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -83,11 +82,30 @@ const SlabsProcessingPage: React.FC = () => {
             breadth: '',
             volume: ''
         },
+        {
+            _id: "65f8fb0fc4417ea5a14fbd82",
+            materialType: "Granite",
+            numberofSlabs: "10",
+            isActive: true,
+            createdAt: "2024-03-19T02:40:15.954Z",
+            height: "50",
+            breadth: "3.5",
+            length: "5.2",
+            blockNumber: '67890',
+            blockLotName: 'LOT 2',
+            updatedAt: '',
+            weight: '40',
+            volume: '750',
+            status: 'completed',
+            slabID: 'Slab-6789'
+        },
     ];
 
     const inCutting = data.filter((data: any) => data.status === 'in Cutting')
     const readyForPolish = data.filter((data: any) => data.status === 'ready for polish')
     const inPolishing = data.filter((data: any) => data.status === 'in polishing')
+    const completed = data.filter((item) => item.status === 'completed');
+
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -104,8 +122,6 @@ const SlabsProcessingPage: React.FC = () => {
                         Efficiently track and manage slabs in process with detailed insights into their dimensions, weight, and progress through the cutting process.
                     </p>
                 </div>
-                {/* Move the interactivity to the client-side button component */}
-                {/* <CreateNewLotButton /> */}
             </div>
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
@@ -114,6 +130,12 @@ const SlabsProcessingPage: React.FC = () => {
                         <TabsTrigger className='gap-2' value="in Cutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="ready for polish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="in polishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className="gap-2" value="completed">
+                            Completed
+                            <Badge className="text-bg-primary-foreground" variant="outline">
+                                {completed.length}
+                            </Badge>
+                        </TabsTrigger>
                     </TabsList>
                     <TabsContent value="in Cutting">
                         <DataTable
@@ -138,6 +160,17 @@ const SlabsProcessingPage: React.FC = () => {
                             bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
+                    </TabsContent>
+                    <TabsContent value="completed">
+                        <DataTable
+                            bulkDeleteIdName="order_id"
+                            bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
+                            bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
+                            bulkDeleteToastMessage="Selected slabs deleted successfully"
+                            searchKey="title"
+                            columns={columns}
+                            data={completed}
+                        />
                     </TabsContent>
                 </Tabs>
             </div>

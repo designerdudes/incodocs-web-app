@@ -6,9 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
-import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 
-interface LotManagement {
+interface Lots {
   _id: string;
   materialType: string;
   numberofBlocks: string;
@@ -26,7 +25,7 @@ interface LotManagement {
 }
 
 export default function LotManagement() {
-  const data: LotManagement[] = [
+  const data: Lots[] = [
     {
       _id: "65f8fb0fc4417ea5a14fbd82",
       materialType: "Granite",
@@ -61,8 +60,8 @@ export default function LotManagement() {
           </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
-        <Link href='./lots/create-new'> 
-        <Button> Create New Lot</Button>
+        <Link href='./lots/create-new'>
+          <Button> Create New Lot</Button>
         </Link>
         {/* <CreateNewLotButton /> */}
       </div>
