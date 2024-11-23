@@ -27,7 +27,7 @@ interface MarkCutAndCreateSlabsFormProps extends React.HTMLAttributes<HTMLDivEle
 const formSchema = z.object({
     _id: z.string().optional(),
     blockLotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }),
-    blockNumber: z.string().min(3, { message: "Block number is required" }),
+    blockNumber: z.number().min(1, { message: "Block number is required" }),
     numberofSlabs: z.string().optional(),
     slabs: z
         .array(

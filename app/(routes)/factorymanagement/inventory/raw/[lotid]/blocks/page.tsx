@@ -6,29 +6,30 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "../../blocks/components/columns";
-import CreateNewLotButton from "../../lots/components/CreateNewLotButton";
+import { cookies } from "next/headers";
 
 interface Props {
     params: {
-        id: string;
-        materialName: string;
-        lotname: string;
-        blockNumber: string;
-        materialType: string;
-        isActive: boolean;
-        createdAt: string;
-        updatedAt: string;
-        weight: string
-        height: string
-        breadth: string
-        length: string
-        volume: string
-        quantity: string
+        lotid: string;
     }
 }
 
-export default function LotManagement({ params }: Props) {
+export default async function BlocksPage({ params }: Props) {
+    let BlocksData = null
+    const cookieStore = cookies();
+    const token = cookieStore.get('AccessToken')?.value || ""
 
+    const res = await fetch(`http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.lotid}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(response => {
+        return response.json()
+    })
+
+    BlocksData = res
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -40,12 +41,11 @@ export default function LotManagement({ params }: Props) {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title={` Details of ${params.lotname}'s Blocks`} />
+                    <Heading className="leading-tight" title={` Details of ${params?.lotid}'s Blocks`} />
                     <p className="text-muted-foreground text-sm mt-2">
-                        Efficiently track and manage Block {`${params.blockNumber}`} with detailed insights into its current status and progress through the production cycle.
+                        Efficiently track and manage Blocks with detailed insights into its current status and progress through the production cycle.
                     </p>
                 </div>
-                {/* <CreateNewLotButton /> */}
             </div>
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
@@ -57,7 +57,7 @@ export default function LotManagement({ params }: Props) {
                     deleteRoute="/category/ids"
                     searchKey="name"
                     columns={columns}
-                    data={params as any}
+                    data={BlocksData as any}
                 />
             </div>
         </div>

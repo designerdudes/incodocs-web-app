@@ -17,6 +17,7 @@ import { deleteData } from '@/axiosUtility/api';
 import { LotManagement } from "./columns";
 import EditLotForm from "./editLotForm";
 import AddBlockForm from "./addBlockForm";
+import { cookies } from "next/headers";
 
 interface Props {
     data: LotManagement;
@@ -25,28 +26,16 @@ interface Props {
 export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const modal = useGlobalModal();
 
     const deleteLot = async () => {
         try {
-            const result = await deleteData(`/categories/v1/category/${data._id}`);
+            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
             toast.success('Lot Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
         } catch (error) {
             console.error('Error deleting data:', error);
         }
-    };
-
-    const addBlock = () => {
-        modal.title = "Add New Lot"; // Set the modal title
-        modal.children = (
-            <div>
-                {/* Replace this with your Add Lot form */}
-                <p>Add Lot form goes here</p>
-            </div>
-        );
-        modal.onOpen();
     };
 
     return (
@@ -87,9 +76,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            modal.title = "Edit Lot Details"; // Set modal title
-                            modal.children = <EditLotForm />; // Render Edit Form
-                            modal.onOpen();
+                            GlobalModal.title = "Edit Lot Details"; // Set modal title
+                            GlobalModal.children = <EditLotForm />; // Render Edit Form
+                            GlobalModal.onOpen();
                         }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
@@ -99,7 +88,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.lotname}`;
+                            GlobalModal.title = `Delete Product - ${data.lotName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this Product?";
                             GlobalModal.children = <Alert onConfirm={deleteLot} />;

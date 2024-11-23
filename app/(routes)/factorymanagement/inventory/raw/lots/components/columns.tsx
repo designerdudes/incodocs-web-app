@@ -8,19 +8,16 @@ import moment from "moment"
 
 
 export type LotManagement = {
-    _id: string
-    lotname: string
-    materialType: string
-    numberofBlocks: string
-    instock: string
-    createdAt: string
-    height: string
-    breadth: string
-    inpolishing: string
-    incutting: string
-    length: string
-    completed: string
-    isActive: boolean
+    _id: string;
+    lotName: string;
+    factoryId: string;
+    organizationId: string;
+    materialType: string;
+    noOfBlocks: number;
+    blocksId: string[];
+    createdAt: string;
+    updatedAt: string;
+    __v: number;
 }
 
 
@@ -60,7 +57,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.lotname}
+                {row.original.lotName}
             </div>
         ),
     },
@@ -94,80 +91,80 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.numberofBlocks}
+                {row.original.noOfBlocks}
             </div>
         ),
     },
-    {
-        accessorKey: "instock",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Blocks In Stock
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.instock}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "incutting",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Blocks in Cutting Phase
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.incutting}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "inpolishing",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Blocks in Polishing Phase
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.inpolishing}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "instock",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Blocks In Stock
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.instock}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "incutting",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Blocks in Cutting Phase
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.incutting}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "inpolishing",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Blocks in Polishing Phase
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.inpolishing}
+    //         </div>
+    //     ),
+    // },
 
 
-    {
-        accessorKey: "completed",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Completed
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.completed}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "completed",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Completed
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.completed}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "createdAt",
         header: ({ column }) => (

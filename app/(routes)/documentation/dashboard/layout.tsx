@@ -1,11 +1,10 @@
 import type { Metadata } from 'next'
 import TopBar from '@/components/topbar'
-import { DocumentationSidebar } from '@/components/sidebar2'
 
 
 export const metadata: Metadata = {
-    title: 'Admin Dashboard| APLus Laundry',
-    description: 'Admin dashboard for APlus Laundry',
+    title: 'Admin Dashboard | Incodocs',
+    description: 'Admin dashboard for Incodocs',
 }
 
 interface DashboardLayoutProps {

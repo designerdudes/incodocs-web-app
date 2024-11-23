@@ -13,7 +13,7 @@ export default function Home() {
   const globalModal = useGlobalModal()
   const getCurrentUserData = async () => {
     try {
-      const res = await fetchData('user/currentUser')
+      const res = await fetchData('/user/currentUser')
       setCurrentUserData(res)
       console.log('User data fetched successfully', res)
     } catch (error) {
