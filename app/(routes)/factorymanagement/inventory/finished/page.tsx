@@ -67,7 +67,7 @@ export default async function FinishedMaterialPage() {
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>
             <div className="topbar w-full flex justify-between items-center">
-                <Link href="./dashboard">
+                <Link href="./">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>

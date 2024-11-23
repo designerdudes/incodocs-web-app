@@ -158,8 +158,35 @@ const rawInventoryCards = [
         showButton: false,
         buttonUrl: '/factorymanagement/inventory/raw/polishing'
     },
+    {
+        title: 'Slabs in Processing',
+        icon: <SparkleIcon className="w-6 h-6" />,
+        value: 30,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/factorymanagement/inventory/raw/processing'
+    },
+]
+
+const InventoryCards = [
+    {
+        title: 'Raw Invetory',
+        icon: <BlocksIcon className="w-6 h-6" />,
+        value: 50,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/factorymanagement/inventory/raw'
+    },
+    {
+        title: 'Finished Material',
+        icon: <ScissorsLineDashed className="w-6 h-6" />,
+        value: 40,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/factorymanagement/inventory/finished'
+    },
 ]
 
 
-export { sidebarTabs, accountingSidebarTabs, rawInventoryCards, documentationSidebarTabs, factoryManagementSidebarTabs }
+export { sidebarTabs, accountingSidebarTabs, rawInventoryCards, documentationSidebarTabs, factoryManagementSidebarTabs, InventoryCards }
 export { BrandName }
