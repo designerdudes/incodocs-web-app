@@ -4,8 +4,8 @@ import TopBar from '@/components/topbar'
 
 
 export const metadata: Metadata = {
-    title: 'Admin Dashboard| APLus Laundry',
-    description: 'Admin dashboard for APlus Laundry',
+    title: 'Admin Dashboard | IncoDocs',
+    description: 'Admin dashboard for IncoDocs',
 }
 
 interface DashboardLayoutProps {

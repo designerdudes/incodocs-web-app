@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import * as React from "react"
 import {
     AudioWaveform,
@@ -30,6 +31,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar"
 import FactorySwitcher from "./factory-switcher"
+import { fetchData } from "@/axiosUtility/api"
 
 // This is sample data.
 const data = {
@@ -40,17 +42,17 @@ const data = {
     },
     Factories: [
         {
-            name: "JabalExim Pvt. Ltd.",
+            factoryName: "JabalExim Pvt. Ltd.",
             logo: GalleryVerticalEnd,
             plan: "Enterprise",
         },
         {
-            name: "Stoneer Pvt. Ltd.",
+            factoryName: "Stoneer Pvt. Ltd.",
             logo: Command,
             plan: "Free",
         },
         {
-            name: "Tilecia Pvt. Ltd.",
+            factoryName: "Tilecia Pvt. Ltd.",
             logo: Command,
             plan: "Free",
         },
@@ -173,10 +175,37 @@ const data = {
     ],
 }
 function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+
+    const [currentFactoryData, setCurrentFactoryData] = useState<any[]>([]);
+
+    const getCurrentFactoryData = async () => {
+        try {
+            const res = await fetchData("/factory/getAll");
+            // Transform data to include `logo` and `plan`
+            const transformedData = res.map((factory: any) => ({
+                factoryName: factory.factoryName,
+                logo: FactoryIcon, // Assign a placeholder or dynamic React component here
+                plan: "Standard Plan", // Placeholder, update this as needed
+            }));
+            setCurrentFactoryData(transformedData);
+            console.log("Factory data fetched successfully", transformedData);
+        } catch (error) {
+            console.error("Error fetching Factory data", error);
+        }
+    };
+
+    useEffect(() => {
+        getCurrentFactoryData();
+    }, []);
+
+    const FactoriesData = currentFactoryData
+    console.log("This is factory data", FactoriesData)
+    console.log("This is the total factories", FactoriesData?.length)
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <FactorySwitcher Factories={data.Factories} />
+                <FactorySwitcher FactoriesData={currentFactoryData} />
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />

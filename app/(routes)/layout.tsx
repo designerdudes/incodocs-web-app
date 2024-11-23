@@ -6,8 +6,8 @@ import { Separator } from '@/components/ui/separator'
 import BreadCrumb from '@/components/layout/breadCrumb'
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard| APLus Laundry',
-  description: 'Admin dashboard for APlus Laundry',
+  title: 'Admin Dashboard | IncoDocs',
+  description: 'Admin dashboard for IncoDocs',
 }
 
 interface DashboardLayoutProps {
