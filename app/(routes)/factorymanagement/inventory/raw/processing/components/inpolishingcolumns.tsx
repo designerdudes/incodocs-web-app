@@ -36,13 +36,13 @@ export const inPolishingolumns: ColumnDef<Block>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Slab Id
+                Slab Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.slabID}
+                {row.original._id}
             </div>
         ),
     },
@@ -63,23 +63,23 @@ export const inPolishingolumns: ColumnDef<Block>[] = [
             </div>
         ),
     },
-    {
-        accessorKey: "materialType",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Material Type
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.materialType}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "materialType",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Material Type
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.materialType}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "status",
         header: ({ column }) => (

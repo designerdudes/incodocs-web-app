@@ -8,62 +8,28 @@ import { cookies } from "next/headers";
 import { MarkCutAndCreateSlabsForm } from "@/components/forms/MarkCutAndCreateSlabsForm";
 import { Block } from "../../components/columns";
 
+interface Props {
+    params: {
+        blockid: string
+    }
+}
 
-// interface Props {
-//     params: {
-//         _id: string
-//         blockNumber: string
-//         blockLotName: string
-//         materialType: string
-//         numberofSlabs: string
-//         isActive: boolean
-//         createdAt: string
-//         updatedAt: string
-//         weight: string
-//         height: string
-//         breadth: string
-//         length: string
-//         volume: string
-//         status: string
-//     }
-// }
-const data: Block = {
-    _id: "65f8fb0fc4417ea5a14fbd82",
-    blockNumber: "12345",
-    blockLotName: "LOT 1",
-    materialType: "Granite",
-    numberofSlabs: "",
-    isActive: true,
-    createdAt: "2024-03-19T02:40:15.954Z",
-    updatedAt: "",
-    weight: "45",
-    height: "54",
-    breadth: "3.2",
-    length: "4.2",
-    volume: "785",
-    status: "In Cutting",
-};
+export default async function MarkCutPage(params: Props) {
 
-export default async function MarkCutPage() {
+    const cookieStore = cookies();
+    const token = cookieStore.get('AccessToken')?.value || ""
 
-
-    // const BlockId = params._id
-    //
-    // const cookieStore = cookies();
-    // const token = cookieStore.get('AccessToken')?.value;
-
-    // // const res = await fetch('https://api.github.com/repos/vercel/next.js', {
-    // const res = await fetch(`/${BlockId}`, {
-    //     method: 'GET',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer ' + token
-    //     }
-    // }).then(response => {
-    //     return response.json()
-    // })
+    const res = await fetch(`http://localhost:4080/factory-management/inventory/raw/get/${params.params.blockid}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(response => {
+        return response.json()
+    })
     let BlockData = null
-    BlockData = data
+    BlockData = res
 
 
     return (
@@ -89,8 +55,8 @@ export default async function MarkCutPage() {
             <Separator orientation="horizontal" />
             <div className="container mx-auto  py-10">
 
-                {data ?
-                    <MarkCutAndCreateSlabsForm gap={3} BlockData={data} />
+                {BlockData ?
+                    <MarkCutAndCreateSlabsForm gap={3} BlockData={BlockData} />
                     :
                     <div className="flex flex-col gap-2 items-center justify-center h-full">
 

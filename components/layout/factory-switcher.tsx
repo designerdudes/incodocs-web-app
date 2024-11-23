@@ -18,7 +18,8 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar";
-import exp from "constants";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import FactoryForm from "../forms/AddFactoryForm";
 
 interface Factory {
     factoryName: string;
@@ -49,6 +50,8 @@ function FactorySwitcher({
     // if (!FactoriesData || FactoriesData.length === 0) {
     //     return <p className="text-sm text-muted-foreground">No factories available</p>;
     // }
+    const GlobalModal = useGlobalModal();
+
 
     return (
         <SidebarMenu>
@@ -94,7 +97,12 @@ function FactorySwitcher({
                             </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 p-2">
+                        <DropdownMenuItem className="gap-2 p-2"
+                            onSelect={() => {
+                                GlobalModal.title = `Enter Factory Details`
+                                GlobalModal.children = <FactoryForm />
+                                GlobalModal.onOpen()
+                            }}>
                             <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                                 <Plus className="size-4" />
                             </div>
