@@ -39,103 +39,15 @@ export default async function SlabsProcessingPage() {
 
     let Blockdata
     Blockdata = blockRes
-    // console.log(Blockdata)
+    console.log(Blockdata)
     let Slabdata
     Slabdata = slabRes
-    // console.log("this is slabs data", Slabdata)
-
-    // const data: Block[] = [
-    //     {
-    //         _id: "65f8fb0fc4417ea5a14fbd82",
-    //         materialType: "Granite",
-    //         numberofSlabs: "",
-    //         isActive: true,
-    //         createdAt: "2024-03-19T02:40:15.954Z",
-    //         height: "54",
-    //         breadth: "3.2",
-    //         length: "4.2",
-    //         blockNumber: '12345',
-    //         blockLotName: 'LOT 1',
-    //         updatedAt: '',
-    //         weight: '45',
-    //         volume: '785',
-    //         status: 'in Cutting',
-    //         slabID: 'Slab-9879'
-    //     },
-    //     {
-    //         _id: "65f8fb0fc4417ea5a14fbd82",
-    //         materialType: "Granite",
-    //         numberofSlabs: "",
-    //         isActive: true,
-    //         createdAt: "2024-03-19T02:40:15.954Z",
-    //         height: "54",
-    //         breadth: "3.2",
-    //         length: "4.2",
-    //         blockNumber: '12345',
-    //         blockLotName: 'LOT 1',
-    //         updatedAt: '',
-    //         weight: '45',
-    //         volume: '785',
-    //         status: 'in Cutting',
-    //         slabID: 'Slab-9879'
-    //     },
-    //     {
-    //         _id: "65f8fb0fc4417ea5a14fbd82",
-    //         slabID: "SLAB-123",
-    //         materialType: "Marble",
-    //         numberofSlabs: "8",
-    //         isActive: true,
-    //         createdAt: "2024-06-19T02:40:15.954Z",
-    //         height: "51",
-    //         breadth: "3.2",
-    //         length: "4.9",
-    //         blockNumber: '54321',
-    //         blockLotName: 'LOT 12',
-    //         updatedAt: '',
-    //         weight: '47',
-    //         volume: '750',
-    //         status: 'ready for polish'
-    //     },
-    //     {
-    //         _id: "65f8fb0fc4417ea5a14fbd82",
-    //         slabID: "SLAB-123",
-    //         materialType: "Granite",
-    //         isActive: true,
-    //         createdAt: "2024-03-19T02:40:15.954Z",
-    //         height: "54",
-    //         length: "4.2",
-    //         blockNumber: '12345',
-    //         blockLotName: 'LOT 11',
-    //         updatedAt: '',
-    //         status: 'in polishing',
-    //         numberofSlabs: '6',
-    //         weight: '',
-    //         breadth: '',
-    //         volume: ''
-    //     },
-    //     {
-    //         _id: "65f8fb0fc4417ea5a14fbd82",
-    //         materialType: "Granite",
-    //         numberofSlabs: "10",
-    //         isActive: true,
-    //         createdAt: "2024-03-19T02:40:15.954Z",
-    //         height: "50",
-    //         breadth: "3.5",
-    //         length: "5.2",
-    //         blockNumber: '67890',
-    //         blockLotName: 'LOT 2',
-    //         updatedAt: '',
-    //         weight: '40',
-    //         volume: '750',
-    //         status: 'completed',
-    //         slabID: 'Slab-6789'
-    //     },
-    // ];
+    console.log("this is slabs data", Slabdata)
 
     const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
     const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
-    const inPolishing = Slabdata.filter((data: any) => data.status === 'Cut')
-    const completed = Slabdata.filter((data: any) => data.status === 'Trimmed');
+    const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
+    const completed = Slabdata.filter((data: any) => data.status === 'polished');
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -159,8 +71,8 @@ export default async function SlabsProcessingPage() {
                     <TabsList className='gap-3'>
                         <TabsTrigger className='gap-2' value="inCutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="cut">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
-                        <TabsTrigger className='gap-2' value="Cut">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
-                        <TabsTrigger className="gap-2" value="Trimmed">Completed<Badge className="text-bg-primary-foreground" variant="outline">{completed.length}
+                        <TabsTrigger className='gap-2' value="inPolishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className="gap-2" value="polished">Completed<Badge className="text-bg-primary-foreground" variant="outline">{completed.length}
                         </Badge>
                         </TabsTrigger>
                     </TabsList>
@@ -180,7 +92,7 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage='Selected blocks deleted successfully'
                             searchKey='title' columns={columns} data={readyForPolish} />
                     </TabsContent>
-                    <TabsContent value="Cut">
+                    <TabsContent value="inPolishing">
                         <DataTable
                             bulkDeleteIdName='order_id'
                             bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
@@ -188,7 +100,7 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
                     </TabsContent>
-                    <TabsContent value="Trimmed">
+                    <TabsContent value="polished">
                         <DataTable
                             bulkDeleteIdName="order_id"
                             bulkDeleteTitle="Are you sure you want to delete the selected slabs?"

@@ -21,6 +21,10 @@ export type Block = {
     length: string
     volume: string
     status: string
+    lotId: {
+        _id: string
+        lotName: string
+    }
 }
 
 const columns: ColumnDef<Block>[] = [
@@ -59,7 +63,7 @@ const columns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blockLotName}
+                {row.original.lotId.lotName}
             </div>
         ),
     },
