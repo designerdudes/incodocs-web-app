@@ -1,4 +1,4 @@
-"use client"
+'use client'
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
@@ -7,18 +7,29 @@ import CellAction from "./cell-actions"
 import moment from "moment"
 
 export type FinishedMaterial = {
-    _id: string
-    materialName: string
-    materialType: string
-    categoryId: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string  
-    height: string
-    breadth: string
-    quantity: string
+    _id: string;
+    blockId: string | null;
+    factoryId: string;
+    slabNumber: number;
+    blockNumber: number;
+    productName: string;
+    quantity: number;
+    status: string;
+    inStock: boolean;
+    createdAt: string;
+    updatedAt: string;
+    dimensions: {
+        thickness: object;
+        length: object;
+        breadth: object;
+        height: object;
+    };
+    trim: {
+        length: object;
+        height: object;
+    };
 }
+
 
 // Define the columns for the data table
 export const columns: ColumnDef<FinishedMaterial>[] = [
@@ -45,90 +56,90 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "materialName",
+        accessorKey: "name",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Material Name
+                Slab Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialName}
+                {row.original?.slabNumber}
             </div>
         ),
     },
     {
-        accessorKey: "materialType",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Type
+                Block Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.blockNumber}
             </div>
         ),
     },
-    {
-        accessorKey: "weight",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                W
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.weight}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "height",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                H
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.height}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "breadth",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                B
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.breadth}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "weight",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             W
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original?.dimensions?.length}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "height",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             H
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original?.dimensions?.height}
+    //         </div>
+    //     ),
+    // },
+    // {
+    //     accessorKey: "breadth",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             B
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.breadth}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "quantity",
         header: ({ column }) => (
@@ -142,7 +153,7 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.quantity}
+                {row.original?.quantity}
             </div>
         ),
     },
@@ -158,8 +169,8 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
             </Button>
         ),
         cell: ({ row }) => (
-            <div className={`capitalize w-fit p-2 py-1 rounded-md text-xs ${row.original.isActive ? "bg-green-200 text-green-800 border-green-800" : "bg-red-200 text-red-800 border-red-800"}`}>
-                {row.original.isActive ? "active" : "inactive"}
+            <div className={`capitalize w-fit p-2 py-1 rounded-md text-xs ${row.original.inStock ? "bg-green-200 text-green-800 border-green-800" : "bg-red-200 text-red-800 border-red-800"}`}>
+                {row.original.inStock ? "active" : "inactive"}
             </div>
         ),
     },
