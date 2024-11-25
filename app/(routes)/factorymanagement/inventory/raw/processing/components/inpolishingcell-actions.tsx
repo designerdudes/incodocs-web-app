@@ -16,21 +16,21 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import CardWithForm from "./addTrimValueForm"
-import { Block } from "./columns";
+import { Slab } from "./inpolishingcolumns";
 
 interface Props {
-    data: Block;
+    data: Slab;
 }
 
 export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const deleteLot = async () => {
+    const deleteSlab = async () => {
 
         try {
-            const result = await deleteData(`/categories/v1/category/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
-            toast.success('Lot Deleted Successfully')
+            toast.success('Slab Deleted Successfully')
             GlobalModal.onClose()
             window.location.reload()
         } catch (error) {
@@ -91,7 +91,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                         onSelect={() => {
                             GlobalModal.title = `Delete Slab - ${data.blockNumber}`
                             GlobalModal.description = "Are you sure you want to delete this Slab?"
-                            GlobalModal.children = <Alert onConfirm={deleteLot} />
+                            GlobalModal.children = <Alert onConfirm={deleteSlab} />
                             GlobalModal.onOpen()
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground">

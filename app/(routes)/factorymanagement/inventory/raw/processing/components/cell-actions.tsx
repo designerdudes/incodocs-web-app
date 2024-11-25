@@ -27,9 +27,9 @@ const CellAction: React.FC<Props> = ({ data }) => {
     const deleteLot = async () => {
 
         try {
-            const result = await deleteData(`/categories/v1/category/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
-            toast.success('Lot Deleted Successfully')
+            toast.success('Slab Deleted Successfully')
             GlobalModal.onClose()
             window.location.reload()
         } catch (error) {

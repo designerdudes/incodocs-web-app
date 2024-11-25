@@ -6,7 +6,57 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Block } from "./columns"
 import InPolishingCellAction from "./inpolishingcell-actions"
 
-export const inPolishingolumns: ColumnDef<Block>[] = [
+
+export type Slab = {
+    _id: string;
+    slabNumber: number; // Updated from slabID to slabNumber
+    blockId: string | null; // Nullable block ID
+    blockNumber: number; // Changed to number for consistency
+    blockLotName?: string; // Optional if not in the provided structure
+    factoryId: string;
+    materialType?: string; // Optional if not provided
+    productName: string; // Added to match structure
+    quantity: number; // Changed to number for consistency
+    dimensions: {
+        thickness: {
+            value: number;
+            units: string;
+        };
+        length: {
+            value: number;
+            units: string;
+        };
+        breadth: {
+            value: number;
+            units: string;
+        };
+        height: {
+            value: number;
+            units: string;
+        };
+    };
+    trim: {
+        length: {
+            units: string;
+        };
+        height: {
+            units: string;
+        };
+    };
+    isActive?: boolean; // Optional if not present
+    weight?: string; // Retained as optional for backward compatibility
+    height?: string; // Retained as optional for backward compatibility
+    breadth?: string; // Retained as optional for backward compatibility
+    length?: string; // Retained as optional for backward compatibility
+    volume?: string; // Retained as optional for backward compatibility
+    status: string;
+    inStock: boolean; // Added based on provided structure
+    createdAt: string;
+    updatedAt: string;
+};
+
+
+export const inPolishingolumns: ColumnDef<Slab>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -30,7 +80,7 @@ export const inPolishingolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "slabId",
+        accessorKey: "slabNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -42,7 +92,7 @@ export const inPolishingolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original._id}
+                {row.original.slabNumber}
             </div>
         ),
     },

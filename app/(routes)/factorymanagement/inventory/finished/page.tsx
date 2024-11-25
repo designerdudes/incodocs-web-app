@@ -5,51 +5,171 @@ import { Separator } from '@/components/ui/separator';
 import { ChevronLeft, PlusIcon } from 'lucide-react';
 import Link from 'next/link';
 import { columns, FinishedMaterial } from './components/columns';
-import { cookies } from 'next/headers';
 
 export default async function FinishedMaterialPage() {
 
     const data: FinishedMaterial[] = [
         {
-            _id: "65f8fb0fc4417ea5a14fbd82",
-            materialName: "Sample Material 1",
-            materialType: "TypeABC",
-            categoryId: "Category123",
-            isActive: true,
-            createdAt: "2024-03-19T02:40:15.954Z",
-            updatedAt: "2024-03-19T02:40:15.954Z",
-            weight: "1000",
-            height: "54",
-            breadth: "3.2",
-            quantity: "200" // Placeholder value
+            dimensions: {
+                thickness: { value: 11, units: "inch" },
+                length: { value: 10, units: "inch" },
+                breadth: { value: 13, units: "inch" },
+                height: { value: 15, units: "inch" }
+            },
+            trim: { length: { units: "inch" }, height: { units: "inch" } },
+            _id: '6743425cd415501d681c3b83',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 1,
+            blockNumber: 23332,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T15:12:28.302Z',
+            updatedAt: '2024-11-24T15:12:28.302Z'
         },
         {
-            _id: "65f8fd0ac4417ea5a14fbda1",
-            materialName: "Sample Material 2",
-            materialType: "TypeXYZ",
-            categoryId: "Category456",
-            isActive: true,
-            createdAt: "2024-03-19T02:48:42.837Z",
-            updatedAt: "2024-03-19T02:58:00.445Z",
-            weight: "1200",
-            height: "40",
-            breadth: "2.8",
-            quantity: "150" // Placeholder value
+            dimensions: {
+                thickness: { value: 16, units: "inch" },
+                length: { value: 60, units: "inch" },
+                breadth: { value: 83, units: "inch" },
+                height: { value: 85, units: "inch" }
+            },
+            trim: { length: { units: "inch" }, height: { units: "inch" } },
+            _id: '674342954e15cd3baf4c3918',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 1,
+            blockNumber: 2323332,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T15:13:25.826Z',
+            updatedAt: '2024-11-24T15:13:25.826Z'
         },
         {
-            _id: "65f8febec4417ea5a14fbdad",
-            materialName: "Sample Material 3",
-            materialType: "TypeDEF",
-            categoryId: "Category789",
-            isActive: true,
-            createdAt: "2024-03-19T02:55:58.275Z",
-            updatedAt: "2024-03-19T02:55:58.275Z",
-            weight: "1100",
-            height: "45",
-            breadth: "3.5",
-            quantity: "180" // Placeholder value
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '6743430b324286e82ef37f7e',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 1,
+            blockNumber: 23232,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T15:15:23.552Z',
+            updatedAt: '2024-11-24T15:15:23.552Z'
+        },
+        {
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '67435b2161571819614af7a7',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 1,
+            blockNumber: 2663232,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T16:58:09.854Z',
+            updatedAt: '2024-11-24T16:58:09.854Z'
+        },
+        {
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '67435b977a2c6c71facbd4c1',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 11,
+            blockNumber: 1234,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T17:00:07.600Z',
+            updatedAt: '2024-11-24T17:00:07.600Z'
+        },
+        {
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '67435ce67a2c6c71facbd4ed',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 11,
+            blockNumber: 12345,
+            productName: 'steps',
+            quantity: 10,
+            status: 'readyForPolish',
+            inStock: true,
+            createdAt: '2024-11-24T17:05:42.287Z',
+            updatedAt: '2024-11-24T17:05:42.287Z'
+        },
+        {
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '67435d6a7a2c6c71facbd4fc',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 121,
+            blockNumber: 12375,
+            productName: 'steps',
+            quantity: 10,
+            status: 'inPolishing',
+            inStock: true,
+            createdAt: '2024-11-24T17:07:54.438Z',
+            updatedAt: '2024-11-24T17:07:54.438Z'
+        },
+        {
+            dimensions: {
+                thickness: [Object],
+                length: [Object],
+                breadth: [Object],
+                height: [Object]
+            },
+            trim: { length: [Object], height: [Object] },
+            _id: '67435db37a2c6c71facbd513',
+            blockId: null,
+            factoryId: '673795b841a2d90248a65dea',
+            slabNumber: 131,
+            blockNumber: 18975,
+            productName: 'steps',
+            quantity: 10,
+            status: 'polished',
+            inStock: true,
+            createdAt: '2024-11-24T17:09:07.337Z',
+            updatedAt: '2024-11-24T17:09:07.337Z'
         }
-    ];
+    ]
 
     // const cookieStore = cookies();
     // const token = cookieStore.get('AccessToken')?.value || "";

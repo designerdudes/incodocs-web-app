@@ -117,7 +117,8 @@ export function MarkCutAndCreateSlabsForm({
                                 <FormItem>
                                     <FormLabel>Block Number</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. 12345" disabled={isLoading} {...field} />
+                                        <Input placeholder="e.g. 12345"
+                                            disabled={isLoading} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

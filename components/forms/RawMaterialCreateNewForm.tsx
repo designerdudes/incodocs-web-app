@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
+import { postData } from "@/axiosUtility/api";
 
 interface RawMaterialCreateNewFormProps {
     gap: number;
@@ -126,12 +127,26 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
         form.setValue("numberOfblocks", updatedEntries.length.toString());
     }
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
+        console.log("Form errors:", form.formState.errors);
+        console.log("Form values:", values);
 
-        // Add your update logic here
-        toast.success("Raw material data updated successfully");
-        setIsLoading(false);
+        try {
+            const response = await postData("/factory-management/inventory/addlotandblocks", {
+                ...values,
+                status: "active",
+            });
+            // const apiLink = `/offer/v1/${response._id}`;
+            // After form submission, handle file upload
+            setIsLoading(false);
+            toast.success("Lot created/updated successfully");
+            router.push("./factorymanahement/inventory/raw/lots");
+        } catch (error) {
+            console.error("Error creating/updating Lot:", error);
+            setIsLoading(false);
+            toast.error("Error creating/updating Lot");
+        }
 
         router.refresh(); // Refresh the current page
     }
@@ -262,6 +277,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     <TableCell>
                                         <Input
                                             value={entry.weight}
+                                            type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "weight", e.target.value)
                                             }
@@ -270,6 +286,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     <TableCell>
                                         <Input
                                             value={entry.length}
+                                            type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "length", e.target.value)
                                             }
@@ -278,6 +295,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     <TableCell>
                                         <Input
                                             value={entry.breadth}
+                                            type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "breadth", e.target.value)
                                             }
@@ -286,6 +304,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     <TableCell>
                                         <Input
                                             value={entry.height}
+                                            type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "height", e.target.value)
                                             }

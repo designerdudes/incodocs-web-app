@@ -7,7 +7,6 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
 import { cookies } from "next/headers";
-import { fetchData } from "@/axiosUtility/api";
 
 interface Lots {
   _id: string;
