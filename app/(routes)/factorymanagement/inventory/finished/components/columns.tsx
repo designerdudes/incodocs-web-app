@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -39,8 +40,11 @@ export const calculateDimensions = (lengthInInches: string, heightInInches: stri
   };
 };
 
+
+
 // Define the columns for the data table
 export const columns: ColumnDef<FinishedMaterial>[] = [
+
   {
     id: "select",
     header: ({ table }) => (

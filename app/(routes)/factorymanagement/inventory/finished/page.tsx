@@ -8,7 +8,6 @@
 // import { cookies } from 'next/headers';
 
 // export default async function FinishedMaterialPage() {
-
 //     const data: FinishedMaterial[] = [
 //         {
 //             _id: "65f8fb0fc4417ea5a14fbd82",
@@ -51,18 +50,19 @@
 //         }
 //     ];
 
-//     // const cookieStore = cookies();
-//     // const token = cookieStore.get('AccessToken')?.value || "";
 
-//     // const res = await fetch('https://apis.offersholic.zephyrapps.in/categories/v1/all', {
-//     //     method: 'GET',
-//     //     headers: {
-//     //         'Content-Type': 'application/json',
-//     //         'Authorization': 'Bearer ' + token
-//     //     }
-//     // });
+     // const cookieStore = cookies();
+     // const token = cookieStore.get('AccessToken')?.value || "";
 
-//     // const categories = await res.json();
+     // const res = await fetch('https://apis.offersholic.zephyrapps.in/categories/v1/all', {
+     //     method: 'GET',
+     //     headers: {
+     //         'Content-Type': 'application/json',
+     //         'Authorization': 'Bearer ' + token
+     //     }
+     // });
+
+     // const categories = await res.json();
 
 //     return (
 //         <div className='w-full space-y-2 h-full flex p-6 flex-col'>
