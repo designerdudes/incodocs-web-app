@@ -62,7 +62,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         Edit Product</DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.slabNumber}`
+                            GlobalModal.title = `Delete Product - ${data.slabnumber}`
                             GlobalModal.description = "Are you sure you want to delete this Product?"
                             GlobalModal.children = <Alert onConfirm={deleteCategory} />
                             GlobalModal.onOpen()

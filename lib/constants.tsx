@@ -187,6 +187,25 @@ const InventoryCards = [
     },
 ]
 
+const FinishedPageCards = [
+    {
+        title: 'Cutting Data',
+        icon: <ScissorsLineDashed className="w-6 h-6" />,
+        value: 50,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/factorymanagement/inventory/finished/cuttingdata'
+    },
+    {
+        title: 'Polish Data',
+        icon: <ScissorsLineDashed className="w-6 h-6" />,
+        value: 40,
+        color: 'bg-primary',
+        showButton: false,
+        buttonUrl: '/factorymanagement/inventory/finished/polishdata'
+    },
+]
 
-export { sidebarTabs, accountingSidebarTabs, rawInventoryCards, documentationSidebarTabs, factoryManagementSidebarTabs, InventoryCards }
+
+export { sidebarTabs, accountingSidebarTabs, rawInventoryCards, documentationSidebarTabs, factoryManagementSidebarTabs, InventoryCards, FinishedPageCards }
 export { BrandName }
