@@ -17,7 +17,6 @@ import { deleteData } from '@/axiosUtility/api';
 import { LotManagement } from "./columns";
 import EditLotForm from "./editLotForm";
 import AddBlockForm from "./addBlockForm";
-import { cookies } from "next/headers";
 
 interface Props {
     data: LotManagement;
@@ -90,14 +89,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         onSelect={() => {
                             GlobalModal.title = `Delete Product - ${data.lotName}`;
                             GlobalModal.description =
-                                "Are you sure you want to delete this Product?";
+                                "Are you sure you want to delete this Lot?";
                             GlobalModal.children = <Alert onConfirm={deleteLot} />;
                             GlobalModal.onOpen();
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground"
                     >
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Product
+                        Delete Lot
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
