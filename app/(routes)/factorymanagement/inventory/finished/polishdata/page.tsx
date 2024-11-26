@@ -80,11 +80,11 @@ export default async function CuttindDataPage() {
         <div className="flex-1">
           <Heading
             className="leading-tight "
-            title="Cutting Data with allowance"
+            title=" Polish Data with allowance "
           />
           <p className="text-muted-foreground text-sm">
             {" "}
-            Cutting Data
+            Polish Data
           </p>
         </div>
         {/* <Link href="finishedmaterial/create-new/">
@@ -95,7 +95,7 @@ export default async function CuttindDataPage() {
         </Link> */}
       </div>
       <Separator orientation="horizontal" />
-      <div className="container mx-auto py-10">
+      <div className="container mx-auto py-10">    
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected Finished Material?"
