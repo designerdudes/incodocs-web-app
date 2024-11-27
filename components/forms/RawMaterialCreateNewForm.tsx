@@ -35,10 +35,10 @@ const formSchema = z.object({
         .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
     entries: z.array(
         z.object({
-            weight: z.string().min(1, { message: "Weight must be a positive number" }),
-            length: z.string().min(1, { message: "Length must be a positive number" }),
-            breadth: z.string().min(1, { message: "Breadth must be a positive number" }),
-            height: z.string().min(1, { message: "Height must be a positive number" }),
+            weight: z.string().min(1, { message: "Weight must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
+            length: z.string().min(1, { message: "Length must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
+            breadth: z.string().min(1, { message: "Breadth must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
+            height: z.string().min(1, { message: "Height must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
             volume: z.string().min(1, { message: "Volume is required" }),
         })
     ),

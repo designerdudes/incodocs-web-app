@@ -158,7 +158,8 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-       Worker SQF
+
+        Workera&apos;s SQF
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
@@ -177,11 +178,10 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
     ),
     cell: ({ row }) => (
       <div
-        className={`capitalize w-fit p-2 py-1 rounded-md text-xs ${
-          row.original.isActive
+        className={`capitalize w-fit p-2 py-1 rounded-md text-xs ${row.original.isActive
             ? "bg-green-200 text-green-800"
             : "bg-red-200 text-red-800"
-        }`}
+          }`}
       >
         {row.original.isActive ? "Active" : "Inactive"}
       </div>
