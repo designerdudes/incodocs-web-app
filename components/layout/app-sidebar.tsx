@@ -79,14 +79,32 @@ const data = {
                         },
                         {
                             title: "Finished Goods",
-                            url: "/factorymanagement/inventory/finished",
+                            url: "/factorymanagement/inventory/finished"
                         },
                     ],
                     url: "/factorymanagement/inventory",
                 },
                 {
                     title: "Accounting",
-                    url: "/factorymanagement/accounts",
+                    url: "/factorymanagement/accounting",
+                    items: [
+                        {
+                            title: "Purchases",
+                            url: "/factorymanagement/inventory/finished/goods1",
+                        },
+                        {
+                            title: "Sales",
+                            url: "/factorymanagement/inventory/finished/goods2",
+                        },
+                        {
+                            title: "Expenses",
+                            url: "/factorymanagement/inventory/finished/goods3",
+                        },
+                        {
+                            title: "GST Ledger",
+                            url: "/factorymanagement/inventory/finished/goods4",
+                        }
+                    ],
                 },
             ],
         },
