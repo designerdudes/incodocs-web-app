@@ -1,42 +1,30 @@
-import { FinancialCard } from "@/components/dashboard/FinancialCard"
-import { GSTLedger } from "@/components/dashboard/GSTLedger"
-import { RevenueChart } from "@/components/dashboard/RevenueChart"
-import { calculateProfits, financialData } from "@/lib/data/accountingData"
+"use client";
 
-export default function DashboardPage() {
-  const { grossProfit, netProfit } = calculateProfits()
+import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { GSTChart } from "@/components/dashboard/gst-chart";
+import { TransactionsTable } from "@/components/dashboard/transactions-table";
+import { GSTSummary } from "@/components/dashboard/gst-summary";
+import { transactions, monthlyBalances } from "@/lib/gst-data";
+
+export default function Home() {
+  const currentMonth = monthlyBalances[monthlyBalances.length - 1];
 
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Accounting Dashboard</h2>
+        <h2 className="text-3xl font-bold tracking-tight">GST Ledger Dashboard</h2>
       </div>
+      <SummaryCards currentBalance={currentMonth} />
+      <GSTSummary transactions={transactions} />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <FinancialCard
-          title="Accounts Payable"
-          amount={financialData.accountsPayable}
-          description="Total amount owed to vendors"
-        />
-        <FinancialCard
-          title="Accounts Receivable"
-          amount={financialData.accountsReceivable}
-          description="Total amount owed by customers"
-        />
-        <FinancialCard
-          title="Gross Profit"
-          amount={grossProfit}
-          description="Revenue minus direct costs"
-        />
-        <FinancialCard
-          title="Net Profit"
-          amount={netProfit}
-          description="Profit after all deductions"
-        />
+        <GSTChart data={monthlyBalances} />
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        {/* <RevenueChart /> */}
-        <GSTLedger />
+      <div className="grid gap-4">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-2xl font-bold tracking-tight">Recent Transactions</h2>
+        </div>
+        <TransactionsTable transactions={transactions} />
       </div>
     </div>
-  )
+  );
 }
