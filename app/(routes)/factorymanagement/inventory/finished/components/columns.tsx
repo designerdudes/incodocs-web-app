@@ -158,11 +158,7 @@ export const columns: ColumnDef<FinishedMaterial>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-<<<<<<< HEAD
-       Worker SQF
-=======
         Workera&apos;s SQF
->>>>>>> c61ef8320f057c94eb64a796911d55182a621d1a
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
