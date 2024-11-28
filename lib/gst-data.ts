@@ -54,11 +54,12 @@ export const transactions: Transaction[] = [
 
 export const monthlyBalances: MonthlyBalance[] = [
   {
-    month: 'March 2024',
-    openingBalance: 48000,
-    closingBalance: 62000,
+    month: 'Oct 2024',
+    openingBalance: 0,
+    closingBalance: 0,
     totalPurchases: 50000,
     totalSales: 120000,
+    totalExpenses: 0,
     igstBalance: 25000, // Updated to reflect settlement
     cgstBalance: 12680, // Updated to reflect settlement
     sgstBalance: 8650, // Updated to reflect settlement
