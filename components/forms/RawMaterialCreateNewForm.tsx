@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import * as React from "react";
 import * as z from "zod";
 import {
@@ -35,13 +35,10 @@ const formSchema = z.object({
     blocks: z.array(
         z.object({
             blockNumber: z.number().min(1, { message: "Block number is required" }),
-            materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
-            dimensions: z.object({
-                weight: z.number().min(0.1, { message: "Weight must be greater than zero" }),
-                length: z.number().min(0.1, { message: "Length must be greater than zero" }),
-                breadth: z.number().min(0.1, { message: "Breadth must be greater than zero" }),
-                height: z.number().min(0.1, { message: "Height must be greater than zero" }),
-            }),
+            weight: z.number().min(0.1, { message: "Weight must be greater than zero" }),
+            length: z.number().min(0.1, { message: "Length must be greater than zero" }),
+            breadth: z.number().min(0.1, { message: "Breadth must be greater than zero" }),
+            height: z.number().min(0.1, { message: "Height must be greater than zero" }),
         })
     ).min(1, { message: "At least one block is required" }),
 });
@@ -54,7 +51,10 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
     const [globalLength, setGlobalLength] = React.useState<string>("");
     const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
     const [globalHeight, setGlobalHeight] = React.useState<string>("");
-    const [applyToAll, setApplyToAll] = React.useState<boolean>(false); // Track if user wants to apply to all rows
+    const [applyWeightToAll, setApplyWeightToAll] = React.useState<boolean>(false);
+    const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
+    const [applyBreadthToAll, setApplyBreadthToAll] = React.useState<boolean>(false);
+    const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -65,14 +65,11 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
 
         if (!isNaN(count) && count > 0) {
             const newBlocks = Array.from({ length: count }, (_, index) => ({
-                blockNumber: index + 1, // Assign a sequential block number starting from 1
-                materialType: "", // Initialize material type as an empty string
-                dimensions: {
-                    weight: 0, // Default weight to 0
-                    length: 0, // Default length to 0
-                    breadth: 0, // Default breadth to 0
-                    height: 0, // Default height to 0
-                },
+                blockNumber: index + 1,
+                weight: 0,
+                length: 0,
+                breadth: 0,
+                height: 0,
             }));
 
             setBlocks(newBlocks);
@@ -83,90 +80,51 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
         }
     }
 
-
-    function handleVolumeCalculation(index: number, field: string, value: string) {
-        const updatedBlocks = [...blocks];
-        updatedBlocks[index] = {
-            ...updatedBlocks[index],
-            [field]: value,
-        };
-
-        const { length, breadth, height } = updatedBlocks[index];
-
+    function calculateVolume(length: number, breadth: number, height: number): string {
         if (length && breadth && height) {
-            const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
-            updatedBlocks[index].volume = volume ? volume.toFixed(2) : "";
-        }
-
-        setBlocks(updatedBlocks);
-        form.setValue("blocks", updatedBlocks);
-    }
-
-    // Apply the global data to all rows
-    function applyGlobalDataToAllRows() {
-        if (applyToAll) {
-            const updatedBlocks = blocks.map((entry) => ({
-                ...entry,
-                weight: globalWeight,
-                length: globalLength,
-                breadth: globalBreadth,
-                height: globalHeight,
-                volume: calculateVolume(globalLength, globalBreadth, globalHeight),
-            }));
-            setBlocks(updatedBlocks);
-            form.setValue("blocks", updatedBlocks);
-        }
-    }
-
-    function calculateVolume(length: string, breadth: string, height: string): string {
-        if (length && breadth && height) {
-            const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
-            return volume ? volume.toFixed(2) : "";
+            const volume = length * breadth * height;
+            return volume.toFixed(2);
         }
         return "";
     }
 
-    function handleDeleteRow(index: number) {
-        const updatedBlocks = blocks.filter((_, i) => i !== index);
+    function applyIndividualGlobalDataToAllRows() {
+        const updatedBlocks = blocks.map((entry) => ({
+            ...entry,
+            weight: applyWeightToAll ? parseFloat(globalWeight) || entry.weight : entry.weight,
+            length: applyLengthToAll ? parseFloat(globalLength) || entry.length : entry.length,
+            breadth: applyBreadthToAll ? parseFloat(globalBreadth) || entry.breadth : entry.breadth,
+            height: applyHeightToAll ? parseFloat(globalHeight) || entry.height : entry.height,
+        }));
         setBlocks(updatedBlocks);
         form.setValue("blocks", updatedBlocks);
-
-        // After deleting a row, update the number of blocks
-        form.setValue("noOfBlocks", updatedBlocks.length.toString());
     }
+
+    React.useEffect(() => {
+        applyIndividualGlobalDataToAllRows();
+    }, [applyWeightToAll, applyLengthToAll, applyBreadthToAll, applyHeightToAll, globalWeight, globalLength, globalBreadth, globalHeight]);
+
+    React.useEffect(() => {
+        form.setValue("noOfBlocks", blocks.length.toString());
+    }, [blocks, form]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
-        console.log("Form errors:", form.formState.errors);
-        console.log("Form values:", values);
-
         try {
-            const response = await postData("/factory-management/inventory/addlotandblocks", {
+            await postData("/factory-management/inventory/addlotandblocks", {
                 ...values,
                 status: "active",
             });
-            // const apiLink = `/offer/v1/${response._id}`;
-            // After form submission, handle file upload
             setIsLoading(false);
             toast.success("Lot created/updated successfully");
-            router.push("./factorymanahement/inventory/raw/lots");
+            router.push("./factorymanagement/inventory/raw/lots");
         } catch (error) {
             console.error("Error creating/updating Lot:", error);
             setIsLoading(false);
             toast.error("Error creating/updating Lot");
         }
-
-        router.refresh(); // Refresh the current page
+        router.refresh();
     }
-
-    React.useEffect(() => {
-        if (applyToAll) applyGlobalDataToAllRows(); // Apply global data to all rows when the option is checked
-    }, [applyToAll, globalWeight, globalLength, globalBreadth, globalHeight]);
-
-    React.useEffect(() => {
-        // Automatically update the "numberOfblocks" field when entries are added or deleted
-        form.setValue("noOfBlocks", blocks.length.toString());
-    }, [blocks, form]);
 
     return (
         <div className="space-y-6">
@@ -223,9 +181,8 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                         />
                     </div>
 
-                    {/* Global Inputs */}
-                    <div className="space-y-3 ">
-                        <div className="grid grid-cols-4 gap-3 mb-4">
+                    <div className="grid grid-cols-4 gap-3">
+                        <div>
                             <Input
                                 value={globalWeight}
                                 onChange={(e) => setGlobalWeight(e.target.value)}
@@ -233,94 +190,140 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                 type="number"
                                 disabled={isLoading}
                             />
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={applyWeightToAll}
+                                    onChange={(e) => setApplyWeightToAll(e.target.checked)}
+                                />{" "}
+                                Apply Weight to all rows
+                            </label>
+                        </div>
+                        <div>
                             <Input
                                 value={globalLength}
                                 onChange={(e) => setGlobalLength(e.target.value)}
-                                placeholder="Length"
+                                placeholder="Length (inch)"
                                 type="number"
                                 disabled={isLoading}
                             />
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={applyLengthToAll}
+                                    onChange={(e) => setApplyLengthToAll(e.target.checked)}
+                                />{" "}
+                                Apply Length to all rows
+                            </label>
+                        </div>
+                        <div>
                             <Input
                                 value={globalBreadth}
                                 onChange={(e) => setGlobalBreadth(e.target.value)}
-                                placeholder="Breadth"
+                                placeholder="Breadth (inch)"
                                 type="number"
                                 disabled={isLoading}
                             />
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={applyBreadthToAll}
+                                    onChange={(e) => setApplyBreadthToAll(e.target.checked)}
+                                />{" "}
+                                Apply Breadth to all rows
+                            </label>
+                        </div>
+                        <div>
                             <Input
                                 value={globalHeight}
                                 onChange={(e) => setGlobalHeight(e.target.value)}
-                                placeholder="Height"
+                                placeholder="Height (inch)"
                                 type="number"
                                 disabled={isLoading}
                             />
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                <input
+                                    type="checkbox"
+                                    checked={applyHeightToAll}
+                                    onChange={(e) => setApplyHeightToAll(e.target.checked)}
+                                />{" "}
+                                Apply Height to all rows
+                            </label>
                         </div>
-                        <label>
-                            <input
-                                type="checkbox"
-                                checked={applyToAll}
-                                onChange={(e) => setApplyToAll(e.target.checked)}
-                            />{" "}
-                            Apply to all rows
-                        </label>
                     </div>
 
-                    {/* Table for Entries */}
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Serial No.</TableHead>
-                                <TableHead>Weight</TableHead>
-                                <TableHead>Length</TableHead>
-                                <TableHead>Breadth</TableHead>
-                                <TableHead>Height</TableHead>
-                                <TableHead>Volume</TableHead>
-                                <TableHead>Actions</TableHead>
+                                <TableHead>#</TableHead>
+                                <TableHead>Weight(tons)</TableHead>
+                                <TableHead>Length(inch)</TableHead>
+                                <TableHead>Breadth(inch)</TableHead>
+                                <TableHead>Height(inch)</TableHead>
+                                <TableHead>Volume(in³)</TableHead>
+                                <TableHead>Action</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {blocks.map((entry, index) => (
+                            {blocks.map((block, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{index + 1}</TableCell> {/* Serial Number */}
+                                    <TableCell>{block.blockNumber}</TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.weight || ""}
                                             type="number"
-                                            onChange={(e) =>
-                                                handleVolumeCalculation(index, "weight", e.target.value)
-                                            }
+                                            value={block.weight}
+                                            onChange={(e) => {
+                                                const updatedBlocks = [...blocks];
+                                                updatedBlocks[index].weight = parseFloat(e.target.value) || 0;
+                                                setBlocks(updatedBlocks);
+                                            }}
                                         />
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.length || ""}
                                             type="number"
-                                            onChange={(e) =>
-                                                handleVolumeCalculation(index, "length", e.target.value)
-                                            }
+                                            value={block.length}
+                                            onChange={(e) => {
+                                                const updatedBlocks = [...blocks];
+                                                updatedBlocks[index].length = parseFloat(e.target.value) || 0;
+                                                setBlocks(updatedBlocks);
+                                            }}
                                         />
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.breadth || ""}
                                             type="number"
-                                            onChange={(e) =>
-                                                handleVolumeCalculation(index, "breadth", e.target.value)
-                                            }
+                                            value={block.breadth}
+                                            onChange={(e) => {
+                                                const updatedBlocks = [...blocks];
+                                                updatedBlocks[index].breadth = parseFloat(e.target.value) || 0;
+                                                setBlocks(updatedBlocks);
+                                            }}
                                         />
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.height || ""}
                                             type="number"
-                                            onChange={(e) =>
-                                                handleVolumeCalculation(index, "height", e.target.value)
-                                            }
+                                            value={block.height}
+                                            onChange={(e) => {
+                                                const updatedBlocks = [...blocks];
+                                                updatedBlocks[index].height = parseFloat(e.target.value) || 0;
+                                                setBlocks(updatedBlocks);
+                                            }}
                                         />
                                     </TableCell>
-                                    <TableCell>{entry.volume || ""}</TableCell>
                                     <TableCell>
-                                        <Button onClick={() => handleDeleteRow(index)} variant="destructive">
+                                        {calculateVolume(block.length, block.breadth, block.height)}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            onClick={() => {
+                                                const updatedBlocks = blocks.filter((_, i) => i !== index);
+                                                setBlocks(updatedBlocks);
+                                            }}
+                                        >
                                             <Trash className="h-4 w-4" />
                                         </Button>
                                     </TableCell>
@@ -329,11 +332,9 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                         </TableBody>
                     </Table>
 
-                    <div className="flex justify-end">
-                        <Button disabled={isLoading} type="submit">
-                            Submit
-                        </Button>
-                    </div>
+                    <Button type="submit" disabled={isLoading} >
+                        Submit
+                    </Button>
                 </form>
             </Form>
         </div>
