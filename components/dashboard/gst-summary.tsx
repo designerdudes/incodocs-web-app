@@ -23,7 +23,7 @@ export function GSTSummary({ transactions }: GSTSummaryProps) {
     <div className="grid gap-4 md:grid-cols-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm font-medium">Input Tax Credit</CardTitle>
+          <CardTitle className="text-sm font-medium">Current Period Input Tax Credit</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
