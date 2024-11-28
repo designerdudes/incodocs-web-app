@@ -1,46 +1,42 @@
-import StatsCard from '@/components/statsCard'
-import { Button } from '@/components/ui/button'
-import Heading from '@/components/ui/heading'
-import { InventoryCards } from '@/lib/constants'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+import { FinancialCard } from "@/components/dashboard/FinancialCard"
+import { GSTLedger } from "@/components/dashboard/GSTLedger"
+import { RevenueChart } from "@/components/dashboard/RevenueChart"
+import { calculateProfits, financialData } from "@/lib/data/accountingData"
 
-function page() {
+export default function DashboardPage() {
+  const { grossProfit, netProfit } = calculateProfits()
+
   return (
-    <div className="flex  flex-col p-6">
-      <div className="flex justify-between items-center gap-2">
-        <Link href="./">
-          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Button>
-        </Link>
-        <div className="flex-1">
-          <Heading className='leading-tight ' title='Accounting' />
-          <p className='mt-2'>Effectively oversee your factory&apos;s Sales, Expenses, and other financial transactions.</p>
-        </div>
-        {/* <Link href={`/shipments/new`}>
-                    <Button className="bg-primary text-white">New Button</Button>
-                </Link> */}
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">Accounting Dashboard</h2>
       </div>
-
-      <div className="flex flex-row gap-4 mt-10 ">
-        {
-          InventoryCards?.map((card, index) => (
-            <StatsCard key={index}
-              title={card.title}
-              stat={card.value}
-              icon={card.icon}
-              desc=""
-              href={card.buttonUrl}
-
-            />
-          ))
-        }
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <FinancialCard
+          title="Accounts Payable"
+          amount={financialData.accountsPayable}
+          description="Total amount owed to vendors"
+        />
+        <FinancialCard
+          title="Accounts Receivable"
+          amount={financialData.accountsReceivable}
+          description="Total amount owed by customers"
+        />
+        <FinancialCard
+          title="Gross Profit"
+          amount={grossProfit}
+          description="Revenue minus direct costs"
+        />
+        <FinancialCard
+          title="Net Profit"
+          amount={netProfit}
+          description="Profit after all deductions"
+        />
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        {/* <RevenueChart /> */}
+        <GSTLedger />
       </div>
     </div>
   )
 }
-
-export default page
