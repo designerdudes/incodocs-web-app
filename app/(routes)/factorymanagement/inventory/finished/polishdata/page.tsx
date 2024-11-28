@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft, PlusIcon } from "lucide-react";
 import Link from "next/link";
-import { columns, FinishedMaterial } from "../components/columns";
+import { columns, FinishedMaterial } from "../components/cuttingWithAllowanceColumns";
 import { cookies } from "next/headers";
 
 export default async function CuttindDataPage() {
@@ -19,9 +19,9 @@ export default async function CuttindDataPage() {
       updatedAt: "2024-03-19T02:40:15.954Z",
       height: "54",
       length: "3.2",
-      lengthincm:"",
-      heightincm:"",
-      squareft:""
+      lengthincm: "",
+      heightincm: "",
+      squareft: ""
     },
     {
       _id: "65f8fd0ac4417ea5a14fbda1",
@@ -35,9 +35,9 @@ export default async function CuttindDataPage() {
 
       height: "40",
       length: "2.8",
-      lengthincm:"",
-      heightincm:"",
-      squareft:""
+      lengthincm: "",
+      heightincm: "",
+      squareft: ""
     },
     {
       _id: "65f8febec4417ea5a14fbdad",
@@ -49,9 +49,9 @@ export default async function CuttindDataPage() {
       updatedAt: "2024-03-19T02:55:58.275Z",
       height: "45",
       length: "3.5",
-      lengthincm:"",
-      heightincm:"",
-      squareft:""
+      lengthincm: "",
+      heightincm: "",
+      squareft: ""
     },
   ];
 
@@ -95,7 +95,7 @@ export default async function CuttindDataPage() {
         </Link> */}
       </div>
       <Separator orientation="horizontal" />
-      <div className="container mx-auto py-10">    
+      <div className="container mx-auto py-10">
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected Finished Material?"

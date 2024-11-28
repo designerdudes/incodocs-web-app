@@ -63,7 +63,7 @@ const columns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.lotId.lotName}
+                {row.original.lotId?.lotName}
             </div>
         ),
     },
