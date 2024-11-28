@@ -7,7 +7,7 @@ export const transactions: Transaction[] = [
     type: 'purchase',
     description: 'Raw Materials',
     amount: 100000,
-    igst: 7650,
+    igst: 18000,
     cgst: 0,
     sgst: 0,
     partyName: 'ABC Suppliers',
@@ -19,7 +19,7 @@ export const transactions: Transaction[] = [
     type: 'sale',
     description: 'Finished Goods',
     amount: 100000,
-    igst: 14000,
+    igst: 18000,
     cgst: 0,
     sgst: 0,
     partyName: 'ABC Suppliers',
@@ -32,8 +32,8 @@ export const transactions: Transaction[] = [
     description: 'Raw Materials',
     amount: 100000,
     igst: 0,
-    cgst: 4000,
-    sgst: 4000,
+    cgst: 9000,
+    sgst: 9000,
     partyName: 'XYZ Traders',
     invoiceNumber: 'SALE-001',
   },
@@ -44,8 +44,8 @@ export const transactions: Transaction[] = [
     description: 'Finished Goods',
     amount: 100000,
     igst: 0,
-    cgst: 17500,
-    sgst: 17500,
+    cgst: 4000,
+    sgst: 4000,
     partyName: 'XYZ Traders',
     invoiceNumber: 'SALE-001',
   },
@@ -56,12 +56,12 @@ export const monthlyBalances: MonthlyBalance[] = [
   {
     month: 'Oct 2024',
     openingBalance: 0,
-    closingBalance: 0,
+    closingBalance: 18000,
     totalPurchases: 50000,
     totalSales: 120000,
     totalExpenses: 0,
-    igstBalance: 25000, // Updated to reflect settlement
-    cgstBalance: 12680, // Updated to reflect settlement
-    sgstBalance: 8650, // Updated to reflect settlement
+    igstBalance: 18000, // Updated to reflect settlement
+    cgstBalance: 0, // Updated to reflect settlement
+    sgstBalance: 0, // Updated to reflect settlement
   }
 ];

@@ -1,3 +1,4 @@
+import { monthlyBalances } from "../gst-data";
 import { GSTBalance } from "./gst-calculations";
 
 export interface GSTSettlement {
@@ -26,6 +27,8 @@ export interface GSTSettlement {
 
 export function calculateGSTSettlement(balance: GSTBalance): GSTSettlement {
   // Initialize settlement structure
+  const currentMonth = monthlyBalances[monthlyBalances.length - 1];
+
   const settlement: GSTSettlement = {
     igst: {
       payable: Math.max(0, balance.output.igst),
@@ -51,9 +54,9 @@ export function calculateGSTSettlement(balance: GSTBalance): GSTSettlement {
   };
 
   // Available credits
-  let igstCredit = Math.max(0, balance.input.igst) + 25000;
-  let cgstCredit = Math.max(0, balance.input.cgst) +12680;
-  let sgstCredit = Math.max(0, balance.input.sgst) +8650 ;
+  let igstCredit = Math.max(0, balance.input.igst) + currentMonth.igstBalance;
+  let cgstCredit = Math.max(0, balance.input.cgst) + currentMonth.cgstBalance;
+  let sgstCredit = Math.max(0, balance.input.sgst)  + currentMonth.sgstBalance;
 
  
   // Step 1: Settle IGST first

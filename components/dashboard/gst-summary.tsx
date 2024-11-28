@@ -10,6 +10,7 @@ import { Transaction } from "@/types/gst";
 import { calculateGSTBalance } from "@/lib/utils/gst-calculations";
 import { calculateGSTSettlement } from "@/lib/utils/gst-settlement";
 import { GSTSettlementPopover } from "./gst-settlement-popover";
+import { monthlyBalances } from "@/lib/gst-data";
 
 interface GSTSummaryProps {
   transactions: Transaction[];
@@ -18,6 +19,7 @@ interface GSTSummaryProps {
 export function GSTSummary({ transactions }: GSTSummaryProps) {
   const gstBalance = calculateGSTBalance(transactions);
   const gstSettlement = calculateGSTSettlement(gstBalance);
+  const currentMonth = monthlyBalances[monthlyBalances.length - 1];
 
   return (
     <div className="grid gap-4 md:grid-cols-4">
@@ -121,19 +123,19 @@ export function GSTSummary({ transactions }: GSTSummaryProps) {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-sm">IGST:</span>
-              <span className="font-medium">₹{gstBalance.input.igst + 25000 - (gstSettlement.igst.settledWithIgst + gstSettlement.cgst.settledWithIgst + gstSettlement.sgst.settledWithIgst)}</span>
+              <span className="font-medium">₹{gstBalance.input.igst +  currentMonth.igstBalance - (gstSettlement.igst.settledWithIgst + gstSettlement.cgst.settledWithIgst + gstSettlement.sgst.settledWithIgst)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm">CGST:</span>
-              <span className="font-medium">₹{gstBalance.input.cgst + 12680 - (gstSettlement.igst.settledWithCgst + gstSettlement.cgst.settledWithCgst + gstSettlement.sgst.settledWithCgst)}</span>
+              <span className="font-medium">₹{gstBalance.input.cgst + currentMonth.cgstBalance - (gstSettlement.igst.settledWithCgst + gstSettlement.cgst.settledWithCgst + gstSettlement.sgst.settledWithCgst)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm">SGST:</span>
-              <span className="font-medium">₹{gstBalance.input.sgst + 8650 - (gstSettlement.igst.settledWithSgst + gstSettlement.cgst.settledWithSgst + gstSettlement.sgst.settledWithSgst)}</span>
+              <span className="font-medium">₹{gstBalance.input.sgst + currentMonth.sgstBalance - (gstSettlement.igst.settledWithSgst + gstSettlement.cgst.settledWithSgst + gstSettlement.sgst.settledWithSgst)}</span>
             </div>
             <div className="flex justify-between border-t pt-2">
               <span className="text-sm font-medium">Total Balance:</span>
-              <span className="font-bold">₹{gstBalance.input.total + 25000 + 12680 + 8650 - (
+              <span className="font-bold">₹{gstBalance.input.total + currentMonth.igstBalance + currentMonth.cgstBalance + currentMonth.sgstBalance - (
                 gstSettlement.igst.settledWithIgst +
                 gstSettlement.cgst.settledWithIgst +
                 gstSettlement.sgst.settledWithIgst +
