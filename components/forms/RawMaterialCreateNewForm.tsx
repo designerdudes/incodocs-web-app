@@ -27,27 +27,29 @@ interface RawMaterialCreateNewFormProps {
 
 const formSchema = z.object({
     lotName: z.string().min(3, { message: "Material name must be at least 3 characters long" }),
-    batchNumber: z.string().min(1, { message: "Batch number is required" }),
     materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
-    numberOfblocks: z
+    noOfBlocks: z
         .string()
         .min(1, { message: "Quantity must be a positive number" })
         .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
-    entries: z.array(
+    blocks: z.array(
         z.object({
-            weight: z.string().min(1, { message: "Weight must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
-            length: z.string().min(1, { message: "Length must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
-            breadth: z.string().min(1, { message: "Breadth must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
-            height: z.string().min(1, { message: "Height must be a positive number" }).refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-            volume: z.string().min(1, { message: "Volume is required" }),
+            blockNumber: z.number().min(1, { message: "Block number is required" }),
+            materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
+            dimensions: z.object({
+                weight: z.number().min(0.1, { message: "Weight must be greater than zero" }),
+                length: z.number().min(0.1, { message: "Length must be greater than zero" }),
+                breadth: z.number().min(0.1, { message: "Breadth must be greater than zero" }),
+                height: z.number().min(0.1, { message: "Height must be greater than zero" }),
+            }),
         })
-    ),
+    ).min(1, { message: "At least one block is required" }),
 });
 
 export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps) {
     const router = useRouter();
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [entries, setEntries] = React.useState<any[]>([]);
+    const [blocks, setBlocks] = React.useState<any[]>([]);
     const [globalWeight, setGlobalWeight] = React.useState<string>("");
     const [globalLength, setGlobalLength] = React.useState<string>("");
     const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
@@ -58,46 +60,52 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
         resolver: zodResolver(formSchema),
     });
 
-    function handleEntriesInputChange(value: string) {
+    function handleBlocksInputChange(value: string) {
         const count = parseInt(value, 10);
+
         if (!isNaN(count) && count > 0) {
-            const newEntries = Array.from({ length: count }, () => ({
-                weight: "",
-                length: "",
-                breadth: "",
-                height: "",
-                volume: "",
+            const newBlocks = Array.from({ length: count }, (_, index) => ({
+                blockNumber: index + 1, // Assign a sequential block number starting from 1
+                materialType: "", // Initialize material type as an empty string
+                dimensions: {
+                    weight: 0, // Default weight to 0
+                    length: 0, // Default length to 0
+                    breadth: 0, // Default breadth to 0
+                    height: 0, // Default height to 0
+                },
             }));
-            setEntries(newEntries);
-            form.setValue("entries", newEntries);
+
+            setBlocks(newBlocks);
+            form.setValue("blocks", newBlocks);
         } else {
-            setEntries([]);
-            form.setValue("entries", []);
+            setBlocks([]);
+            form.setValue("blocks", []);
         }
     }
 
+
     function handleVolumeCalculation(index: number, field: string, value: string) {
-        const updatedEntries = [...entries];
-        updatedEntries[index] = {
-            ...updatedEntries[index],
+        const updatedBlocks = [...blocks];
+        updatedBlocks[index] = {
+            ...updatedBlocks[index],
             [field]: value,
         };
 
-        const { length, breadth, height } = updatedEntries[index];
+        const { length, breadth, height } = updatedBlocks[index];
 
         if (length && breadth && height) {
             const volume = parseFloat(length) * parseFloat(breadth) * parseFloat(height);
-            updatedEntries[index].volume = volume ? volume.toFixed(2) : "";
+            updatedBlocks[index].volume = volume ? volume.toFixed(2) : "";
         }
 
-        setEntries(updatedEntries);
-        form.setValue("entries", updatedEntries);
+        setBlocks(updatedBlocks);
+        form.setValue("blocks", updatedBlocks);
     }
 
     // Apply the global data to all rows
     function applyGlobalDataToAllRows() {
         if (applyToAll) {
-            const updatedEntries = entries.map((entry) => ({
+            const updatedBlocks = blocks.map((entry) => ({
                 ...entry,
                 weight: globalWeight,
                 length: globalLength,
@@ -105,8 +113,8 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                 height: globalHeight,
                 volume: calculateVolume(globalLength, globalBreadth, globalHeight),
             }));
-            setEntries(updatedEntries);
-            form.setValue("entries", updatedEntries);
+            setBlocks(updatedBlocks);
+            form.setValue("blocks", updatedBlocks);
         }
     }
 
@@ -119,12 +127,12 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
     }
 
     function handleDeleteRow(index: number) {
-        const updatedEntries = entries.filter((_, i) => i !== index);
-        setEntries(updatedEntries);
-        form.setValue("entries", updatedEntries);
+        const updatedBlocks = blocks.filter((_, i) => i !== index);
+        setBlocks(updatedBlocks);
+        form.setValue("blocks", updatedBlocks);
 
         // After deleting a row, update the number of blocks
-        form.setValue("numberOfblocks", updatedEntries.length.toString());
+        form.setValue("noOfBlocks", updatedBlocks.length.toString());
     }
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -152,13 +160,13 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
     }
 
     React.useEffect(() => {
-        applyGlobalDataToAllRows(); // Apply global data to all rows when the option is checked
+        if (applyToAll) applyGlobalDataToAllRows(); // Apply global data to all rows when the option is checked
     }, [applyToAll, globalWeight, globalLength, globalBreadth, globalHeight]);
 
     React.useEffect(() => {
         // Automatically update the "numberOfblocks" field when entries are added or deleted
-        form.setValue("numberOfblocks", entries.length.toString());
-    }, [entries, form]);
+        form.setValue("noOfBlocks", blocks.length.toString());
+    }, [blocks, form]);
 
     return (
         <div className="space-y-6">
@@ -192,7 +200,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                             )}
                         />
                         <FormField
-                            name="numberOfblocks"
+                            name="noOfBlocks"
                             control={form.control}
                             render={({ field }) => (
                                 <FormItem>
@@ -204,7 +212,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                             disabled={isLoading}
                                             onChange={(e) => {
                                                 field.onChange(e);
-                                                handleEntriesInputChange(e.target.value);
+                                                handleBlocksInputChange(e.target.value);
                                             }}
                                             value={field.value}
                                         />
@@ -216,8 +224,8 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                     </div>
 
                     {/* Global Inputs */}
-                    <div className="space-y-3">
-                        <div className="grid grid-cols-4 gap-3">
+                    <div className="space-y-3 ">
+                        <div className="grid grid-cols-4 gap-3 mb-4">
                             <Input
                                 value={globalWeight}
                                 onChange={(e) => setGlobalWeight(e.target.value)}
@@ -271,12 +279,12 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {entries.map((entry, index) => (
+                            {blocks.map((entry, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{index + 1}</TableCell> {/* Serial Number */}
                                     <TableCell>
                                         <Input
-                                            value={entry.weight}
+                                            value={entry.weight || ""}
                                             type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "weight", e.target.value)
@@ -285,7 +293,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.length}
+                                            value={entry.length || ""}
                                             type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "length", e.target.value)
@@ -294,7 +302,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.breadth}
+                                            value={entry.breadth || ""}
                                             type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "breadth", e.target.value)
@@ -303,14 +311,14 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
                                     </TableCell>
                                     <TableCell>
                                         <Input
-                                            value={entry.height}
+                                            value={entry.height || ""}
                                             type="number"
                                             onChange={(e) =>
                                                 handleVolumeCalculation(index, "height", e.target.value)
                                             }
                                         />
                                     </TableCell>
-                                    <TableCell>{entry.volume}</TableCell>
+                                    <TableCell>{entry.volume || ""}</TableCell>
                                     <TableCell>
                                         <Button onClick={() => handleDeleteRow(index)} variant="destructive">
                                             <Trash className="h-4 w-4" />

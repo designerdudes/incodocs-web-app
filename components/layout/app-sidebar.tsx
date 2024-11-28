@@ -199,8 +199,8 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }, []);
 
     const FactoriesData = currentFactoryData
-    console.log("This is factory data", FactoriesData)
-    console.log("This is the total factories", FactoriesData?.length)
+    // console.log("This is factory data", FactoriesData)
+    // console.log("This is the total factories", FactoriesData?.length)
 
     return (
         <Sidebar collapsible="icon" {...props}>

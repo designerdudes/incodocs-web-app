@@ -39,10 +39,10 @@ export default async function SlabsProcessingPage() {
 
     let Blockdata
     Blockdata = blockRes
-    console.log(Blockdata)
+    // console.log(Blockdata)
     let Slabdata
     Slabdata = slabRes
-    console.log("this is slabs data", Slabdata)
+    // console.log("this is slabs data", Slabdata)
 
     const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
     const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
