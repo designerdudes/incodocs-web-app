@@ -16,6 +16,10 @@ export default function Home() {
       </div>
       <SummaryCards currentBalance={currentMonth} />
       <GSTSummary transactions={transactions} />
+        <div className="flex items-center justify-between space-y-2">
+            <h2 className="text-2xl font-bold tracking-tight">Monthly Balances</h2>
+
+        </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <GSTChart data={monthlyBalances} />
       </div>

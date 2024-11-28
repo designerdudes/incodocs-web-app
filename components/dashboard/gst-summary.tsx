@@ -20,7 +20,7 @@ export function GSTSummary({ transactions }: GSTSummaryProps) {
   const gstSettlement = calculateGSTSettlement(gstBalance);
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-sm font-medium">Input Tax Credit</CardTitle>
@@ -107,6 +107,43 @@ export function GSTSummary({ transactions }: GSTSummaryProps) {
                 gstSettlement.cgst.finalPayable +
                 gstSettlement.sgst.finalPayable
               ).toLocaleString()}</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Ledger balance after GST settlement */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-sm font-medium">Ledger Balance After Settlement</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-sm">IGST:</span>
+              <span className="font-medium">₹{gstBalance.input.igst + 25000 - (gstSettlement.igst.settledWithIgst + gstSettlement.cgst.settledWithIgst + gstSettlement.sgst.settledWithIgst)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm">CGST:</span>
+              <span className="font-medium">₹{gstBalance.input.cgst + 12680 - (gstSettlement.igst.settledWithCgst + gstSettlement.cgst.settledWithCgst + gstSettlement.sgst.settledWithCgst)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-sm">SGST:</span>
+              <span className="font-medium">₹{gstBalance.input.sgst + 8650 - (gstSettlement.igst.settledWithSgst + gstSettlement.cgst.settledWithSgst + gstSettlement.sgst.settledWithSgst)}</span>
+            </div>
+            <div className="flex justify-between border-t pt-2">
+              <span className="text-sm font-medium">Total Balance:</span>
+              <span className="font-bold">₹{gstBalance.input.total + 25000 + 12680 + 8650 - (
+                gstSettlement.igst.settledWithIgst +
+                gstSettlement.cgst.settledWithIgst +
+                gstSettlement.sgst.settledWithIgst +
+                gstSettlement.igst.settledWithCgst +
+                gstSettlement.cgst.settledWithCgst +
+                gstSettlement.sgst.settledWithCgst +
+                gstSettlement.igst.settledWithSgst +
+                gstSettlement.cgst.settledWithSgst +
+                gstSettlement.sgst.settledWithSgst
+              )}</span>
             </div>
           </div>
         </CardContent>

@@ -16,6 +16,7 @@ export interface MonthlyBalance {
   openingBalance: number;
   closingBalance: number;
   totalPurchases: number;
+  totalExpenses: number;
   totalSales: number;
   igstBalance: number;
   cgstBalance: number;
