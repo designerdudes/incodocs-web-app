@@ -44,6 +44,12 @@ export function GSTSettlementPopover({ type, settlement }: GSTSettlementPopoverP
               <span className="text-sm font-medium">Final Payable:</span>
               <span className="text-sm font-bold">₹{settlement.igst.finalPayable.toLocaleString()}</span>
             </div>
+            <div className="grid grid-cols-2 gap-2 border-t pt-2">
+              <span className="text-sm font-medium">{ 
+                settlement.igst.finalPayable > 0 ? "IGST" : settlement.cgst.finalPayable > 0 ? "CGST" : "SGST"
+                } credit after settlement:</span>
+              <span className="text-sm font-bold">₹{settlement.igst.finalPayable > 0 ? settlement.igst.finalPayable.toLocaleString() : settlement.cgst.finalPayable > 0 ? settlement.cgst.finalPayable.toLocaleString() : settlement.sgst.finalPayable.toLocaleString()}</span>
+            </div>
           </div>
         );
       case "cgst":
