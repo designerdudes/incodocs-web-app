@@ -1,46 +1,34 @@
-import StatsCard from '@/components/statsCard'
-import { Button } from '@/components/ui/button'
-import Heading from '@/components/ui/heading'
-import { InventoryCards } from '@/lib/constants'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
+"use client";
 
-function page() {
+import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { GSTChart } from "@/components/dashboard/gst-chart";
+import { TransactionsTable } from "@/components/dashboard/transactions-table";
+import { GSTSummary } from "@/components/dashboard/gst-summary";
+import { transactions, monthlyBalances } from "@/lib/gst-data";
+
+export default function Home() {
+  const currentMonth = monthlyBalances[monthlyBalances.length - 1];
+
   return (
-    <div className="flex  flex-col p-6">
-      <div className="flex justify-between items-center gap-2">
-        <Link href="./">
-          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Button>
-        </Link>
-        <div className="flex-1">
-          <Heading className='leading-tight ' title='Accounting' />
-          <p className='mt-2'>Effectively oversee your factory&apos;s Sales, Expenses, and other financial transactions.</p>
-        </div>
-        {/* <Link href={`/shipments/new`}>
-                    <Button className="bg-primary text-white">New Button</Button>
-                </Link> */}
+    <div className="flex-1 space-y-4 p-8 pt-6">
+      <div className="flex items-center justify-between space-y-2">
+        <h2 className="text-3xl font-bold tracking-tight">GST Ledger Dashboard</h2>
       </div>
+      <SummaryCards currentBalance={currentMonth} />
+      <GSTSummary transactions={transactions} />
+        <div className="flex items-center justify-between space-y-2">
+            <h2 className="text-2xl font-bold tracking-tight">Monthly Balances</h2>
 
-      <div className="flex flex-row gap-4 mt-10 ">
-        {
-          InventoryCards?.map((card, index) => (
-            <StatsCard key={index}
-              title={card.title}
-              stat={card.value}
-              icon={card.icon}
-              desc=""
-              href={card.buttonUrl}
-
-            />
-          ))
-        }
+        </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <GSTChart data={monthlyBalances} />
+      </div>
+      <div className="grid gap-4">
+        <div className="flex items-center justify-between space-y-2">
+          <h2 className="text-2xl font-bold tracking-tight">Recent Transactions</h2>
+        </div>
+        <TransactionsTable transactions={transactions} />
       </div>
     </div>
-  )
+  );
 }
-
-export default page
