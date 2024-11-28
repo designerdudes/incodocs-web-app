@@ -51,9 +51,9 @@ export function calculateGSTSettlement(balance: GSTBalance): GSTSettlement {
   };
 
   // Available credits
-  let igstCredit = Math.max(0, balance.input.igst);
-  let cgstCredit = Math.max(0, balance.input.cgst);
-  let sgstCredit = Math.max(0, balance.input.sgst);
+  let igstCredit = Math.max(0, balance.input.igst) + 25000;
+  let cgstCredit = Math.max(0, balance.input.cgst) +12680;
+  let sgstCredit = Math.max(0, balance.input.sgst) +8650 ;
 
  
   // Step 1: Settle IGST first
