@@ -18,6 +18,7 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
 
 interface MarkCutAndCreateSlabsFormProps extends React.HTMLAttributes<HTMLDivElement> {
     gap: number;
@@ -37,7 +38,7 @@ const formSchema = z.object({
                     .refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
                 height: z.string()
                     .min(1, { message: "Height must be a positive number" })
-                    .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" })
+                    .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
             })
         )
         .optional(),
@@ -50,8 +51,12 @@ export function MarkCutAndCreateSlabsForm({
     ...props
 }: MarkCutAndCreateSlabsFormProps) {
     const router = useRouter();
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [slabsCount, setSlabsCount] = React.useState<number>(0);
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [slabsCount, setSlabsCount] = React.useState(0);
+    const [globalLength, setGlobalLength] = React.useState<string>("");
+    const [globalHeight, setGlobalHeight] = React.useState<string>("");
+    const [applyLengthToAll, setApplyLengthToAll] = React.useState(false);
+    const [applyHeightToAll, setApplyHeightToAll] = React.useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -78,6 +83,32 @@ export function MarkCutAndCreateSlabsForm({
         }
     }
 
+    React.useEffect(() => {
+        if (applyLengthToAll || applyHeightToAll) {
+            const updatedSlabs = form.getValues("slabs") || [];
+            const newSlabs = updatedSlabs.map((slab) => ({
+                length: applyLengthToAll ? globalLength : slab.length,
+                height: applyHeightToAll ? globalHeight : slab.height,
+            }));
+            form.setValue("slabs", newSlabs);
+        }
+    }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
+
+    
+    function calculateSqft(length: string, height: string): string {
+        const lengthInFeet = parseFloat(length) / 12 || 0; // Convert length to feet
+        const heightInFeet = parseFloat(height) / 12 || 0; // Convert height to feet
+        const area = lengthInFeet * heightInFeet;
+        return area > 0 ? area.toFixed(2) : "0.00"; // Return area as a string with 2 decimal places
+    }
+    
+    function handleDeleteRow(index: number) {
+        const updatedSlabs = [...form.getValues("slabs")];
+        updatedSlabs.splice(index, 1);
+        setSlabsCount(updatedSlabs.length);
+        form.setValue("slabs", updatedSlabs);
+    }
+
     function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
 
@@ -95,7 +126,6 @@ export function MarkCutAndCreateSlabsForm({
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     {/* Input Fields */}
                     <div className={`grid grid-cols-${gap} gap-3`}>
-                        {/* Lot Name */}
                         <FormField
                             name="blockLotName"
                             control={form.control}
@@ -109,7 +139,6 @@ export function MarkCutAndCreateSlabsForm({
                                 </FormItem>
                             )}
                         />
-                        {/* Block Number */}
                         <FormField
                             name="blockNumber"
                             control={form.control}
@@ -117,14 +146,12 @@ export function MarkCutAndCreateSlabsForm({
                                 <FormItem>
                                     <FormLabel>Block Number</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="e.g. 12345"
-                                            disabled={isLoading} {...field} />
+                                        <Input placeholder="e.g. 12345" disabled={isLoading} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
-                        {/* Number of Slabs */}
                         <FormField
                             name="numberofSlabs"
                             control={form.control}
@@ -133,14 +160,14 @@ export function MarkCutAndCreateSlabsForm({
                                     <FormLabel>Number of Slabs</FormLabel>
                                     <FormControl>
                                         <Input
-                                            placeholder="Enter number of slabs"
                                             type="number"
+                                            placeholder="Enter number of slabs"
                                             disabled={isLoading}
+                                            value={field.value}
                                             onChange={(e) => {
                                                 field.onChange(e);
                                                 handleSlabsInputChange(e.target.value);
                                             }}
-                                            value={field.value}
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -149,18 +176,60 @@ export function MarkCutAndCreateSlabsForm({
                         />
                     </div>
 
+                    {/* Global Inputs for Length and Height */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Input
+                                placeholder="Length(inches)"
+                                type="number"
+                                value={globalLength}
+                                onChange={(e) => setGlobalLength(e.target.value)}
+                                disabled={isLoading}
+                            />
+                            <label className="text-sm font-medium flex items-center mt-2">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2"
+                                    checked={applyLengthToAll}
+                                    onChange={(e) => setApplyLengthToAll(e.target.checked)}
+                                />
+                                Apply Length to all rows
+                            </label>
+                        </div>
+                        <div>
+                            <Input
+                                placeholder="Height(inches)"
+                                type="number"
+                                value={globalHeight}
+                                onChange={(e) => setGlobalHeight(e.target.value)}
+                                disabled={isLoading}
+                            />
+                            <label className="text-sm font-medium flex items-center mt-2">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2"
+                                    checked={applyHeightToAll}
+                                    onChange={(e) => setApplyHeightToAll(e.target.checked)}
+                                />
+                                Apply Height to all rows
+                            </label>
+                        </div>
+                    </div>
+
                     {/* Table for Slabs */}
                     {slabsCount > 0 && (
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Slab #</TableHead>
-                                    <TableHead>Length (in inches)</TableHead>
-                                    <TableHead>Height (in inches)</TableHead>
+                                    <TableHead>#</TableHead>
+                                    <TableHead>Length(inches)</TableHead>
+                                    <TableHead>Height(inches)</TableHead>
+                                    <TableHead>Area (sqft)</TableHead>
+                                    <TableHead>Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {Array.from({ length: slabsCount }).map((_, index) => (
+                                {form.getValues("slabs").map((slab, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{index + 1}</TableCell>
                                         <TableCell>
@@ -172,7 +241,6 @@ export function MarkCutAndCreateSlabsForm({
                                                         <FormControl>
                                                             <Input
                                                                 placeholder="e.g. 54"
-                                                                type="number"
                                                                 disabled={isLoading}
                                                                 {...field}
                                                             />
@@ -191,7 +259,6 @@ export function MarkCutAndCreateSlabsForm({
                                                         <FormControl>
                                                             <Input
                                                                 placeholder="e.g. 32"
-                                                                type="number"
                                                                 disabled={isLoading}
                                                                 {...field}
                                                             />
@@ -201,21 +268,36 @@ export function MarkCutAndCreateSlabsForm({
                                                 )}
                                             />
                                         </TableCell>
+                                        <TableCell>
+                                            <span>
+                                                {calculateSqft(
+                                                    form.getValues(`slabs.${index}.length`),
+                                                    form.getValues(`slabs.${index}.height`)
+                                                )}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Button
+                                                variant="destructive"
+                                                onClick={() => handleDeleteRow(index)}
+                                                disabled={isLoading}
+                                            >
+                                               <Trash className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                             <TableFooter>
                                 <TableRow>
-                                    <TableCell colSpan={3}>Total Slabs: {slabsCount}</TableCell>
+                                    <TableCell colSpan={5}>Total Slabs: {slabsCount}</TableCell>
                                 </TableRow>
                             </TableFooter>
                         </Table>
                     )}
 
-                    {/* Submit Button */}
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading && <span className="mr-2 spinner"></span>}
-                        Update
+                    <Button type="submit" disabled={isLoading}>
+                        {isLoading ? "Loading..." : "Update Slabs"}
                     </Button>
                 </form>
             </Form>

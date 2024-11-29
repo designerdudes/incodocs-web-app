@@ -4,11 +4,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useGlobalModal } from '@/hooks/GlobalModal';
 import { Edit2, Eye, MoreHorizontal, Trash } from 'lucide-react'
 import React from 'react'
-import { FinishedMaterial } from './cuttingWithAllowanceColumns'
 import { Alert } from '@/components/forms/Alert';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
+import { FinishedMaterial } from '../page';
+
 
 interface Props {
     data: FinishedMaterial
@@ -47,7 +48,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={
                             () => {
-                                router.push(`./finishedmaterial/view/${data._id}`)
+                                router.push(`./finished/view/${data._id}`)
                             }
                         }>
                         <Eye className="mr-2 h-4 w-4" />
@@ -62,7 +63,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         Edit Product</DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.slabnumber}`
+                            GlobalModal.title = `Delete Product - ${data.slabNumber}`
                             GlobalModal.description = "Are you sure you want to delete this Product?"
                             GlobalModal.children = <Alert onConfirm={deleteCategory} />
                             GlobalModal.onOpen()
