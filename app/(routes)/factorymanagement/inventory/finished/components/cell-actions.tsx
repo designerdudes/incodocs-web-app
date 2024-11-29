@@ -4,7 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { useGlobalModal } from '@/hooks/GlobalModal';
 import { Edit2, Eye, MoreHorizontal, Trash } from 'lucide-react'
 import React from 'react'
-import { FinishedMaterial } from './columns'
+import { FinishedMaterial } from './cuttingWithAllowanceColumns'
 import { Alert } from '@/components/forms/Alert';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';

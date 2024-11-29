@@ -1,12 +1,12 @@
 "use client";
-import { Inter } from 'next/font/google'
+import { Inter, Lexend } from 'next/font/google'
 import './globals.css'
 import { NewOrderModalProvider } from '@/components/providers/NewOrderModal-Provider'
 import { ToastProvider } from '@/components/providers/toast-provider'
 import { useEffect, useState } from 'react'
 import { ThemeProvider } from '@/components/theme-provider';
 
-const inter = Inter({ subsets: ['latin'], variable: "--font-sans", })
+const inter = Lexend({ subsets: ['latin'], variable: "--font-sans", })
 
 
 
