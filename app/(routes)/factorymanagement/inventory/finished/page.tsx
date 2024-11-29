@@ -100,18 +100,6 @@ export default async function FinishedMaterialPage() {
                                 <TabsTrigger className='gap-2' value="CuttingInchesWithAllowance">Cutting Inches With Allowance</TabsTrigger>
                                 <TabsTrigger className='gap-2' value="CuttinginchesWithOutAllowance">Cutting Inches WithOut Allowance</TabsTrigger>
                             </TabsList>
-                            <TabsContent value="CuttinginchesWithOutAllowance">
-                                <DataTable
-                                    bulkDeleteIdName='_id'
-                                    bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
-                                    bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
-                                    bulkDeleteToastMessage='Selected Slabs deleted successfully'
-                                    deleteRoute="/category/ids"
-                                    searchKey='slabNumber'
-                                    columns={CuttingInchesWithOutAllowanceColumns}
-                                    data={slabsData}
-                                />
-                            </TabsContent>
                             <TabsContent value="CuttingInchesWithAllowance">
                                 <DataTable
                                     bulkDeleteIdName='_id'
@@ -121,6 +109,18 @@ export default async function FinishedMaterialPage() {
                                     deleteRoute="/category/ids"
                                     searchKey='slabNumber'
                                     columns={CuttingInchesWithAllowanceColumns}
+                                    data={slabsData}
+                                />
+                            </TabsContent>
+                            <TabsContent value="CuttinginchesWithOutAllowance">
+                                <DataTable
+                                    bulkDeleteIdName='_id'
+                                    bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
+                                    bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
+                                    bulkDeleteToastMessage='Selected Slabs deleted successfully'
+                                    deleteRoute="/category/ids"
+                                    searchKey='slabNumber'
+                                    columns={CuttingInchesWithOutAllowanceColumns}
                                     data={slabsData}
                                 />
                             </TabsContent>
