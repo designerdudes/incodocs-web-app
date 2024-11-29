@@ -3,7 +3,7 @@ import { Transaction, MonthlyBalance } from '@/types/gst';
 export const transactions: Transaction[] = [
   {
     id: '1',
-    date: '2024-03-01',
+    date: '01/03/2024',
     type: 'purchase',
     description: 'Raw Materials',
     amount: 100000,
@@ -15,7 +15,7 @@ export const transactions: Transaction[] = [
   },
   {
     id: '2',
-    date: '2024-03-01',
+    date: '01/03/2024',
     type: 'sale',
     description: 'Finished Goods',
     amount: 100000,
@@ -27,7 +27,7 @@ export const transactions: Transaction[] = [
   },
   {
     id: '3',
-    date: '2024-03-05',
+    date: '05/03/2024',
     type: 'purchase',
     description: 'Raw Materials',
     amount: 100000,
@@ -39,7 +39,7 @@ export const transactions: Transaction[] = [
   },
   {
     id: '4',
-    date: '2024-03-05',
+    date: '05/03/2024',
     type: 'sale',
     description: 'Finished Goods',
     amount: 100000,
