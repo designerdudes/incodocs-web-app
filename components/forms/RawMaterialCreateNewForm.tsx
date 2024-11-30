@@ -110,6 +110,7 @@ export function RawMaterialCreateNewForm({ gap }: RawMaterialCreateNewFormProps)
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
+        console.log("values", values);
         try {
             await postData("/factory-management/inventory/addlotandblocks", {
                 ...values,

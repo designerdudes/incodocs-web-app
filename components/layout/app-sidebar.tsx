@@ -22,7 +22,6 @@ import {
 import NavMain from "@/components/layout/nav-main"
 import NavProjects from "@/components/nav-projects"
 import NavUser from "@/components/layout/nav-user"
-// import { FactorySwitcher } from "@/components/team-switcher"
 import {
     Sidebar,
     SidebarContent,
@@ -194,18 +193,19 @@ const data = {
 }
 function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
-    const [currentFactoryData, setCurrentFactoryData] = useState<any[]>([]);
+    const [FactoryData, setFactoryData] = useState<any[]>([]);
 
-    const getCurrentFactoryData = async () => {
+    const getFactoryData = async () => {
         try {
             const res = await fetchData("/factory/getAll");
             // Transform data to include `logo` and `plan`
             const transformedData = res.map((factory: any) => ({
                 factoryName: factory.factoryName,
+                factoryId: factory._id,
                 logo: FactoryIcon, // Assign a placeholder or dynamic React component here
                 plan: "Standard Plan", // Placeholder, update this as needed
             }));
-            setCurrentFactoryData(transformedData);
+            setFactoryData(transformedData);
             console.log("Factory data fetched successfully", transformedData);
         } catch (error) {
             console.error("Error fetching Factory data", error);
@@ -213,17 +213,16 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     useEffect(() => {
-        getCurrentFactoryData();
+        getFactoryData();
     }, []);
 
-    const FactoriesData = currentFactoryData
-    // console.log("This is factory data", FactoriesData)
-    // console.log("This is the total factories", FactoriesData?.length)
+    // console.log("This is factory data", FactoryData)
+    // console.log("This is the total factories", FactoryData?.length)
 
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <FactorySwitcher FactoriesData={currentFactoryData} />
+                <FactorySwitcher FactoriesData={FactoryData} />
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
