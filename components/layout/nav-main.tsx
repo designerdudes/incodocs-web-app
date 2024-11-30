@@ -1,7 +1,6 @@
 "use client";
 
 import { ChevronRight, type LucideIcon } from "lucide-react";
-
 import {
     Collapsible,
     CollapsibleContent,
@@ -17,7 +16,7 @@ import {
     SidebarMenuSubButton,
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import Link from "next/link";
+import { useParams } from "next/navigation";
 
 type NavItem = {
     title: string;
@@ -28,42 +27,49 @@ type NavItem = {
 };
 
 export default function NavMain({ items }: { items: NavItem[] }) {
-    const renderNavItems = (navItems: NavItem[]) => {
-        return navItems.map((item) => (
-            <Collapsible
-                key={item.title}
-                asChild
-                defaultOpen={item.isActive}
-                className="group/collapsible"
-            >
-                <SidebarMenuItem>
-                    <CollapsibleTrigger asChild>
-                        <SidebarMenuButton tooltip={item.title}>
-                            {item.icon && <item.icon />}
-                            <a href={item.url}>
-                                <span>{item.title}</span>
-                            </a>
-                            {item.items && (
-                                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            )}
-                        </SidebarMenuButton>
-                    </CollapsibleTrigger>
-                    {item.items && (
-                        <CollapsibleContent>
-                            <SidebarMenuSub>
-                                {renderNavItems(item.items)} {/* Recursive rendering */}
-                            </SidebarMenuSub>
-                        </CollapsibleContent>
-                    )}
-                </SidebarMenuItem>
-            </Collapsible>
-        ));
+    const RenderNavTabs = (navItems: NavItem[]) => {
+        const factoryId = useParams().factoryid;
+        return navItems.map((item) => {
+            const itemUrl = item.url.startsWith('/')
+                ? `/${factoryId}${item.url}`
+                : `${factoryId}/${item.url}`;
+            return (
+
+                <Collapsible
+                    key={item.title}
+                    asChild
+                    defaultOpen={item.isActive}
+                    className="group/collapsible"
+                >
+                    <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                            <SidebarMenuButton tooltip={item.title}>
+                                {item.icon && <item.icon />}
+                                <a href={itemUrl}>
+                                    <span>{item.title}</span>
+                                </a>
+                                {item.items && (
+                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                )}
+                            </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        {item.items && (
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    {RenderNavTabs(item.items)} {/* Recursive rendering */}
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        )}
+                    </SidebarMenuItem>
+                </Collapsible>
+            )
+        });
     };
 
     return (
         <SidebarGroup>
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
-            <SidebarMenu>{renderNavItems(items)}</SidebarMenu>
+            <SidebarMenu>{RenderNavTabs(items)}</SidebarMenu>
         </SidebarGroup>
     );
 }

@@ -1,12 +1,25 @@
 import StatsCard from '@/components/statsCard'
 import { Button } from '@/components/ui/button'
 import Heading from '@/components/ui/heading'
-import { rawInventoryCards } from '@/lib/constants'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
+import { rawInventoryCards as BaseInventoryCards } from '@/lib/constants';
 
-function page() {
+
+interface Props {
+    params: {
+        factoryid: string;
+    }
+}
+
+function page({ params }: Props) {
+
+    const rawInventoryCards = BaseInventoryCards.map((card) => ({
+        ...card,
+        buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
+    }));
+
     return (
         <div className="flex  flex-col p-6">
             <div className="flex justify-between items-center gap-2">
@@ -20,9 +33,6 @@ function page() {
                     <Heading className='leading-tight ' title='Raw Material Inventory ' />
                     <p className='text-muted-foreground text-sm'> Raw Material Data</p>
                 </div>
-                {/* <Link href={`/shipments/new`}>
-                    <Button className="bg-primary text-white">New Button</Button>
-                </Link> */}
             </div>
             <div className="flex flex-row gap-4 mt-10 ">
                 {
@@ -33,13 +43,11 @@ function page() {
                             icon={card.icon}
                             desc=""
                             href={card.buttonUrl}
-
                         />
                     ))
                 }
             </div>
         </div>
-
     )
 }
 

@@ -50,7 +50,6 @@ export default function RootLayout({
           <NewOrderModalProvider />
           {children}
         </ThemeProvider>
-
       </body>
     </html>
   )

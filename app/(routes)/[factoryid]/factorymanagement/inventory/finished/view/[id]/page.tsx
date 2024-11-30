@@ -26,7 +26,6 @@ interface Props {
     id: string;
     materialName: string;
     materialType: string;
-    isActive: boolean;
     createdAt: string;
     updatedAt: string;
     weight: string;
@@ -39,7 +38,7 @@ interface Props {
 }
 export default async function ViewFinishedPage({ params }: Props) {
   const FinishedMaterialID = params.id;
-  console.log(params.id);
+  // console.log(params.id);
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -54,7 +53,7 @@ export default async function ViewFinishedPage({ params }: Props) {
     }
   );
   const FinishedMaterial = await res.json();
-  console.log(FinishedMaterial);
+  // console.log(FinishedMaterial);
 
   return (
     <div>
