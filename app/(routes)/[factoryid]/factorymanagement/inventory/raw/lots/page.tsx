@@ -21,12 +21,18 @@ interface Lots {
   __v: number;
 }
 
-export default async function LotManagement() {
+interface Props {
+  params: {
+    factoryid: string;
+  }
+}
+
+export default async function LotManagement({ params }: Props) {
 
   const cookieStore = cookies();
   const token = cookieStore.get('AccessToken')?.value || ""
 
-  const res = await fetch('http://localhost:4080/factory-management/inventory/factory-lot/get/673795b841a2d90248a65dea', {
+  const res = await fetch(`http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -38,6 +44,7 @@ export default async function LotManagement() {
 
   let lotsData
   lotsData = res
+  console.log('Lots Data', lotsData)
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

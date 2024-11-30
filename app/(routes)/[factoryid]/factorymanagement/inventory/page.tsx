@@ -14,7 +14,7 @@ interface Props {
 
 function Page({ params }: Props) {
 
-  console.log('Factory ID IS ', params.factoryid)
+  // console.log('Factory ID IS ', params.factoryid)
   const InventoryCards = BaseInventoryCards.map((card) => ({
     ...card,
     buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
