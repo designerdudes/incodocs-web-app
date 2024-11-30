@@ -9,7 +9,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"; 
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -90,7 +90,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Finished Material Details</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -167,8 +167,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {(
-                            (FinishedMaterial.trim?.length?.value *
-                              FinishedMaterial.trim?.height?.value) /
+                            (FinishedMaterial.dimensions?.length?.value *
+                              FinishedMaterial.dimensions?.height?.value) /
                             144
                           ).toFixed(2)}
                         </TableCell>
