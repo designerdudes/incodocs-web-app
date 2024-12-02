@@ -60,7 +60,7 @@ export default async function ViewFinishedPage({ params }: Props) {
       <div className="w-full h-full flex flex-col p-8">
         <div className="flex items-center justify-between mb-4">
           <div className="topbar flex items-center justify-between w-full">
-            <Link href="/factorymanagement/inventory/finished/">
+            <Link href="../">
               <Button variant="outline" size="icon" className="h-7 w-7">
                 <ChevronLeft className="h-4 w-4" />
                 <span className="sr-only">Back</span>
