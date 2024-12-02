@@ -36,9 +36,12 @@ interface Props {
     quantity: string;
   };
 }
+
+
 export default async function ViewFinishedPage({ params }: Props) {
   const FinishedMaterialID = params.id;
   // console.log(params.id);
+  
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -78,6 +81,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                   <IconPencil className="w-4 ml-2" />
                 </Button>
               </Link>
+              
+              
             </div>
           </div>
         </div>
@@ -144,6 +149,134 @@ export default async function ViewFinishedPage({ params }: Props) {
                           {FinishedMaterial.trim?.height?.value}
                         </TableCell>
                       </TableRow>
+                      
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Category Created At
+                        </TableCell>
+                        <TableCell>
+                          {moment(FinishedMaterial.createdAt).format(
+                            "YYYY-MM-DD"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Category Updated At
+                        </TableCell>
+                        <TableCell>
+                          {moment(FinishedMaterial.updatedAt).format(
+                            "YYYY-MM-DD"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <Card className="mt-25">
+                <CardContent>
+                <CardHeader>
+                  <CardTitle>Cutting Inches With Allowance</CardTitle>
+                </CardHeader>
+                  <Table>
+                  <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Length (cm)
+                        </TableCell>
+                        <TableCell>
+                          {FinishedMaterial.dimensions?.length?.value * 2.54}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Height (cm)
+                        </TableCell>
+                        <TableCell>
+                          {FinishedMaterial.dimensions?.height?.value * 2.54}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Total SQF
+                        </TableCell>
+                        <TableCell>
+                          {(
+                            (FinishedMaterial.dimensions?.length?.value *
+                              FinishedMaterial.dimensions?.height?.value) /
+                            144
+                          ).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <Card className="mt-32">
+                <CardContent>
+                <CardHeader>
+                  <CardTitle>Cutting Inches Without Allowance</CardTitle>
+                </CardHeader>
+                  <Table>
+                  <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Length (cm)
+                        </TableCell>
+                        <TableCell>
+                          {FinishedMaterial.dimensions?.length?.value * 2.54}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Height (cm)
+                        </TableCell>
+                        <TableCell>
+                          {FinishedMaterial.trim?.height?.value * 2.54}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Total SQF
+                        </TableCell>
+                        <TableCell>
+                          {(
+                            (FinishedMaterial.dimensions?.length?.value *
+                              FinishedMaterial.dimensions?.height?.value) /
+                            144
+                          ).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <Card className="mt-32">
+                <CardContent>
+                <CardHeader>
+                  <CardTitle>Polishing Inches With Allowance</CardTitle>
+                </CardHeader>
+                  <Table>
+                  <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
                           Length (cm)
@@ -178,34 +311,43 @@ export default async function ViewFinishedPage({ params }: Props) {
               </Card>
               <Card className="mt-32">
                 <CardContent>
+                <CardHeader>
+                  <CardTitle>Polishing Inches Without Allowance</CardTitle>
+                </CardHeader>
                   <Table>
+                  <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
                     <TableBody>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
-                          Status
+                          Length (cm)
                         </TableCell>
                         <TableCell>
-                          {FinishedMaterial.isActive ? "Active" : "Inactive"}
+                          {FinishedMaterial.trim?.length?.value * 2.54}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
-                          Category Created At
+                          Height (cm)
                         </TableCell>
                         <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
+                          {FinishedMaterial.trim?.height?.value * 2.54}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
-                          Category Updated At
+                          Total SQF
                         </TableCell>
                         <TableCell>
-                          {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
-                          )}
+                          {(
+                            (FinishedMaterial.dimensions?.length?.value *
+                              FinishedMaterial.dimensions?.height?.value) /
+                            144
+                          ).toFixed(2)}
                         </TableCell>
                       </TableRow>
                     </TableBody>

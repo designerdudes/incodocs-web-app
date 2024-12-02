@@ -213,11 +213,11 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     useEffect(() => {
-        getFactoryData();
+        getFactoryData(); 
     }, []);
 
-    // console.log("This is factory data", FactoryData)
-    // console.log("This is the total factories", FactoryData?.length)
+    console.log("This is factory data", FactoryData)
+    console.log("This is the total factories", FactoryData?.length)
 
     return (
         <Sidebar collapsible="icon" {...props}>
