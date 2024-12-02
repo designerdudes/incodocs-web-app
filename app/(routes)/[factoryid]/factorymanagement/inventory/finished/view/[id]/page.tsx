@@ -237,7 +237,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                           Length (cm)
                         </TableCell>
                         <TableCell>
-                          {FinishedMaterial.dimensions?.length?.value * 2.54}
+                          {FinishedMaterial.dimensions ?.length?.value * 2.54}
                         </TableCell>
                       </TableRow>
                       <TableRow>
