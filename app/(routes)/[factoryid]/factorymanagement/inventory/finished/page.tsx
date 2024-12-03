@@ -22,15 +22,7 @@ export type FinishedMaterial = {
     inStock: boolean; // Availability status
 
     dimensions: {
-        thickness: {
-            value: number;
-            units: string; // E.g., "inch"
-        };
         length: {
-            value: number;
-            units: string; // E.g., "inch"
-        };
-        breadth: {
             value: number;
             units: string; // E.g., "inch"
         };
@@ -55,20 +47,28 @@ export type FinishedMaterial = {
     updatedAt: string; // ISO 8601 timestamp
 };
 
+interface Props {
+    params: {
+        factoryid: string;
+    }
+}
 
-export default async function FinishedMaterialPage() {
+
+export default async function FinishedMaterialPage({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get('AccessToken')?.value || "";
 
-    const res = await fetch('http://localhost:4080/factory-management/inventory/finished/get', {
+    const res = await fetch(`http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         }
-    });
+    }).then(response => {
+        return response.json()
+    })
 
-    const slabsData = await res.json();
+    const slabsData = res
     // console.log(slabsData);
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>

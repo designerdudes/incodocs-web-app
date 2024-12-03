@@ -89,19 +89,19 @@ const data = {
                     items: [
                         {
                             title: "Purchases",
-                            url: "/factorymanagement/inventory/finished/goods1",
+                            url: "/factorymanagement/accounting/purchases",
                         },
                         {
                             title: "Sales",
-                            url: "/factorymanagement/inventory/finished/goods2",
+                            url: "/factorymanagement/accounting/sales",
                         },
                         {
                             title: "Expenses",
-                            url: "/factorymanagement/inventory/finished/goods3",
+                            url: "/factorymanagement/accounting/expenses",
                         },
                         {
                             title: "GST Ledger",
-                            url: "/factorymanagement/inventory/finished/goods4",
+                            url: "/factorymanagement/accounting/GSTLedger",
                         }
                     ],
                 },
@@ -213,7 +213,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     useEffect(() => {
-        getFactoryData(); 
+        getFactoryData();
     }, []);
 
     console.log("This is factory data", FactoryData)
