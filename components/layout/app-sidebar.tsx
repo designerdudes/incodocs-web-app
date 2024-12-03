@@ -89,19 +89,19 @@ const data = {
                     items: [
                         {
                             title: "Purchases",
-                            url: "/factorymanagement/inventory/finished/goods1",
+                            url: "/factorymanagement/accounting/purchases",
                         },
                         {
                             title: "Sales",
-                            url: "/factorymanagement/inventory/finished/goods2",
+                            url: "/factorymanagement/accounting/sales",
                         },
                         {
                             title: "Expenses",
-                            url: "/factorymanagement/inventory/finished/goods3",
+                            url: "/factorymanagement/accounting/expenses",
                         },
                         {
                             title: "GST Ledger",
-                            url: "/factorymanagement/inventory/finished/goods4",
+                            url: "/factorymanagement/accounting/gst-ledger",
                         }
                     ],
                 },
@@ -115,6 +115,10 @@ const data = {
                 {
                     title: "Export Docs",
                     url: "#",
+                },
+                {
+                    title: "Shipments",
+                    url: "/shipment",
                 },
                 {
                     title: "Invoices",
@@ -134,20 +138,20 @@ const data = {
             title: "Intergration",
             url: "#",
             icon: SquareTerminal,
-            items: [
-                {
-                    title: "Company Info",
-                    url: "#",
-                },
-                {
-                    title: "Manage Team",
-                    url: "#",
-                },
-                {
-                    title: "Plans $ Billing",
-                    url: "#",
-                },
-            ],
+            // items: [
+            //     {
+            //         title: "Company Info",
+            //         url: "#",
+            //     },
+            //     {
+            //         title: "Manage Team",
+            //         url: "#",
+            //     },
+            //     {
+            //         title: "Plans $ Billing",
+            //         url: "#",
+            //     },
+            // ],
         },
         {
             title: "Settings",
@@ -156,20 +160,17 @@ const data = {
             items: [
                 {
                     title: "General",
-                    url: "#",
+                    url: "/settings?tab=general",
                 },
                 {
                     title: "Team",
-                    url: "#",
+                    url: "/settings?tab=team",
                 },
                 {
-                    title: "Billing",
-                    url: "#",
+                    title: "Factory",
+                    url: "settings?tab=factory",
                 },
-                {
-                    title: "Limits",
-                    url: "#",
-                },
+             
             ],
         },
     ],
@@ -219,6 +220,8 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     console.log("This is factory data", FactoryData)
     console.log("This is the total factories", FactoryData?.length)
 
+
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -226,7 +229,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
-                <NavProjects projects={data.projects} />
+                {/* <NavProjects projects={data.projects} /> */}
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={data.user} />
