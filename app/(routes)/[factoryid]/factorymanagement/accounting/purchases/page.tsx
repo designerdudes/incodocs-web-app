@@ -221,7 +221,7 @@ export default async function Purchases({ params }: Props) {
                         Seamlessly manage and monitor raw material and finished goods purchases with comprehensive details, ensuring efficient tracking and streamlined progress through the production workflow.
                     </p>
                 </div>
-                <Link href='./lots/create-new'>
+                <Link href='./purchases/create-new'>
                     <Button> Create New Purchase</Button>
                 </Link>
             </div>
