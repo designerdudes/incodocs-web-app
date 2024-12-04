@@ -102,6 +102,7 @@ const data = {
                         {
                             title: "GST Ledger",
                             url: "/factorymanagement/accounting/gst-ledger",
+
                         }
                     ],
                 },
@@ -214,7 +215,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     };
 
     useEffect(() => {
-        getFactoryData(); 
+        getFactoryData();
     }, []);
 
     console.log("This is factory data", FactoryData)
