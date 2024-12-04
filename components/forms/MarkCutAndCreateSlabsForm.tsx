@@ -169,6 +169,16 @@ export function MarkCutAndCreateSlabsForm({
     }
   }
 
+  function calculateTotalSqft(): string {
+    const slabs = form.getValues("slabs") || [];
+    const totalSqft = slabs.reduce((sum, slab) => {
+      const lengthInFeet = (slab.length || 0) / 12;
+      const heightInFeet = (slab.height || 0) / 12;
+      return sum + lengthInFeet * heightInFeet;
+    }, 0);
+    return totalSqft.toFixed(2); // Round to 2 decimal places
+  }
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -263,19 +273,19 @@ export function MarkCutAndCreateSlabsForm({
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                            <Input
-                        placeholder="e.g. 32"
-                        type="number"
-                        min="0"
-                        disabled={isLoading}
-                        value={field.value}
-                        onChange={(e) => {
-                            const value = parseFloat(e.target.value);
-                            if (!isNaN(value) && value >= 0) {
-                                field.onChange(value);  // Send parsed number
-                            }
-                        }}
-                    />
+                              <Input
+                                placeholder="e.g. 32"
+                                type="number"
+                                min="0"
+                                disabled={isLoading}
+                                value={field.value}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value);
+                                  if (!isNaN(value) && value >= 0) {
+                                    field.onChange(value); // Send parsed number
+                                  }
+                                }}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -296,10 +306,10 @@ export function MarkCutAndCreateSlabsForm({
                                 disabled={isLoading}
                                 value={field.value}
                                 onChange={(e) => {
-                                    const value = parseFloat(e.target.value);
-                                    if (!isNaN(value) && value >= 0) {
-                                        field.onChange(value);  // Send parsed number
-                                    }
+                                  const value = parseFloat(e.target.value);
+                                  if (!isNaN(value) && value >= 0) {
+                                    field.onChange(value); // Send parsed number
+                                  }
                                 }}
                               />
                             </FormControl>
@@ -330,7 +340,9 @@ export function MarkCutAndCreateSlabsForm({
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={5}>Total Slabs: {slabsCount}</TableCell>
+                  <TableCell colSpan={5}>
+                    Total Area (sqft): {calculateTotalSqft()}
+                  </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
