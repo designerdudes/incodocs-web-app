@@ -115,7 +115,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
         ...values,
         status: "active",
       });
-      toast.success("Lot created/updated successfully");
+      toast.success("Purchased Added Successfully");
       router.push("./factorymanagement/inventory/raw/lots");
     } catch (error) {
       toast.error("Error creating/updating Lot");
