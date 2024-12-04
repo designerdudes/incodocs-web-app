@@ -38,7 +38,7 @@ export default function NavProjects({
 
     return (
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-            <SidebarGroupLabel>Projects</SidebarGroupLabel>
+            <SidebarGroupLabel>Organisation</SidebarGroupLabel>
             <SidebarMenu>
                 {projects.map((item) => (
                     <SidebarMenuItem key={item.name}>
@@ -77,12 +77,7 @@ export default function NavProjects({
                         </DropdownMenu>
                     </SidebarMenuItem>
                 ))}
-                <SidebarMenuItem>
-                    <SidebarMenuButton className="text-sidebar-foreground/70">
-                        <MoreHorizontal className="text-sidebar-foreground/70" />
-                        <span>More</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
+              
             </SidebarMenu>
         </SidebarGroup>
     )
