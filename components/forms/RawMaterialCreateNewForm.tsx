@@ -34,50 +34,48 @@ interface RawMaterialCreateNewFormProps {
 const formSchema = z.object({
   lotName: z
     .string()
-    .min(3, { message: "Material name must be at least 3 characters long" }),
+    .min(3, { message: "Lot name must be at least 3 characters long" }),
   materialType: z
     .string()
     .min(3, { message: "Material type must be at least 3 characters long" }),
   noOfBlocks: z
-    .string()
-    .min(1, { message: "Quantity must be a positive number" })
-    .refine((val) => parseFloat(val) > 0, {
-      message: "Quantity must be greater than zero",
-    }),
-  // factoryId: z.string(),
+    .number()
+    .min(1, { message: "Number of blocks must be greater than zero" }),
   blocks: z
     .array(
       z.object({
-        blockNumber: z.number().min(1, { message: "Block number is required" }),
-        weight: z
-          .number()
-          .min(0.1, { message: "Weight must be greater than zero" })
-          .refine((val) => val > 0, {
-            message: "weight must be greater than zero",
+        dimensions: z.object({
+          weight: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Weight must be greater than zero" }),
+            units: z.literal("tons").default("tons"),
           }),
-        breadth: z
-          .number()
-          .min(0.1, { message: "Breadth must be greater than zero" })
-          .refine((val) => val > 0, {
-            message: "breadth must be greater than zero",
+          length: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
-        length: z
-          .number()
-          .min(0.1, { message: "Length must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Length must be greater than zero",
+          breadth: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Breadth must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
-        height: z
-          .number()
-          .min(0.1, { message: "Height must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Height must be greater than zero",
+          height: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
+        }),
       })
     )
     .min(1, { message: "At least one block is required" })
     .optional(),
 });
+
 //     blocks: z.array(
 //         z.object({
 //             blockNumber: z.number().min(1, { message: "Block number is required" }),
@@ -118,13 +116,16 @@ export function RawMaterialCreateNewForm({
     const count = parseInt(value, 10);
 
     if (!isNaN(count) && count > 0) {
-      const newBlocks = Array.from({ length: count }, (_, index) => ({
-        blockNumber: index + 1,
-        weight: 0,
-        length: 0,
-        breadth: 0,
-        height: 0,
-      }));
+      const newBlocks = Array.from({ length: count }, (_, index) => (
+        {
+          dimensions: {
+            blockNumber: index + 1,
+            weight: { value: 0, units: "tons" as "tons" },
+            length: { value: 0, units: "inch" as "inch" },
+            breadth: { value: 0, units: "inch" as "inch" },
+            height: { value: 0, units: "inch" as "inch" },
+          }
+        }));
 
       setBlocks(newBlocks);
       form.setValue("blocks", newBlocks);
@@ -180,7 +181,7 @@ export function RawMaterialCreateNewForm({
   ]);
 
   React.useEffect(() => {
-    form.setValue("noOfBlocks", blocks.length.toString());
+    form.setValue("noOfBlocks", blocks.length);
   }, [blocks, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
@@ -361,75 +362,71 @@ export function RawMaterialCreateNewForm({
                     <div>
                       <Input
                         type="number"
-                        value={block.weight}
+                        value={block.dimensions.weight.value}
                         onChange={(e) => {
                           const updatedBlocks = [...blocks];
-                          updatedBlocks[index].weight =
+                          updatedBlocks[index].dimensions.weight.value =
                             parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                          form.trigger(`blocks.${index}.weight`); // Trigger validation for this field
+                          setBlocks(updatedBlocks); // Trigger validation for this field
                         }}
                       />
-                      <FormMessage>
+                      {/* <FormMessage>
                         {form.formState.errors.blocks?.[index]?.weight?.message}
-                      </FormMessage>
+                      </FormMessage> */}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <Input
                         type="number"
-                        value={block.length}
+                        value={block.dimensions.length.value}
                         onChange={(e) => {
                           const updatedBlocks = [...blocks];
-                          updatedBlocks[index].length =
+                          updatedBlocks[index].dimensions.length.value =
                             parseFloat(e.target.value) || 0;
                           setBlocks(updatedBlocks);
-                          form.trigger(`blocks.${index}.length`);
                         }}
                       />
-                      <FormMessage>
-                        {form.formState.errors.blocks?.[index]?.length?.message}
-                      </FormMessage>
+                      {/* <FormMessage>
+                        {form.formState.errors.blocks?.[index]?dimensions.length?.message}
+                      </FormMessage> */}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <Input
                         type="number"
-                        value={block.breadth}
+                        value={block.dimensions.breadth.value}
                         onChange={(e) => {
                           const updatedBlocks = [...blocks];
-                          updatedBlocks[index].breadth =
+                          updatedBlocks[index].dimensions.breadth.value =
                             parseFloat(e.target.value) || 0;
                           setBlocks(updatedBlocks);
-                          form.trigger(`blocks.${index}.breadth`);
                         }}
                       />
-                      <FormMessage>
+                      {/* <FormMessage>
                         {
-                          form.formState.errors.blocks?.[index]?.breadth
+                          form.formState.errors.blocks?.[index]?dimensions.breadth
                             ?.message
                         }
-                      </FormMessage>
+                      </FormMessage> */}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <Input
                         type="number"
-                        value={block.height}
+                        value={block.dimensions.height.value}
                         onChange={(e) => {
                           const updatedBlocks = [...blocks];
-                          updatedBlocks[index].height =
+                          updatedBlocks[index].dimensions.height.value =
                             parseFloat(e.target.value) || 0;
                           setBlocks(updatedBlocks);
-                          form.trigger(`blocks.${index}.height`);
                         }}
                       />
-                      <FormMessage>
+                      {/* <FormMessage>
                         {form.formState.errors.blocks?.[index]?.height?.message}
-                      </FormMessage>
+                      </FormMessage> */}
                     </div>
                   </TableCell>
                   <TableCell>
