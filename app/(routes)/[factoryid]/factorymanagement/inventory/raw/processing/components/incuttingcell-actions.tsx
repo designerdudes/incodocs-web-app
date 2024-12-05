@@ -15,13 +15,13 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./columns";
+import { Block } from "./incuttingcolumns";
 
 interface Props {
     data: Block;
 }
 
-const CellAction: React.FC<Props> = ({ data }) => {
+const IncuttingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
     const deleteLot = async () => {
@@ -97,4 +97,4 @@ const CellAction: React.FC<Props> = ({ data }) => {
     );
 };
 
-export default CellAction;
+export default IncuttingCellAction;
