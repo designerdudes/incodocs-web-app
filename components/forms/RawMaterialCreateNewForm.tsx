@@ -23,7 +23,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { postData } from "@/axiosUtility/api";
 
@@ -44,6 +44,7 @@ const formSchema = z.object({
     .refine((val) => parseFloat(val) > 0, {
       message: "Quantity must be greater than zero",
     }),
+  // factoryId: z.string(),
   blocks: z
     .array(
       z.object({
@@ -106,6 +107,8 @@ export function RawMaterialCreateNewForm({
     React.useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] =
     React.useState<boolean>(false);
+  const factoryId = useParams().factoryid
+  const organizationId = "674b0a687d4f4b21c6c980ba"
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -186,6 +189,8 @@ export function RawMaterialCreateNewForm({
     try {
       await postData("/factory-management/inventory/addlotandblocks", {
         ...values,
+        factoryId,
+        organizationId,
         status: "active",
       });
       setIsLoading(false);

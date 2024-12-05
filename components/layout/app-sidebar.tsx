@@ -171,7 +171,7 @@ const data = {
                     title: "Factory",
                     url: "settings?tab=factory",
                 },
-             
+
             ],
         },
     ],
@@ -217,11 +217,6 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     useEffect(() => {
         getFactoryData();
     }, []);
-
-    console.log("This is factory data", FactoryData)
-    console.log("This is the total factories", FactoryData?.length)
-
-
 
     return (
         <Sidebar collapsible="icon" {...props}>
