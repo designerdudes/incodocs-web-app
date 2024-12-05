@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import columns, { Block } from './components/columns';
+import { incuttingcolumns } from './components/incuttingcolumns';
+import { Readyforpolishcolumns } from './components/readyforpolishcolumns';
 import { inPolishingolumns } from './components/inpolishingcolumns';
 import { cookies } from 'next/headers';
 
@@ -45,14 +46,14 @@ export default async function SlabsProcessingPage() {
     // console.log("this is slabs data", Slabdata)
 
     const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
-    const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
+    const readyForPolish = Blockdata.filter((data: any) => data.status === 'readyforpolish')
     const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
     const completed = Slabdata.filter((data: any) => data.status === 'polished');
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex justify-between items-center">
-                <Link href="../raw">
+                <Link href="./">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
@@ -70,11 +71,11 @@ export default async function SlabsProcessingPage() {
                 <Tabs defaultValue="inCutting" className="w-full">
                     <TabsList className='gap-3'>
                         <TabsTrigger className='gap-2' value="inCutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
-                        <TabsTrigger className='gap-2' value="cut">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className='gap-2' value="readyforpolish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="inPolishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
-                        <TabsTrigger className="gap-2" value="polished">Completed<Badge className="text-bg-primary-foreground" variant="outline">{completed.length}
+                        {/* <TabsTrigger className="gap-2" value="polished">Completed<Badge className="text-bg-primary-foreground" variant="outline">{completed.length}
                         </Badge>
-                        </TabsTrigger>
+                        </TabsTrigger> */}
                     </TabsList>
                     <TabsContent value="inCutting">
                         <DataTable
@@ -82,15 +83,15 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteTitle='Are you sure you want to delete the selected blocks?'
                             bulkDeleteDescription='This will delete the selected blocks, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected blocks deleted successfully'
-                            searchKey='title' columns={columns} data={inCutting} />
+                            searchKey='title' columns={incuttingcolumns} data={inCutting} />
                     </TabsContent>
-                    <TabsContent value="cut">
+                    <TabsContent value="readyforpolish">
                         <DataTable
                             bulkDeleteIdName='order_id'
                             bulkDeleteTitle='Are you sure you want to delete the selected blocks?'
                             bulkDeleteDescription='This will delete the selected blocks, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected blocks deleted successfully'
-                            searchKey='title' columns={columns} data={readyForPolish} />
+                            searchKey='title' columns={Readyforpolishcolumns} data={readyForPolish} />
                     </TabsContent>
                     <TabsContent value="inPolishing">
                         <DataTable
@@ -100,7 +101,7 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
                     </TabsContent>
-                    <TabsContent value="polished">
+                    {/* <TabsContent value="polished">
                         <DataTable
                             bulkDeleteIdName="order_id"
                             bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
@@ -110,7 +111,7 @@ export default async function SlabsProcessingPage() {
                             columns={inPolishingolumns}
                             data={completed}
                         />
-                    </TabsContent>
+                    </TabsContent> */}
                 </Tabs>
             </div>
         </div>

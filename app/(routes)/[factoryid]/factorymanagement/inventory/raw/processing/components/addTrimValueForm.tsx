@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { Block } from "./columns";
+import { Block } from "./incuttingcolumns";
 
 const data: Block = {
     _id: "65f8fb0fc4417ea5a14fbd82",
