@@ -137,7 +137,7 @@ const data = {
         },
         {
             title: "Intergration",
-            url: "#",
+            url: "",
             icon: SquareTerminal,
             // items: [
             //     {
@@ -156,20 +156,21 @@ const data = {
         },
         {
             title: "Settings",
-            url: "#",
+            url: "/settings",
             icon: Settings2,
             items: [
                 {
                     title: "General",
-                    url: "/settings?tab=general",
+                    url: "/settings/general",
                 },
                 {
+                    
                     title: "Team",
-                    url: "/settings?tab=team",
+                    url: "/settings/team",
                 },
                 {
                     title: "Factory",
-                    url: "settings?tab=factory",
+                    url: "/settings/factory",
                 },
              
             ],
@@ -214,7 +215,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
     };
 
-    useEffect(() => {
+    useEffect(() => { 
         getFactoryData();
     }, []);
 

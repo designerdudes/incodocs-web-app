@@ -17,6 +17,9 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
+import { postData } from "@/axiosUtility/api";
+import { Toast } from "../ui/toast";
+import toast from "react-hot-toast";
 
 // Factory Form Schema
 const formSchema = z.object({
@@ -24,18 +27,12 @@ const formSchema = z.object({
     organizationId: z.string().min(1, { message: "Organization must be selected" }),
     address: z.object({
         location: z.string().min(1, { message: "Location is required" }),
-        coordinates: z.object({
-            longitude: z.number({ invalid_type_error: "Must be a number" }),
-            latitude: z.number({ invalid_type_error: "Must be a number" }),
-        }),
         pincode: z.string().min(6, { message: "Pincode must be at least 6 characters" }),
     }),
 });
 
 const organizations = [
-    { id: "6716c1bf34d6bd442d8a0e59", name: "Organization A" },
-    { id: "8826c1bf34d6bd442d8b1e71", name: "Organization B" },
-    { id: "9936c1bf34d6bd442d8c2f82", name: "Organization C" },
+    { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
 ];
 
 function FactoryForm() {
@@ -47,10 +44,6 @@ function FactoryForm() {
             organizationId: "",
             address: {
                 location: "",
-                coordinates: {
-                    longitude: 0,
-                    latitude: 0,
-                },
                 pincode: "",
             },
         },
@@ -59,7 +52,7 @@ function FactoryForm() {
     const GlobalModal = useGlobalModal();
     const router = useRouter();
 
-    const handleSubmit = (values: z.infer<typeof formSchema>) => {
+    const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
         GlobalModal.title = "Confirm Factory Details";
@@ -79,10 +72,6 @@ function FactoryForm() {
                     <strong>Address:</strong> {values.address.location}
                 </p>
                 <p>
-                    <strong>Coordinates:</strong>{" "}
-                    {`Longitude: ${values.address.coordinates.longitude}, Latitude: ${values.address.coordinates.latitude}`}
-                </p>
-                <p>
                     <strong>Pincode:</strong> {values.address.pincode}
                 </p>
                 <div className="flex justify-end space-x-2">
@@ -96,11 +85,23 @@ function FactoryForm() {
                         Cancel
                     </Button>
                     <Button
-                        onClick={() => {
-                            console.log("Factory Details Submitted:", values);
-                            GlobalModal.onClose();
-                            router.push("./dashboard");
-                            setIsLoading(false);
+                        onClick={async () => {
+                            try {
+                                await postData("/factory/add", {
+                                    ...values,
+                                    status: "active",
+                                });
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.success("Factory created/updated successfully");
+                                router.push("./dashboard");
+                            } catch (error) {
+                                console.error("Error creating/updating Factory:", error);
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.error("Error creating/updating Factory");
+                            }
+                            router.refresh();
                         }}
                     >
                         Confirm
@@ -110,7 +111,6 @@ function FactoryForm() {
         );
         GlobalModal.onOpen();
     };
-
     return (
         <Form {...form}>
             <form
