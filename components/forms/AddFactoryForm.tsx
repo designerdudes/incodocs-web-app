@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 const formSchema = z.object({
     factoryName: z.string().min(1, { message: "Factory Name is required" }),
     organizationId: z.string().min(1, { message: "Organization must be selected" }),
+    gstNo: z.string().min(1, { message: "GST number is required" }),
     address: z.object({
         location: z.string().min(1, { message: "Location is required" }),
         pincode: z.string().min(6, { message: "Pincode must be at least 6 characters" }),
@@ -42,6 +43,7 @@ function FactoryForm() {
         defaultValues: {
             factoryName: "",
             organizationId: "",
+            gstNo: "",
             address: {
                 location: "",
                 pincode: "",
@@ -54,7 +56,6 @@ function FactoryForm() {
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
-
         GlobalModal.title = "Confirm Factory Details";
         GlobalModal.description = "Please review the entered details:";
         GlobalModal.children = (
@@ -67,6 +68,9 @@ function FactoryForm() {
                     {
                         organizations.find((org) => org.id === values.organizationId)?.name
                     }
+                </p>
+                <p>
+                    <strong>GST Number:</strong> {values.gstNo}
                 </p>
                 <p>
                     <strong>Address:</strong> {values.address.location}
@@ -94,15 +98,16 @@ function FactoryForm() {
                                 setIsLoading(false);
                                 GlobalModal.onClose();
                                 toast.success("Factory created/updated successfully");
-                                router.push("./dashboard");
+                                // router.push("./dashboard");
                             } catch (error) {
                                 console.error("Error creating/updating Factory:", error);
                                 setIsLoading(false);
                                 GlobalModal.onClose();
                                 toast.error("Error creating/updating Factory");
                             }
-                            router.refresh();
-                        }}
+                            window.location.reload();
+                        }
+                        }
                     >
                         Confirm
                     </Button>
@@ -154,6 +159,19 @@ function FactoryForm() {
                                         ))}
                                     </SelectContent>
                                 </Select>
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="gstNo"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>GST Number</FormLabel>
+                            <FormControl>
+                                <Input placeholder="Eg: 361AAA90823RFS56" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
