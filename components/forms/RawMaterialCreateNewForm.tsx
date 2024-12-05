@@ -204,6 +204,13 @@ export function RawMaterialCreateNewForm({
     router.refresh();
   }
 
+  function calculateTotalVolume(): number {
+    return blocks.reduce((total, block) => {
+      const volume = block.length * block.breadth * block.height;
+      return total + (volume || 0); // Add only valid volumes
+    }, 0);
+  }
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -445,6 +452,13 @@ export function RawMaterialCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={6} className="text-right font-bold">
+                  Total Volume (in³): {calculateTotalVolume().toFixed(2)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
 
           <Button type="submit" disabled={isLoading}>
