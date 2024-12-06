@@ -35,8 +35,8 @@ import { fetchData } from "@/axiosUtility/api"
 // This is sample data.
 const data = {
     user: {
-        name: "Ahmed El Gabri",
-        email: "mdahmed@example.com",
+        name: "Hasan Abu Jabal",
+        email: "Hasan@example.com",
         avatar: "/avatars/shadcn.jpg",
     },
     Factories: [
