@@ -44,6 +44,17 @@ const formSchema = z.object({
   blocks: z
     .array(
       z.object({
+        materialType: z
+          .string()
+          .min(1, { message: "Material type is required" })
+          .optional(),
+        status: z
+          .string()
+          .min(1, { message: "Status is required" })
+          .optional(),
+        inStock: z
+          .boolean()
+          .optional(),
         dimensions: z.object({
           weight: z.object({
             value: z
@@ -72,20 +83,8 @@ const formSchema = z.object({
         }),
       })
     )
-    .min(1, { message: "At least one block is required" })
-    .optional(),
+    .min(1, { message: "At least one block is required" }),
 });
-
-//     blocks: z.array(
-//         z.object({
-//             blockNumber: z.number().min(1, { message: "Block number is required" }),
-//             weight: z.number().min(0.1, { message: "Weight must be greater than zero" }),
-//             length: z.number().min(0.1, { message: "Length must be greater than zero" }),
-//             breadth: z.number().min(0.1, { message: "Breadth must be greater than zero" }),
-//             height: z.number().min(0.1, { message: "Height must be greater than zero" }),
-//         })
-//     ).min(1, { message: "At least one block is required" }),
-// });
 
 export function RawMaterialCreateNewForm({
   gap,
@@ -135,18 +134,6 @@ export function RawMaterialCreateNewForm({
     }
   }
 
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volume = length * breadth * height;
-      return volume.toFixed(2);
-    }
-    return "";
-  }
-
   function applyIndividualGlobalDataToAllRows() {
     const updatedBlocks = blocks.map((entry) => ({
       ...entry,
@@ -168,19 +155,6 @@ export function RawMaterialCreateNewForm({
   }
 
   React.useEffect(() => {
-    applyIndividualGlobalDataToAllRows();
-  }, [
-    applyWeightToAll,
-    applyLengthToAll,
-    applyBreadthToAll,
-    applyHeightToAll,
-    globalWeight,
-    globalLength,
-    globalBreadth,
-    globalHeight,
-  ]);
-
-  React.useEffect(() => {
     form.setValue("noOfBlocks", blocks.length);
   }, [blocks, form]);
 
@@ -196,7 +170,7 @@ export function RawMaterialCreateNewForm({
       });
       setIsLoading(false);
       toast.success("Lot created/updated successfully");
-      router.push("./factorymanagement/inventory/raw/lots");
+      router.push("./");
     } catch (error) {
       console.error("Error creating/updating Lot:", error);
       setIsLoading(false);
@@ -216,7 +190,7 @@ export function RawMaterialCreateNewForm({
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className={`grid grid-cols-${gap} gap-3`}>
+          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="lotName"
               control={form.control}
@@ -284,9 +258,24 @@ export function RawMaterialCreateNewForm({
                 <input
                   type="checkbox"
                   checked={applyWeightToAll}
-                  onChange={(e) => setApplyWeightToAll(e.target.checked)}
-                />{" "}
-                Apply Weight to all rows
+                  onChange={(e) => {
+                    setApplyWeightToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          weight: {
+                            ...block.dimensions.weight,
+                            value: parseFloat(globalWeight) || 0,
+                          },
+                        },
+                      }));
+                      setBlocks(updatedBlocks);
+                      form.setValue("blocks", updatedBlocks);
+                    }
+                  }}
+                /> Apply Weight to all rows
               </label>
             </div>
             <div>
@@ -301,9 +290,24 @@ export function RawMaterialCreateNewForm({
                 <input
                   type="checkbox"
                   checked={applyLengthToAll}
-                  onChange={(e) => setApplyLengthToAll(e.target.checked)}
-                />{" "}
-                Apply Length to all rows
+                  onChange={(e) => {
+                    setApplyLengthToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          length: {
+                            ...block.dimensions.length,
+                            value: parseFloat(globalLength) || 0,
+                          },
+                        },
+                      }));
+                      setBlocks(updatedBlocks);
+                      form.setValue("blocks", updatedBlocks);
+                    }
+                  }}
+                /> Apply Length to all rows
               </label>
             </div>
             <div>
@@ -318,9 +322,24 @@ export function RawMaterialCreateNewForm({
                 <input
                   type="checkbox"
                   checked={applyBreadthToAll}
-                  onChange={(e) => setApplyBreadthToAll(e.target.checked)}
-                />{" "}
-                Apply Breadth to all rows
+                  onChange={(e) => {
+                    setApplyBreadthToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          breadth: {
+                            ...block.dimensions.breadth,
+                            value: parseFloat(globalBreadth) || 0,
+                          },
+                        },
+                      }));
+                      setBlocks(updatedBlocks);
+                      form.setValue("blocks", updatedBlocks);
+                    }
+                  }}
+                /> Apply Breadth to all rows
               </label>
             </div>
             <div>
@@ -335,22 +354,36 @@ export function RawMaterialCreateNewForm({
                 <input
                   type="checkbox"
                   checked={applyHeightToAll}
-                  onChange={(e) => setApplyHeightToAll(e.target.checked)}
-                />{" "}
-                Apply Height to all rows
+                  onChange={(e) => {
+                    setApplyHeightToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          height: {
+                            ...block.dimensions.height,
+                            value: parseFloat(globalHeight) || 0,
+                          },
+                        },
+                      }));
+                      setBlocks(updatedBlocks);
+                      form.setValue("blocks", updatedBlocks);
+                    }
+                  }}
+                /> Apply Height to all rows
               </label>
             </div>
           </div>
-
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Weight(tons)</TableHead>
-                <TableHead>Length(inch)</TableHead>
-                <TableHead>Breadth(inch)</TableHead>
-                <TableHead>Height(inch)</TableHead>
-                <TableHead>Volume(in³)</TableHead>
+                <TableHead>Weight (tons)</TableHead>
+                <TableHead>Length (inch)</TableHead>
+                <TableHead>Breadth (inch)</TableHead>
+                <TableHead>Height (inch)</TableHead>
+                <TableHead>Volume (in³)</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -359,88 +392,80 @@ export function RawMaterialCreateNewForm({
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    <div>
-                      <Input
-                        type="number"
-                        value={block.dimensions.weight.value}
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.weight.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks); // Trigger validation for this field
-                        }}
-                      />
-                      {/* <FormMessage>
-                        {form.formState.errors.blocks?.[index]?.weight?.message}
-                      </FormMessage> */}
-                    </div>
+                    <Input
+                      type="number"
+                      value={block.dimensions.weight.value}
+                      placeholder="Enter weight"
+                      onChange={(e) => {
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks[index].dimensions.weight.value =
+                          parseFloat(e.target.value) || 0;
+                        setBlocks(updatedBlocks);
+                        form.setValue("blocks", updatedBlocks);
+                      }}
+                      disabled={isLoading}
+                    />
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <Input
-                        type="number"
-                        value={block.dimensions.length.value}
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.length.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                        }}
-                      />
-                      {/* <FormMessage>
-                        {form.formState.errors.blocks?.[index]?dimensions.length?.message}
-                      </FormMessage> */}
-                    </div>
+                    <Input
+                      type="number"
+                      value={block.dimensions.length.value}
+                      placeholder="Enter length"
+                      onChange={(e) => {
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks[index].dimensions.length.value =
+                          parseFloat(e.target.value) || 0;
+                        setBlocks(updatedBlocks);
+                        form.setValue("blocks", updatedBlocks);
+                      }}
+                      disabled={isLoading}
+                    />
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <Input
-                        type="number"
-                        value={block.dimensions.breadth.value}
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.breadth.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                        }}
-                      />
-                      {/* <FormMessage>
-                        {
-                          form.formState.errors.blocks?.[index]?dimensions.breadth
-                            ?.message
-                        }
-                      </FormMessage> */}
-                    </div>
+                    <Input
+                      type="number"
+                      value={block.dimensions.breadth.value}
+                      placeholder="Enter breadth"
+                      onChange={(e) => {
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks[index].dimensions.breadth.value =
+                          parseFloat(e.target.value) || 0;
+                        setBlocks(updatedBlocks);
+                        form.setValue("blocks", updatedBlocks);
+                      }}
+                      disabled={isLoading}
+                    />
                   </TableCell>
                   <TableCell>
-                    <div>
-                      <Input
-                        type="number"
-                        value={block.dimensions.height.value}
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.height.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                        }}
-                      />
-                      {/* <FormMessage>
-                        {form.formState.errors.blocks?.[index]?.height?.message}
-                      </FormMessage> */}
-                    </div>
+                    <Input
+                      type="number"
+                      value={block.dimensions.height.value}
+                      placeholder="Enter height"
+                      onChange={(e) => {
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks[index].dimensions.height.value =
+                          parseFloat(e.target.value) || 0;
+                        setBlocks(updatedBlocks);
+                        form.setValue("blocks", updatedBlocks);
+                      }}
+                      disabled={isLoading}
+                    />
                   </TableCell>
                   <TableCell>
-                    {calculateVolume(block.length, block.breadth, block.height)}
+                    {(
+                      block.dimensions.length.value *
+                      block.dimensions.breadth.value *
+                      block.dimensions.height.value
+                    ).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => {
-                        const updatedBlocks = blocks.filter(
-                          (_, i) => i !== index
-                        );
+                        const updatedBlocks = blocks.filter((_, i) => i !== index);
                         setBlocks(updatedBlocks);
+                        form.setValue("blocks", updatedBlocks);
                       }}
                     >
                       <Trash className="h-4 w-4" />
@@ -457,7 +482,6 @@ export function RawMaterialCreateNewForm({
               </TableRow>
             </TableFooter>
           </Table>
-
           <Button type="submit" disabled={isLoading}>
             Submit
           </Button>
@@ -465,4 +489,5 @@ export function RawMaterialCreateNewForm({
       </Form>
     </div>
   );
+
 }
