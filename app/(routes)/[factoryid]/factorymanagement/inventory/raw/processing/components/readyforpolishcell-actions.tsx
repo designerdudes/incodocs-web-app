@@ -57,7 +57,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        send to polish
+                        Send For Polish
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}
@@ -97,4 +97,3 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     );
 };
 
- 

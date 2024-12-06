@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import {ReadyforpolishCellAction} from "./readyforpolishcell-actions"
+import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
 
 export type Block = {
     _id: string
@@ -131,7 +131,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.status}
+                {row.original?.status === "cut" ? "Ready for Polish" : row.original?.status || "N/A"}
             </div>
         ),
     },
