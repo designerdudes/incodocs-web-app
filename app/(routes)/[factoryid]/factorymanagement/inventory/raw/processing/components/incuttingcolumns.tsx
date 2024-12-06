@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import CellAction from "./cell-actions"
+import incutingCellAction from "./incuttingcell-actions"
+import IncuttingCellAction from "./incuttingcell-actions"
 
 export type Block = {
     _id: string
@@ -27,7 +28,7 @@ export type Block = {
     }
 }
 
-const columns: ColumnDef<Block>[] = [
+export const incuttingcolumns: ColumnDef<Block>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -146,8 +147,7 @@ const columns: ColumnDef<Block>[] = [
         ),
 
         id: "actions",
-        cell: ({ row }) => <CellAction data={row.original} />
+        cell: ({ row }) => <IncuttingCellAction data={row.original} />
     },
 ]
 
-export default columns
