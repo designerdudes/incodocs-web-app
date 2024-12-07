@@ -6,7 +6,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Block } from "./incuttingcolumns"
 import InPolishingCellAction from "./inpolishingcell-actions"
 
-
 export type Slab = {
     _id: string;
     slabNumber: number; // Updated from slabID to slabNumber
@@ -54,7 +53,6 @@ export type Slab = {
     createdAt: string;
     updatedAt: string;
 };
-
 
 export const inPolishingolumns: ColumnDef<Slab>[] = [
     {

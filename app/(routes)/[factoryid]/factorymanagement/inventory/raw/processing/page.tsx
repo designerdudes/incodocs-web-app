@@ -72,9 +72,6 @@ export default async function SlabsProcessingPage() {
                         <TabsTrigger className='gap-2' value="inCutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="readyforpolish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="inPolishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
-                        {/* <TabsTrigger className="gap-2" value="polished">Completed<Badge className="text-bg-primary-foreground" variant="outline">{completed.length}
-                        </Badge>
-                        </TabsTrigger> */}
                     </TabsList>
                     <TabsContent value="inCutting">
                         <DataTable
@@ -100,17 +97,6 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
                     </TabsContent>
-                    {/* <TabsContent value="polished">
-                        <DataTable
-                            bulkDeleteIdName="order_id"
-                            bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
-                            bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
-                            bulkDeleteToastMessage="Selected slabs deleted successfully"
-                            searchKey="title"
-                            columns={inPolishingolumns}
-                            data={completed}
-                        />
-                    </TabsContent> */}
                 </Tabs>
             </div>
         </div>
