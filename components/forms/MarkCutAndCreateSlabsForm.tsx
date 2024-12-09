@@ -32,26 +32,6 @@ interface MarkCutAndCreateSlabsFormProps
   BlockData: any;
 }
 
-// const formSchema = z.object({
-//     _id: z.string().refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
-//     numberofSlabs: z
-//     .string()
-//     .refine((val) => parseFloat(val) > 0, { message: "Number of slabs must be a non-negative integer" })
-//     .optional(),
-
-//     slabs: z
-//     .array(
-//         z.object({
-//             length: z
-//                 .number()
-//                 .min(0.1, { message: "Length must be a positive number" }),
-//             height: z
-//                 .number()
-//                 .min(0.1, { message: "Height must be a positive number" }),
-//         })
-//     )
-//     .optional(),
-// });
 const formSchema = z.object({
   _id: z.string().optional(),
   numberofSlabs: z
@@ -63,18 +43,22 @@ const formSchema = z.object({
   slabs: z
     .array(
       z.object({
-        length: z
-          .number()
-          .min(0.1, { message: "Length must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Length must be greater than zero",
+        productName: z.string().optional(),
+        quantity: z.string().optional(),
+        dimensions: z.object({
+          length: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
-        height: z
-          .number()
-          .min(0.1, { message: "Height must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Height must be greater than zero",
+          height: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
+        }),
       })
     )
     .min(1, { message: "You must define at least one slab" }) // Ensure slabs array is not empty
@@ -87,6 +71,7 @@ export function MarkCutAndCreateSlabsForm({
   gap,
   ...props
 }: MarkCutAndCreateSlabsFormProps) {
+  console.log("this is block data", BlockData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [slabsCount, setSlabsCount] = React.useState(0);
@@ -105,20 +90,41 @@ export function MarkCutAndCreateSlabsForm({
     mode: "onChange",
   });
 
+  // function handleSlabsInputChange(value: string) {
+  //   const count = parseInt(value, 10);
+  //   if (!isNaN(count) && count > 0) {
+  //     setSlabsCount(count);
+  //     form.setValue(
+  //       "slabs",
+  //       Array.from({ length: count }, () => ({ length: 0, height: 0 }))
+  //     );
+  //   } else {
+  //     setSlabsCount(0);
+  //     form.setValue("slabs", []);
+  //   }
+  // }
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
       setSlabsCount(count);
       form.setValue(
         "slabs",
-        Array.from({ length: count }, () => ({ length: 0, height: 0 }))
+        Array.from({ length: count }, () => ({
+          productName: "",
+          quantity: "0",
+          dimensions: {
+            length: { value: 0, units: "inch" },
+            height: { value: 0, units: "inch" },
+          },
+          status: "readyForPolish",
+          inStock: true,
+        }))
       );
     } else {
       setSlabsCount(0);
       form.setValue("slabs", []);
     }
   }
-
   // React.useEffect(() => {
   //     if (applyLengthToAll || applyHeightToAll) {
   //         const updatedSlabs = form.getValues("slabs") || [];
@@ -142,12 +148,19 @@ export function MarkCutAndCreateSlabsForm({
     }
   }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
 
+
+
+
+
+  
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
+  
+
 
   function handleDeleteRow(index: number) {
     const updatedSlabs = [...form.getValues("slabs")];
@@ -156,6 +169,8 @@ export function MarkCutAndCreateSlabsForm({
     form.setValue("slabs", updatedSlabs);
   }
 
+
+    
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
