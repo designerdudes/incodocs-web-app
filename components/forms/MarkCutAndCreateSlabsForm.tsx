@@ -36,7 +36,7 @@ const formSchema = z.object({
   _id: z.string().optional(),
   numberofSlabs: z.string().regex(/^\d+$/, {
     message: "Number of slabs must be a non-negative integer",
-  }),
+  }).optional(),
   slabs: z
     .array(
       z.object({
@@ -53,6 +53,7 @@ const formSchema = z.object({
               .min(0.1, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
+          status: z.literal("readyForPolish").default("readyForPolish")
         })
       })
     )
@@ -87,6 +88,7 @@ export function MarkCutAndCreateSlabsForm({
       const defaultDimensions = {
         length: { value: 0, units: "inch" as "inch" },
         height: { value: 0, units: "inch" as "inch" },
+        status: "readyForPolish" as "readyForPolish"
       };
       form.setValue(
         "slabs",
@@ -133,6 +135,7 @@ export function MarkCutAndCreateSlabsForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    console.log("Values", values)
     try {
       await putData(`/factory-management/inventory/updateblockaddslab/${BlockData._id}`, {
         ...values,
