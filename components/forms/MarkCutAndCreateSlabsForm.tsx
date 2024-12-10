@@ -64,6 +64,7 @@ export function MarkCutAndCreateSlabsForm({
   BlockData,
   gap,
 }: MarkCutAndCreateSlabsFormProps) {
+  console.log("this is block data", BlockData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [slabsCount, setSlabsCount] = React.useState(0);
@@ -81,6 +82,19 @@ export function MarkCutAndCreateSlabsForm({
     },
   });
 
+  // function handleSlabsInputChange(value: string) {
+  //   const count = parseInt(value, 10);
+  //   if (!isNaN(count) && count > 0) {
+  //     setSlabsCount(count);
+  //     form.setValue(
+  //       "slabs",
+  //       Array.from({ length: count }, () => ({ length: 0, height: 0 }))
+  //     );
+  //   } else {
+  //     setSlabsCount(0);
+  //     form.setValue("slabs", []);
+  //   }
+  // }
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
@@ -125,6 +139,8 @@ export function MarkCutAndCreateSlabsForm({
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
+  
+
 
   function handleDeleteRow(index: number) {
     const updatedSlabs = [...form.getValues("slabs")];
@@ -133,6 +149,8 @@ export function MarkCutAndCreateSlabsForm({
     form.setValue("slabs", updatedSlabs);
   }
 
+
+    
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     console.log("Values", values)

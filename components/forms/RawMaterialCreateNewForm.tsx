@@ -24,7 +24,7 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Trash } from "lucide-react";
+import { Trash, Volume } from "lucide-react";
 import { postData } from "@/axiosUtility/api";
 
 interface RawMaterialCreateNewFormProps {
@@ -48,13 +48,8 @@ const formSchema = z.object({
           .string()
           .min(1, { message: "Material type is required" })
           .optional(),
-        status: z
-          .string()
-          .min(1, { message: "Status is required" })
-          .optional(),
-        inStock: z
-          .boolean()
-          .optional(),
+        status: z.string().min(1, { message: "Status is required" }).optional(),
+        inStock: z.boolean().optional(),
         dimensions: z.object({
           weight: z.object({
             value: z
@@ -104,8 +99,8 @@ export function RawMaterialCreateNewForm({
     React.useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] =
     React.useState<boolean>(false);
-  const factoryId = useParams().factoryid
-  const organizationId = "674b0a687d4f4b21c6c980ba"
+  const factoryId = useParams().factoryid;
+  const organizationId = "674b0a687d4f4b21c6c980ba";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -115,16 +110,15 @@ export function RawMaterialCreateNewForm({
     const count = parseInt(value, 10);
 
     if (!isNaN(count) && count > 0) {
-      const newBlocks = Array.from({ length: count }, (_, index) => (
-        {
-          dimensions: {
-            blockNumber: index + 1,
-            weight: { value: 0, units: "tons" as "tons" },
-            length: { value: 0, units: "inch" as "inch" },
-            breadth: { value: 0, units: "inch" as "inch" },
-            height: { value: 0, units: "inch" as "inch" },
-          }
-        }));
+      const newBlocks = Array.from({ length: count }, (_, index) => ({
+        dimensions: {
+          blockNumber: index + 1,
+          weight: { value: 0, units: "tons" as "tons" },
+          length: { value: 0, units: "inch" as "inch" },
+          breadth: { value: 0, units: "inch" as "inch" },
+          height: { value: 0, units: "inch" as "inch" },
+        },
+      }));
 
       setBlocks(newBlocks);
       form.setValue("blocks", newBlocks);
@@ -179,12 +173,21 @@ export function RawMaterialCreateNewForm({
     router.refresh();
   }
 
-  function calculateTotalVolume(): number {
-    return blocks.reduce((total, block) => {
-      const volume = block.length * block.breadth * block.height;
+  function calculateTotalVolume() {
+    const totalVolumeInInches = blocks.reduce((total, block) => {
+      const { length, breadth, height } = block.dimensions;
+      const volume = length.value * breadth.value * height.value;
       return total + (volume || 0); // Add only valid volumes
     }, 0);
+  
+    const totalVolumeInCm = totalVolumeInInches * 16.387; // Convert to cm³
+  
+    return {
+      inInches: totalVolumeInInches,
+      inCm: totalVolumeInCm,
+    };
   }
+  
 
   return (
     <div className="space-y-6">
@@ -275,7 +278,8 @@ export function RawMaterialCreateNewForm({
                       form.setValue("blocks", updatedBlocks);
                     }
                   }}
-                /> Apply Weight to all rows
+                />{" "}
+                Apply Weight to all rows
               </label>
             </div>
             <div>
@@ -307,7 +311,8 @@ export function RawMaterialCreateNewForm({
                       form.setValue("blocks", updatedBlocks);
                     }
                   }}
-                /> Apply Length to all rows
+                />{" "}
+                Apply Length to all rows
               </label>
             </div>
             <div>
@@ -339,7 +344,8 @@ export function RawMaterialCreateNewForm({
                       form.setValue("blocks", updatedBlocks);
                     }
                   }}
-                /> Apply Breadth to all rows
+                />{" "}
+                Apply Breadth to all rows
               </label>
             </div>
             <div>
@@ -371,7 +377,8 @@ export function RawMaterialCreateNewForm({
                       form.setValue("blocks", updatedBlocks);
                     }
                   }}
-                /> Apply Height to all rows
+                />{" "}
+                Apply Height to all rows
               </label>
             </div>
           </div>
@@ -383,7 +390,8 @@ export function RawMaterialCreateNewForm({
                 <TableHead>Length (inch)</TableHead>
                 <TableHead>Breadth (inch)</TableHead>
                 <TableHead>Height (inch)</TableHead>
-                <TableHead>Volume (in³)</TableHead>
+                <TableHead>Volume(in³)</TableHead>
+                <TableHead>Volume(cm³)</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -459,11 +467,21 @@ export function RawMaterialCreateNewForm({
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
+                    {(
+                      block.dimensions.length.value *
+                      block.dimensions.breadth.value *
+                      block.dimensions.height.value *
+                     2.54
+                    ).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
                     <Button
                       variant="destructive"
                       size="sm"
                       onClick={() => {
-                        const updatedBlocks = blocks.filter((_, i) => i !== index);
+                        const updatedBlocks = blocks.filter(
+                          (_, i) => i !== index
+                        );
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
@@ -474,13 +492,20 @@ export function RawMaterialCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={6} className="text-right font-bold">
-                  Total Volume (in³): {calculateTotalVolume().toFixed(2)}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={5} className="text-right font-bold">
+                    Total Volume (in³): {calculateTotalVolume().inInches.toFixed(2)}
+                  </TableCell>
+                  <TableCell colSpan={4} className="text-right font-bold">
+                    Total Volume (cm³): {calculateTotalVolume().inCm.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  
+            
+                </TableRow>
+              </TableFooter>
           </Table>
           <Button type="submit" disabled={isLoading}>
             Submit
@@ -489,5 +514,4 @@ export function RawMaterialCreateNewForm({
       </Form>
     </div>
   );
-
 }
