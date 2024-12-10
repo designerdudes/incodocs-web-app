@@ -29,6 +29,12 @@ import {
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import { Alert } from "@/components/forms/Alert";
+import { putData } from "@/axiosUtility/api";
+import toast from 'react-hot-toast';
+
+
 
 interface Props {
   data: any;
@@ -36,6 +42,8 @@ interface Props {
 
 export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const GlobalModal = useGlobalModal();
+
 
   // State for controlling the drawer and managing cutting data
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -66,6 +74,21 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     setIsDrawerOpen(false); // Close drawer after submission
   };
 
+
+  const sendForCutting = async () => {
+
+    try {
+      const result = await putData(`/factory-management/inventory/raw/put/${data._id}`,
+        { status: "inCutting", });
+      toast.success('Block send for cutting Successfully')
+      GlobalModal.onClose()
+      window.location.reload()
+    } catch (error) {
+      console.error('Error deleting data:', error);
+    }
+  }
+
+
   return (
     <div>
       {/* Dropdown Menu */}
@@ -79,6 +102,17 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            onSelect={() => {
+              GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`
+              GlobalModal.description = "Are you sure you want to send this Block for cutting?"
+              GlobalModal.children = <Alert onConfirm={sendForCutting} />
+              GlobalModal.onOpen()
+            }}
+            className="focus:bg-destructive focus:text-destructive-foreground">
+            <ScissorsIcon className="mr-2 h-4 w-4" />
+            Send For Cutting</DropdownMenuItem>
 
           {/* View Lot Details */}
           <DropdownMenuItem
