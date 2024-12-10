@@ -40,11 +40,6 @@ const formSchema = z.object({
   slabs: z
     .array(
       z.object({
-<<<<<<< HEAD
-        productName: z.string().optional(),
-        quantity: z.string().optional(),
-=======
->>>>>>> 06d9c53ae9335e12551f672db2d555491d6b3eb1
         dimensions: z.object({
           length: z.object({
             value: z
@@ -58,11 +53,7 @@ const formSchema = z.object({
               .min(0.1, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
-<<<<<<< HEAD
-        }),
-=======
         })
->>>>>>> 06d9c53ae9335e12551f672db2d555491d6b3eb1
       })
     )
     .min(1, { message: "You must define at least one slab" }),
@@ -113,39 +104,13 @@ export function MarkCutAndCreateSlabsForm({
       };
       form.setValue(
         "slabs",
-<<<<<<< HEAD
-        Array.from({ length: count }, () => ({
-          productName: "",
-          quantity: "0",
-          dimensions: {
-            length: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-          },
-          status: "readyForPolish",
-          inStock: true,
-        }))
-=======
         Array.from({ length: count }, () => ({ dimensions: defaultDimensions }))
->>>>>>> 06d9c53ae9335e12551f672db2d555491d6b3eb1
       );
     } else {
       setSlabsCount(0);
       form.setValue("slabs", []);
     }
   }
-<<<<<<< HEAD
-  // React.useEffect(() => {
-  //     if (applyLengthToAll || applyHeightToAll) {
-  //         const updatedSlabs = form.getValues("slabs") || [];
-  //         const newSlabs = updatedSlabs.map((slab) => ({
-  //             length: applyLengthToAll ? Number(globalLength) : slab.length,
-  //             height: applyHeightToAll ? Number(globalHeight) : slab.height,
-  //         }));
-  //         form.setValue("slabs", newSlabs);
-  //     }
-  // }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
-=======
->>>>>>> 06d9c53ae9335e12551f672db2d555491d6b3eb1
 
   React.useEffect(() => {
     if (applyLengthToAll || applyHeightToAll) {
@@ -166,13 +131,6 @@ export function MarkCutAndCreateSlabsForm({
   }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
 
 
-<<<<<<< HEAD
-
-
-
-  
-=======
->>>>>>> 06d9c53ae9335e12551f672db2d555491d6b3eb1
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
