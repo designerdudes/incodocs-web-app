@@ -52,10 +52,50 @@ function FactoryForm() {
     },
   });
 
+  const Data = {
+    _id: "674aed27789669ed4a672cd0",
+    factoryName: "OGfactory",
+    organizationId: "674b0a687d4f4b21c6c980ba",
+    gstNo: "3213568796545",
+    userId: ["674b02414761e56e10a9a475"],
+    address: {
+      coordinates: {
+        type: "Point",
+        coordinates: [40.7128, -74.006],
+      },
+      location: "343 Example Street",
+      pincode: "500008",
+      _id: "674aed27789669ed4a672cd1",
+    },
+    lotId: [
+      "67540b6d065f3deb256868a6",
+      "6757fc2c4de9022bb87cd0ce",
+      "675803bd065f3deb256868e9",
+    ],
+    SlabsId: [
+      "674b11e65876bbcd611069a4",
+      "674b19b0f05b5214616704e9",
+      "6757fd1d4de9022bb87cd12a",
+      "6757fd5a4de9022bb87cd134",
+    ],
+    BlocksId: [
+      "675803bd065f3deb256868ec",
+      "675803bd065f3deb256868ed",
+      "675803bd065f3deb256868ee",
+    ],
+    createdAt: "2024-11-30",
+    updatedAt: "2024-12-10",
+    __v: 0,
+    workersCuttingPay: 3.75,
+    workersPolishingPay: 11,
+  };
+
   return (
     <div className="max-w-2xl mx-10 p-6  ">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Edit Factory Details</h1>
+        <h1 className="text-2xl font-bold text-gray-800">
+          Edit Factory Details
+        </h1>
         <p className="text-sm text-gray-600">
           Fill in the form below to edit the factory details
         </p>
@@ -74,7 +114,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: Factory A"
+                    defaultValue={Data.factoryName}
                     {...field}
                   />
                 </FormControl>
@@ -83,53 +123,36 @@ function FactoryForm() {
             )}
           />
 
-<FormField
-            name="address.location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">Facory Id</FormLabel>
-                <FormControl>
-                  <Input
-                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eslo123"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Organization Dropdown */}
           <FormField
-            name="organizationId"
+            name="gstNo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="font-medium text-gray-700">
-                  Organization
+                  GST Number
                 </FormLabel>
                 <FormControl>
-                  <Select>
-                    <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue placeholder="Select an organization" />
-                    </SelectTrigger>
-                  </Select>
+                  <Input
+                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    defaultValue={Data.gstNo}
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
           {/* Address Fields */}
           <FormField
             name="address.location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-medium text-gray-700">Location</FormLabel>
+                <FormLabel className="font-medium text-gray-700">
+                  Location
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: 343 Main Street"
+                    defaultValue={Data.address.location}
                     {...field}
                   />
                 </FormControl>
@@ -143,11 +166,31 @@ function FactoryForm() {
             name="address.pincode"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="font-medium text-gray-700">Pincode</FormLabel>
+                <FormLabel className="font-medium text-gray-700">
+                  Pincode
+                </FormLabel>
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: 500081"
+                    defaultValue={Data.address.pincode}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="createdAt"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-medium text-gray-700">
+                  Created Date
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    defaultValue={Data.createdAt}
                     {...field}
                   />
                 </FormControl>
@@ -156,64 +199,127 @@ function FactoryForm() {
             )}
           />
         </div>
+        <div className="flex mt-5">
+        <div className="mr-10">
+            {" "}
+            <FormField
+              name="TotalBlocks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-gray-700">
+                    Total Blocks
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      defaultValue={Data.BlocksId} readOnly 
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="mr-10">
+            {" "}
+            <FormField
+              name="TotalLots"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-gray-700">
+                    Total Lots
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      defaultValue={Data.lotId} readOnly
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              name="TotalSlabs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-gray-700">
+                    Total Slabs
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      defaultValue={Data.SlabsId} readOnly
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
 
+        <div className="flex mt-5">
+          <div className=" mr-10">
+            <FormField
+              name="workersCuttingPay"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-gray-700">
+                    Workers Cutting Pay
+                  </FormLabel>
 
-        <div className="space-y-4 mt-10">
-    <h2 className="text-lg font-semibold">Contact Information</h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      {/* Contact Person */}
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">Contact Person</label>
-        <input
-          type="text"
-          placeholder="Enter contact person's name"
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-        />
-      </div>
+                  <FormControl>
+                    <Input
+                      className=" px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      defaultValue={Data.workersCuttingPay}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div>
+            <FormField
+              name="workersPolishingPay"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-gray-700">
+                    Workers Polish Pay
+                  </FormLabel>
 
-      {/* Email */}
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">Email</label>
-        <input
-          type="email"
-          placeholder="Enter email"
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-        />
-      </div>
-
-      {/* Phone Number */}
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">Phone Number</label>
-        <input
-          type="tel"
-          placeholder="Enter phone number"
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-        />
-      </div>
-
-      {/* Alternate Phone Number */}
-      <div className="space-y-1">
-        <label className="block text-sm font-medium">Alternate Phone</label>
-        <input
-          type="tel"
-          placeholder="Enter alternate phone number"
-          className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-        />
-      </div>
-    </div>
-  </div>
-
-
-
-        {/* Submit Button */}
+                  <FormControl>
+                    <Input
+                      className="px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      defaultValue={Data.workersPolishingPay}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+        <div className="space-y-4 mt-10"></div>
+        {/* Update Button */}
         <div className="mt-6">
           <Button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-blue-600 text-white hover:bg-blue-700 focus:ring focus:ring-blue-300"
+            className=" bg-blue-600 text-white hover:bg-blue-700 focus:ring focus:ring-blue-300"
           >
-            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            Submit
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Update
           </Button>
         </div>
       </Form>
