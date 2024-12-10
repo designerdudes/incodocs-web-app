@@ -164,7 +164,7 @@ export default async function Purchases({ params }: Props) {
                     <p className="text-muted-foreground text-sm mt-2">
                         Effortlessly track and manage the sale of finished goods with detailed records, ensuring transparency, compliance, and streamlined monitoring of customer transactions.                    </p>
                 </div>
-                <Link href='./lots/create-new'>
+                <Link href='./sales/create-new'>
                     <Button> Create New Sale</Button>
                 </Link>
             </div>
