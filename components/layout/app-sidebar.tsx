@@ -97,7 +97,7 @@ const data = {
                         },
                         {
                             title: "Expenses",
-                            url: "/factorymanagement/accounting/expenses",
+                            url: "/factorymanagement/accounting/Expenses",
                         },
                         {
                             title: "GST Ledger",

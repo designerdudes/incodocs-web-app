@@ -1,4 +1,3 @@
-"use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,36 +9,35 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
+import { Edit, EyeIcon, MoreHorizontal, Plus, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./incuttingcolumns";
+import { expense } from "../page";
 
 interface Props {
-    data: Block;
+  data : expense
 }
 
-export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
+
+export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
+
     const deleteLot = async () => {
-
         try {
-            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-            toast.success('Slab Deleted Successfully')
-            GlobalModal.onClose()
-            window.location.reload()
+            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
+            toast.success('Lot Deleted Successfully');
+            GlobalModal.onClose();
+            window.location.reload();
         } catch (error) {
             console.error('Error deleting data:', error);
         }
-    }
+    };
 
     return (
         <div>
-            {/* Dropdown Menu */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
@@ -53,48 +51,43 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./cutting/${data._id}/markcut`);
-                        }}
-                    >
-                        <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Send To Polish
-                    </DropdownMenuItem>
-
-                    {/* View Lot Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./lots/${data._id}/blocks`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
-                        View Block Details
+                        View Expense Details
                     </DropdownMenuItem>
 
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            // modal.title = "Edit New Lot"; // Set the title of the modal
-                            // modal.children = <EditLotForm />; // Set the content of the modal
-                            // modal.onOpen();
+                            GlobalModal.title = "Edit Lot Details"; // Set modal title
+                            // GlobalModal.children = <EditLotForm />; // Render Edit Form
+                            GlobalModal.onOpen();
                         }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit Lot Details
+                        Edit Expense Details
                     </DropdownMenuItem>
+
+                    {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.blockNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Product?"
-                            GlobalModal.children = <Alert onConfirm={deleteLot} />
-                            GlobalModal.onOpen()
+                            GlobalModal.title = `Delete Product - ${data.ExpenseName}`;
+                            GlobalModal.description =
+                                "Are you sure you want to delete this Lot?";
+                            GlobalModal.children = <Alert onConfirm={deleteLot} />;
+                            GlobalModal.onOpen();
                         }}
-                        className="focus:bg-destructive focus:text-destructive-foreground">
+                        className="focus:bg-destructive focus:text-destructive-foreground"
+                    >
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Product</DropdownMenuItem>
+                        Delete Expense Details
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     );
 };
 
- 
+export default CellAction;
