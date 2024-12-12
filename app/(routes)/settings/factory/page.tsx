@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -12,83 +12,81 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useGlobalModal } from "@/hooks/GlobalModal";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { Separator } from "@/components/ui/separator";
-
+ 
 // Factory Form Schema
 const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
-  organizationId: z
-    .string()
-    .min(1, { message: "Organization must be selected" }),
+  gstNo: z.string().min(1, { message: "GST Number is required" }),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
     pincode: z
       .string()
       .min(6, { message: "Pincode must be at least 6 characters" }),
   }),
+  createdAt: z.number().min(0, { message: "date should be number" }),
+  workersCuttingPay: z.number().min(0, { message: "Pay must be positive" }),
+  workersPolishingPay: z.number().min(0, { message: "Pay must be positive" }),
 });
 
 function FactoryForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isFetching, setIsFetching] = useState<boolean>(true);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       factoryName: "",
-      organizationId: "",
+      gstNo: "",
       address: {
         location: "",
         pincode: "",
       },
+      createdAt: 0,
+      workersCuttingPay: 0,
+      workersPolishingPay: 0,
     },
   });
 
-  const Data = {
-    _id: "674aed27789669ed4a672cd0",
-    factoryName: "OGfactory",
-    organizationId: "674b0a687d4f4b21c6c980ba",
-    gstNo: "3213568796545",
-    userId: ["674b02414761e56e10a9a475"],
-    address: {
-      coordinates: {
-        type: "Point",
-        coordinates: [40.7128, -74.006],
-      },
-      location: "343 Example Street",
-      pincode: "500008",
-      _id: "674aed27789669ed4a672cd1",
-    },
-    lotId: [
-      "67540b6d065f3deb256868a6",
-      "6757fc2c4de9022bb87cd0ce",
-      "675803bd065f3deb256868e9",
-    ],
-    SlabsId: [
-      "674b11e65876bbcd611069a4",
-      "674b19b0f05b5214616704e9",
-      "6757fd1d4de9022bb87cd12a",
-      "6757fd5a4de9022bb87cd134",
-    ],
-    BlocksId: [
-      "675803bd065f3deb256868ec",
-      "675803bd065f3deb256868ed",
-      "675803bd065f3deb256868ee",
-    ],
-    createdAt: "2024-11-30",
-    updatedAt: "2024-12-10",
-    __v: 0,
-    workersCuttingPay: 3.75,
-    workersPolishingPay: 11,
-  };
+  // Fetch data from API
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setIsFetching(true);
+        const response = await fetch(
+          "http://localhost:4080/factory/getSingle/674aed27789669ed4a672cd0"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch data from the API");
+        }
+        const data = await response.json();
+
+        // Update form default values
+        form.reset({
+          factoryName: data.factoryName || "",
+          gstNo: data.gstNo || "",
+          address: {
+            location: data.address.location || "",
+            pincode: data.address.pincode || "",
+          },
+          createdAt: data.createdAt || 0,
+          workersCuttingPay: data.workersCuttingPay || 0,
+          workersPolishingPay: data.workersPolishingPay || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        alert("Failed to fetch data. Please try again.");
+      } finally {
+        setIsFetching(false);
+      }
+    }
+
+    fetchData();
+  }, [form]);
+
+
 
   return (
     <div className="max-w-2xl mx-10 p-6  ">
@@ -114,7 +112,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={Data.factoryName}
+                    // defaultValue={Data.factoryName}
                     {...field}
                   />
                 </FormControl>
@@ -133,7 +131,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={Data.gstNo}
+                    // defaultValue={Data.gstNo}
                     {...field}
                   />
                 </FormControl>
@@ -152,7 +150,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={Data.address.location}
+                    // defaultValue={Data.address.location}
                     {...field}
                   />
                 </FormControl>
@@ -172,7 +170,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={Data.address.pincode}
+                    // defaultValue={Data.address.pincode}
                     {...field}
                   />
                 </FormControl>
@@ -190,7 +188,7 @@ function FactoryForm() {
                 <FormControl>
                   <Input
                     className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    defaultValue={Data.createdAt}
+                    // defaultValue={Data.createdAt}
                     {...field}
                   />
                 </FormControl>
@@ -199,70 +197,7 @@ function FactoryForm() {
             )}
           />
         </div>
-        <div className="flex mt-5">
-        <div className="mr-10">
-            {" "}
-            <FormField
-              name="TotalBlocks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-medium text-gray-700">
-                    Total Blocks
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={Data.BlocksId} readOnly 
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="mr-10">
-            {" "}
-            <FormField
-              name="TotalLots"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-medium text-gray-700">
-                    Total Lots
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={Data.lotId} readOnly
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div>
-            <FormField
-              name="TotalSlabs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="font-medium text-gray-700">
-                    Total Slabs
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      className=" cursor-not-allowed px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={Data.SlabsId} readOnly
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-        </div>
+        
 
         <div className="flex mt-5">
           <div className=" mr-10">
@@ -277,7 +212,7 @@ function FactoryForm() {
                   <FormControl>
                     <Input
                       className=" px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={Data.workersCuttingPay}
+                      // defaultValue={Data.workersCuttingPay}
                       {...field}
                     />
                   </FormControl>
@@ -298,7 +233,7 @@ function FactoryForm() {
                   <FormControl>
                     <Input
                       className="px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      defaultValue={Data.workersPolishingPay}
+                      // defaultValue={Data.workersPolishingPay}
                       {...field}
                     />
                   </FormControl>
@@ -309,6 +244,9 @@ function FactoryForm() {
           </div>
         </div>
         <div className="space-y-4 mt-10"></div>
+
+
+
         {/* Update Button */}
         <div className="mt-6">
           <Button
