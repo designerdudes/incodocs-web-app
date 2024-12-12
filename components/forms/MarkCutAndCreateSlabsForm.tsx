@@ -160,7 +160,7 @@ export function MarkCutAndCreateSlabsForm({
         status: "cut",
       });
       toast.success("Block data updated successfully");
-      router.refresh();
+      router.push("../../processing");
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
