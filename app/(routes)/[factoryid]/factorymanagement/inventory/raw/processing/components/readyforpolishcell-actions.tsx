@@ -27,13 +27,13 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     const deleteLot = async () => {
 
         try {
-            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
-            toast.success('Slab Deleted Successfully')
+            toast.success('Block Deleted Successfully')
             GlobalModal.onClose()
             window.location.reload()
         } catch (error) {
-            console.error('Error deleting data:', error);
+            console.error('Error deleting Block:', error);
         }
     }
 
@@ -57,7 +57,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Send To Polish
+                        Send For Polish
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}
@@ -90,11 +90,10 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground">
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Product</DropdownMenuItem>
+                        Delete Block</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     );
 };
 
- 

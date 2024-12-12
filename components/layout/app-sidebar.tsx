@@ -35,8 +35,8 @@ import { fetchData } from "@/axiosUtility/api"
 // This is sample data.
 const data = {
     user: {
-        name: "Ahmed El Gabri",
-        email: "mdahmed@example.com",
+        name: "Hasan Abu Jabal",
+        email: "Hasan@example.com",
         avatar: "/avatars/shadcn.jpg",
     },
     Factories: [
@@ -172,7 +172,7 @@ const data = {
                     title: "Factory",
                     url: "/settings/factory",
                 },
-             
+
             ],
         },
     ],
@@ -218,11 +218,6 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     useEffect(() => { 
         getFactoryData();
     }, []);
-
-    console.log("This is factory data", FactoryData)
-    console.log("This is the total factories", FactoryData?.length)
-
-
 
     return (
         <Sidebar collapsible="icon" {...props}>

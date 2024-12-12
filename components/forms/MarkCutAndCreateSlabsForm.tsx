@@ -25,68 +25,46 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
+import { putData } from "@/axiosUtility/api";
 
-interface MarkCutAndCreateSlabsFormProps
-  extends React.HTMLAttributes<HTMLDivElement> {
+interface MarkCutAndCreateSlabsFormProps {
   gap: number;
   BlockData: any;
 }
 
-// const formSchema = z.object({
-//     _id: z.string().refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
-//     numberofSlabs: z
-//     .string()
-//     .refine((val) => parseFloat(val) > 0, { message: "Number of slabs must be a non-negative integer" })
-//     .optional(),
-
-//     slabs: z
-//     .array(
-//         z.object({
-//             length: z
-//                 .number()
-//                 .min(0.1, { message: "Length must be a positive number" }),
-//             height: z
-//                 .number()
-//                 .min(0.1, { message: "Height must be a positive number" }),
-//         })
-//     )
-//     .optional(),
-// });
 const formSchema = z.object({
   _id: z.string().optional(),
-  numberofSlabs: z
-    .string()
-    .regex(/^\d+$/, {
-      message: "Number of slabs must be a non-negative integer",
-    })
-    .optional(),
+  numberofSlabs: z.string().regex(/^\d+$/, {
+    message: "Number of slabs must be a non-negative integer",
+  }).optional(),
   slabs: z
     .array(
       z.object({
-        length: z
-          .number()
-          .min(0.1, { message: "Length must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Length must be greater than zero",
+        dimensions: z.object({
+          length: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
-        height: z
-          .number()
-          .min(0.1, { message: "Height must be a non-negative number" })
-          .refine((val) => val > 0, {
-            message: "Height must be greater than zero",
+          height: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
           }),
+          status: z.literal("readyForPolish").default("readyForPolish")
+        })
       })
     )
-    .min(1, { message: "You must define at least one slab" }) // Ensure slabs array is not empty
-    .optional(),
+    .min(1, { message: "You must define at least one slab" }),
 });
 
 export function MarkCutAndCreateSlabsForm({
-  className,
   BlockData,
   gap,
-  ...props
 }: MarkCutAndCreateSlabsFormProps) {
+  console.log("this is block data", BlockData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [slabsCount, setSlabsCount] = React.useState(0);
@@ -102,16 +80,33 @@ export function MarkCutAndCreateSlabsForm({
       numberofSlabs: BlockData?.numberofSlabs || "",
       slabs: BlockData?.slabs || [],
     },
-    mode: "onChange",
   });
 
+  // function handleSlabsInputChange(value: string) {
+  //   const count = parseInt(value, 10);
+  //   if (!isNaN(count) && count > 0) {
+  //     setSlabsCount(count);
+  //     form.setValue(
+  //       "slabs",
+  //       Array.from({ length: count }, () => ({ length: 0, height: 0 }))
+  //     );
+  //   } else {
+  //     setSlabsCount(0);
+  //     form.setValue("slabs", []);
+  //   }
+  // }
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
       setSlabsCount(count);
+      const defaultDimensions = {
+        length: { value: 0, units: "inch" as "inch" },
+        height: { value: 0, units: "inch" as "inch" },
+        status: "readyForPolish" as "readyForPolish"
+      };
       form.setValue(
         "slabs",
-        Array.from({ length: count }, () => ({ length: 0, height: 0 }))
+        Array.from({ length: count }, () => ({ dimensions: defaultDimensions }))
       );
     } else {
       setSlabsCount(0);
@@ -119,28 +114,24 @@ export function MarkCutAndCreateSlabsForm({
     }
   }
 
-  // React.useEffect(() => {
-  //     if (applyLengthToAll || applyHeightToAll) {
-  //         const updatedSlabs = form.getValues("slabs") || [];
-  //         const newSlabs = updatedSlabs.map((slab) => ({
-  //             length: applyLengthToAll ? Number(globalLength) : slab.length,
-  //             height: applyHeightToAll ? Number(globalHeight) : slab.height,
-  //         }));
-  //         form.setValue("slabs", newSlabs);
-  //     }
-  // }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
-
   React.useEffect(() => {
     if (applyLengthToAll || applyHeightToAll) {
       const updatedSlabs = form.getValues("slabs") || [];
       const newSlabs = updatedSlabs.map((slab) => ({
-        length: applyLengthToAll ? Number(globalLength) : slab.length,
-        height: applyHeightToAll ? Number(globalHeight) : slab.height,
+        dimensions: {
+          ...slab.dimensions,
+          length: applyLengthToAll
+            ? { value: Number(globalLength) || 0, units: "inch" as "inch" }
+            : slab.dimensions.length,
+          height: applyHeightToAll
+            ? { value: Number(globalHeight) || 0, units: "inch" as "inch" }
+            : slab.dimensions.height,
+        },
       }));
       form.setValue("slabs", newSlabs, { shouldValidate: true });
-      form.trigger("slabs"); // Trigger validation to update form state and re-render
     }
   }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
+
 
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
@@ -148,6 +139,8 @@ export function MarkCutAndCreateSlabsForm({
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
+  
+
 
   function handleDeleteRow(index: number) {
     const updatedSlabs = [...form.getValues("slabs")];
@@ -156,12 +149,18 @@ export function MarkCutAndCreateSlabsForm({
     form.setValue("slabs", updatedSlabs);
   }
 
+
+    
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    console.log("Values", values)
     try {
-      // Add your update logic here
+      await putData(`/factory-management/inventory/updateblockaddslab/${BlockData._id}`, {
+        ...values,
+        status: "cut",
+      });
       toast.success("Block data updated successfully");
-      router.refresh(); // Refresh the current page
+      router.refresh();
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
@@ -172,8 +171,8 @@ export function MarkCutAndCreateSlabsForm({
   function calculateTotalSqft(): string {
     const slabs = form.getValues("slabs") || [];
     const totalSqft = slabs.reduce((sum, slab) => {
-      const lengthInFeet = (slab.length || 0) / 12;
-      const heightInFeet = (slab.height || 0) / 12;
+      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
+      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
       return sum + lengthInFeet * heightInFeet;
     }, 0);
     return totalSqft.toFixed(2); // Round to 2 decimal places
@@ -198,11 +197,8 @@ export function MarkCutAndCreateSlabsForm({
                       value={field.value}
                       onChange={(e) => {
                         const value = parseInt(e.target.value, 10);
-                        if (!isNaN(value) && value >= 0) {
-                          // Only allow non-negative values
-                          field.onChange(value.toString());
-                          handleSlabsInputChange(value.toString());
-                        }
+                        field.onChange(value.toString());
+                        handleSlabsInputChange(value.toString());
                       }}
                     />
                   </FormControl>
@@ -211,7 +207,6 @@ export function MarkCutAndCreateSlabsForm({
               )}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
@@ -250,7 +245,6 @@ export function MarkCutAndCreateSlabsForm({
               </label>
             </div>
           </div>
-
           {slabsCount > 0 && (
             <Table>
               <TableHeader>
@@ -267,64 +261,33 @@ export function MarkCutAndCreateSlabsForm({
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
-                      <FormField
-                        name={`slabs.${index}.length`}
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g. 32"
-                                type="number"
-                                min="0"
-                                disabled={isLoading}
-                                value={field.value}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  if (!isNaN(value) && value >= 0) {
-                                    field.onChange(value); // Send parsed number
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                      <Input
+                        placeholder="Length"
+                        type="number"
+                        value={slab.dimensions.length.value}
+                        onChange={(e) => {
+                          const slabs = form.getValues("slabs");
+                          slabs[index].dimensions.length.value = parseFloat(e.target.value) || 0;
+                          form.setValue("slabs", slabs, { shouldValidate: true });
+                        }}
+                        disabled={isLoading}
                       />
                     </TableCell>
                     <TableCell>
-                      <FormField
-                        name={`slabs.${index}.height`}
-                        control={form.control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g. 32"
-                                type="number"
-                                min="0"
-                                disabled={isLoading}
-                                value={field.value}
-                                onChange={(e) => {
-                                  const value = parseFloat(e.target.value);
-                                  if (!isNaN(value) && value >= 0) {
-                                    field.onChange(value); // Send parsed number
-                                  }
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+                      <Input
+                        placeholder="Height"
+                        type="number"
+                        value={slab.dimensions.height.value}
+                        onChange={(e) => {
+                          const slabs = form.getValues("slabs");
+                          slabs[index].dimensions.height.value = parseFloat(e.target.value) || 0;
+                          form.setValue("slabs", slabs, { shouldValidate: true });
+                        }}
+                        disabled={isLoading}
                       />
                     </TableCell>
                     <TableCell>
-                      <span>
-                        {calculateSqft(
-                          form.getValues(`slabs.${index}.length`),
-                          form.getValues(`slabs.${index}.height`)
-                        )}
-                      </span>
+                      {calculateSqft(slab.dimensions.length.value, slab.dimensions.height.value)}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -347,9 +310,8 @@ export function MarkCutAndCreateSlabsForm({
               </TableFooter>
             </Table>
           )}
-
-          <Button type="submit" disabled={!form.formState.isValid || isLoading}>
-            {isLoading ? "Loading..." : "Update Slabs"}
+          <Button type="submit" disabled={isLoading}>
+            Update Slabs
           </Button>
         </form>
       </Form>

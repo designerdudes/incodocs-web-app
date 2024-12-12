@@ -1,13 +1,14 @@
 // "use client";
+
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { RawMaterialCreateNewForm } from "@/components/forms/RawMaterialCreateNewForm";
+import { SalesCreateNewForm } from "@/components/forms/salesForm";
 
-
-console.log(Button, Heading, RawMaterialCreateNewForm); // Debug undefined components
+ 
+console.log(Button, Heading, SalesCreateNewForm); // Debug undefined components
 
 export default function CreateNewFormPage() {
     return (
@@ -22,16 +23,16 @@ export default function CreateNewFormPage() {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title="Create new Lot Inventory"
+                        title="Create new Sale"
                     />
                     <p className="text-muted-foreground text-sm">
-                        Fill in the form below to edit the finished product in your inventory
+                        Fill in the form below to sale the product.
                     </p>
                 </div>
             </div>
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
-                <RawMaterialCreateNewForm gap={3} />
+                <SalesCreateNewForm gap={3} />
             </div>
         </div>
     );
