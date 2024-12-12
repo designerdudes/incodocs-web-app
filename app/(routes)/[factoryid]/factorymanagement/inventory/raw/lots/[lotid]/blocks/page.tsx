@@ -41,7 +41,7 @@ export default async function BlocksPage({ params }: Props) {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title={` Details of ${BlocksData[0].lotName}'s Blocks`} />
+                    <Heading className="leading-tight" title={` Details of ${BlocksData[0]?.lotName}'s Blocks`} />
                     <p className="text-muted-foreground text-sm mt-2">
                         Efficiently track and manage Blocks with detailed insights into its current status and progress through the production cycle.
                     </p>
