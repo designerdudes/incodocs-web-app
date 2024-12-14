@@ -26,6 +26,7 @@ const formSchema = z
     customerName: z
       .string()
       .min(3, { message: "Customer name must be at least 3 characters long" }),
+    customerId: z.string().nonempty({ message: "Customer ID is required" }),
     customerAddress: z
       .string()
       .min(5, { message: "Customer address must be at least 5 characters long" }),
@@ -41,13 +42,14 @@ const formSchema = z
     length: z
       .number({ invalid_type_error: "Length must be a number" })
       .min(1, { message: "Length must be greater than 0" }),
-    salesDate: z
-      .string()
-      .min(3, { message: "Sales Date must be at least 3 characters long" }),
+    salesDate: z.string().nonempty({ message: "Sales Date is required" }),
     gstPercentage: z
       .enum(["0", "1", "5", "12", "18"], {
         errorMap: () => ({ message: "Invalid GST percentage selected" }),
       }),
+    invoiceValue: z
+      .number({ invalid_type_error: "Invoice value must be a number" })
+      .min(1, { message: "Invoice value must be greater than 0" }),
   });
 
 export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
@@ -58,6 +60,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       customerName: "",
+      customerId: "",
       customerAddress: "",
       gstNumber: "",
       noOfSlabs: 1,
@@ -65,6 +68,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       length: 1,
       salesDate: "",
       gstPercentage: "0",
+      invoiceValue: 0,
     },
   });
 
@@ -88,8 +92,8 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className={`grid grid-cols-${gap} gap-3`}>
-            {/* Customer Name */}
+          {/* Row 1: Customer Name, Customer ID, Customer Address */}
+          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="customerName"
               control={form.control}
@@ -108,7 +112,28 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
 
-            {/* Customer Address */}
+            <FormField
+              name="customerId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer ID</FormLabel>
+                  <FormControl>
+                    <select
+                      disabled={isLoading}
+                      {...field}
+                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                    >
+                      <option value="674774f016639ce732baba5b">
+                        674774f016639ce732baba5b
+                      </option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               name="customerAddress"
               control={form.control}
@@ -126,8 +151,10 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+          </div>
 
-            {/* GST Number */}
+          {/* Row 2: GST Number, No of Slabs, Height */}
+          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="gstNumber"
               control={form.control}
@@ -145,10 +172,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-          </div>
 
-          <div className={`grid grid-cols-3 gap-3`}>
-            {/* No of Slabs */}
             <FormField
               name="noOfSlabs"
               control={form.control}
@@ -168,13 +192,12 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
 
-            {/* Height */}
             <FormField
               name="height"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Height</FormLabel>
+                  <FormLabel>Height (inch)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter Height"
@@ -187,14 +210,16 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+          </div>
 
-            {/* Length */}
+          {/* Row 3: Length, GST Percentage, Invoice Value */}
+          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="length"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Length</FormLabel>
+                  <FormLabel>Length (inch)</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter Length"
@@ -207,10 +232,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-          </div>
 
-          <div className={`grid grid-cols-${gap} gap-3`}>
-            {/* GST Percentage */}
             <FormField
               name="gstPercentage"
               control={form.control}
@@ -234,25 +256,47 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+
+            <FormField
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <FormField
-            name="salesDate"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sales Date</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="DD/MM/YYYY"
-                    disabled={isLoading}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Row 4: Sales Date */}
+          <div className={`grid grid-cols-3 gap-3`}>
+            <FormField
+              name="salesDate"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sales Date</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Sales Date (DD/MM/YYYY)"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <Button type="submit" disabled={isLoading}>
             Submit

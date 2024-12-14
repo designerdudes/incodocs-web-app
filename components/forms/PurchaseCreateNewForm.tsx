@@ -26,6 +26,13 @@ const formSchema = z
     SupplierName: z
       .string()
       .min(3, { message: "Supplier name must be at least 3 characters long" }),
+    SupplierId: z.string().nonempty({ message: "Supplier ID is required" }),
+    invoiceNo: z
+      .string()
+      .min(1, { message: "Invoice number must be provided" }),
+    invoiceValue: z
+      .number({ invalid_type_error: "Invoice value must be a number" })
+      .min(1, { message: "Invoice value must be greater than 0" }),
     supplierGSTN: z
       .string()
       .min(3, { message: "Supplier GSTN must be at least 3 characters long" }),
@@ -34,6 +41,9 @@ const formSchema = z
       .min(3, { message: "Purchase date must be at least 3 characters long" }),
     purchaseType: z.enum(["Raw", "Finished"], {
       errorMap: () => ({ message: "Invalid option selected" }),
+    }),
+    gstPercentage: z.enum(["0%", "1%", "5%", "12%", "18%"], {
+      errorMap: () => ({ message: "Invalid GST Percentage selected" }),
     }),
     rate: z
       .number({ invalid_type_error: "Rate must be a number" })
@@ -77,6 +87,10 @@ const formSchema = z
     breadth: z
       .number()
       .min(1, { message: "Breadth must be greater than 0" })
+      .optional(),
+    weight: z
+      .number()
+      .min(0.1, { message: "Weight must be greater than zero" })
       .optional(),
   })
   .refine(
@@ -143,6 +157,29 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 </FormItem>
               )}
             />
+            {/* Supplier ID */}
+            <FormField
+              name="SupplierId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Supplier ID</FormLabel>
+                  <FormControl>
+                    <select
+                      disabled={isLoading}
+                      {...field}
+                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                    >
+                      <option value="674ed28087fc4dd914ea444d">
+                        674ed28087fc4dd914ea444d
+                      </option>
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
 
             {/* Supplier GSTN */}
             <FormField
@@ -172,6 +209,67 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       disabled={isLoading}
                       {...field}
                     />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Invoice No */}
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Invoice Value */}
+            <FormField
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* GST Percentage */}
+            <FormField
+              name="gstPercentage"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Percentage</FormLabel>
+                  <FormControl>
+                    <select
+                      disabled={isLoading}
+                      {...field}
+                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                    >
+                      <option value="0%">0%</option>
+                      <option value="1%">1%</option>
+                      <option value="5%">5%</option>
+                      <option value="12%">12%</option>
+                      <option value="18%">18%</option>
+                    </select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -262,7 +360,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Length</FormLabel>
+                    <FormLabel>Length (inch)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Length"
@@ -282,7 +380,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Height</FormLabel>
+                    <FormLabel>Height (inch)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Height"
@@ -302,10 +400,29 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Breadth</FormLabel>
+                    <FormLabel>Breadth (inch)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Breadth"
+                        type="number"
+                        disabled={isLoading}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              {/* Weight */}
+              <FormField
+                name="weight"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Weight (tons)</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter Weight"
                         type="number"
                         disabled={isLoading}
                         {...field}
@@ -347,7 +464,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Length</FormLabel>
+                    <FormLabel>Length (inch)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Length"
@@ -367,7 +484,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 control={form.control}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Height</FormLabel>
+                    <FormLabel>Height (inch)</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Enter Height"
