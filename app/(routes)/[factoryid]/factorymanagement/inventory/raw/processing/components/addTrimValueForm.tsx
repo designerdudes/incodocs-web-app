@@ -33,7 +33,11 @@ const data: Block = {
     numberofSlabs: "12",
     weight: "2",
     breadth: "4",
-    volume: "23"
+    volume: "23",
+    lotId: {
+        _id: "",
+        lotName: ""
+    }
 };
 
 const formSchema = z.object({

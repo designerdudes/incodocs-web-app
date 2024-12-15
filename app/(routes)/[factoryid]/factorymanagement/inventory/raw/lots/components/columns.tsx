@@ -91,7 +91,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.noOfBlocks}
+                {row.original.blocksId.length}
             </div>
         ),
     },

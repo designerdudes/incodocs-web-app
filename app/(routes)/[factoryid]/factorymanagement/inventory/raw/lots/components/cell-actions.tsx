@@ -36,7 +36,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     };
-
+    // console.log(data._id)
     return (
         <div>
             <DropdownMenu>
@@ -53,10 +53,12 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Add Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Enter Block Details`
-                            GlobalModal.children = <AddBlockForm />
-                            GlobalModal.onOpen()
+                            GlobalModal.title = `Enter Block Details`;
+                            GlobalModal.description = `You are about to add a block to the lot named "${data.lotName}".`;
+                            GlobalModal.children = <AddBlockForm params={{ _id: data._id }} />;
+                            GlobalModal.onOpen();
                         }}
+
                     >
                         <Plus className="mr-2 h-4 w-4" />
                         Add Block
@@ -76,7 +78,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = "Edit Lot Details"; // Set modal title
-                            GlobalModal.children = <EditLotForm />; // Render Edit Form
+                            GlobalModal.children = <EditLotForm params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >

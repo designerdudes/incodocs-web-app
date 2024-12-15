@@ -7,7 +7,7 @@ import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
 
 export type Block = {
     _id: string
-    slabID: string
+    SlabsId: []
     blockNumber: string
     blockLotName: string
     materialType: string
@@ -114,7 +114,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.numberofSlabs}
+                {row.original.SlabsId.length}
             </div>
         ),
     },

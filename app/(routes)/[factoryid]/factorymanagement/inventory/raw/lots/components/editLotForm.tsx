@@ -16,33 +16,22 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
+import { putData } from "@/axiosUtility/api";
+import toast from "react-hot-toast";
+
 
 const formSchema = z.object({
-    lotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }),
-    materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }),
-    quantity: z
-        .string()
-        .min(1, { message: "Quantity must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Quantity must be greater than zero" }),
-    weight: z
-        .string()
-        .min(1, { message: "Weight must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Weight must be greater than zero" }),
-    height: z
-        .string()
-        .min(1, { message: "Height must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-    length: z
-        .string()
-        .min(1, { message: "Length must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
-    breadth: z
-        .string()
-        .min(1, { message: "Breadth must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Breadth must be greater than zero" }),
+    lotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }).optional(),
+    materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }).optional(),
 });
 
-export default function CardWithForm() {
+interface Props {
+    params: {
+        _id: string;
+    }
+}
+
+export default function EditLotForm({ params }: Props) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -50,6 +39,7 @@ export default function CardWithForm() {
 
     const GlobalModal = useGlobalModal();
     const router = useRouter();
+    const lotId = params._id
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -76,13 +66,24 @@ export default function CardWithForm() {
                         Cancel
                     </Button>
                     <Button
-                        onClick={() => {
-                            console.log("Lot Created:", values);
-
-                            GlobalModal.onClose();
-                            router.push("./lots");
-                            setIsLoading(false);
-                        }}
+                        onClick={async () => {
+                            try {
+                                await putData(`/factory-management/inventory/lot/update/${lotId}`, {
+                                    ...values,
+                                });
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.success("Factory updated successfully");
+                                // router.push("./dashboard");
+                            } catch (error) {
+                                console.error("Error updating Factory:", error);
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.error("Error updating Factory");
+                            }
+                            window.location.reload();
+                        }
+                        }
                     >
                         Confirm
                     </Button>
@@ -98,25 +99,25 @@ export default function CardWithForm() {
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="grid gap-4"
             >
-                
+
                 <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="lotName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Lot Name</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Eg: Lot ABC"
-                                    type="text"
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                    <FormField
+                        control={form.control}
+                        name="lotName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Lot Name</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        placeholder="Eg: Lot ABC"
+                                        type="text"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <FormField
                         control={form.control}
                         name="materialType"
