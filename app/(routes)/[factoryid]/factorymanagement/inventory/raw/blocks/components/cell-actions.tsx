@@ -33,6 +33,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import { putData } from "@/axiosUtility/api";
 import toast from 'react-hot-toast';
+import EditBlockForm from "./editBlockForm";
 
 
 
@@ -103,16 +104,21 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            onSelect={() => {
-              GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`
-              GlobalModal.description = "Are you sure you want to send this Block for cutting?"
-              GlobalModal.children = <Alert onConfirm={sendForCutting} />
-              GlobalModal.onOpen()
-            }}
-            className="focus:bg-destructive focus:text-destructive-foreground">
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Send For Cutting</DropdownMenuItem>
+          {data.status === "inStock" && (
+  <DropdownMenuItem
+    onSelect={() => {
+      GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`;
+      GlobalModal.description = "Are you sure you want to send this Block for cutting?";
+      GlobalModal.children = <Alert onConfirm={sendForCutting} />;
+      GlobalModal.onOpen();
+    }}
+    className="focus:bg-destructive focus:text-destructive-foreground"
+  >
+    <ScissorsIcon className="mr-2 h-4 w-4" />
+    Send For Cutting
+  </DropdownMenuItem>
+)}
+
 
           {/* View Lot Details */}
           <DropdownMenuItem
@@ -123,17 +129,18 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             <EyeIcon className="mr-2 h-4 w-4" />
             View Block Details
           </DropdownMenuItem>
-
-          {/* Edit Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./lotmanagement/edit/${data._id}`);
-            }}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Block Details
-          </DropdownMenuItem>
-          {/* Send For Cutting */}
+           {/* Edit Lot Details */}
+                               <DropdownMenuItem
+                                   onSelect={() => {
+                                       GlobalModal.title = "Edit Block Details"; // Set modal title
+                                       GlobalModal.children = <EditBlockForm />; // Render Edit Form
+                                       GlobalModal.onOpen();
+                                   }}
+                               >
+                                   <Edit className="mr-2 h-4 w-4" />
+                                   Edit Block Details
+                               </DropdownMenuItem>
+                               
           <DropdownMenuItem onSelect={() => setIsDrawerOpen(true)}>
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete
