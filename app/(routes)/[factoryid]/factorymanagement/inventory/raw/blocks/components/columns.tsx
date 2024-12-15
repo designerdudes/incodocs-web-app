@@ -125,7 +125,8 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.status}
+             {row.original?.status === "cut" ? "Ready for Polish" : row.original?.status || "N/A"}
+
             </div>
         ),
     },

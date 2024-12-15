@@ -103,16 +103,21 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            onSelect={() => {
-              GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`
-              GlobalModal.description = "Are you sure you want to send this Block for cutting?"
-              GlobalModal.children = <Alert onConfirm={sendForCutting} />
-              GlobalModal.onOpen()
-            }}
-            className="focus:bg-destructive focus:text-destructive-foreground">
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Send For Cutting</DropdownMenuItem>
+          {data.status === "inStock" && (
+  <DropdownMenuItem
+    onSelect={() => {
+      GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`;
+      GlobalModal.description = "Are you sure you want to send this Block for cutting?";
+      GlobalModal.children = <Alert onConfirm={sendForCutting} />;
+      GlobalModal.onOpen();
+    }}
+    className="focus:bg-destructive focus:text-destructive-foreground"
+  >
+    <ScissorsIcon className="mr-2 h-4 w-4" />
+    Send For Cutting
+  </DropdownMenuItem>
+)}
+
 
           {/* View Lot Details */}
           <DropdownMenuItem
