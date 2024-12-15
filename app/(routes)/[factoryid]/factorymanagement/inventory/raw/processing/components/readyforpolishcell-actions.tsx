@@ -15,7 +15,8 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./incuttingcolumns";
+import { Block } from "./readyforpolishcolumns";
+import { SendForPolish } from "./sendForPolsih";
 
 interface Props {
     data: Block;
@@ -50,16 +51,25 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./cutting/${data._id}/markcut`);
+                            GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
+                            GlobalModal.description = `There are ${data.SlabsId.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
+                            GlobalModal.children = (
+                                <SendForPolish
+                                    totalSlabs={data.SlabsId.length}
+                                    onConfirm={(selectedSlabs) => {
+                                        console.log(`Sending ${selectedSlabs} slabs for polishing.`);
+                                        // Call your API here to process the slabs
+                                    }}
+                                />
+                            );
+                            GlobalModal.onOpen();
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Send For Polish
                     </DropdownMenuItem>
-
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
@@ -69,7 +79,6 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Block Details
                     </DropdownMenuItem>
-
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {

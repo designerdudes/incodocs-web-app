@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { rawInventoryCards as BaseInventoryCards } from '@/lib/constants';
+import { cookies } from 'next/headers'
 
 
 interface Props {
@@ -13,10 +14,28 @@ interface Props {
     }
 }
 
-function page({ params }: Props) {
+export default async function page({ params }: Props) {
+
+
+    const cookieStore = cookies();
+    const token = cookieStore.get('AccessToken')?.value || ""
+
+    const res = await fetch(`http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        }
+    }).then(response => {
+        return response.json()
+    })
+
+    let lotsData
+    lotsData = res
 
     const rawInventoryCards = BaseInventoryCards.map((card) => ({
         ...card,
+        value: lotsData.length,
         buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
     }));
 
@@ -51,4 +70,3 @@ function page({ params }: Props) {
     )
 }
 
-export default page

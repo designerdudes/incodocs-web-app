@@ -179,15 +179,15 @@ export function RawMaterialCreateNewForm({
       const volume = length.value * breadth.value * height.value;
       return total + (volume || 0); // Add only valid volumes
     }, 0);
-  
+
     const totalVolumeInCm = totalVolumeInInches * 16.387; // Convert to cm³
-  
+
     return {
       inInches: totalVolumeInInches,
       inCm: totalVolumeInCm,
     };
   }
-  
+
 
   return (
     <div className="space-y-6">
@@ -471,7 +471,7 @@ export function RawMaterialCreateNewForm({
                       block.dimensions.length.value *
                       block.dimensions.breadth.value *
                       block.dimensions.height.value *
-                     2.54
+                      2.54
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
@@ -492,20 +492,20 @@ export function RawMaterialCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={5} className="text-right font-bold">
-                    Total Volume (in³): {calculateTotalVolume().inInches.toFixed(2)}
-                  </TableCell>
-                  <TableCell colSpan={4} className="text-right font-bold">
-                    Total Volume (cm³): {calculateTotalVolume().inCm.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  
-            
-                </TableRow>
-              </TableFooter>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={5} className="text-right font-bold">
+                  Total Volume (in³): {calculateTotalVolume().inInches.toFixed(2)}
+                </TableCell>
+                <TableCell colSpan={4} className="text-right font-bold">
+                  Total Volume (cm³): {calculateTotalVolume().inCm.toFixed(2)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+
+
+              </TableRow>
+            </TableFooter>
           </Table>
           <Button type="submit" disabled={isLoading}>
             Submit
