@@ -76,27 +76,8 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                         View Slab Details
                     </DropdownMenuItem>
 
-                    {/* Edit Lot Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            // modal.title = "Edit New Lot"; // Set the title of the modal
-                            // modal.children = <EditLotForm />; // Set the content of the modal
-                            // modal.onOpen();
-                        }}
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Slab Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Delete Slab - ${data.blockNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Slab?"
-                            GlobalModal.children = <Alert onConfirm={deleteSlab} />
-                            GlobalModal.onOpen()
-                        }}
-                        className="focus:bg-destructive focus:text-destructive-foreground">
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete Slab</DropdownMenuItem>
+                    
+                    
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

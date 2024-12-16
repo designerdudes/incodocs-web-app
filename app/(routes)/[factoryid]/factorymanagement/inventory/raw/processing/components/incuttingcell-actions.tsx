@@ -50,7 +50,7 @@ const IncuttingCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* View Lot Details */}
+                    {/* Mark cut */}
                     <DropdownMenuItem
                         onSelect={() => {
                             router.push(`./cutting/${data._id}/markcut`);
@@ -63,34 +63,16 @@ const IncuttingCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./processing/blocks/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Block Details
                     </DropdownMenuItem>
 
-                    {/* Edit Lot Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            // modal.title = "Edit New Lot"; // Set the title of the modal
-                            // modal.children = <EditLotForm />; // Set the content of the modal
-                            // modal.onOpen();
-                        }}
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Lot Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.blockNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Product?"
-                            GlobalModal.children = <Alert onConfirm={deleteLot} />
-                            GlobalModal.onOpen()
-                        }}
-                        className="focus:bg-destructive focus:text-destructive-foreground">
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete Product</DropdownMenuItem>
+                    
+                    
+                    
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
