@@ -43,7 +43,7 @@ export default function Blocks() {
         <div className="flex-1">
           <Heading className="leading-tight" title="Blocks" />
           <p className="text-muted-foreground text-sm">
-            The tracking of blocks through various stages of production.</p>
+            The tracking of blockssssss through various stages of production.</p>
         </div>
         {/* Move the interactivity to the client-side button component */}
         {/* <CreateNewLotButton /> */}

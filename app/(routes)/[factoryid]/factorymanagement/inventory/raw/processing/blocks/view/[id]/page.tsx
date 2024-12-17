@@ -33,7 +33,7 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params?.blockid}`,
+    `http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.blockid}`,
     {
       method: "GET",
       headers: {
@@ -46,28 +46,10 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = res;
+  
   console.log(SlabData);
   console.log(SlabData.dimensionsNumber);
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
-  }
-  const volumeinInchs = calculateVolume(SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value)
-    
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
-  }
- 
+  
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -105,6 +87,13 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Lot Name
+                    </TableCell>
+                    <TableCell>{SlabData?.lotname}</TableCell>
+                  </TableRow>
+                  <TableRow/>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Number
@@ -153,25 +142,8 @@ export default async function SlabsPage({ params }: Props) {
                     </TableCell>
                     <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">Volume (in³)</TableCell>
-                    <TableCell>
-                      {calculateVolume(
-                        SlabData?.dimensions?.length?.value,
-                        SlabData?.dimensions?.breadth?.value,
-                        SlabData?.dimensions?.height?.value
-                      )}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">Volume (cm³)</TableCell>
-                    <TableCell>
-                      {convertInchCubeToCmCube(volumeinInchs
-                        
-                      )}
-                    </TableCell>
-                  </TableRow>
-
+                 
+                  
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Created At

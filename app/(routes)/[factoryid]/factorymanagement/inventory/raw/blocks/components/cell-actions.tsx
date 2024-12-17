@@ -33,6 +33,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import { putData } from "@/axiosUtility/api";
 import toast from 'react-hot-toast';
+import { deleteData } from '@/axiosUtility/api';
 import EditBlockForm from "./editBlockForm";
 
 
@@ -45,6 +46,16 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
 
+   const deleteLot = async () => {
+        try {
+           await deleteData(`/factory-management/inventory/raw/lots/${data._id}/blocks`);
+            toast.success('Lot Deleted Successfully');
+            GlobalModal.onClose();
+            window.location.reload();
+        } catch (error) {
+            console.error('Error deleting data:', error);
+        }
+    };
 
   // State for controlling the drawer and managing cutting data
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
@@ -102,22 +113,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
 
-          {data.status === "inStock" && (
-  <DropdownMenuItem
-    onSelect={() => {
-      GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`;
-      GlobalModal.description = "Are you sure you want to send this Block for cutting?";
-      GlobalModal.children = <Alert onConfirm={sendForCutting} />;
-      GlobalModal.onOpen();
-    }}
-    className="focus:bg-destructive focus:text-destructive-foreground"
-  >
-    <ScissorsIcon className="mr-2 h-4 w-4" />
-    Send For Cutting
-  </DropdownMenuItem>
-)}
 
 
           {/* View Lot Details */}
@@ -141,7 +137,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                                    Edit Block Details
                                </DropdownMenuItem>
                                
-          <DropdownMenuItem onSelect={() => setIsDrawerOpen(true)}>
+          <DropdownMenuItem onSelect={() => {
+                                      GlobalModal.title = `Delete Product - ${data.lotid}`;
+                                      GlobalModal.description =
+                                          "Are you sure you want to delete this Lot?";
+                                      GlobalModal.children = <Alert onConfirm={deleteLot} />;
+                                      GlobalModal.onOpen();
+                                  }}
+                                  className="focus:bg-destructive focus:text-destructive-foreground">
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
