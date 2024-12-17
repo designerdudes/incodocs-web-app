@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
-import { ChevronLeft } from "lucide-react";
+import { ArrowUpDown, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -20,6 +20,12 @@ import {
   Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { Separator } from "@/components/ui/separator";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Blocks } from "../../../../blocks/components/columns";
+import { columns } from "./columns";
 
 interface Props {
   params: {
@@ -28,7 +34,7 @@ interface Props {
 }
 
 export default async function SlabsPage({ params }: Props) {
-  let SlabData = null;
+  let BlockData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -45,7 +51,28 @@ export default async function SlabsPage({ params }: Props) {
     return response.json();
   });
 
-  SlabData = res;
+  BlockData = res;
+  console.log(BlockData);
+  console.log(BlockData.dimensionsNumber);
+
+  let SlabData = null;
+  const CookieStore = cookies();
+  const Token = cookieStore.get("AccessToken")?.value || "";
+
+  const resp = await fetch(
+    `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+
+  SlabData = resp;
   console.log(SlabData);
   console.log(SlabData.dimensionsNumber);
   function calculateVolume(
@@ -59,15 +86,17 @@ export default async function SlabsPage({ params }: Props) {
     }
     return "";
   }
-  const volumeinInchs = calculateVolume(SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value)
-    
+  const volumeinInchs = calculateVolume(
+    BlockData?.dimensions?.length?.value,
+    BlockData?.dimensions?.breadth?.value,
+    BlockData?.dimensions?.height?.value
+  );
+
   function convertInchCubeToCmCube(volumeinInchs: any) {
     const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
+    const inchToCm = volumeinInchs * conversionFactor;
+    return inchToCm.toFixed(2);
   }
- 
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -81,7 +110,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block ${SlabData.blockNumber} `}
+            title={` Details of Block ${BlockData.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Slabs with detailed insights into its current
@@ -89,12 +118,13 @@ export default async function SlabsPage({ params }: Props) {
           </p>
         </div>
       </div>
-      <div className="flex-1">
-        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+      <div className="flex flex-col flex-1">
+        <div className="grid grid-cols-2 gap-6">
+          {/* Block Details Card */}
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Block Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -109,66 +139,74 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Block Number
                     </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>{BlockData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Number of slabs
                     </TableCell>
-                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
+                    <TableCell>{BlockData?.SlabsId?.length}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>{BlockData.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{SlabData.status}</TableCell>
+                    <TableCell>{BlockData.status}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Weight (tons)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.weight?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.dimensions?.weight?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Length (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.dimensions?.length?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Breadth (inch)
                     </TableCell>
                     <TableCell>
-                      {SlabData?.dimensions?.breadth?.value}
+                      {BlockData?.dimensions?.breadth?.value}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Height (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.dimensions?.height?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Volume (in³)</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Volume (in³)
+                    </TableCell>
                     <TableCell>
                       {calculateVolume(
-                        SlabData?.dimensions?.length?.value,
-                        SlabData?.dimensions?.breadth?.value,
-                        SlabData?.dimensions?.height?.value
+                        BlockData?.dimensions?.length?.value,
+                        BlockData?.dimensions?.breadth?.value,
+                        BlockData?.dimensions?.height?.value
                       )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Volume (cm³)</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Volume (cm³)
+                    </TableCell>
                     <TableCell>
-                      {convertInchCubeToCmCube(volumeinInchs
-                        
-                      )}
+                      {convertInchCubeToCmCube(volumeinInchs)}
                     </TableCell>
                   </TableRow>
 
@@ -177,7 +215,7 @@ export default async function SlabsPage({ params }: Props) {
                       Block Created At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
+                      {moment(BlockData.createdAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -185,13 +223,27 @@ export default async function SlabsPage({ params }: Props) {
                       Block Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
+
+          {/* Slabs DataTable */}
+          <div className="container mx-auto">
+            <DataTable
+              bulkDeleteIdName="_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+              bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+              deleteRoute="/category/ids"
+              searchKey="name"
+              columns={columns}
+              data={SlabData as any}
+            />
+          </div>
         </div>
       </div>
     </div>
