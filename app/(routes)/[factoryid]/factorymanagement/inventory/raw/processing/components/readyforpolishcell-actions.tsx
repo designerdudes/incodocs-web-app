@@ -90,16 +90,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Lot Details
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.blockNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Product?"
-                            GlobalModal.children = <Alert onConfirm={deleteLot} />
-                            GlobalModal.onOpen()
-                        }}
-                        className="focus:bg-destructive focus:text-destructive-foreground">
-                        <Trash className="mr-2 h-4 w-4" />
-                        Delete Block</DropdownMenuItem>
+                    
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

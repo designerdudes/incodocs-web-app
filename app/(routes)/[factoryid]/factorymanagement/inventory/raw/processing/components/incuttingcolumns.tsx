@@ -102,23 +102,24 @@ export const incuttingcolumns: ColumnDef<Block>[] = [
             </div>
         ),
     },
-    {
-        accessorKey: "numberofSlabs",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Total Slabs
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.numberofSlabs}
-            </div>
-        ),
-    },
+    
+    // {
+    //     accessorKey: "numberofSlabs",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Total Slabs
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.numberofSlabs}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "status",
         header: ({ column }) => (
