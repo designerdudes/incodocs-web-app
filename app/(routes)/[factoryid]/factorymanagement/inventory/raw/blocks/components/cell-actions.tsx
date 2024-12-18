@@ -113,8 +113,20 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-
-
+          {data.status === "inStock" && (
+  <DropdownMenuItem
+    onSelect={() => {
+      GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`;
+      GlobalModal.description = "Are you sure you want to send this Block for cutting?";
+      GlobalModal.children = <Alert onConfirm={sendForCutting} />;
+      GlobalModal.onOpen();
+    }}
+    className="focus:bg-destructive focus:text-destructive-foreground"
+  >
+    <ScissorsIcon className="mr-2 h-4 w-4" />
+    Send For Cutting
+  </DropdownMenuItem>
+)}
 
           {/* View Lot Details */}
           <DropdownMenuItem
@@ -138,9 +150,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                                </DropdownMenuItem>
                                
           <DropdownMenuItem onSelect={() => {
-                                      GlobalModal.title = `Delete Product - ${data.lotid}`;
+                                      GlobalModal.title = `Delete Product - ${data.blockNumber}`;
                                       GlobalModal.description =
-                                          "Are you sure you want to delete this Lot?";
+                                          "Are you sure you want to delete this Block?";
                                       GlobalModal.children = <Alert onConfirm={deleteLot} />;
                                       GlobalModal.onOpen();
                                   }}
