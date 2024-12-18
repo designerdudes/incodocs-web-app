@@ -16,41 +16,44 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "../ui/calendar";
 
 interface SalesCreateNewFormProps {
   gap: number;
 }
 
-const formSchema = z
-  .object({
-    customerName: z
-      .string()
-      .min(3, { message: "Customer name must be at least 3 characters long" }),
-    customerId: z.string().nonempty({ message: "Customer ID is required" }),
-    customerAddress: z
-      .string()
-      .min(5, { message: "Customer address must be at least 5 characters long" }),
-    gstNumber: z
-      .string()
-      .min(3, { message: "GST Number must be at least 3 characters long" }),
-    noOfSlabs: z
-      .number({ invalid_type_error: "No of Slabs must be a number" })
-      .min(1, { message: "No of Slabs must be greater than 0" }),
-    height: z
-      .number({ invalid_type_error: "Height must be a number" })
-      .min(1, { message: "Height must be greater than 0" }),
-    length: z
-      .number({ invalid_type_error: "Length must be a number" })
-      .min(1, { message: "Length must be greater than 0" }),
-    salesDate: z.string().nonempty({ message: "Sales Date is required" }),
-    gstPercentage: z
-      .enum(["0", "1", "5", "12", "18"], {
-        errorMap: () => ({ message: "Invalid GST percentage selected" }),
-      }),
-    invoiceValue: z
-      .number({ invalid_type_error: "Invoice value must be a number" })
-      .min(1, { message: "Invoice value must be greater than 0" }),
-  });
+const formSchema = z.object({
+  customerName: z
+    .string()
+    .min(3, { message: "Customer name must be at least 3 characters long" }),
+  customerId: z.string().nonempty({ message: "Customer ID is required" }),
+  customerAddress: z
+    .string()
+    .min(5, { message: "Customer address must be at least 5 characters long" }),
+  gstNumber: z
+    .string()
+    .min(3, { message: "GST Number must be at least 3 characters long" }),
+  noOfSlabs: z
+    .number({ invalid_type_error: "No of Slabs must be a number" })
+    .min(1, { message: "No of Slabs must be greater than 0" }),
+  height: z
+    .number({ invalid_type_error: "Height must be a number" })
+    .min(1, { message: "Height must be greater than 0" }),
+  length: z
+    .number({ invalid_type_error: "Length must be a number" })
+    .min(1, { message: "Length must be greater than 0" }),
+  salesDate: z.string().nonempty({ message: "Sales Date is required" }),
+  gstPercentage: z.enum(["0", "1", "5", "12", "18"], {
+    errorMap: () => ({ message: "Invalid GST percentage selected" }),
+  }),
+  invoiceValue: z
+    .number({ invalid_type_error: "Invoice value must be a number" })
+    .min(1, { message: "Invoice value must be greater than 0" }),
+});
 
 export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
   const router = useRouter();
@@ -286,11 +289,36 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 <FormItem>
                   <FormLabel>Sales Date</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter Sales Date (DD/MM/YYYY)"
-                      disabled={isLoading}
-                      {...field}
-                    />
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-[40%] justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value
+                              ? format(new Date(field.value), "PPP")
+                              : "Sale date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onSelect={(date) =>
+                              field.onChange(date ? date.toISOString() : "")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
