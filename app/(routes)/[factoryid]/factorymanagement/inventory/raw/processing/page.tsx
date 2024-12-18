@@ -48,7 +48,8 @@ export default async function SlabsProcessingPage() {
     const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
     const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
     const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
-    console.log(readyForPolish)
+    console.log(inCutting)
+
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -101,7 +102,6 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
                     </TabsContent>
-                    
                 </Tabs>
             </div>-
         </div>

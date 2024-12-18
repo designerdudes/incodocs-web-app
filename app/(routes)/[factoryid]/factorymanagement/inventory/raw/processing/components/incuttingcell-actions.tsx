@@ -21,7 +21,7 @@ interface Props {
     data: Block;
 }
 
-const IncuttingCellAction: React.FC<Props> = ({ data }) => {
+const        IncuttingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
     const deleteLot = async () => {
@@ -36,6 +36,8 @@ const IncuttingCellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     }
+
+    console.log("this is id", data._id)
 
     return (
         <div>
@@ -69,10 +71,6 @@ const IncuttingCellAction: React.FC<Props> = ({ data }) => {
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Block Details
                     </DropdownMenuItem>
-
-                    
-                    
-                    
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

@@ -23,17 +23,21 @@ import moment from "moment";
 
 interface Props {
   params: {
-    blockid: string;
+    id: string;
+    factoryid:string;
   };
 }
 
 export default async function SlabsPage({ params }: Props) {
   let SlabData = null;
+  console.log("params is ",params)
+  console.log('id of Block is',params.id)
+  console.log("factory Id", params.factoryid)
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.blockid}`,
+    `http://localhost:4080/factory-management/inventory/raw/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -48,7 +52,6 @@ export default async function SlabsPage({ params }: Props) {
   SlabData = res;
   
   console.log(SlabData);
-  console.log(SlabData.dimensionsNumber);
   
 
   return (
@@ -91,7 +94,7 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Lot Name
                     </TableCell>
-                    <TableCell>{SlabData?.lotname}</TableCell>
+                    <TableCell>{SlabData?.lotId?.lotName}</TableCell>
                   </TableRow>
                   <TableRow/>
                   <TableRow>

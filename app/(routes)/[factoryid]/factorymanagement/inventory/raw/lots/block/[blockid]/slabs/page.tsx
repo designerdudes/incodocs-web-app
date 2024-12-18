@@ -52,8 +52,8 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   BlockData = res;
-  console.log(BlockData);
-  console.log(BlockData.dimensionsNumber);
+  console.log("this is lot ID", BlockData.lotId._id)
+  // console.log(BlockData);
 
   let SlabData = null;
   const CookieStore = cookies();
@@ -73,8 +73,7 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = resp;
-  console.log(SlabData);
-  console.log(SlabData.dimensionsNumber);
+  // console.log(SlabData);
   function calculateVolume(
     length: number,
     breadth: number,
@@ -101,7 +100,7 @@ export default async function SlabsPage({ params }: Props) {
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href="../">
+        <Link href={`../../${BlockData.lotId._id}/blocks`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -155,7 +154,8 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{BlockData.status}</TableCell>
+                    <TableCell>{BlockData?.status === "cut" ? "Ready for Polish" : BlockData?.status || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">

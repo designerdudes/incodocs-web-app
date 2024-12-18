@@ -48,7 +48,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
    const deleteLot = async () => {
         try {
-           await deleteData(`/factory-management/inventory/raw/lots/${data._id}/blocks`);
+           await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
             toast.success('Lot Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
@@ -150,73 +150,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Drawer for Send for Cutting */}
-      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerContent>
-          <div className="mx-auto w-full max-w-sm">
-            <DrawerHeader>
-              <DrawerTitle>Send Blocks for Cutting</DrawerTitle>
-              <DrawerDescription>
-                Enter the number of blocks for cutting (within available stock).
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="p-4 pb-0">
-              <div className="grid gap-4">
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="blocks">Blocks in Stock</Label>
-                  <div className="col-span-2 text-center text-lg font-semibold">
-                    {availableBlocks} blocks
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="blocks">Blocks for Cutting</Label>
-                  <Input
-                    id="blocks"
-                    type="number"
-                    placeholder="No. of Blocks"
-                    className="col-span-2 h-8"
-                    value={cuttingData.blocks}
-                    onChange={handleInputChange}
-                    max={availableBlocks}
-                    min={0}
-                  />
-                </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="width">Width (inches)</Label>
-                  <Input
-                    id="width"
-                    type="number"
-                    placeholder="Width"
-                    className="col-span-2 h-8"
-                    value={cuttingData.width}
-                    onChange={handleInputChange}
-                  />
-                </div>
-                <div className="grid grid-cols-3 items-center gap-4">
-                  <Label htmlFor="height">Height (inches)</Label>
-                  <Input
-                    id="height"
-                    type="number"
-                    placeholder="Height"
-                    className="col-span-2 h-8"
-                    value={cuttingData.height}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-            <DrawerFooter>
-              <Button className="w-full" onClick={handleSubmit}>
-                Submit
-              </Button>
-              <DrawerClose asChild>
-                <Button variant="outline">Cancel</Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </div>
-        </DrawerContent>
-      </Drawer>
     </div>
   );
 };
