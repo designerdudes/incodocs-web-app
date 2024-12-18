@@ -55,7 +55,7 @@ const        IncuttingCellAction: React.FC<Props> = ({ data }) => {
                     {/* Mark cut */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./cutting/${data._id}/markcut`);
+                            router.push(`./processing/cutting/${data._id}/markcut`);
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
