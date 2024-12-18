@@ -86,6 +86,9 @@ export default async function SlabsProcessingPage() {
                         Efficiently track and manage Expenses in process with detailed insights into their dimensions, weight, and progress through the cutting process.
                     </p>
                 </div>
+                <Link href='./Expenses/create-new'>
+                    <Button> Create New Expense</Button>
+                </Link>
             </div>
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
