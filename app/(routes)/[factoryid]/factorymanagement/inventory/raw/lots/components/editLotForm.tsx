@@ -52,6 +52,7 @@ export default function EditLotForm({ params }: Props) {
   });
 
   const lotId = params._id;
+  // console.log(params._id)
  
 
   // Fetch existing lot data and reset form values
@@ -60,7 +61,7 @@ export default function EditLotForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/factory-lot/get/${lotId}`
+          `http://localhost:4080/factory-management/inventory/lot/getbyid/${lotId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch lot data");
@@ -79,8 +80,6 @@ export default function EditLotForm({ params }: Props) {
         setIsFetching(false);
       }
     }
-
- 
 
 
     fetchLotData();
