@@ -58,7 +58,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                         // }}
                         onSelect={() => {
                             GlobalModal.title = `Enter triming Values of Slab:${data.slabNumber}`
-                            GlobalModal.children = <CardWithForm />
+                            GlobalModal.children = <CardWithForm params={{ id: data._id }} />
                             GlobalModal.onOpen()
                         }}
                     >
