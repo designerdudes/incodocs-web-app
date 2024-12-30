@@ -57,7 +57,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                         //     router.push(`./polishing/${data._id}/markpolish`);
                         // }}
                         onSelect={() => {
-                            GlobalModal.title = `Enter triming Values`
+                            GlobalModal.title = `Enter triming Values of Slab:${data.slabNumber}`
                             GlobalModal.children = <CardWithForm />
                             GlobalModal.onOpen()
                         }}
