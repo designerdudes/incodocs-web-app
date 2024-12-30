@@ -83,7 +83,7 @@ export default async function SlabsProcessingPage() {
                 <div className="flex-1">
                     <Heading className="leading-tight" title="Expenses page" />
                     <p className="text-muted-foreground text-sm mt-2">
-                        Efficiently track and manage Expenses in process with detailed insights into their dimensions, weight, and progress through the cutting process.
+                        Efficiently track, manage, and analyze your expenses effortlessly with our user-friendly interface.
                     </p>
                 </div>
                 <Link href='./Expenses/create-new'>
@@ -105,16 +105,3 @@ export default async function SlabsProcessingPage() {
         </div>
     );
 };
-
-// import React from 'react'
-
-// const hello = () => {
-//   return (
-//     <div>
-//       yo buddy
-//     </div>
-//   )
-// }
-
-// export default hello
-

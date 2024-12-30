@@ -101,7 +101,7 @@ const data = {
                         },
                         {
                             title: "GST Ledger",
-                            url: "/factorymanagement/accounting/gst-ledger",
+                            url: "/factorymanagement/accounting/GSTLedger",
 
                         }
                     ],
