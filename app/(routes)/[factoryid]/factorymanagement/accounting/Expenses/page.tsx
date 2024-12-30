@@ -86,6 +86,9 @@ export default async function SlabsProcessingPage() {
                         Efficiently track, manage, and analyze your expenses effortlessly with our user-friendly interface.
                     </p>
                 </div>
+                <Link href='./Expenses/create-new'>
+                    <Button> Create New Expense</Button>
+                </Link>
             </div>
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">

@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
-import { ArrowUpDown, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -21,11 +21,6 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { Separator } from "@/components/ui/separator";
-import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Blocks } from "../../../../blocks/components/columns";
-import { columns } from "./columns";
 
 interface Props {
   params: {
@@ -34,7 +29,7 @@ interface Props {
 }
 
 export default async function SlabsPage({ params }: Props) {
-  let BlockData = null;
+  let SlabData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -51,29 +46,9 @@ export default async function SlabsPage({ params }: Props) {
     return response.json();
   });
 
-  BlockData = res;
-  console.log("this is lot ID", BlockData.lotId._id)
-  // console.log(BlockData);
-
-  let SlabData = null;
-  const CookieStore = cookies();
-  const Token = cookieStore.get("AccessToken")?.value || "";
-
-  const resp = await fetch(
-    `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
-
-  SlabData = resp;
-  // console.log(SlabData);
+  SlabData = res;
+  console.log(SlabData);
+  console.log(SlabData.dimensionsNumber);
   function calculateVolume(
     length: number,
     breadth: number,
@@ -86,21 +61,20 @@ export default async function SlabsPage({ params }: Props) {
     return "";
   }
   const volumeinInchs = calculateVolume(
-    BlockData?.dimensions?.length?.value,
-    BlockData?.dimensions?.breadth?.value,
-    BlockData?.dimensions?.height?.value
+    SlabData?.dimensions?.length?.value,
+    SlabData?.dimensions?.breadth?.value,
+    SlabData?.dimensions?.height?.value
   );
 
   function convertInchCubeToCmCube(volumeinInchs: any) {
     const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    const inchToCm = volumeinInchs * conversionFactor;
-    return inchToCm.toFixed(2);
+    return volumeinInchs * conversionFactor;
   }
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href={`../../${BlockData.lotId._id}/blocks`}>
+        <Link href="../">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -109,22 +83,22 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block ${BlockData.blockNumber} `}
+            title={` Details of Sales ${SlabData.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
-            Efficiently track Slabs with detailed insights into its current
-            status and progress through the production cycle.
+            Comprehensive insights into slab sales, including quantity,
+            material, dimensions, and pricing, to streamline inventory tracking
+            and enhance sales management.
           </p>
         </div>
       </div>
-        <Separator/>
-      <div className="flex flex-col flex-1 py-2">
-        <div className="grid grid-cols-2 gap-6">
-          {/* Block Details Card */}
+      <Separator />
+      <div className="flex-1">
+        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
-              <CardTitle>Block Details</CardTitle>
-              <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
+              <CardTitle>Sales Details</CardTitle>
+              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -137,114 +111,87 @@ export default async function SlabsPage({ params }: Props) {
                 <TableBody>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Block Number
+                      Customer Name
                     </TableCell>
-                    <TableCell>{BlockData?.blockNumber}</TableCell>
+                    <TableCell>{SlabData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Number of slabs
+                      GST Number
                     </TableCell>
-                    <TableCell>{BlockData?.SlabsId?.length}</TableCell>
+                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Material Type
+                      Invoice No.
                     </TableCell>
-                    <TableCell>{BlockData.materialType}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{BlockData?.status === "cut" ? "Ready for Polish" : BlockData?.status || "N/A"}
-                    </TableCell>
+                    <TableCell>{SlabData.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Weight (tons)
+                      Invoice Value
                     </TableCell>
-                    <TableCell>
-                      {BlockData?.dimensions?.weight?.value}
+                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Number of Slabs
                     </TableCell>
+                    <TableCell>{SlabData.status}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Length (inch)
                     </TableCell>
-                    <TableCell>
-                      {BlockData?.dimensions?.length?.value}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Breadth (inch)
-                    </TableCell>
-                    <TableCell>
-                      {BlockData?.dimensions?.breadth?.value}
-                    </TableCell>
+                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Height (inch)
                     </TableCell>
-                    <TableCell>
-                      {BlockData?.dimensions?.height?.value}
-                    </TableCell>
+                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Volume (in³)
+                      Area of Sqft
                     </TableCell>
-                    <TableCell>
-                      {calculateVolume(
-                        BlockData?.dimensions?.length?.value,
-                        BlockData?.dimensions?.breadth?.value,
-                        BlockData?.dimensions?.height?.value
-                      )}
-                    </TableCell>
+                    <TableCell>{SlabData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Volume (cm³)
+                      GST Percentage
+                    </TableCell>
+                    <TableCell>{SlabData.materialType}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Sales Date
                     </TableCell>
                     <TableCell>
-                      {convertInchCubeToCmCube(volumeinInchs)}
+                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
 
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Block Created At
+                      Slab Created At
                     </TableCell>
                     <TableCell>
-                      {moment(BlockData.createdAt).format("YYYY-MM-DD")}
+                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Block Updated At
+                      Slab Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
-
-          {/* Slabs DataTable */}
-          <div className="container mx-auto">
-            <DataTable
-              bulkDeleteIdName="_id"
-              bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-              bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-              bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-              deleteRoute="/category/ids"
-              searchKey="name"
-              columns={columns}
-              data={SlabData as any}
-            />
-          </div>
         </div>
       </div>
     </div>

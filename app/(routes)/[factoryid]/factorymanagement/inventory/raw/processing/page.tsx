@@ -11,6 +11,7 @@ import { incuttingcolumns } from './components/incuttingcolumns';
 import { Readyforpolishcolumns } from './components/readyforpolishcolumns';
 import { inPolishingolumns } from './components/inpolishingcolumns';
 import { cookies } from 'next/headers';
+import { Polishedcolumns } from './components/polishedcolumns';
 
 
 export default async function SlabsProcessingPage() {
@@ -48,7 +49,8 @@ export default async function SlabsProcessingPage() {
     const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
     const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
     const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
-    console.log(inCutting)
+    const Polished = Slabdata.filter((data: any) => data.status === 'polished')
+    
 
 
     return (
@@ -74,7 +76,7 @@ export default async function SlabsProcessingPage() {
                         <TabsTrigger className='gap-2' value="inCutting">In Cutting<Badge className='text-bg-primary-foreground ' variant="outline">{inCutting?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="readyforpolish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="inPolishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
-                        <TabsTrigger className='gap-2' value="inPolishing">Polishied<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
+                        <TabsTrigger className='gap-2' value="Polished">Polishied<Badge className='text-bg-primary-foreground' variant="outline">{Polished?.length}</Badge> </TabsTrigger>
 
 
                     </TabsList>
@@ -101,6 +103,14 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected slabs deleted successfully'
                             searchKey='title' columns={inPolishingolumns} data={inPolishing} />
+                    </TabsContent>
+                    <TabsContent value="Polished">
+                        <DataTable
+                            bulkDeleteIdName='order_id'
+                            bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                            bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                            bulkDeleteToastMessage='Selected slabs deleted successfully'
+                            searchKey='title' columns={Polishedcolumns} data={Polished} />
                     </TabsContent>
                 </Tabs>
             </div>-

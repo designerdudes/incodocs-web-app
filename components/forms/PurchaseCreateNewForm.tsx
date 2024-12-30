@@ -16,6 +16,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { cn } from "@/lib/utils";
+import { Calendar } from "../ui/calendar";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 interface PurchaseCreateNewFormProps {
   gap: number;
@@ -197,23 +202,47 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
             />
 
             {/* Purchase Date */}
-            <FormField
-              name="purchaseDate"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Purchase Date</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="DD/MM/YYYY"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+<FormField
+  name="purchaseDate"
+  control={form.control}
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Purchase Date</FormLabel>
+      <FormControl>
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-[40%] justify-start text-left font-normal",
+                  !field.value && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {field.value
+                  ? format(new Date(field.value), "PPP")
+                  : "Purchase date"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <Calendar
+                mode="single"
+                selected={field.value ? new Date(field.value) : undefined}
+                onSelect={(date) =>
+                  field.onChange(date ? date.toISOString() : "")
+                }
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
             {/* Invoice No */}
             <FormField
               name="invoiceNo"

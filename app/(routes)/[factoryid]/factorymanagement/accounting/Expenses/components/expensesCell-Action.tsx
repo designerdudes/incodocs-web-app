@@ -51,7 +51,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./lots/${data._id}/blocks`);
+                            router.push(`./Expenses/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />

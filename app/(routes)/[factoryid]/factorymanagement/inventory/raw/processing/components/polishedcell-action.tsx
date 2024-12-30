@@ -15,26 +15,26 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./readyforpolishcolumns";
-import { SendForPolish } from "./sendForPolsih";
+import CardWithForm from "./addTrimValueForm"
+import { Slab } from "./inpolishingcolumns";
 
 interface Props {
-    data: Block;
+    data: Slab;
 }
 
-export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
+export const PolishedCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const deleteLot = async () => {
+    const deleteSlab = async () => {
 
         try {
-            const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
-            toast.success('Block Deleted Successfully')
+            toast.success('Slab Deleted Successfully')
             GlobalModal.onClose()
             window.location.reload()
         } catch (error) {
-            console.error('Error deleting Block:', error);
+            console.error('Error deleting data:', error);
         }
     }
 
@@ -51,25 +51,21 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+               
                     <DropdownMenuItem
+                        // onSelect={() => {
+                        //     router.push(`./polishing/${data._id}/markpolish`);
+                        // }}
                         onSelect={() => {
-                            GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
-                            GlobalModal.description = `There are ${data.SlabsId.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
-                            GlobalModal.children = (
-                                <SendForPolish
-                                    totalSlabs={data.SlabsId.length}
-                                    onConfirm={(selectedSlabs) => {
-                                        console.log(`Sending ${selectedSlabs} slabs for polishing.`);
-                                        // Call your API here to process the slabs
-                                    }}
-                                />
-                            );
-                            GlobalModal.onOpen();
+                            GlobalModal.title = `Enter triming Values`
+                            GlobalModal.children = <CardWithForm />
+                            GlobalModal.onOpen()
                         }}
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Send For Polish
+                        Edit Trim Values
                     </DropdownMenuItem>
+
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
@@ -77,19 +73,10 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
-                        View Block Details
+                        View Slab Details
                     </DropdownMenuItem>
-                    {/* Edit Lot Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            // modal.title = "Edit New Lot"; // Set the title of the modal
-                            // modal.children = <EditLotForm />; // Set the content of the modal
-                            // modal.onOpen();
-                        }}
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Lot Details
-                    </DropdownMenuItem>
+
+                    
                     
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -97,3 +84,4 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     );
 };
 
+export default PolishedCellAction;
