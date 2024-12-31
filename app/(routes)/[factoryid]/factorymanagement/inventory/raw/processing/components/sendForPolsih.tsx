@@ -1,37 +1,89 @@
-"use client"
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Assuming you have an Input component
-import { Label } from "@/components/ui/label"; // Assuming you have a Label component
+import { Label } from "@/components/ui/label";
+import { fetchData, putData } from "@/axiosUtility/api";
+import { useState, useEffect } from "react";
 
 interface SendForPolishProps {
-    onConfirm: (selectedSlabs: number) => void;
-    totalSlabs: number; // Pass total slabs available in the block
+    blockId: string;
+    onConfirm: (selectedSlabs: string[]) => void;
 }
 
-export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSlabs }) => {
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [selectedSlabs, setSelectedSlabs] = React.useState<number>(0);
+const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [slabData, setSlabData] = useState<any>(null);
+    const [selectedSlabs, setSelectedSlabs] = useState<string[]>([]);
     const GlobalModal = useGlobalModal();
+
+    useEffect(() => {
+        const fetchSlabData = async () => {
+            try {
+                const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
+                setSlabData(GetData);
+                console.log("This is Block data", GetData);
+            } catch (error) {
+                console.error("Error fetching slab data:", error);
+            }
+        };
+
+        if (blockId) {
+            fetchSlabData();
+        }
+    }, [blockId]);
+
+    const toggleSlabSelection = (slabId: string) => {
+        setSelectedSlabs((prev) =>
+            prev.includes(slabId)
+                ? prev.filter((id) => id !== slabId) // Deselect slab
+                : [...prev, slabId] // Select slab
+        );
+    };
 
     const onSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
 
-        if (selectedSlabs <= 0 || selectedSlabs > totalSlabs) {
-            alert("Please select a valid number of slabs.");
+        if (selectedSlabs.length === 0) {
+            alert("Please select at least one slab.");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            await onConfirm(selectedSlabs); // Call the onConfirm with the selected slabs
+            // Call the API to update the slab status
+            const response = await putData(
+                "/factory-management/inventory/updatemultipleslabs",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        slabNumbers: selectedSlabs,
+                        status: "polished",
+                    }),
+
+                }
+            );
+            console.log("response ", response)
+
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            console.log("Response:", await response.json());
+
+            // Notify the parent component
+            await onConfirm(selectedSlabs);
             GlobalModal.onClose();
         } catch (error) {
             console.error("Error sending slabs for polishing:", error);
+            alert("Failed to update slab status. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -39,27 +91,28 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
-            {/* Show total slabs */}
             <div className="space-y-2">
                 <Label>Total Slabs in Block</Label>
-                <p className="text-gray-600">{totalSlabs}</p>
+                <p className="text-gray-600">{slabData?.SlabsId.length || 0}</p>
             </div>
 
-            {/* Input for selecting slabs */}
+            {/* Display slabs with checkboxes */}
             <div className="space-y-2">
-                <Label htmlFor="slabsToSend">Select Slabs to Send for Polishing</Label>
-                <Input
-                    id="slabsToSend"
-                    type="number"
-                    value={selectedSlabs}
-                    onChange={(e) => setSelectedSlabs(Number(e.target.value))}
-                    placeholder="Enter number of slabs"
-                    min={1}
-                    max={totalSlabs}
-                />
+                <Label>Select Slabs to Send for Polishing</Label>
+                {slabData?.SlabsId.map((slabId: string, index: number) => (
+                    <div key={slabId} className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id={`slab-${slabId}`}
+                            checked={selectedSlabs.includes(slabId)}
+                            onChange={() => toggleSlabSelection(slabId)}
+                        />
+                        {/* Replace slabId with a user-friendly slab number */}
+                        <label htmlFor={`slab-${slabId}`}>Slab {index + 1}</label>
+                    </div>
+                ))}
             </div>
 
-            {/* Action buttons */}
             <div className={cn("flex gap-2 justify-end")}>
                 <Button
                     variant="secondary"
@@ -76,3 +129,5 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
         </form>
     );
 };
+
+export default SendForPolish;
