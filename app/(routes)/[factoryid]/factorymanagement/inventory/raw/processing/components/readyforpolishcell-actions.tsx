@@ -22,7 +22,7 @@ interface Props {
 export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    console.log("These are slab ids ", data.SlabsId)
+    // console.log("These are slab ids ", data.SlabsId)
 
 
     return (
