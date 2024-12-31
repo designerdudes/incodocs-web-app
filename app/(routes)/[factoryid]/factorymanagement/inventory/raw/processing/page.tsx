@@ -77,8 +77,6 @@ export default async function SlabsProcessingPage() {
                         <TabsTrigger className='gap-2' value="readyforpolish">Ready For Polish<Badge className='text-bg-primary-foreground' variant="outline">{readyForPolish?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="inPolishing">In Polishing<Badge className='text-bg-primary-foreground' variant="outline">{inPolishing?.length}</Badge> </TabsTrigger>
                         <TabsTrigger className='gap-2' value="Polished">Polishied<Badge className='text-bg-primary-foreground' variant="outline">{Polished?.length}</Badge> </TabsTrigger>
-
-
                     </TabsList>
                     <TabsContent value="inCutting">
                         <DataTable

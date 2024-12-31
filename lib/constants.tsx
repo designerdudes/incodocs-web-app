@@ -236,6 +236,41 @@ const FinishedPageCards = [
   },
 ];
 
+const AccountingCard = [
+  {
+    title: "Purchases",
+    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    value: 50,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/accounting/purchases",
+  },
+  {
+    title: "Sales",
+    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    value: 40,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/accounting/sales",
+  },
+  {
+    title: "Expenses",
+    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    value: 40,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/accounting/Expenses",
+  },
+  {
+    title: "GST Ledger",
+    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    value: 40,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/accounting/GSTLedger",
+  },
+];
+
 export {
   sidebarTabs,
   accountingSidebarTabs,
@@ -246,4 +281,4 @@ export {
   FinishedPageCards,
   FactoryCards,
 };
-export { BrandName };
+    export { BrandName, AccountingCard };

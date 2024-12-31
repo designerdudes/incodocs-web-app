@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Block } from "./incuttingcolumns"
 import InPolishingCellAction from "./inpolishingcell-actions"
 
 export type Slab = {

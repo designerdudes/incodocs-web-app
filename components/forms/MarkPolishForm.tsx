@@ -9,6 +9,7 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { putData } from "@/axiosUtility/api";
 
 interface MarkPolishFormProps extends React.HTMLAttributes<HTMLDivElement> {
     BlockData: any;
@@ -43,16 +44,23 @@ export function MarkPolishForm({ BlockData, className, gap, ...props }: MarkPoli
         },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
+        console.log("Values", values)
+        try {
+          await putData(`/factory-management/inventory/finished/put/${BlockData._id}`, {
+            ...values,
+            status: "polished",
+          });
+          toast.success("Slab data updated successfully");
+          router.push("../../");
+        } catch (error) {
+          toast.error("An error occurred while updating data");
+        } finally {
+          setIsLoading(false);
+        }
+      }
 
-        // Add your update logic here
-        toast.success("Slab data updated successfully");
-        setIsLoading(false);
-
-        // Navigate or handle further logic
-        router.refresh(); // Refresh the current page
-    }
 
     return (
         <div className="space-y-6">
