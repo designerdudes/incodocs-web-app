@@ -25,18 +25,6 @@ interface Props {
 export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const deleteLot = async () => {
-
-        try {
-            const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-            toast.success('Block Deleted Successfully')
-            GlobalModal.onClose()
-            window.location.reload()
-        } catch (error) {
-            console.error('Error deleting Block:', error);
-        }
-    }
 
     return (
         <div>
@@ -90,7 +78,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Lot Details
                     </DropdownMenuItem>
-                    
+
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

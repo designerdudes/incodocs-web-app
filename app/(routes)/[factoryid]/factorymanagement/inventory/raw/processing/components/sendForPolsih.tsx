@@ -1,37 +1,71 @@
-"use client"
+"use client";
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input"; // Assuming you have an Input component
-import { Label } from "@/components/ui/label"; // Assuming you have a Label component
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface SendForPolishProps {
     onConfirm: (selectedSlabs: number) => void;
-    totalSlabs: number; // Pass total slabs available in the block
+    totalSlabs: number;
 }
 
 export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSlabs }) => {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [selectedSlabs, setSelectedSlabs] = React.useState<number>(0);
+    const [slabNumbers, setSlabNumbers] = React.useState<string>(""); // Input for slab numbers
     const GlobalModal = useGlobalModal();
 
     const onSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
 
-        if (selectedSlabs <= 0 || selectedSlabs > totalSlabs) {
-            alert("Please select a valid number of slabs.");
+        const slabNumbersArray = slabNumbers
+            .split(",")
+            .map((num) => parseInt(num.trim()))
+            .filter((num) => !isNaN(num));
+
+        if (slabNumbersArray.length !== selectedSlabs) {
+            alert("The number of slab numbers entered does not match the selected count.");
+            return;
+        }
+
+        // Remove this condition if slab numbers don't need to match a range
+        if (slabNumbersArray.some((num) => num < 1)) {
+            alert("Please enter valid slab numbers.");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            await onConfirm(selectedSlabs); // Call the onConfirm with the selected slabs
+            // Call the API to update the status
+            const response = await fetch(
+                "http://localhost:4080/factory-management/inventory/updatemultipleslabs",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        slabNumbers: slabNumbersArray,
+                        status: "polished",
+                    }),
+                }
+            );
+            console.log(response)
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.statusText}`);
+            }
+
+            // Notify the parent component
+            await onConfirm(selectedSlabs);
             GlobalModal.onClose();
         } catch (error) {
             console.error("Error sending slabs for polishing:", error);
+            alert("Failed to update slab status. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -39,15 +73,13 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
-            {/* Show total slabs */}
             <div className="space-y-2">
                 <Label>Total Slabs in Block</Label>
                 <p className="text-gray-600">{totalSlabs}</p>
             </div>
 
-            {/* Input for selecting slabs */}
             <div className="space-y-2">
-                <Label htmlFor="slabsToSend">Select Slabs to Send for Polishing</Label>
+                <Label htmlFor="slabsToSend">Number of Slabs to Send</Label>
                 <Input
                     id="slabsToSend"
                     type="number"
@@ -59,7 +91,17 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
                 />
             </div>
 
-            {/* Action buttons */}
+            <div className="space-y-2">
+                <Label htmlFor="slabNumbers">Slab Numbers</Label>
+                <Input
+                    id="slabNumbers"
+                    type="text"
+                    value={slabNumbers}
+                    onChange={(e) => setSlabNumbers(e.target.value)}
+                    placeholder="Enter slab numbers (e.g., 286, 287)"
+                />
+            </div>
+
             <div className={cn("flex gap-2 justify-end")}>
                 <Button
                     variant="secondary"
