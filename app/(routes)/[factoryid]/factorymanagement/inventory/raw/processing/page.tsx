@@ -50,8 +50,6 @@ export default async function SlabsProcessingPage() {
     const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
     const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
     const Polished = Slabdata.filter((data: any) => data.status === 'polished')
-    
-
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
