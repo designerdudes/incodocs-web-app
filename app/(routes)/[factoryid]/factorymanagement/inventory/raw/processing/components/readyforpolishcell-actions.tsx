@@ -12,11 +12,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Alert } from "@/components/forms/Alert";
-import toast from 'react-hot-toast';
-import { deleteData } from '@/axiosUtility/api';
 import { Block } from "./readyforpolishcolumns";
-import { SendForPolish } from "./sendForPolsih";
+import SendForPolish from "./sendForPolsih";
 
 interface Props {
     data: Block;
@@ -25,6 +22,8 @@ interface Props {
 export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
+    console.log("These are slab ids ", data.SlabsId)
+
 
     return (
         <div>
@@ -45,7 +44,8 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                             GlobalModal.description = `There are ${data.SlabsId.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
                             GlobalModal.children = (
                                 <SendForPolish
-                                    totalSlabs={data.SlabsId.length}
+                                    blockId={data._id}
+                                    // totalSlabs={data.SlabsId.length}
                                     onConfirm={(selectedSlabs) => {
                                         console.log(`Sending ${selectedSlabs} slabs for polishing.`);
                                         // Call your API here to process the slabs

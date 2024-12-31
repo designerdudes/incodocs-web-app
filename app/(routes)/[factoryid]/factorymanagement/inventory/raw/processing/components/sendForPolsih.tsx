@@ -4,61 +4,79 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { fetchData, putData } from "@/axiosUtility/api";
+import { useState, useEffect } from "react";
 
 interface SendForPolishProps {
-    onConfirm: (selectedSlabs: number) => void;
-    totalSlabs: number;
+    blockId: string;
+    onConfirm: (selectedSlabs: string[]) => void;
 }
 
-export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSlabs }) => {
-    const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [selectedSlabs, setSelectedSlabs] = React.useState<number>(0);
-    const [slabNumbers, setSlabNumbers] = React.useState<string>(""); // Input for slab numbers
+const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => {
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [slabData, setSlabData] = useState<any>(null);
+    const [selectedSlabs, setSelectedSlabs] = useState<string[]>([]);
     const GlobalModal = useGlobalModal();
+
+    useEffect(() => {
+        const fetchSlabData = async () => {
+            try {
+                const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
+                setSlabData(GetData);
+                console.log("This is Block data", GetData);
+            } catch (error) {
+                console.error("Error fetching slab data:", error);
+            }
+        };
+
+        if (blockId) {
+            fetchSlabData();
+        }
+    }, [blockId]);
+
+    const toggleSlabSelection = (slabId: string) => {
+        setSelectedSlabs((prev) =>
+            prev.includes(slabId)
+                ? prev.filter((id) => id !== slabId) // Deselect slab
+                : [...prev, slabId] // Select slab
+        );
+    };
 
     const onSubmit = async (event: React.SyntheticEvent) => {
         event.preventDefault();
 
-        const slabNumbersArray = slabNumbers
-            .split(",")
-            .map((num) => parseInt(num.trim()))
-            .filter((num) => !isNaN(num));
-
-        if (slabNumbersArray.length !== selectedSlabs) {
-            alert("The number of slab numbers entered does not match the selected count.");
-            return;
-        }
-
-        // Remove this condition if slab numbers don't need to match a range
-        if (slabNumbersArray.some((num) => num < 1)) {
-            alert("Please enter valid slab numbers.");
+        if (selectedSlabs.length === 0) {
+            alert("Please select at least one slab.");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // Call the API to update the status
-            const response = await fetch(
-                "http://localhost:4080/factory-management/inventory/updatemultipleslabs",
+            // Call the API to update the slab status
+            const response = await putData(
+                "/factory-management/inventory/updatemultipleslabs",
                 {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        slabNumbers: slabNumbersArray,
+                        slabNumbers: selectedSlabs,
                         status: "polished",
                     }),
+
                 }
             );
-            console.log(response)
+            console.log("response ", response)
+
 
             if (!response.ok) {
                 throw new Error(`Error: ${response.statusText}`);
             }
+
+            console.log("Response:", await response.json());
 
             // Notify the parent component
             await onConfirm(selectedSlabs);
@@ -75,31 +93,24 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
         <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
                 <Label>Total Slabs in Block</Label>
-                <p className="text-gray-600">{totalSlabs}</p>
+                <p className="text-gray-600">{slabData?.SlabsId.length || 0}</p>
             </div>
 
+            {/* Display slabs with checkboxes */}
             <div className="space-y-2">
-                <Label htmlFor="slabsToSend">Number of Slabs to Send</Label>
-                <Input
-                    id="slabsToSend"
-                    type="number"
-                    value={selectedSlabs}
-                    onChange={(e) => setSelectedSlabs(Number(e.target.value))}
-                    placeholder="Enter number of slabs"
-                    min={1}
-                    max={totalSlabs}
-                />
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="slabNumbers">Slab Numbers</Label>
-                <Input
-                    id="slabNumbers"
-                    type="text"
-                    value={slabNumbers}
-                    onChange={(e) => setSlabNumbers(e.target.value)}
-                    placeholder="Enter slab numbers (e.g., 286, 287)"
-                />
+                <Label>Select Slabs to Send for Polishing</Label>
+                {slabData?.SlabsId.map((slabId: string, index: number) => (
+                    <div key={slabId} className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id={`slab-${slabId}`}
+                            checked={selectedSlabs.includes(slabId)}
+                            onChange={() => toggleSlabSelection(slabId)}
+                        />
+                        {/* Replace slabId with a user-friendly slab number */}
+                        <label htmlFor={`slab-${slabId}`}>Slab {index + 1}</label>
+                    </div>
+                ))}
             </div>
 
             <div className={cn("flex gap-2 justify-end")}>
@@ -118,3 +129,5 @@ export const SendForPolish: React.FC<SendForPolishProps> = ({ onConfirm, totalSl
         </form>
     );
 };
+
+export default SendForPolish;
