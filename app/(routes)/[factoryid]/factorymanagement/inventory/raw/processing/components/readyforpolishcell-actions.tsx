@@ -54,6 +54,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                             );
                             GlobalModal.onOpen();
                         }}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Send For Polish
@@ -61,7 +62,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./processing/blocks/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />

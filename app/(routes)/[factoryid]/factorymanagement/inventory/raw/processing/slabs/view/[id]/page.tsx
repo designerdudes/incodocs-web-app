@@ -28,7 +28,7 @@ interface Props {
   };
 }
 
-export default async function BlocksPage({ params }: Props) {
+export default async function SlabsPage({ params }: Props) {
   let SlabData = null;
   console.log("params is ",params)
   console.log('id of Block is',params.id)
@@ -37,7 +37,7 @@ export default async function BlocksPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params?.id}`,
+    `http://localhost:4080/factory-management/inventory/finished/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -78,7 +78,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
-              <CardTitle>Block Details</CardTitle>
+              <CardTitle>Slab Details</CardTitle>
               <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -90,12 +90,12 @@ export default async function BlocksPage({ params }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                <TableRow>
+                {/* <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Lot Name
                     </TableCell>
                     <TableCell>{SlabData?.lotId?.lotName}</TableCell>
-                  </TableRow>
+                  </TableRow> */}
                   <TableRow/>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
@@ -105,52 +105,53 @@ export default async function BlocksPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Number of slabs
+                    Slab Number
                     </TableCell>
-                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
+                    <TableCell>{SlabData?.slabNumber}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
-                    <TableCell>{SlabData?.materialType}</TableCell>
+                    <TableCell>{SlabData.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{SlabData?.status === "cut" ? "Ready for Polish" : SlabData?.status || "N/A"}</TableCell>
-                    
+                    <TableCell>{SlabData.status}</TableCell>
                   </TableRow>
+                  
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Weight (tons)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.weight?.value}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Length (inch)
+                     Before Trim Length (inch)
                     </TableCell>
                     <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
                   </TableRow>
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Breadth (inch)
-                    </TableCell>
-                    <TableCell>
-                      {SlabData?.dimensions?.breadth?.value}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Height (inch)
+                    Before Trim Height (inch)
                     </TableCell>
                     <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                     Trim Length (inch)
+                    </TableCell>
+                    <TableCell>{SlabData?.trim?.length?.value}</TableCell>
+                  </TableRow>
+                  
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                     Trim Height (inch)
+                    </TableCell>
+                    <TableCell>{SlabData?.trim?.height?.value}</TableCell>
                   </TableRow>
                  
                   
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Block Created At
+                      Slab Created At
                     </TableCell>
                     <TableCell>
                       {moment(SlabData.createdAt).format("YYYY-MM-DD")}
@@ -158,7 +159,7 @@ export default async function BlocksPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Block Updated At
+                      Slab Updated At
                     </TableCell>
                     <TableCell>
                       {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
