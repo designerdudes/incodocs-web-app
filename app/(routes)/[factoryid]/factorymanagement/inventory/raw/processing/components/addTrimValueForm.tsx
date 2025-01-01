@@ -15,7 +15,6 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import { Slab } from "./inpolishingcolumns";
 import toast from "react-hot-toast";
@@ -35,7 +34,7 @@ interface Props {
     params: { id: string };
 }
 
-function CardWithForm( params : Props ) {
+function CardWithForm(params: Props) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [slabData, setSlabData] = React.useState<Slab>();
     const form = useForm<z.infer<typeof formSchema>>({
@@ -58,7 +57,6 @@ function CardWithForm( params : Props ) {
     },);
 
     const GlobalModal = useGlobalModal();
-    const router = useRouter();
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -90,26 +88,26 @@ function CardWithForm( params : Props ) {
                         Cancel
                     </Button>
                     <Button
-                       onClick={async () => {
-                        try {
-                            await putData(`/factory-management/inventory/finished/put/${params.params.id}`, {
-                                ...values,
-                                status: "polished",
-                            });
-                            setIsLoading(false);
-                            GlobalModal.onClose();
-                            toast.success("Slab created/updated successfully");
-                        } catch (error) {
-                            console.error("Error creating/updating Slab:", error);
-                            setIsLoading(false);
-                            GlobalModal.onClose();
-                            toast.error("Error creating/updating Slab");
+                        onClick={async () => {
+                            try {
+                                await putData(`/factory-management/inventory/finished/put/${params.params.id}`, {
+                                    ...values,
+                                    status: "polished",
+                                });
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.success("Trim values added successfully");
+                            } catch (error) {
+                                console.error("Error updating trim values:", error);
+                                setIsLoading(false);
+                                GlobalModal.onClose();
+                                toast.error("Error updating trim values");
+                            }
+                            window.location.reload();
                         }
-                        window.location.reload();
-                    }
-                    }
-                >
-                    Confirm
+                        }
+                    >
+                        Confirm
                     </Button>
                 </div>
             </div>
