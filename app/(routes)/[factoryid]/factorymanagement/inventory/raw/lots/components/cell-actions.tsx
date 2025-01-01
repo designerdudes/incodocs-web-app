@@ -58,6 +58,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                             GlobalModal.children = <AddBlockForm params={{ _id: data._id }} />;
                             GlobalModal.onOpen();
                         }}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
 
                     >
                         <Plus className="mr-2 h-4 w-4" />

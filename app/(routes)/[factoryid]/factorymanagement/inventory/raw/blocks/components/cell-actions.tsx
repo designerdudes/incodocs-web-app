@@ -121,7 +121,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       GlobalModal.children = <Alert onConfirm={sendForCutting} />;
       GlobalModal.onOpen();
     }}
-    className="focus:bg-destructive focus:text-destructive-foreground"
+    className="focus:bg-green-500 focus:text-destructive-foreground"
   >
     <ScissorsIcon className="mr-2 h-4 w-4" />
     Send For Cutting

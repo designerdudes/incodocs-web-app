@@ -52,7 +52,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     {/* View Lot Details */}
-                    <DropdownMenuItem
+                    <DropdownMenuItem 
                         // onSelect={() => {
                         //     router.push(`./polishing/${data._id}/markpolish`);
                         // }}
@@ -60,7 +60,8 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                             GlobalModal.title = `Enter triming Values of Slab:${data.slabNumber}`
                             GlobalModal.children = <CardWithForm params={{ id: data._id }} />
                             GlobalModal.onOpen()
-                        }}
+                        }} 
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Mark Polish
@@ -69,7 +70,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./processing/slabs/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />

@@ -63,6 +63,7 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                             }} />
                             GlobalModal.onOpen()
                         }}
+                        
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Edit Trim Values
@@ -71,7 +72,7 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./processing/slabs/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
