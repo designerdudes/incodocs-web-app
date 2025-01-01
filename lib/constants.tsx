@@ -142,9 +142,6 @@ const accountingSidebarTabs = [
   },
 ];
 
-//dashboard cards
-
-//raw inventory cards
 const rawInventoryCards = [
   {
     title: "Total Lots",
@@ -154,22 +151,7 @@ const rawInventoryCards = [
     showButton: false,
     buttonUrl: "/factorymanagement/inventory/raw/lots",
   },
-  // {
-  //   title: "Slabs in Cutting",
-  //   icon: <ScissorsLineDashed className="w-6 h-6" />,
-  //   value: 40,
-  //   color: "bg-primary",
-  //   showButton: false,
-  //   buttonUrl: "/factorymanagement/inventory/raw/cutting",
-  // },
-  // {
-  //   title: "Slabs in Polishing",
-  //   icon: <SparkleIcon className="w-6 h-6" />,
-  //   value: 20,
-  //   color: "bg-primary",
-  //   showButton: false,
-  //   buttonUrl: "/factorymanagement/inventory/raw/polishing",
-  // },
+
   {
     title: "Slabs in Processing",
     icon: <SparkleIcon className="w-6 h-6" />,
@@ -281,4 +263,4 @@ export {
   FinishedPageCards,
   FactoryCards,
 };
-    export { BrandName, AccountingCard };
+export { BrandName, AccountingCard };
