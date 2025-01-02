@@ -16,18 +16,23 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { fetchData, putData } from "@/axiosUtility/api";
-import { Slab } from "./inpolishingcolumns";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-    height: z
-        .string()
-        .min(1, { message: "Height must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Height must be greater than zero" }),
-    length: z
-        .string()
-        .min(1, { message: "Length must be a positive number" })
-        .refine((val) => parseFloat(val) > 0, { message: "Length must be greater than zero" }),
+    trim: z.object({
+        length: z.object({
+            value: z
+                .number()
+                .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+        }),
+        height: z.object({
+            value: z
+                .number()
+                .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+        }),
+    }),
 });
 
 interface Props {
@@ -36,25 +41,36 @@ interface Props {
 
 function CardWithForm(params: Props) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
-    const [slabData, setSlabData] = React.useState<Slab>();
+    const [slabData, setSlabData] = React.useState<any>();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            height: "", // Provide initial value
-            length: "",
+            trim: {
+                height: { value: 0, units: "inch" },
+                length: { value: 0, units: "inch" },
+            },
         },
     });
+
     React.useEffect(() => {
         const fetchSlabData = async () => {
             try {
-                const GetData = await fetchData(`/factory-management/inventory/finished/get/${params.params.id}`);
+                const GetData = await fetchData(
+                    `/factory-management/inventory/finished/get/${params.params.id}`
+                );
                 setSlabData(GetData);
+
+                // Update form default values when data is fetched
+                if (GetData?.trim) {
+                    form.setValue("trim.height.value", GetData.trim.height.value || 0);
+                    form.setValue("trim.length.value", GetData.trim.length.value || 0);
+                }
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
         };
         fetchSlabData();
-    },);
+    }, []);
 
     const GlobalModal = useGlobalModal();
 
@@ -65,17 +81,16 @@ function CardWithForm(params: Props) {
         GlobalModal.children = (
             <div className="space-y-4">
                 <p>
-                    <strong>Slab Number:</strong> {slabData?.slabNumber
-                    }
+                    <strong>Slab Number:</strong> {slabData?.slabNumber}
                 </p>
                 <p>
                     <strong>Block Number:</strong> {slabData?.blockNumber}
                 </p>
                 <p>
-                    <strong>Height (inches):</strong> {values.height}
+                    <strong>Height (inches):</strong> {values.trim.height.value}
                 </p>
                 <p>
-                    <strong>Length (inches):</strong> {values.length}
+                    <strong>Length (inches):</strong> {values.trim.length.value}
                 </p>
                 <div className="flex justify-end space-x-2">
                     <Button
@@ -90,22 +105,24 @@ function CardWithForm(params: Props) {
                     <Button
                         onClick={async () => {
                             try {
-                                await putData(`/factory-management/inventory/finished/put/${params.params.id}`, {
-                                    ...values,
-                                    status: "polished",
-                                });
+                                await putData(
+                                    `/factory-management/inventory/finished/put/${params.params.id}`,
+                                    {
+                                        trim: values.trim,
+                                        status: "polished",
+                                    }
+                                );
                                 setIsLoading(false);
                                 GlobalModal.onClose();
-                                toast.success("Trim values added successfully");
+                                toast.success("Slab Trim Values updated successfully");
                             } catch (error) {
-                                console.error("Error updating trim values:", error);
+                                console.error("Error updating Slab:", error);
                                 setIsLoading(false);
                                 GlobalModal.onClose();
-                                toast.error("Error updating trim values");
+                                toast.error("Error updating Slab");
                             }
-                            window.location.reload();
-                        }
-                        }
+                            window.location.reload()
+                        }}
                     >
                         Confirm
                     </Button>
@@ -118,23 +135,27 @@ function CardWithForm(params: Props) {
     return (
         <Form {...form}>
             <form
-                onSubmit={form.handleSubmit(handleSubmit)}
+                onSubmit={form.handleSubmit((values) => {
+                    handleSubmit(values);
+                })}
                 className="grid gap-4"
             >
                 <div className="grid grid-cols-2 gap-4">
                     {/* Height */}
                     <FormField
                         control={form.control}
-                        name="height"
+                        name="trim.height.value"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Height (inches)</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Eg: 54"
+                                        placeholder="Eg: 15"
                                         type="number"
-                                        {...field}
                                         value={field.value || ""}
+                                        onChange={(e) =>
+                                            field.onChange(parseFloat(e.target.value))
+                                        }
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -144,16 +165,18 @@ function CardWithForm(params: Props) {
                     {/* Length */}
                     <FormField
                         control={form.control}
-                        name="length"
+                        name="trim.length.value"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Length (inches)</FormLabel>
                                 <FormControl>
                                     <Input
-                                        placeholder="Eg: 120"
+                                        placeholder="Eg: 10"
                                         type="number"
-                                        {...field}
                                         value={field.value || ""}
+                                        onChange={(e) =>
+                                            field.onChange(parseFloat(e.target.value))
+                                        }
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -162,11 +185,7 @@ function CardWithForm(params: Props) {
                     />
                 </div>
                 {/* Submit Button */}
-                <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full"
-                >
+                <Button type="submit" disabled={isLoading} className="w-full">
                     {isLoading && (
                         <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                     )}

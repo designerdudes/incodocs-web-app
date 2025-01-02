@@ -12,11 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import CardWithForm from "./addTrimValueForm"
 import { Slab } from "./inpolishingcolumns";
+import CardWithForm from "./editTrimValues";
 
 interface Props {
     data: Slab;
@@ -38,6 +37,7 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
         }
     }
 
+
     return (
         <div>
             {/* Dropdown Menu */}
@@ -51,16 +51,19 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-               
+
                     <DropdownMenuItem
                         // onSelect={() => {
                         //     router.push(`./polishing/${data._id}/markpolish`);
                         // }}
                         onSelect={() => {
-                            GlobalModal.title = `Enter triming Values`
-                            GlobalModal.children = <CardWithForm />
+                            GlobalModal.title = `Edit triming Values`
+                            GlobalModal.children = <CardWithForm params={{
+                                id: data._id
+                            }} />
                             GlobalModal.onOpen()
                         }}
+                        
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Edit Trim Values
@@ -69,15 +72,15 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./${data._id}/blocks`);
+                            router.push(`./processing/slabs/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Slab Details
                     </DropdownMenuItem>
 
-                    
-                    
+
+
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

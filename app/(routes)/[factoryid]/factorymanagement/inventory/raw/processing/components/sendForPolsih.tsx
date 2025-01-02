@@ -24,7 +24,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setSlabData(GetData);
-                console.log("This is Block data", GetData);
+                // console.log("This is Block data", GetData);
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
@@ -54,40 +54,36 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         setIsLoading(true);
 
         try {
-            // Call the API to update the slab status
+            // Use putData to update the slab status
             const response = await putData(
                 "/factory-management/inventory/updatemultipleslabs",
                 {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        slabNumbers: selectedSlabs,
-                        status: "polished",
-                    }),
-
+                    slabNumbers: selectedSlabs,
+                    status: "polished",
                 }
             );
-            console.log("response ", response)
 
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.statusText}`);
-            }
-
-            console.log("Response:", await response.json());
+            console.log("Response:", response);
+            alert(response.message || "Slabs updated successfully.");
 
             // Notify the parent component
             await onConfirm(selectedSlabs);
             GlobalModal.onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error sending slabs for polishing:", error);
-            alert("Failed to update slab status. Please try again.");
+
+            // Provide detailed error messages if available
+            if (error.response?.data?.message) {
+                alert(`Failed to update slab status: ${error.response.data.message}`);
+            } else {
+                alert("Failed to update slab status. Please try again.");
+            }
         } finally {
             setIsLoading(false);
         }
     };
+
+
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>

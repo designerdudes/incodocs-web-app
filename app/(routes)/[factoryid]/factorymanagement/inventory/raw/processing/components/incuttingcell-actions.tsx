@@ -57,6 +57,7 @@ const        IncuttingCellAction: React.FC<Props> = ({ data }) => {
                         onSelect={() => {
                             router.push(`./processing/cutting/${data._id}/markcut`);
                         }}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Mark Cut
