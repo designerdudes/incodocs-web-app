@@ -35,17 +35,29 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
         FactoriesData.length > 0 ? FactoriesData[0] : null // Default to the first factory
     );
 
-    // Update activeFactory when FactoriesData changes
-    React.useEffect(() => {
-        if (FactoriesData.length > 0 && !activeFactory) {
-            setActiveFactory(FactoriesData[0]);
-        }
-    }, [FactoriesData]);
-
     const handleFactorySelect = (factory: Factory) => {
         setActiveFactory(factory);
+        localStorage.setItem("activeFactoryId", factory.factoryId); // Store the selected factory ID
         router.push(`/${factory.factoryId}/dashboard`);
     };
+
+    // Update activeFactory when FactoriesData changes
+    
+    React.useEffect(() => {
+        const storedFactoryId = localStorage.getItem("activeFactoryId");
+        if (storedFactoryId && FactoriesData.length > 0) {
+            const foundFactory = FactoriesData.find((factory) => factory.factoryId === storedFactoryId);
+            if (foundFactory) {
+                setActiveFactory(foundFactory); // Set the active factory from localStorage
+            }
+        } else if (FactoriesData.length > 0) {
+            setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
+        }
+    }, [FactoriesData]);
+    
+
+    
+    
 
     const GlobalModal = useGlobalModal();
 
