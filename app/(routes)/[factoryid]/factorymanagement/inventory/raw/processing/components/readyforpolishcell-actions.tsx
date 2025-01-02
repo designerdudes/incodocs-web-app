@@ -59,6 +59,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         <ScissorsIcon className="mr-2 h-4 w-4" />
                         Send For Polish
                     </DropdownMenuItem>
+                    
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
@@ -68,6 +69,17 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Block Details
                     </DropdownMenuItem>
+
+
+
+
+
+
+
+
+
+
+
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {

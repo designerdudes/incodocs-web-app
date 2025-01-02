@@ -43,31 +43,19 @@ export default async function page({ params }: Props) {
         if (card.title === 'Total Lots') {
             return {
                 ...card,
-                value: lotsData.length, // Set lots count
+                value: lotsData.length || 0, // Set lots count
                 buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
             }
         } else if (card.title === 'Slabs in Processing') {
             return {
                 ...card,
-                value: slabData.length, // Set slabs count
+                value: slabData.length || 0 , // Set slabs count
                 buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
             }
         }
         return card
     })
 
-<<<<<<< HEAD
-    let lotsData
-    lotsData = res
-
-    const rawInventoryCards = BaseInventoryCards.map((card) => ({
-        ...card,
-        value: lotsData.length || 0,
-        buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
-    }));
-
-=======
->>>>>>> d99a601e321ef434b787645055b9bc11194ed785
     return (
         <div className="flex flex-col p-6">
             <div className="flex justify-between items-center gap-2">
