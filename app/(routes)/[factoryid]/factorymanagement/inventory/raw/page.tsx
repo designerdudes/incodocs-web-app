@@ -35,7 +35,7 @@ export default async function page({ params }: Props) {
 
     const rawInventoryCards = BaseInventoryCards.map((card) => ({
         ...card,
-        value: lotsData.length,
+        value: lotsData.length || 0,
         buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
     }));
 
