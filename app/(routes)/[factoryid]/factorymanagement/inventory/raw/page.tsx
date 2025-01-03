@@ -43,13 +43,13 @@ export default async function page({ params }: Props) {
         if (card.title === 'Total Lots') {
             return {
                 ...card,
-                value: lotsData.length, // Set lots count
+                value: lotsData.length || 0, // Set lots count
                 buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
             }
         } else if (card.title === 'Slabs in Processing') {
             return {
                 ...card,
-                value: slabData.length, // Set slabs count
+                value: slabData.length || 0 , // Set slabs count
                 buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
             }
         }

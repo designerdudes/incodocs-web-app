@@ -35,6 +35,7 @@ interface Props {
   params: {
     _id: string; // Lot ID
   };
+  
 }
 
 export default function EditLotForm({ params }: Props) {
@@ -52,7 +53,7 @@ export default function EditLotForm({ params }: Props) {
   });
 
   const lotId = params._id;
-  // console.log(params._id)
+  console.log(params._id)
  
 
   // Fetch existing lot data and reset form values
