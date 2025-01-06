@@ -34,11 +34,16 @@ export const Alert: React.FC<AlertProps> = ({ onConfirm, actionType }) => {
             >
                 Cancel
             </Button>
-            <Button onClick={onConfirm} variant="destructive">
+            <Button
+                onClick={onConfirm}
+                className={cn(
+                    actionType === "cut" ? "bg-green-500 text-white" : "bg-red-500 text-white"
+                )}
+            >
                 {isLoading && (
                     <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
                 )}
-                {actionType === "cut" ? "Yes, Cut" : "Yes, Delete"} {/* Conditional Label */}
+                {actionType === "cut" ? "Yes, Cut" : "Yes, Delete"}
             </Button>
         </div>
     );

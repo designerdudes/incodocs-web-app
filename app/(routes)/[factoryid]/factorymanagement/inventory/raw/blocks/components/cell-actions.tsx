@@ -89,7 +89,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 );
                 GlobalModal.onOpen();
               }}
-              className="focus:bg-destructive focus:text-destructive-foreground"
+              className="focus:bg-green-500 focus:text-destructive-foreground"
             >
               <ScissorsIcon className="mr-2 h-4 w-4" />
               Send For Cutting
@@ -109,7 +109,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = "Edit Block Details"; // Set modal title
-              GlobalModal.children = <EditBlockForm />; // Render Edit Form
+              GlobalModal.children = <EditBlockForm params={{
+                _id: data._id
+              }} />; // Render Edit Form
               GlobalModal.onOpen();
             }}
           >
