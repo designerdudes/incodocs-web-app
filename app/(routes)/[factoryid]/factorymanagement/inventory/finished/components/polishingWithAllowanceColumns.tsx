@@ -7,11 +7,28 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./cell-actions";
 import { FinishedMaterial } from "../page";
 
-function calculateAdjustedDimensions(length: number, height: number, trimLength: number, trimHeight: number) {
-    const adjustedLengthWithAllowance = length - trimLength + 6; // Length adjustment
-    const adjustedHeightWithAllowance = height - trimHeight + 2; // Height adjustment
-    const adjustedLength = adjustedLengthWithAllowance - 4
-    const adjustedHeight = adjustedHeightWithAllowance - 2
+function calculateAdjustedDimensions(length: number, height: number, trimLength?: number, trimHeight?: number) {
+    // Use default values of 0 if trimLength or trimHeight are missing
+    const validTrimLength = trimLength || 0;
+    const validTrimHeight = trimHeight || 0;
+
+    const adjustedLengthWithAllowance = length - validTrimLength + 6; // Length adjustment
+    const adjustedHeightWithAllowance = height - validTrimHeight + 2; // Height adjustment
+    const adjustedLength = adjustedLengthWithAllowance - 4;
+    const adjustedHeight = adjustedHeightWithAllowance - 2;
+
+    // Handle cases where adjusted values are not valid numbers
+    if (isNaN(adjustedLength) || isNaN(adjustedHeight)) {
+        return {
+            adjustedLength: "",
+            adjustedHeight: "",
+            lengthInCm: "",
+            heightInCm: "",
+            squareFt: "",
+            amount: "",
+        };
+    }
+
     const lengthInCm = (adjustedLength * 2.54).toFixed(2); // Convert to cm
     const heightInCm = (adjustedHeight * 2.54).toFixed(2); // Convert to cm
     const squareFt = ((adjustedLength * adjustedHeight) / 144).toFixed(2); // Calculate square feet

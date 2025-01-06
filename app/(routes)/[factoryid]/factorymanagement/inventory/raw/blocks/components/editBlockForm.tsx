@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -19,10 +19,32 @@ import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  height: z.number().min(1, { message: "Height must be greater than 0" }),
-  length: z.number().min(1, { message: "Length must be greater than 0" }),
-  breadth: z.number().min(1, { message: "Breadth must be greater than 0" }),
-  weight: z.number().min(1, { message: "Weight must be greater than 0" }),
+  dimensions: z.object({
+    length: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Length must be greater than zero" }),
+      units: z.literal("inch").default("inch"),
+    }),
+    height: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Height must be greater than zero" }),
+      units: z.literal("inch").default("inch"),
+    }),
+    breadth: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Breadth must be greater than zero" }),
+      units: z.literal("inch").default("inch"),
+    }),
+    weight: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Weight must be greater than zero" }),
+      units: z.literal("tons").default("tons"),
+    }),
+  }),
 });
 
 interface Props {
@@ -40,22 +62,16 @@ export default function EditBlockForm({ params }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      height: 0,
-      length: 0,
-      breadth: 0,
-      weight: 0,
+      dimensions: {
+        length: { value: 0, units: "inch" },
+        height: { value: 0, units: "inch" },
+        breadth: { value: 0, units: "inch" },
+        weight: { value: 0, units: "tons" },
+      },
     },
   });
 
-  const blockId = params._id; // Get the block ID passed as a parameter
-
-  // Watch form fields
-  const { height, length, breadth } = useWatch({
-    control: form.control,
-  });
-
-  // Calculate volume dynamically
-  const volume = height * length * breadth;
+  const blockId = params._id;
 
   // Fetch block data and reset form with values
   useEffect(() => {
@@ -70,12 +86,26 @@ export default function EditBlockForm({ params }: Props) {
         }
         const data = await response.json();
 
-        // Reset form with fetched values
+        // Map backend data to form values
         form.reset({
-          height: data.dimensions?.height?.value || 0,
-          length: data.dimensions?.length?.value || 0,
-          breadth: data.dimensions?.breadth?.value || 0,
-          weight: data.dimensions?.weight?.value || 0,
+          dimensions: {
+            length: {
+              value: data.dimensions?.length?.value || 0,
+              units: data.dimensions?.length?.units || "inch",
+            },
+            height: {
+              value: data.dimensions?.height?.value || 0,
+              units: data.dimensions?.height?.units || "inch",
+            },
+            breadth: {
+              value: data.dimensions?.breadth?.value || 0,
+              units: data.dimensions?.breadth?.units || "inch",
+            },
+            weight: {
+              value: data.dimensions?.weight?.value || 0,
+              units: data.dimensions?.weight?.units || "tons",
+            },
+          },
         });
       } catch (error) {
         console.error("Error fetching block data:", error);
@@ -95,11 +125,10 @@ export default function EditBlockForm({ params }: Props) {
     GlobalModal.description = "Are you sure you want to update this block?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>Height: {values.height}</p>
-        <p>Length: {values.length}</p>
-        <p>Breadth: {values.breadth}</p>
-        <p>Weight: {values.weight}</p>
-        <p>Volume: {values.height * values.length * values.breadth}</p>
+        <p>Length: {values.dimensions.length.value} {values.dimensions.length.units}</p>
+        <p>Height: {values.dimensions.height.value} {values.dimensions.height.units}</p>
+        <p>Breadth: {values.dimensions.breadth.value} {values.dimensions.breadth.units}</p>
+        <p>Weight: {values.dimensions.weight.value} {values.dimensions.weight.units}</p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -114,13 +143,13 @@ export default function EditBlockForm({ params }: Props) {
             onClick={async () => {
               try {
                 await putData(
-                  `/factory-management/inventory/raw/update/${blockId}`,
+                  `/factory-management/inventory/raw/put/${blockId}`,
                   values
                 );
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Block updated successfully");
-                router.refresh();
+                window.location.reload()
               } catch (error) {
                 console.error("Error updating block:", error);
                 setIsLoading(false);
@@ -146,18 +175,26 @@ export default function EditBlockForm({ params }: Props) {
     );
   }
 
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="height"
+            name="dimensions.height.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Height</FormLabel>
+                <FormLabel>Height (inches)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Height" type="number" {...field} />
+                  <Input
+                    placeholder="Eg: 15"
+                    type="number"
+                    value={field.value || ""}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value))
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -165,12 +202,19 @@ export default function EditBlockForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="length"
+            name="dimensions.length.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Length</FormLabel>
+                <FormLabel>Length (inches)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Length" type="number" {...field} />
+                  <Input
+                    placeholder="Eg: 10"
+                    type="number"
+                    value={field.value || ""}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value))
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -181,12 +225,19 @@ export default function EditBlockForm({ params }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="breadth"
+            name="dimensions.breadth.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Breadth</FormLabel>
+                <FormLabel>Length (inches)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Breadth" type="number" {...field} />
+                  <Input
+                    placeholder="Eg: 10"
+                    type="number"
+                    value={field.value || ""}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value))
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -194,12 +245,19 @@ export default function EditBlockForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="weight"
+            name="dimensions.weight.value"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Weight</FormLabel>
                 <FormControl>
-                  <Input placeholder="Weight" type="number" {...field} />
+                  <Input
+                    placeholder="Eg: 10"
+                    type="number"
+                    value={field.value || ""}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value))
+                    }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -207,10 +265,10 @@ export default function EditBlockForm({ params }: Props) {
           />
         </div>
 
-        <div>
+        {/* <div>
           <FormLabel>Volume (in³)</FormLabel>
           <p className="border p-2 rounded bg-gray-100">{volume || 0}</p>
-        </div>
+        </div> */}
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
