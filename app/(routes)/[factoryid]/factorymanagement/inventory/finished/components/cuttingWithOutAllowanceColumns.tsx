@@ -6,7 +6,6 @@ import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./cell-actions";
 import { FinishedMaterial } from "../page";
-import { log } from "console";
 
 export default function calculateDimensions(
     length: number,

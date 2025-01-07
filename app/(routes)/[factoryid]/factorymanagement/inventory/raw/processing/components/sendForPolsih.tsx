@@ -7,16 +7,17 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { fetchData, putData } from "@/axiosUtility/api";
 import { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 
 interface SendForPolishProps {
     blockId: string;
-    onConfirm: (selectedSlabs: string[]) => void;
+    onConfirm: (selectedSlabs: number[]) => void;
 }
 
 const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [slabData, setSlabData] = useState<any>(null);
-    const [selectedSlabs, setSelectedSlabs] = useState<string[]>([]);
+    const [selectedSlabs, setSelectedSlabs] = useState<number[]>([]);
     const GlobalModal = useGlobalModal();
 
     useEffect(() => {
@@ -24,7 +25,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setSlabData(GetData);
-                // console.log("This is Block data", GetData);
+                console.log("This is Block data", GetData);
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
@@ -35,11 +36,11 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         }
     }, [blockId]);
 
-    const toggleSlabSelection = (slabId: string) => {
+    const toggleSlabSelection = (slabNumber: number) => {
         setSelectedSlabs((prev) =>
-            prev.includes(slabId)
-                ? prev.filter((id) => id !== slabId) // Deselect slab
-                : [...prev, slabId] // Select slab
+            prev.includes(slabNumber)
+                ? prev.filter((num) => num !== slabNumber) // Deselect slab
+                : [...prev, slabNumber] // Select slab
         );
     };
 
@@ -47,43 +48,46 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         event.preventDefault();
 
         if (selectedSlabs.length === 0) {
-            alert("Please select at least one slab.");
+            toast.error("Please select at least one slab.");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // Use putData to update the slab status
+            const payload = {
+                slabNumbers: selectedSlabs,
+                status: "inPolishing",
+            };
+
             const response = await putData(
                 "/factory-management/inventory/updatemultipleslabs",
-                {
-                    slabNumbers: selectedSlabs,
-                    status: "polished",
-                }
+                payload
             );
 
             console.log("Response:", response);
-            alert(response.message || "Slabs updated successfully.");
+            console.log("Payload", payload)
+            setIsLoading(false);
+            GlobalModal.onClose();
+            toast.success("Slabs updated successfully.");
 
             // Notify the parent component
-            await onConfirm(selectedSlabs);
+            // await onConfirm(selectedSlabs);
             GlobalModal.onClose();
         } catch (error: any) {
             console.error("Error sending slabs for polishing:", error);
 
             // Provide detailed error messages if available
             if (error.response?.data?.message) {
-                alert(`Failed to update slab status: ${error.response.data.message}`);
+                toast.error(`Failed to update slab status: ${error.response.data.message}`);
             } else {
-                alert("Failed to update slab status. Please try again.");
+                toast.error("Failed to update slab status. Please try again.");
             }
         } finally {
             setIsLoading(false);
         }
+        window.location.reload()
     };
-
-
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
@@ -95,16 +99,15 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             {/* Display slabs with checkboxes */}
             <div className="space-y-2">
                 <Label>Select Slabs to Send for Polishing</Label>
-                {slabData?.SlabsId.map((slabId: string, index: number) => (
-                    <div key={slabId} className="flex items-center gap-2">
+                {slabData?.SlabsId.map((slab: any, index: number) => (
+                    <div key={slab._id} className="flex items-center gap-2">
                         <input
                             type="checkbox"
-                            id={`slab-${slabId}`}
-                            checked={selectedSlabs.includes(slabId)}
-                            onChange={() => toggleSlabSelection(slabId)}
+                            id={`slab-${slab.slabNumber}`}
+                            checked={selectedSlabs.includes(slab.slabNumber)}
+                            onChange={() => toggleSlabSelection(slab.slabNumber)}
                         />
-                        {/* Replace slabId with a user-friendly slab number */}
-                        <label htmlFor={`slab-${slabId}`}>Slab {index + 1}</label>
+                        <label htmlFor={`slab-${slab.slabNumber}`}>Slab {slab.slabNumber || index + 1}</label>
                     </div>
                 ))}
             </div>
