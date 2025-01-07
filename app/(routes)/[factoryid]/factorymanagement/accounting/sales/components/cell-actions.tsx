@@ -73,10 +73,10 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.customerName}`;
+                            GlobalModal.title = `Delete Sale Details - ${data.customerName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this Lot?";
-                            GlobalModal.children = <Alert onConfirm={deleteLot} />;
+                            GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;
                             GlobalModal.onOpen();
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground"
