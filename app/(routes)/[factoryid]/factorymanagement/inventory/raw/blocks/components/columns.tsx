@@ -8,6 +8,7 @@ import moment from "moment"
 
 
 export type Blocks = {
+    
     dimensions: {
         weight: {
             value: number;
@@ -26,6 +27,8 @@ export type Blocks = {
             units: string;
         };
     };
+
+
     _id: string;
     lotId: string;
     blockNumber: number;

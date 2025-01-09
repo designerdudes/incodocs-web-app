@@ -76,7 +76,7 @@ export default async function SlabsPage({ params }: Props) {
   
   SlabData = resp;
   
-  console.log(BlockData);
+  // console.log(BlockData);
   
   function calculateVolume(
     length: number,

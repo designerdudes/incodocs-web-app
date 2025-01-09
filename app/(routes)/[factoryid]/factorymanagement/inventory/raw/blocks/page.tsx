@@ -19,6 +19,7 @@ interface Blocks {
 }
 
 export default function Blocks() {
+  
   const data: Blocks[] = [
     {
       _id: "65f8fb0fc4417ea5a14fbd82",

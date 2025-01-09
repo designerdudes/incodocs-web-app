@@ -148,6 +148,9 @@ export function MarkCutAndCreateSlabsForm({
       });
       toast.success("Block data updated successfully");
       router.push("../../");
+      window.location.reload()
+      
+      
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
