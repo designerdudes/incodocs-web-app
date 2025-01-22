@@ -53,14 +53,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         }>
                         <Eye className="mr-2 h-4 w-4" />
                         View Product Details</DropdownMenuItem>
-                    <DropdownMenuItem
+                    {/* <DropdownMenuItem
                         onSelect={
                             () => {
                                 router.push(`./finishedmaterial/edit/${data._id}`)
                             }
                         }>
                         <Edit2 className="mr-2 h-4 w-4" />
-                        Edit Product</DropdownMenuItem>
+                        Edit Product</DropdownMenuItem> */}
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = `Delete Product - ${data.slabNumber}`
