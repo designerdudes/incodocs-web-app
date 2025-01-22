@@ -51,8 +51,10 @@ export default async function SlabsPage({ params }: Props) {
     return response.json();
   });
 
+  
   BlockData = res;
-  console.log("this is lot ID", BlockData.lotId._id)
+  console.log("this is lot ID", BlockData.lotId._id);
+  console.log("this is block data", BlockData)
   // console.log(BlockData);
 
   let SlabData = null;
@@ -72,12 +74,7 @@ export default async function SlabsPage({ params }: Props) {
     return response.json();
   });
 
-
-  
   SlabData = resp;
-  
-  // console.log(BlockData);
-  
   function calculateVolume(
     length: number,
     breadth: number,
@@ -100,6 +97,7 @@ export default async function SlabsPage({ params }: Props) {
     const inchToCm = volumeinInchs * conversionFactor;
     return inchToCm.toFixed(2);
   }
+  // console.log("BlockData:", BlockData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -116,12 +114,12 @@ export default async function SlabsPage({ params }: Props) {
             title={` Details of Block ${BlockData.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
-            Efficiently track Slabs with detailed insights into its current
+            Efficiently track Blocks with detailed insights into its current
             status and progress through the production cycle.
           </p>
         </div>
       </div>
-        <Separator/>
+      <Separator />
       <div className="flex flex-col flex-1 py-2">
         <div className="grid grid-cols-2 gap-6">
           {/* Block Details Card */}
@@ -155,11 +153,14 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
-                    <TableCell>{BlockData.materialType}</TableCell>
+                    <TableCell>{BlockData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{BlockData?.status === "cut" ? "Ready for Polish" : BlockData?.status || "N/A"}
+                    <TableCell>
+                      {BlockData?.status === "cut"
+                        ? "Ready for Polish"
+                        : BlockData?.status || "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
