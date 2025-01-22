@@ -25,7 +25,7 @@ export default function CreateNewFormPage() {
                         title="Create new Lot Inventory"
                     />
                     <p className="text-muted-foreground text-sm">
-                        Fill in the form below to edit the finished product in your inventory
+                        Fill in the form below to create the finished product in your inventory
                     </p>
                 </div>
             </div>
