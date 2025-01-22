@@ -282,6 +282,7 @@ export function MarkCutAndCreateSlabsForm({
                     <TableCell>
                       <Button
                         variant="destructive"
+                        type="button"
                         onClick={() => handleDeleteRow(index)}
                         disabled={isLoading}
                       >

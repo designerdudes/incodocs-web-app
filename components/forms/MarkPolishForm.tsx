@@ -46,12 +46,14 @@ export function MarkPolishForm({ BlockData, className, gap, ...props }: MarkPoli
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true);
-        console.log("Values", values)
         try {
-          await putData(`/factory-management/inventory/finished/put/${BlockData._id}`, {
-            ...values,
-            status: "polished",
-          });
+            await putData(`/factory-management/inventory/finished/put/${BlockData._id}`, {
+                ...values,
+                status: "polished",
+            });
+            
+        
+            console.log("Values", values)
           toast.success("Slab data updated successfully");
           router.push("../../");
         } catch (error) {

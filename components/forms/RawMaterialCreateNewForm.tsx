@@ -478,10 +478,12 @@ export function RawMaterialCreateNewForm({
                     <Button
                       variant="destructive"
                       size="sm"
+                      type="button"
                       onClick={() => {
                         const updatedBlocks = blocks.filter(
                           (_, i) => i !== index
                         );
+
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
