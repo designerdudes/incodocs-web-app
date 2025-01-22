@@ -75,9 +75,6 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = resp;
-
-  console.log("This is slab data", SlabData);
-
   function calculateVolume(
     length: number,
     breadth: number,
