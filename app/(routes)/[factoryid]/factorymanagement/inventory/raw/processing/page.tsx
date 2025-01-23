@@ -120,7 +120,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="title"
+              searchKey="blockLotName"
               columns={incuttingcolumns}
               data={inCutting}
             />
@@ -132,7 +132,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="title"
+              searchKey="blockLotName"
               columns={Readyforpolishcolumns}
               data={readyForPolish}
             />
@@ -144,7 +144,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              searchKey="title"
+              searchKey="slabNumber"
               columns={inPolishingolumns}
               data={inPolishing}
             />
@@ -156,7 +156,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              searchKey="title"
+              searchKey="slabNumber"
               columns={Polishedcolumns}
               data={Polished}
             />

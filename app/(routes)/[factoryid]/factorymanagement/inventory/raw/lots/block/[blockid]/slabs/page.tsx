@@ -245,7 +245,7 @@ export default async function SlabsPage({ params }: Props) {
               bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected Raw Material deleted successfully"
               deleteRoute="/category/ids"
-              searchKey="name"
+              searchKey="slabNumber"
               columns={columns}
               data={SlabData as any}
             />
