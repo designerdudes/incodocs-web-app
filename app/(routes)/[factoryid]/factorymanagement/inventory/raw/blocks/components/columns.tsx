@@ -62,7 +62,7 @@ export const columns: ColumnDef<Blocks>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -96,7 +96,7 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
     },
     {
-        accessorKey: "numberofslabs",
+        accessorKey: "SlabsId",
         header: ({ column }) => (
             <Button
                 variant="ghost"

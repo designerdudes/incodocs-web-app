@@ -96,7 +96,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
     },
     {
-        accessorKey: "name",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"

@@ -69,7 +69,7 @@ export const incuttingcolumns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "name",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"

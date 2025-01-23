@@ -51,7 +51,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "title",
+        accessorKey: "lotName",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -68,7 +68,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "name",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -102,7 +102,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "numberofSlabs",
+        accessorKey: "SlabsId",
         header: ({ column }) => (
             <Button
                 variant="ghost"

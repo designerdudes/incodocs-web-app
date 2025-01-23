@@ -45,7 +45,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name", // Corrected key
+        accessorKey: "lotName", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -79,7 +79,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
     },
     {
-        accessorKey: "numberofBlocks",
+        accessorKey: "blocksId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
