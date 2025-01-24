@@ -54,7 +54,7 @@ export const columns: ColumnDef<Blocks>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name",
+        accessorKey: "slabNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -69,6 +69,7 @@ export const columns: ColumnDef<Blocks>[] = [
                 {row.original.blockNumber}
             </div>
         ),
+        filterFn:"includesString"
     },
     {
         accessorKey: "materialType",

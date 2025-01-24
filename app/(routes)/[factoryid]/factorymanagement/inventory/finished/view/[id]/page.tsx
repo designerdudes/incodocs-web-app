@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { cookies } from "next/headers";
+import Heading from "@/components/ui/heading";
 
 interface Props {
   params: {
@@ -113,10 +114,18 @@ export default async function ViewFinishedPage({ params }: Props) {
                 <span className="sr-only">Back</span>
               </Button>
             </Link>
-            <h1 className="ml-4 flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">
-              View and Manage Finished Material details
-            </h1>
-            <div className="hidden items-center gap-2 md:ml-auto md:flex">
+            <div className="flex-1">
+              <Heading
+                className="leading-tight "
+                title="View and Manage Finished Products Details"
+              />
+              <p className="text-muted-foreground text-sm mt-2">
+                View and manage finished product materials with detailed
+                insights into quantity, specifications, and status, ensuring
+                efficient tracking and streamlined operations.
+              </p>
+            </div>
+            {/* <div className="hidden items-center gap-2 md:ml-auto md:flex">
               <Link
                 href={`/factorymanagement/inventory/finishedmaterial/edit/${FinishedMaterialID}`}
               >
@@ -125,7 +134,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                   <IconPencil className="w-4 ml-2" />
                 </Button>
               </Link>
-            </div>
+            </div> */}
           </div>
         </div>
 
@@ -274,28 +283,23 @@ export default async function ViewFinishedPage({ params }: Props) {
                           Height (inch)
                         </TableCell>
                         <TableCell>
-                        {adjustedDimensions?.adjustedHeight}
+                          {adjustedDimensions?.adjustedHeight}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
                           Length (cm)
                         </TableCell>
-                        <TableCell>
-                          { adjustedDimensions?.lengthInCm}
-                        </TableCell>
+                        <TableCell>{adjustedDimensions?.lengthInCm}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
                           Height (cm)
                         </TableCell>
-                        <TableCell>
-                        { adjustedDimensions?.heightInCm}
-                        </TableCell>
+                        <TableCell>{adjustedDimensions?.heightInCm}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Total SQF</TableCell>
-                        
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">

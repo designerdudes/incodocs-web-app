@@ -82,7 +82,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
                 <div className="flex-1">
                     <Heading className='leading-tight ' title='Finished Material Inventory ' />
                     <p className='text-muted-foreground text-sm mt-2'>
-                        Efficiently track and manage finished materials with detailed insights into their dimensions, weight, and processing stages, ensuring accurate inventory management, streamlined cutting processes, and real-time updates on stock availability and product status.</p>
+                    Track and manage finished materials with detailed insights into dimensions, weight, and processing stages for accurate inventory control, efficient cutting, and real-time stock updates.</p>
                 </div>
             </div>
             <Separator orientation='horizontal' />
