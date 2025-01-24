@@ -68,6 +68,7 @@ function CardWithForm(params: Props) {
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
+           
         };
         fetchSlabData();
     }, []);
