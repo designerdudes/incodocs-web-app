@@ -59,6 +59,7 @@ export const columns: ColumnDef<LotManagement>[] = [
             <div className="capitalize">
                 {row.original.lotName}
             </div>
+
         ),
     },
     {

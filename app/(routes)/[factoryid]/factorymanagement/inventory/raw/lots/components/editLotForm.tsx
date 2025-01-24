@@ -19,7 +19,6 @@ import { useRouter } from "next/navigation";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
-
 const formSchema = z.object({
   lotName: z
     .string()
@@ -35,7 +34,6 @@ interface Props {
   params: {
     _id: string; // Lot ID
   };
-  
 }
 
 export default function EditLotForm({ params }: Props) {
@@ -53,8 +51,7 @@ export default function EditLotForm({ params }: Props) {
   });
 
   const lotId = params._id;
-  console.log(params._id)
- 
+  console.log(params._id);
 
   // Fetch existing lot data and reset form values
   useEffect(() => {
@@ -82,10 +79,8 @@ export default function EditLotForm({ params }: Props) {
       }
     }
 
-
     fetchLotData();
   }, [lotId, form]);
-  
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -116,7 +111,8 @@ export default function EditLotForm({ params }: Props) {
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Lot updated successfully");
-                router.refresh(); 
+
+                window.location.reload();
               } catch (error) {
                 console.error("Error updating lot:", error);
                 setIsLoading(false);
@@ -166,7 +162,11 @@ export default function EditLotForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Material Type</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: Material XYZ" type="text" {...field} />
+                  <Input
+                    placeholder="Eg: Material XYZ"
+                    type="text"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

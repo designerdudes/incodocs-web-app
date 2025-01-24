@@ -51,7 +51,8 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "lotName",
+
+        accessorKey: "blockLotName",
         header: ({ column }) => (
             <Button
                 variant="ghost"

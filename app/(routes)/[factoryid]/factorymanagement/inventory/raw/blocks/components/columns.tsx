@@ -8,6 +8,7 @@ import moment from "moment"
 
 
 export type Blocks = {
+    
     dimensions: {
         weight: {
             value: number;
@@ -26,6 +27,8 @@ export type Blocks = {
             units: string;
         };
     };
+
+
     _id: string;
     lotId: string;
     blockNumber: number;
@@ -63,21 +66,11 @@ export const columns: ColumnDef<Blocks>[] = [
     },
     {
         accessorKey: "blockNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.blockNumber}
-            </div>
-        ),
+        header: "Block Number",
+        cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+        filterFn: "includesString", // Use the built-in filtering logic for partial matches
     },
+    
     {
         accessorKey: "materialType",
         header: ({ column }) => (

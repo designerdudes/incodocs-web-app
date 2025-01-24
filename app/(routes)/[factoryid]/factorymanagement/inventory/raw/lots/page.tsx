@@ -24,26 +24,28 @@ interface Lots {
 interface Props {
   params: {
     factoryid: string;
-  }
+  };
 }
 
 export default async function LotManagement({ params }: Props) {
-
   const cookieStore = cookies();
-  const token = cookieStore.get('AccessToken')?.value || ""
+  const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(`http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
+  const res = await fetch(
+    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
     }
-  }).then(response => {
-    return response.json()
-  })
+  ).then((response) => {
+    return response.json();
+  });
 
-  let lotsData
-  lotsData = res
+  let lotsData;
+  lotsData = res;
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -57,11 +59,12 @@ export default async function LotManagement({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Lots Management" />
           <p className="text-muted-foreground text-sm mt-2">
-            Efficiently track and manage raw material lots with detailed insights into their current status and progress through the production cycle.
+            Track and manage lots in detail, including associated blocks, slabs,
+            material type, status, and production progress.
           </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
-        <Link href='./lots/create-new'>
+        <Link href="./lots/create-new">
           <Button> Create New Lot</Button>
         </Link>
         {/* <CreateNewLotButton /> */}
@@ -74,7 +77,7 @@ export default async function LotManagement({ params }: Props) {
           bulkDeleteDescription="This will delete all the selected Lots, and they will not be recoverable."
           bulkDeleteToastMessage="Selected lots deleted successfully"
           deleteRoute="/category/ids"
-          searchKey="name"
+          searchKey="lotName"
           columns={columns}
           data={lotsData as any}
         />

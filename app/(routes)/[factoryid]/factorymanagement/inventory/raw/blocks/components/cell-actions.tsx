@@ -20,8 +20,8 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import { putData } from "@/axiosUtility/api";
-import toast from 'react-hot-toast';
-import { deleteData } from '@/axiosUtility/api';
+import toast from "react-hot-toast";
+import { deleteData } from "@/axiosUtility/api";
 import EditBlockForm from "./editBlockForm";
 
 interface Props {
@@ -35,11 +35,11 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
-      toast.success('Lot Deleted Successfully');
+      toast.success("Lot Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error('Error deleting data:', error);
+      console.error("Error deleting data:", error);
     }
   };
 
@@ -49,20 +49,19 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     height: "",
   });
 
-
   const sendForCutting = async () => {
-
     try {
-      const result = await putData(`/factory-management/inventory/raw/put/${data._id}`,
-        { status: "inCutting", });
-      toast.success('Block send for cutting Successfully')
-      GlobalModal.onClose()
-      window.location.reload()
+      const result = await putData(
+        `/factory-management/inventory/raw/put/${data._id}`,
+        { status: "inCutting" }
+      );
+      toast.success("Block send for cutting Successfully");
+      GlobalModal.onClose();
+      window.location.reload();
     } catch (error) {
-      console.error('Error deleting data:', error);
+      console.error("Error deleting data:", error);
     }
-  }
-
+  };
 
   return (
     <div>
@@ -80,7 +79,8 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             <DropdownMenuItem
               onSelect={() => {
                 GlobalModal.title = `Send Block for Cutting - ${data.blockNumber}`;
-                GlobalModal.description = "Are you sure you want to send this Block for cutting?";
+                GlobalModal.description =
+                  "Are you sure you want to send this Block for cutting?";
                 GlobalModal.children = (
                   <Alert
                     onConfirm={sendForCutting}
@@ -106,32 +106,36 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             View Block Details
           </DropdownMenuItem>
           {/* Edit Lot Details */}
+          {data.status !== "cut" && (
+            <DropdownMenuItem
+              onSelect={() => {
+                GlobalModal.title = "Edit Block Details"; // Set modal title
+                GlobalModal.children = (
+                  <EditBlockForm params={{ _id: data._id }} />
+                ); // Render Edit Form
+                GlobalModal.onOpen();
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Block Details
+            </DropdownMenuItem>
+          )}
+
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = "Edit Block Details"; // Set modal title
-              GlobalModal.children = <EditBlockForm params={{
-                _id: data._id
-              }} />; // Render Edit Form
+              GlobalModal.title = `Delete Block - ${data.blockNumber}`;
+              GlobalModal.description =
+                "Are you sure you want to delete this Block?";
+              GlobalModal.children = (
+                <Alert
+                  onConfirm={deleteLot}
+                  actionType="delete" // Pass the action type
+                />
+              );
               GlobalModal.onOpen();
             }}
+            className="focus:bg-destructive focus:text-destructive-foreground"
           >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Block Details
-          </DropdownMenuItem>
-
-          <DropdownMenuItem onSelect={() => {
-            GlobalModal.title = `Delete Block - ${data.blockNumber}`;
-            GlobalModal.description =
-              "Are you sure you want to delete this Block?";
-            GlobalModal.children = (
-              <Alert
-                onConfirm={deleteLot}
-                actionType="delete" // Pass the action type
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-            className="focus:bg-destructive focus:text-destructive-foreground">
             <TrashIcon className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
