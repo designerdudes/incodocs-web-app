@@ -24,7 +24,6 @@ import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Blocks } from "../../../../blocks/components/columns";
 import { columns } from "./columns";
 
 interface Props {
