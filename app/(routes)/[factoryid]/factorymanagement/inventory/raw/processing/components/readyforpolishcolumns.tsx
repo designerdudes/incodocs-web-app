@@ -51,23 +51,23 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-
-        accessorKey: "blockLotName",
+        accessorKey: "lotName",
         header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block&apos;s Lot Name
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Block&apos;s Lot Name
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
         ),
         cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.lotId?.lotName}
-            </div>
+          <div className="capitalize">
+            {row.original.lotId?.lotName}
+          </div>
         ),
-    },
+        filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
+      },
     {
         accessorKey: "blockNumber",
         header: ({ column }) => (

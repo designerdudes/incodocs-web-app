@@ -119,7 +119,7 @@ export function DataTable<TData, TValue>({
         <div className="relative max-w-sm w-full flex items-center">
           <Search className="h-4 absolute right-2 text-gray-500" />
           <Input
-            placeholder={`Search by ${searchKey}...`}
+            placeholder={`Search by ${searchKey}`}
             value={
               (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
             }

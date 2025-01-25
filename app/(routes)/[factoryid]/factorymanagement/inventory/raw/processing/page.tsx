@@ -63,6 +63,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
+    console.log(" Slab in processing", blockRes);
+   
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -120,7 +122,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="blockLotName"
+              searchKey="lotName"
               columns={incuttingcolumns}
               data={inCutting}
             />
@@ -132,7 +134,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="blockLotName"
+              searchKey="lotName"
               columns={Readyforpolishcolumns}
               data={readyForPolish}
             />
