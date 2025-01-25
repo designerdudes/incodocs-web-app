@@ -72,13 +72,9 @@ export const columns: ColumnDef<Slabs>[] = [
                 Slab Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.slabNumber}
-            </div>
-            
-        ),
+        ),        
+        cell: ({ row }) => <div>{row.original.slabNumber}</div>,
+        filterFn: "includesString", // Use the built-in filtering logic for partial matches
     },
     
     {

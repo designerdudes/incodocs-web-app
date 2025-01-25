@@ -29,7 +29,8 @@ export default async function BlocksPage({ params }: Props) {
         return response.json()
     })
 
-    BlocksData = res
+    BlocksData = res;
+    console.log("BlocksData:", BlocksData);
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -55,7 +56,7 @@ export default async function BlocksPage({ params }: Props) {
                     bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                     deleteRoute="/category/ids"
-                    searchKey="name"
+                    searchKey="blockNumber"
                     columns={columns}
                     data={BlocksData as any}
                 />

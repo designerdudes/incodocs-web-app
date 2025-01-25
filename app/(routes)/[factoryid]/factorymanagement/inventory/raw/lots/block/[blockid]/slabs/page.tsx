@@ -96,7 +96,7 @@ export default async function SlabsPage({ params }: Props) {
     const inchToCm = volumeinInchs * conversionFactor;
     return inchToCm.toFixed(2);
   }
-  // console.log("BlockData:", BlockData);
+  console.log("Slab Data:", SlabData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -244,7 +244,7 @@ export default async function SlabsPage({ params }: Props) {
               bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected Raw Material deleted successfully"
               deleteRoute="/category/ids"
-              searchKey="name"
+              searchKey="slabNumber"
               columns={columns}
               data={SlabData as any}
             />
