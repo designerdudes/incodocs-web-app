@@ -80,7 +80,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
     },
     {
-        accessorKey: "numberofBlocks",
+        accessorKey: "blocksId",
         header: ({ column }) => (
             <Button
                 variant="ghost"

@@ -69,7 +69,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
       },
     {
-        accessorKey: "name",
+        accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -103,7 +103,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "numberofSlabs",
+        accessorKey: "SlabsId",
         header: ({ column }) => (
             <Button
                 variant="ghost"

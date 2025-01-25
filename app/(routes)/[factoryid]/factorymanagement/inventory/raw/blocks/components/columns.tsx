@@ -97,7 +97,7 @@ export const columns: ColumnDef<Blocks>[] = [
         ),
     },
     {
-        accessorKey: "numberofslabs",
+        accessorKey: "SlabsId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
