@@ -33,7 +33,7 @@ export type Blocks = {
     lotId: string;
     blockNumber: number;
     materialType: string;
-    SlabsId: string[];
+    SlabsId:  { _id: string; slabNumber: number }[]
     status: string;
     createdAt: string;
     updatedAt: string;
@@ -66,7 +66,15 @@ export const columns: ColumnDef<Blocks>[] = [
     },
     {
         accessorKey: "blockNumber",
-        header: "Block Number",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block Number
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),        
         cell: ({ row }) => <div>{row.original.blockNumber}</div>,
         filterFn: "includesString", // Use the built-in filtering logic for partial matches
     },
