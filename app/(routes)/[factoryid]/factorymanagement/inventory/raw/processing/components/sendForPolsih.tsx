@@ -1,5 +1,4 @@
 "use client";
-
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -25,7 +24,6 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setSlabData(GetData);
-                console.log("This is Block data", GetData);
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }

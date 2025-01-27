@@ -4,28 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
-
-export type Block = {
-    _id: string
-    SlabsId: []
-    blockNumber: string
-    blockLotName: string
-    materialType: string
-    numberofSlabs: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string
-    height: string
-    breadth: string
-    length: string
-    volume: string
-    status: string
-    lotId: {
-        _id: string
-        lotName: string
-    }
-}
+import { Block } from "./incuttingcolumns"
 
 export const Readyforpolishcolumns: ColumnDef<Block>[] = [
     {
@@ -51,8 +30,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-
-        accessorKey: "blockLotName",
+        accessorKey: "lotName",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -67,6 +45,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
                 {row.original.lotId?.lotName}
             </div>
         ),
+        filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
     },
     {
         accessorKey: "blockNumber",
@@ -98,7 +77,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.lotId?.materialType}
             </div>
         ),
     },
