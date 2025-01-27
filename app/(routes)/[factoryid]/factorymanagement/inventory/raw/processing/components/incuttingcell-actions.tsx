@@ -10,9 +10,8 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
+import { EyeIcon, MoreHorizontal, ScissorsIcon, } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { Block } from "./incuttingcolumns";
@@ -21,11 +20,10 @@ interface Props {
     data: Block;
 }
 
-const        IncuttingCellAction: React.FC<Props> = ({ data }) => {
+const IncuttingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
     const deleteLot = async () => {
-
         try {
             const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
@@ -36,9 +34,6 @@ const        IncuttingCellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     }
-
-    console.log("this is id", data._id)
-
     return (
         <div>
             {/* Dropdown Menu */}

@@ -4,28 +4,7 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
-
-export type Block = {
-    _id: string
-    SlabsId: []
-    blockNumber: string
-    blockLotName: string
-    materialType: string
-    numberofSlabs: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string
-    height: string
-    breadth: string
-    length: string
-    volume: string
-    status: string
-    lotId: {
-        _id: string
-        lotName: string
-    }
-}
+import { Block } from "./incuttingcolumns"
 
 export const Readyforpolishcolumns: ColumnDef<Block>[] = [
     {
@@ -53,21 +32,21 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
     {
         accessorKey: "lotName",
         header: ({ column }) => (
-          <Button
-            variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          >
-            Block&apos;s Lot Name
-            <ArrowUpDown className="ml-2 h-4 w-4" />
-          </Button>
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block&apos;s Lot Name
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
         ),
         cell: ({ row }) => (
-          <div className="capitalize">
-            {row.original.lotId?.lotName}
-          </div>
+            <div className="capitalize">
+                {row.original.lotId?.lotName}
+            </div>
         ),
         filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
-      },
+    },
     {
         accessorKey: "blockNumber",
         header: ({ column }) => (
@@ -98,7 +77,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.lotId?.materialType}
             </div>
         ),
     },
