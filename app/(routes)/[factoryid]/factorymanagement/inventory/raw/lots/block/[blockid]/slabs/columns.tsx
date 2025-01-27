@@ -122,4 +122,5 @@ export const columns: ColumnDef<slabData>[] = [
       ).toFixed(2);
       return <div>{squareFt}</div>;
     },
+  }
 ];
