@@ -78,7 +78,7 @@ export const columns: ColumnDef<Blocks>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Lenght
+                Lenght (inch)
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
@@ -95,7 +95,7 @@ export const columns: ColumnDef<Blocks>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Height
+                Height (inch)
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
