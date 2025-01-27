@@ -2,9 +2,45 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Trash } from "lucide-react";
 import { Plus } from 'lucide-react';
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Icons } from "@/components/ui/icons";
+import { fetchData, putData } from "@/axiosUtility/api";
+import toast from "react-hot-toast";
+
+const formSchema = z.object({
+    trim: z.object({
+        length: z.object({
+            value: z
+                .number()
+                .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+        }),
+        height: z.object({
+            value: z
+                .number()
+                .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+        }),
+    }),
+});
+
+interface Props {
+    params: { id: string };
+}
 
 const EditLotDetailsForm: React.FC = () => {
   const [slabs, setSlabs] = useState<number[]>([0]); 
@@ -30,7 +66,7 @@ const EditLotDetailsForm: React.FC = () => {
 
   return (
     <div>
-      <h2 className="text-lg  mb-4">Edit or Add Number of Slabs</h2>
+      <h2 className="text-lg  mb-4">Edit Number of slabs of blockNumber</h2>
       <div className="space-y-4">
         {/* Display slabs */}
         {slabs.map((slab, index) => (
