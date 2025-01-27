@@ -25,7 +25,7 @@ export default function CreateNewFormPage() {
                         title="Create new Lot Inventory"
                     />
                     <p className="text-muted-foreground text-sm">
-                        Fill in the form below to create the finished product in your inventory
+                    Complete the form below to add a new lot to your inventory. Provide essential information like material type, dimensions, quantity, and any additional details.
                     </p>
                 </div>
             </div>

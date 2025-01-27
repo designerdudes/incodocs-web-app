@@ -82,9 +82,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
             title="Blocks and Slabs In Process"
           />
           <p className="text-muted-foreground text-sm mt-2">
-            Blocks are raw materials, cut into slabs for processing like
-            polishing and shaping, tracking their journey from source to
-            finished product.
+          On this page, each block is processed into slabs by cutting. Once cut, the slabs are polished to perfection and then added to the finished materials inventory, ready for further use or distribution.
           </p>
         </div>
       </div>
