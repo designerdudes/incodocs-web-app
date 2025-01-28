@@ -35,7 +35,7 @@ interface MarkCutAndCreateSlabsFormProps {
 const formSchema = z.object({
   _id: z.string().optional(),
   numberofSlabs: z.string().regex(/^\d+$/, {
-    message: "Number of slabs must be a non-negative integer",
+    message: "Number of slabs must be a positive numbers",
   }).optional(),
   slabs: z
     .array(
@@ -147,8 +147,27 @@ export function MarkCutAndCreateSlabsForm({
         status: "cut",
       });
       toast.success("Block data updated successfully");
-      router.push("../../");
-      window.location.reload()
+      router.push("../.././");
+      async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsLoading(true);
+        console.log("Values", values)
+        try {
+          await putData(`/factory-management/inventory/updateblockaddslab/${BlockData._id}`, {
+            ...values,
+            status: "cut",
+          });
+          toast.success("Block data updated successfully");
+          router.push("../.././");
+          window.location.reload()
+          
+          
+        } catch (error) {
+          toast.error("An error occurred while updating data");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    
       
       
     } catch (error) {

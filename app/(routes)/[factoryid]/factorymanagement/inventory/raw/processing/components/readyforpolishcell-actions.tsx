@@ -15,12 +15,10 @@ import {
   EyeIcon,
   MoreHorizontal,
   ScissorsIcon,
-  Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Block } from "./readyforpolishcolumns";
+import { Block } from "././incuttingcolumns";
 import SendForPolish from "./sendForPolsih";
-
 import EditLotDetails from "./editLotDetails";
 
 interface Props {
@@ -81,11 +79,11 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
 
           {/* Edit Lot Details */}
           <DropdownMenuItem
-           onSelect={() => {
-            GlobalModal.title = `Edit Slabs `
-            GlobalModal.children = <EditLotDetails  />
-            GlobalModal.onOpen()
-        }}
+            onSelect={() => {
+              GlobalModal.title = `Edit Slabs `
+              GlobalModal.children = <EditLotDetails />
+              GlobalModal.onOpen()
+            }}
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Lot Details
