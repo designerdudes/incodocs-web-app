@@ -63,7 +63,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
-    console.log(" Slab in processing", blockRes);
+    console.log(" Slab in processing", slabRes);
+    console.log(" Block in processing", blockRes);
    
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

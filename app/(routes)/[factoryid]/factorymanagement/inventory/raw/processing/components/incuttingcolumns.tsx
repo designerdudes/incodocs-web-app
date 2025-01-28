@@ -25,6 +25,7 @@ export type Block = {
     lotId: {
         _id: string
         lotName: string
+        materialType: string
     }
 }
 
@@ -100,7 +101,7 @@ export const incuttingcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original.lotId.materialType}
             </div>
         ),
     },

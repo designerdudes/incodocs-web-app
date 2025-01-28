@@ -34,9 +34,12 @@ interface MarkCutAndCreateSlabsFormProps {
 
 const formSchema = z.object({
   _id: z.string().optional(),
-  numberofSlabs: z.string().regex(/^\d+$/, {
-    message: "Number of slabs must be a non-negative integer",
-  }).optional(),
+  numberofSlabs: z
+    .string()
+    .regex(/^\d+$/, {
+      message: "Number of slabs must be a non-negative integer",
+    })
+    .optional(),
   slabs: z
     .array(
       z.object({
@@ -44,21 +47,21 @@ const formSchema = z.object({
           length: z.object({
             value: z
               .number()
-              .min(0.1, { message: "Length must be greater than zero" }),
+              .positive({ message: "Length must be a positive number" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
               .number()
-              .min(0.1, { message: "Height must be greater than zero" }),
+              .positive({ message: "Height must be a positive number" }),
             units: z.literal("inch").default("inch"),
           }),
-          status: z.literal("readyForPolish").default("readyForPolish")
-        })
+        }),
       })
     )
     .min(1, { message: "You must define at least one slab" }),
 });
+
 
 export function MarkCutAndCreateSlabsForm({
   BlockData,
