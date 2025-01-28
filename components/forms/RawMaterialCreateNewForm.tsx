@@ -174,20 +174,15 @@ export function RawMaterialCreateNewForm({
   }
 
   function calculateTotalVolume() {
-    const totalVolumeInInches = blocks.reduce((total, block) => {
+    const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume = length.value * breadth.value * height.value;
-      return total + (volume || 0); // Add only valid volumes
+      const volume = (length.value * breadth.value * height.value) / 1000000;
+      return total + (volume || 0);
     }, 0);
-
-    const totalVolumeInCm = totalVolumeInInches * 16.387; // Convert to cm³
-
     return {
-      inInches: totalVolumeInInches,
-      inCm: totalVolumeInCm,
+      inM: totalVolumeInM, 
     };
   }
-
 
   return (
     <div className="space-y-6">
@@ -218,6 +213,94 @@ export function RawMaterialCreateNewForm({
                       placeholder="Granite"
                       disabled={isLoading}
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="materialcost"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Material Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter material cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="markercost"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marker Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter marker cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="transportcost"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transport Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter transport cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="markername"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marker Operator</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Operator Name"
+                      type="string"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -286,7 +369,7 @@ export function RawMaterialCreateNewForm({
               <Input
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
+                placeholder="Length (cm)"
                 type="number"
                 disabled={isLoading}
               />
@@ -319,7 +402,7 @@ export function RawMaterialCreateNewForm({
               <Input
                 value={globalBreadth}
                 onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (inch)"
+                placeholder="Breadth (cm)"
                 type="number"
                 disabled={isLoading}
               />
@@ -352,7 +435,7 @@ export function RawMaterialCreateNewForm({
               <Input
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
+                placeholder="Height (cm)"
                 type="number"
                 disabled={isLoading}
               />
@@ -387,11 +470,11 @@ export function RawMaterialCreateNewForm({
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Weight (tons)</TableHead>
-                <TableHead>Length (inch)</TableHead>
-                <TableHead>Breadth (inch)</TableHead>
-                <TableHead>Height (inch)</TableHead>
-                <TableHead>Volume(in³)</TableHead>
-                <TableHead>Volume(cm³)</TableHead>
+                <TableHead>Length (cm)</TableHead>
+                <TableHead>Breadth (cm)</TableHead>
+                <TableHead>Height (cm)</TableHead>
+                <TableHead>Volume(m³)</TableHead>
+                <TableHead> Vehicle Number </TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -461,18 +544,20 @@ export function RawMaterialCreateNewForm({
                   </TableCell>
                   <TableCell>
                     {(
-                      block.dimensions.length.value *
-                      block.dimensions.breadth.value *
-                      block.dimensions.height.value
+                      (block.dimensions.length.value *
+                        block.dimensions.breadth.value *
+                        block.dimensions.height.value) /
+                      1000000
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    {(
-                      block.dimensions.length.value *
-                      block.dimensions.breadth.value *
-                      block.dimensions.height.value *
-                      2.54
-                    ).toFixed(2)}
+                    <Input
+                      type="number"
+                      
+                      placeholder="BH 08 BH 0823"
+                      
+                      disabled={isLoading}
+                    />
                   </TableCell>
                   <TableCell>
                     <Button
@@ -496,17 +581,13 @@ export function RawMaterialCreateNewForm({
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={5} className="text-right font-bold">
-                  Total Volume (in³): {calculateTotalVolume().inInches.toFixed(2)}
-                </TableCell>
-                <TableCell colSpan={4} className="text-right font-bold">
-                  Total Volume (cm³): {calculateTotalVolume().inCm.toFixed(2)}
+                <TableCell colSpan={8
+                  
+                } className="text-right font-bold">
+                  Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
               </TableRow>
-              <TableRow>
-
-
-              </TableRow>
+              <TableRow></TableRow>
             </TableFooter>
           </Table>
           <Button type="submit" disabled={isLoading}>
