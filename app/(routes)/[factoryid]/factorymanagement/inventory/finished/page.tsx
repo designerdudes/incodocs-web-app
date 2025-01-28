@@ -89,7 +89,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
             </div>
             <Separator orientation='horizontal' />
             <div className="container mx-auto py-10">
-                <Tabs defaultValue="CuttingData" className="w-full">
+                <Tabs defaultValue="Polished" className="w-full">
                     <div className='text-center mb-4'>
                         <TabsList className='gap-6'>
                             <TabsTrigger className="gap-2" value="Polished">
@@ -97,6 +97,9 @@ export default async function FinishedMaterialPage({ params }: Props) {
                                 <Badge className="text-bg-primary-foreground" variant="outline">
                                     {Polished?.length}
                                 </Badge>
+                            </TabsTrigger>
+                            <TabsTrigger className="gap-2" value="Sold">
+                                Sold Slab Data
                             </TabsTrigger>
                         </TabsList>
                     </div>
