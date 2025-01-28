@@ -10,7 +10,6 @@ import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { FinishedMaterial } from '../page';
 
-
 interface Props {
     data: FinishedMaterial
 }
@@ -29,8 +28,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         } catch (error) {
             console.error('Error deleting data:', error);
         }
-
-
     }
     const router = useRouter()
     return (
@@ -65,7 +62,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         onSelect={() => {
                             GlobalModal.title = `Delete Product - ${data.slabNumber}`
                             GlobalModal.description = "Are you sure you want to delete this Product?"
-                            GlobalModal.children = <Alert onConfirm={deleteCategory} />
+                            GlobalModal.children = <Alert onConfirm={deleteCategory} actionType={'delete'} />
                             GlobalModal.onOpen()
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground">

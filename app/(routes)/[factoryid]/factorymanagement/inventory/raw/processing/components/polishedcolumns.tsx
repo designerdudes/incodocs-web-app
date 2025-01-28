@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Block } from "./incuttingcolumns"
 import { PolishedCellAction } from "./polishedcell-action"
 
 
@@ -112,23 +111,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
             </div>
         ),
     },
-    // {
-    //     accessorKey: "materialType",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Material Type
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.materialType}
-    //         </div>
-    //     ),
-    // },
+
     {
         accessorKey: "status",
         header: ({ column }) => (
@@ -146,24 +129,23 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
             </div>
         ),
     },
-    // {
-    //     accessorKey: "createdAt",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Block Created Date
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div>
-    //             {moment(row.original.createdAt).format("DD MMM YYYY")}
-    //         </div>
-    //     ),
-    // },
-
+    {
+        accessorKey: "materialType",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Material Type
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original.materialType}
+            </div>
+        ),
+    },
     {
 
         header: ({ column }) => (
@@ -176,6 +158,6 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
 
         id: "actions",
         cell: ({ row }) => <PolishedCellAction data={row.original} />
-    
+
     },
 ]
