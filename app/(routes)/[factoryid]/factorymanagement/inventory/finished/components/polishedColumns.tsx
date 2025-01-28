@@ -3,18 +3,19 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import InPolishingCellAction from "./inpolishingcell-actions"
+import { PolishedCellAction } from "./polishedCellAction"
+
 
 export type Slab = {
     _id: string;
-    slabNumber: number;
-    blockId: string | null;
-    blockNumber: number;
-    blockLotName?: string;
+    slabNumber: number; // Updated from slabID to slabNumber
+    blockId: string | null; // Nullable block ID
+    blockNumber: number; // Changed to number for consistency
+    blockLotName?: string; // Optional if not in the provided structure
     factoryId: string;
-    materialType?: string;
-    productName: string;
-    quantity: number;
+    materialType?: string; // Optional if not provided
+    productName: string; // Added to match structure
+    quantity: number; // Changed to number for consistency
     dimensions: {
         thickness: {
             value: number;
@@ -41,19 +42,19 @@ export type Slab = {
             units: string;
         };
     };
-    isActive?: boolean;
-    weight?: string;
-    height?: string;
-    breadth?: string;
-    length?: string;
-    volume?: string;
+    isActive?: boolean; // Optional if not present
+    weight?: string; // Retained as optional for backward compatibility
+    height?: string; // Retained as optional for backward compatibility
+    breadth?: string; // Retained as optional for backward compatibility
+    length?: string; // Retained as optional for backward compatibility
+    volume?: string; // Retained as optional for backward compatibility
     status: string;
-    inStock: boolean;
+    inStock: boolean; // Added based on provided structure
     createdAt: string;
     updatedAt: string;
 };
 
-export const inPolishingolumns: ColumnDef<Slab>[] = [
+export const Polishedcolumns: ColumnDef<Slab>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -110,6 +111,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
             </div>
         ),
     },
+
     {
         accessorKey: "status",
         header: ({ column }) => (
@@ -155,6 +157,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         ),
 
         id: "actions",
-        cell: ({ row }) => <InPolishingCellAction data={row.original} />
+        cell: ({ row }) => <PolishedCellAction data={row.original} />
+
     },
 ]
