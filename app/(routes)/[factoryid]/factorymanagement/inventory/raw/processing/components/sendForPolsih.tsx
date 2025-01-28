@@ -24,6 +24,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setSlabData(GetData);
+                console.log("Block Data", GetData);
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
