@@ -1,6 +1,5 @@
 "use client";
 import { ColumnDef } from "@tanstack/react-table";
-import { Blocks } from "../../../../blocks/components/columns";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
@@ -31,12 +30,6 @@ export type slabData = {
   slabNumber: number;
   blockNumber: number;
 };
-function calculateSqft(length?: number, height?: number): string {
-  const lengthInFeet = (length || 0) / 12;
-  const heightInFeet = (height || 0) / 12;
-  const area = lengthInFeet * heightInFeet;
-  return area > 0 ? area.toFixed(2) : "0.00";
-}
 
 export const columns: ColumnDef<slabData>[] = [
   {
@@ -122,4 +115,5 @@ export const columns: ColumnDef<slabData>[] = [
       ).toFixed(2);
       return <div>{squareFt}</div>;
     },
+  }
 ];

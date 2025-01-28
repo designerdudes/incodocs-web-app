@@ -17,7 +17,7 @@ import {
   ScissorsIcon,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Block } from "./readyforpolishcolumns";
+import { Block } from "././incuttingcolumns";
 import SendForPolish from "./sendForPolsih";
 import EditLotDetails from "./editLotDetails";
 
