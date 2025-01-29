@@ -38,6 +38,22 @@ const formSchema = z.object({
   materialType: z
     .string()
     .min(3, { message: "Material type must be at least 3 characters long" }),
+  markerCost: z
+    .number()
+    .min(1, { message: "Marker cost must be greater than or equal to zero" })
+    .optional(),
+  transportCost: z
+    .number()
+    .min(1, { message: "Transport cost must be greater than or equal to zero" })
+    .optional(),
+  materialCost: z
+    .number()
+    .min(1, { message: "Material cost must be greater than or equal to zero" })
+    .optional(),
+  markerOperatorName: z
+    .string()
+    .min(1, { message: "Marker name is required" })
+    .optional(),
   noOfBlocks: z
     .number()
     .min(1, { message: "Number of blocks must be greater than zero" }),
@@ -82,7 +98,6 @@ const formSchema = z.object({
 });
 
 export function RawMaterialCreateNewForm({
-  gap,
 }: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -101,7 +116,6 @@ export function RawMaterialCreateNewForm({
     React.useState<boolean>(false);
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
@@ -128,33 +142,12 @@ export function RawMaterialCreateNewForm({
     }
   }
 
-  function applyIndividualGlobalDataToAllRows() {
-    const updatedBlocks = blocks.map((entry) => ({
-      ...entry,
-      weight: applyWeightToAll
-        ? parseFloat(globalWeight) || entry.weight
-        : entry.weight,
-      length: applyLengthToAll
-        ? parseFloat(globalLength) || entry.length
-        : entry.length,
-      breadth: applyBreadthToAll
-        ? parseFloat(globalBreadth) || entry.breadth
-        : entry.breadth,
-      height: applyHeightToAll
-        ? parseFloat(globalHeight) || entry.height
-        : entry.height,
-    }));
-    setBlocks(updatedBlocks);
-    form.setValue("blocks", updatedBlocks);
-  }
-
   React.useEffect(() => {
     form.setValue("noOfBlocks", blocks.length);
   }, [blocks, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log("values", values);
     try {
       await postData("/factory-management/inventory/addlotandblocks", {
         ...values,
@@ -180,7 +173,7 @@ export function RawMaterialCreateNewForm({
       return total + (volume || 0);
     }, 0);
     return {
-      inM: totalVolumeInM, 
+      inM: totalVolumeInM,
     };
   }
 
@@ -220,7 +213,7 @@ export function RawMaterialCreateNewForm({
               )}
             />
             <FormField
-              name="materialcost"
+              name="materialCost"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -231,8 +224,8 @@ export function RawMaterialCreateNewForm({
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value}
                     />
@@ -242,7 +235,7 @@ export function RawMaterialCreateNewForm({
               )}
             />
             <FormField
-              name="markercost"
+              name="markerCost"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -253,8 +246,8 @@ export function RawMaterialCreateNewForm({
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value}
                     />
@@ -264,7 +257,7 @@ export function RawMaterialCreateNewForm({
               )}
             />
             <FormField
-              name="transportcost"
+              name="transportCost"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -275,8 +268,8 @@ export function RawMaterialCreateNewForm({
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value}
                     />
@@ -286,7 +279,7 @@ export function RawMaterialCreateNewForm({
               )}
             />
             <FormField
-              name="markername"
+              name="markerOperatorName"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -552,10 +545,10 @@ export function RawMaterialCreateNewForm({
                   </TableCell>
                   <TableCell>
                     <Input
-                      type="number"
-                      
+                      type="string"
+
                       placeholder="BH 08 BH 0823"
-                      
+
                       disabled={isLoading}
                     />
                   </TableCell>
@@ -582,7 +575,7 @@ export function RawMaterialCreateNewForm({
             <TableFooter>
               <TableRow>
                 <TableCell colSpan={8
-                  
+
                 } className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>

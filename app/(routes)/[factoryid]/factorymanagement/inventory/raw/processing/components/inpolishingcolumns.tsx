@@ -8,11 +8,13 @@ import InPolishingCellAction from "./inpolishingcell-actions"
 export type Slab = {
     _id: string;
     slabNumber: number;
-    blockId: string | null;
+    blockId: {
+        id: string;
+        materialType: string;
+    }
     blockNumber: number;
     blockLotName?: string;
     factoryId: string;
-    materialType?: string;
     productName: string;
     quantity: number;
     dimensions: {
@@ -140,7 +142,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.blockId?.materialType}
             </div>
         ),
     },

@@ -51,17 +51,14 @@ export function MarkPolishForm({ BlockData, className, gap, ...props }: MarkPoli
                 ...values,
                 status: "polished",
             });
-            
-        
-            console.log("Values", values)
-          toast.success("Slab data updated successfully");
-          router.push("../../");
+            toast.success("Slab data updated successfully");
+            router.push("../../");
         } catch (error) {
-          toast.error("An error occurred while updating data");
+            toast.error("An error occurred while updating data");
         } finally {
-          setIsLoading(false);
+            setIsLoading(false);
         }
-      }
+    }
 
 
     return (

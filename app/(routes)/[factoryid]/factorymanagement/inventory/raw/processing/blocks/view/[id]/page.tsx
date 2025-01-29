@@ -20,6 +20,8 @@ import {
   Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { DataTable } from "@/components/ui/data-table";
+import { columns } from "../../../../lots/block/[blockid]/slabs/columns";
 
 interface Props {
   params: {
@@ -30,6 +32,8 @@ interface Props {
 
 export default async function BlocksPage({ params }: Props) {
   let BlockData = null;
+  let SlabData = null;
+
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
@@ -48,6 +52,22 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   BlockData = res;
+
+  const resp = await fetch(
+    `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+
+  SlabData = resp;
+
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -161,6 +181,19 @@ export default async function BlocksPage({ params }: Props) {
               </Table>
             </CardContent>
           </Card>
+          {/* Slabs DataTable */}
+          <div className="container mx-auto">
+            <DataTable
+              bulkDeleteIdName="_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+              bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+              deleteRoute="/category/ids"
+              searchKey="slabNumber"
+              columns={columns}
+              data={SlabData as any}
+            />
+          </div>
         </div>
       </div>
     </div>

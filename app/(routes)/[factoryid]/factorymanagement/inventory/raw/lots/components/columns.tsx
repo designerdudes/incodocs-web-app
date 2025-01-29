@@ -59,7 +59,6 @@ export const columns: ColumnDef<LotManagement>[] = [
             <div className="capitalize">
                 {row.original.lotName}
             </div>
-
         ),
     },
     {
@@ -96,76 +95,6 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-    // {
-    //     accessorKey: "instock",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Blocks In Stock
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.instock}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "incutting",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Blocks in Cutting Phase
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.incutting}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "inpolishing",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Blocks in Polishing Phase
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.inpolishing}
-    //         </div>
-    //     ),
-    // },
-
-
-    // {
-    //     accessorKey: "completed",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Completed
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.completed}
-    //         </div>
-    //     ),
-    // },
     {
         accessorKey: "createdAt",
         header: ({ column }) => (
@@ -183,9 +112,7 @@ export const columns: ColumnDef<LotManagement>[] = [
             </div>
         ),
     },
-
     {
-
         header: ({ column }) => (
             <Button
                 variant="ghost"
