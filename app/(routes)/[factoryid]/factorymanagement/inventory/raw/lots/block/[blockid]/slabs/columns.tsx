@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 
-export type slabData = {
+export interface SlabInterface {
   dimensions: {
     length: {
       value: number;
@@ -17,21 +17,26 @@ export type slabData = {
   };
   trim: {
     length: {
-      value: number;
+      value?: number; // Optional due to potential absence of trim data
       units: string;
     };
     height: {
-      value: number;
+      value?: number; // Optional due to potential absence of trim data
       units: string;
     };
   };
   _id: string;
-  BlockId: string;
+  blockId: string;
+  factoryId: string;
   slabNumber: number;
   blockNumber: number;
-};
+  status: string;
+  __v: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export const columns: ColumnDef<slabData>[] = [
+export const columns: ColumnDef<SlabInterface>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -67,53 +72,52 @@ export const columns: ColumnDef<slabData>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div>
-        {(row.original.slabNumber)}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.slabNumber}</div>,
     filterFn: "includesString", // Use the built-in filtering logic for partial matches
   },
   {
-    accessorKey: "Lenght",
+    accessorKey: "length",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Lenght
+        Length (inch)
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.dimensions?.length?.value}</div>
+      <div>
+        {row.original?.dimensions?.length?.value || ""}
+      </div>
     ),
   },
   {
-    accessorKey: "numberofslabs",
+    accessorKey: "height",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Height
+        Height (inch)
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.dimensions?.height?.value}</div>
+      <div className="capitalize">
+        {row.original?.dimensions?.height?.value || ""}
+      </div>
     ),
   },
   {
     accessorKey: "squareft",
     header: "Total SQF",
     cell: ({ row }) => {
-      const squareFt = (
-        (row.original?.dimensions?.length?.value *
-          row.original?.dimensions?.height?.value) /
-        144
-      ).toFixed(2);
-      return <div>{squareFt}</div>;
+      const lengthInInches = row.original?.dimensions?.length?.value || 0;
+      const heightInInches = row.original?.dimensions?.height?.value || 0;
+      // Convert square inches to square feet
+      const totalSqFt = (lengthInInches * heightInInches) / 144;
+      return <div>{totalSqFt.toFixed(2)}</div>;
     },
-  }
+  },
 ];

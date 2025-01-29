@@ -77,8 +77,6 @@ function CardWithForm() {
                     </Button>
                     <Button
                         onClick={() => {
-                            console.log("Lot Created:", values);
-
                             GlobalModal.onClose();
                             router.push("./lots");
                             setIsLoading(false);
