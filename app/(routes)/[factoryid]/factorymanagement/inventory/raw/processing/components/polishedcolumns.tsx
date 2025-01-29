@@ -94,7 +94,8 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockId?.materialType}
+                {row.original?.blockId?.lotId?.materialType}
+
             </div>
         ),
     },

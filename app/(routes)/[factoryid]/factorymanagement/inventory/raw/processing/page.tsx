@@ -16,42 +16,52 @@ import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllow
 import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
+import { Console } from "node:console";
 
 export type FinishedMaterial = {
-  _id: string; // Unique identifier
-  slabNumber: number; // Sequential slab number
-  blockNumber: number | null; // Block number, can be null
-  factoryId: string; // Associated factory identifier
-  productName: string; // Name of the product
-  quantity: number; // Quantity of the finished material
-  status: string; // Status (e.g., "polished")
-  inStock: boolean; // Availability status
-
-  dimensions: {
-    length: {
-      value: number;
-      units: string; // E.g., "inch"
+  
+    _id: string; // Unique identifier
+    slabNumber: number; // Sequential slab number
+    blockNumber: number | null; // Block number, can be null
+    factoryId: string; // Associated factory identifier
+    productName: string; // Name of the product
+    quantity: number; // Quantity of the finished material
+    status: string; // Status (e.g., "polished")
+    inStock: boolean; // Availability status
+  
+    blockId: {
+      _id: string;
+      lotId?: {
+        _id: string;
+        materialType: string;
+      };
     };
-    height: {
-      value: number;
-      units: string; // E.g., "inch"
+  
+    dimensions: {
+      length: {
+        value: number;
+        units: string; // E.g., "inch"
+      };
+      height: {
+        value: number;
+        units: string; // E.g., "inch"
+      };
     };
+  
+    trim: {
+      length: {
+        value: number;
+        units: string; // E.g., "inch"
+      };
+      height: {
+        value: number;
+        units: string; // E.g., "inch"
+      };
+    };
+  
+    createdAt: string; // ISO 8601 timestamp
+    updatedAt: string; // ISO 8601 timestamp
   };
-
-  trim: {
-    length: {
-      value: number;
-      units: string; // E.g., "inch"
-    };
-    height: {
-      value: number;
-      units: string; // E.g., "inch"
-    };
-  };
-
-  createdAt: string; // ISO 8601 timestamp
-  updatedAt: string; // ISO 8601 timestamp
-};
 
 interface Props {
   params: {
@@ -101,17 +111,17 @@ export default async function SlabsProcessingPage({ params }: Props) {
   })
 
   const slabsData = res
-
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
 
+  
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-  );
-  const inPolishing = Array.isArray(Slabdata)
+);
+const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
   const Polished = Array.isArray(Slabdata)
