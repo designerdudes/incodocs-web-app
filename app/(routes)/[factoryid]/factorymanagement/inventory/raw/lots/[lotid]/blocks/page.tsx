@@ -30,7 +30,6 @@ export default async function BlocksPage({ params }: Props) {
     })
 
     BlocksData = res;
-    console.log("BlocksData:", BlocksData);
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -44,8 +43,7 @@ export default async function BlocksPage({ params }: Props) {
                 <div className="flex-1">
                     <Heading className="leading-tight" title={` Details of ${BlocksData[0]?.lotName}'s Blocks`} />
                     <p className="text-muted-foreground text-sm mt-2">
-                        Efficiently track and manage Blocks with detailed insights into its current status and progress through the production cycle.
-                    </p>
+                        This section allows you to send blocks from your inventory for cutting. Select the block and initiate the cutting process as the next step in its preparation.</p>
                 </div>
             </div>
             <Separator orientation="horizontal" />

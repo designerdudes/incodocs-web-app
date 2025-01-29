@@ -3,10 +3,58 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
-import { Block } from "./incuttingcolumns"
+import { PolishedCellAction } from "./polishedCellAction"
 
-export const Readyforpolishcolumns: ColumnDef<Block>[] = [
+
+export type Slab = {
+    _id: string;
+    slabNumber: number; // Updated from slabID to slabNumber
+    blockId: string | null; // Nullable block ID
+    blockNumber: number; // Changed to number for consistency
+    blockLotName?: string; // Optional if not in the provided structure
+    factoryId: string;
+    materialType?: string; // Optional if not provided
+    productName: string; // Added to match structure
+    quantity: number; // Changed to number for consistency
+    dimensions: {
+        thickness: {
+            value: number;
+            units: string;
+        };
+        length: {
+            value: number;
+            units: string;
+        };
+        breadth: {
+            value: number;
+            units: string;
+        };
+        height: {
+            value: number;
+            units: string;
+        };
+    };
+    trim: {
+        length: {
+            units: string;
+        };
+        height: {
+            units: string;
+        };
+    };
+    isActive?: boolean; // Optional if not present
+    weight?: string; // Retained as optional for backward compatibility
+    height?: string; // Retained as optional for backward compatibility
+    breadth?: string; // Retained as optional for backward compatibility
+    length?: string; // Retained as optional for backward compatibility
+    volume?: string; // Retained as optional for backward compatibility
+    status: string;
+    inStock: boolean; // Added based on provided structure
+    createdAt: string;
+    updatedAt: string;
+};
+
+export const Polishedcolumns: ColumnDef<Slab>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -30,22 +78,21 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "lotName",
+        accessorKey: "slabNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Block&apos;s Lot Name
+                Slab Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.lotId?.lotName}
+                {row.original.slabNumber}
             </div>
         ),
-        filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
     },
     {
         accessorKey: "blockNumber",
@@ -64,6 +111,24 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
             </div>
         ),
     },
+
+    {
+        accessorKey: "status",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Slab Status
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original.status}
+            </div>
+        ),
+    },
     {
         accessorKey: "materialType",
         header: ({ column }) => (
@@ -77,41 +142,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.lotId?.materialType}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "SlabsId",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Total Slabs
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.SlabsId.length}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "status",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Blocks Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.status === "cut" ? "Ready for Polish" : row.original?.status || "N/A"}
+                {row.original.materialType}
             </div>
         ),
     },
@@ -126,7 +157,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
 
         id: "actions",
-        cell: ({ row }) => <ReadyforpolishCellAction data={row.original} />
+        cell: ({ row }) => <PolishedCellAction data={row.original} />
+
     },
 ]
-

@@ -12,6 +12,46 @@ import { Readyforpolishcolumns } from "./components/readyforpolishcolumns";
 import { inPolishingolumns } from "./components/inpolishingcolumns";
 import { cookies } from "next/headers";
 import { Polishedcolumns } from "./components/polishedcolumns";
+import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllowanceColumns";
+import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
+import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
+import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
+
+export type FinishedMaterial = {
+  _id: string; // Unique identifier
+  slabNumber: number; // Sequential slab number
+  blockNumber: number | null; // Block number, can be null
+  factoryId: string; // Associated factory identifier
+  productName: string; // Name of the product
+  quantity: number; // Quantity of the finished material
+  status: string; // Status (e.g., "polished")
+  inStock: boolean; // Availability status
+
+  dimensions: {
+    length: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+    height: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+  };
+
+  trim: {
+    length: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+    height: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+  };
+
+  createdAt: string; // ISO 8601 timestamp
+  updatedAt: string; // ISO 8601 timestamp
+};
 
 interface Props {
   params: {
@@ -50,22 +90,34 @@ export default async function SlabsProcessingPage({ params }: Props) {
     return response.json();
   });
 
+  const res = await fetch(`http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + token
+    }
+  }).then(response => {
+    return response.json()
+  })
+
+  const slabsData = res
+
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
 
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
   );
-  const readyForPolish = Blockdata.filter((data: any) => data.status === "cut");
+  const readyForPolish = Blockdata.filter((data: any) =>
+    data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
+  );
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
-    console.log(" Slab in processing", slabRes);
-    console.log(" Block in processing", blockRes);
-   
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -81,9 +133,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
             title="Blocks and Slabs In Process"
           />
           <p className="text-muted-foreground text-sm mt-2">
-            Blocks are raw materials, cut into slabs for processing like
-            polishing and shaping, tracking their journey from source to
-            finished product.
+            On this page, each block is processed into slabs by cutting. Once cut, the slabs are polished to perfection and then added to the finished materials inventory, ready for further use or distribution.
           </p>
         </div>
       </div>
@@ -115,8 +165,19 @@ export default async function SlabsProcessingPage({ params }: Props) {
                 {Polished?.length}
               </Badge>
             </TabsTrigger>
+            <TabsList className='gap-6'>
+              <TabsTrigger className='gap-2' value="CuttingData">Cutting Data
+                <Badge className="text-bg-primary-foreground" variant="outline">
+                  {slabsData?.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger className='gap-2' value="PolishingData">Polishing Data
+                <Badge className="text-bg-primary-foreground" variant="outline">
+                  {slabsData?.length}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
           </TabsList>
-
           <TabsContent value="inCutting">
             <DataTable
               bulkDeleteIdName="order_id"
@@ -128,7 +189,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
               data={inCutting}
             />
           </TabsContent>
-
           <TabsContent value="readyforpolish">
             <DataTable
               bulkDeleteIdName="order_id"
@@ -140,7 +200,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
               data={readyForPolish}
             />
           </TabsContent>
-
           <TabsContent value="inPolishing">
             <DataTable
               bulkDeleteIdName="order_id"
@@ -152,7 +211,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
               data={inPolishing}
             />
           </TabsContent>
-
           <TabsContent value="Polished">
             <DataTable
               bulkDeleteIdName="order_id"
@@ -163,6 +221,66 @@ export default async function SlabsProcessingPage({ params }: Props) {
               columns={Polishedcolumns}
               data={Polished}
             />
+          </TabsContent>
+          <TabsContent value="CuttingData">
+            <Tabs defaultValue="CuttingInchesWithAllowance" className="w-full" >
+              <div className='text-center mt-4'>
+                <TabsList className='gap-6'>
+                  <TabsTrigger className='gap-2' value="CuttingInchesWithAllowance">Cutting Inches With Allowance</TabsTrigger>
+                  <TabsTrigger className='gap-2' value="CuttinginchesWithOutAllowance">Cutting Inches WithOut Allowance</TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="CuttingInchesWithAllowance">
+                <DataTable
+                  bulkDeleteIdName='_id'
+                  bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
+                  bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
+                  bulkDeleteToastMessage='Selected Slabs deleted successfully'
+                  deleteRoute="/category/ids"
+                  searchKey='slabNumber'
+                  columns={CuttingInchesWithAllowanceColumns}
+                  data={slabsData}
+                />
+              </TabsContent>
+              <TabsContent value="CuttinginchesWithOutAllowance">
+                <DataTable
+                  bulkDeleteIdName='_id'
+                  bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
+                  bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
+                  bulkDeleteToastMessage='Selected Slabs deleted successfully'
+                  deleteRoute="/category/ids"
+                  searchKey='slabNumber'
+                  columns={CuttingInchesWithOutAllowanceColumns}
+                  data={slabsData}
+                />
+              </TabsContent>
+            </Tabs>
+          </TabsContent>
+          <TabsContent value="PolishingData">
+            <Tabs defaultValue="PolishingInchesWithOutAllowance" className="w-full" >
+              <div className='text-center mt-4'>
+                <TabsList className='gap-6'>
+                  <TabsTrigger className='gap-2' value="PolishingInchesWithOutAllowance">Polishing Inches WithOut Allowance</TabsTrigger>
+                  <TabsTrigger className='gap-2' value="PolishingInchesWithAllowance">Polishing Inches With Allowance</TabsTrigger>
+                </TabsList>
+              </div>
+              <TabsContent value="PolishingInchesWithOutAllowance">
+                <DataTable
+                  bulkDeleteIdName='order_id'
+                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                  bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  searchKey='slabNumber' columns={polishingInchesWithOutAllowanceColumns} data={slabsData} />
+              </TabsContent>
+              <TabsContent value="PolishingInchesWithAllowance">
+                <DataTable
+                  bulkDeleteIdName='order_id'
+                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                  bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  searchKey='slabNumber' columns={polishingInchesWithAllowanceColumns} data={slabsData} />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </div>

@@ -26,6 +26,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
+import { preload } from "react-dom";
 
 interface MarkCutAndCreateSlabsFormProps {
   gap: number;
@@ -34,28 +35,26 @@ interface MarkCutAndCreateSlabsFormProps {
 
 const formSchema = z.object({
   _id: z.string().optional(),
-  numberofSlabs: z
-    .string()
-    .regex(/^\d+$/, {
-      message: "Number of slabs must be a non-negative integer",
-    })
-    .optional(),
+  numberofSlabs: z.string().regex(/^[1-9]\d*$/, {
+    message: "Number of slabs must be a positive number",
+  }),
   slabs: z
     .array(
       z.object({
         dimensions: z.object({
           length: z.object({
             value: z
-              .number()
-              .positive({ message: "Length must be a positive number" }),
+              .number({ required_error: "Length is required" })
+              .min(0.1, { message: "Length must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
-              .number()
-              .positive({ message: "Height must be a positive number" }),
+              .number({ required_error: "Height is required" })
+              .min(0.1, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
+          status: z.literal("readyForPolish").default("readyForPolish"),
         }),
       })
     )
@@ -67,7 +66,6 @@ export function MarkCutAndCreateSlabsForm({
   BlockData,
   gap,
 }: MarkCutAndCreateSlabsFormProps) {
-  console.log("this is block data", BlockData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [slabsCount, setSlabsCount] = React.useState(0);
@@ -122,15 +120,12 @@ export function MarkCutAndCreateSlabsForm({
     }
   }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
 
-
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
-
-
 
   function handleDeleteRow(index: number) {
     const updatedSlabs = [...form.getValues("slabs")];
@@ -139,21 +134,16 @@ export function MarkCutAndCreateSlabsForm({
     form.setValue("slabs", updatedSlabs);
   }
 
-
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log("Values", values)
     try {
       await putData(`/factory-management/inventory/updateblockaddslab/${BlockData._id}`, {
         ...values,
         status: "cut",
       });
       toast.success("Block data updated successfully");
-      router.push("../../");
-      window.location.reload()
-      
-      
+      router.push("../.././");
+
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
@@ -216,7 +206,7 @@ export function MarkCutAndCreateSlabsForm({
                   checked={applyLengthToAll}
                   onChange={(e) => setApplyLengthToAll(e.target.checked)}
                 />{" "}
-                Apply Length to all rows
+                Apply Length (inches) to all rows
               </label>
             </div>
             <div>
@@ -234,7 +224,7 @@ export function MarkCutAndCreateSlabsForm({
                   checked={applyHeightToAll}
                   onChange={(e) => setApplyHeightToAll(e.target.checked)}
                 />{" "}
-                Apply Height to all rows
+                Apply Height (inches) to all rows
               </label>
             </div>
           </div>
@@ -254,29 +244,51 @@ export function MarkCutAndCreateSlabsForm({
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
-                      <Input
-                        placeholder="Length"
-                        type="number"
-                        value={slab.dimensions.length.value}
-                        onChange={(e) => {
-                          const slabs = form.getValues("slabs");
-                          slabs[index].dimensions.length.value = parseFloat(e.target.value) || 0;
-                          form.setValue("slabs", slabs, { shouldValidate: true });
-                        }}
-                        disabled={isLoading}
+                      <FormField
+                        name={`slabs.${index}.dimensions.length.value`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Length"
+                                type="number"
+                                value={slab.dimensions.length.value}
+                                onChange={(e) => {
+                                  const slabs = form.getValues("slabs");
+                                  slabs[index].dimensions.length.value = parseFloat(e.target.value) || 0;
+                                  form.setValue("slabs", slabs, { shouldValidate: true });
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </TableCell>
                     <TableCell>
-                      <Input
-                        placeholder="Height"
-                        type="number"
-                        value={slab.dimensions.height.value}
-                        onChange={(e) => {
-                          const slabs = form.getValues("slabs");
-                          slabs[index].dimensions.height.value = parseFloat(e.target.value) || 0;
-                          form.setValue("slabs", slabs, { shouldValidate: true });
-                        }}
-                        disabled={isLoading}
+                      <FormField
+                        name={`slabs.${index}.dimensions.height.value`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Height"
+                                type="number"
+                                value={slab.dimensions.height.value}
+                                onChange={(e) => {
+                                  const slabs = form.getValues("slabs");
+                                  slabs[index].dimensions.height.value = parseFloat(e.target.value) || 0;
+                                  form.setValue("slabs", slabs, { shouldValidate: true });
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
                     </TableCell>
                     <TableCell>

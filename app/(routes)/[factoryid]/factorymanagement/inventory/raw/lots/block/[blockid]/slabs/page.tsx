@@ -2,7 +2,7 @@ import React from "react";
 import { cookies } from "next/headers";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
-import { ArrowUpDown, ChevronLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -22,9 +22,6 @@ import {
 import moment from "moment";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
-import { ColumnDef } from "@tanstack/react-table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Blocks } from "../../../../blocks/components/columns";
 import { columns } from "./columns";
 
 interface Props {
@@ -35,6 +32,7 @@ interface Props {
 
 export default async function SlabsPage({ params }: Props) {
   let BlockData = null;
+  let SlabData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -51,15 +49,7 @@ export default async function SlabsPage({ params }: Props) {
     return response.json();
   });
 
-  
   BlockData = res;
-  console.log("this is lot ID", BlockData.lotId._id);
-  console.log("this is block data", BlockData)
-  // console.log(BlockData);
-
-  let SlabData = null;
-  const CookieStore = cookies();
-  const Token = cookieStore.get("AccessToken")?.value || "";
 
   const resp = await fetch(
     `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
@@ -75,6 +65,7 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = resp;
+
   function calculateVolume(
     length: number,
     breadth: number,
@@ -97,7 +88,6 @@ export default async function SlabsPage({ params }: Props) {
     const inchToCm = volumeinInchs * conversionFactor;
     return inchToCm.toFixed(2);
   }
-  console.log("Slab Data:", SlabData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

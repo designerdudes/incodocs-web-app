@@ -10,7 +10,6 @@ interface Props {
 }
 
 export default async function Home({ params }: Props) {
-  console.log('Factory ID ', params.factoryid)
   const cookieStore = cookies();
   const token = cookieStore.get('AccessToken')?.value || "";
 

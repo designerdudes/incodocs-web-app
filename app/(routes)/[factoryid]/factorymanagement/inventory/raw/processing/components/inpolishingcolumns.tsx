@@ -8,11 +8,13 @@ import InPolishingCellAction from "./inpolishingcell-actions"
 export type Slab = {
     _id: string;
     slabNumber: number;
-    blockId: string | null;
+    blockId: {
+        id: string;
+        materialType: string;
+    }
     blockNumber: number;
     blockLotName?: string;
     factoryId: string;
-    materialType?: string;
     productName: string;
     quantity: number;
     dimensions: {
@@ -124,6 +126,23 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         cell: ({ row }) => (
             <div className="capitalize">
                 {row.original.status}
+            </div>
+        ),
+    },
+    {
+        accessorKey: "materialType",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Material Type
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.blockId?.materialType}
             </div>
         ),
     },

@@ -21,8 +21,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { DataTable } from "@/components/ui/data-table";
-import { Separator } from "@/components/ui/separator";
-import { incuttingcolumns } from "../../../components/incuttingcolumns";
+import { columns } from "../../../../lots/block/[blockid]/slabs/columns";
 
 interface Props {
   params: {
@@ -32,10 +31,10 @@ interface Props {
 }
 
 export default async function BlocksPage({ params }: Props) {
+  let BlockData = null;
   let SlabData = null;
-  console.log("params is ", params);
-  console.log("id of Block is", params.id);
-  console.log("factory Id", params.factoryid);
+
+
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -52,9 +51,23 @@ export default async function BlocksPage({ params }: Props) {
     return response.json();
   });
 
-  SlabData = res;
+  BlockData = res;
 
-  console.log("This is slab", SlabData);
+  const resp = await fetch(
+    `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+
+  SlabData = resp;
+
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -68,7 +81,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block ${SlabData.blockNumber} `}
+            title={` Details of Block ${BlockData?.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Slabs with detailed insights into its current
@@ -76,110 +89,111 @@ export default async function BlocksPage({ params }: Props) {
           </p>
         </div>
       </div>
-      <Separator />
-      <div className="grid grid-cols-2 gap-6">
-        {/* Card Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Block Details</CardTitle>
-            <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Field</TableHead>
-                  <TableHead>Details</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">Lot Name</TableCell>
-                  <TableCell>{SlabData?.lotId?.lotName}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Number
-                  </TableCell>
-                  <TableCell>{SlabData?.blockNumber}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Number of slabs
-                  </TableCell>
-                  <TableCell>{SlabData?.SlabsId?.length}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Material Type
-                  </TableCell>
-                  <TableCell>{SlabData?.lotId?.materialType}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">Status</TableCell>
-                  <TableCell>
-                    {SlabData?.status === "cut"
-                      ? "Ready for Polish"
-                      : SlabData?.status || "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Weight (tons)
-                  </TableCell>
-                  <TableCell>{SlabData?.dimensions?.weight?.value}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Length (inch)
-                  </TableCell>
-                  <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Breadth (inch)
-                  </TableCell>
-                  <TableCell>{SlabData?.dimensions?.breadth?.value}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Height (inch)
-                  </TableCell>
-                  <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Created At
-                  </TableCell>
-                  <TableCell>
-                    {moment(SlabData.createdAt).format("YYYY-MM-DD")}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Updated At
-                  </TableCell>
-                  <TableCell>
-                    {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+      <div className="flex-1">
+        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+          <Card x-chunk="dashboard-07-chunk-0">
+            <CardHeader>
+              <CardTitle>Block Details</CardTitle>
+              <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Field</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Lot Name
+                    </TableCell>
+                    <TableCell>{BlockData?.lotId?.lotName}</TableCell>
+                  </TableRow>
+                  <TableRow />
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Block Number
+                    </TableCell>
+                    <TableCell>{BlockData?.blockNumber}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Number of slabs
+                    </TableCell>
+                    <TableCell>{BlockData?.SlabsId?.length}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Material Type
+                    </TableCell>
+                    <TableCell>{BlockData?.lotId?.materialType}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Status</TableCell>
+                    <TableCell>{BlockData?.status === "cut" ? "Ready for Polish" : BlockData?.status || "N/A"}</TableCell>
 
-        {/* DataTable Section */}
-        <div className="flex flex-col w-full">
-          <DataTable
-            bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-            bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-            deleteRoute="/category/ids"
-            searchKey="slabNumber"
-            columns={incuttingcolumns}
-            data={SlabData as any}
-          />
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Weight (tons)
+                    </TableCell>
+                    <TableCell>{BlockData?.dimensions?.weight?.value}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Length (inch)
+                    </TableCell>
+                    <TableCell>{BlockData?.dimensions?.length?.value}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Breadth (inch)
+                    </TableCell>
+                    <TableCell>
+                      {BlockData?.dimensions?.breadth?.value}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Height (inch)
+                    </TableCell>
+                    <TableCell>{BlockData?.dimensions?.height?.value}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Block Created At
+                    </TableCell>
+                    <TableCell>
+                      {moment(BlockData?.createdAt).format("YYYY-MM-DD")}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Block Updated At
+                    </TableCell>
+                    <TableCell>
+                      {moment(BlockData?.updatedAt).format("YYYY-MM-DD")}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          {/* Slabs DataTable */}
+          <div className="container mx-auto">
+            <DataTable
+              bulkDeleteIdName="_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+              bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+              deleteRoute="/category/ids"
+              searchKey="slabNumber"
+              columns={columns}
+              data={SlabData as any}
+            />
+          </div>
         </div>
       </div>
     </div>

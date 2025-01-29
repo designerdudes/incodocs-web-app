@@ -4,19 +4,18 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import Heading from '@/components/ui/heading'
 import StatsCard from '@/components/statsCard'
-import { AccountingCard, AccountingCard as BaseInventoryCards} from '@/lib/constants'
+import { AccountingCard, AccountingCard as BaseInventoryCards } from '@/lib/constants'
 interface Props {
-    params: {
-      factoryid: string;
-    }
+  params: {
+    factoryid: string;
   }
+}
 function page({ params }: Props) {
-    console.log('Factory ID IS ', params.factoryid)
 
-    const AccountingCard = BaseInventoryCards.map((card) => ({
-        ...card,
-        buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
-      }));
+  const AccountingCard = BaseInventoryCards.map((card) => ({
+    ...card,
+    buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
+  }));
   return (
     <div className="flex  flex-col p-6">
       <div className="flex justify-between items-center gap-2">
@@ -51,8 +50,8 @@ function page({ params }: Props) {
       </div>
     </div>
 
-    
-    
+
+
   )
 }
 

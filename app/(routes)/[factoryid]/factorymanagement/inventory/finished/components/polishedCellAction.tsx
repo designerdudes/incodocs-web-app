@@ -10,18 +10,65 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EyeIcon, MoreHorizontal, ScissorsIcon } from "lucide-react";
+import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import CardWithForm from "./addTrimValueForm"
-import { Slab } from "./inpolishingcolumns";
+// import CardWithForm from "./editTrimValues";
+export type Slab = {
+    _id: string;
+    slabNumber: number;
+    blockId: string | null;
+    blockNumber: number;
+    blockLotName?: string;
+    factoryId: string;
+    materialType?: string;
+    productName: string;
+    quantity: number;
+    dimensions: {
+        thickness: {
+            value: number;
+            units: string;
+        };
+        length: {
+            value: number;
+            units: string;
+        };
+        breadth: {
+            value: number;
+            units: string;
+        };
+        height: {
+            value: number;
+            units: string;
+        };
+    };
+    trim: {
+        length: {
+            units: string;
+        };
+        height: {
+            units: string;
+        };
+    };
+    isActive?: boolean;
+    weight?: string;
+    height?: string;
+    breadth?: string;
+    length?: string;
+    volume?: string;
+    status: string;
+    inStock: boolean;
+    createdAt: string;
+    updatedAt: string;
+};
+
 
 interface Props {
     data: Slab;
 }
 
-export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
+export const PolishedCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
     const deleteSlab = async () => {
@@ -37,6 +84,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
         }
     }
 
+
     return (
         <div>
             {/* Dropdown Menu */}
@@ -50,21 +98,23 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* View Lot Details */}
-                    <DropdownMenuItem
+
+                    {/* <DropdownMenuItem
                         // onSelect={() => {
                         //     router.push(`./polishing/${data._id}/markpolish`);
                         // }}
                         onSelect={() => {
-                            GlobalModal.title = `Enter triming Values of Slab:${data.slabNumber}`
-                            GlobalModal.children = <CardWithForm params={{ id: data._id }} />
+                            GlobalModal.title = `Edit triming Values`
+                            GlobalModal.children = <CardWithForm params={{
+                                id: data._id
+                            }} />
                             GlobalModal.onOpen()
                         }}
-                        className="focus:bg-green-500 focus:text-destructive-foreground"
+                        
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Mark Polish
-                    </DropdownMenuItem>
+                        Edit Trim Values
+                    </DropdownMenuItem> */}
 
                     {/* View Lot Details */}
                     <DropdownMenuItem
@@ -75,10 +125,13 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
                         <EyeIcon className="mr-2 h-4 w-4" />
                         View Slab Details
                     </DropdownMenuItem>
+
+
+
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     );
 };
 
-export default InPolishingCellAction;
+export default PolishedCellAction;

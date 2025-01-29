@@ -24,15 +24,13 @@ import moment from "moment";
 interface Props {
   params: {
     id: string;
-    factoryid:string;
+    factoryid: string;
   };
 }
 
 export default async function SlabsPage({ params }: Props) {
   let SlabData = null;
-  console.log("params is ",params)
-  console.log('id of Block is',params.id)
-  console.log("factory Id", params.factoryid)
+
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -50,9 +48,6 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = res;
-  
-  console.log(SlabData);
-  
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -66,7 +61,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block ${SlabData.blockNumber} `}
+            title={` Details of Slab ${SlabData.slabNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Slabs with detailed insights into its current
@@ -90,25 +85,20 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                {/* <TableRow>
+                  <TableRow />
+                  <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Lot Name
+                      Slab Number
                     </TableCell>
-                    <TableCell>{SlabData?.lotId?.lotName}</TableCell>
-                  </TableRow> */}
-                  <TableRow/>
+                    <TableCell>{SlabData?.slabNumber}</TableCell>
+                  </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Number
                     </TableCell>
                     <TableCell>{SlabData?.blockNumber}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                    Slab Number
-                    </TableCell>
-                    <TableCell>{SlabData?.slabNumber}</TableCell>
-                  </TableRow>
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Material Type
@@ -119,36 +109,36 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">Status</TableCell>
                     <TableCell>{SlabData.status}</TableCell>
                   </TableRow>
-                  
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                     Before Trim Length (inch)
+                      Before Trim Length (inch)
                     </TableCell>
                     <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
                   </TableRow>
 
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                    Before Trim Height (inch)
+                      Before Trim Height (inch)
                     </TableCell>
                     <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
                   </TableRow>
 
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                     Trim Length (inch)
+                      Trim Length (inch)
                     </TableCell>
                     <TableCell>{SlabData?.trim?.length?.value}</TableCell>
                   </TableRow>
-                  
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                     Trim Height (inch)
+                      Trim Height (inch)
                     </TableCell>
                     <TableCell>{SlabData?.trim?.height?.value}</TableCell>
                   </TableRow>
-                 
-                  
+
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Slab Created At

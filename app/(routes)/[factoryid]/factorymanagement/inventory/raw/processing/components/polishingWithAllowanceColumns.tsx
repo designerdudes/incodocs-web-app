@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import CellAction from "./cell-actions";
+import CellAction from "./cuttingWithAllowaneCellAction"
 import { FinishedMaterial } from "../page";
 
 function calculateAdjustedDimensions(length: number, height: number, trimLength?: number, trimHeight?: number) {

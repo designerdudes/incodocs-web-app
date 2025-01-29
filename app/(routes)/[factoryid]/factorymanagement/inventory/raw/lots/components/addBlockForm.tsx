@@ -101,7 +101,6 @@ function AddBlockForm({ params }: Props) {
 
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
-        console.log("These are values ", values)
         GlobalModal.title = "Confirm Details";
         GlobalModal.description = "Please review the entered details:";
         GlobalModal.children = (
