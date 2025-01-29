@@ -62,7 +62,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
                     >
                         <Plus className="mr-2 h-4 w-4" />
-                        Add Block
+                        Add Blocks
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}
