@@ -16,13 +16,10 @@ interface Props {
 
 export const CellAction: React.FC<Props> = ({ data }) => {
     const GlobalModal = useGlobalModal();
-    const deleteCategory = async () => {
-
-
+    const deleteSlab = async () => {
         try {
-            const result = await deleteData(`/categories/v1/category/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-            toast.success('Product Deleted Successfully')
+            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            toast.success('Slab Deleted Successfully')
             GlobalModal.onClose()
             window.location.reload()
         } catch (error) {
@@ -60,14 +57,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         Edit Product</DropdownMenuItem> */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Product - ${data.slabNumber}`
-                            GlobalModal.description = "Are you sure you want to delete this Product?"
-                            GlobalModal.children = <Alert onConfirm={deleteCategory} actionType={'delete'} />
+                            GlobalModal.title = `Delete Slab - ${data.slabNumber}`
+                            GlobalModal.description = "Are you sure you want to delete this Slab?"
+                            GlobalModal.children = <Alert onConfirm={deleteSlab} actionType={'delete'} />
                             GlobalModal.onOpen()
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground">
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Product</DropdownMenuItem>
+                        Delete Slab</DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
