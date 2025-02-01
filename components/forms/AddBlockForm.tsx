@@ -25,13 +25,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash, Volume } from "lucide-react";
-import { postData } from "@/axiosUtility/api";
+import { postData, putData } from "@/axiosUtility/api";
 
 interface AddBlockFormProps {
-    params: {
-        _id: string; // Lot ID
-      };
-  
+  params: {
+    lotId: string;
+  };
   gap: number;
 }
 
@@ -54,35 +53,29 @@ const formSchema = z.object({
   blocks: z
     .array(
       z.object({
-        materialType: z
-          .string()
-          .min(1, { message: "Material type is required" })
-          .optional(),
-        status: z.string().min(1, { message: "Status is required" }).optional(),
-        inStock: z.boolean().optional(),
         dimensions: z.object({
           weight: z.object({
             value: z
-              .number()
-              .min(0.1, { message: "Weight must be greater than zero" }),
+              .number({ required_error: "Weight is required" })
+              .min(0.1, { message: "Weight is required" }),
             units: z.literal("tons").default("tons"),
           }),
           length: z.object({
             value: z
-              .number()
-              .min(0.1, { message: "Length must be greater than zero" }),
+              .number({ required_error: "Length is required" })
+              .min(0.1, { message: "Length is requied" }),
             units: z.literal("inch").default("inch"),
           }),
           breadth: z.object({
             value: z
-              .number()
-              .min(0.1, { message: "Breadth must be greater than zero" }),
+              .number({ required_error: "Breadth is required" })
+              .min(0.1, { message: "Breadth is required" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
-              .number()
-              .min(0.1, { message: "Height must be greater than zero" }),
+              .number({ required_error: "Height is required" })
+              .min(0.1, { message: "Height is required" }),
             units: z.literal("inch").default("inch"),
           }),
         }),
@@ -112,7 +105,6 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  
 
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
@@ -143,15 +135,18 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await postData("/factory-management/inventory/addlotandblocks", {
-        ...values,
-        factoryId,
-        organizationId,
-        status: "active",
-      });
+      await putData(
+        `/factory-management/inventory/lot/update/${params.lotId}`,
+        {
+          ...values,
+          factoryId,
+          organizationId,
+          status: "active",
+        }
+      );
       setIsLoading(false);
       toast.success("Lot created/updated successfully");
-      router.push("./");
+      router.push("../");
     } catch (error) {
       console.error("Error creating/updating Lot:", error);
       setIsLoading(false);
@@ -418,63 +413,111 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
-                      value={block.dimensions.weight.value}
-                      placeholder="Enter weight"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.weight.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
+                    <FormField
+                      name={`blocks.${index}.dimensions.weight.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Weight"
+                              type="number"
+                              value={block.dimensions.weight.value}
+                              onChange={(e) => {
+                                const slabs = form.getValues("blocks");
+                                blocks[index].dimensions.weight.value =
+                                  parseFloat(e.target.value) || 0;
+                                form.setValue("blocks", slabs, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
-                      value={block.dimensions.length.value}
-                      placeholder="Enter length"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.length.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
+                    <FormField
+                      name={`blocks.${index}.dimensions.length.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Length"
+                              type="number"
+                              value={block.dimensions.length.value}
+                              onChange={(e) => {
+                                const slabs = form.getValues("blocks");
+                                blocks[index].dimensions.length.value =
+                                  parseFloat(e.target.value) || 0;
+                                form.setValue("blocks", slabs, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
-                      value={block.dimensions.breadth.value}
-                      placeholder="Enter breadth"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.breadth.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
+                    <FormField
+                      name={`blocks.${index}.dimensions.breadth.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Breadth"
+                              type="number"
+                              value={block.dimensions.breadth.value}
+                              onChange={(e) => {
+                                const slabs = form.getValues("blocks");
+                                blocks[index].dimensions.breadth.value =
+                                  parseFloat(e.target.value) || 0;
+                                form.setValue("blocks", slabs, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="number"
-                      value={block.dimensions.height.value}
-                      placeholder="Enter height"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.height.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
+                    <FormField
+                      name={`blocks.${index}.dimensions.height.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Height"
+                              type="number"
+                              value={block.dimensions.height.value}
+                              onChange={(e) => {
+                                const slabs = form.getValues("blocks");
+                                blocks[index].dimensions.height.value =
+                                  parseFloat(e.target.value) || 0;
+                                form.setValue("blocks", slabs, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
