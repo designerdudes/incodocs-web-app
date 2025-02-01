@@ -19,49 +19,49 @@ import { polishingInchesWithAllowanceColumns } from "./components/polishingWithA
 import { Console } from "node:console";
 
 export type FinishedMaterial = {
-  
-    _id: string; // Unique identifier
-    slabNumber: number; // Sequential slab number
-    blockNumber: number | null; // Block number, can be null
-    factoryId: string; // Associated factory identifier
-    productName: string; // Name of the product
-    quantity: number; // Quantity of the finished material
-    status: string; // Status (e.g., "polished")
-    inStock: boolean; // Availability status
-  
-    blockId: {
+
+  _id: string; // Unique identifier
+  slabNumber: number; // Sequential slab number
+  blockNumber: number | null; // Block number, can be null
+  factoryId: string; // Associated factory identifier
+  productName: string; // Name of the product
+  quantity: number; // Quantity of the finished material
+  status: string; // Status (e.g., "polished")
+  inStock: boolean; // Availability status
+
+  blockId: {
+    _id: string;
+    lotId?: {
       _id: string;
-      lotId?: {
-        _id: string;
-        materialType: string;
-      };
+      materialType: string;
     };
-  
-    dimensions: {
-      length: {
-        value: number;
-        units: string; // E.g., "inch"
-      };
-      height: {
-        value: number;
-        units: string; // E.g., "inch"
-      };
-    };
-  
-    trim: {
-      length: {
-        value: number;
-        units: string; // E.g., "inch"
-      };
-      height: {
-        value: number;
-        units: string; // E.g., "inch"
-      };
-    };
-  
-    createdAt: string; // ISO 8601 timestamp
-    updatedAt: string; // ISO 8601 timestamp
   };
+
+  dimensions: {
+    length: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+    height: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+  };
+
+  trim: {
+    length: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+    height: {
+      value: number;
+      units: string; // E.g., "inch"
+    };
+  };
+
+  createdAt: string; // ISO 8601 timestamp
+  updatedAt: string; // ISO 8601 timestamp
+};
 
 interface Props {
   params: {
@@ -114,20 +114,19 @@ export default async function SlabsProcessingPage({ params }: Props) {
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
 
-  
+
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-);
-const inPolishing = Array.isArray(Slabdata)
+  );
+  const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
-
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -194,9 +193,9 @@ const inPolishing = Array.isArray(Slabdata)
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="lotName"
+              searchKey="blockNumber"
               columns={incuttingcolumns}
-              data={inCutting}
+              data={inCutting as any}
             />
           </TabsContent>
           <TabsContent value="readyforpolish">
@@ -205,7 +204,7 @@ const inPolishing = Array.isArray(Slabdata)
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="lotName"
+              searchKey="blockNumber"
               columns={Readyforpolishcolumns}
               data={readyForPolish}
             />

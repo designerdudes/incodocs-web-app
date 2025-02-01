@@ -57,7 +57,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.lotName}
+                {row.original?.lotName}
             </div>
         ),
     },
@@ -74,7 +74,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.materialType}
             </div>
         ),
     },
@@ -91,7 +91,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blocksId.length}
+                {row.original?.blocksId?.length}
             </div>
         ),
     },
@@ -108,7 +108,7 @@ export const columns: ColumnDef<LotManagement>[] = [
         ),
         cell: ({ row }) => (
             <div>
-                {moment(row.original.createdAt).format("DD MMM YYYY")}
+                {moment(row.original?.createdAt).format("DD MMM YYYY")}
             </div>
         ),
     },
