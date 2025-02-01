@@ -46,6 +46,7 @@ export default async function LotManagement({ params }: Props) {
 
   let lotsData;
   lotsData = res;
+  console.log(lotsData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

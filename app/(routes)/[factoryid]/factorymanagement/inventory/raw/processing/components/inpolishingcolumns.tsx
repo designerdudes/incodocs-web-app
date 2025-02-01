@@ -95,6 +95,8 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
                 {row.original.slabNumber}
             </div>
         ),
+        filterFn: 'includesString',
+
     },
     {
         accessorKey: "blockNumber",

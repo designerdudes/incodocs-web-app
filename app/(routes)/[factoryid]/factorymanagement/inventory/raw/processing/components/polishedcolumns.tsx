@@ -45,6 +45,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
                 {row.original.slabNumber}
             </div>
         ),
+        filterFn: 'includesString',
     },
     {
         accessorKey: "blockNumber",

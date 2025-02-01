@@ -56,6 +56,7 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
             </Button>
         ),
         cell: ({ row }) => <div className="capitalize">{row.original?.slabNumber}</div>,
+        filterFn: 'includesString',
     },
     {
         accessorKey: "length",
