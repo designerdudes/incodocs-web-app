@@ -29,12 +29,18 @@ type NavItem = {
 export default function NavMain({ items }: { items: NavItem[] }) {
     const RenderNavTabs = (navItems: NavItem[]) => {
         const factoryId = useParams().factoryid;
-        return navItems.map((item) => {
-            const itemUrl = item.url.startsWith('/')
-                ? `/${factoryId}${item.url}`
-                : `${factoryId}/${item.url}`;
-            return (
 
+        return navItems.map((item) => {
+            // Apply factoryId conditionally only for 'factorymanagement' and its children
+            const shouldPrependFactoryId = item.url.includes('factorymanagement') || item.url === '/dashboard';
+
+            const itemUrl = shouldPrependFactoryId
+                ? `/${factoryId}${item.url}`
+                : item.url.startsWith('/')
+                    ? item.url
+                    : `/${item.url}`;
+
+            return (
                 <Collapsible
                     key={item.title}
                     asChild
@@ -62,7 +68,7 @@ export default function NavMain({ items }: { items: NavItem[] }) {
                         )}
                     </SidebarMenuItem>
                 </Collapsible>
-            )
+            );
         });
     };
 

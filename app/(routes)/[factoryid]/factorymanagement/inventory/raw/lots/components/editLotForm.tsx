@@ -77,7 +77,6 @@ export default function EditLotForm({ params }: Props) {
         setIsFetching(false);
       }
     }
-
     fetchLotData();
   }, [lotId, form]);
 

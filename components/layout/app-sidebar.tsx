@@ -119,19 +119,19 @@ const data = {
                 },
                 {
                     title: "Shipments",
-                    url: "/shipment",
+                    url: "/documentation/shipment",
                 },
                 {
                     title: "Invoices",
-                    url: "#",
+                    url: "/documentation/invoices",
                 },
                 {
                     title: "Purchase Orders",
-                    url: "#",
+                    url: "/documentation/purchaseorders",
                 },
                 {
                     title: "Quotes",
-                    url: "#",
+                    url: "/documentation/quotes",
                 },
             ],
         },
@@ -164,7 +164,7 @@ const data = {
                     url: "/settings/general",
                 },
                 {
-                    
+
                     title: "Team",
                     url: "/settings/team",
                 },
@@ -215,7 +215,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
     };
 
-    useEffect(() => { 
+    useEffect(() => {
         getFactoryData();
     }, []);
 
