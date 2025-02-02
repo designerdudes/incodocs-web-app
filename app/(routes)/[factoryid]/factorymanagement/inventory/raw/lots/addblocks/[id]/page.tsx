@@ -4,25 +4,24 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-
 import { AddBlockForm } from "@/components/forms/AddBlockForm";
 import { cookies } from "next/headers";
 interface Props {
     params: {
+        id   : string;
         lotid: string;
     }
 }
 
-
-
-console.log(Button, Heading, AddBlockForm); // Debug undefined components
-
 export default async function AddBlockFormPage({params}:Props) {
-     let BlockData = null
+    let lotId = null
+    lotId = params.id
+    console.log(params.id)
+     let LotData = null
         const cookieStore = cookies();
         const token = cookieStore.get('AccessToken')?.value || ""
     
-        const res = await fetch(`http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.lotid}`, {
+        const res = await fetch(`http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -31,7 +30,7 @@ export default async function AddBlockFormPage({params}:Props) {
         }).then(response => {
             return response.json()
         })
-        BlockData = res;
+        LotData = res;
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
@@ -44,7 +43,7 @@ export default async function AddBlockFormPage({params}:Props) {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title={`Add New Block to ${BlockData[0]?.lotName}`}
+                        title={`Add New Block to ${LotData[0]?.lotName}`}
                     />
                     <p className="text-muted-foreground text-sm">
                     Add a new block to a lot by entering its details, ensuring accurate inventory tracking and management.
@@ -53,9 +52,7 @@ export default async function AddBlockFormPage({params}:Props) {
             </div>
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
-                <AddBlockForm gap={3} params={{
-                    _id: ""
-                }}/>
+                <AddBlockForm gap={3} params={{lotId}}/>
             </div>
         </div>
     );

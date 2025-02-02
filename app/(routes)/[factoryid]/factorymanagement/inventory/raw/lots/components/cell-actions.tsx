@@ -37,7 +37,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       console.error("Error deleting data:", error);
     }
   };
-  // console.log(data._id)
   return (
     <div>
       <DropdownMenu>
