@@ -30,7 +30,7 @@ export default async function Home({ params }: Props) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <Link href={`/${params.factoryid}/factorymanagement`} passHref>
-          <Card className="cursor-pointer hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+          <Card>
             <CardHeader className="flex flex-col gap-2 items-start">
               <FiBriefcase className="text-4xl text-indigo-500 self-end" />
               <CardTitle className="text-2xl font-semibold text-gray-800">Factory Management</CardTitle>
@@ -46,7 +46,7 @@ export default async function Home({ params }: Props) {
           </Card>
         </Link>
         <Link href="/documentation/dashboard" passHref>
-          <Card className="cursor-pointer hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+          <Card>
             <CardHeader className="flex flex-col gap-2 items-start">
               <FiFileText className="text-4xl text-green-500 self-end" />
               <CardTitle className="text-2xl font-semibold text-gray-800">Documentation</CardTitle>
@@ -62,7 +62,7 @@ export default async function Home({ params }: Props) {
           </Card>
         </Link>
         <Link href="/settings" passHref>
-          <Card className="cursor-pointer hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+          <Card>
             <CardHeader className="flex flex-col gap-2 items-start">
               <FiSettings className="text-4xl text-yellow-500 self-end" />
               <CardTitle className="text-2xl font-semibold text-gray-800">Settings</CardTitle>
@@ -78,6 +78,6 @@ export default async function Home({ params }: Props) {
           </Card>
         </Link>
       </div>
-    </main>
+    </main >
   );
 }

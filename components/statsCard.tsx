@@ -30,7 +30,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
     const router = useRouter();
 
     return (
-        <Card className={`relative p-6 shadow-lg rounded-2xl border ${className} transition-transform transform hover:scale-105 duration-300`}>
+        <Card className={`relative p-6 shadow-lg rounded-2xl border ${className} `}>
             <div className="absolute top-5 right-5 text-gray-600">
                 {icon}
             </div>
