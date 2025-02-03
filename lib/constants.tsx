@@ -1,25 +1,19 @@
 import {
-  BadgeIndianRupee,
   BlocksIcon,
-  BoxIcon,
-  CogIcon,
-  FrameIcon,
-  GroupIcon,
   HelpCircle,
   HomeIcon,
-  IndianRupeeIcon,
-  LayoutDashboardIcon,
   ScissorsLineDashed,
-  ServerIcon,
   Settings,
   Sheet,
-  ShoppingBagIcon,
   SparkleIcon,
-  TagIcon,
   User,
-  UserCog,
-  Users,
 } from "lucide-react";
+import { FiDollarSign, FiGrid } from "react-icons/fi";
+import { MdAccountBalance } from "react-icons/md";
+import { SiCodeblocks } from "react-icons/si";
+import { FcProcess } from "react-icons/fc";
+
+
 
 const BrandName = "IncoDocs";
 
@@ -145,7 +139,7 @@ const accountingSidebarTabs = [
 const rawInventoryCards = [
   {
     title: "Total Lots",
-    icon: <BlocksIcon className="w-6 h-6" />,
+    icon: <BlocksIcon className="w-6 h-6 text-green-500 self-end" />,
     value: 50,
     color: "bg-primary",
     showButton: false,
@@ -154,7 +148,7 @@ const rawInventoryCards = [
 
   {
     title: "Slabs in Processing",
-    icon: <SparkleIcon className="w-6 h-6" />,
+    icon: <FcProcess className="w-6 h-6 text-indigo-500 self-end" />,
     value: 30,
     color: "bg-primary",
     showButton: false,
@@ -165,7 +159,7 @@ const rawInventoryCards = [
 const InventoryCards = [
   {
     title: "Raw Invetory",
-    icon: <BlocksIcon className="w-6 h-6" />,
+    icon: <SiCodeblocks className="w-6 h-6  text-green-500 self-end" />,
     value: 50,
     color: "bg-primary",
     showButton: false,
@@ -173,7 +167,7 @@ const InventoryCards = [
   },
   {
     title: "Finished Material",
-    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    icon: <FiGrid className="w-6 h-6 text-indigo-500 self-end" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
@@ -183,7 +177,7 @@ const InventoryCards = [
 const FactoryCards = [
   {
     title: "Inventory",
-    icon: <BlocksIcon className="w-6 h-6" />,
+    icon: <FiGrid className="w-6 h-6 text-4xl text-indigo-500 self-end" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
@@ -191,7 +185,7 @@ const FactoryCards = [
   },
   {
     title: "Accounting",
-    icon: <BlocksIcon className="w-6 h-6" />,
+    icon: <MdAccountBalance className="w-6 h-6 text-4xl text-green-500 self-end" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
