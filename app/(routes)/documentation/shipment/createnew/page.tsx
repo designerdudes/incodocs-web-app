@@ -7,8 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { NewShipmentForm } from "@/components/forms/newShipmentForm"; 
 
 
-console.log(Button, Heading, NewShipmentForm); // Debug undefined components
-
 export default function CreateNewFormPage() {
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">

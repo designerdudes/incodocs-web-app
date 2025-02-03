@@ -134,7 +134,7 @@ export function NewShipmentForm() {
         setIsLoading(true)
         try {
             console.log(values)
-            const res = await axios.post('/api/shipment/createnew', values)
+            const res = await axios.post('/shipment/add', values)
             console.log(res)
             setIsLoading(false)
             router.push('/shipments')
@@ -214,10 +214,10 @@ export function NewShipmentForm() {
                                             <FormControl>
                                                 <Button
                                                     size={'lg'} variant={"outline"}
-                                                // className={cn(
-                                                //     "w-[240px] pl-3 text-left font-normal",
-                                                //     !field.value && "text-muted-foreground"
-                                                // )}
+                                                className={cn(
+                                                    "w-[240px] pl-3 text-left font-normal",
+                                                    !field.value && "text-muted-foreground"
+                                                )}
                                                 >
                                                     {field.value ? (
                                                         format(field.value as Date, "PPPP")
@@ -347,7 +347,7 @@ export function NewShipmentForm() {
                                 <FormItem>
                                     <FormLabel>Forwarder Invoice</FormLabel>
                                     <FormControl>
-                                        <Input type='text' disabled={isLoading} placeholder="eg. https://drive.google.com/file/d/1zskHj_SAun0LoGhiG_dppiHFy78rKIFI/view?usp=share_link"  {...field} />
+                                        <Input className='cursor-pointer' type='file' disabled={isLoading}  {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -393,7 +393,7 @@ export function NewShipmentForm() {
                                 <FormItem>
                                     <FormLabel>Transporter Invoice</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isLoading} type='tel' placeholder="eg. https://drive.google.com/file/d/1zskHj_SAun0LoGhiG_dppiHFy78rKIFI/view?usp=share_link"  {...field} />
+                                    <Input className='cursor-pointer '   type='file' disabled={isLoading}  {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -426,9 +426,7 @@ export function NewShipmentForm() {
                                 <FormItem>
                                     <FormLabel>Upload Shipping Bill</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isLoading} placeholder=""
-                                            {...field} />
-
+                                    <Input className='cursor-pointer' type='file' disabled={isLoading}  {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -646,8 +644,7 @@ export function NewShipmentForm() {
                                 <FormItem>
                                     <FormLabel>Upload Supplier Invoice</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isLoading} placeholder=""
-                                            {...field} />
+                                    <Input className='cursor-pointer' type='file' disabled={isLoading}  {...field} />
 
                                     </FormControl>
                                     <FormMessage />
@@ -866,8 +863,7 @@ export function NewShipmentForm() {
                                 <FormItem>
                                     <FormLabel>Upload BL</FormLabel>
                                     <FormControl>
-                                        <Input disabled={isLoading} placeholder=""
-                                            {...field} />
+                                    <Input className='cursor-pointer' type='file' disabled={isLoading}  {...field} />
 
                                     </FormControl>
                                     <FormMessage />
