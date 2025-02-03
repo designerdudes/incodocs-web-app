@@ -8,8 +8,12 @@ import { PolishedCellAction } from "./polishedCellAction"
 
 export type Slab = {
     _id: string;
+    blockId: {
+        lotId: any
+        id: string;
+        materialType: string;
+    }
     slabNumber: number; // Updated from slabID to slabNumber
-    blockId: string | null; // Nullable block ID
     blockNumber: number; // Changed to number for consistency
     blockLotName?: string; // Optional if not in the provided structure
     factoryId: string;
@@ -112,23 +116,23 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
     },
 
-    {
-        accessorKey: "status",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Slab Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.status}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "status",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Slab Status
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.status}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "materialType",
         header: ({ column }) => (
@@ -142,7 +146,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.materialType}
+                {row.original?.blockId?.lotId?.materialType}
             </div>
         ),
     },

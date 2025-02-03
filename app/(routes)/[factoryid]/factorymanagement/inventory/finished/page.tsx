@@ -71,6 +71,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const Polished = Array.isArray(slabsData)
         ? slabsData.filter((data: any) => data.status === "polished")
         : [];
+        
 
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>

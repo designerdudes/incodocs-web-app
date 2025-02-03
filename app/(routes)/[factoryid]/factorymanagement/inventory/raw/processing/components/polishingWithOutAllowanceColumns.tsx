@@ -32,19 +32,6 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
         enableHiding: false,
     },
     {
-        accessorKey: "blockNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block. No
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => <div className="capitalize">{row.original?.blockNumber}</div>,
-    },
-    {
         accessorKey: "slabNumber",
         header: ({ column }) => (
             <Button
@@ -58,6 +45,20 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
         cell: ({ row }) => <div className="capitalize">{row.original?.slabNumber}</div>,
         filterFn: 'includesString',
     },
+    {
+        accessorKey: "blockNumber",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block. No
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => <div className="capitalize">{row.original?.blockNumber}</div>,
+    },
+    
     {
         accessorKey: "trimLength",
         header: "Trim Length (inch)",

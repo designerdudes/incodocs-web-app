@@ -18,7 +18,11 @@ import { deleteData } from '@/axiosUtility/api';
 export type Slab = {
     _id: string;
     slabNumber: number;
-    blockId: string | null;
+    blockId: {
+        lotId: any
+        id: string;
+        materialType: string;
+    },
     blockNumber: number;
     blockLotName?: string;
     factoryId: string;
@@ -119,7 +123,7 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./processing/slabs/view/${data._id}`);
+                            router.push(`./finished/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
