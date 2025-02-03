@@ -120,13 +120,16 @@ export default async function SlabsProcessingPage({ params }: Props) {
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
+  
   );
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
+    // console.log(inPolishing);
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -269,18 +272,10 @@ export default async function SlabsProcessingPage({ params }: Props) {
             <Tabs defaultValue="PolishingInchesWithOutAllowance" className="w-full" >
               <div className='text-center mt-4'>
                 <TabsList className='gap-6'>
-                  <TabsTrigger className='gap-2' value="PolishingInchesWithOutAllowance">Polishing Inches WithOut Allowance</TabsTrigger>
                   <TabsTrigger className='gap-2' value="PolishingInchesWithAllowance">Polishing Inches With Allowance</TabsTrigger>
+                  <TabsTrigger className='gap-2' value="PolishingInchesWithOutAllowance">Polishing Inches WithOut Allowance</TabsTrigger>
                 </TabsList>
               </div>
-              <TabsContent value="PolishingInchesWithOutAllowance">
-                <DataTable
-                  bulkDeleteIdName='order_id'
-                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
-                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
-                  bulkDeleteToastMessage='Selected slabs deleted successfully'
-                  searchKey='slabNumber' columns={polishingInchesWithOutAllowanceColumns} data={slabsData} />
-              </TabsContent>
               <TabsContent value="PolishingInchesWithAllowance">
                 <DataTable
                   bulkDeleteIdName='order_id'
@@ -288,6 +283,14 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected slabs deleted successfully'
                   searchKey='slabNumber' columns={polishingInchesWithAllowanceColumns} data={slabsData} />
+              </TabsContent>
+              <TabsContent value="PolishingInchesWithOutAllowance">
+                <DataTable
+                  bulkDeleteIdName='order_id'
+                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
+                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
+                  bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  searchKey='slabNumber' columns={polishingInchesWithOutAllowanceColumns} data={slabsData} />
               </TabsContent>
             </Tabs>
           </TabsContent>

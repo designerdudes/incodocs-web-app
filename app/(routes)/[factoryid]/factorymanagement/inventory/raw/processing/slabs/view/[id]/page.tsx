@@ -48,6 +48,7 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = res;
+  console.log(SlabData)
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -103,7 +104,7 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>{SlabData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>

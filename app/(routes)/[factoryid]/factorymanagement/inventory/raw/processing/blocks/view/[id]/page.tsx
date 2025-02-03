@@ -52,6 +52,7 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   BlockData = res;
+  // console.log(BlockData)
 
   const resp = await fetch(
     `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.id}`,
@@ -67,7 +68,7 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   SlabData = resp;
-
+// console.log(SlabData)
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
