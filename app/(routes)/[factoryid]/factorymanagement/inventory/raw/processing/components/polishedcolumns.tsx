@@ -45,6 +45,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
                 {row.original.slabNumber}
             </div>
         ),
+        filterFn: 'includesString',
     },
     {
         accessorKey: "blockNumber",
@@ -94,7 +95,8 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockId?.materialType}
+                {row.original?.blockId?.lotId?.materialType}
+
             </div>
         ),
     },

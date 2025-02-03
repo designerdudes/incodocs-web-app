@@ -19,24 +19,24 @@ export default async function page({ params }: Props) {
 
   // Fetch Lots Data
   const Lotres = await fetch(
-    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
+    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params.factoryid}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       },
     }
   ).then((response) => response.json());
 
   // Fetch Slabs Data
   const Slabres = await fetch(
-    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`,
+    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       },
     }
   ).then((response) => response.json());
@@ -45,22 +45,22 @@ export default async function page({ params }: Props) {
   const slabData = Slabres;
 
   // Update cards with specific values
-  const rawInventoryCards = BaseInventoryCards.map((card) => {
-    if (card.title === "Total Lots") {
-      return {
-        ...card,
-        value: lotsData.length || 0, // Set lots count
-        buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
-      };
-    } else if (card.title === "Slabs in Processing") {
-      return {
-        ...card,
-        value: slabData.length || 0, // Set slabs count
-        buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
-      };
-    }
-    return card;
-  });
+  const rawInventoryCards = BaseInventoryCards.map((card) => ({
+    ...card,
+    value:
+      card.title === "Total Lots"
+        ? lotsData.length || 0
+        : card.title === "Slabs in Processing"
+          ? slabData.length || 0
+          : card.value,
+    // buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
+    desc:
+      card.title === "Total Lots"
+        ? "Number of lots currently available in inventory."
+        : card.title === "Slabs in Processing"
+          ? "Slabs that are currently under processing."
+          : "", // Default to empty if not explicitly handled // Ensure correct factory ID in URL
+  }));
 
   return (
     <div className="flex flex-col p-6">
@@ -74,21 +74,21 @@ export default async function page({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Raw Material Inventory" />
           <p className="text-muted-foreground text-sm">
-            Efficiently track and manage raw
-            materials, ensuring visibility of quantity, status, and progress
-            through the production cycle.
+            Efficiently track and manage raw materials, ensuring visibility of
+            quantity, status, and progress through the production cycle.
           </p>
         </div>
       </div>
-      <div className="flex flex-row gap-4 mt-10">
-        {rawInventoryCards?.map((card, index) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
+        {rawInventoryCards.map((card, index) => (
           <StatsCard
             key={index}
             title={card.title}
             stat={card.value}
             icon={card.icon}
             desc=""
-            href={card.buttonUrl}
+            href={card.buttonUrl} // Now correctly prefixed with factory ID
+            factoryId={params.factoryid} // Pass factory ID correctly
           />
         ))}
       </div>

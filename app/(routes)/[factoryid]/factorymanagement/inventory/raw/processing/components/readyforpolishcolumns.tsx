@@ -30,6 +30,24 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
+        accessorKey: "blockNumber",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block Number
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original.blockNumber}
+            </div>
+        ),
+        filterFn: 'includesString',
+    },
+    {
         accessorKey: "lotName",
         header: ({ column }) => (
             <Button
@@ -46,23 +64,6 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
             </div>
         ),
         filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
-    },
-    {
-        accessorKey: "blockNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.blockNumber}
-            </div>
-        ),
     },
     {
         accessorKey: "materialType",

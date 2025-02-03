@@ -42,7 +42,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={
                             () => {
-                                router.push(`./finished/view/${data._id}`)
+                                router.push(`./processing/view/${data._id}`)
                             }
                         }>
                         <Eye className="mr-2 h-4 w-4" />

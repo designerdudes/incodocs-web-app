@@ -9,6 +9,7 @@ export type Slab = {
     _id: string;
     slabNumber: number;
     blockId: {
+        lotId: any
         id: string;
         materialType: string;
     }
@@ -94,6 +95,8 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
                 {row.original.slabNumber}
             </div>
         ),
+        filterFn: 'includesString',
+
     },
     {
         accessorKey: "blockNumber",
@@ -142,7 +145,8 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockId?.materialType}
+                {row.original?.blockId?.lotId?.materialType}
+
             </div>
         ),
     },

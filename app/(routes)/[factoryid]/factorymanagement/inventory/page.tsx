@@ -4,7 +4,7 @@ import Heading from '@/components/ui/heading'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
-import { InventoryCards as BaseInventoryCards } from '@/lib/constants';
+import { InventoryCards } from '@/lib/constants';
 
 interface Props {
   params: {
@@ -13,13 +13,6 @@ interface Props {
 }
 
 function Page({ params }: Props) {
-
-  // console.log('Factory ID IS ', params.factoryid)
-  const InventoryCards = BaseInventoryCards.map((card) => ({
-    ...card,
-    buttonUrl: `/${params.factoryid}${card.buttonUrl}`, // Prepend factoryId to the URL
-  }));
-
 
   return (
     <div className="flex  flex-col p-6">
@@ -34,12 +27,9 @@ function Page({ params }: Props) {
           <Heading className='leading-tight ' title='Inventory' />
           <p className='mt-2'>Effectively oversee your factory&apos;s Inventory and proccessing goods inventory.</p>
         </div>
-        {/* <Link href={`/shipments/new`}>
-                    <Button className="bg-primary text-white">New Button</Button>
-                </Link> */}
       </div>
 
-      <div className="flex flex-row gap-4 mt-10 ">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
         {
           InventoryCards?.map((card, index) => (
             <StatsCard
@@ -49,7 +39,7 @@ function Page({ params }: Props) {
               icon={card.icon}
               desc=""
               href={card.buttonUrl}
-            />
+              factoryId={params.factoryid} />
           ))
         }
       </div>

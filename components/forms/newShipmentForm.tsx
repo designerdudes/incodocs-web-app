@@ -27,52 +27,53 @@ import { useRouter } from 'next/navigation'
 
 const formSchema = z.object({
     //Booking Details
-    containerNumber: z.string().optional(),
-    portOfLoading: z.string().optional(),
-    destinationPort: z.string().optional(),
-    vesselSailingDate: z.date().optional(),
-    vesselArrivingDate: z.date().optional(),
-    truckNumber: z.string().optional(),
-    truckDriverNumber: z.string().optional(),
+    containerNumber: z.string().min(3, { message: "container Number must be at least 3 characters long" }),
+    portOfLoading: z.string().min(3, { message: " required name" }),
+    destinationPort: z.string().min(3, { message: " required name" }),
+    vesselSailingDate: z.date(),
+    vesselArrivingDate: z.date(),
+    truckNumber: z.string().min(10, { message: "  number should be 10 character long" }),
+    truckDriverNumber: z.string().min(10, { message: "  truck driver number should be 10 character long" }),
 
     //Shipping Details
-    shippingLine: z.string().optional(),
-    forwarder: z.string().optional(),
-    forwarderInvoice: z.string().optional(),
-    valueOfForwarderInvoice: z.string().optional(),
-    transporter: z.string().optional(),
+    shippingLine: z.string().min(3, { message:"required  name" }),
+    forwarderName: z.string().min(3, { message:"name must be at least 3 characters long" }),
+    forwarderInvoice: z.string(),
+    valueOfForwarderInvoice: z.string().min(3, { message: " required value" }),
+    transporter: z.string().min(3, { message: " required name" }),
     transporterInvoice: z.string().optional(),
-    valueOfTransporterInvoice: z.string().optional(),
+    valueOfTransporterInvoice: z.string().min(3, { message: " required value" }),
 
     //Shipping Bill Details
-    shippingBillNumber: z.string().optional(),
-    shippingBillDate: z.date().optional(),
-    uploadShippingBill: z.string().optional(),
-    cbName: z.string().optional(),
+    shippingBillNumber: z.string().min(1, { message: "shipping bill Number must be at least 3 characters long" }),
+    shippingBillDate: z.date(),
+    uploadShippingBill: z.string().min(1, { message: "attach bill"}),
+    cbName: z.string().min(3, { message: " required name" }),
 
     //Supplier Details
-    supplierName: z.string().optional(),
-    actualSupplierName: z.string().optional(),
-    supplierGSTIN: z.string().optional(),
-    supplierInvoiceNumber: z.string().optional(),
-    supplierInvoiceDate: z.date().optional(),
-    supplierInvoiceValueWithOutGST: z.string().optional(),
-    supplierInvoiceValueWithGST: z.string().optional(),
-    uploadSupplierInvoice: z.string().optional(),
-    actualSupplierInvoice: z.string().optional(),
-    actualSupplierInvoiceValue: z.string().optional(),
+    supplierName: z.string().min(3, { message: " required name" }),
+    actualSupplierName: z.string().min(3, { message: " required name" }),
+    supplierGSTIN: z.string().min(3, { message: " required GSTIN" }),
+    supplierInvoiceNumber: z.string().min(10, { message: "  number should be 10 character long" }),
+    supplierInvoiceDate: z.date(),
+    supplierInvoiceValueWithOutGST: z.string().min(1, { message: " enter some value" }),
+    supplierInvoiceValueWithGST: z.string().min(1, { message: " enter some value" }),
+    uploadSupplierInvoice: z.string(),
+    actualSupplierInvoice: z.string(),
+    actualSupplierInvoiceValue: z.string().min(1, { message: " enter some value" }),
 
     //Sale Inovice Details
-    commercialInvoiceNumber: z.string().optional(),
-    commercialInvoiceDate: z.date().optional(),
-    consigneeDetails: z.string().optional(),
-    actualBuyer: z.string().optional(),
+    commercialInvoiceNumber: z.string().min(3, { message: " Number must be at least 3 characters long" }),
+    commercialInvoiceDate: z.date(),
+    consigneeDetails: z.string().min(1, { message: "enter some details" }),
+    actualBuyer: z.string().min(3, { message: " required name" }),
 
     //BL Details
-    blNumber: z.string().optional(),
-    blDate: z.date().optional(),
-    telexDate: z.date().optional(),
-    uploadBL: z.string().optional()
+    blNumber: z.string().min(3, { message: " Number must be at least 3 characters long" }),
+    blDate: z.date(),
+    telexDate: z.date(),
+    uploadBL: z.string().min(1, { message: " upload bill" }),
+    
 })
 
 export function NewShipmentForm() {
@@ -328,7 +329,7 @@ export function NewShipmentForm() {
                         />
                         <FormField
                             control={form.control}
-                            name="forwarder"
+                            name="forwarderName"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Forwarder Name</FormLabel>

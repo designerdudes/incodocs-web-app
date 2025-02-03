@@ -35,7 +35,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
-      toast.success("Lot Deleted Successfully");
+      toast.success("Block Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
@@ -59,7 +59,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error While ssending Block send for cutting:", error);
     }
   };
 

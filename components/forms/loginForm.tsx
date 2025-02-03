@@ -57,12 +57,10 @@ export function LoginForm() {
 
                 setLoading(true)
                 const res = await postData('/user/login', user)
-
                 console.log(res.token)
                 Cookies.set('AccessToken', res?.token, { expires: 7 }); // Set the expiration in days
                 toast.success('Login successful')
-                router.push('/dashboard')
-
+                router.push('/settings/factory')
                 router.refresh()
             } catch (error: any) {
                 setLoading(false)

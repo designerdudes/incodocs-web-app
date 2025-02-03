@@ -16,8 +16,10 @@ import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllow
 import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
+import { Console } from "node:console";
 
 export type FinishedMaterial = {
+
   _id: string; // Unique identifier
   slabNumber: number; // Sequential slab number
   blockNumber: number | null; // Block number, can be null
@@ -26,6 +28,14 @@ export type FinishedMaterial = {
   quantity: number; // Quantity of the finished material
   status: string; // Status (e.g., "polished")
   inStock: boolean; // Availability status
+
+  blockId: {
+    _id: string;
+    lotId?: {
+      _id: string;
+      materialType: string;
+    };
+  };
 
   dimensions: {
     length: {
@@ -50,7 +60,7 @@ export type FinishedMaterial = {
   };
 
   createdAt: string; // ISO 8601 timestamp
-  updatedAt: string; // ISO 8601 timestamp
+  updatedAt: string; // ISO 8601 timestamp
 };
 
 interface Props {
@@ -101,9 +111,9 @@ export default async function SlabsProcessingPage({ params }: Props) {
   })
 
   const slabsData = res
-
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
+
 
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
@@ -117,7 +127,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
-
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -184,9 +193,9 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="lotName"
+              searchKey="blockNumber"
               columns={incuttingcolumns}
-              data={inCutting}
+              data={inCutting as any}
             />
           </TabsContent>
           <TabsContent value="readyforpolish">
@@ -195,7 +204,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
-              searchKey="lotName"
+              searchKey="blockNumber"
               columns={Readyforpolishcolumns}
               data={readyForPolish}
             />

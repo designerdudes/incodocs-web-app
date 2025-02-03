@@ -1,11 +1,10 @@
 "use client"
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import Heading from './ui/heading';
-import { ArrowBigRightDashIcon, ArrowRight, ArrowRightFromLineIcon, ArrowRightIcon, LucideArrowUpRight } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Heading from '@/components/ui/heading';
+import { ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
 
 interface StatsCardProps {
     title: string;
@@ -13,8 +12,9 @@ interface StatsCardProps {
     statPrefix?: string;
     icon: React.ReactNode;
     desc?: string;
-    clasname?: string;
+    className?: string;
     href: string;
+    factoryId: string; // Factory ID is now dynamically passed
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -23,22 +23,31 @@ const StatsCard: React.FC<StatsCardProps> = ({
     statPrefix = '',
     icon,
     desc,
-    clasname,
-    href
+    className,
+    href,
+    factoryId
 }) => {
-    const router = useRouter()
+    const router = useRouter();
 
     return (
-        <Card className='text-left w-full flex flex-col justify-evenly items-stretch relative'>
-            <CardHeader>
-                <CardTitle className='text-md font-normal'>{title}</CardTitle>
-                <Heading title={`${statPrefix}${stat}`} className='text-3xl font-extrabold' />
-                <p className='opacity-80 text-sm py-1'>{desc}</p>
-                <Button onClick={() => router.push(href)} variant='secondary'>View All <ArrowRight className='w-4 ml-3' /></Button>
-            </CardHeader>
-            <div className='absolute top-5 right-5'>
+        <Card className={`relative p-6 shadow-lg rounded-2xl border ${className} transition-transform transform hover:scale-105 duration-300`}>
+            <div className="absolute top-5 right-5 text-gray-600">
                 {icon}
             </div>
+            <CardHeader className="flex flex-col space-y-2">
+                <CardTitle className="text-lg font-semibold text-gray-800">{title}</CardTitle>
+                <Heading title={`${statPrefix}${stat}`} className="text-4xl font-extrabold text-gray-900" />
+                <p className="opacity-80 text-sm">{desc}</p>
+            </CardHeader>
+            <CardContent>
+                <Button
+                    onClick={() => router.push(`/${factoryId}${href}`)}
+                    variant="default"
+                    className="w-full mt-2 flex justify-center items-center space-x-2"
+                >
+                    <span>View All</span> <ArrowRight className="w-4 ml-1" />
+                </Button>
+            </CardContent>
         </Card>
     );
 };

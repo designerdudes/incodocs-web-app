@@ -177,7 +177,7 @@ function Page() {
                     <Heading className="text-3xl" title="Shipments" />
                     <p>This is the shipments page</p>
                 </div>
-                <Link href={`/shipments/new`}>
+                <Link href={`./shipment/createnew`}>
                     <Button className="bg-primary text-white">New Shipment</Button>
                 </Link>
             </div>
