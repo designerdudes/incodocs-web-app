@@ -14,13 +14,22 @@ import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 interface PurchaseCreateNewFormProps {
   gap: number;
@@ -56,19 +65,32 @@ const formSchema = z
     blocks: z
       .array(
         z.object({
-          blockNumber: z.number().min(1, { message: "Block number is required" }),
-          weight: z
-            .number()
-            .min(0.1, { message: "Weight must be greater than zero" }),
-          breadth: z
-            .number()
-            .min(0.1, { message: "Breadth must be greater than zero" }),
-          length: z
-            .number()
-            .min(0.1, { message: "Length must be greater than zero" }),
-          height: z
-            .number()
-            .min(0.1, { message: "Height must be greater than zero" }),
+          dimensions: z.object({
+            weight: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Weight must be greater than zero" }),
+              units: z.literal("tons").default("tons"),
+            }),
+            length: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Length must be greater than zero" }),
+              units: z.literal("inch").default("inch"),
+            }),
+            breadth: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Breadth must be greater than zero" }),
+              units: z.literal("inch").default("inch"),
+            }),
+            height: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Height must be greater than zero" }),
+              units: z.literal("inch").default("inch"),
+            }),
+          }),
         })
       )
       .min(1, { message: "At least one block is required" })
@@ -81,21 +103,26 @@ const formSchema = z
       .number()
       .min(1, { message: "No of Slabs must be greater than 0" })
       .optional(),
-    length: z
-      .number()
-      .min(1, { message: "Length must be greater than 0" })
-      .optional(),
-    height: z
-      .number()
-      .min(1, { message: "Height must be greater than 0" })
-      .optional(),
-    breadth: z
-      .number()
-      .min(1, { message: "Breadth must be greater than 0" })
-      .optional(),
-    weight: z
-      .number()
-      .min(0.1, { message: "Weight must be greater than zero" })
+    slabs: z
+      .array(
+        z.object({
+          dimensions: z.object({
+            length: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Length must be greater than zero" }),
+              units: z.literal("inch").default("inch"),
+            }),
+            height: z.object({
+              value: z
+                .number()
+                .min(0.1, { message: "Height must be greater than zero" }),
+              units: z.literal("inch").default("inch"),
+            }),
+          }),
+        })
+      )
+      .min(1, { message: "At least one slab is required" })
       .optional(),
   })
   .refine(
@@ -114,7 +141,21 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
   const [purchaseType, setPurchaseType] = React.useState<"Raw" | "Finished">(
     "Raw"
   );
-
+  const [blocks, setBlocks] = React.useState<any[]>([]);
+  const [globalWeight, setGlobalWeight] = React.useState<string>("");
+  const [globalLength, setGlobalLength] = React.useState<string>("");
+  const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
+  const [globalHeight, setGlobalHeight] = React.useState<string>("");
+  const [applyWeightToAll, setApplyWeightToAll] =
+    React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] =
+    React.useState<boolean>(false);
+  const [applyBreadthToAll, setApplyBreadthToAll] =
+    React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =
+    React.useState<boolean>(false);
+  const factoryId = useParams().factoryid;
+  const organizationId = "674b0a687d4f4b21c6c980ba";
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -126,6 +167,26 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
       blocks: [],
     },
   });
+  function handleBlocksInputChange(value: string) {
+    const count = parseInt(value, 10);
+
+    if (!isNaN(count) && count > 0) {
+      const newBlocks = Array.from({ length: count }, (_, index) => ({
+        dimensions: {
+          length: { value: 0, units: "inch" as "inch" },
+          weight: { value: 0, units: "tons" as "tons" },
+          breadth: { value: 0, units: "inch" as "inch" },
+          height: { value: 0, units: "inch" as "inch" },
+        },
+      }));
+
+      setBlocks(newBlocks);
+      form.setValue("blocks", newBlocks);
+    } else {
+      setBlocks([]);
+      form.setValue("blocks", []);
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -137,10 +198,21 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
       toast.success("Purchased Added Successfully");
       router.push("./factorymanagement/inventory/raw/lots");
     } catch (error) {
-      toast.error("Error creating/updating Lot");
+      toast.error("Error creating/updating Purchase");
     } finally {
       setIsLoading(false);
     }
+    router.refresh();
+  }
+  function calculateTotalVolume() {
+    const totalVolumeInM = blocks.reduce((total, block) => {
+      const { length, breadth, height } = block.dimensions;
+      const volume = (length.value * breadth.value * height.value) / 1000000;
+      return total + (volume || 0);
+    }, 0);
+    return {
+      inM: totalVolumeInM,
+    };
   }
 
   return (
@@ -185,7 +257,6 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
               )}
             />
 
-
             {/* Supplier GSTN */}
             <FormField
               name="supplierGSTN"
@@ -202,46 +273,48 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
             />
 
             {/* Purchase Date */}
-<FormField
-  name="purchaseDate"
-  control={form.control}
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Purchase Date</FormLabel>
-      <FormControl>
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[40%] justify-start text-left font-normal",
-                  !field.value && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {field.value
-                  ? format(new Date(field.value), "PPP")
-                  : "Purchase date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={field.value ? new Date(field.value) : undefined}
-                onSelect={(date) =>
-                  field.onChange(date ? date.toISOString() : "")
-                }
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+            <FormField
+              name="purchaseDate"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Purchase Date</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-[40%] justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value
+                              ? format(new Date(field.value), "PPP")
+                              : "Purchase date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onSelect={(date) =>
+                              field.onChange(date ? date.toISOString() : "")
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Invoice No */}
             <FormField
@@ -362,110 +435,227 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
 
           {/* Raw Specific Fields */}
           {purchaseType === "Raw" && (
-            <div className="grid grid-cols-3 gap-3">
-              {/* No of Blocks */}
-              <FormField
-                name="noOfBlocks"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>No of Blocks</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter number of blocks"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                {/* No of Slabs */}
+                <FormField
+                  name="noOfSlabs"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>No of Blocks</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter number of Blocks"
+                          type="number"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-              {/* Length */}
-              <FormField
-                name="length"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Length (inch)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Length"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Dimensions Inputs */}
+              <div className="grid grid-cols-4 gap-3 mt-3">
+                {[
+                  {
+                    label: "Weight (tons)",
+                    value: globalWeight,
+                    setter: setGlobalWeight,
+                    apply: applyWeightToAll,
+                    setApply: setApplyWeightToAll,
+                    key: "weight",
+                  },
+                  {
+                    label: "Length (cm)",
+                    value: globalLength,
+                    setter: setGlobalLength,
+                    apply: applyLengthToAll,
+                    setApply: setApplyLengthToAll,
+                    key: "length",
+                  },
+                  {
+                    label: "Breadth (cm)",
+                    value: globalBreadth,
+                    setter: setGlobalBreadth,
+                    apply: applyBreadthToAll,
+                    setApply: setApplyBreadthToAll,
+                    key: "breadth",
+                  },
+                  {
+                    label: "Height (cm)",
+                    value: globalHeight,
+                    setter: setGlobalHeight,
+                    apply: applyHeightToAll,
+                    setApply: setApplyHeightToAll,
+                    key: "height",
+                  },
+                ].map(({ label, value, setter, apply, setApply, key }) => (
+                  <div key={key}>
+                    <Input
+                      value={value}
+                      onChange={(e) => setter(e.target.value)}
+                      placeholder={label}
+                      type="number"
+                      disabled={isLoading}
+                    />
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <input
+                        type="checkbox"
+                        checked={apply}
+                        onChange={(e) => {
+                          setApply(e.target.checked);
+                          if (e.target.checked) {
+                            const updatedBlocks = blocks.map((block) => ({
+                              ...block,
+                              dimensions: {
+                                ...block.dimensions,
+                                [key]: {
+                                  ...block.dimensions[key],
+                                  value: parseFloat(value) || 0,
+                                },
+                              },
+                            }));
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }
+                        }}
+                      />{" "}
+                      Apply {label} to all rows
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Weight (tons)</TableHead>
+                    <TableHead>Length (cm)</TableHead>
+                    <TableHead>Breadth (cm)</TableHead>
+                    <TableHead>Height (cm)</TableHead>
+                    <TableHead>Volume(m³)</TableHead>
+                    <TableHead> Vehicle Number </TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {blocks.map((block, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={block.dimensions.weight.value}
+                          placeholder="Enter weight"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.weight.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={block.dimensions.length.value}
+                          placeholder="Enter length"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.length.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={block.dimensions.breadth.value}
+                          placeholder="Enter breadth"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.breadth.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={block.dimensions.height.value}
+                          placeholder="Enter height"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.height.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          (block.dimensions.length.value *
+                            block.dimensions.breadth.value *
+                            block.dimensions.height.value) /
+                          1000000
+                        ).toFixed(2)}
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="string"
+                          placeholder="BH 08 BH 0823"
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => {
+                            const updatedBlocks = blocks.filter(
+                              (_, i) => i !== index
+                            );
 
-              {/* Height */}
-              <FormField
-                name="height"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Height (inch)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Height"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Breadth */}
-              <FormField
-                name="breadth"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Breadth (inch)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Breadth"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              {/* Weight */}
-              <FormField
-                name="weight"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Weight (tons)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Weight"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-right font-bold">
+                      Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow></TableRow>
+                </TableFooter>
+              </Table>
+            </>
           )}
 
           {/* Finished Specific Fields */}
           {purchaseType === "Finished" && (
+            <>
             <div className="grid grid-cols-3 gap-3">
               {/* No of Slabs */}
               <FormField
@@ -476,47 +666,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                     <FormLabel>No of Slabs</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter number of slabs"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Length */}
-              <FormField
-                name="length"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Length (inch)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Length"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Height */}
-              <FormField
-                name="height"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Height (inch)</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter Height"
+                        placeholder="Enter number of Slabs"
                         type="number"
                         disabled={isLoading}
                         {...field}
@@ -527,6 +677,149 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 )}
               />
             </div>
+
+            {/* Dimensions Inputs */}
+            <div className="grid grid-cols-4 gap-3 mt-3">
+              {[
+                
+                {
+                  label: "Length (cm)",
+                  value: globalLength,
+                  setter: setGlobalLength,
+                  apply: applyLengthToAll,
+                  setApply: setApplyLengthToAll,
+                  key: "length",
+                },
+                {
+                  label: "Height (cm)",
+                  value: globalHeight,
+                  setter: setGlobalHeight,
+                  apply: applyHeightToAll,
+                  setApply: setApplyHeightToAll,
+                  key: "height",
+                },
+              ].map(({ label, value, setter, apply, setApply, key }) => (
+                <div key={key}>
+                  <Input
+                    value={value}
+                    onChange={(e) => setter(e.target.value)}
+                    placeholder={label}
+                    type="number"
+                    disabled={isLoading}
+                  />
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <input
+                      type="checkbox"
+                      checked={apply}
+                      onChange={(e) => {
+                        setApply(e.target.checked);
+                        if (e.target.checked) {
+                          const updatedBlocks = blocks.map((block) => ({
+                            ...block,
+                            dimensions: {
+                              ...block.dimensions,
+                              [key]: {
+                                ...block.dimensions[key],
+                                value: parseFloat(value) || 0,
+                              },
+                            },
+                          }));
+                          setBlocks(updatedBlocks);
+                          form.setValue("blocks", updatedBlocks);
+                        }
+                      }}
+                    />{" "}
+                    Apply {label} to all rows
+                  </label>
+                </div>
+              ))}
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  
+                  <TableHead>Length (cm)</TableHead>
+                  
+                  <TableHead>Height (cm)</TableHead>
+                  <TableHead>Volume(m³)</TableHead>
+                  
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {blocks.map((block, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={block.dimensions.length.value}
+                        placeholder="Enter length"
+                        onChange={(e) => {
+                          const updatedBlocks = [...blocks];
+                          updatedBlocks[index].dimensions.length.value =
+                            parseFloat(e.target.value) || 0;
+                          setBlocks(updatedBlocks);
+                          form.setValue("blocks", updatedBlocks);
+                        }}
+                        disabled={isLoading}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="number"
+                        value={block.dimensions.height.value}
+                        placeholder="Enter height"
+                        onChange={(e) => {
+                          const updatedBlocks = [...blocks];
+                          updatedBlocks[index].dimensions.height.value =
+                            parseFloat(e.target.value) || 0;
+                          setBlocks(updatedBlocks);
+                          form.setValue("blocks", updatedBlocks);
+                        }}
+                        disabled={isLoading}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {(
+                        (block.dimensions.length.value *
+                          block.dimensions.breadth.value *
+                          block.dimensions.height.value) /
+                        1000000
+                      ).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => {
+                          const updatedBlocks = blocks.filter(
+                            (_, i) => i !== index
+                          );
+
+                          setBlocks(updatedBlocks);
+                          form.setValue("blocks", updatedBlocks);
+                        }}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={8} className="text-right font-bold">
+                    Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
+                  </TableCell>
+                </TableRow>
+                <TableRow></TableRow>
+              </TableFooter>
+            </Table>
+          </>
           )}
 
           <Button type="submit" disabled={isLoading}>

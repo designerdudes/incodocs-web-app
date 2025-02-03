@@ -53,7 +53,7 @@ export default async function BlocksPage({ params }: Props) {
   BlocksData = res;
   let LotData = null;
   const resp = await fetch(
-    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
+    `http://localhost:4080/factory-management/inventory/lot/getbyid/${params?.lotid}`,
     {
       method: "GET",
       headers: {
@@ -65,7 +65,7 @@ export default async function BlocksPage({ params }: Props) {
     return response.json();
   });
   LotData = resp;
-  console.log("This is lotsData",LotData);
+
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
       {/* Top Bar */}
@@ -97,7 +97,7 @@ export default async function BlocksPage({ params }: Props) {
         <Card className="w-2/5">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
-            <CardDescription>{`Details of ${LotData?.lotId}`}</CardDescription>
+            <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -122,23 +122,23 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Total Blocks
                   </TableCell>
-                  <TableCell>{LotData?.lotId?.totalBlocks}</TableCell>
+                  <TableCell>{LotData?.noOfBlocks}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Transport Cost: 
+                    Transport Cost:
                   </TableCell>
                   <TableCell>{LotData?.transportCost}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Material Cost: 
+                    Material Cost:
                   </TableCell>
                   <TableCell>{LotData?.materialCost}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Marker Cost: 
+                    Marker Cost:
                   </TableCell>
                   <TableCell>{LotData?.markerCost}</TableCell>
                 </TableRow>
