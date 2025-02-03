@@ -80,9 +80,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           {/* Edit Lot Details */}
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Slabs `
-              GlobalModal.children = <EditLotDetails />
-              GlobalModal.onOpen()
+              router.push(`./processing/edit/${data._id}`);
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
