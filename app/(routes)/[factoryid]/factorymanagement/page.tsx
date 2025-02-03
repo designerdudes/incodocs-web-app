@@ -33,7 +33,7 @@ function FactoryManagementPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <Link href={`/${params.factoryid}/factorymanagement/inventory`} passHref>
-          <Card className="cursor-pointer hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+          <Card>
             <CardHeader className="flex flex-col gap-2 items-start">
               <FiGrid className="w-6 h-6 text-4xl text-indigo-500 self-end" />
               <CardTitle className="text-2xl font-semibold text-gray-800">Inventory</CardTitle>
@@ -49,7 +49,7 @@ function FactoryManagementPage() {
           </Card>
         </Link>
         <Link href={`/${params.factoryid}/factorymanagement/accounting`} passHref>
-          <Card className="cursor-pointer hover:shadow-2xl transition-transform transform hover:scale-105 duration-300">
+          <Card>
             <CardHeader className="flex flex-col gap-2 items-start">
               <MdAccountBalance className="w-6 h-6 text-4xl text-green-500 self-end" />
               <CardTitle className="text-2xl font-semibold text-gray-800">Accounting</CardTitle>
