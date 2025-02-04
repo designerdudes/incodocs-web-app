@@ -51,6 +51,9 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   BlocksData = res;
+  console.log(BlocksData);
+
+
   let LotData = null;
   const resp = await fetch(
     `http://localhost:4080/factory-management/inventory/lot/getbyid/${params?.lotid}`,
@@ -123,7 +126,7 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Total Blocks
                   </TableCell>
-                  <TableCell>{LotData?.noOfBlocks}</TableCell>
+                  <TableCell>{LotData?.blocksId?.length}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">

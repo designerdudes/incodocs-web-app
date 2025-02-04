@@ -195,6 +195,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
+              deleteRoute="/factory-management/inventory/deletemultipleblocks"
               searchKey="blockNumber"
               columns={incuttingcolumns}
               data={inCutting as any}
@@ -206,6 +207,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
+              deleteRoute="/factory-management/inventory/deletemultipleblocks"
               searchKey="blockNumber"
               columns={Readyforpolishcolumns}
               data={readyForPolish.map((block: Block) => ({
@@ -221,6 +223,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
+              deleteRoute="/factory-management/inventory/deletemultipleslabs"
               searchKey="slabNumber"
               columns={inPolishingolumns}
               data={inPolishing}
@@ -232,6 +235,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
+              deleteRoute="/factory-management/inventory/deletemultipleslabs"
               searchKey="slabNumber"
               columns={Polishedcolumns}
               data={Polished}
@@ -251,7 +255,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
                   bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected Slabs deleted successfully'
-                  deleteRoute="/category/ids"
+                  deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey='slabNumber'
                   columns={CuttingInchesWithAllowanceColumns}
                   data={slabsData}
@@ -263,7 +267,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
                   bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected Slabs deleted successfully'
-                  deleteRoute="/category/ids"
+                  deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey='slabNumber'
                   columns={CuttingInchesWithOutAllowanceColumns}
                   data={slabsData}
@@ -285,6 +289,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
                   bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey='slabNumber' columns={polishingInchesWithAllowanceColumns} data={slabsData} />
               </TabsContent>
               <TabsContent value="PolishingInchesWithOutAllowance">
@@ -293,6 +298,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
                   bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey='slabNumber' columns={polishingInchesWithOutAllowanceColumns} data={slabsData} />
               </TabsContent>
             </Tabs>

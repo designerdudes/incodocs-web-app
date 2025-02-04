@@ -76,7 +76,7 @@ export default async function LotManagement({ params }: Props) {
           bulkDeleteTitle="Are you sure you want to delete the selected Lots?"
           bulkDeleteDescription="This will delete all the selected Lots, and they will not be recoverable."
           bulkDeleteToastMessage="Selected lots deleted successfully"
-          deleteRoute="/category/ids"
+          deleteRoute="/factory-management/inventory/deletemultiplelots"
           searchKey="lotName"
           columns={columns}
           data={lotsData as any}
