@@ -38,10 +38,11 @@ import {
   SelectValue,
 } from "./select";
 import { DataTablePagination } from "./data-table-pagination";
-// import toast from "react-hot-toast"
-// import { useGlobalModal } from "@/hooks/GlobalModal"
-// import { Alert } from "../forms/Alert"
-// import { deleteAllData } from '../../axiosUtility/api'
+import toast from "react-hot-toast";
+import { deleteAllData } from "@/axiosUtility/api";
+import { Alert } from "../forms/Alert";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -90,28 +91,39 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  // const modal = useGlobalModal()
+  const modal = useGlobalModal()
 
-  const handleBulkDelete = (ids: any) => {
-    // @mujahed add delete functionallity here
+  const handleBulkDelete = async () => {
+    const selectedIds = table
+      .getFilteredSelectedRowModel()
+      .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
-    console.log("ids ids", ids);
+    if (selectedIds.length === 0) {
+      toast.error("No slabs selected for deletion.");
+      return;
+    }
 
-    const Delete = async () => {
-      try {
-        // const result = await deleteAllData(deleteRoute as string, ids); // Assuming deleteData supports sending data in the request body
-        window.location.reload();
+    try {
+      console.log("Deleting Slabs IDs:", selectedIds);
+      console.log("Delete Route:", deleteRoute);
 
-        // modal.onClose();
-      } catch (error) {
-        console.error("Error deleting data:", error);
-      }
-    };
+      await deleteAllData(deleteRoute as string, { ids: selectedIds });
 
-    // Delete()
-    // toast.success(bulkDeleteToastMessage ?? "Successfully Deleted")
+      toast.success(bulkDeleteToastMessage ?? "Selected Slabs deleted successfully");
+
+      // Clear selection after deletion
+      table.resetRowSelection();
+
+      // Refresh data (optional, better to use state update)
+      // window.location.reload();
+
+      modal.onClose();
+    } catch (error) {
+      console.error("Error deleting slabs:", error);
+      toast.error("Error deleting slabs. Please try again.");
+    }
   };
-  
+
 
   return (
     <div>
@@ -169,9 +181,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                       {/* Add the 'fixed' class to the last column header */}
                       {index === columns.length - 1 && (
                         <div className="fixed" />
@@ -235,20 +247,15 @@ export function DataTable<TData, TValue>({
               variant="destructive"
               className="ml-2"
               onClick={() => {
-                const selectedIds = table
-                  .getFilteredSelectedRowModel()
-                  .rows.map(
-                    (row: any) => row.original[bulkDeleteIdName as string]
-                  );
-
-                // modal.title = bulkDeleteTitle ?? "Delete This Data?"
-                // modal.description = bulkDeleteDescription ?? "Are you sure you want to delete this data? This action cannot be undone."
-                // modal.children = <Alert onConfirm={() => handleBulkDelete(selectedIds)} />
-                // modal.onOpen()
+                modal.title = bulkDeleteTitle ?? "Delete Selected Slabs?";
+                modal.description = bulkDeleteDescription ?? "Are you sure you want to delete these slabs? This action cannot be undone.";
+                modal.children = <Alert onConfirm={handleBulkDelete} actionType="delete" />;
+                modal.onOpen();
               }}
             >
               Delete Selected
             </Button>
+
           )}
         </div>
         <div>
