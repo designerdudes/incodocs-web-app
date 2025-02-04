@@ -19,8 +19,14 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Block } from "././incuttingcolumns";
 import SendForPolish from "./sendForPolsih";
-import EditLotDetails from "./editLotDetails";
-
+interface Slab {
+  _id: string;
+  slabNumber: number;
+  status: string;
+  blockId: string;
+  createdAt: string;
+  updatedAt: string;
+}
 interface Props {
   data: Block;
 }
@@ -28,7 +34,8 @@ interface Props {
 export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  // console.log("These are slab ids ", data.SlabsId)
+  const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
+
 
   return (
     <div>
@@ -46,7 +53,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
-              GlobalModal.description = `There are ${data.SlabsId.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
+              GlobalModal.description = `There are ${readyForPolishSlabs.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
               GlobalModal.children = (
                 <SendForPolish
                   blockId={data._id}
@@ -55,7 +62,6 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
                     console.log(
                       `Sending ${selectedSlabs} slabs for polishing.`
                     );
-                    // Call your API here to process the slabs
                   }}
                 />
               );

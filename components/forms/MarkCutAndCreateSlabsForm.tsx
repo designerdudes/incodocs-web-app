@@ -142,13 +142,13 @@ export function MarkCutAndCreateSlabsForm({
         status: "cut",
       });
       toast.success("Block data updated successfully");
-      router.push("../.././");
-
+      router.back();
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
       setIsLoading(false);
     }
+    window.location.reload();
   }
 
   function calculateTotalSqft(): string {

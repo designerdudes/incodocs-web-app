@@ -14,17 +14,29 @@ interface SendForPolishProps {
 }
 
 const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [slabData, setSlabData] = useState<any>(null);
-    const [selectedSlabs, setSelectedSlabs] = useState<number[]>([]);
     const GlobalModal = useGlobalModal();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [BlockData, setBlockData] = useState<any>(null);
+    const [selectedSlabs, setSelectedSlabs] = useState<number[]>([]);
+    const [readyForPolishSlabs, setReadyForPolishSlabs] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchSlabData = async () => {
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
-                setSlabData(GetData);
-                console.log("Block Data", GetData);
+                setBlockData(GetData);
+                // Ensure SlabsId exists and is an array before filtering
+                if (Array.isArray(GetData?.SlabsId)) {
+                    console.log("All Slabs:", GetData.SlabsId);
+
+                    const filteredSlabs = GetData.SlabsId.filter(
+                        (slab: { status?: string }) => slab.status === "readyForPolish"
+                    );
+                    setReadyForPolishSlabs(filteredSlabs);
+                } else {
+                    console.warn("SlabsId is not an array or is undefined");
+                    setReadyForPolishSlabs([]); // Fallback to empty array
+                }
             } catch (error) {
                 console.error("Error fetching slab data:", error);
             }
@@ -34,6 +46,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             fetchSlabData();
         }
     }, [blockId]);
+
 
     const toggleSlabSelection = (slabNumber: number) => {
         setSelectedSlabs((prev) =>
@@ -87,30 +100,34 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         }
         window.location.reload()
     };
+    console.log("this are ready for polish", readyForPolishSlabs)
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
                 <Label>Total Slabs in Block</Label>
-                <p className="text-gray-600">{slabData?.SlabsId.length || 0}</p>
+                <p className="text-gray-600">{BlockData?.SlabsId.length || 0}</p>
             </div>
 
             {/* Display slabs with checkboxes */}
             <div className="space-y-2">
                 <Label>Select Slabs to Send for Polishing</Label>
-                {slabData?.SlabsId.map((slab: any, index: number) => (
-                    <div key={slab._id} className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            id={`slab-${slab.slabNumber}`}
-                            checked={selectedSlabs.includes(slab.slabNumber)}
-                            onChange={() => toggleSlabSelection(slab.slabNumber)}
-                        />
-                        <label htmlFor={`slab-${slab.slabNumber}`}>Slab {slab.slabNumber || index + 1}</label>
-                    </div>
-                ))}
+                {readyForPolishSlabs.length > 0 ? (
+                    readyForPolishSlabs.map((slab, index) => (
+                        <div key={slab._id} className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                id={`slab-${slab.slabNumber}`}
+                                checked={selectedSlabs.includes(slab.slabNumber)}
+                                onChange={() => toggleSlabSelection(slab.slabNumber)}
+                            />
+                            <label htmlFor={`slab-${slab.slabNumber}`}>Slab {slab.slabNumber || index + 1}</label>
+                        </div>
+                    ))
+                ) : (
+                    <p className="text-gray-500">No slabs are ready for polishing.</p>
+                )}
             </div>
-
             <div className={cn("flex gap-2 justify-end")}>
                 <Button
                     variant="secondary"
