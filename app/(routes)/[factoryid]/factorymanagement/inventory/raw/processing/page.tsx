@@ -16,7 +16,7 @@ import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllow
 import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
-import { Console } from "node:console";
+import { Block } from './components/incuttingcolumns'
 
 export type FinishedMaterial = {
 
@@ -28,7 +28,6 @@ export type FinishedMaterial = {
   quantity: number; // Quantity of the finished material
   status: string; // Status (e.g., "polished")
   inStock: boolean; // Availability status
-
   blockId: {
     _id: string;
     lotId?: {
@@ -120,12 +119,12 @@ export default async function SlabsProcessingPage({ params }: Props) {
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-  
+
   );
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
-    // console.log(inPolishing);
+  // console.log(inPolishing);
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
@@ -209,9 +208,13 @@ export default async function SlabsProcessingPage({ params }: Props) {
               bulkDeleteToastMessage="Selected blocks deleted successfully"
               searchKey="blockNumber"
               columns={Readyforpolishcolumns}
-              data={readyForPolish}
+              data={readyForPolish.map((block: Block) => ({
+                ...block,
+                readyForPolishCount: block.SlabsId.filter((slab: any) => slab.status === "readyForPolish").length
+              }))}
             />
           </TabsContent>
+
           <TabsContent value="inPolishing">
             <DataTable
               bulkDeleteIdName="order_id"

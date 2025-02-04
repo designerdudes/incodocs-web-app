@@ -83,19 +83,19 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
     },
     {
-        accessorKey: "SlabsId",
+        accessorKey: "readyForPolishCount",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Total Slabs
+                Ready for Polish Slabs
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.SlabsId.length}
+                {row.original.readyForPolishCount}
             </div>
         ),
     },

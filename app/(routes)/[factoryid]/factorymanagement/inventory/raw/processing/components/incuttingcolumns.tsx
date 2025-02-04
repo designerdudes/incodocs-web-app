@@ -26,6 +26,7 @@ export type Block = {
         lotName: string
         materialType: string
     }
+    readyForPolishCount: number
 }
 
 export const incuttingcolumns: ColumnDef<Block>[] = [
