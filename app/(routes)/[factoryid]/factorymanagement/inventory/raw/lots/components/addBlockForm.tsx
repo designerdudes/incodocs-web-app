@@ -147,66 +147,32 @@ function AddBlockForm({ params }: Props) {
     setVolume(volume);
   };
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    GlobalModal.title = "Confirm Details";
-    GlobalModal.description = "Please review the entered details:";
-    GlobalModal.children = (
-      <div className="space-y-4">
-        <p>
-          <strong>Height (inches):</strong> {values.dimensions.height.value}
-        </p>
-        <p>
-          <strong>Length (inches):</strong> {values.dimensions.length.value}
-        </p>
-        <p>
-          <strong>Breadth (inches):</strong> {values.dimensions.breadth.value}
-        </p>
-        <p>
-          <strong>Weight (tons):</strong> {values.dimensions.weight.value}
-        </p>
-        <p>
-          <strong>Volume (cubic inches):</strong> {volume.toFixed(2)}
-        </p>
-        <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              GlobalModal.onClose();
-              setIsLoading(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              try {
-                await postData("/factory-management/inventory/raw/add", {
-                  ...values,
-                  factoryId,
-                  lotId,
-                  status: "inStock",
-                });
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.success("Factory created successfully");
-                // router.push("./dashboard");
-              } catch (error) {
-                console.error("Error creating Factory:", error);
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.error("Error creating Factory");
-              }
-              window.location.reload();
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
-      </div>
-    );
-    GlobalModal.onOpen();
+
+    // Ensure blocks are part of the form submission
+    const submissionData = {
+      ...values,
+      blocks, // Add blocks explicitly
+      factoryId,
+      lotId,
+      status: "inStock",
+    };
+
+    try {
+      await postData("/factory-management/inventory/raw/add", submissionData);
+      setIsLoading(false);
+      toast.success("Block added successfully");
+
+      // Redirect instead of reloading
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error creating Factory:", error);
+      setIsLoading(false);
+      toast.error("Error creating Factory");
+    }
   };
+
   const [blocks, setBlocks] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");

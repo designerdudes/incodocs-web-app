@@ -65,6 +65,7 @@ export default async function BlocksPage({ params }: Props) {
     return response.json();
   });
   LotData = resp;
+  console.log(LotData);
 
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">

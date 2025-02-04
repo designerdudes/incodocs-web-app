@@ -105,6 +105,8 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
+  let lotId = params.lotId
+  console.log("this is lot id",params.lotId);
 
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
@@ -134,24 +136,32 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+
+    const submissionData = {
+      ...values,
+      lotId,
+      blocks,
+      factoryId,
+      organizationId,
+      status: "active",
+    };
+
+    console.log("Submitting data:", submissionData); // Debugging
+
     try {
       await putData(
         `/factory-management/inventory/lot/update/${params.lotId}`,
-        {
-          ...values,
-          factoryId,
-          organizationId,
-          status: "active",
-        }
+        submissionData
       );
       setIsLoading(false);
-      toast.success("Lot created/updated successfully");
+      toast.success("Block created/updated successfully");
       router.push("../");
     } catch (error) {
-      console.error("Error creating/updating Lot:", error);
+      console.error("Error creating/updating Block:", error);
       setIsLoading(false);
-      toast.error("Error creating/updating Lot");
+      toast.error("Error creating/updating Block");
     }
+
     router.refresh();
   }
 
