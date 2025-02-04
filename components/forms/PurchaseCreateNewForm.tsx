@@ -99,10 +99,7 @@ const formSchema = z
       .number()
       .min(1, { message: "No of Blocks must be greater than 0" })
       .optional(),
-    noOfSlabs: z
-      .number()
-      .min(1, { message: "No of Slabs must be greater than 0" })
-      .optional(),
+
     slabs: z
       .array(
         z.object({
@@ -123,6 +120,10 @@ const formSchema = z
         })
       )
       .min(1, { message: "At least one slab is required" })
+      .optional(),
+    noOfSlabs: z
+      .number()
+      .min(1, { message: "No of Slabs must be greater than 0" })
       .optional(),
   })
   .refine(
@@ -187,6 +188,24 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
       form.setValue("blocks", []);
     }
   }
+  function handleSlabsInputChange(value: string) {
+    const count = parseInt(value, 10);
+
+    if (!isNaN(count) && count > 0) {
+      const newSlabs = Array.from({ length: count }, (_, index) => ({
+        dimensions: {
+          length: { value: 0, units: "inch" as "inch" },
+          height: { value: 0, units: "inch" as "inch" },
+        },
+      }));
+
+      setBlocks(newSlabs);
+      form.setValue("slabs", newSlabs);
+    } else {
+      setBlocks([]);
+      form.setValue("slabs", []);
+    }
+  }
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -213,6 +232,21 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
     return {
       inM: totalVolumeInM,
     };
+  }
+  function calculateSqft(length?: number, height?: number): string {
+    const lengthInFeet = (length || 0) / 12;
+    const heightInFeet = (height || 0) / 12;
+    const area = lengthInFeet * heightInFeet;
+    return area > 0 ? area.toFixed(2) : "0.00";
+  }
+  function calculateTotalSqft(): string {
+    const slabs = form.getValues("slabs") || [];
+    const totalSqft = slabs.reduce((sum, slab) => {
+      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
+      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
+      return sum + lengthInFeet * heightInFeet;
+    }, 0);
+    return totalSqft.toFixed(2); // Round to 2 decimal places
   }
 
   return (
@@ -437,19 +471,23 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
           {purchaseType === "Raw" && (
             <>
               <div className="grid grid-cols-3 gap-3">
-                {/* No of Slabs */}
+                {/* No of Blocks */}
                 <FormField
-                  name="noOfSlabs"
+                  name="noOfBlocks"
                   control={form.control}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>No of Blocks</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="Enter number of Blocks"
+                          placeholder="Enter number of blocks"
                           type="number"
                           disabled={isLoading}
-                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e); // Updates form state
+                            handleBlocksInputChange(e.target.value); // Calls the function
+                          }}
+                          value={field.value}
                         />
                       </FormControl>
                       <FormMessage />
@@ -549,7 +587,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       <TableCell>
                         <Input
                           type="number"
-                          value={block.dimensions.weight.value}
+                          value={block?.dimensions?.weight?.value}
                           placeholder="Enter weight"
                           onChange={(e) => {
                             const updatedBlocks = [...blocks];
@@ -564,7 +602,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       <TableCell>
                         <Input
                           type="number"
-                          value={block.dimensions.length.value}
+                          value={block?.dimensions?.length?.value}
                           placeholder="Enter length"
                           onChange={(e) => {
                             const updatedBlocks = [...blocks];
@@ -579,7 +617,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       <TableCell>
                         <Input
                           type="number"
-                          value={block.dimensions.breadth.value}
+                          value={block?.dimensions?.breadth?.value}
                           placeholder="Enter breadth"
                           onChange={(e) => {
                             const updatedBlocks = [...blocks];
@@ -594,7 +632,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       <TableCell>
                         <Input
                           type="number"
-                          value={block.dimensions.height.value}
+                          value={block?.dimensions?.height?.value}
                           placeholder="Enter height"
                           onChange={(e) => {
                             const updatedBlocks = [...blocks];
@@ -608,9 +646,9 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       </TableCell>
                       <TableCell>
                         {(
-                          (block.dimensions.length.value *
-                            block.dimensions.breadth.value *
-                            block.dimensions.height.value) /
+                          (block?.dimensions?.length?.value *
+                            block?.dimensions?.breadth?.value *
+                            block?.dimensions?.height?.value) /
                           1000000
                         ).toFixed(2)}
                       </TableCell>
@@ -656,170 +694,171 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
           {/* Finished Specific Fields */}
           {purchaseType === "Finished" && (
             <>
-            <div className="grid grid-cols-3 gap-3">
-              {/* No of Slabs */}
-              <FormField
-                name="noOfSlabs"
-                control={form.control}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>No of Slabs</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter number of Slabs"
-                        type="number"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+              <div className="grid grid-cols-3 gap-3">
+                {/* No of Slabs */}
+                <FormField
+                  name="noOfSlabs"
+                  control={form.control}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>No of Slabs</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter number of Slabs"
+                          type="number"
+                          disabled={isLoading}
+                          onChange={(e) => {
+                            field.onChange(e); // Updates form state
+                            handleSlabsInputChange(e.target.value); // Calls the function
+                          }}
+                          value={field.value}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
-            {/* Dimensions Inputs */}
-            <div className="grid grid-cols-4 gap-3 mt-3">
-              {[
-                
-                {
-                  label: "Length (cm)",
-                  value: globalLength,
-                  setter: setGlobalLength,
-                  apply: applyLengthToAll,
-                  setApply: setApplyLengthToAll,
-                  key: "length",
-                },
-                {
-                  label: "Height (cm)",
-                  value: globalHeight,
-                  setter: setGlobalHeight,
-                  apply: applyHeightToAll,
-                  setApply: setApplyHeightToAll,
-                  key: "height",
-                },
-              ].map(({ label, value, setter, apply, setApply, key }) => (
-                <div key={key}>
-                  <Input
-                    value={value}
-                    onChange={(e) => setter(e.target.value)}
-                    placeholder={label}
-                    type="number"
-                    disabled={isLoading}
-                  />
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    <input
-                      type="checkbox"
-                      checked={apply}
-                      onChange={(e) => {
-                        setApply(e.target.checked);
-                        if (e.target.checked) {
-                          const updatedBlocks = blocks.map((block) => ({
-                            ...block,
-                            dimensions: {
-                              ...block.dimensions,
-                              [key]: {
-                                ...block.dimensions[key],
-                                value: parseFloat(value) || 0,
+              {/* Dimensions Inputs */}
+              <div className="grid grid-cols-4 gap-3 mt-3">
+                {[
+                  {
+                    label: "Length (inch)",
+                    value: globalLength,
+                    setter: setGlobalLength,
+                    apply: applyLengthToAll,
+                    setApply: setApplyLengthToAll,
+                    key: "length",
+                  },
+                  {
+                    label: "Height (inch)",
+                    value: globalHeight,
+                    setter: setGlobalHeight,
+                    apply: applyHeightToAll,
+                    setApply: setApplyHeightToAll,
+                    key: "height",
+                  },
+                ].map(({ label, value, setter, apply, setApply, key }) => (
+                  <div key={key}>
+                    <Input
+                      value={value}
+                      onChange={(e) => setter(e.target.value)}
+                      placeholder={label}
+                      type="number"
+                      disabled={isLoading}
+                    />
+                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <input
+                        type="checkbox"
+                        checked={apply}
+                        onChange={(e) => {
+                          setApply(e.target.checked);
+                          if (e.target.checked) {
+                            const updatedBlocks = blocks.map((block) => ({
+                              ...block,
+                              dimensions: {
+                                ...block.dimensions,
+                                [key]: {
+                                  ...block.dimensions[key],
+                                  value: parseFloat(value) || 0,
+                                },
                               },
-                            },
-                          }));
-                          setBlocks(updatedBlocks);
-                          form.setValue("blocks", updatedBlocks);
-                        }
-                      }}
-                    />{" "}
-                    Apply {label} to all rows
-                  </label>
-                </div>
-              ))}
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  
-                  <TableHead>Length (cm)</TableHead>
-                  
-                  <TableHead>Height (cm)</TableHead>
-                  <TableHead>Volume(m³)</TableHead>
-                  
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {blocks.map((block, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={block.dimensions.length.value}
-                        placeholder="Enter length"
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.length.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                          form.setValue("blocks", updatedBlocks);
+                            }));
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }
                         }}
-                        disabled={isLoading}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        value={block.dimensions.height.value}
-                        placeholder="Enter height"
-                        onChange={(e) => {
-                          const updatedBlocks = [...blocks];
-                          updatedBlocks[index].dimensions.height.value =
-                            parseFloat(e.target.value) || 0;
-                          setBlocks(updatedBlocks);
-                          form.setValue("blocks", updatedBlocks);
-                        }}
-                        disabled={isLoading}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {(
-                        (block.dimensions.length.value *
-                          block.dimensions.breadth.value *
-                          block.dimensions.height.value) /
-                        1000000
-                      ).toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        type="button"
-                        onClick={() => {
-                          const updatedBlocks = blocks.filter(
-                            (_, i) => i !== index
-                          );
+                      />{" "}
+                      Apply {label} to all rows
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
 
-                          setBlocks(updatedBlocks);
-                          form.setValue("blocks", updatedBlocks);
-                        }}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
+                    <TableHead>Length (inch)</TableHead>
+
+                    <TableHead>Height (inch)</TableHead>
+                    <TableHead>Area (sqft)</TableHead>
+
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {blocks.map((slab, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={slab?.dimensions?.length?.value}
+                          placeholder="Enter length"
+                          onChange={(e) => {
+                            const updatedSlabs = [...blocks];
+                            updatedSlabs[index].dimensions.length.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedSlabs);
+                            form.setValue("blocks", updatedSlabs);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          value={slab?.dimensions?.height?.value}
+                          placeholder="Enter height"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.height.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                          disabled={isLoading}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {calculateSqft(
+                          slab?.dimensions?.length?.value,
+                          slab?.dimensions?.height?.value
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => {
+                            const updatedBlocks = blocks.filter(
+                              (_, i) => i !== index
+                            );
+
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                          }}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-right font-bold">
+                      Total Area (sqft): {calculateTotalSqft()}
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={8} className="text-right font-bold">
-                    Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
-                  </TableCell>
-                </TableRow>
-                <TableRow></TableRow>
-              </TableFooter>
-            </Table>
-          </>
+                  <TableRow></TableRow>
+                </TableFooter>
+              </Table>
+            </>
           )}
 
           <Button type="submit" disabled={isLoading}>
