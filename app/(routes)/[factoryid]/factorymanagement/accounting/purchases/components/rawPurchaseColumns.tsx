@@ -31,7 +31,7 @@ export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "name", // Corrected key
+        accessorKey: "supplierName", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"

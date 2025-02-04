@@ -48,7 +48,7 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = res;
-  console.log(SlabData)
+  // console.log("This is SlabData", SlabData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -104,7 +104,9 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
-                    <TableCell>{SlabData?.lotId?.materialType}</TableCell>
+                    <TableCell>
+                      {SlabData?.blockId?.lotId?.materialType}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
@@ -115,14 +117,20 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Before Trim Length (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
+                    <TableCell>
+                      {SlabData?.dimensions?.length?.value ??
+                        "Need to be polished"}
+                    </TableCell>
                   </TableRow>
 
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Before Trim Height (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
+                    <TableCell>
+                      {SlabData?.dimensions?.length?.value ??
+                        "Need to be polished"}
+                    </TableCell>
                   </TableRow>
 
                   <TableRow>
@@ -138,7 +146,6 @@ export default async function SlabsPage({ params }: Props) {
                     </TableCell>
                     <TableCell>{SlabData?.trim?.height?.value}</TableCell>
                   </TableRow>
-
 
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
