@@ -43,7 +43,7 @@ export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.supplierName}
+                {row.original?.supplierName}
             </div>
         ),
     },

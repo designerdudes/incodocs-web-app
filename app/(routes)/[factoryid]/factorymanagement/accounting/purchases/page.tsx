@@ -238,7 +238,7 @@ export default async function Purchases({ params }: Props) {
                             bulkDeleteTitle='Are you sure you want to delete the selected purchases?'
                             bulkDeleteDescription='This will delete the purchases, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected purchases deleted successfully'
-                            searchKey='title' columns={rawPurchaseColumns} data={RawPurchased} />
+                            searchKey='supplierName' columns={rawPurchaseColumns} data={RawPurchased} />
                     </TabsContent>
                     <TabsContent value="Finished">
                         <DataTable
@@ -246,7 +246,7 @@ export default async function Purchases({ params }: Props) {
                             bulkDeleteTitle='Are you sure you want to delete the selected purchases?'
                             bulkDeleteDescription='This will delete the selected purchases, and they will not be recoverable.'
                             bulkDeleteToastMessage='Selected purchases deleted successfully'
-                            searchKey='title' columns={FinishedPurchaseColumns} data={FinishedPurchased} />
+                            searchKey='supplierName' columns={FinishedPurchaseColumns} data={FinishedPurchased} />
                     </TabsContent>
                 </Tabs>
             </div>
