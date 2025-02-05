@@ -28,6 +28,28 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Material type must be at least 3 characters long" })
     .optional(),
+  materialCost: z
+    .union([
+      z.string().min(1, { message: "Material cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
+  markerCost: z
+    .union([
+      z.string().min(1, { message: "Marker cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
+  transportCost: z
+    .union([
+      z.string().min(1, { message: "Transport cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
+  markerOperatorName: z
+    .string()
+    .min(3, { message: "Marker operator must be at least 3 characters long" })
+    .optional(),
 });
 
 interface Props {
@@ -47,6 +69,10 @@ export default function EditLotForm({ params }: Props) {
     defaultValues: {
       lotName: "",
       materialType: "",
+      materialCost: "",
+      markerCost: "",
+      transportCost: "",
+      markerOperatorName: "",
     },
   });
 
@@ -69,6 +95,10 @@ export default function EditLotForm({ params }: Props) {
         form.reset({
           lotName: data.lotName || "",
           materialType: data.materialType || "",
+          materialCost: data.materialCost || "",
+          markerCost: data.markerCost || "",
+          transportCost: data.transportCost || "",
+          markerOperatorName: data.markerOperatorName || "",
         });
       } catch (error) {
         console.error("Error fetching lot data:", error);
@@ -89,6 +119,10 @@ export default function EditLotForm({ params }: Props) {
       <div className="space-y-4">
         <p>Lot Name: {values.lotName}</p>
         <p>Material Type: {values.materialType}</p>
+        <p>Material Cost: {values.materialCost}</p>
+        <p>Marker Cost: {values.markerCost}</p>
+        <p>Transport Cost: {values.transportCost}</p>
+        <p>Marker Operator: {values.markerOperatorName}</p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -162,6 +196,84 @@ export default function EditLotForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: Material XYZ"
+                    type="text"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {/* Material Cost Field */}
+          <FormField
+            control={form.control}
+            name="materialCost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Material Cost</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: 1000"
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Marker Cost Field */}
+          <FormField
+            control={form.control}
+            name="markerCost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Marker Cost</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: 1000"
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Transport Cost Field */}
+          <FormField
+            control={form.control}
+            name="transportCost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Transport Cost</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: 1000"
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Marker Operator Field */}
+          <FormField
+            control={form.control}
+            name="markerOperatorName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Marker Operator</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: Operator John"
                     type="text"
                     {...field}
                   />

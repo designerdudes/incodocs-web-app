@@ -148,8 +148,9 @@ export function MarkCutAndCreateSlabsForm({
     } finally {
       setIsLoading(false);
     }
-    window.location.reload();
   }
+  
+
 
   function calculateTotalSqft(): string {
     const slabs = form.getValues("slabs") || [];

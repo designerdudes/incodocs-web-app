@@ -148,6 +148,12 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
+                    Marker Operator:
+                  </TableCell>
+                  <TableCell>{LotData?.markerOperatorName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
                     Block Created At
                   </TableCell>
                   <TableCell>
