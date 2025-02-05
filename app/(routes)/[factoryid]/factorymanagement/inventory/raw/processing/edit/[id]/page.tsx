@@ -1,107 +1,63 @@
-"use client"
-import React, { useState, useEffect } from 'react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import Heading from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import EditSlabsForm from "@/components/forms/EditSlabForm";
 
-const EditSlabPage = ({ blockId }) => {
-  const [slabs, setSlabs] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentSlab, setCurrentSlab] = useState(null);
 
-  // Fetch slabs from the backend when the component mounts
-  useEffect(() => {
-    fetch(`factory-management/inventory/finished/get${blockId}`)
-      .then((response) => response.json())
-      .then((data) => setSlabs(data))
-      .catch((error) => console.error('Error fetching slabs:', error));
-  }, [blockId]);
-
-  // Handle Delete Slab
-  const handleDelete = (slabId) => {
-    fetch(`/api/slabs/${slabId}`, { method: 'DELETE' })
-      .then(() => {
-        setSlabs(slabs.filter((slab) => slab.id !== slabId));
-      })
-      .catch((error) => console.error('Error deleting slab:', error));
+interface Props {
+  params: {
+    id: string;
   };
+}
 
-  // Handle Edit Slab
-  const handleEdit = (slab) => {
-    setIsEditing(true);
-    setCurrentSlab(slab);
-  };
+export default async function EditPage({ params }: Props) {
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
 
-  // Handle Save Edits
-  const handleSave = () => {
-    fetch(`/api/slabs/${currentSlab.id}`, {
-      method: 'PUT',
+  const res = await fetch(
+    `http://localhost:4080/factory-management/inventory/raw/get/${params.id}`,
+    {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
       },
-      body: JSON.stringify({
-        length: currentSlab.length,
-        height: currentSlab.height,
-      }),
-    })
-      .then(() => {
-        setSlabs(
-          slabs.map((slab) =>
-            slab.id === currentSlab.id
-              ? { ...slab, length: currentSlab.length, height: currentSlab.height }
-              : slab
-          )
-        );
-        setIsEditing(false);
-        setCurrentSlab(null);
-      })
-      .catch((error) => console.error('Error updating slab:', error));
-  };
+    }
+  ).then((response) => response.json());
+
+  let BlockData = res;
+  console.log(BlockData);
 
   return (
-    <div>
-      <h2>Edit Slabs</h2>
-      <div>
-        {slabs.map((slab) => (
-          <div key={slab.id} className="slab">
-            <div>
-              <label>Length: </label>
-              {isEditing && currentSlab.id === slab.id ? (
-                <input
-                  type="number"
-                  value={currentSlab.length}
-                  onChange={(e) =>
-                    setCurrentSlab({ ...currentSlab, length: e.target.value })
-                  }
-                />
-              ) : (
-                <span>{slab.length}</span>
-              )}
-            </div>
-            <div>
-              <label>Height: </label>
-              {isEditing && currentSlab.id === slab.id ? (
-                <input
-                  type="number"
-                  value={currentSlab.height}
-                  onChange={(e) =>
-                    setCurrentSlab({ ...currentSlab, height: e.target.value })
-                  }
-                />
-              ) : (
-                <span>{slab.height}</span>
-              )}
-            </div>
-            <button onClick={() => handleDelete(slab.id)}>Delete</button>
-            <button onClick={() => handleEdit(slab)}>Edit</button>
-          </div>
-        ))}
-      </div>
-      {isEditing && (
-        <div>
-          <button onClick={handleSave}>Save Changes</button>
-          <button onClick={() => setIsEditing(false)}>Cancel</button>
+    <div className="w-auto space-y-2 h-full flex p-6 flex-col">
+      <div className="topbar w-full flex justify-between items-center">
+        <Link href="../">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title={`Edit Slabs of Block ${BlockData.blockNumber}`} />
+          <p className="text-muted-foreground text-sm mt-2">
+            Enter the total number of slabs for Block {BlockData.blockNumber} and efficiently track its progress in the cutting process.
+          </p>
         </div>
-      )}
+      </div>
+      <Separator orientation="horizontal" />
+      <div className="container mx-auto py-10">
+        {BlockData ? (
+          <EditSlabsForm blockId={BlockData._id} initialSlabs={BlockData.SlabsId || []} />
+        ) : (
+          <div className="flex flex-col gap-2 items-center justify-center h-full">
+            <p className="text-muted-foreground text-lg">No Category Found</p>
+          </div>
+        )}
+      </div>
     </div>
   );
-};
-
-export default EditSlabPage;
+}
