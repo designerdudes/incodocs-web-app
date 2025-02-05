@@ -290,8 +290,8 @@ export function RawMaterialCreateNewForm({
                       type="string"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value}
                     />

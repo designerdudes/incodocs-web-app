@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import React, { useEffect, useState } from "react";
 import { columns } from "./components1/columns";
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 function Page() {
     const [shipmentData, setShipmentData] = useState<any[]>([]); 
@@ -31,9 +32,17 @@ function Page() {
     return (
         <div className="flex flex-col p-6">
             <div className="flex justify-between items-center gap-2">
-                <div className="flex flex-col">
-                    <Heading className="text-3xl" title="Shipments" />
-                    <p>This is the shipments page</p>
+        <Link href="./">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Shipment Page" />
+          <p className="text-muted-foreground text-sm">
+          Track and manage shipments with real-time visibility of container details, status, and progress through the logistics cycle. 
+          </p>
                 </div>
                 <Link href={`./shipment/createnew`}>
                     <Button className="bg-primary text-white">New Shipment</Button>
