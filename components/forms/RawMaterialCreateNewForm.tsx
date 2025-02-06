@@ -476,6 +476,12 @@ export function RawMaterialCreateNewForm({
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
+                    <FormField
+                      name={`blocks.${index}.dimensions.weight.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
                     <Input
                       type="number"
                       value={block.dimensions.weight.value}
@@ -489,8 +495,19 @@ export function RawMaterialCreateNewForm({
                       }}
                       disabled={isLoading}
                     />
-                  </TableCell>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+               </TableCell>
                   <TableCell>
+                   <FormField
+                      name={`blocks.${index}.dimensions.length.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                    <FormItem>
+                    <FormControl>
                     <Input
                       type="number"
                       value={block.dimensions.length.value}
@@ -504,8 +521,19 @@ export function RawMaterialCreateNewForm({
                       }}
                       disabled={isLoading}
                     />
+                     </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                      )}
+                      />
                   </TableCell>
                   <TableCell>
+                    <FormField
+                      name={`blocks.${index}.dimensions.breadth.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
                     <Input
                       type="number"
                       value={block.dimensions.breadth.value}
@@ -519,22 +547,40 @@ export function RawMaterialCreateNewForm({
                       }}
                       disabled={isLoading}
                     />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                      )}
+                      />
                   </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={block.dimensions.height.value}
-                      placeholder="Enter height"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.height.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
-                    />
-                  </TableCell>
+                      <TableCell>
+                        <FormField
+                          name={`blocks.${index}.dimensions.height.value`}
+                          control={form.control}
+                          render={({ field }) => (
+                        <FormItem>
+                        <FormControl>
+                        <Input
+                          type="number"
+                          value={block.dimensions.height.value}
+                          placeholder="Enter height"
+                          onChange={(e) => {
+                            const updatedBlocks = [...blocks];
+                            updatedBlocks[index].dimensions.height.value =
+                              parseFloat(e.target.value) || 0;
+                            setBlocks(updatedBlocks);
+                            form.setValue("blocks", updatedBlocks);
+                           }}
+                          disabled={isLoading}
+                          
+                        />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                        )}
+                        />
+
+                      </TableCell>
                   <TableCell>
                     {(
                       (block.dimensions.length.value *
@@ -572,16 +618,13 @@ export function RawMaterialCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={8
-
-                } className="text-right font-bold">
-                  Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
-                </TableCell>
-              </TableRow>
-              <TableRow></TableRow>
-            </TableFooter>
+              <TableFooter>
+                 <TableRow> 
+                   <TableCell colSpan={8} className="text-right font-bold">
+                     Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
+                   </ TableCell>
+                 </TableRow>
+              </TableFooter>
           </Table>
           <Button type="submit" disabled={isLoading}>
             Submit

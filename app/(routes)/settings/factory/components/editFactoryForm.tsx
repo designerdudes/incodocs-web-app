@@ -89,8 +89,8 @@ export default function EditFactoryForm({ params }: Props) {
                     workersPolishingPay: data.workersPolishingPay || 0,
                 });
             } catch (error) {
-                console.error("Error fetching lot data:", error);
-                toast.error("Failed to fetch lot data");
+                console.error("Error fetching Factory data:", error);
+                toast.error("Failed to fetch Factory data");
             } finally {
                 setIsFetching(false);
             }
@@ -102,8 +102,8 @@ export default function EditFactoryForm({ params }: Props) {
     const handleSubmit = (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
 
-        GlobalModal.title = "Confirm Lot Update";
-        GlobalModal.description = "Are you sure you want to update this lot?";
+        GlobalModal.title = "Confirm Factory Update";
+        GlobalModal.description = "Are you sure you want to update this Factory?";
         GlobalModal.children = (
             <div className="space-y-4">
                 <p>Factory Name: {values.factoryName}</p>
@@ -127,7 +127,7 @@ export default function EditFactoryForm({ params }: Props) {
                                 );
                                 setIsLoading(false);
                                 GlobalModal.onClose();
-                                toast.success("Lot updated successfully");
+                                toast.success("Factory updated successfully");
 
                                 window.location.reload();
                             } catch (error) {
@@ -164,7 +164,7 @@ export default function EditFactoryForm({ params }: Props) {
                         name="factoryName"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Lot Name</FormLabel>
+                                <FormLabel>Factory Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Eg: Lot ABC" type="text" {...field} />
                                 </FormControl>
@@ -255,7 +255,12 @@ export default function EditFactoryForm({ params }: Props) {
                                     <Input
                                         placeholder="Eg: 100"
                                         type="number"
-                                        {...field}
+                                        disabled={isLoading}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            field.onChange(value ? parseFloat(value) : undefined);
+                                        }}
+                                        value={field.value}
                                     />
                                 </FormControl>
                                 <FormMessage />
@@ -272,7 +277,12 @@ export default function EditFactoryForm({ params }: Props) {
                                     <Input
                                         placeholder="Eg: 200"
                                         type="number"
-                                        {...field}
+                                        disabled={isLoading}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            field.onChange(value ? parseFloat(value) : undefined);
+                                        }}
+                                        value={field.value}
                                     />
                                 </FormControl>
                                 <FormMessage />

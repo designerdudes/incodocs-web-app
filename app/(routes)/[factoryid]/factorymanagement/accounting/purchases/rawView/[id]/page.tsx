@@ -46,6 +46,7 @@ export default async function SlabsPage({ params }: Props) {
   });
 
   SlabData = res;
+  // console.log("SlabData",SlabData)
 
   function calculateVolume(
     length: number,
@@ -81,7 +82,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Raw Purchase ${SlabData.blockNumber} `}
+            title={` Details of Raw Purchase ${SlabData.blockid} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             A comprehensive view of all customer transactions involving the
