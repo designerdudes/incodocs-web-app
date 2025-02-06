@@ -99,28 +99,26 @@ export function DataTable<TData, TValue>({
       .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
     if (selectedIds.length === 0) {
-      toast.error("No slabs selected for deletion.");
+      toast.error("No product selected for deletion.");
       return;
     }
 
     try {
-      console.log("Deleting Slabs IDs:", selectedIds);
-      console.log("Delete Route:", deleteRoute);
 
       await deleteAllData(deleteRoute as string, { ids: selectedIds });
 
-      toast.success(bulkDeleteToastMessage ?? "Selected Slabs deleted successfully");
+      toast.success(bulkDeleteToastMessage ?? "Selected product deleted successfully");
 
       // Clear selection after deletion
       table.resetRowSelection();
 
       // Refresh data (optional, better to use state update)
-      // window.location.reload();
+      window.location.reload();
 
       modal.onClose();
     } catch (error) {
-      console.error("Error deleting slabs:", error);
-      toast.error("Error deleting slabs. Please try again.");
+      console.error("Error deleting data:", error);
+      toast.error("Error deleting data. Please try again.");
     }
   };
 
