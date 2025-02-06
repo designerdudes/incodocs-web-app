@@ -16,7 +16,7 @@ import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllow
 import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
-import { Block } from './components/incuttingcolumns'
+import { Block } from './components/incuttingcolumns';
 
 export type FinishedMaterial = {
 
