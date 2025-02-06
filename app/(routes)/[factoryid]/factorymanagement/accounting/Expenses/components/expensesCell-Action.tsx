@@ -15,6 +15,12 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { expense } from "../page";
+import EditExpenseForm from "./editExpense";
+
+
+
+
+
 
 interface Props {
   data : expense
@@ -58,11 +64,11 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         View Expense Details
                     </DropdownMenuItem>
 
-                    {/* Edit Lot Details */}
+                    {/* Edit Expense Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = "Edit Lot Details"; // Set modal title
-                            // GlobalModal.children = <EditLotForm />; // Render Edit Form
+                            GlobalModal.title = "Edit Expense Details"; // Set modal title
+                            GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >

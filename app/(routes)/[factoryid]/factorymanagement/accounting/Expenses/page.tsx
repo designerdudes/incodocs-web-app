@@ -97,7 +97,7 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
                             bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
                             bulkDeleteToastMessage="Selected slabs deleted successfully"
-                            searchKey="title"
+                            searchKey="ExpenseName"
                             columns={expensecolumns}
                             data={data}
                         />
