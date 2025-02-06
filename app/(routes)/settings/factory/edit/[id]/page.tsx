@@ -22,8 +22,8 @@ const formSchema = z.object({
             .min(6, { message: "Pincode must be at least 6 characters" }),
     }),
     createdAt: z.number().min(0, { message: "date should be number" }),
-    workersCuttingPay: z.number().min(0, { message: "Pay must be positive" }),
-    workersPolishingPay: z.number().min(0, { message: "Pay must be positive" }),
+    workersCuttingPay: z.string().min(0, { message: "Pay must be positive" }),
+    workersPolishingPay: z.string().min(0, { message: "Pay must be positive" }),
 });
 
 export default function EditFactoryPage({ params }: { params: { id: string } }) {
@@ -39,8 +39,8 @@ export default function EditFactoryPage({ params }: { params: { id: string } }) 
                 pincode: "",
             },
             createdAt: 0,
-            workersCuttingPay: 0,
-            workersPolishingPay: 0,
+            workersCuttingPay: "",
+            workersPolishingPay: "",
         },
     });
 
@@ -171,9 +171,15 @@ export default function EditFactoryPage({ params }: { params: { id: string } }) 
 
                                         <FormControl>
                                             <Input
+                                            type="string"
                                                 className=" px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                                                disabled={isLoading}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    field.onChange(value ? parseFloat(value) : undefined);
+                                                  }}
+                                                  value={field.value}
                                                 // defaultValue={Data.workersCuttingPay}
-                                                {...field}
                                             />
                                         </FormControl>
                                         <FormMessage />
@@ -192,9 +198,14 @@ export default function EditFactoryPage({ params }: { params: { id: string } }) 
 
                                         <FormControl>
                                             <Input
+                                            type="string"
                                                 className="px-14 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                                                // defaultValue={Data.workersPolishingPay}
-                                                {...field}
+                                                disabled={isLoading}
+                                                onChange={(e) => {
+                                                    const value = e.target.value;
+                                                    field.onChange(value ? parseFloat(value) : undefined);
+                                                  }}
+                                                  value={field.value}
                                             />
                                         </FormControl>
                                         <FormMessage />

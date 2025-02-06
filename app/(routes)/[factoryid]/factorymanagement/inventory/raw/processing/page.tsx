@@ -191,7 +191,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
           </TabsList>
           <TabsContent value="inCutting">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
@@ -203,7 +203,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
           </TabsContent>
           <TabsContent value="readyforpolish">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
               bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
               bulkDeleteToastMessage="Selected blocks deleted successfully"
@@ -219,7 +219,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
 
           <TabsContent value="inPolishing">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
@@ -231,7 +231,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
           </TabsContent>
           <TabsContent value="Polished">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
@@ -285,7 +285,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               </div>
               <TabsContent value="PolishingInchesWithAllowance">
                 <DataTable
-                  bulkDeleteIdName='order_id'
+                  bulkDeleteIdName='_id'
                   bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
                   bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected slabs deleted successfully'
@@ -294,7 +294,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
               </TabsContent>
               <TabsContent value="PolishingInchesWithOutAllowance">
                 <DataTable
-                  bulkDeleteIdName='order_id'
+                  bulkDeleteIdName='_id'
                   bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
                   bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
                   bulkDeleteToastMessage='Selected slabs deleted successfully'

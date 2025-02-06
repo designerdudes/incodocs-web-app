@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ColumnHeader } from "./column-header"
 import moment from "moment"
 import { shipment } from "../data/schema"
-import { DataTableRowActions } from "./row-actions"
+import { DataTableCellActions } from "./cell-actions"
 
 export const columns: ColumnDef<shipment>[] = [
     {
@@ -167,6 +167,6 @@ export const columns: ColumnDef<shipment>[] = [
 
     {
         id: "actions",
-        cell: ({ row }) => <DataTableRowActions row={row} />,
+        cell: ({ row }) => <DataTableCellActions row={row} />,
     },
 ]

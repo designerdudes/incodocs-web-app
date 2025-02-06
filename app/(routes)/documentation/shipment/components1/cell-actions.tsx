@@ -1,0 +1,123 @@
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Edit, EyeIcon, MoreHorizontal, Scissors, Trash } from "lucide-react";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import { deleteData } from "@/axiosUtility/api";
+import { Alert } from "@/components/forms/Alert";
+import toast from "react-hot-toast";
+import { shipment } from "../data/schema";
+import { Row } from "@tanstack/react-table"; // Ensure this import exists
+
+interface DataTableCellActionsProps {
+  row: Row<shipment>;
+}
+
+export function DataTableCellActions({ row }: DataTableCellActionsProps) {
+  const router = useRouter();
+  const GlobalModal = useGlobalModal();
+
+  const shipmentData = row.original; // Extract row data
+  const shipmentId = shipmentData._id; // Ensure ID is available
+
+  // Delete shipment function
+  const deleteShipment = async () => {
+    if (!shipmentId) {
+      console.error("Error: Shipment ID is undefined.");
+      toast.error("Error: Shipment ID is missing.");
+      return;
+    }
+
+    try {
+      console.log(`Deleting shipment with ID: ${shipmentId}`);
+      const result = await deleteData(`/shipment/${shipmentId}`);
+      console.log("Delete response:", result);
+
+      toast.success("Shipment Deleted Successfully");
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      console.error("Error deleting shipment:", error);
+      toast.error("Failed to delete shipment");
+    }
+  };
+
+  return (
+    <div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="gap-2" align="end">
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+
+          {/* Edit Shipment */}
+          <DropdownMenuItem
+            onClick={() => router.push(`./shipment/edit`)}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            <Scissors className="mr-2 h-4 w-4" />
+            Edit Shipment
+          </DropdownMenuItem>
+
+          {/* View Shipment */}
+          <DropdownMenuItem
+            onClick={() => router.push(`./shipment/view`)}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Shipment
+          </DropdownMenuItem>
+
+          {/* upload metrics */}
+          <DropdownMenuItem
+            onClick={() => router.push(`./shipment/view`)}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            {/* <EyeIcon className="mr-2 h-4 w-4" /> */}
+            Upload Metrics
+          </DropdownMenuItem>
+          {/* change to Inactive */}
+          <DropdownMenuItem
+            onClick={() => router.push(`./shipment/view`)}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            {/* <EyeIcon className="mr-2 h-4 w-4" /> */}
+            Change to inactive
+          </DropdownMenuItem>
+
+          {/* Delete Shipment */}
+          <DropdownMenuItem
+            onSelect={() => {
+              GlobalModal.title = "Delete shipment";
+              GlobalModal.description =
+                "Are you sure you want to delete this Shipment?";
+              GlobalModal.children = (
+                <Alert onConfirm={deleteShipment} actionType={"delete"} />
+              );
+              GlobalModal.onOpen();
+            }}
+            className="focus:bg-destructive focus:text-destructive-foreground"
+          >
+            <Trash className="mr-2 h-4 w-4" />
+            Delete Shipment
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
