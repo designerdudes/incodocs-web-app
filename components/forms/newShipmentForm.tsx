@@ -261,16 +261,16 @@ export function NewShipmentForm() {
       shippingDetails: {
         shippingLine: "",
         forwarder: "",
-        forwarderInvoice: "",
+        forwarderInvoice: null,
         valueOfForwarderInvoice: "",
         transporter: "",
-        transporterInvoice: "",
+        transporterInvoice: null,
         valueOfTransporterInvoice: "",
       },
       shippingBillDetails: {
         shippingBillNumber: "",
         shippingBillDate: new Date(),
-        uploadShippingBill: "",
+        uploadShippingBill: null,
       },
       supplierDetails: {
         supplierName: "",
@@ -280,8 +280,8 @@ export function NewShipmentForm() {
         supplierInvoiceDate: new Date(),
         supplierInvoiceValueWithOutGST: "",
         supplierInvoiceValueWithGST: "",
-        uploadSupplierInvoice: "",
-        actualSupplierInvoice: "",
+        uploadSupplierInvoice: null,
+        actualSupplierInvoice: null,
         actualSupplierInvoiceValue: "",
       },
       saleInvoiceDetails: {
@@ -294,7 +294,7 @@ export function NewShipmentForm() {
         blNumber: "",
         blDate: new Date(),
         telexDate: new Date(),
-        uploadBL: "",
+        uploadBL: null,
       },
     },
   });
@@ -306,21 +306,60 @@ export function NewShipmentForm() {
     console.log("Form submitted with values:", values);
 
     try {
-      const res = await postData("/shipment/add", {
+      // Fields that require file uploads
+      const uploadFields = [
+        "shippingDetails.forwarderInvoice",
+        "shippingDetails.transporterInvoice",
+        "shippingBillDetails.uploadShippingBill",
+        "supplierDetails.uploadSupplierInvoice",
+        "supplierDetails.actualSupplierInvoice", // Added this field
+        "blDetails.uploadBL",
+      ];
+
+      const uploadedFiles: Record<string, string> = {};
+
+      for (const field of uploadFields) {
+        const file = values[field];
+
+        if (file instanceof File) {
+          const formData = new FormData();
+          formData.append("file", file);
+
+          // Upload file to the server
+          const uploadResponse = await postData(
+            "/shipmentdocsfile/upload",
+            formData
+          );
+
+          if (uploadResponse?.filePath) {
+            uploadedFiles[field] = uploadResponse.filePath;
+          } else {
+            throw new Error(`Failed to upload file: ${field}`);
+          }
+        }
+      }
+
+      // Merge uploaded file URLs into values
+      const updatedValues = {
         ...values,
+        ...uploadedFiles, // Add uploaded file paths
         organization,
         status: "active",
-      });
+      };
+
+      // Submit final form data
+      const res = await postData("/shipment/add", updatedValues);
       console.log("Response:", res);
-      setIsLoading(false);
+
       toast.success("Shipment created successfully");
       router.push("/shipment");
     } catch (error) {
       console.error("Error creating shipment:", error);
-      setIsLoading(false);
       toast.error("Error creating shipment");
+    } finally {
+      setIsLoading(false);
+      router.refresh();
     }
-    router.refresh();
   }
 
   return (
@@ -332,16 +371,16 @@ export function NewShipmentForm() {
         <div className="flex justify-between">
           <Heading
             className="text-xl"
-            title={stepNames.map((step) => {
-              if (step.index === currentStep) {
-                return step.title.toString();
-              }
-            })}
+            title={
+              stepNames.find((step) => step.index === currentStep)?.title ||
+              "Step"
+            }
           />
-          <p className=" text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Step {currentStep} of {totalSteps}
           </p>
         </div>
+
         <Separator className="my-2" orientation="horizontal" />
 
         {currentStep === 1 && (
@@ -573,10 +612,8 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) =>
-                          field.onChange(e.target.files?.[0] || null)
-                        }
-                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+
                       />
                     </FormControl>
                     <Button
@@ -646,8 +683,8 @@ export function NewShipmentForm() {
                         className="cursor-pointer "
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+                        
                       />
                     </FormControl>
                     <Button
@@ -701,10 +738,8 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) =>
-                          field.onChange(e.target.files?.[0] || null)
-                        }
-                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+                        
                       />
                     </FormControl>
                     <Button
@@ -964,10 +999,8 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) =>
-                          field.onChange(e.target.files?.[0] || null)
-                        }
-                        value={field.value}
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+                    
                       />
                     </FormControl>
                     <Button
@@ -994,9 +1027,7 @@ export function NewShipmentForm() {
                       <Input
                         disabled={isLoading}
                         type="file"
-                        onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                        value={field.value}
-                      />
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}                />
                     </FormControl>
                     <Button
                       type="button"
@@ -1229,9 +1260,7 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) =>
-                          field.onChange(e.target.files?.[0] || null)
-                        }
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
                       />
                     </FormControl>
                     <Button
