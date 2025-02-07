@@ -18,9 +18,18 @@ import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -30,7 +39,7 @@ const formSchema = z.object({
   customerName: z
     .string()
     .min(3, { message: "Customer name must be at least 3 characters long" }),
-  customerId: z.string().nonempty({ message: "Customer ID is required" }),
+  customerId: z.string().min(3, { message: "Customer ID is required" }),
   customerAddress: z
     .string()
     .min(5, { message: "Customer address must be at least 5 characters long" }),
@@ -38,14 +47,29 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "GST Number must be at least 3 characters long" }),
   noOfSlabs: z
-    .number({ invalid_type_error: "No of Slabs must be a number" })
+    .number()
     .min(1, { message: "No of Slabs must be greater than 0" }),
-  height: z
-    .number({ invalid_type_error: "Height must be a number" })
-    .min(1, { message: "Height must be greater than 0" }),
-  length: z
-    .number({ invalid_type_error: "Length must be a number" })
-    .min(1, { message: "Length must be greater than 0" }),
+  // ✅ Slabs Array (with its own length & height inside dimensions)
+  slabs: z
+    .array(
+      z.object({
+        dimensions: z.object({
+          length: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+          }),
+          height: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.literal("inch").default("inch"),
+          }),
+        }),
+      })
+    )
+    .min(1, { message: "At least one slab is required" }),
   salesDate: z.string().nonempty({ message: "Sales Date is required" }),
   gstPercentage: z.enum(["0", "1", "5", "12", "18"], {
     errorMap: () => ({ message: "Invalid GST percentage selected" }),
@@ -56,6 +80,13 @@ const formSchema = z.object({
 });
 
 export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
+  const [slabs, setSlabs] = React.useState<any[]>([]);
+  const [globalLength, setGlobalLength] = React.useState<string>("");
+  const [globalHeight, setGlobalHeight] = React.useState<string>("");
+  const [applyLengthToAll, setApplyLengthToAll] =
+    React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =
+    React.useState<boolean>(false);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -66,14 +97,35 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       customerId: "",
       customerAddress: "",
       gstNumber: "",
-      noOfSlabs: 1,
-      height: 1,
-      length: 1,
+      noOfSlabs: 0,
       salesDate: "",
       gstPercentage: "0",
       invoiceValue: 0,
     },
   });
+
+  function handleSlabsInputChange(value: string) {
+    const count = parseInt(value, 10);
+
+    if (!isNaN(count) && count > 0) {
+      const newSlabs = Array.from({ length: count }, (_, index) => ({
+        dimensions: {
+          slabNumber: index + 1,
+          length: { value: 0, units: "inch" as "inch" },
+          height: { value: 0, units: "inch" as "inch" },
+        },
+      }));
+
+      setSlabs(newSlabs);
+      form.setValue("slabs", newSlabs);
+    } else {
+      setSlabs([]);
+      form.setValue("slabs", []);
+    }
+  }
+  React.useEffect(() => {
+    form.setValue("noOfSlabs", slabs.length);
+  }, [slabs, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -89,6 +141,21 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
     } finally {
       setIsLoading(false);
     }
+  }
+  function calculateSqft(length?: number, height?: number): string {
+    const lengthInFeet = (length || 0) / 12;
+    const heightInFeet = (height || 0) / 12;
+    const area = lengthInFeet * heightInFeet;
+    return area > 0 ? area.toFixed(2) : "0.00";
+  }
+  function calculateTotalSqft(): string {
+    const slabs = form.getValues("slabs") || [];
+    const totalSqft = slabs.reduce((sum, slab) => {
+      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
+      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
+      return sum + lengthInFeet * heightInFeet;
+    }, 0);
+    return totalSqft.toFixed(2); // Round to 2 decimal places
   }
 
   return (
@@ -184,29 +251,14 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                   <FormLabel>No of Slabs</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter number of slabs"
+                      placeholder="Enter number of Slabs"
                       type="number"
                       disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              name="height"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Height (inch)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter Height"
-                      type="number"
-                      disabled={isLoading}
-                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e); // Updates form state
+                        handleSlabsInputChange(e.target.value); // Calls the function
+                      }}
+                      value={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -217,25 +269,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
 
           {/* Row 3: Length, GST Percentage, Invoice Value */}
           <div className={`grid grid-cols-3 gap-3`}>
-            <FormField
-              name="length"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Length (inch)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter Length"
-                      type="number"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               name="gstPercentage"
               control={form.control}
@@ -278,10 +311,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* Row 4: Sales Date */}
-          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="salesDate"
               control={form.control}
@@ -325,6 +354,187 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
           </div>
+          {/* Dimensions Inputs */}
+          <div className="grid grid-cols-4 gap-3 mt-3">
+            {/* ✅ Length Input & Apply Checkbox */}
+            <div>
+              <Input
+                value={globalLength}
+                onChange={(e) => setGlobalLength(e.target.value)}
+                placeholder="Length (inch)"
+                type="number"
+                disabled={isLoading}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyLengthToAll}
+                  onChange={(e) => {
+                    setApplyLengthToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedSlabs = slabs.map((slab) => ({
+                        ...slab, // ✅ Spread only the current slab, not the whole slabs array
+                        dimensions: {
+                          ...slab.dimensions,
+                          length: {
+                            ...slab.dimensions.length, // ✅ Only update length, keeping height unchanged
+                            value: parseFloat(globalLength) || 0,
+                          },
+                        },
+                      }));
+                      setSlabs(updatedSlabs);
+                      form.setValue("slabs", updatedSlabs);
+                    }
+                  }}
+                />{" "}
+                Apply Length to all rows
+              </label>
+            </div>
+
+            {/* ✅ Height Input & Apply Checkbox */}
+            <div>
+              <Input
+                value={globalHeight}
+                onChange={(e) => setGlobalHeight(e.target.value)}
+                placeholder="Height (inch)"
+                type="number"
+                disabled={isLoading}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyHeightToAll}
+                  onChange={(e) => {
+                    setApplyHeightToAll(e.target.checked);
+                    if (e.target.checked) {
+                      const updatedSlabs = slabs.map((slab) => ({
+                        ...slab, // ✅ Spread only the current slab
+                        dimensions: {
+                          ...slab.dimensions,
+                          height: {
+                            ...slab.dimensions.height, // ✅ Only update height, keeping length unchanged
+                            value: parseFloat(globalHeight) || 0,
+                          },
+                        },
+                      }));
+                      setSlabs(updatedSlabs);
+                      form.setValue("slabs", updatedSlabs);
+                    }
+                  }}
+                />{" "}
+                Apply Height to all rows
+              </label>
+            </div>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>#</TableHead>
+
+                <TableHead>Length (inch)</TableHead>
+
+                <TableHead>Height (inch)</TableHead>
+                <TableHead>Area (sqft)</TableHead>
+
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {slabs.map((slab, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>
+
+                  <TableCell>
+                    <FormField
+                      name={`slabs.${index}.dimensions.length.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={slab.dimensions.length.value}
+                              placeholder="Enter length"
+                              onChange={(e) => {
+                                const updatedBlocks = [...slabs];
+                                updatedBlocks[index].dimensions.length.value =
+                                  parseFloat(e.target.value) || 0;
+                                setSlabs(updatedBlocks);
+                                form.setValue("slabs", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      name={`slabs.${index}.dimensions.height.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={slab.dimensions.height
+                                
+                                .value}
+                              placeholder="Enter height"
+                              onChange={(e) => {
+                                const updatedBlocks = [...slabs];
+                                updatedBlocks[index].dimensions.height.value =
+                                  parseFloat(e.target.value) || 0;
+                                setSlabs(updatedBlocks);
+                                form.setValue("slabs", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+
+                  <TableCell>
+                    {calculateSqft(
+                      slab?.dimensions?.length?.value,
+                      slab?.dimensions?.height?.value
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      type="button"
+                      onClick={() => {
+                        const updatedBlocks = slabs.filter(
+                          (_, i) => i !== index
+                        );
+
+                        setSlabs(updatedBlocks);
+                        form.setValue("slabs", updatedBlocks);
+                      }}
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={8} className="text-right font-bold">
+                  Total Area (sqft): {calculateTotalSqft()}
+                </TableCell>
+              </TableRow>
+              <TableRow></TableRow>
+            </TableFooter>
+          </Table>
 
           <Button type="submit" disabled={isLoading}>
             Submit
