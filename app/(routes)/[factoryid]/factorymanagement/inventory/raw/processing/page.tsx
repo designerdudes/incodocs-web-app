@@ -276,7 +276,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
             </Tabs>
           </TabsContent>
           <TabsContent value="PolishingData">
-            <Tabs defaultValue="PolishingInchesWithOutAllowance" className="w-full" >
+            <Tabs defaultValue="PolishingInchesWithAllowance" className="w-full" >
               <div className='text-center mt-4'>
                 <TabsList className='gap-6'>
                   <TabsTrigger className='gap-2' value="PolishingInchesWithAllowance">Polishing Inches With Allowance</TabsTrigger>
