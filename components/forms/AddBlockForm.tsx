@@ -150,7 +150,7 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
 
     try {
       await putData(
-        `/factory-management/inventory/lot/update/${params.lotId}`,
+        `/factory-management/inventory/updatelotaddblocks/${params.lotId}`,
         submissionData
       );
       setIsLoading(false);
