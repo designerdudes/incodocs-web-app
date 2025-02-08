@@ -65,7 +65,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
                     table.getIsAllPageRowsSelected() ||
                     (table.getIsSomePageRowsSelected() && "indeterminate")
                 }
-                onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
+                onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
                 aria-label="Select all"
             />
         ),

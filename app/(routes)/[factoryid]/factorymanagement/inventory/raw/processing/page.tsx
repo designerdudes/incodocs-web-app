@@ -16,10 +16,9 @@ import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllow
 import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
-import { Block } from './components/incuttingcolumns';
+import { Block } from "./components/incuttingcolumns";
 
 export type FinishedMaterial = {
-
   _id: string; // Unique identifier
   slabNumber: number; // Sequential slab number
   blockNumber: number | null; // Block number, can be null
@@ -99,27 +98,28 @@ export default async function SlabsProcessingPage({ params }: Props) {
     return response.json();
   });
 
-  const res = await fetch(`http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + token
+  const res = await fetch(
+    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
     }
-  }).then(response => {
-    return response.json()
-  })
+  ).then((response) => {
+    return response.json();
+  });
 
-  const slabsData = res
+  const slabsData = res;
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
-
 
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-
   );
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
@@ -144,7 +144,9 @@ export default async function SlabsProcessingPage({ params }: Props) {
             title="Blocks and Slabs In Process"
           />
           <p className="text-muted-foreground text-sm mt-2">
-            On this page, each block is processed into slabs by cutting. Once cut, the slabs are polished to perfection and then added to the finished materials inventory, ready for further use or distribution.
+            On this page, each block is processed into slabs by cutting. Once
+            cut, the slabs are polished to perfection and then added to the
+            finished materials inventory, ready for further use or distribution.
           </p>
         </div>
       </div>
@@ -176,13 +178,15 @@ export default async function SlabsProcessingPage({ params }: Props) {
                 {Polished?.length}
               </Badge>
             </TabsTrigger>
-            <TabsList className='gap-6'>
-              <TabsTrigger className='gap-2' value="CuttingData">Cutting Data
+            <TabsList className="gap-6">
+              <TabsTrigger className="gap-2" value="CuttingData">
+                Cutting Data
                 <Badge className="text-bg-primary-foreground" variant="outline">
                   {slabsData?.length}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger className='gap-2' value="PolishingData">Polishing Data
+              <TabsTrigger className="gap-2" value="PolishingData">
+                Polishing Data
                 <Badge className="text-bg-primary-foreground" variant="outline">
                   {slabsData?.length}
                 </Badge>
@@ -212,7 +216,9 @@ export default async function SlabsProcessingPage({ params }: Props) {
               columns={Readyforpolishcolumns}
               data={readyForPolish.map((block: Block) => ({
                 ...block,
-                readyForPolishCount: block.SlabsId.filter((slab: any) => slab.status === "readyForPolish").length
+                readyForPolishCount: block.SlabsId.filter(
+                  (slab: any) => slab.status === "readyForPolish"
+                ).length,
               }))}
             />
           </TabsContent>
@@ -227,6 +233,12 @@ export default async function SlabsProcessingPage({ params }: Props) {
               searchKey="slabNumber"
               columns={inPolishingolumns}
               data={inPolishing}
+              tab="inPolishing"
+              bulkPolishTitle="Are you sure you want to mark these slabs as polished?"
+              bulkPOlishDescription="This will mark the selected slabs as polished, and they will not be recoverable."
+              bulkPolishIdName="_id"
+              updateRoute="/factory-management/inventory/addtrim-multipleslabs"
+              bulkPolisToastMessage=" selected slabs marked as polished"
             />
           </TabsContent>
           <TabsContent value="Polished">
@@ -242,33 +254,43 @@ export default async function SlabsProcessingPage({ params }: Props) {
             />
           </TabsContent>
           <TabsContent value="CuttingData">
-            <Tabs defaultValue="CuttingInchesWithAllowance" className="w-full" >
-              <div className='text-center mt-4'>
-                <TabsList className='gap-6'>
-                  <TabsTrigger className='gap-2' value="CuttingInchesWithAllowance">Cutting Inches With Allowance</TabsTrigger>
-                  <TabsTrigger className='gap-2' value="CuttinginchesWithOutAllowance">Cutting Inches WithOut Allowance</TabsTrigger>
+            <Tabs defaultValue="CuttingInchesWithAllowance" className="w-full">
+              <div className="text-center mt-4">
+                <TabsList className="gap-6">
+                  <TabsTrigger
+                    className="gap-2"
+                    value="CuttingInchesWithAllowance"
+                  >
+                    Cutting Inches With Allowance
+                  </TabsTrigger>
+                  <TabsTrigger
+                    className="gap-2"
+                    value="CuttinginchesWithOutAllowance"
+                  >
+                    Cutting Inches WithOut Allowance
+                  </TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="CuttingInchesWithAllowance">
                 <DataTable
-                  bulkDeleteIdName='_id'
-                  bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
-                  bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
-                  bulkDeleteToastMessage='Selected Slabs deleted successfully'
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+                  bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+                  bulkDeleteToastMessage="Selected Slabs deleted successfully"
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
-                  searchKey='slabNumber'
+                  searchKey="slabNumber"
                   columns={CuttingInchesWithAllowanceColumns}
                   data={slabsData}
                 />
               </TabsContent>
               <TabsContent value="CuttinginchesWithOutAllowance">
                 <DataTable
-                  bulkDeleteIdName='_id'
-                  bulkDeleteTitle='Are you sure you want to delete the selected Slabs?'
-                  bulkDeleteDescription='This will delete all the selected Slabs, and they will not be recoverable.'
-                  bulkDeleteToastMessage='Selected Slabs deleted successfully'
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+                  bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+                  bulkDeleteToastMessage="Selected Slabs deleted successfully"
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
-                  searchKey='slabNumber'
+                  searchKey="slabNumber"
                   columns={CuttingInchesWithOutAllowanceColumns}
                   data={slabsData}
                 />
@@ -276,30 +298,49 @@ export default async function SlabsProcessingPage({ params }: Props) {
             </Tabs>
           </TabsContent>
           <TabsContent value="PolishingData">
-            <Tabs defaultValue="PolishingInchesWithAllowance" className="w-full" >
-              <div className='text-center mt-4'>
-                <TabsList className='gap-6'>
-                  <TabsTrigger className='gap-2' value="PolishingInchesWithAllowance">Polishing Inches With Allowance</TabsTrigger>
-                  <TabsTrigger className='gap-2' value="PolishingInchesWithOutAllowance">Polishing Inches WithOut Allowance</TabsTrigger>
+            <Tabs
+              defaultValue="PolishingInchesWithAllowance"
+              className="w-full"
+            >
+              <div className="text-center mt-4">
+                <TabsList className="gap-6">
+                  <TabsTrigger
+                    className="gap-2"
+                    value="PolishingInchesWithAllowance"
+                  >
+                    Polishing Inches With Allowance
+                  </TabsTrigger>
+                  <TabsTrigger
+                    className="gap-2"
+                    value="PolishingInchesWithOutAllowance"
+                  >
+                    Polishing Inches WithOut Allowance
+                  </TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="PolishingInchesWithAllowance">
                 <DataTable
-                  bulkDeleteIdName='_id'
-                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
-                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
-                  bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
+                  bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
+                  bulkDeleteToastMessage="Selected slabs deleted successfully"
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
-                  searchKey='slabNumber' columns={polishingInchesWithAllowanceColumns} data={slabsData} />
+                  searchKey="slabNumber"
+                  columns={polishingInchesWithAllowanceColumns}
+                  data={slabsData}
+                />
               </TabsContent>
               <TabsContent value="PolishingInchesWithOutAllowance">
                 <DataTable
-                  bulkDeleteIdName='_id'
-                  bulkDeleteTitle='Are you sure you want to delete the selected slabs?'
-                  bulkDeleteDescription='This will delete the selected slabs, and they will not be recoverable.'
-                  bulkDeleteToastMessage='Selected slabs deleted successfully'
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
+                  bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
+                  bulkDeleteToastMessage="Selected slabs deleted successfully"
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
-                  searchKey='slabNumber' columns={polishingInchesWithOutAllowanceColumns} data={slabsData} />
+                  searchKey="slabNumber"
+                  columns={polishingInchesWithOutAllowanceColumns}
+                  data={slabsData}
+                />
               </TabsContent>
             </Tabs>
           </TabsContent>
