@@ -97,8 +97,7 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
-export function RawMaterialCreateNewForm({
-}: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any[]>([]);
@@ -289,11 +288,7 @@ export function RawMaterialCreateNewForm({
                       placeholder="Enter Operator Name"
                       type="string"
                       disabled={isLoading}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : undefined);
-                      }}
-                      value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -480,107 +475,105 @@ export function RawMaterialCreateNewForm({
                       name={`blocks.${index}.dimensions.weight.value`}
                       control={form.control}
                       render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                    <Input
-                      type="number"
-                      value={block.dimensions.weight.value}
-                      placeholder="Enter weight"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.weight.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={block.dimensions.weight.value}
+                              placeholder="Enter weight"
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].dimensions.weight.value =
+                                  parseFloat(e.target.value) || 0;
+                                setBlocks(updatedBlocks);
+                                form.setValue("blocks", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-               </TableCell>
+                  </TableCell>
                   <TableCell>
-                   <FormField
+                    <FormField
                       name={`blocks.${index}.dimensions.length.value`}
                       control={form.control}
                       render={({ field }) => (
-                    <FormItem>
-                    <FormControl>
-                    <Input
-                      type="number"
-                      value={block.dimensions.length.value}
-                      placeholder="Enter length"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.length.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
-                    />
-                     </FormControl>
-                    <FormMessage />
-                    </FormItem>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={block.dimensions.length.value}
+                              placeholder="Enter length"
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].dimensions.length.value =
+                                  parseFloat(e.target.value) || 0;
+                                setBlocks(updatedBlocks);
+                                form.setValue("blocks", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
-                      />
+                    />
                   </TableCell>
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.breadth.value`}
                       control={form.control}
                       render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                    <Input
-                      type="number"
-                      value={block.dimensions.breadth.value}
-                      placeholder="Enter breadth"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.breadth.value =
-                          parseFloat(e.target.value) || 0;
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
-                    />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                      )}
-                      />
-                  </TableCell>
-                      <TableCell>
-                        <FormField
-                          name={`blocks.${index}.dimensions.height.value`}
-                          control={form.control}
-                          render={({ field }) => (
                         <FormItem>
-                        <FormControl>
-                        <Input
-                          type="number"
-                          value={block.dimensions.height.value}
-                          placeholder="Enter height"
-                          onChange={(e) => {
-                            const updatedBlocks = [...blocks];
-                            updatedBlocks[index].dimensions.height.value =
-                              parseFloat(e.target.value) || 0;
-                            setBlocks(updatedBlocks);
-                            form.setValue("blocks", updatedBlocks);
-                           }}
-                          disabled={isLoading}
-                          
-                        />
-                        </FormControl>
-                        <FormMessage />
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={block.dimensions.breadth.value}
+                              placeholder="Enter breadth"
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].dimensions.breadth.value =
+                                  parseFloat(e.target.value) || 0;
+                                setBlocks(updatedBlocks);
+                                form.setValue("blocks", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
                         </FormItem>
-                        )}
-                        />
-
-                      </TableCell>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      name={`blocks.${index}.dimensions.height.value`}
+                      control={form.control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              value={block.dimensions.height.value}
+                              placeholder="Enter height"
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].dimensions.height.value =
+                                  parseFloat(e.target.value) || 0;
+                                setBlocks(updatedBlocks);
+                                form.setValue("blocks", updatedBlocks);
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
                   <TableCell>
                     {(
                       (block.dimensions.length.value *
@@ -592,9 +585,7 @@ export function RawMaterialCreateNewForm({
                   <TableCell>
                     <Input
                       type="string"
-
                       placeholder="BH 08 BH 0823"
-
                       disabled={isLoading}
                     />
                   </TableCell>
@@ -618,13 +609,13 @@ export function RawMaterialCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
-              <TableFooter>
-                 <TableRow> 
-                   <TableCell colSpan={8} className="text-right font-bold">
-                     Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
-                   </ TableCell>
-                 </TableRow>
-              </TableFooter>
+            <TableFooter>
+              <TableRow>
+                <TableCell colSpan={8} className="text-right font-bold">
+                  Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
           <Button type="submit" disabled={isLoading}>
             Submit

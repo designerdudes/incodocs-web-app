@@ -30,7 +30,7 @@ export default async function EditPage({ params }: Props) {
   ).then((response) => response.json());
 
   let BlockData = res;
-  console.log(BlockData);
+  console.log("This is Blockdata",BlockData);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -51,7 +51,9 @@ export default async function EditPage({ params }: Props) {
       <Separator orientation="horizontal" />
       <div className="container mx-auto py-10">
         {BlockData ? (
-          <EditSlabsForm blockId={BlockData._id} initialSlabs={BlockData.SlabsId || []} />
+          <EditSlabsForm blockId={BlockData._id} initialSlabs={BlockData.SlabsId || []} params={{
+            id: ""
+          }} />
         ) : (
           <div className="flex flex-col gap-2 items-center justify-center h-full">
             <p className="text-muted-foreground text-lg">No Category Found</p>
