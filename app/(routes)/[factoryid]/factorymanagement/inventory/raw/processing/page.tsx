@@ -119,8 +119,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-
-  );
+);
+console.log(readyForPolish)
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];

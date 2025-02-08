@@ -19,6 +19,7 @@ function Page() {
                 setLoading(true);
                 const data = await fetchData("/shipment/getAll");
                 setShipmentData(data);
+                console.log(setShipmentData)
             } catch (error) {
                 console.error("Error fetching shipment data:", error);
             } finally {
