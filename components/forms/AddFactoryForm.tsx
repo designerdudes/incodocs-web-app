@@ -38,6 +38,7 @@ const organizations = [
 
 function FactoryForm() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {

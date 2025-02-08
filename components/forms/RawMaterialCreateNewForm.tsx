@@ -288,11 +288,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       placeholder="Enter Operator Name"
                       type="string"
                       disabled={isLoading}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : undefined);
-                      }}
-                      value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

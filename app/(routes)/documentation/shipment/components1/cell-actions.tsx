@@ -29,7 +29,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
   const shipmentId = shipmentData._id; // Ensure ID is available
 
   // Delete shipment function
-  const deleteShipment = async () => {
+  const deleteShipment = async () => { 
     if (!shipmentId) {
       console.error("Error: Shipment ID is undefined.");
       toast.error("Error: Shipment ID is missing.");
@@ -65,6 +65,16 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
+
+              {/* View Shipment */}
+              <DropdownMenuItem
+            onClick={() => router.push(`./shipment/view/${shipmentId}`)}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Shipment
+          </DropdownMenuItem>
+
           {/* Edit Shipment */}
           <DropdownMenuItem
             onClick={() => router.push(`./shipment/edit`)}
@@ -74,14 +84,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
             Edit Shipment
           </DropdownMenuItem>
 
-          {/* View Shipment */}
-          <DropdownMenuItem
-            onClick={() => router.push(`./shipment/view`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <EyeIcon className="mr-2 h-4 w-4" />
-            View Shipment
-          </DropdownMenuItem>
+      
 
           {/* upload metrics */}
           <DropdownMenuItem

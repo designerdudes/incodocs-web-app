@@ -1,9 +1,13 @@
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
 import { cookies } from "next/headers";
 import CellAction from "./components/cell-actions";
+
+import FactoryForm from "@/components/forms/AddFactoryForm";
+import AddFactoryButton from "./components/AddFactoryButton";
 
 export interface Factory {
   _id: string;
@@ -39,6 +43,8 @@ export default async function FactoryPage() {
     console.error("Error fetching factories:", error);
   }
 
+
+
   return (
     <div className="max-w-2xl mx-10 p-6  ">
       <div className="topbar w-full flex items-center justify-between">
@@ -58,7 +64,7 @@ export default async function FactoryPage() {
           </p>
         </div>
       </div>
-      <div className="space-y-4 mt-4">
+      <div className="space-y-4 mt-4 mb-1">
         {factories.length > 0 ? (
           factories.map((factory) => (
             <div key={factory._id} className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
@@ -66,18 +72,27 @@ export default async function FactoryPage() {
                 <h2 className="text-lg font-medium">{factory.factoryName}</h2>
                 <p className="text-gray-500 text-sm">{factory.address.location}</p>
               </div>
-              <div className="flex gap-3">
-                <CellAction data={factory} />
+              <div className="flex   gap-3">
                 {/* <Link href={`/settings/factory/edit/${factory._id}`} className="text-blue-600 hover:underline">
                   Edit
                 </Link>  */}
               </div>
+              <CellAction data={factory} />
             </div>
           ))
         ) : (
           <p className="text-gray-500 text-center">No factories available.</p>
         )}
       </div>
+
+      <div>
+
+        {/* <button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white">Add factory</button> */}
+
+        <AddFactoryButton />
+      </div>
+
+
     </div>
   );
 }
