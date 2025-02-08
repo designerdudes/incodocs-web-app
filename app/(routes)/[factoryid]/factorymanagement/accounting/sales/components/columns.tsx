@@ -31,7 +31,7 @@ export const Columns: ColumnDef<Sales>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "title", // Corrected key
+        accessorKey: "customerName", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -48,14 +48,31 @@ export const Columns: ColumnDef<Sales>[] = [
         ),
     },
     {
-        accessorKey: "supplierGSTN",
-        header: "GST Number",
+        accessorKey: "customerGSTN", // Corrected key
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                GST Number
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
         cell: ({ row }) => (
             <div className="capitalize">
                 {row.original.customerGSTN}
             </div>
         ),
     },
+    // {
+    //     accessorKey: "supplierGSTN",
+    //     header: "GST Number",
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.customerGSTN}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "noOfSlabs",
         header: ({ column }) => (
