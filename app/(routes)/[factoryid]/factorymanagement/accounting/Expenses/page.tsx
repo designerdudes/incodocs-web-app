@@ -1,11 +1,14 @@
+"use client";
 import { DataTable } from '@/components/ui/data-table';
 import { Separator } from '@/components/ui/separator';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Heading from '@/components/ui/heading';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { expensecolumns } from './components/expensesColoums';
+import { expensecolumns } from './components/expensesColums';
+import { fetchData } from '@/axiosUtility/api';
+
 
 export type expense = {
   _id: string;
@@ -16,60 +19,27 @@ export type expense = {
 }
 
 
-export default async function SlabsProcessingPage() {
+function Page() {
+    const [expenseData, setExpenseData] = useState<any[]>([]); 
+    const [loading, setLoading] = useState(true);
 
-    // const cookieStore = cookies();
-    // const token = cookieStore.get('AccessToken')?.value || ""
-
-    // const blockRes = await fetch('http://localhost:4080/factory-management/inventory/raw/get', {
-    //     method: 'GET',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer ' + token
-    //     }
-    // }).then(response => {
-    //     return response.json()
-    // })
-
-    // const slabRes = await fetch('http://localhost:4080/factory-management/inventory/finished/get', {
-    //     method: 'GET',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         'Authorization': 'Bearer ' + token
-    //     }
-    // }).then(response => {
-    //     return response.json()
-    // })
-
-    // let Blockdata
-    // Blockdata = blockRes
-    // console.log(Blockdata)
-    // let Slabdata
-    // Slabdata = slabRes
-    // console.log("this is slabs data", Slabdata)
-
-    // const inCutting = Blockdata.filter((data: any) => data.status === 'inCutting')
-    // const readyForPolish = Blockdata.filter((data: any) => data.status === 'cut')
-    // const inPolishing = Slabdata.filter((data: any) => data.status === 'inPolishing')
-   
-    const data = [
-      {
-        _id: "1",
-        ExpenseName: "Ramesh Singh",
-        ExpenseValue: "1234",
-        GSTPercentage: 15,
-        ExpenseDate: "120",
-    },
-    {
-      _id: "2",
-      ExpenseName: "Suresh Singh",
-      ExpenseValue: "7890",
-      GSTPercentage: 15,
-      ExpenseDate: "120",
-  },
-    ]
-
-
+    useEffect(() => {
+        const fetchExpenseData = async () => { 
+            try {
+                setLoading(true);
+                const data = await fetchData("/expense/getall");
+                setExpenseData(data);
+                console.log("thi is data",expenseData)
+            } catch (error) {
+                console.error("Error fetching expense data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+    
+        fetchExpenseData();
+    }, []);
+    
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -99,9 +69,10 @@ export default async function SlabsProcessingPage() {
                             bulkDeleteToastMessage="Selected slabs deleted successfully"
                             searchKey="title"
                             columns={expensecolumns}
-                            data={data}
+                            data={expenseData}
                         />
             </div>
         </div>
     );
-};
+}
+export default Page;
