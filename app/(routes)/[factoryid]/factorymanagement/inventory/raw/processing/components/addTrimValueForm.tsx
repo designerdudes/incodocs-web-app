@@ -41,7 +41,7 @@ interface Props {
   params: { id: string };
 }
 
-function CardWithForm(params: Props) {
+function  CardWithForm(params: Props) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [slabData, setSlabData] = React.useState<Slab>();
   const form = useForm<z.infer<typeof formSchema>>({
