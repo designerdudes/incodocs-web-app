@@ -74,6 +74,8 @@ export default async function ViewFinishedPage({ params }: Props) {
       },
     }
   );
+  
+  
   const FinishedMaterial = await res.json();
 
   // console.log(FinishedMaterial);
@@ -83,6 +85,7 @@ export default async function ViewFinishedPage({ params }: Props) {
         FinishedMaterial.dimensions.height.value
       )
     : null;
+    
 
   function calculateDimensions(
     length: number,
@@ -107,7 +110,7 @@ export default async function ViewFinishedPage({ params }: Props) {
     <div>
       <div className="w-full h-full flex flex-col p-8">
         <div className="flex items-center justify-between mb-4">
-          <div className="topbar flex items-center justify-between w-full">
+          <div className="topbar flex items-center justify-between gap-4 w-full">
             <Link href="../">
               <Button variant="outline" size="icon" className="h-7 w-7">
                 <ChevronLeft className="h-4 w-4" />
@@ -299,7 +302,14 @@ export default async function ViewFinishedPage({ params }: Props) {
                         <TableCell>{adjustedDimensions?.heightInCm}</TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell>Total SQF</TableCell>
+                        <TableCell className="whitespace-nowrap">Total SQF</TableCell>
+                        <TableCell>
+                        {(
+                            ((FinishedMaterial?.dimensions?.length?.value *
+                              FinishedMaterial?.dimensions?.height?.value) /
+                              144) ).toFixed(2)}
+
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
@@ -419,15 +429,14 @@ export default async function ViewFinishedPage({ params }: Props) {
                           ).toFixed(2)}
                         </TableCell>
                       </TableRow>
-
                       <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Created At
-                        </TableCell>
+                        <TableCell className="whitespace-nowrap">Total SQF</TableCell>
                         <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
+                        {(
+                            ((FinishedMaterial?.dimensions?.length?.value *
+                              FinishedMaterial?.dimensions?.height?.value) /
+                              144) ).toFixed(2)}
+
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -441,6 +450,16 @@ export default async function ViewFinishedPage({ params }: Props) {
                               144) *
                             3.75
                           ).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Category Created At
+                        </TableCell>
+                        <TableCell>
+                          {moment(FinishedMaterial.createdAt).format(
+                            "YYYY-MM-DD"
+                          )}
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -534,6 +553,16 @@ export default async function ViewFinishedPage({ params }: Props) {
                           {(
                             FinishedMaterial?.dimensions?.height?.value * 2.54
                           ).toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">Total SQF</TableCell>
+                        <TableCell>
+                        {(
+                            ((FinishedMaterial?.dimensions?.length?.value *
+                              FinishedMaterial?.dimensions?.height?.value) /
+                              144) ).toFixed(2)}
+
                         </TableCell>
                       </TableRow>
                       <TableRow>
