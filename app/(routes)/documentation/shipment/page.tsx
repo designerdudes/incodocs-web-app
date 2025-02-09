@@ -50,7 +50,13 @@ function Page() {
                 </Link>
             </div>
             <Separator className="my-2" />
-        <DataTable searchKey="" data={shipmentData} columns={columns} />
+        <DataTable 
+        bulkDeleteIdName="_id"
+        bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
+        bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
+        bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+        deleteRoute="/shipment/delete/all"
+        searchKey="" data={shipmentData} columns={columns} />
         
         </div>
     );
