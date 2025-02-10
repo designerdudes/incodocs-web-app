@@ -63,8 +63,8 @@ export function AppearanceForm() {
                     control={form.control}
                     name="theme"
                     render={({ field }) => (
-                        <FormItem className="space-y-1">
-                            <FormLabel>Theme</FormLabel>
+                        <FormItem className="space-y-1 ml-9">
+                            <FormLabel className="text-2xl font-medium mb-1e">Theme</FormLabel>
                             <FormDescription>
                                 Select the theme for the dashboard.
                             </FormDescription>
@@ -131,7 +131,7 @@ export function AppearanceForm() {
                     )}
                 />
 
-                <Button type="submit">Update preferences</Button>
+                <Button type="submit" className="ml-9">Update preferences</Button>
             </form>
         </Form>
     )
