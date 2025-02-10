@@ -15,6 +15,7 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { Sales } from "../page";
+import EditSalesForm from "./editSales"
 
 
 interface Props {
@@ -62,7 +63,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = "Edit Lot Details"; // Set modal title
-                            // GlobalModal.children = <EditLotForm />; // Render Edit Form
+                            GlobalModal.children = <EditSalesForm params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >

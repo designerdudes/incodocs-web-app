@@ -189,6 +189,10 @@ const formSchema = z.object({
       .min(1, { message: "Enter some details" })
       .optional(),
     actualBuyer: z.string().min(3, { message: "Required name" }).optional(),
+    commercialInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
   }),
 
   blDetails: z.object({
@@ -245,61 +249,36 @@ export function NewShipmentForm() {
     },
   ];
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-
-    defaultValues: {
-      bookingDetails: {
-        containerNumber: "",
-        portOfLoading: "",
-        destinationPort: "",
-        vesselSailingDate: new Date(),
-        vesselArrivingDate: new Date(),
-        truckNumber: "",
-        truckDriverNumber: "",
-      },
-      shippingDetails: {
-        shippingLine: "",
-        forwarder: "",
-        forwarderInvoice: null,
-        valueOfForwarderInvoice: "",
-        transporter: "",
-        transporterInvoice: null,
-        valueOfTransporterInvoice: "",
-      },
-      shippingBillDetails: {
-        shippingBillNumber: "",
-        shippingBillDate: new Date(),
-        uploadShippingBill: null,
-      },
-      supplierDetails: {
-        supplierName: "",
-        actualSupplierName: "",
-        supplierGSTIN: "",
-        supplierInvoiceNumber: "",
-        supplierInvoiceDate: new Date(),
-        supplierInvoiceValueWithOutGST: "",
-        supplierInvoiceValueWithGST: "",
-        uploadSupplierInvoice: null,
-        actualSupplierInvoice: null,
-        actualSupplierInvoiceValue: "",
-      },
-      saleInvoiceDetails: {
-        commercialInvoiceNumber: "",
-        commercialInvoiceDate: new Date(),
-        consigneeDetails: "",
-        actualBuyer: "",
-      },
-      blDetails: {
-        blNumber: "",
-        blDate: new Date(),
-        telexDate: new Date(),
-        uploadBL: null,
-      },
-    },
   });
 
-  console.log("form values:", form.getValues());
+  const handleFileUpload = async (file: File | undefined): Promise<string | undefined> => {
+    if (!file) return undefined;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("File upload failed");
+      }
+
+      const data = await response.json();
+      return data.filePath || undefined;
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      return undefined;
+    }
+  };
+
+
+  // console.log("form values:", form.getValues());
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -312,40 +291,63 @@ export function NewShipmentForm() {
         "shippingDetails.transporterInvoice",
         "shippingBillDetails.uploadShippingBill",
         "supplierDetails.uploadSupplierInvoice",
-        "supplierDetails.actualSupplierInvoice", // Added this field
+        "supplierDetails.actualSupplierInvoice",
+        "saleInvoiceDetails.commercialInvoice",
         "blDetails.uploadBL",
-      ];
+      ] as const; // Mark it as a tuple to avoid indexing issues
 
-      const uploadedFiles: Record<string, string> = {};
+      const uploadedFiles: Record<string, string | undefined> = {};
 
+      // Upload files
       for (const field of uploadFields) {
-        const file = values[field];
+        // Use `lodash.get` for safe access or split manually
+        const pathSegments = field.split(".");
+        let file: any = values;
+
+        for (const segment of pathSegments) {
+          if (file && typeof file === "object") {
+            file = file[segment];
+          } else {
+            file = undefined;
+            break;
+          }
+        }
 
         if (file instanceof File) {
-          const formData = new FormData();
-          formData.append("file", file);
-
-          // Upload file to the server
-          const uploadResponse = await postData(
-            "/shipmentdocsfile/upload",
-            formData
-          );
-
-          if (uploadResponse?.filePath) {
-            uploadedFiles[field] = uploadResponse.filePath;
+          const filePath = await handleFileUpload(file);
+          if (filePath) {
+            uploadedFiles[field] = filePath;
           } else {
             throw new Error(`Failed to upload file: ${field}`);
           }
         }
       }
 
-      // Merge uploaded file URLs into values
+      // Now merge `uploadedFiles` back into the `values` object
       const updatedValues = {
         ...values,
-        ...uploadedFiles, // Add uploaded file paths
-        organization,
-        status: "active",
+        shippingDetails: {
+          ...values.shippingDetails,
+          forwarderInvoice: uploadedFiles["shippingDetails.forwarderInvoice"] || undefined,
+          transporterInvoice: uploadedFiles["shippingDetails.transporterInvoice"] || undefined,
+        },
+        shippingBillDetails: {
+          ...values.shippingBillDetails,
+          uploadShippingBill: uploadedFiles["shippingBillDetails.uploadShippingBill"] || undefined,
+        },
+        supplierDetails: {
+          ...values.supplierDetails,
+          uploadSupplierInvoice: uploadedFiles["supplierDetails.uploadSupplierInvoice"] || undefined,
+          actualSupplierInvoice: uploadedFiles["supplierDetails.actualSupplierInvoice"] || undefined,
+        },
+        blDetails: {
+          ...values.blDetails,
+          uploadBL: uploadedFiles["blDetails.uploadBL"] || undefined,
+        },
       };
+
+      console.log("Final Payload:", updatedValues);
+
 
       // Submit final form data
       const res = await postData("/shipment/add", updatedValues);
@@ -398,8 +400,9 @@ export function NewShipmentForm() {
                       placeholder="eg. MRKU6998040"
                       className=" uppercase"
                       type="string"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -417,8 +420,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. CHENNAI"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)}
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)}
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -436,8 +440,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. UMM QASAR"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -528,8 +533,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. TN01BQ2509"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -548,8 +554,9 @@ export function NewShipmentForm() {
                       type="tel"
                       placeholder="eg. TN01BQ2509"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -572,8 +579,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. MAERSK"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -591,8 +599,10 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VTRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)}
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)}
+                      // value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -612,7 +622,16 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }}
 
                       />
                     </FormControl>
@@ -644,8 +663,10 @@ export function NewShipmentForm() {
                         maximumFractionDigits: 0,
                         currency: "INR",
                       }).format(122394)}`}
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -663,8 +684,10 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VS TRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -683,8 +706,8 @@ export function NewShipmentForm() {
                         className="cursor-pointer "
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                        
+                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)}
+
                       />
                     </FormControl>
                     <Button
@@ -714,8 +737,10 @@ export function NewShipmentForm() {
                         maximumFractionDigits: 0,
                         currency: "INR",
                       }).format(123000)}`}
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -738,8 +763,16 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                        
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     <Button
@@ -767,8 +800,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. 5151992"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)}
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)}
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -843,8 +877,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VTRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -862,8 +897,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VTRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -882,8 +918,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. 33AAACV1234A1ZV"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -901,8 +938,9 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. 5151992"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      // onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
+                      // value={field.value}
+                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -957,8 +995,8 @@ export function NewShipmentForm() {
                         maximumFractionDigits: 0,
                         currency: "INR",
                       }).format(123000)}`}
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -979,8 +1017,8 @@ export function NewShipmentForm() {
                         maximumFractionDigits: 0,
                         currency: "INR",
                       }).format(123000)}`}
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -999,8 +1037,16 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                    
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     <Button
@@ -1027,7 +1073,7 @@ export function NewShipmentForm() {
                       <Input
                         disabled={isLoading}
                         type="file"
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}                />
+                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)} />
                     </FormControl>
                     <Button
                       type="button"
@@ -1052,8 +1098,8 @@ export function NewShipmentForm() {
                     <Input
                       disabled={isLoading}
                       placeholder="eg : 123456"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -1076,10 +1122,38 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. 5151992"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="saleInvoiceDetails.commercialInvoice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>commercial Invoice</FormLabel>
+                  <div className="flex items-center gap-2">
+                    <FormControl>
+                      <Input
+                        className="cursor-pointer"
+                        type="file"
+                        disabled={isLoading}
+                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)}
+                      />
+                    </FormControl>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="text-white bg-blue-500 hover:bg-blue-600"
+                    >
+                      <UploadCloud className="w-5 h-5 mr-2" />
+                      Upload
+                    </Button>
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -1129,8 +1203,8 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VTRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -1148,8 +1222,8 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. VTRANS"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -1172,8 +1246,8 @@ export function NewShipmentForm() {
                       disabled={isLoading}
                       placeholder="eg. 5151992"
                       className=" uppercase"
-                      onChange={(e) => field.onChange(e.target.value)} // Remove parseFloat
-                      value={field.value}
+                      {...field}
+
                     />
                   </FormControl>
                   <FormMessage />
@@ -1260,8 +1334,16 @@ export function NewShipmentForm() {
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                      />
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }} />
                     </FormControl>
                     <Button
                       type="button"
