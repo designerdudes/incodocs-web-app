@@ -59,6 +59,9 @@ export default function EditSlabForm({ id }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: { slabs },
   });
+  useEffect(() => {
+    form.reset({ slabs });
+  }, [slabs]);
 
   useEffect(() => {
     const fetchSlabData = async () => {
@@ -81,72 +84,72 @@ export default function EditSlabForm({ id }: Props) {
       await axios.delete(
         `http://localhost:4080/factory-management/inventory/finished/delete/${slabId}`
       );
+
+      // ✅ Update state to remove deleted slab
       setSlabs((prev) => prev.filter((slab) => slab._id !== slabId));
+      form.setValue(
+        "slabs",
+        slabs.filter((slab) => slab._id !== slabId) // ✅ Ensure form reflects state update
+      );
+
       toast.success("Slab Deleted Successfully");
     } catch (error) {
       console.error("Error deleting slab:", error);
+      toast.error("Failed to delete slab.");
     }
   };
 
   const handleSubmit = async (values: any) => {
     try {
-
       setIsLoading(true);
 
-      const newSlabs = values.slabs.filter((slab: any) => !slab._id);
       const updatedSlabs = values.slabs.filter((slab: any) => slab._id);
 
-
-      if (newSlabs.length > 0) {
-        const newSlabsPayload = {
-          status: "cut",
-          slabs: newSlabs.map((slab: any) => ({
-            productName: slab.productName || "steps",
-            quantity: slab.quantity || 1,
-            dimensions: {
-              length: { value: slab.dimensions.length.value, units: "inch" },
-              height: { value: slab.dimensions.height.value, units: "inch" },
-            },
-            status: slab.status || "readyForPolish",
-            inStock: slab.inStock ?? true,
-          })),
-        };
-
-        await axios.put(
-          "http://localhost:4080/factory-management/inventory/updateblockaddslab/67a34ab253007369e0d97126",
-          newSlabsPayload
-        );
+      // ✅ Check if values actually changed before updating
+      if (JSON.stringify(updatedSlabs) === JSON.stringify(slabs)) {
+        toast("No changes detected.");
+        setIsLoading(false);
+        return;
       }
 
       if (updatedSlabs.length > 0) {
-        const updatedSlabsPayload = {
-          slabNumbers: updatedSlabs.map((slab: any) => slab.slabNumber),
+        const updatedSlabsPayload = updatedSlabs.map((slab: any) => ({
+          slabNumber: slab.slabNumber,
           dimensions: {
-            length: {
-              value: updatedSlabs[0].dimensions.length.value,
-              units: "inch",
-            },
-            height: {
-              value: updatedSlabs[0].dimensions.height.value,
-              units: "inch",
-            },
+            length: { value: slab.dimensions.length.value || 0, units: "inch" },
+            height: { value: slab.dimensions.height.value || 0, units: "inch" },
           },
-        };
+        }));
 
-        console.log("Updated Slabs Payload:", updatedSlabsPayload); // Debugging
+        console.log("🟡 Sending Updated Slabs Payload:", updatedSlabsPayload);
 
-        await axios.put(
+        const updateResponse = await axios.put(
           "http://localhost:4080/factory-management/inventory/updateMultipleSlabsValue",
-          updatedSlabsPayload
+          { slabs: updatedSlabsPayload }
         );
-      }
 
-      toast.success("Slabs Added/Updated Successfully");
-      setIsLoading(false);
-      router.back();
-    } catch (error) {
-      console.error("Error updating slabs:", error);
-      toast.error("Failed to update slabs");
+        console.log("✅ Update Response Data:", updateResponse.data);
+
+        if (updateResponse.status === 200) {
+          toast.success("Slabs Updated Successfully");
+
+          // ✅ Update UI state with new slabs from API response
+          setSlabs(updateResponse.data.updatedSlabs || updatedSlabs);
+
+          // ✅ Ensure form reflects new state
+          form.reset({
+            slabs: updateResponse.data.updatedSlabs || updatedSlabs,
+          });
+
+          // ✅ Prevent unnecessary page navigation after deleting a slab
+        } else {
+          throw new Error("Unexpected API response");
+        }
+      }
+    } catch (error: any) {
+      console.error("❌ Error updating slabs:", error);
+      toast.error("Failed to update slabs. Please try again.");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -206,32 +209,29 @@ export default function EditSlabForm({ id }: Props) {
           <div className="flex gap-4 mt-4">
             <Button
               type="button"
-              onClick={() =>
-                setSlabs([
-                  ...slabs,
-                  {
-                    _id: Date.now().toString(),
-                    slabNumber: slabs.length + 1,
-                    dimensions: {
-                      height: { value: 0, units: "inch" },
-                      length: { value: 0, units: "inch" },
-                    },
+              onClick={() => {
+                const newSlab = {
+                  _id: undefined, // No _id for new slabs
+                  slabNumber: slabs.length + 1,
+                  productName: "steps",
+                  quantity: 1,
+                  status: "readyForPolish",
+                  inStock: true,
+                  dimensions: {
+                    height: { value: 0, units: "inch" },
+                    length: { value: 0, units: "inch" },
                   },
-                ])
-              }
+                };
+
+                const updatedSlabs = [...slabs, newSlab];
+                setSlabs(updatedSlabs);
+                form.setValue("slabs", updatedSlabs); // 🔥 Sync form state with slabs
+              }}
             >
               Add Slab
             </Button>
-            <Button
-              type="button"
-              className="bg-blue-500 text-white"
-              disabled={isLoading}
-              onClick={() => {
-                form.handleSubmit((values) => {
-                  handleSubmit(values); // Call handleSubmit manually
-                })();
-              }}
-            >
+
+            <Button type="submit" disabled={isLoading}>
               {isLoading && (
                 <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
               )}
