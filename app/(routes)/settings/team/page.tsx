@@ -1,242 +1,99 @@
-"use client";
-import React, { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useGlobalModal } from "@/hooks/GlobalModal";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Icons } from "@/components/ui/icons";
-import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
+import { cookies } from "next/headers";
+import CellAction from "./components/cell-actionbutton";
+import { string } from "zod";
+import { Key, ReactNode } from "react";
 
-// Factory Form Schema
-const formSchema = z.object({
-  factoryName: z.string().min(1, { message: "Factory Name is required" }),
-  organizationId: z
-    .string()
-    .min(1, { message: "Organization must be selected" }),
-  address: z.object({
-    location: z.string().min(1, { message: "Location is required" }),
-    pincode: z
-      .string()
-      .min(6, { message: "Pincode must be at least 6 characters" }),
-  }),
-});
+export interface Factory {
+  _id: Key | null | undefined;
+  TeamMemberName: ReactNode;
+  contactPerson: string ;
+  Email : string;
+  phoneNumber: number;
+  AlternatePhone: number;
+  factoryNam: string;
+  EmloyeeId: number;
+  role: string;
+  address: {
+    location: string;
+    pincode: string;
+  };
+}
 
-function FactoryForm() {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      factoryName: "",
-      organizationId: "",
-      address: {
-        location: "",
-        pincode: "",
-      },
-    },
-  });
+export default async function TeamMemberPage() {
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  // let factories: Factory[] = [];
+  // try {
+  //   const res = await fetch("http://localhost:4080/factory/getAll", {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: "Bearer " + token,
+  //     },
+  //   });
+
+  //   if (!res.ok) {
+  //     throw new Error("Failed to fetch factories");
+  //   }
+  //   factories = await res.json();
+  // } catch (error) {
+  //   console.error("Error fetching factories:", error);
+  // }
+
+
 
   return (
-    <div className="w-[700px] mx-5 p-6  ">
-      <div className="topbar w-full flex items-center justify-between mb-2">
+    <div className="max-w-2xl mx-10 p-6 ">
+      <div className="topbar w-full flex items-center justify-between">
         <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
           </Button>
         </Link>
-        <div className="flex-1 mb-3">
-          <Heading className="leading-tight" title="Team Member Management" />
+        <div className="flex-1">
+          <Heading
+            className="leading-tight"
+            title="TeamMember Settings"
+          />
           <p className="text-muted-foreground text-sm">
-            Fill in the form below to edit a team memeber details.
+          edit a team memeber details.
           </p>
         </div>
       </div>
+      <div className="space-y-4 mt-4 mb-1">
+        {/* {factories.length > 0 ? (
+          factories.map((Member) => ( */}
+            <div  className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
+              <div>
+                <h2 className="text-lg font-medium">ramesh</h2>
+                <p className="text-gray-500 text-sm">hyd</p>
+              </div>
 
-      <Form {...form}>
-       <div className="space-y-4 mt-10">
-          <h2 className="text-lg font-semibold">Contact Information</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Contact Person */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium">
-                Contact Person
-              </label>
-              <input
-                type="text"
-                placeholder="Enter contact person's name"
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-              />
+              <div className="flex   gap-3">
+                {/* <Link href={`/settings/Member/edit/${Member._id}`} className="text-blue-600 hover:underline">
+                  Edit
+                </Link>  */}
+              </div>
+              <CellAction data={} />
             </div>
+          {/* )) */}
+        {/* ) : (
+          <p className="text-gray-500 text-center">No TeamMember available.</p>
+        )} */}
+      </div>
 
-            {/* Email */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium">Email</label>
-              <input
-                type="email"
-                placeholder="Enter email"
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-              />
-            </div>
+      <div>
 
-            {/* Phone Number */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium">Phone Number</label>
-              <input
-                type="tel"
-                placeholder="Enter phone number"
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-              />
-            </div>
+        {/* <button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white">Add Member</button> */}
 
-            {/* Alternate Phone Number */}
-            <div className="space-y-1">
-              <label className="block text-sm font-medium">
-                Alternate Phone
-              </label>
-              <input
-                type="tel"
-                placeholder="Enter alternate phone number"
-                className="w-full border border-gray-300 rounded-md p-2 focus:ring focus:ring-blue-300"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          {/* Factory Name */}
-          <FormField
-            name="factoryName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Name
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: Factory A"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            name="address.location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Emloyee Id
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eslo123"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Organization Dropdown */}
-          <FormField
-            name="organizationId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Role
-                </FormLabel>
-                <FormControl>
-                  <Select>
-                    <SelectTrigger className="border-gray-300 focus:ring-blue-500 focus:border-blue-500">
-                      <SelectValue placeholder="Select an organization" />
-                    </SelectTrigger>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Address Fields */}
-          <FormField
-            name="address.location"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Position
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: 343 Main Street"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Pincode */}
-          <FormField
-            name="address.pincode"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Pincode
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    className="w-full border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Eg: 500081"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      </Form>
-      {/* Submit Button */}
-      <div className="mt-6">
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white hover:bg-blue-700 focus:ring focus:ring-blue-300"
-          >
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Submit
-          </Button>
-        </div>
-    </div>
+        {/* <AddTeamMembers /> */}
+      </div>
+   </div>
   );
 }
-
-export default FactoryForm;
