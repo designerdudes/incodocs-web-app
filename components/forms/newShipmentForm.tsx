@@ -255,37 +255,42 @@ export function NewShipmentForm() {
 
   const handleFileUpload = async (file: File | undefined): Promise<string | undefined> => {
     if (!file) return undefined;
-
+  
     const formData = new FormData();
     formData.append("file", file);
-
+  
     try {
       const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
-
+  
+      // Ensure the response is OK before parsing JSON
       if (!response.ok) {
-        throw new Error("File upload failed");
+        throw new Error(`File upload failed: ${response.statusText}`);
       }
-
-      const data = await response.json();
-      return data.filePath || undefined;
+  
+      const result = await response.json(); // Parse once
+      console.log("✅ File Upload Response:", result);
+  
+      return result.filePath || undefined; // Ensure correct key
     } catch (error) {
-      console.error("Error uploading file:", error);
+      console.error("❌ Error uploading file:", error);
+      toast.error("File upload failed");
       return undefined;
     }
   };
+  
+  
 
 
   // console.log("form values:", form.getValues());
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log("Form submitted with values:", values);
-
+    console.log("📨 Form submitted with values:", values);
+  
     try {
-      // Fields that require file uploads
       const uploadFields = [
         "shippingDetails.forwarderInvoice",
         "shippingDetails.transporterInvoice",
@@ -294,75 +299,87 @@ export function NewShipmentForm() {
         "supplierDetails.actualSupplierInvoice",
         "saleInvoiceDetails.commercialInvoice",
         "blDetails.uploadBL",
-      ] as const; // Mark it as a tuple to avoid indexing issues
-
+      ] as const; // Ensure correct type inference
+  
       const uploadedFiles: Record<string, string | undefined> = {};
-
-      // Upload files
-      for (const field of uploadFields) {
-        // Use `lodash.get` for safe access or split manually
-        const pathSegments = field.split(".");
-        let file: any = values;
-
-        for (const segment of pathSegments) {
-          if (file && typeof file === "object") {
-            file = file[segment];
-          } else {
-            file = undefined;
-            break;
-          }
-        }
-
-        if (file instanceof File) {
-          const filePath = await handleFileUpload(file);
-          if (filePath) {
-            uploadedFiles[field] = filePath;
-          } else {
-            throw new Error(`Failed to upload file: ${field}`);
-          }
-        }
-      }
-
-      // Now merge `uploadedFiles` back into the `values` object
+  
+      // Upload files sequentially
+      // for (const field of uploadFields) {
+      //   // Extract file from nested object structure
+      //   const pathSegments = field.split(".");
+      //   let file: any = values;
+  
+      //   for (const segment of pathSegments) {
+      //     if (file && typeof file === "object") {
+      //       file = file[segment];
+      //     } else {
+      //       file = undefined;
+      //       break;
+      //     }
+      //   }
+  
+      //   if (file instanceof File) {
+      //     console.log(`📤 Uploading file for: ${field}`, file);
+  
+      //     const filePath = await handleFileUpload(file);
+  
+      //     if (filePath) {
+      //       uploadedFiles[field] = filePath;
+      //       console.log(`✅ File uploaded successfully: ${field} → ${filePath}`);
+      //     } else {
+      //       console.error(`❌ File upload failed for: ${field}`);
+      //       toast.error(`File upload failed: ${field}`);
+      //       return; // Stop submission if any upload fails
+      //     }
+      //   }
+      // }
+  
+      // ✅ Build the updated values with uploaded file URLs
       const updatedValues = {
         ...values,
         shippingDetails: {
           ...values.shippingDetails,
-          forwarderInvoice: uploadedFiles["shippingDetails.forwarderInvoice"] || undefined,
-          transporterInvoice: uploadedFiles["shippingDetails.transporterInvoice"] || undefined,
+          forwarderInvoice: uploadedFiles["shippingDetails.forwarderInvoice"],
+          transporterInvoice: uploadedFiles["shippingDetails.transporterInvoice"],
         },
         shippingBillDetails: {
           ...values.shippingBillDetails,
-          uploadShippingBill: uploadedFiles["shippingBillDetails.uploadShippingBill"] || undefined,
+          uploadShippingBill: uploadedFiles["shippingBillDetails.uploadShippingBill"],
         },
         supplierDetails: {
           ...values.supplierDetails,
-          uploadSupplierInvoice: uploadedFiles["supplierDetails.uploadSupplierInvoice"] || undefined,
-          actualSupplierInvoice: uploadedFiles["supplierDetails.actualSupplierInvoice"] || undefined,
+          uploadSupplierInvoice: uploadedFiles["supplierDetails.uploadSupplierInvoice"],
+          actualSupplierInvoice: uploadedFiles["supplierDetails.actualSupplierInvoice"],
+        },
+        saleInvoiceDetails: {
+          ...values.saleInvoiceDetails,
+          commercialInvoice: uploadedFiles["saleInvoiceDetails.commercialInvoice"],
         },
         blDetails: {
           ...values.blDetails,
-          uploadBL: uploadedFiles["blDetails.uploadBL"] || undefined,
+          uploadBL: uploadedFiles["blDetails.uploadBL"],
         },
+        organization, // Ensure organization is included
       };
-
-      console.log("Final Payload:", updatedValues);
-
-
-      // Submit final form data
+  
+      console.log("📦 Final Payload before submission:", updatedValues);
+  
+      // ✅ Submit final form data
       const res = await postData("/shipment/add", updatedValues);
-      console.log("Response:", res);
-
+      console.log("✅ Response:", res);
+  
       toast.success("Shipment created successfully");
-      router.push("/shipment");
+      router.push("./");
     } catch (error) {
-      console.error("Error creating shipment:", error);
+      console.error("🔥 Error creating shipment:", error);
       toast.error("Error creating shipment");
     } finally {
       setIsLoading(false);
       router.refresh();
     }
   }
+  
+  
 
   return (
     <Form {...form}>
@@ -610,7 +627,7 @@ export function NewShipmentForm() {
               )}
             />
 
-            <FormField
+<FormField
               control={form.control}
               name="shippingDetails.forwarderInvoice"
               render={({ field }) => (
@@ -619,7 +636,7 @@ export function NewShipmentForm() {
                   <div className="flex items-center gap-2">
                     <FormControl>
                       <Input
-                        className="cursor-pointer"
+                        className="cursor-pointer "
                         type="file"
                         disabled={isLoading}
                         onChange={async (e) => {
@@ -631,8 +648,8 @@ export function NewShipmentForm() {
                               field.onChange(uploadedFilePath);
                             }
                           }
-                        }}
-
+                        }
+                      }
                       />
                     </FormControl>
                     <Button
@@ -706,8 +723,17 @@ export function NewShipmentForm() {
                         className="cursor-pointer "
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)}
-
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }
+                      }
                       />
                     </FormControl>
                     <Button
@@ -1070,10 +1096,21 @@ export function NewShipmentForm() {
                   <FormLabel>Actual Supplier Invoice</FormLabel>
                   <div className="flex items-center gap-2">
                     <FormControl>
-                      <Input
-                        disabled={isLoading}
+                    <Input
+                        className="cursor-pointer"
                         type="file"
-                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)} />
+                        disabled={isLoading}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }}
+                      />
                     </FormControl>
                     <Button
                       type="button"
@@ -1138,11 +1175,20 @@ export function NewShipmentForm() {
                   <FormLabel>commercial Invoice</FormLabel>
                   <div className="flex items-center gap-2">
                     <FormControl>
-                      <Input
+                    <Input
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
-                        onChange={(e) => field.onChange(e.target.files?.[0] || undefined)}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0] || undefined;
+                          field.onChange(file);
+                          if (file) {
+                            const uploadedFilePath = await handleFileUpload(file);
+                            if (uploadedFilePath) {
+                              field.onChange(uploadedFilePath);
+                            }
+                          }
+                        }}
                       />
                     </FormControl>
                     <Button
