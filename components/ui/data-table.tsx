@@ -54,24 +54,7 @@ import {
 import { Icons } from "./icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-
-const formSchema = z.object({
-  trim: z.object({
-    length: z.object({
-      value: z
-        .number()
-        .positive({ message: "Length must be greater than zero" }),
-      units: z.literal("inch"),
-    }),
-    height: z.object({
-      value: z
-        .number()
-        .positive({ message: "Height must be greater than zero" }),
-      units: z.literal("inch"),
-    }),
-  }),
-  status: z.literal("polished"),
-});
+import MarkMultipleSlabsPolishForm from "./MarkMultipleSlabsPolishForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -132,16 +115,6 @@ export function DataTable<TData, TValue>({
       columnVisibility,
     },
   });
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      trim: {
-        height: { value: 0, units: "inch" },
-        length: { value: 0, units: "inch" },
-      },
-      status: "polished",
-    },
-  });
 
   const modal = useGlobalModal();
 
@@ -172,49 +145,6 @@ export function DataTable<TData, TValue>({
     } catch (error) {
       console.error("Error deleting data:", error);
       toast.error("Error deleting data. Please try again.");
-    }
-  };
-
-  const handleBulkPolish = async (values: z.infer<typeof formSchema>) => {
-    const selectedIds = table
-      .getFilteredSelectedRowModel()
-      .rows.map((row: any) => row.original[bulkPolishIdName as string]);
-
-    if (selectedIds.length === 0) {
-      toast.error("No slabs selected to polish.");
-      return;
-    }
-
-    // Ensure values are passed correctly
-    // console.log("Form Values:", values);
-    // console.log("Selected IDs:", selectedIds);
-
-    try {
-      const res = await putData(updateRoute as string, {
-        ids: selectedIds, // ✅ Correct key name
-        ...values,
-      });
-      // console.log(res)
-      toast.success(
-        bulkPolisToastMessage ?? "Selected slabs marked as polished!"
-      );
-
-      // Clear selection after polishing
-      table.resetRowSelection();
-
-      // Refresh data (if needed, but state update is preferable)
-      window.location.reload();
-
-      modal.onClose();
-    } catch (error: any) {
-      console.error("Error marking slabs as polished:", error);
-
-      if (error.response) {
-        console.error("Response data:", error.response.data);
-        console.error("Response status:", error.response.status);
-      }
-
-      toast.error("Error processing request. Please try again.");
     }
   };
 
@@ -360,78 +290,19 @@ export function DataTable<TData, TValue>({
                 variant="destructive"
                 className="ml-2 hover:bg-green-400 bg-green-500"
                 onClick={() => {
-                  modal.title = bulkPolishTitle ?? "Polish Selected Slabs?";
+                  modal.title =
+                    bulkPolishTitle ?? "Enter triming Values of Slab:";
                   modal.description =
                     bulkPOlishDescription ??
                     "Are you sure you want to polish these slabs? This action cannot be undone.";
-
                   modal.children = (
-                    <Form {...form}>
-                      <form
-                        onSubmit={form.handleSubmit(handleBulkPolish)}
-                        className="grid gap-4"
-                      >
-                        <div className="grid grid-cols-2 gap-4">
-                          {/* Height Input */}
-                          <FormField
-                            control={form.control}
-                            name="trim.height.value"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Height (inches)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Eg: 54"
-                                    type="number"
-                                    {...field}
-                                    value={field.value || ""}
-                                    onChange={(e) =>
-                                      field.onChange(+e.target.value)
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          {/* Length Input */}
-                          <FormField
-                            control={form.control}
-                            name="trim.length.value"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Length (inches)</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    placeholder="Eg: 120"
-                                    type="number"
-                                    {...field}
-                                    value={field.value || ""}
-                                    onChange={(e) =>
-                                      field.onChange(+e.target.value)
-                                    }
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        {/* Submit Button */}
-                        <Button
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full"
-                        >
-                          {isLoading && (
-                            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                          )}
-                          Submit
-                        </Button>
-                      </form>
-                    </Form>
+                    <MarkMultipleSlabsPolishForm
+                      table={table}
+                      bulkPolishIdName={bulkPolishIdName}
+                      updateRoute={updateRoute}
+                      bulkPolisToastMessage={bulkPolisToastMessage}
+                    />
                   );
-
                   modal.onOpen();
                 }}
               >
