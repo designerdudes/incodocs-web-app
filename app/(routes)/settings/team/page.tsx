@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import CellAction from "./components/cell-actionbutton";
 import { string } from "zod";
 import { Key, ReactNode } from "react";
+import EditTeamMember from "./components/EditTeamMember";
 
 export interface Factory {
   _id: Key | null | undefined;
@@ -80,7 +81,7 @@ export default async function TeamMemberPage() {
                   Edit
                 </Link>  */}
               </div>
-              <CellAction data={} />
+              <CellAction data={EditTeamMember} />
             </div>
           {/* )) */}
         {/* ) : (
