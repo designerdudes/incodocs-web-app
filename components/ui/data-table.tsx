@@ -53,9 +53,12 @@ interface DataTableProps<TData, TValue> {
   bulkDeleteDescription?: string;
   bulkDeleteToastMessage?: string;
   deleteRoute?: string;
+  showDropdown?: boolean; // ✅ Add this line
+
 }
 
-export function DataTable<TData, TValue>({
+export function 
+DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
@@ -64,6 +67,8 @@ export function DataTable<TData, TValue>({
   bulkDeleteDescription,
   bulkDeleteToastMessage,
   deleteRoute,
+  showDropdown = false, // ✅ Set a default value (false)
+
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -123,6 +128,67 @@ export function DataTable<TData, TValue>({
   };
 
 
+// Function to extract all nested keys
+const getAllKeys = (obj: Record<string, any>, prefix = ""): string[] => {
+  return Object.entries(obj).flatMap(([key, value]) =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? getAllKeys(value, `${prefix}${key}.`) // Recursively get nested keys
+      : `${prefix}${key}` // Add the key with prefix for clarity
+  );
+};
+
+// Defined data for the shipping page dropdown
+const formData = {
+  bookingDetails: {
+    containerNumber: "",
+    portOfLoading: "",
+    destinationPort: "",
+    vesselSailingDate: new Date(),
+    vesselArrivingDate: new Date(),
+    truckNumber: "",
+    truckDriverNumber: "",
+  },
+  shippingDetails: {
+    shippingLine: "",
+    forwarder: "",
+    forwarderInvoice: null,
+    valueOfForwarderInvoice: "",
+    transporter: "",
+    valueOfTransporterInvoice: "",
+  },
+  shippingBillDetails: {
+    shippingBillNumber: "",
+    shippingBillDate: new Date(),
+ 
+  },
+  supplierDetails: {
+    supplierName: "",
+    actualSupplierName: "",
+    supplierGSTIN: "",
+    supplierInvoiceNumber: "",
+    supplierInvoiceDate: new Date(),
+    supplierInvoiceValueWithOutGST: "",
+    supplierInvoiceValueWithGST: "",
+  
+    actualSupplierInvoiceValue: "",
+  },
+  saleInvoiceDetails: {
+    commercialInvoiceNumber: "",
+    commercialInvoiceDate: new Date(),
+    consigneeDetails: "",
+    actualBuyer: "",
+  },
+  blDetails: {
+    blNumber: "",
+    blDate: new Date(),
+
+  },
+};
+
+// Get all dropdown options (nested keys)
+const dropdownOptions = getAllKeys(formData);
+
+
   return (
     <div>
       <div className="flex items-center py-4">
@@ -140,6 +206,35 @@ export function DataTable<TData, TValue>({
             className="max-w-sm"
           />
         </div>
+
+<div className=" ml-3 ">
+
+ {/* dropdown Only visible on Shipment Page */}
+ {showDropdown && (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="outline">Select Field</Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
+      {dropdownOptions.map((option) => (
+        <DropdownMenuCheckboxItem
+          key={option}
+          checked={table.getColumn(option)?.getIsVisible() ?? false}
+          onCheckedChange={(value) =>
+            table.getColumn(option)?.toggleVisibility(!!value)
+          }
+        >
+          {option}
+        </DropdownMenuCheckboxItem>
+      ))}
+    </DropdownMenuContent>
+  </DropdownMenu>
+)}
+
+
+</div>
+
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">

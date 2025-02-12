@@ -49,8 +49,18 @@ function Page() {
                 </Link>
             </div>
             <Separator className="my-2" />
-        <DataTable searchKey="" data={shipmentData} columns={columns} />
-        
+<div >
+
+<DataTable 
+  searchKey="containerNumber" 
+  data={shipmentData} 
+  columns={columns} 
+  showDropdown={true} // ✅ Enable dropdown for Shipment Page
+/> 
+
+</div>
+
+       
         </div>
     );
 }

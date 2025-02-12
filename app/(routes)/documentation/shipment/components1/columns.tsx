@@ -35,13 +35,11 @@ export const columns: ColumnDef<shipment>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "bookingDetailsSchema.containerNumber",
+        accessorKey: "containerNumber",
         header: ({ column }) => (
             <ColumnHeader column={column} title="Container Number" />
         ),
         cell: ({ row }) => {
-
-
             return (
                 <div className="flex space-x-2">
 
@@ -50,7 +48,10 @@ export const columns: ColumnDef<shipment>[] = [
                     </span>
                 </div>
             )
+            
         },
+        // filterFn: "includesString", // Use the built-in filtering logic for partial matches
+
     },
     {
         accessorKey: "Truck Number",
