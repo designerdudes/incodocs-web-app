@@ -10,28 +10,29 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, Plus, Trash } from "lucide-react";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import EditTeamMember from "./EditTeamMember";
+import { Employee } from "../page";
 
 
 interface Props {
-    data: any;
+    data: Employee;
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
 
-    const deleteFactory = async () => {
+    const deleteEmployee = async () => {
         try {
             const result = await deleteData(
-                `/factory/delete/${data._id}`
+                `/employers/delete/${data._id}`
             );
-            toast.success(" Deleted Successfully");
+            toast.success("Employee Deleted Successfully");
             GlobalModal.onClose();
             router.back();
             window.location.reload();
@@ -66,11 +67,11 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete factory */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Member - ${data.MemberName}`;
+                            GlobalModal.title = `Delete Member - ${data.teamMemberName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this member?";
                             GlobalModal.children = (
-                                <Alert onConfirm={deleteFactory} actionType={"delete"} />
+                                <Alert onConfirm={deleteEmployee} actionType={"delete"} />
                             );
                             GlobalModal.onOpen();
                         }}

@@ -14,7 +14,7 @@ export default function AddTeamButton() {
 
   // Function to open the modal and set content
   const openTeamForm = () => {
-    setTitle("Enter Employee   Details"); // Set the title of the modal
+    setTitle("Enter Employee Details"); // Set the title of the modal
     setChildren(<AddTeamForm />); // Set the form (or any component) as modal content
     onOpen(); // Open the modal
   };

@@ -3,36 +3,35 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
-// import { cookies } from "next/headers";
-// import CellAction from "./components/cell-actionbutton";
-import { string } from "zod";
-import { Key, ReactNode } from "react";
-import EditTeamMember from "./components/EditTeamMember";
 import { cookies } from "next/headers";
 import AddTeamButton from "./components/AddTeamMember";
 import CellAction from "./components/cell-actionbutton";
 
-
-export interface Factory {
-  _id: Key | null | undefined;
-  TeamMemberName: ReactNode;
-  contactPerson: string;
-  Email: string;
-  phoneNumber: number;
-  AlternatePhone: number;
-  factoryNam: string;
-  EmloyeeId: number;
+export interface Employee {
+  _id: string;
+  teamMemberName: string;
+  employeeId: string;
+  organizationId: string;
   role: string;
+  position: string;
+  createdAt: string;
+  updatedAt: string;
   address: {
     location: string;
-    pincode: string;
+    pincode: number;
+  };
+  contactInformation: {
+    contactPerson: string;
+    email: string;
+    phoneNumber: string;
+    alternatePhone: string;
   };
 }
 
 export default async function TeamMemberPage() {
   const cookieStore = cookies();
   const token = (await cookieStore).get("AccessToken")?.value || "";
-  let factories: Factory[] = [];
+  let EmployeesData: Employee[] = [];
   try {
     const res = await fetch("http://localhost:4080/employers/getall", {
       method: "GET",
@@ -41,16 +40,13 @@ export default async function TeamMemberPage() {
         Authorization: "Bearer " + token,
       },
     });
-
     if (!res.ok) {
-      throw new Error("Failed to fetch factories");
+      throw new Error("Failed to fetch employees data");
     }
-    factories = await res.json();
+    EmployeesData = await res.json();
   } catch (error) {
-    console.error("Error fetching factories:", error);
+    console.error("Error fetching employees:", error);
   }
-  console.log(factories)
-
 
   return (
     <div className="max-w-2xl mx-10 p-6 ">
@@ -64,40 +60,32 @@ export default async function TeamMemberPage() {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title="TeamMember Settings"
+            title="Team Settings"
           />
           <p className="text-muted-foreground text-sm">
-            Edit a team member details.
+            Adjust your factory-related settings here.
           </p>
         </div>
       </div>
       <div className="space-y-4 mt-4 mb-1">
-        {/* {factories.length > 0 ? (
-          factories.map((Member) => ( */}
-        <div className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
-          <div>
-            <h2 className="text-lg font-medium">ramesh</h2>
-            <p className="text-gray-500 text-sm">hyd</p>
-          </div>
-
-          {/* <div className="flex   gap-3"> */}
-          {/* <Link href={`/settings/Member/edit/${Member._id}`} className="text-blue-600 hover:underline">
-                  Edit
-                </Link>  */}
-        </div>
-        <CellAction data={EditTeamMember} />
+        {EmployeesData.length > 0 ? (
+          EmployeesData.map((Employee) => (
+            <div key={Employee._id} className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
+              <div>
+                <h2 className="text-lg font-medium">{Employee.teamMemberName}</h2>
+                <p className="text-gray-500 text-sm">{Employee.employeeId}</p>
+              </div>
+              <div className="flex   gap-3">
+              </div>
+              <CellAction data={Employee} />
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500 text-center">No employee available.</p>
+        )}
       </div>
-      {/* )) */}
-      {/* ) : (
-          <p className="text-gray-500 text-center">No TeamMember available.</p>
-        )} */}
-      {/* </div> */}
-
       <div>
-
-        {/* <Button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white"></Button>  */}
-
-        < AddTeamButton />
+        <AddTeamButton />
       </div>
     </div>
   );
