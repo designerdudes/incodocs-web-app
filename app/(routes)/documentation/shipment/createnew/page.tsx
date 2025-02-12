@@ -16,8 +16,9 @@ import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { CertificateOfOrigin } from "./components/CertificateOfOrigin";
 
-const totalSteps = 6;
+const totalSteps = 7;
 
 const steps = [
     { id: 1, name: "Booking Details", component: <BookingDetails /> },
@@ -26,6 +27,7 @@ const steps = [
     { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
     { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
     { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
+    { id: 7, name: "Certificate Of Origin ", component: <CertificateOfOrigin /> },
 ];
 
 const formSchema = z.object({
@@ -119,6 +121,8 @@ const formSchema = z.object({
             .string()
             .min(1, { message: "Enter some value" })
             .optional(),
+        shippingbill: z.string().min(1, { message: "shippingbill must be selected" }),
+            
     }),
 
     saleInvoiceDetails: z.object({
@@ -150,6 +154,18 @@ const formSchema = z.object({
             .refine((file) => file instanceof File, { message: "Upload required" })
             .optional(),
     }),
+    CertificateOfOrigin: z.object({
+        CertificateOfOriginNumber: z
+            .string()
+            .min(3, { message: "Number must be at least 3 characters long" })
+            .optional(),
+            CertificateOfOriginDate: z.date().optional(),Date: z.date().optional(),
+        IssuerOFCertificateOfOrigin: z.string().min(3, { message: "Required name" }).optional(),
+        uploadCopyOfFormagation: z
+        .any()
+        .refine((file) => file instanceof File, { message: "Upload required" })
+        .optional(),
+    }),
 });
 
 
@@ -173,6 +189,7 @@ export default function CreateNewFormPage() {
             supplierDetails: {},
             saleInvoiceDetails: {},
             blDetails: {},
+            CertificateOfOrigin: {},
         },
     });
 

@@ -71,7 +71,7 @@ const formSchema = z.object({
   
       const factoryId = params._id;
 
-      // Fetch existing lot data and reset form values
+      
       useEffect(() => {
           async function fetchLotData() {
               try {

@@ -9,6 +9,10 @@ import { FileInput } from "lucide-react";
 export function ShippingDetails() {
     const { control } = useFormContext();
 
+    function setFile(file: File | null) {
+        throw new Error("Function not implemented.");
+    }
+
     return (
         <div className="grid grid-cols-4 gap-3">
             {/* Shipping Line */}
@@ -26,13 +30,13 @@ export function ShippingDetails() {
                 )}
             />
 
-            {/* Forwarder */}
+            {/* Forwarder Name */}
             <FormField
                 control={control}
                 name="shippingDetails.forwarder"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Forwarder</FormLabel>
+                        <FormLabel>Forwarder Name</FormLabel>
                         <FormControl>
                             <Input placeholder="eg. DHL" className="uppercase" {...field} />
                         </FormControl>
@@ -41,21 +45,27 @@ export function ShippingDetails() {
                 )}
             />
 
-            {/* Forwarder Invoice */}
+            {/*  Upload Forwarder Invoice */}
             <FormField
                 control={control}
-                name="shippingDetails.forwarderInvoice"
+                name="shippingDetails.Upload Forwarder Invoice"
                 render={({ field }) => (
                     <FormItem>
-                        <FormLabel>Forwarder Invoice</FormLabel>
+                        <FormLabel>Upload Forwarder Invoice</FormLabel>
                         <FormControl>
-                            <FileInput {...field} />
+                            <Input
+                                type="file"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setFile(file);
+                                    field.onChange(file);
+                                }}
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
                 )}
             />
-
             {/* Value of Forwarder Invoice */}
             <FormField
                 control={control}
@@ -89,12 +99,19 @@ export function ShippingDetails() {
             {/* Transporter Invoice */}
             <FormField
                 control={control}
-                name="shippingDetails.transporterInvoice"
+                name="shippingDetails.Transporter Invoice"
                 render={({ field }) => (
                     <FormItem>
                         <FormLabel>Transporter Invoice</FormLabel>
                         <FormControl>
-                            <FileInput {...field} />
+                            <Input
+                                type="file"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setFile(file);
+                                    field.onChange(file);
+                                }}
+                            />
                         </FormControl>
                         <FormMessage />
                     </FormItem>
