@@ -7,6 +7,8 @@ import { cookies } from "next/headers";
 import CellAction from "./components/cell-actionbutton";
 import { string } from "zod";
 import { Key, ReactNode } from "react";
+import EditTeamMember from "./components/EditTeamMember";
+import AddTeamMember from "./components/addTeamMember"
 
 export interface Factory {
   _id: Key | null | undefined;
@@ -25,25 +27,25 @@ export interface Factory {
 }
 
 export default async function TeamMemberPage() {
-  // const cookieStore = cookies();
-  // const token = cookieStore.get("AccessToken")?.value || "";
-  // let factories: Factory[] = [];
-  // try {
-  //   const res = await fetch("http://localhost:4080/factory/getAll", {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: "Bearer " + token,
-  //     },
-  //   });
+  const cookieStore = cookies();
+  const token = (await cookieStore).get("AccessToken")?.value || "";
+  let factories: Factory[] = [];
+  try {
+    const res = await fetch("http://localhost:4080/employers/getall", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    });
 
-  //   if (!res.ok) {
-  //     throw new Error("Failed to fetch factories");
-  //   }
-  //   factories = await res.json();
-  // } catch (error) {
-  //   console.error("Error fetching factories:", error);
-  // }
+    if (!res.ok) {
+      throw new Error("Failed to fetch factories");
+    }
+    factories = await res.json();
+  } catch (error) {
+    console.error("Error fetching factories:", error);
+  }
 
 
 
@@ -62,7 +64,7 @@ export default async function TeamMemberPage() {
             title="TeamMember Settings"
           />
           <p className="text-muted-foreground text-sm">
-          edit a team memeber details.
+          Edit a team member details.
           </p>
         </div>
       </div>
@@ -80,7 +82,7 @@ export default async function TeamMemberPage() {
                   Edit
                 </Link>  */}
               </div>
-              <CellAction data={} />
+              <CellAction data={EditTeamMember} />
             </div>
           {/* )) */}
         {/* ) : (
@@ -90,9 +92,9 @@ export default async function TeamMemberPage() {
 
       <div>
 
-        {/* <button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white">Add Member</button> */}
+        {/* <Button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white"></Button>  */}
 
-        {/* <AddTeamMembers /> */}
+         <AddTeamMember />
       </div>
    </div>
   );

@@ -24,7 +24,7 @@ export interface Factory {
 
 export default async function FactoryPage() {
   const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+  const token = (await cookieStore).get("AccessToken")?.value || "";
   let factories: Factory[] = [];
   try {
     const res = await fetch("http://localhost:4080/factory/getAll", {
