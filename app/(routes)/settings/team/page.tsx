@@ -3,18 +3,21 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
-import { cookies } from "next/headers";
-import CellAction from "./components/cell-actionbutton";
+// import { cookies } from "next/headers";
+// import CellAction from "./components/cell-actionbutton";
 import { string } from "zod";
 import { Key, ReactNode } from "react";
 import EditTeamMember from "./components/EditTeamMember";
-import AddTeamMember from "./components/addTeamMember"
+import { cookies } from "next/headers";
+import AddTeamButton from "./components/AddTeamMember";
+import CellAction from "./components/cell-actionbutton";
+
 
 export interface Factory {
   _id: Key | null | undefined;
   TeamMemberName: ReactNode;
-  contactPerson: string ;
-  Email : string;
+  contactPerson: string;
+  Email: string;
   phoneNumber: number;
   AlternatePhone: number;
   factoryNam: string;
@@ -46,7 +49,7 @@ export default async function TeamMemberPage() {
   } catch (error) {
     console.error("Error fetching factories:", error);
   }
-
+  console.log(factories)
 
 
   return (
@@ -64,38 +67,38 @@ export default async function TeamMemberPage() {
             title="TeamMember Settings"
           />
           <p className="text-muted-foreground text-sm">
-          Edit a team member details.
+            Edit a team member details.
           </p>
         </div>
       </div>
       <div className="space-y-4 mt-4 mb-1">
         {/* {factories.length > 0 ? (
           factories.map((Member) => ( */}
-            <div  className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
-              <div>
-                <h2 className="text-lg font-medium">ramesh</h2>
-                <p className="text-gray-500 text-sm">hyd</p>
-              </div>
+        <div className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
+          <div>
+            <h2 className="text-lg font-medium">ramesh</h2>
+            <p className="text-gray-500 text-sm">hyd</p>
+          </div>
 
-              <div className="flex   gap-3">
-                {/* <Link href={`/settings/Member/edit/${Member._id}`} className="text-blue-600 hover:underline">
+          {/* <div className="flex   gap-3"> */}
+          {/* <Link href={`/settings/Member/edit/${Member._id}`} className="text-blue-600 hover:underline">
                   Edit
                 </Link>  */}
-              </div>
-              <CellAction data={EditTeamMember} />
-            </div>
-          {/* )) */}
-        {/* ) : (
+        </div>
+        <CellAction data={EditTeamMember} />
+      </div>
+      {/* )) */}
+      {/* ) : (
           <p className="text-gray-500 text-center">No TeamMember available.</p>
         )} */}
-      </div>
+      {/* </div> */}
 
       <div>
 
         {/* <Button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white"></Button>  */}
 
-         <AddTeamMember />
+        < AddTeamButton />
       </div>
-   </div>
+    </div>
   );
 }

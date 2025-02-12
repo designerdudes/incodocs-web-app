@@ -38,25 +38,25 @@ const formSchema = z.object({
 
 const organizations = [
     { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
-    { id:"684c47u4nf7n48nf4h8f38fh8a", name: "organization naval"}
+    { id: "684c47u4nf7n48nf4h8f38fh8a", name: "organization naval" }
 ];
 
-function TeamForm() {
+export default function TeamForm() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            EmployeeName : "",
-            EmployeeEmailId : "" ,
+            EmployeeName: "",
+            EmployeeEmailId: "",
             phoneNumber: "",
-            AlternatePhone:"" ,
-            factoryName: "" ,
-            EmloyeeId: "" ,
-            organizationId: "" ,
+            AlternatePhone: "",
+            factoryName: "",
+            EmloyeeId: "",
+            organizationId: "",
             address: {
-             location: "" ,
-              pincode: "" ,
+                location: "",
+                pincode: "",
             },
         },
     });
@@ -144,150 +144,150 @@ function TeamForm() {
                 onSubmit={form.handleSubmit(handleSubmit)}
                 className="grid gap-4"
             >
-             <div className="flex">  
-              <div className="pr-3">
-                {/* EmployeeName */}
-                <FormField
-                    control={form.control}
-                    name="EmployeeName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Employee Name</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: EmployeeName ABC" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="EmployeeEmailId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Employee Email Id</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: EmployeeEmailId" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="phoneNumber"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Phone Number</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: phoneNumber" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="AlternatePhone"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Alternate Phone</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: AlternatePhone" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-              </div>
-              <div className="pl-3">
-                <FormField
-                    control={form.control}
-                    name="factoryName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>FctoryName</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: factoryName" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="EmloyeeId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>EmloyeeId</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: EmloyeeId" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {/* Organization Dropdown */}
-                <FormField
-                    control={form.control}
-                    name="organizationId"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Organization</FormLabel>
-                            <FormControl>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select an Organization" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {organizations.map((org) => (
-                                            <SelectItem key={org.id} value={org.id}>
-                                                {org.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                
-                {/* Address Fields */}
-                <FormField
-                    control={form.control}
-                    name="address.location"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Location</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: 343 Main Street" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                {/* Pincode */}
-                <FormField
-                    control={form.control}
-                    name="address.pincode"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Pincode</FormLabel>
-                            <FormControl>
-                                <Input placeholder="Eg: 500081" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-              </div>
-             </div> 
-             {/* Submit Button */}
-             <Button
+                <div className="flex">
+                    <div className="pr-3">
+                        {/* EmployeeName */}
+                        <FormField
+                            control={form.control}
+                            name="EmployeeName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Employee Name</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: EmployeeName ABC" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="EmployeeEmailId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Employee Email Id</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: EmployeeEmailId" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="phoneNumber"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Phone Number</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: phoneNumber" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="AlternatePhone"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Alternate Phone</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: AlternatePhone" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                    <div className="pl-3">
+                        <FormField
+                            control={form.control}
+                            name="factoryName"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>FctoryName</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: factoryName" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="EmloyeeId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>EmloyeeId</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: EmloyeeId" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {/* Organization Dropdown */}
+                        <FormField
+                            control={form.control}
+                            name="organizationId"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Organization</FormLabel>
+                                    <FormControl>
+                                        <Select
+                                            onValueChange={field.onChange}
+                                            value={field.value}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select an Organization" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {organizations.map((org) => (
+                                                    <SelectItem key={org.id} value={org.id}>
+                                                        {org.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Address Fields */}
+                        <FormField
+                            control={form.control}
+                            name="address.location"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Location</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: 343 Main Street" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        {/* Pincode */}
+                        <FormField
+                            control={form.control}
+                            name="address.pincode"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Pincode</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="Eg: 500081" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
+                </div>
+                {/* Submit Button */}
+                <Button
                     type="submit"
                     disabled={isLoading}
                     className="w-full"
@@ -302,4 +302,3 @@ function TeamForm() {
     );
 }
 
-export default TeamForm;
