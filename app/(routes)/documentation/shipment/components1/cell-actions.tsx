@@ -77,7 +77,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
 
           {/* Edit Shipment */}
           <DropdownMenuItem
-            onClick={() => router.push(`./shipment/edit`)}
+            onClick={() => router.push(`./shipment/edit/${shipmentId}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <Scissors className="mr-2 h-4 w-4" />
