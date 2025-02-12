@@ -6,16 +6,16 @@ import Heading from '@/components/ui/heading';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { expensecolumns } from './components/expensesColums';
+import { expensecolumns } from './components/expenseColumns';
 import { fetchData } from '@/axiosUtility/api';
 
 
 export type expense = {
   _id: string;
-  ExpenseName: string;
-  ExpenseValue : string;
-  GSTPercentage: number;
-  ExpenseDate: string;
+  expenseName: string;
+  expenseValue : string;
+  gstPercentage: number;
+  expenseDate: string;
 }
 
 
@@ -29,7 +29,8 @@ function Page() {
                 setLoading(true);
                 const data = await fetchData("/expense/getall");
                 setExpenseData(data);
-                console.log("thi is data",expenseData)
+                console.log(expenseData)
+
             } catch (error) {
                 console.error("Error fetching expense data:", error);
             } finally {

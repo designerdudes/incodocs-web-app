@@ -30,7 +30,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "newExpense.ExpenseName", // ✅ Correct key
+        accessorKey: "expenseName", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -42,12 +42,12 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.ExpenseName}
+                {row.original.expenseName}
             </div>
         ),
     },
     {
-        accessorKey: "ExpenseValue", // ✅ Correct key
+        accessorKey: "expenseValue", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -59,12 +59,12 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.ExpenseValue}
+                {row.original.expenseValue}
             </div>
         ),
     },
     {
-        accessorKey: "GSTPercentage", // ✅ Correct key
+        accessorKey: "gstPercentage", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -76,12 +76,12 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.GSTPercentage}
+                {row.original.gstPercentage}
             </div>
         ),
     },
     {
-        accessorKey: "ExpenseDate", // ✅ Correct key
+        accessorKey: "expenseDate", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -93,7 +93,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {new Date(row.original.ExpenseDate).toLocaleDateString()} 
+                {new Date(row.original.expenseDate).toLocaleDateString()} 
             </div>
         ),
     },
