@@ -19,13 +19,13 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
     const [BlockData, setBlockData] = useState<any>(null);
     const [selectedSlabs, setSelectedSlabs] = useState<number[]>([]);
     const [readyForPolishSlabs, setReadyForPolishSlabs] = useState<any[]>([]);
+    const [selectAll, setSelectAll] = useState(false); // Track Select All state
 
     useEffect(() => {
         const fetchSlabData = async () => {
             try {
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setBlockData(GetData);
-                // Ensure SlabsId exists and is an array before filtering
                 if (Array.isArray(GetData?.SlabsId)) {
                     console.log("All Slabs:", GetData.SlabsId);
 
@@ -47,6 +47,14 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         }
     }, [blockId]);
 
+    useEffect(() => {
+        // Sync the selected slabs with selectAll state
+        if (selectAll) {
+            setSelectedSlabs(readyForPolishSlabs.map((slab) => slab.slabNumber));
+        } else {
+            setSelectedSlabs([]);
+        }
+    }, [selectAll, readyForPolishSlabs]);
 
     const toggleSlabSelection = (slabNumber: number) => {
         setSelectedSlabs((prev) =>
@@ -78,18 +86,15 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             );
 
             console.log("Response:", response);
-            console.log("Payload", payload)
+            console.log("Payload", payload);
             setIsLoading(false);
             GlobalModal.onClose();
             toast.success("Slabs updated successfully.");
 
-            // Notify the parent component
-            // await onConfirm(selectedSlabs);
             GlobalModal.onClose();
         } catch (error: any) {
             console.error("Error sending slabs for polishing:", error);
 
-            // Provide detailed error messages if available
             if (error.response?.data?.message) {
                 toast.error(`Failed to update slab status: ${error.response.data.message}`);
             } else {
@@ -98,9 +103,10 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         } finally {
             setIsLoading(false);
         }
-        window.location.reload()
+        window.location.reload();
     };
-    console.log("this are ready for polish", readyForPolishSlabs)
+
+    console.log("These are ready for polish", readyForPolishSlabs);
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
@@ -112,6 +118,20 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
             {/* Display slabs with checkboxes */}
             <div className="space-y-2">
                 <Label>Select Slabs to Send for Polishing</Label>
+
+                {/* Select All checkbox - Positioned just below the label */}
+                {readyForPolishSlabs.length > 0 && (
+                    <div className="flex items-center gap-2">
+                        <input
+                            type="checkbox"
+                            id="select-all"
+                            checked={selectAll}
+                            onChange={() => setSelectAll(!selectAll)} // Toggle selectAll state
+                        />
+                        <label htmlFor="select-all" className="font-medium">Select All Slabs</label>
+                    </div>
+                )}
+
                 {readyForPolishSlabs.length > 0 ? (
                     readyForPolishSlabs.map((slab, index) => (
                         <div key={slab._id} className="flex items-center gap-2">
@@ -128,6 +148,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
                     <p className="text-gray-500">No slabs are ready for polishing.</p>
                 )}
             </div>
+
             <div className={cn("flex gap-2 justify-end")}>
                 <Button
                     variant="secondary"
