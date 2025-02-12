@@ -80,32 +80,45 @@ const factoryManagementSidebarTabs = [
   },
 ];
 
-const documentationSidebarTabs = [
+const documentationCards = [
   {
-    title: "Home",
-    path: "/dashboard",
-    icon: <HomeIcon className="w-4 mr-2" />,
+    title: "Export Docs",
+    icon: <FiGrid className="w-6 h-6 text-green-500 self-end" />,
+    value: 50,
+    color: "bg-primary",
     showButton: false,
+    buttonUrl: "/exportDocs",
   },
+
   {
     title: "Shipments",
+    value: 50,
     path: "/documentation/shipments/dashboard",
     icon: <Sheet className="w-4 mr-2" />,
-    showButton: true,
-    buttonUrl: "/shipments/new",
+    showButton: false,
+    buttonUrl: "/documentation/shipments",
   },
   {
-    title: "Settings",
+    title: "Invoices",
     path: "/settings",
     icon: <Settings className="w-4 mr-2" />,
     showButton: false,
+    value: 50,
   },
   {
-    title: "Help Center",
-    path: "/hel[-center",
+    title: "Purchase Orders",
+    path: "/purchaseorders",
     icon: <HelpCircle className="w-4 mr-2" />,
     showButton: false,
+    value: 50,
   },
+  {
+    title: "Quotations",
+    path: "/quotations",
+    icon: <HelpCircle className="w-4 mr-2" />,
+    showButton: false,
+    value: 50,
+  }
 ];
 
 const accountingSidebarTabs = [
@@ -251,7 +264,7 @@ export {
   sidebarTabs,
   accountingSidebarTabs,
   rawInventoryCards,
-  documentationSidebarTabs,
+  documentationCards,
   factoryManagementSidebarTabs,
   InventoryCards,
   FinishedPageCards,

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "../forms/AddFactoryForm";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 interface Factory {
     factoryName: string;
@@ -30,6 +30,7 @@ interface Factory {
 
 function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
     const router = useRouter();
+    const pathname = usePathname();
     const { isMobile } = useSidebar();
     const [activeFactory, setActiveFactory] = React.useState<Factory | null>(
         FactoriesData.length > 0 ? FactoriesData[0] : null // Default to the first factory
@@ -40,9 +41,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
         localStorage.setItem("activeFactoryId", factory.factoryId); // Store the selected factory ID
         router.push(`/${factory.factoryId}/dashboard`);
     };
-
     // Update activeFactory when FactoriesData changes
-    
     React.useEffect(() => {
         const storedFactoryId = localStorage.getItem("activeFactoryId");
         if (storedFactoryId && FactoriesData.length > 0) {
@@ -54,10 +53,15 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
             setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
         }
     }, [FactoriesData]);
-    
 
-    
-    
+    React.useEffect(() => {
+        const storedFactoryId = localStorage.getItem("activeFactoryId");
+
+        // If navigating to a page without a factory ID, redirect to the last used one
+        if (pathname.includes("undefined")) {
+            router.replace(`/${storedFactoryId}/dashboard`);
+        }
+    }, [pathname, router]);
 
     const GlobalModal = useGlobalModal();
 
