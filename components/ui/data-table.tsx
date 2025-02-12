@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import * as z from "zod";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -39,10 +40,21 @@ import {
 } from "./select";
 import { DataTablePagination } from "./data-table-pagination";
 import toast from "react-hot-toast";
-import { deleteAllData } from "@/axiosUtility/api";
+import { deleteAllData, putData } from "@/axiosUtility/api";
 import { Alert } from "../forms/Alert";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./form";
+import { Icons } from "./icons";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import MarkMultipleSlabsPolishForm from "./MarkMultipleSlabsPolishForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -55,6 +67,12 @@ interface DataTableProps<TData, TValue> {
   deleteRoute?: string;
   showDropdown?: boolean; // ✅ Add this line
 
+  tab?: string; // New prop to determine the active tab
+  bulkPolishTitle?: string;
+  bulkPOlishDescription?: string;
+  bulkPolishIdName?: string;
+  updateRoute?: string;
+  bulkPolisToastMessage?: string;
 }
 
 export function 
@@ -69,7 +87,14 @@ DataTable<TData, TValue>({
   deleteRoute,
   showDropdown = false, // ✅ Set a default value (false)
 
+  tab, // Get the tab name from props
+  bulkPolishTitle,
+  bulkPOlishDescription,
+  bulkPolishIdName,
+  updateRoute,
+  bulkPolisToastMessage,
 }: DataTableProps<TData, TValue>) {
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -96,7 +121,7 @@ DataTable<TData, TValue>({
     },
   });
 
-  const modal = useGlobalModal()
+  const modal = useGlobalModal();
 
   const handleBulkDelete = async () => {
     const selectedIds = table
@@ -109,10 +134,11 @@ DataTable<TData, TValue>({
     }
 
     try {
-
       await deleteAllData(deleteRoute as string, { ids: selectedIds });
 
-      toast.success(bulkDeleteToastMessage ?? "Selected product deleted successfully");
+      toast.success(
+        bulkDeleteToastMessage ?? "Selected product deleted successfully"
+      );
 
       // Clear selection after deletion
       table.resetRowSelection();
@@ -274,9 +300,9 @@ const dropdownOptions = getAllKeys(formData);
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       {/* Add the 'fixed' class to the last column header */}
                       {index === columns.length - 1 && (
                         <div className="fixed" />
@@ -341,15 +367,44 @@ const dropdownOptions = getAllKeys(formData);
               className="ml-2"
               onClick={() => {
                 modal.title = bulkDeleteTitle ?? "Delete Selected Slabs?";
-                modal.description = bulkDeleteDescription ?? "Are you sure you want to delete these slabs? This action cannot be undone.";
-                modal.children = <Alert onConfirm={handleBulkDelete} actionType="delete" />;
+                modal.description =
+                  bulkDeleteDescription ??
+                  "Are you sure you want to delete these slabs? This action cannot be undone.";
+                modal.children = (
+                  <Alert onConfirm={handleBulkDelete} actionType="delete" />
+                );
                 modal.onOpen();
               }}
             >
               Delete Selected
             </Button>
-
           )}
+
+          {tab === "inPolishing" &&
+            table.getFilteredSelectedRowModel().rows.length > 1 && (
+              <Button
+                variant="destructive"
+                className="ml-2 hover:bg-green-400 bg-green-500"
+                onClick={() => {
+                  modal.title =
+                    bulkPolishTitle ?? "Enter triming Values of Slab:";
+                  modal.description =
+                    bulkPOlishDescription ??
+                    "Are you sure you want to polish these slabs? This action cannot be undone.";
+                  modal.children = (
+                    <MarkMultipleSlabsPolishForm
+                      table={table}
+                      bulkPolishIdName={bulkPolishIdName}
+                      updateRoute={updateRoute}
+                      bulkPolisToastMessage={bulkPolisToastMessage}
+                    />
+                  );
+                  modal.onOpen();
+                }}
+              >
+                Mark Polished
+              </Button>
+            )}
         </div>
         <div>
           <DataTablePagination table={table} />

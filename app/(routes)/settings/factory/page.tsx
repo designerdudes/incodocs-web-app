@@ -24,7 +24,7 @@ export interface Factory {
 
 export default async function FactoryPage() {
   const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+  const token = (await cookieStore).get("AccessToken")?.value || "";
   let factories: Factory[] = [];
   try {
     const res = await fetch("http://localhost:4080/factory/getAll", {
@@ -46,7 +46,7 @@ export default async function FactoryPage() {
 
 
   return (
-    <div className="max-w-2xl mx-10 p-6  ">
+    <div className="max-w-2xl mx-10 p-6 ">
       <div className="topbar w-full flex items-center justify-between">
         <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">

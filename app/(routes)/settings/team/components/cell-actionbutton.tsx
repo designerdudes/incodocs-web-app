@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,36 +13,32 @@ import {
 import { Edit, EyeIcon, MoreHorizontal, Plus, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
-import toast from 'react-hot-toast';
-import { deleteData } from '@/axiosUtility/api';
-import { expense } from "../page";
-import EditExpenseForm from "./editExpense";
-
-
-
-
+import toast from "react-hot-toast";
+import { deleteData } from "@/axiosUtility/api";
+import EditTeamMember from "./EditTeamMember";
 
 
 interface Props {
-  data : expense
+    data: any;
 }
-
 
 export const CellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
 
-    const deleteLot = async () => {
+    const deleteFactory = async () => {
         try {
-            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
-            toast.success('Lot Deleted Successfully');
+            const result = await deleteData(
+                `/factory/delete/${data._id}`
+            );
+            toast.success(" Deleted Successfully");
             GlobalModal.onClose();
+            router.back();
             window.location.reload();
         } catch (error) {
-            console.error('Error deleting data:', error);
+            console.error("Error deleting data:", error);
         }
     };
-
     return (
         <div>
             <DropdownMenu>
@@ -54,41 +51,33 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* View Lot Details */}
+                    {/* Edit TeamMember Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./Expenses/view/${data._id}`);
-                        }}
-                    >
-                        <EyeIcon className="mr-2 h-4 w-4" />
-                        View Expense Details
-                    </DropdownMenuItem>
-
-                    {/* Edit Expense Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = "Edit Expense Details"; // Set modal title
-                            GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
+                            GlobalModal.title = "Edit TeamMember Details"; // Set modal title
+                            GlobalModal.children = <EditTeamMember params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >
                         <Edit className="mr-2 h-4 w-4" />
-                        Edit Expense Details
+                        Edit TeamMember Details
                     </DropdownMenuItem>
 
-                    {/* Delete Lot */}
+                    {/* Delete factory */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete expense details - ${data.ExpenseName}`;
+                            GlobalModal.title = `Delete Member - ${data.MemberName}`;
                             GlobalModal.description =
-                                "Are you sure you want to delete this Lot?";
-                            GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;
+                                "Are you sure you want to delete this member?";
+                            GlobalModal.children = (
+                                <Alert onConfirm={deleteFactory} actionType={"delete"} />
+                            );
                             GlobalModal.onOpen();
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground"
                     >
                         <Trash className="mr-2 h-4 w-4" />
-                        Delete Expense Details
+                        Delete Member
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

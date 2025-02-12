@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import moment from "moment"
-import { Sales } from "../page"
-import CellAction from "./cell-actions"
+import CellAction from "./expensesCell-Action"
+import { expense } from "../page"
 
-export const Columns: ColumnDef<Sales>[] = [
+export const expensecolumns: ColumnDef<expense>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -31,93 +30,75 @@ export const Columns: ColumnDef<Sales>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "customerName", // Corrected key
+        accessorKey: "newExpense.ExpenseName", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Customer Name
+                Expense Name
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.customerName}
+                {row.original.ExpenseName}
             </div>
         ),
     },
     {
-        accessorKey: "customerGSTN", // Corrected key
+        accessorKey: "ExpenseValue", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                GST Number
+                Expense Value
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.customerGSTN}
+                {row.original.ExpenseValue}
             </div>
         ),
     },
-    // {
-    //     accessorKey: "supplierGSTN",
-    //     header: "GST Number",
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.customerGSTN}
-    //         </div>
-    //     ),
-    // },
     {
-        accessorKey: "noOfSlabs",
+        accessorKey: "GSTPercentage", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Number of Slabs
+                GST Percentage
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.noOfSlabs}
+                {row.original.GSTPercentage}
             </div>
         ),
     },
     {
-        accessorKey: "saleDate",
+        accessorKey: "ExpenseDate", // ✅ Correct key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Sale Date
+                Expense Date
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
-            <div>
-                {moment(row.original.saleDate).format("DD MMM YYYY")}
+            <div className="capitalize">
+                {new Date(row.original.ExpenseDate).toLocaleDateString()} 
             </div>
         ),
     },
-
     {
-
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-            >
-                Action
-            </Button>
-        ),
-
+        header: "Action",
         id: "actions",
         cell: ({ row }) => <CellAction data={row.original} />
     },

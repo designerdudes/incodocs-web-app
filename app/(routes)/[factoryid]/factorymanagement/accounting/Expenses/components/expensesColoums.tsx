@@ -31,7 +31,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "title",
+        accessorKey: "ExpenseName",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -48,7 +48,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
     },
     {
-        accessorKey: "name",
+        accessorKey: "ExpenseValue",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -65,7 +65,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
     },
     {
-      accessorKey: "title",
+      accessorKey: "GSTPercentage",
       header: ({ column }) => (
           <Button
               variant="ghost"
@@ -82,7 +82,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
       ),
   },
   {
-    accessorKey: "title",
+    accessorKey: "ExpenseDate",
     header: ({ column }) => (
         <Button
             variant="ghost"
@@ -98,57 +98,6 @@ export const expensecolumns: ColumnDef<expense>[] = [
         </div>
     ),
 },
-    // {
-    //     accessorKey: "materialType",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Material Type
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.materialType}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "numberofSlabs",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Total Slabs
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.numberofSlabs}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "status",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Blocks Status
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.status}
-    //         </div>
-    //     ),
-    // },
     {
 
         header: ({ column }) => (
