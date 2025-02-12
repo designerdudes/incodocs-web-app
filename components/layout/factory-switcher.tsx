@@ -20,6 +20,7 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "../forms/AddFactoryForm";
 import { usePathname, useRouter } from "next/navigation";
+import AddFactoryButton from "@/app/(routes)/settings/factory/components/AddFactoryButton";
 
 interface Factory {
     factoryName: string;
@@ -63,12 +64,15 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
         }
     }, [pathname, router]);
 
-    const GlobalModal = useGlobalModal();
+    // const GlobalModal = useGlobalModal();
 
     return (
+        <div>
         <SidebarMenu>
             <SidebarMenuItem>
                 <DropdownMenu>
+                <div>
+
                     <DropdownMenuTrigger asChild>
                         <SidebarMenuButton
                             size="lg"
@@ -109,7 +113,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                             </DropdownMenuItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
+                        {/* <DropdownMenuItem
                             className="gap-2 p-2"
                             onSelect={() => {
                                 GlobalModal.title = `Enter Factory Details`;
@@ -121,11 +125,17 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                 <Plus className="size-4" />
                             </div>
                             <div className="font-medium text-muted-foreground">Add Factory</div>
-                        </DropdownMenuItem>
+                            
+                        </DropdownMenuItem> */}
+                                    
+            <AddFactoryButton />
                     </DropdownMenuContent>
+                    </div>
+
                 </DropdownMenu>
             </SidebarMenuItem>
         </SidebarMenu>
+        </div>
     );
 }
 
