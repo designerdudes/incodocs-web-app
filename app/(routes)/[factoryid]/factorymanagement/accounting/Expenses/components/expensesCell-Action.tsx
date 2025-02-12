@@ -17,11 +17,6 @@ import { deleteData } from '@/axiosUtility/api';
 import { expense } from "../page";
 import EditExpenseForm from "./editExpense";
 
-
-
-
-
-
 interface Props {
   data : expense
 }

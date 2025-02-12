@@ -76,7 +76,6 @@ export default function EditFactoryForm({ params }: Props) {
 
     const EmployeeId = params._id;
 
-    // Fetch existing lot data and reset form values
     useEffect(() => {
         async function fetchLotData() {
             try {

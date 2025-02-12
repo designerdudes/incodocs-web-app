@@ -24,52 +24,26 @@ import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: {
-    blockid: string;
+    id: string;
   };
 }
 
-export default async function SlabsPage({ params }: Props) {
-  let SlabData = null;
+export default async function ExpensePage({ params }: Props) {
+  
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params?.blockid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
+  const res = await fetch(`http://localhost:4080/expense/getbyid/${params.id}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
   });
 
-  SlabData = res;
-
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
-  }
-  const volumeinInchs = calculateVolume(
-    SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value
-  );
-
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
-  }
-
+  const expenseData = await res.json();
+  
+  // Display data after fetching
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -80,10 +54,7 @@ export default async function SlabsPage({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading
-            className="leading-tight"
-            title={` Details of Expense ${SlabData.blockNumber} `}
-          />
+          <Heading className="leading-tight" title={`Expense Details`} />
           <p className="text-muted-foreground text-sm mt-2">
             Detailed overview of expenses, covering costs, categories, and dates
             to ensure efficient financial tracking and budget management.
@@ -96,7 +67,7 @@ export default async function SlabsPage({ params }: Props) {
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Expense Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details for Expense ID: ${expenseData._id}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -108,30 +79,28 @@ export default async function SlabsPage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Expense Name
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell className="whitespace-nowrap">Expense Name</TableCell>
+                    <TableCell>{expenseData.expenseName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Expense Value
-                    </TableCell>
-                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
+                    <TableCell className="whitespace-nowrap">Expense Value</TableCell>
+                    <TableCell>{expenseData.expenseValue}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      GST Percentage
-                    </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell className="whitespace-nowrap">GST Percentage</TableCell>
+                    <TableCell>{expenseData.gstPercentage}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Expense Date
-                    </TableCell>
-                    <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
-                    </TableCell>
+                    <TableCell className="whitespace-nowrap">Expense Date</TableCell>
+                    <TableCell>{moment(expenseData.expenseDate).format("YYYY-MM-DD")}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Created At</TableCell>
+                    <TableCell>{moment(expenseData.createdAt).format("YYYY-MM-DD")}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Updated At</TableCell>
+                    <TableCell>{moment(expenseData.updatedAt).format("YYYY-MM-DD")}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

@@ -32,6 +32,7 @@ export default async function TeamMemberPage() {
   const cookieStore = cookies();
   const token = (await cookieStore).get("AccessToken")?.value || "";
   let EmployeesData: Employee[] = [];
+
   try {
     const res = await fetch("http://localhost:4080/employers/getall", {
       method: "GET",
@@ -48,6 +49,7 @@ export default async function TeamMemberPage() {
     console.error("Error fetching employees:", error);
   }
 
+
   return (
     <div className="max-w-2xl mx-10 p-6 ">
       <div className="topbar w-full flex items-center justify-between">
@@ -62,6 +64,7 @@ export default async function TeamMemberPage() {
             className="leading-tight"
             title="Team Settings"
           />
+
           <p className="text-muted-foreground text-sm">
             Adjust your factory-related settings here.
           </p>

@@ -105,8 +105,8 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  let lotId = params.lotId
-  console.log("this is lot id",params.lotId);
+  let lotId = params.lotId;
+  console.log("this is lot id", params.lotId);
 
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
@@ -262,7 +262,7 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                         field.onChange(e);
                         handleBlocksInputChange(e.target.value);
                       }}
-                      value={field.value}
+                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
                     />
                   </FormControl>
                   <FormMessage />
