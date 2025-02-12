@@ -89,24 +89,36 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
         accessorKey: "squareft",
         header: "Total SQF",
         cell: ({ row }) => {
-            const squareFt = (
-                (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) /
-                144
-            ).toFixed(2);
-            return <div>{squareFt}</div>;
+          const squareFt = ((row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144).toFixed(2);
+          return <div>{squareFt}</div>;
         },
-    },
-    {
+        footer: ({ table }) => {
+          const totalSQF = table.getRowModel().rows.reduce((sum, row) => {
+            const sqf = (row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144;
+            return sum + sqf;
+          }, 0);
+          return <span className="font-medium text-gray-600">Total SQF: {totalSQF.toFixed(2)} </span>;
+        },
+      },
+      
+      {
         accessorKey: "amount",
-        header: "Amount",
+        header: "Total Amount",
         cell: ({ row }) => {
-            const amount = (
-                (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) /
-                144 * (3.75)
-            ).toFixed(2);
-            return <div>{amount}</div>;
+          const amount = (
+            (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144 * (3.75)
+          ).toFixed(2);
+          return <div>{amount}</div>;
         },
-    },
+        footer: ({ table }) => {
+          const totalAmount = table.getRowModel().rows.reduce((sum, row) => {
+            const amt = ((row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144) * 3.75;
+            return sum + amt;
+          }, 0);
+          return <span className="font-medium text-gray-600">Total Amount: {totalAmount.toFixed(2)}</span>;
+        },
+      },
+      
 
     {
         id: "actions",
@@ -114,4 +126,3 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
         cell: ({ row }) => <CellAction data={row.original} />,
     },
 ];
-

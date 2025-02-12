@@ -245,6 +245,26 @@ export function DataTable<TData, TValue>({
               </TableRow>
             )}
           </TableBody>
+          <tfoot>
+            {table.getFooterGroups().map((footerGroup) => (
+              <TableRow key={footerGroup.id} className="pt-4">
+                {" "}
+                {/* Added padding-bottom */}
+                {footerGroup.headers.map((header) => (
+                  <TableCell key={header.id} className="font-medium pb-4">
+                    {" "}
+                    {/* Applied font-medium and padding-bottom */}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </tfoot>
         </Table>
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
