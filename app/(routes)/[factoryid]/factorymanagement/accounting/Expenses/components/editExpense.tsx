@@ -1,238 +1,195 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { useGlobalModal } from "@/hooks/GlobalModal";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Icons } from "@/components/ui/icons";
-import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
-import toast from "react-hot-toast";
+// "use client";
+// import React, { useEffect, useState } from "react";
+// import { Button } from "@/components/ui/button";
+// import * as z from "zod";
+// import { useForm } from "react-hook-form";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+// import { Input } from "@/components/ui/input";
+// import { useGlobalModal } from "@/hooks/GlobalModal";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { Icons } from "@/components/ui/icons";
+// import { useRouter } from "next/navigation";
+// import toast from "react-hot-toast";
+// import { putData } from "@/axiosUtility/api";
+// import { cookies } from "next/headers";
 
-const formSchema = z.object({
-    ExpenseName: z
-    .string()
-    .min(3, { message: " name must be at least 3 characters long" })
-    .optional(),
-    ExpenseValue: z
-    .string()
-    .min(3, { message: "Enter Expense value " })
-    .optional(),
-    GSTPercentage: z
-    .union([
-      z.string().min(1, { message: " Enter percentage" }),
-      z.number(),
-    ])
-    .optional(),
-    ExpenseDate: z
-    .union([
-      z.string().min(1, { message: "Enter date" }),
-      z.number(),
-    ])
-    .optional(),
-});
+// const formSchema = z.object({
+//   ExpenseName: z.string().min(3, { message: "Name must be at least 3 characters long" }).optional(),
+//   ExpenseValue: z.string().min(3, { message: "Enter Expense value" }).optional(),
+//   GSTPercentage: z.union([z.string().min(1, { message: "Enter percentage" }), z.number()]).optional(),
+//   ExpenseDate: z.union([z.string().min(1, { message: "Enter date" }), z.number()]).optional(),
+// });
 
-interface Props {
-  params: {
-    _id: string; // Lot ID
-  };
-}
+// interface Props {
+//   params: {
+//     id: string;
+//   };
+// }
 
-export default function EditLotForm({ params }: Props){
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
-  const GlobalModal = useGlobalModal();
-  const router = useRouter();
+// export default async function EditExpense({ params }: Props) {
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      ExpenseName:"",
-      ExpenseValue: "",
-      GSTPercentage: "",
-      ExpenseDate: "",
-    },
-  });
+//  const cookieStore = cookies();
+//   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const lotId = params._id;
 
-  // Fetch existing lot data and reset form values
-  useEffect(() => {
-    async function fetchLotData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/lot/getbyid/${lotId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch lot data");
-        }
-        const data = await response.json();
+//   const GlobalModal = useGlobalModal();
+//   const router = useRouter();
 
-        // Reset form with fetched values
-        form.reset({
-           ExpenseName: data.ExpenseName || "",
-           ExpenseValue: data.ExpenseValue|| "",
-           GSTPercentage: data. GSTPercentage || "",
-           ExpenseDate: data. ExpenseDate || "",
-        });
-      } catch (error) {
-        console.error("Error fetching lot data:", error);
-        toast.error("Failed to fetch lot data");
-      } finally {
-        setIsFetching(false);
-      }
-    }
-    fetchLotData();
-  }, [lotId, form]);
+//   const form = useForm<z.infer<typeof formSchema>>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: {
+//       ExpenseName: "",
+//       ExpenseValue: "",
+//       GSTPercentage: "",
+//       ExpenseDate: "",
+//     },
+//   });
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
+//   const res = await fetch(`http://localhost:4080/expense/getbyid/${params.id}`, {
+//     method: "GET",
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: "Bearer " + token,
+//     },
+//   });
 
-    GlobalModal.title = "Confirm Lot Update";
-    GlobalModal.description = "Are you sure you want to update this lot?";
-    GlobalModal.children = (
-      <div className="space-y-4">
-        <p>ExpenseName: {values.ExpenseName}</p>
-        <p>ExpenseValue: {values.ExpenseValue}</p>
-        <p>GSTPercentage: {values. GSTPercentage}</p>
-        <p>ExpenseDate: {values.ExpenseDate}</p>
-        <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              GlobalModal.onClose();
-              setIsLoading(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              try {
-                await putData(
-                  `/factory-management/inventory/lot/update/${lotId}`,
-                  values
-                );
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.success("Lot updated successfully");
+//   const expenseData = await res.json();
 
-                window.location.reload();
-              } catch (error) {
-                console.error("Error updating lot:", error);
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.error("Error updating lot");
-              }
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
-      </div>
-    );
-    GlobalModal.onOpen();
-  };
+//   console.log()
 
-  // if (isFetching) {
-  //   return (
-  //     <div className="flex items-center justify-center h-60">
-  //       <Icons.spinner className="h-6 w-6 animate-spin" />
-  //       <p className="ml-2 text-gray-500">Loading lot details...</p>
-  //     </div>
-  //   );
-  // }
+//         // Reset the form with the fetched data
+//         form.reset({
+//           ExpenseName: expenseData.expenseName || "",
+//           ExpenseValue: expenseData.expenseValue || "",
+//           GSTPercentage: expenseData.gstPercentage || "",
+//           ExpenseDate: expenseData.expenseDate || "",
+//         });
+//       } catch (error) {
+//         console.error("Error fetching expense data:", error);
+//         toast.error("Failed to fetch expense data");
+//       } finally {
+//         setIsFetching(false);
+//       }
+//     };
 
-  return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="ExpenseName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expense Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Eg:  ABC" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="ExpenseValue"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expense Value</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Eg:123456789"
-                    type="text"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/*  GST Percentage Field */}
-          <FormField
-            control={form.control}
-            name="GSTPercentage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel> GSTPercentage</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="eg: 100"
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+//     fetchExpenseData();
+//   }, [params.id, form]);
 
-          {/*  Expense Date Field */}
-          <FormField
-            control={form.control}
-            name="ExpenseDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel> ExpenseDate</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Eg:10/02/2025"
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-          Submit
-        </Button>
-      </form>
-    </Form>
-  );
-}
+//   const handleSubmit = (values: z.infer<typeof formSchema>) => {
+//     setIsLoading(true);
+
+//     GlobalModal.title = "Confirm Expense Update";
+//     GlobalModal.description = "Are you sure you want to update this expense?";
+//     GlobalModal.children = (
+//       <div className="space-y-4">
+//         <p>Expense Name: {values.ExpenseName}</p>
+//         <p>Expense Value: {values.ExpenseValue}</p>
+//         <p>GST Percentage: {values.GSTPercentage}</p>
+//         <p>Expense Date: {values.ExpenseDate}</p>
+//         <div className="flex justify-end space-x-2">
+//           <Button
+//             variant="outline"
+//             onClick={() => {
+//               GlobalModal.onClose();
+//               setIsLoading(false);
+//             }}
+//           >
+//             Cancel
+//           </Button>
+//           <Button
+//             onClick={async () => {
+//               try {
+//                 await putData(`/expense/put/${params.id}`, values); // Adjust the URL as needed
+//                 setIsLoading(false);
+//                 GlobalModal.onClose();
+//                 toast.success("Expense Updated successfully");
+
+//                 router.push("/expenses"); // Adjust redirect to where you want after updating
+//               } catch (error) {
+//                 console.error("Error updating expense:", error);
+//                 setIsLoading(false);
+//                 GlobalModal.onClose();
+//                 toast.error("Error updating expense");
+//               }
+//             }}
+//           >
+//             Confirm
+//           </Button>
+//         </div>
+//       </div>
+//     );
+//     GlobalModal.onOpen();
+//   };
+
+//   return (
+//     <Form {...form}>
+//       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+//         <div className="grid grid-cols-2 gap-4">
+//           <FormField
+//             control={form.control}
+//             name="ExpenseName"
+//             render={({ field }) => (
+//               <FormItem>
+//                 <FormLabel>Expense Name</FormLabel>
+//                 <FormControl>
+//                   <Input placeholder="Eg: ABC" type="text" {...field} />
+//                 </FormControl>
+//                 <FormMessage />
+//               </FormItem>
+//             )}
+//           />
+//           <FormField
+//             control={form.control}
+//             name="ExpenseValue"
+//             render={({ field }) => (
+//               <FormItem>
+//                 <FormLabel>Expense Value</FormLabel>
+//                 <FormControl>
+//                   <Input placeholder="Eg: 123456789" type="text" {...field} />
+//                 </FormControl>
+//                 <FormMessage />
+//               </FormItem>
+//             )}
+//           />
+//           <FormField
+//             control={form.control}
+//             name="GSTPercentage"
+//             render={({ field }) => (
+//               <FormItem>
+//                 <FormLabel>GST Percentage</FormLabel>
+//                 <FormControl>
+//                   <Input placeholder="eg: 18" type="number" {...field} />
+//                 </FormControl>
+//                 <FormMessage />
+//               </FormItem>
+//             )}
+//           />
+//           <FormField
+//             control={form.control}
+//             name="ExpenseDate"
+//             render={({ field }) => (
+//               <FormItem>
+//                 <FormLabel>Expense Date</FormLabel>
+//                 <FormControl>
+//                   <Input placeholder="Eg: 2024-12-04" type="date" {...field} />
+//                 </FormControl>
+//                 <FormMessage />
+//               </FormItem>
+//             )}
+//           />
+//         </div>
+//         <Button type="submit" disabled={isLoading} className="w-full">
+//           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+//           Submit
+//         </Button>
+//       </form>
+//     </Form>
+//   );
+// }
