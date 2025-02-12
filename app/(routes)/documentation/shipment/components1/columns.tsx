@@ -176,6 +176,7 @@ export const columns: ColumnDef<shipment>[] = [
     },
   },
 
+
   {
     accessorKey: "forwarderInvoice",
     header: ({ column }) => (
@@ -183,7 +184,6 @@ export const columns: ColumnDef<shipment>[] = [
     ),
     cell: ({ row }) => {
         const fileUrl = row.original?.shippingDetails?.forwarderInvoice;
-
         return (
           <div className="flex items-center space-x-2">
             <span className="truncate font-medium">{fileUrl}</span>

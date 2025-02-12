@@ -50,14 +50,21 @@ function Page() {
                 </Link>
             </div>
             <Separator className="my-2" />
-            <DataTable
-                bulkDeleteIdName="_id"
+<div >
+
+<DataTable 
+  bulkDeleteIdName="_id"
                 bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                 bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
                 bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                 deleteRoute="/shipment/delete/all"
-                searchKey="" data={shipmentData} columns={columns} />
+  searchKey="containerNumber" 
+  data={shipmentData} 
+  columns={columns} 
+  showDropdown={true} // ✅ Enable dropdown for Shipment Page
+/> 
 
+</div>
         </div>
     );
 }
