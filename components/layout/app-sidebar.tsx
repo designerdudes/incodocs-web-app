@@ -209,7 +209,7 @@ function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 plan: "Standard Plan", // Placeholder, update this as needed
             }));
             setFactoryData(transformedData);
-            console.log("Factory data fetched successfully", transformedData);
+            // console.log("Factory data fetched successfully", transformedData);
         } catch (error) {
             console.error("Error fetching Factory data", error);
         }
