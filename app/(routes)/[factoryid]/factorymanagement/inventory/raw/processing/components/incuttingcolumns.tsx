@@ -9,6 +9,7 @@ export type Block = {
     _id: string
     slabID: string
     blockNumber: string
+    factoryId:String
     blockLotName: string
     numberofSlabs: string
     isActive: boolean
