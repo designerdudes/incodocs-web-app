@@ -42,19 +42,19 @@ function FactoryManagementPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
         <Link href={`/${params.factoryid}/factorymanagement/inventory`} passHref>
-          <Card>
-            <CardHeader className="flex flex-col gap-2 items-start">
-              <FiGrid className="w-6 h-6 text-4xl text-indigo-500 self-end" />
-              <CardTitle className="text-2xl font-semibold text-gray-800">
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
                 Inventory
               </CardTitle>
+              <FiGrid className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-base text-gray-600">
                 A comprehensive solution for managing inventory, monitoring
                 production, and streamlining operations efficiently.
               </CardDescription>
-              <p className="text-gray-700">
+              <p className="text-sm text-gray-700">
                 Track raw materials, oversee blocks and slabs, and monitor
                 production stages with real-time data.
               </p>
@@ -62,19 +62,19 @@ function FactoryManagementPage() {
           </Card>
         </Link>
         <Link href={`/${params.factoryid}/factorymanagement/accounting`} passHref>
-          <Card>
-            <CardHeader className="flex flex-col gap-2 items-start">
-              <MdAccountBalance className="w-6 h-6 text-4xl text-green-500 self-end" />
-              <CardTitle className="text-2xl font-semibold text-gray-800">
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
                 Accounting
               </CardTitle>
+              <MdAccountBalance className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-base text-gray-600">
                 Effortlessly streamline and manage your business documents,
                 ensuring accuracy and easy retrieval.
               </CardDescription>
-              <p className="text-gray-700">
+              <p className="text-sm text-gray-700">
                 Create, store, and retrieve essential documents like invoices,
                 export papers, and shipment records.
               </p>

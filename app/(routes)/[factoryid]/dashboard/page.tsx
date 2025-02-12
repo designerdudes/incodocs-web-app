@@ -30,48 +30,48 @@ export default async function Home({ params }: Props) {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <Link href={`/${params.factoryid}/factorymanagement`} passHref>
-          <Card>
-            <CardHeader className="flex flex-col gap-2 items-start">
-              <FiBriefcase className="text-4xl text-indigo-500 self-end" />
-              <CardTitle className="text-2xl font-semibold text-gray-800">Factory Management</CardTitle>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Factory Management</CardTitle>
+              <FiBriefcase className="h-6 w-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-base text-gray-600">
                 Your complete solution for handling inventory, tracking production, and optimizing operations.
               </CardDescription>
-              <p className="text-gray-700">
+              <p className="text-sm text-gray-700">
                 Monitor raw materials, manage blocks and slabs, and track production phases with real-time insights.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/documentation/dashboard" passHref>
-          <Card>
-            <CardHeader className="flex flex-col gap-2 items-start">
-              <FiFileText className="text-4xl text-green-500 self-end" />
-              <CardTitle className="text-2xl font-semibold text-gray-800">Documentation</CardTitle>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Documentation</CardTitle>
+              <FiFileText className="h-6 w-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-base text-gray-600">
                 Simplify and organize your business documentation with ease.
               </CardDescription>
-              <p className="text-gray-700">
+              <p className="text-sm text-gray-700">
                 Generate, store, and access critical documents such as invoices, export papers, and shipment details.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/settings" passHref>
-          <Card>
-            <CardHeader className="flex flex-col gap-2 items-start">
-              <FiSettings className="text-4xl text-yellow-500 self-end" />
-              <CardTitle className="text-2xl font-semibold text-gray-800">Settings</CardTitle>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Settings</CardTitle>
+              <FiSettings className="h-6 w-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-base text-gray-600">
                 Customize your preferences and manage account settings.
               </CardDescription>
-              <p className="text-gray-700">
+              <p className="text-sm text-gray-700">
                 Adjust notification settings, update profile information, and more.
               </p>
             </CardContent>
