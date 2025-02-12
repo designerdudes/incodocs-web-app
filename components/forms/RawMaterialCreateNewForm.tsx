@@ -310,7 +310,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         field.onChange(e);
                         handleBlocksInputChange(e.target.value);
                       }}
-                      value={field.value}
+                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
                     />
                   </FormControl>
                   <FormMessage />
