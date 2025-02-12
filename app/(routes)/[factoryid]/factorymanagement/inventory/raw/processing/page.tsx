@@ -285,6 +285,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   data={slabsData}
                 />
               </TabsContent>
+              
               <TabsContent value="CuttinginchesWithOutAllowance">
                 <DataTable
                   bulkDeleteIdName="_id"
