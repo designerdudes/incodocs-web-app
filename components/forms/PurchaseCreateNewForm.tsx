@@ -458,7 +458,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       }
                       type="number"
                       disabled={isLoading}
-                      {...field}
+                      value={field.value === 0 ? "" : field.value}
                     />
                   </FormControl>
                   <FormMessage />

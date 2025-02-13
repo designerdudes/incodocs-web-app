@@ -112,7 +112,7 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
         },
         footer: ({ table }) => {
           const totalAmount = table.getRowModel().rows.reduce((sum, row) => {
-            const amt = ((row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144) * 3.75;
+            const amt = ((row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144) * (row.original?.workersCuttingPay);
             return sum + amt;
           }, 0);
           return <span className="font-medium text-gray-600">Total Amount: {totalAmount.toFixed(2)}</span>;

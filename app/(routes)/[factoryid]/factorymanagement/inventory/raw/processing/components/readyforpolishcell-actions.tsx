@@ -90,7 +90,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Lot Details
+            Edit Block Details
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

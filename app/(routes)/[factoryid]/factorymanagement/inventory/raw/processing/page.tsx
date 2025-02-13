@@ -59,6 +59,8 @@ export type FinishedMaterial = {
 
   createdAt: string; // ISO 8601 timestamp
   updatedAt: string; // ISO 8601 timestamp
+  workersCuttingPay:number;
+  workersPolishingPay:number;
 };
 
 interface Props {
