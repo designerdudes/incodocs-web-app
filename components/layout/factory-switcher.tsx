@@ -68,52 +68,51 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
 
     return (
         <div>
-        <SidebarMenu>
-            <SidebarMenuItem>
-                <DropdownMenu>
-                <div>
-
-                    <DropdownMenuTrigger asChild>
-                        <SidebarMenuButton
-                            size="lg"
-                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                        >
-                            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                                {activeFactory && <activeFactory.logo className="size-4" />}
-                            </div>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">
-                                    {activeFactory?.factoryName}
-                                </span>
-                                <span className="truncate text-xs">{activeFactory?.plan}</span>
-                            </div>
-                            <ChevronsUpDown className="ml-auto" />
-                        </SidebarMenuButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent
-                        className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                        align="start"
-                        side={isMobile ? "bottom" : "right"}
-                        sideOffset={4}
-                    >
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            Factories
-                        </DropdownMenuLabel>
-                        {FactoriesData.map((factory, index) => (
-                            <DropdownMenuItem
-                                key={factory.factoryId}
-                                onClick={() => handleFactorySelect(factory)}
-                                className="gap-2 p-2"
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <DropdownMenu>
+                        <div>
+                            <DropdownMenuTrigger asChild>
+                                <SidebarMenuButton
+                                    size="lg"
+                                    className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                                >
+                                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                                        {activeFactory && <activeFactory.logo className="size-4" />}
+                                    </div>
+                                    <div className="grid flex-1 text-left text-sm leading-tight">
+                                        <span className="truncate font-semibold">
+                                            {activeFactory?.factoryName}
+                                        </span>
+                                        <span className="truncate text-xs">{activeFactory?.plan}</span>
+                                    </div>
+                                    <ChevronsUpDown className="ml-auto" />
+                                </SidebarMenuButton>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
+                                align="start"
+                                side={isMobile ? "bottom" : "right"}
+                                sideOffset={4}
                             >
-                                <div className="flex size-6 items-center justify-center rounded-sm border">
-                                    <factory.logo className="size-4 shrink-0" />
-                                </div>
-                                {factory.factoryName}
-                                <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
-                            </DropdownMenuItem>
-                        ))}
-                        <DropdownMenuSeparator />
-                        {/* <DropdownMenuItem
+                                <DropdownMenuLabel className="text-xs text-muted-foreground">
+                                    Factories
+                                </DropdownMenuLabel>
+                                {FactoriesData.map((factory, index) => (
+                                    <DropdownMenuItem
+                                        key={factory.factoryId}
+                                        onClick={() => handleFactorySelect(factory)}
+                                        className="gap-2 p-2"
+                                    >
+                                        <div className="flex size-6 items-center justify-center rounded-sm border">
+                                            <factory.logo className="size-4 shrink-0" />
+                                        </div>
+                                        {factory.factoryName}
+                                        <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
+                                    </DropdownMenuItem>
+                                ))}
+                                <DropdownMenuSeparator />
+                                {/* <DropdownMenuItem
                             className="gap-2 p-2"
                             onSelect={() => {
                                 GlobalModal.title = `Enter Factory Details`;
@@ -127,14 +126,13 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                             <div className="font-medium text-muted-foreground">Add Factory</div>
                             
                         </DropdownMenuItem> */}
-                                    
-            <AddFactoryButton />
-                    </DropdownMenuContent>
-                    </div>
-
-                </DropdownMenu>
-            </SidebarMenuItem>
-        </SidebarMenu>
+                                <div>                                <AddFactoryButton />
+                                </div>
+                            </DropdownMenuContent>
+                        </div>
+                    </DropdownMenu>
+                </SidebarMenuItem>
+            </SidebarMenu>
         </div>
     );
 }
