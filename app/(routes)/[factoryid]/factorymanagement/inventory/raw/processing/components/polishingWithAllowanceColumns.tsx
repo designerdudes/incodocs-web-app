@@ -10,6 +10,7 @@ import { FinishedMaterial } from "../page";
 function calculateAdjustedDimensions(
   length: number,
   height: number,
+  workersPolishingPay: number,
   trimLength?: number,
   trimHeight?: number
 ) {
@@ -37,7 +38,7 @@ function calculateAdjustedDimensions(
   const lengthInCm = (adjustedLength * 2.54).toFixed(2); // Convert to cm
   const heightInCm = (adjustedHeight * 2.54).toFixed(2); // Convert to cm
   const squareFt = ((adjustedLength * adjustedHeight) / 144).toFixed(2); // Calculate square feet
-  const amount = (((adjustedLength * adjustedHeight) / 144) * 11).toFixed(2); // Calculate amount
+  const amount = (((adjustedLength * adjustedHeight) / 144) * workersPolishingPay).toFixed(2); // Calculate amount
 
   return {
     adjustedLength: adjustedLength.toFixed(2),
@@ -124,6 +125,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { adjustedLength } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -137,6 +139,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { adjustedHeight } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -150,6 +153,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { lengthInCm } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -163,6 +167,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { heightInCm } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -176,6 +181,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { squareFt } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -186,6 +192,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           const { squareFt } = calculateAdjustedDimensions(
             row.original?.dimensions?.length?.value,
             row.original?.dimensions?.height?.value,
+            row.original?.workersPolishingPay,
             row.original?.trim?.length?.value,
             row.original?.trim?.height?.value
           );
@@ -206,6 +213,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         const { amount } = calculateAdjustedDimensions(
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
+          row.original?.workersPolishingPay,
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
@@ -216,6 +224,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           const { amount } = calculateAdjustedDimensions(
             row.original?.dimensions?.length?.value,
             row.original?.dimensions?.height?.value,
+            row.original?.workersPolishingPay,
             row.original?.trim?.length?.value,
             row.original?.trim?.height?.value
           );

@@ -255,10 +255,10 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e); // Updates form state
-                        handleSlabsInputChange(e.target.value); // Calls the function
+                        field.onChange(e);
+                        handleSlabsInputChange(e.target.value);
                       }}
-                      value={field.value}
+                      value={field.value === 0 ? "" : field.value} // Calls the function
                     />
                   </FormControl>
                   <FormMessage />
@@ -304,7 +304,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       placeholder="Enter Invoice Value"
                       type="number"
                       disabled={isLoading}
-                      {...field}
+                      value={field.value === 0 ? "" : field.value}
                     />
                   </FormControl>
                   <FormMessage />
