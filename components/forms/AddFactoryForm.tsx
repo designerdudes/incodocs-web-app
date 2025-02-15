@@ -96,7 +96,7 @@ function FactoryForm() {
         </p>
         <p>
           <strong>Workers Cutting Pay:</strong>{values.workersCuttingPay}
-        </p>
+          </p>
         <p>
           <strong>Workers Polishing Pay:</strong>{values.workersPolishingPay}
         </p>
@@ -217,6 +217,8 @@ function FactoryForm() {
           )}
         />
         {/* Workers Cutting Pay */}
+        <div className="grid grid-cols-2 gap-4">
+
         <FormField
           control={form.control}
           name="workersCuttingPay"
@@ -229,12 +231,12 @@ function FactoryForm() {
                   placeholder="Eg: 1500"
                   value={field.value === 0 ? "" : field.value}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                  />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
-        />
+          />
         {/* Workers Polishing Pay */}
         <FormField
           control={form.control}
@@ -248,12 +250,13 @@ function FactoryForm() {
                   placeholder="Eg: 1200"
                   value={field.value === 0 ? "" : field.value}
                   onChange={(e) => field.onChange(Number(e.target.value))}
-                />
+                  />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
-        />
+          />
+          </div>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
