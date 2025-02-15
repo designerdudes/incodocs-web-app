@@ -21,12 +21,11 @@
 //     description: "",
 //     children: <></>
 
-// }))  
-
+// }))
 
 // working code starts here add new factory
 
-import { create } from 'zustand'
+import { create } from "zustand";
 
 interface useGlobalModalProps {
   isOpen: boolean;
@@ -44,7 +43,10 @@ export const useGlobalModal = create<useGlobalModalProps>((set) => ({
   isOpen: false,
   isDismissable: true,
   onOpen: () => set({ isOpen: true }),
-  onClose: () => set({ isOpen: false }),
+  onClose: () => {
+    set({ isOpen: false });
+    window.location.reload();
+  },
   title: "",
   description: "",
   children: <></>,
