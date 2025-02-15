@@ -15,16 +15,20 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const shippingBill = [
-    { id: "1",  name: "ShippingBillNo24" },
-    { id: "2", name: "ShippingBillNo24"}
+  { id: "1", name: "ShippingBillNo24" },
+  { id: "2", name: "ShippingBillNo24" },
 ];
-
 
 export function SupplierDetails() {
   const { control } = useFormContext();
@@ -167,9 +171,19 @@ export function SupplierDetails() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clearence Supplier Invoice</FormLabel>
-              <FormControl>
-                <Input type="file" {...field} />
-              </FormControl>
+              <div className="flex items-center gap-2">
+                <FormControl>
+                  <Input type="file" {...field} />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="text-white bg-blue-500 hover:bg-blue-600"
+                >
+                  <UploadCloud className="w-5 h-10 mr-2" />
+                  Upload
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -204,9 +218,19 @@ export function SupplierDetails() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Actual Supplier Invoice</FormLabel>
-              <FormControl>
-                <Input type="file" {...field} />
-              </FormControl>
+              <div className="flex items-center gap-2">
+                <FormControl>
+                  <Input type="file" {...field} />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  className="text-white bg-blue-500 hover:bg-blue-600"
+                >
+                  <UploadCloud className="w-5 h-10 mr-2" />
+                  Upload
+                </Button>
+              </div>
               <FormMessage />
             </FormItem>
           )}
