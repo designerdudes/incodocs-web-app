@@ -106,7 +106,7 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
         header: "Total Amount",
         cell: ({ row }) => {
           const amount = (
-            (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144 * (3.75)
+            (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144 * (row.original?.workersCuttingPay)
           ).toFixed(2);
           return <div>{amount}</div>;
         },

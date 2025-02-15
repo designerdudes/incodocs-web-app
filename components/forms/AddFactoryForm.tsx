@@ -98,7 +98,8 @@ function FactoryForm() {
           <strong>Workers Cutting Pay:</strong>{values.workersCuttingPay}
           </p>
         <p>
-          <strong>Workers Polishing Pay:</strong>{values.workersPolishingPay}
+          <strong>Workers Polishing Pay:</strong>
+          {values.workersPolishingPay}
         </p>
         <div className="flex justify-end space-x-2">
           <Button

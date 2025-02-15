@@ -133,6 +133,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
 
+    console.log(slabsData)
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
