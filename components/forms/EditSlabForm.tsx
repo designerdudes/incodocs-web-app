@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
@@ -12,7 +12,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Button } from "../ui/button";
-import { Icons } from "../ui/icons";
 import { Input } from "../ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -27,17 +26,24 @@ interface Props {
 const formSchema = z.object({
   slabs: z.array(
     z.object({
-      _id: z.string(),
       slabNumber: z.number(),
       dimensions: z.object({
-        height: z.object({ value: z.number().min(1), units: z.string() }),
-        length: z.object({ value: z.number().min(1), units: z.string() }),
+        length: z.object({
+          value: z.number(),
+          units: z.string(),
+        }),
+        height: z.object({
+          value: z.number(),
+          units: z.string(),
+        }),
       }),
     })
   ),
 });
 
-export default function EditSlabForm({ id }: Props) {
+
+export default function EditSlabForm({ id
+}: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [slabs, setSlabs] = useState<any[]>([]);
   const router = useRouter();
@@ -60,6 +66,7 @@ export default function EditSlabForm({ id }: Props) {
     fetchSlabData();
   }, [id]);
 
+
   const handleDelete = async (slabId: string) => {
     try {
       await axios.delete(`http://localhost:4080/factory-management/inventory/finished/delete/${slabId}`);
@@ -70,34 +77,33 @@ export default function EditSlabForm({ id }: Props) {
     }
   };
 
-  const handleSubmit = async (values: any) => {
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("Form data:", values);
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      const newSlabs = values.slabs.filter((slab: any) => !slabs.some((s) => s._id === slab._id));
-      const updatedSlabs = values.slabs.filter((slab: any) => slabs.some((s) => s._id === slab._id));
+      await putData(`/factory-management/inventory/updateMultipleSlabsValue`, {
+        ...values,
+      });
 
-      if (newSlabs.length > 0) {
-        await axios.post("http://localhost:4080/factory-management/inventory/updateblockaddslab/67a34ab253007369e0d97126", { slabs: newSlabs });
-      }
-      if (updatedSlabs.length > 0) {
-        await axios.put("http://localhost:4080/factory-management/inventory/updateMultipleSlabsValue", { slabs: updatedSlabs });
-      }
-
-      toast.success("Slabs Added/Updated Successfully");
-      setIsLoading(false);
+      toast.success("Slab Values Updated Successfully");
       router.back();
     } catch (error) {
-      console.error("Error updating slabs:", error);
-      toast.error("Failed to update slabs");
+      console.error("Validation or API error:", error);
+      toast.error("An error occurred while updating data");
+    }
+    finally {
       setIsLoading(false);
     }
   };
 
+
   return (
-    <div className="p-4 border rounded shadow-md">
+    <div className="space-y-6">
       <h2 className="text-xl font-semibold mb-4">Edit Slabs</h2>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           {slabs.map((slab, index) => (
             <div key={slab._id} className="flex items-center gap-4 mb-2">
               <span className="font-semibold">Slab {slab.slabNumber}</span>
@@ -142,17 +148,9 @@ export default function EditSlabForm({ id }: Props) {
               </Button>
             </div>
           ))}
-          <div className="flex gap-4 mt-4">
-            <Button
-              type="button"
-              onClick={() => setSlabs([...slabs, { _id: Date.now().toString(), slabNumber: slabs.length + 1, dimensions: { height: { value: 0, units: "inch" }, length: { value: 0, units: "inch" } } }])}
-            >
-              Add Slab
-            </Button>
-            <Button type="submit" className="bg-blue-500 text-white" disabled={isLoading}>
-              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />} Update Slabs
-            </Button>
-          </div>
+          <Button type="submit" disabled={isLoading}>
+            Update Slabs
+          </Button>
         </form>
       </Form>
     </div>
