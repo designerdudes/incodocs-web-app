@@ -7,6 +7,19 @@ import Heading from "@/components/ui/heading";
 import StatsCard from "@/components/statsCard";
 import { documentationCards, FactoryCards } from "@/lib/constants";
 import { useParams } from "next/navigation";
+import {
+    Card,
+    CardHeader,
+    CardTitle,
+    CardContent,
+    CardDescription,
+  } from "@/components/ui/card";
+import { FiBriefcase, FiFileText, FiGrid } from "react-icons/fi";
+import { MdAccountBalance } from "react-icons/md";
+import { TbFileExport } from "react-icons/tb";
+import { LiaShippingFastSolid, LiaFileInvoiceSolid } from "react-icons/lia";
+import { BiPurchaseTag } from "react-icons/bi";
+import { HiOutlineDocumentCurrencyRupee } from "react-icons/hi2";
 
 function FactoryManagementPage() {
     const params = useParams();
@@ -30,6 +43,103 @@ function FactoryManagementPage() {
                 </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <Link href={`/documentation/exportdocs`} passHref>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+                Export Docs
+              </CardTitle>
+              <TbFileExport  className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                A comprehensive solution for managing exportdocs, monitoring efficiently.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+              Track and manage all your export documents with ease, ensuring seamless communication and compliance. Stay updated with real-time status and access essential documents like invoices and packing lists.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/shipment`} passHref>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+                Shipments
+              </CardTitle>
+              <LiaShippingFastSolid className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Effortlessly manage your business shipments,
+                ensuring accuracy and easy retrieval.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+              Track and manage your shipments efficiently with real-time updates on delivery status and progress. Ensure timely deliveries by monitoring all stages of shipment from dispatch to arrival.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/invoices`} passHref>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+              Invoices
+              </CardTitle>
+              <LiaFileInvoiceSolid className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Effortlessly manage your business invoices,
+                ensuring accuracy and easy retrieval.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+              Easily generate and manage invoices with accurate details and real-time tracking. Stay on top of payments and ensure smooth financial transactions with organized invoice records.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/purchaseorder`} passHref>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+                Purchase Order
+              </CardTitle>
+              <BiPurchaseTag className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Effortlessly manage your business purchaseorder,
+                ensuring accuracy and easy retrieval.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+              Efficiently manage and track your purchase orders from creation to delivery. Stay updated with real-time status and ensure timely fulfillment of all orders.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/quotes`} passHref>
+          <Card className="bg-white dark:bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">
+                Quotes
+              </CardTitle>
+              <HiOutlineDocumentCurrencyRupee className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Effortlessly manage your business quotes,
+                ensuring accuracy and easy retrieval.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+              Generate and manage quotes quickly with accurate pricing and product details. Track quote status and ensure timely follow-ups for seamless customer engagement.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
                 {/* {documentationCards.map((card, index) => (
                     <StatsCard
                         key={index}
@@ -42,7 +152,7 @@ function FactoryManagementPage() {
                     />
                 ))} */}
             </div>
-        </div>
+        
     );
 }
 

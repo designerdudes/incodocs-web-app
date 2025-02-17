@@ -31,7 +31,7 @@ export default async function Page() {
     return (
         <div className="flex flex-col p-6">
             <div className="flex justify-between items-center gap-2">
-                <Link href="./">
+                <Link href="/documentation/dashboard">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
