@@ -217,20 +217,27 @@ export default function CreateNewFormPage() {
 
             </div>
             <FormProvider {...methods}>
-                <form onSubmit={methods.handleSubmit((data) => console.log(data))} className="flex flex-col gap-3 w-full p-3"
-                >
-                    <div className="flex justify-between">
-                        <Heading
-                            className="text-xl"
-                            title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
-                        />
-                        <p className="text-sm text-muted-foreground">
-                            Step {currentStep + 1} of {totalSteps}
-                        </p>
-                    </div>
-                    {steps[currentStep].component} {/* Ensure this is inside the form */}
-                </form>
-            </FormProvider>
+    <form 
+        onSubmit={methods.handleSubmit((data) => console.log(data))} 
+        className="flex flex-col gap-3 w-full p-3"
+    >
+        {/* Step heading */}
+        <div className="flex justify-between">
+            <Heading
+                className="text-xl"
+                title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
+            />
+            <p className="text-sm text-muted-foreground">
+                Step {currentStep + 1} of {steps.length}
+            </p>
+        </div>
+
+        {/* Step Content */}
+        {steps[currentStep].component}
+    </form>
+</FormProvider>
+
         </div>
     );
 }
+
