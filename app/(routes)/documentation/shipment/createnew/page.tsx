@@ -27,7 +27,7 @@ const steps = [
     { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
     { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
     { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
-    { id: 7, name: "Certificate Of Origin ", component: <CertificateOfOrigin /> },
+    { id: 7, name: "Other Details ", component: <CertificateOfOrigin /> },
 ];
 
 const formSchema = z.object({
@@ -216,43 +216,51 @@ export default function CreateNewFormPage() {
             {/* <div className="container mx-auto">
                 <NewShipmentForm />
             </div> */}
-            <div className="w-full">
-                <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
-                {/* <div className="p-4">{steps[currentStep].component}</div> */}
+           <div className="w-full">
+    <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+</div>
 
-                <div className="flex justify-between mt-4">
-                    <Button onClick={prevStep} disabled={currentStep === 0}>
-                        Previous
-                    </Button>
-                    <Button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-                        Next
-                    </Button>
-                </div>
+<FormProvider {...methods}>
+    <form 
+        onSubmit={methods.handleSubmit((data) => console.log(data))} 
+        className="flex flex-col gap-3 w-full p-3"
+    >
+        {/* Buttons at the top */}
+        <div className="flex justify-between mt-4">
+            {/* "Previous" button (always on the left, but hidden on the first step) */}
+            <Button 
+                type="button" 
+                onClick={prevStep} 
+                disabled={currentStep === 0}
+                className={currentStep === 0 ? "invisible" : ""}
+            >
+                  Previous
+            </Button>
 
-            </div>
-            <FormProvider {...methods}>
-                <form onSubmit={methods.handleSubmit((data) => console.log(data))} className="flex flex-col gap-3 w-full p-3"
-                >
-                    <div className="flex justify-between">
-                        <Heading
-                            className="text-xl"
-                            title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
-                        />
-                        <p className="text-sm text-muted-foreground">
-                            Step {currentStep + 1} of {totalSteps}
-                        </p>
-                    </div>
-                    {steps[currentStep].component} {/* Ensure this is inside the form */}
-                    {/* <div className="flex justify-between mt-4">
-                        <Button onClick={prevStep} disabled={currentStep === 0}>
-                            Previous
-                        </Button>
-                        <Button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-                            Next
-                        </Button>
-                    </div> */}
-                </form>
-            </FormProvider>
+            {/* "Next" button (always on the right) */}
+            {currentStep < steps.length - 1 && (
+                <Button type="button" onClick={nextStep}>
+                    Next
+                </Button>
+            )}
+        </div>
+
+        {/* Step heading */}
+        <div className="flex justify-between">
+            <Heading
+                className="text-xl"
+                title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
+            />
+            <p className="text-sm text-muted-foreground">
+                Step {currentStep + 1} of {steps.length}
+            </p>
+        </div>
+
+        {/* Step Content */}
+        {steps[currentStep].component}
+    </form>
+</FormProvider>
+
         </div>
     );
 }
