@@ -24,14 +24,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SaveDetailsProps } from "./BookingDetails";
 
 const shippingBill = [
   { id: "1", name: "ShippingBillNo24" },
   { id: "2", name: "ShippingBillNo24" },
 ];
 
-export function SupplierDetails() {
+export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
   const { control } = useFormContext();
+  const { handleSubmit } = useFormContext();
+
 
   return (
     <>
@@ -279,6 +282,9 @@ export function SupplierDetails() {
             </FormItem>
           )}
         />
+        <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
+          Save Progress
+        </Button></div>
       </div>
     </>
   );

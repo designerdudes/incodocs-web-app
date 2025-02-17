@@ -27,10 +27,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SaveDetailsProps } from "./BookingDetails";
 
-export function ShippingDetails() {
+export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
   const [invoices, setInvoices] = useState<any[]>([]);
+  const { handleSubmit } = useFormContext();
+
   // const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
 
   const handleDelete = (index: number) => {
@@ -224,6 +227,7 @@ export function ShippingDetails() {
           </div>
         )}
       </div>
+      <div className="mt-4"><Button type="button" onClick={handleSubmit(saveProgress)}>Save Progress</Button></div>
     </div>
   );
 }

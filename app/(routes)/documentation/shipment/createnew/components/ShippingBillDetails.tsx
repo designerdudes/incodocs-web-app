@@ -19,12 +19,15 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { SaveDetailsProps } from "./BookingDetails";
 
-export function ShippingBillDetails() {
+export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
-  const [shippingBills, setShippingBills] = useState([]);
+  const [shippingBills, setShippingBills] = useState<{ uploadShippingBill: string; shippingBillNumber: string; shippingBillDate: string; drawbackValue: string; roadtepValue: string; }[]>([]);
+  const { handleSubmit } = useFormContext();
 
-  const handleShippingBillCountChange = (value : string) => {
+
+  const handleShippingBillCountChange = (value: string) => {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
       const newShippingBills = Array.from({ length: count }, () => ({
@@ -64,8 +67,8 @@ export function ShippingBillDetails() {
           </FormItem>
         )}
       />
-{/* CB Name */}
-<FormField
+      {/* CB Name */}
+      <FormField
         control={control}
         name="shippingBillDetails.cbName"
         render={({ field }) => (
@@ -221,6 +224,10 @@ export function ShippingBillDetails() {
           </Table>
         </div>
       )}
+      <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
+        Save Progress
+      </Button></div>
+
     </div>
   );
 }

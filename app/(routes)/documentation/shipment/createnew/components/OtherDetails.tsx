@@ -18,10 +18,12 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { SaveDetailsProps } from "./BookingDetails";
 
-export function CertificateOfOrigin() {
+export function OtherDetails({ saveProgress }: SaveDetailsProps) {
   const { control } = useFormContext();
   const [file, setFile] = useState<File | null>(null);
+  const { handleSubmit } = useFormContext();
 
   return (
     <div className="grid grid-cols-4 gap-3">
