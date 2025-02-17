@@ -35,6 +35,21 @@ export const columns: ColumnDef<shipment>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "BookingNumber",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Booking Number" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {row.original.bookingDetails?.BookingNumber}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "bookingDetailsSchema.containerNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Container Number" />
@@ -278,6 +293,53 @@ export const columns: ColumnDef<shipment>[] = [
       );
     },
   },
+  {
+    accessorKey: "Port Code",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Port Code" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.PortCode}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "CB Name",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="CB Name" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.CBName}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "CB Code",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="CB Code" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.CBCode}
+          </span>
+        </div>
+      );
+    },
+  },
+
+
 
   {
     accessorKey: "shippingBillDate",
@@ -334,21 +396,7 @@ export const columns: ColumnDef<shipment>[] = [
     },
   },
 
-  {
-    accessorKey: "actualSupplierName",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Actual Supplier Name " />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actualSupplierName}
-          </span>
-        </div>
-      );
-    },
-  },
+  
 
   {
     accessorKey: "supplierGSTIN",
@@ -452,6 +500,41 @@ export const columns: ColumnDef<shipment>[] = [
               </a>
             )}
           </div>
+      );
+    },
+  },
+  {
+    accessorKey: "ClearanceSupplierInvoice",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Upload Clearance Supplier Invoice" />
+    ),
+    cell: ({ row }) => {
+        const fileUrl = row.original?.supplierDetails?.uploadSupplierInvoice;
+
+        return (
+          <div className="flex items-center space-x-2">
+            <span className="truncate font-medium">{fileUrl}</span>
+            {fileUrl && (
+              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+              </a>
+            )}
+          </div>
+      );
+    },
+  },
+  {
+    accessorKey: "actualSupplierName",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Actual Supplier Name " />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.supplierDetails?.actualSupplierName}
+          </span>
+        </div>
       );
     },
   },
@@ -638,6 +721,70 @@ export const columns: ColumnDef<shipment>[] = [
       );
     },
   },
+  {
+    accessorKey: "CertificateOfOriginNumber",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Certificate Of Origin Number" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.OriginDetails?.CertificateOfOriginNumber}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "OriginDate",
+    header: ({ column }) => <ColumnHeader column={column} title="OriginDate" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            
+            {moment(row.original?.OriginDetails?.OriginDate).format(
+              "MMM Do YY"
+            )}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "IssuerOfCertificateOfOrigin",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Issuer Of Certificate Of Origin" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.OriginDetails?.IssuerOfCertificateOfOrigin}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "Upload Copy Of Fumigation",
+    header: ({ column }) => <ColumnHeader column={column} title="Upload Copy Of Fumigation" />,
+    cell: ({ row }) => {
+      const fileUrl = row.original?.OriginDetails?.UploadCopyOfFumigation;
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+  
 
   {
     id: "actions",
