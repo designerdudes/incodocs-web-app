@@ -26,6 +26,7 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table"; // ShadCN Table components
+import ProductButton from "./ProductButton";
 
 export function BookingDetails() {
   const { control, setValue } = useFormContext();
@@ -57,6 +58,8 @@ export function BookingDetails() {
       setValue("bookingDetails.containers", []); // Clear containers data if the value is invalid
     }
   };
+
+  
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -280,16 +283,31 @@ export function BookingDetails() {
                           </FormControl>
                         )}
                       />
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="lg"
-                        type="button"
-                        // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
-                      >
-                        Add Product
-                      </Button>
-                    )}
+                    ) :  
+
+                    <div>
+<ProductButton/>
+
+                    </div>
+                    
+                    // (
+
+                      
+
+
+
+                      
+                    //   <Button
+                    //     variant="default"
+                    //     size="lg"
+                    //     type="button"
+                    //     // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
+                    //   >
+                    //     Add Product
+                    //   </Button>
+                    // ) 
+                    
+                    }
                   </TableCell>
 
                   {/* Delete Action */}
