@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import  { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import React from "react";
@@ -292,6 +292,39 @@ const page = () => {
                   <TableRow>
                     <TableCell>Upload BL</TableCell>
                     <TableCell>Los Angeles</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+          <Card x-chunk="dashboard-07-chunk-0">
+            <CardHeader>
+              <CardTitle>Certificate Of Origin</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Field</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Certificate Of Origin Number</TableCell>
+                    <TableCell>123456</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell> Origin Date</TableCell>
+                    <TableCell>2025-02-07</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Issuer Of Certificate Of Origin</TableCell>
+                    <TableCell>Details</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Upload Copy Of Formagation</TableCell>
+                    <TableCell>Details</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
