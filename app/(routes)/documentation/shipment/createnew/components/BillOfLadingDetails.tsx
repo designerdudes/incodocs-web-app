@@ -17,9 +17,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
+import { SaveDetailsProps } from "./BookingDetails";
 
-export function BillOfLadingDetails() {
+export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
   const { control } = useFormContext();
+  const { handleSubmit } = useFormContext();
+
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -132,6 +135,9 @@ export function BillOfLadingDetails() {
           </FormItem>
         )}
       />
+      <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
+        Save Progress
+      </Button></div>
     </div>
   );
 }

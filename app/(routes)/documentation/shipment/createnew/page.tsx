@@ -4,7 +4,6 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { NewShipmentForm } from "@/components/forms/newShipmentForm";
 import { useState } from "react";
 import ProgressBar from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
@@ -16,158 +15,150 @@ import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CertificateOfOrigin } from "./components/CertificateOfOrigin";
+import { OtherDetails } from "./components/OtherDetails";
 
-const totalSteps = 7;
+
+const saveProgress = (data: any) => {
+    console.log("Saving progress...", data);
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    alert("Progress saved!");
+};
+
 
 const steps = [
-    { id: 1, name: "Booking Details", component: <BookingDetails /> },
-    { id: 2, name: "Shipping Details", component: <ShippingDetails /> },
-    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails /> },
-    { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
-    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
-    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
-    { id: 7, name: "Other Details ", component: <CertificateOfOrigin /> },
+    { id: 1, name: "Booking Details", component: <BookingDetails saveProgress={saveProgress} /> },
+    { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgress} /> },
+    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgress} /> },
+    { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgress} /> },
+    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails saveProgress={saveProgress} /> },
+    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgress} /> },
+    { id: 7, name: "Other Details", component: <OtherDetails saveProgress={saveProgress} /> },
 ];
+
 
 const formSchema = z.object({
     bookingDetails: z.object({
-        containerNumber: z
-            .string()
-            .min(3, {
-                message: "Container Number must be at least 3 characters long",
+        bookingNumber: z.string().min(3, { message: "Required name" }),
+        portOfLoading: z.string().min(3, { message: "Required name" }),
+        destinationPort: z.string().min(3, { message: "Required name" }),
+        vesselSailingDate: z.date(),
+        vesselArrivingDate: z.date(),
+        containers: z.array(z.object({
+            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }),
+            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }),
+            trukDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }),
+            addProductDetails: z.object({
+                productCategory: z.string().min(3, { message: "Required category" }),
+                graniteAndMarble: z.string().min(3, { message: "Required type" }),
+                tiles: z.object({
+                    noOfBoxes: z.number().min(1, { message: "Required value" }),
+                    noOfPiecesPerBoxes: z.number().min(1, { message: "Required value" }),
+                    sizePerTile: z.object({
+                        length: z.object({
+                            value: z.number(),
+                            units: z.string()
+                        }),
+                        breadth: z.object({
+                            value: z.number(),
+                            units: z.string()
+                        })
+                    })
+                })
             })
-            .optional(),
-        portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-        destinationPort: z.string().min(3, { message: "Required name" }).optional(),
-        vesselSailingDate: z.date().optional(),
-        vesselArrivingDate: z.date().optional(),
-        truckNumber: z
-            .string()
-            .min(10, { message: "Number should be 10 characters long" })
-            .optional(),
-        truckDriverNumber: z
-            .string()
-            .min(10, { message: "Truck driver number should be 10 characters long" })
-            .optional(),
+        }))
     }),
 
     shippingDetails: z.object({
-        shippingLine: z.string().min(3, { message: "Required name" }).optional(),
-        forwarder: z
-            .string()
-            .min(3, { message: "Name must be at least 3 characters long" })
-            .optional(),
-        forwarderInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        valueOfForwarderInvoice: z
-            .string()
-            .min(1, { message: "Required value" })
-            .optional(),
-        transporter: z.string().min(3, { message: "Required name" }).optional(),
-        transporterInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        valueOfTransporterInvoice: z
-            .string()
-            .min(1, { message: "Required value" })
-            .optional(),
+        shippingLine: z.string().min(3, { message: "Required name" }),
+        noOfShipmentinvoices: z.number(),
+        shippingLineInvoices: z.array(z.object({
+            invoiceNumber: z.string(),
+            uploadInvoiceUrl: z.string(),
+            date: z.date(),
+            valueWithGst: z.number(),
+            valueWithoutGst: z.number()
+        })),
+        transporterName: z.string().min(3, { message: "Required name" }),
+        noOftransportinvoices: z.number(),
+        transporterInvoices: z.array(z.object({
+            invoiceNumber: z.string(),
+            uploadInvoiceUrl: z.string(),
+            date: z.date(),
+            valueWithGst: z.number(),
+            valueWithoutGst: z.number()
+        })),
+        forwarderName: z.string().min(3, { message: "Required name" }),
+        noOfForwarderinvoices: z.number(),
+        forwarderInvoices: z.array(z.object({
+            invoiceNumber: z.string(),
+            uploadInvoiceUrl: z.string(),
+            date: z.date(),
+            valueWithGst: z.number(),
+            valueWithoutGst: z.number()
+        }))
     }),
 
     shippingBillDetails: z.object({
-        shippingBillNumber: z
-            .string()
-            .min(1, { message: "Shipping bill number is required" })
-            .optional(),
-        shippingBillDate: z.date().optional(),
-        uploadShippingBill: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
+        portCode: z.string(),
+        cbName: z.date(),
+        cdCode: z.string(),
+        ShippingBills: z.object({
+            shippingBillUrl: z.string(),
+            shippingBillNumber: z.string(),
+            shippingBillDate: z.date(),
+            drawbackValue: z.string(),
+            rodtepValue: z.string()
+        })
     }),
 
     supplierDetails: z.object({
-        supplierName: z.string().min(3, { message: "Required name" }).optional(),
-        actualSupplierName: z
-            .string()
-            .min(3, { message: "Required name" })
-            .optional(),
-        supplierGSTIN: z.string().min(3, { message: "Required GSTIN" }).optional(),
-        supplierInvoiceNumber: z
-            .string()
-            .min(10, { message: "Number should be 10 characters long" })
-            .optional(),
-        supplierInvoiceDate: z.date().optional(),
-        supplierInvoiceValueWithOutGST: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        supplierInvoiceValueWithGST: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        uploadSupplierInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        actualSupplierInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        actualSupplierInvoiceValue: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        shippingbill: z.string().min(1, { message: "shippingbill must be selected" }),
-            
+        clearance: z.object({
+            supplierName: z.string().min(3, { message: "Required name" }),
+            noOfInvoices: z.number(),
+            invoices: z.array(z.object({
+                supplierGSTN: z.string().min(3, { message: "Required GSTIN" }),
+                supplierInvoiceNumber: z.string(),
+                supplierInvoiceDate: z.date(),
+                supplierInvoiceValueWithGST: z.string(),
+                supplierInvoiceValueWithOutGST: z.string(),
+                clearanceSupplierInvoiceUrl: z.string()
+            }))
+        }),
+        actual: z.object({
+            actualSupplierName: z.string(),
+            actualSupplierInvoiceValue: z.string(),
+            actualSupplierInvoiceUrl: z.string(),
+            shippingBillUrl: z.string()
+        })
     }),
 
     saleInvoiceDetails: z.object({
-        commercialInvoiceNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-        commercialInvoiceDate: z.date().optional(),
-        consigneeDetails: z
-            .string()
-            .min(1, { message: "Enter some details" })
-            .optional(),
-        actualBuyer: z.string().min(3, { message: "Required name" }).optional(),
-        commercialInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
+        consignee: z.string(),
+        actualBuyer: z.string(),
+        commercialInvoices: z.object({
+            commercialInvoiceNumber: z.string(),
+            clearanceCommercialInvoiceUrl: z.string(),
+            actualCommercialInvoiceUrl: z.string(),
+            saberInvoiceUrl: z.string()
+        })
     }),
 
     blDetails: z.object({
-        blNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-        blDate: z.date().optional(),
-        telexDate: z.date().optional(),
-        uploadBL: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
+        blNumber: z.string(),
+        blDate: z.date(),
+        telexDate: z.date(),
+        uploadBL: z.string()
     }),
-    CertificateOfOrigin: z.object({
-        CertificateOfOriginNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-            CertificateOfOriginDate: z.date().optional(),Date: z.date().optional(),
-        IssuerOFCertificateOfOrigin: z.string().min(3, { message: "Required name" }).optional(),
-        uploadCopyOfFormagation: z
-        .any()
-        .refine((file) => file instanceof File, { message: "Upload required" })
-        .optional(),
-    }),
-});
 
+    otherDetails: z.object({
+        certificateOfOriginNumber: z.string(),
+        date: z.date(),
+        issuerOfCOO: z.string(),
+        uploadCopyOfFumigationCertificate: z.string()
+    }),
+
+    organizationId: z.string()
+});
 
 export default function CreateNewFormPage() {
     const [currentStep, setCurrentStep] = useState(0);
@@ -216,51 +207,50 @@ export default function CreateNewFormPage() {
             {/* <div className="container mx-auto">
                 <NewShipmentForm />
             </div> */}
-           <div className="w-full">
-    <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
-</div>
+            <div className="w-full">
+                <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+            </div>
 
-<FormProvider {...methods}>
-    <form 
-        onSubmit={methods.handleSubmit((data) => console.log(data))} 
-        className="flex flex-col gap-3 w-full p-3"
-    >
-        {/* Buttons at the top */}
-        <div className="flex justify-between mt-4">
-            {/* "Previous" button (always on the left, but hidden on the first step) */}
-            <Button 
-                type="button" 
-                onClick={prevStep} 
-                disabled={currentStep === 0}
-                className={currentStep === 0 ? "invisible" : ""}
-            >
-                  Previous
-            </Button>
+            <FormProvider {...methods}>
+                <form
+                    onSubmit={methods.handleSubmit((data) => console.log(data))}
+                    className="flex flex-col gap-3 w-full p-3"
+                >
+                    {/* Buttons at the top */}
+                    <div className="flex justify-between mt-4">
+                        {/* "Previous" button (always on the left, but hidden on the first step) */}
+                        <Button
+                            type="button"
+                            onClick={prevStep}
+                            disabled={currentStep === 0}
+                            className={currentStep === 0 ? "invisible" : ""}
+                        >
+                            Previous
+                        </Button>
 
-            {/* "Next" button (always on the right) */}
-            {currentStep < steps.length - 1 && (
-                <Button type="button" onClick={nextStep}>
-                    Next
-                </Button>
-            )}
-        </div>
+                        {/* "Next" button (always on the right) */}
+                        {currentStep < steps.length - 1 && (
+                            <Button type="button" onClick={nextStep}>
+                                Next
+                            </Button>
+                        )}
+                    </div>
 
-        {/* Step heading */}
-        <div className="flex justify-between">
-            <Heading
-                className="text-xl"
-                title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
-            />
-            <p className="text-sm text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
-            </p>
-        </div>
+                    {/* Step heading */}
+                    <div className="flex justify-between">
+                        <Heading
+                            className="text-xl"
+                            title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
+                        />
+                        <p className="text-sm text-muted-foreground">
+                            Step {currentStep + 1} of {steps.length}
+                        </p>
+                    </div>
 
-        {/* Step Content */}
-        {steps[currentStep].component}
-    </form>
-</FormProvider>
-
+                    {/* Step Content */}
+                    {steps[currentStep].component}
+                </form>
+            </FormProvider>
         </div>
     );
 }

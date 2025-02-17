@@ -28,10 +28,15 @@ import {
 } from "@/components/ui/table"; // ShadCN Table components
 import ProductButton from "./ProductButton";
 
-export function BookingDetails() {
+export interface SaveDetailsProps {
+  saveProgress: (data: any) => void;
+}
+
+export function BookingDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
   const [containers, setContainers] = React.useState<any[]>([]); // Store containers as an array
   const [showProductForm, setShowProductForm] = useState<boolean>(false);
+  const { handleSubmit } = useFormContext();
 
   const handleDelete = (index: number) => {
     const updatedContainers = containers.filter((_, i) => i !== index); // Remove container at the given index
@@ -59,7 +64,7 @@ export function BookingDetails() {
     }
   };
 
-  
+
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -283,30 +288,30 @@ export function BookingDetails() {
                           </FormControl>
                         )}
                       />
-                    ) :  
+                    ) :
 
-                    <div>
-<ProductButton/>
+                      <div>
+                        <ProductButton />
 
-                    </div>
-                    
-                    // (
+                      </div>
 
-                      
+                      // (
 
 
 
-                      
-                    //   <Button
-                    //     variant="default"
-                    //     size="lg"
-                    //     type="button"
-                    //     // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
-                    //   >
-                    //     Add Product
-                    //   </Button>
-                    // ) 
-                    
+
+
+
+                      //   <Button
+                      //     variant="default"
+                      //     size="lg"
+                      //     type="button"
+                      //     // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
+                      //   >
+                      //     Add Product
+                      //   </Button>
+                      // ) 
+
                     }
                   </TableCell>
 
@@ -327,6 +332,11 @@ export function BookingDetails() {
           </Table>
         </div>
       )}
+      <div className="mt-8"><Button type="button" onClick={handleSubmit(saveProgress)}>
+        Save Progress
+      </Button></div>
+      {/* Save Button */}
+
     </div>
   );
 }

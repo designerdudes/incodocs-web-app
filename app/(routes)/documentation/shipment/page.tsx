@@ -26,8 +26,6 @@ export default async function Page() {
     let shipmentData;
     shipmentData = res;
 
-    console.log(shipmentData);
-
     return (
         <div className="flex flex-col p-6">
             <div className="flex justify-between items-center gap-2">
