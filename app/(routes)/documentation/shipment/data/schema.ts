@@ -3,65 +3,143 @@ import { z } from "zod";
 export const shipmentSchema = z.object({
   _id: z.string(),
   bookingDetails: z.object({
-    containerNumber: z.string().optional(),
-    portOfLoading: z.string().optional(),
-    destinationPort: z.string().optional(),
-    vesselSailingDate: z.date().optional(),
-    vesselArrivingDate: z.date().optional(),
-    truckNumber: z.string().optional(),
-    truckDriverNumber: z.string().optional(),
+    bookingNumber: z.string(),
+    portOfLoading: z.string(),
+    destinationPort: z.string(),
+    vesselSailingDate: z.string().datetime(),
+    vesselArrivingDate: z.string().datetime(),
+    containers: z.array(
+      z.object({
+        containerNumber: z.string().optional(),
+        truckNumber: z.string().optional(),
+        trukDriverContactNumber: z.number(),
+        addProductDetails: z.object({
+          tiles: z.object({
+            sizePerTile: z.object({
+              length: z.object({ value: z.number(), units: z.string() }),
+              breadth: z.object({ value: z.number(), units: z.string() }),
+            }),
+            noOfBoxes: z.number(),
+            noOfPiecesPerBoxes: z.number(),
+          }),
+          productCategory: z.string(),
+          graniteAndMarble: z.string(),
+          _id: z.string(),
+        }),
+        _id: z.string(),
+      })
+    ),
+    _id: z.string(),
   }),
 
-  // Shipping Details
   shippingDetails: z.object({
-    shippingLine: z.string().optional(),
-    forwarder: z.string().optional(),
-    forwarderInvoice: z.string().optional(),
-    valueOfForwarderInvoice: z.string().optional(),
-    transporter: z.string().optional(),
-    transporterInvoice: z.string().optional(),
-    valueOfTransporterInvoice: z.string().optional(),
+    shippingLine: z.string(),
+    forwarderInvoice: z.string(),
+    valueOfForwarderInvoice: z.string(),
+    transporter: z.string(),
+    transporterInvoice: z.string(),
+    valueOfTransporterInvoice: z.string(),
+    _id: z.string(),
+    shippingLineInvoices: z.array(z.string()),
+    transporterInvoices: z.array(z.string()),
+    forwarderInvoices: z.array(z.string()),
   }),
 
-  // Shipping Bill Details
   shippingBillDetails: z.object({
-    shippingBillNumber: z.string().optional(),
-    shippingBillDate: z.date().optional(),
-    uploadShippingBill: z.string().optional(),
-    cbName: z.string().optional(),
+    portCode: z.string(),
+    cbName: z.string().datetime(),
+    cbCode: z.string(),
+    ShippingBills: z.array(
+      z.object({
+        shippingBillUrl: z.string(),
+        shippingBillNumber: z.string(),
+        shippingBillDate: z.string().datetime(),
+        drawbackValue: z.string(),
+        roadtepValue: z.string(),
+        _id: z.string(),
+      })
+    ),
+    _id: z.string(),
   }),
 
-  // Supplier Details
+  supplierDetails: z.object({
+    clearance: z.object({
+      supplierName: z.string(),
+      supplierGSTN: z.string(),
+      supplierInvoiceNumber: z.string(),
+      supplierInvoiceDate: z.string().datetime(),
+      supplierInvoiceValueWithGST: z.string(),
+      supplierInvoiceValueWithOutGST: z.string(),
+      clearanceSupplierInvoiceUrl: z.string(),
+      _id: z.string(),
+      invoices: z.array(z.string()),
+    }),
+    actual: z.object({
+      actualSupplierName: z.string(),
+      actualSupplierInvoiceValue: z.string(),
+      actualSupplierInvoiceUrl: z.string(),
+      shippingBillUrl: z.string(),
+      _id: z.string(),
+    }),
+    _id: z.string(),
+  }),
+
   saleInvoiceDetails: z.object({
-    supplierDetails: z.object({
-      supplierName: z.string().optional(),
-      actualSupplierName: z.string().optional(),
-      supplierGSTIN: z.string().optional(),
-      supplierInvoiceNumber: z.string().optional(),
-      supplierInvoiceDate: z.date().optional(),
-      supplierInvoiceValueWithOutGST: z.string().optional(),
-      supplierInvoiceValueWithGST: z.string().optional(),
-      uploadSupplierInvoice: z.string().optional(),
-      actualSupplierInvoice: z.string().optional(),
-      actualSupplierInvoiceValue: z.string().optional(),
+    consignee: z.string(),
+    actualBuyer: z.string(),
+    commercialInvoices: z.object({
+      commercialInvoiceNumber: z.string(),
+      clearanceCommercialInvoiceUrl: z.string(),
+      actualCommercialInvoiceUrl: z.string(),
+      saberInvoiceUrl: z.string(),
+      _id: z.string(),
     }),
-
-    // Sale Invoice Details
-    saleInvoice: z.object({
-      commercialInvoiceNumber: z.string().optional(),
-      commercialInvoiceDate: z.date().optional(),
-      consigneeDetails: z.string().optional(),
-      actualBuyer: z.string().optional(),
-    }),
-
-    // BL Details
-    blDetails: z.object({
-      blNumber: z.string().optional(),
-      blDate: z.date().optional(),
-      telexDate: z.date().optional(),
-      uploadBL: z.string().optional(),
-    }),
+    _id: z.string(),
   }),
+
+  blDetails: z.object({
+    blNumber: z.string(),
+    blDate: z.string().datetime(),
+    telexDate: z.string().datetime(),
+    _id: z.string(),
+    uploadBL: z.string(),
+  }),
+
+  OtherDetails: z.object({
+    certificateOfOriginNumber: z.string(),
+    date: z.string().datetime(),
+    issuerOfCOO: z.string(),
+    uploadCopyOfFumigationCertificate: z.string(),
+    _id: z.string(),
+  }),
+
+  organizationId: z.object({
+    _id: z.string(),
+    name: z.string(),
+    description: z.string(),
+    owner: z.string(),
+    members: z.array(z.string()),
+    address: z.object({
+      coordinates: z.object({
+        type: z.string(),
+        coordinates: z.tuple([z.number(), z.number()]),
+      }),
+      location: z.string(),
+      pincode: z.string(),
+      _id: z.string(),
+    }),
+    shipments: z.array(z.string()),
+    factory: z.array(z.string()),
+    createdAt: z.string().datetime(),
+    updatedAt: z.string().datetime(),
+    __v: z.number(),
+    teams: z.array(z.string()),
+    employees: z.array(z.string()),
+  }),
+
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+  __v: z.number(),
 });
 
 export type Shipment = z.infer<typeof shipmentSchema>;
