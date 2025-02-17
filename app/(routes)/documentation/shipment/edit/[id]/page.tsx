@@ -1,10 +1,9 @@
- "use client";
+"use client";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { EditShipmentForm } from "@/components/forms/editShipmentForm";
 import { useState } from "react";
 import ProgressBar from "./components/ProgressBar";
 import { FormProvider, useForm } from "react-hook-form";
@@ -14,7 +13,6 @@ import { ShippingDetails } from "./components/ShippingDetails";
 import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CertificateOfOrigin } from "./components/CertificateOfOrigin";
 
@@ -122,7 +120,7 @@ const formSchema = z.object({
             .min(1, { message: "Enter some value" })
             .optional(),
         shippingbill: z.string().min(1, { message: "shippingbill must be selected" }),
-            
+
     }),
 
     saleInvoiceDetails: z.object({
@@ -159,18 +157,18 @@ const formSchema = z.object({
             .string()
             .min(3, { message: "Number must be at least 3 characters long" })
             .optional(),
-            CertificateOfOriginDate: z.date().optional(),Date: z.date().optional(),
+        CertificateOfOriginDate: z.date().optional(), Date: z.date().optional(),
         IssuerOFCertificateOfOrigin: z.string().min(3, { message: "Required name" }).optional(),
         uploadCopyOfFormagation: z
-        .any()
-        .refine((file) => file instanceof File, { message: "Upload required" })
-        .optional(),
+            .any()
+            .refine((file) => file instanceof File, { message: "Upload required" })
+            .optional(),
     }),
 });
 
 export default function CreateNewFormPage() {
     const [currentStep, setCurrentStep] = useState(0);
-        const totalSteps = steps.length;
+    const totalSteps = steps.length;
 
     const nextStep = () => {
         if (currentStep < steps.length - 1) {
@@ -188,26 +186,26 @@ export default function CreateNewFormPage() {
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
-            <Link href="../">
-          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Button>
-        </Link>
+                <Link href="../">
+                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+                        <ChevronLeft className="h-4 w-4" />
+                        <span className="sr-only">Back</span>
+                    </Button>
+                </Link>
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
                         title="Edit Shipment Details"
                     />
                     <p className="text-muted-foreground text-sm">
-                    Complete the form below to Edit shipment details. Edit essential information like  container.no, trucks.no, invoices, and any additional details.
+                        Complete the form below to Edit shipment details. Edit essential information like  container.no, trucks.no, invoices, and any additional details.
                     </p>
                 </div>
             </div>
             <Separator orientation="horizontal" />
-                        <div className="w-full">
+            <div className="w-full">
                 <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
-                
+
                 <div className="flex justify-between mt-4">
                     <Button onClick={prevStep} disabled={currentStep === 0}>
                         Previous

@@ -14,11 +14,11 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
 import toast from "react-hot-toast";
-import { shipment } from "../data/schema";
 import { Row } from "@tanstack/react-table"; // Ensure this import exists
+import { Shipment } from "../data/schema";
 
 interface DataTableCellActionsProps {
-  row: Row<shipment>;
+  row: Row<Shipment>;
 }
 
 export function DataTableCellActions({ row }: DataTableCellActionsProps) {
@@ -29,7 +29,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
   const shipmentId = shipmentData._id; // Ensure ID is available
 
   // Delete shipment function
-  const deleteShipment = async () => { 
+  const deleteShipment = async () => {
     if (!shipmentId) {
       console.error("Error: Shipment ID is undefined.");
       toast.error("Error: Shipment ID is missing.");
@@ -38,9 +38,8 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
 
     try {
       console.log(`Deleting shipment with ID: ${shipmentId}`);
-      const result = await deleteData(`/shipment/${shipmentId}`);
+      const result = await deleteData(`/shipment/delete/${shipmentId}`);
       console.log("Delete response:", result);
-
       toast.success("Shipment Deleted Successfully");
 
       setTimeout(() => {
@@ -66,8 +65,8 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
           <DropdownMenuSeparator />
 
 
-              {/* View Shipment */}
-              <DropdownMenuItem
+          {/* View Shipment */}
+          <DropdownMenuItem
             onClick={() => router.push(`./shipment/view/${shipmentId}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
@@ -84,7 +83,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
             Edit Shipment
           </DropdownMenuItem>
 
-      
+
 
           {/* upload metrics */}
           <DropdownMenuItem
