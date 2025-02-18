@@ -66,7 +66,6 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   TeamData = res;
-  console.log(TeamData);
 
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
