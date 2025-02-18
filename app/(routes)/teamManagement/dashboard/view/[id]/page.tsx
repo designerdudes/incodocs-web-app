@@ -1,10 +1,12 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { cookies } from "next/headers";
+import { useParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -22,11 +24,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 
-interface Props {
-  params: {
-    id: any;
-  };
-
+interface EmployeeData {
   address: {
     location: string;
     pincode: number;
@@ -47,25 +45,49 @@ interface Props {
   updatedAt: string;
 }
 
-export default async function BlocksPage({ params }: Props) {
-  let TeamData = null;
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+export default function BlocksPage() {
+  const { id } = useParams();
+  const [teamData, setTeamData] = useState<EmployeeData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const res = await fetch(
-    `http://localhost:4080/employers/getone/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("AccessToken="))
+          ?.split("=")[1];
+
+        const res = await fetch(
+          `http://localhost:4080/employers/getone/${id}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await res.json();
+        setTeamData(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  ).then((response) => {
-    return response.json();
-  });
 
-  TeamData = res;
+    fetchData();
+  }, [id]);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (!teamData) {
+    return <p>Error: No data found</p>;
+  }
 
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
@@ -80,7 +102,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of ${TeamData?.teamMemberName}`}
+            title={`Details of ${teamData?.teamMemberName}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Include personal and professional information such as name, employee
@@ -97,7 +119,7 @@ export default async function BlocksPage({ params }: Props) {
         <Card className="w-3/5">
           <CardHeader>
             <CardTitle>Employee Details</CardTitle>
-            <CardDescription>{`Details of ${TeamData?.employeeId}`}</CardDescription>
+            <CardDescription>{`Details of ${teamData?.employeeId}`}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -112,54 +134,54 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Employee Id
                   </TableCell>
-                  <TableCell>{TeamData?.employeeId}</TableCell>
+                  <TableCell>{teamData?.employeeId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Employee Name
                   </TableCell>
-                  <TableCell>{TeamData?.teamMemberName}</TableCell>
+                  <TableCell>{teamData?.teamMemberName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Organization Id
                   </TableCell>
-                  <TableCell>{TeamData?.organizationId}</TableCell>
+                  <TableCell>{teamData?.organizationId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Role</TableCell>
-                  <TableCell>{TeamData?.role}</TableCell>
+                  <TableCell>{teamData?.role}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Position</TableCell>
-                  <TableCell>{TeamData?.position}</TableCell>
+                  <TableCell>{teamData?.position}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Location</TableCell>
-                  <TableCell>{TeamData?.address?.location}</TableCell>
+                  <TableCell>{teamData?.address?.location}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Pincode</TableCell>
-                  <TableCell>{TeamData?.address?.pincode}</TableCell>
+                  <TableCell>{teamData?.address?.pincode}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Contact Person
                   </TableCell>
                   <TableCell>
-                    {TeamData?.contactInformation?.contactPerson}
+                    {teamData?.contactInformation?.contactPerson}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Email</TableCell>
-                  <TableCell>{TeamData?.contactInformation?.email}</TableCell>
+                  <TableCell>{teamData?.contactInformation?.email}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Phone Number
                   </TableCell>
                   <TableCell>
-                    {TeamData?.contactInformation?.phoneNumber}
+                    {teamData?.contactInformation?.phoneNumber}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -167,7 +189,7 @@ export default async function BlocksPage({ params }: Props) {
                     Alternate Number
                   </TableCell>
                   <TableCell>
-                    {TeamData?.contactInformation?.alternatePhone}
+                    {teamData?.contactInformation?.alternatePhone}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -175,7 +197,7 @@ export default async function BlocksPage({ params }: Props) {
                     Created At
                   </TableCell>
                   <TableCell>
-                    {moment(TeamData.createdAt).format("YYYY-MM-DD")}
+                    {moment(teamData.createdAt).format("YYYY-MM-DD")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -183,7 +205,7 @@ export default async function BlocksPage({ params }: Props) {
                     Updated At
                   </TableCell>
                   <TableCell>
-                    {moment(TeamData.updatedAt).format("YYYY-MM-DD")}
+                    {moment(teamData.updatedAt).format("YYYY-MM-DD")}
                   </TableCell>
                 </TableRow>
               </TableBody>
