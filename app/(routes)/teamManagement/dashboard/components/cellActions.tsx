@@ -70,7 +70,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit TeamMember Details
+            Edit Team Member Details
           </DropdownMenuItem>
 
           {/* Delete Lot */}
