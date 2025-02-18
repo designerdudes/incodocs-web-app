@@ -62,7 +62,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           {/* Edit Lot Details */}
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = "Edit TeamMember Details"; // Set modal title
+              GlobalModal.title = "Edit Team Member Details"; // Set modal title
               GlobalModal.children = (
                 <EditTeamMemberForm params={{ _id: data._id }} />
               ); // Render Edit Form
