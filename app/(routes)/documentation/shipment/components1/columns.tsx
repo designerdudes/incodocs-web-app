@@ -3,11 +3,11 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnHeader } from "./column-header";
 import moment from "moment";
-import { shipment } from "../data/schema";
 import { DataTableCellActions } from "./cell-actions";
 import { Eye } from "lucide-react";
+import { Shipment } from "../data/schema";
 
-export const columns: ColumnDef<shipment>[] = [
+export const columns: ColumnDef<Shipment>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -35,6 +35,21 @@ export const columns: ColumnDef<shipment>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "BookingNumber",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Booking Number" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {row.original.bookingDetails?.bookingNumber}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
     accessorKey: "bookingDetailsSchema.containerNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Container Number" />
@@ -43,7 +58,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.bookingDetails?.containerNumber}
+            {row.original.bookingDetails?.containers?.map(container => container.containerNumber).join(", ")}
           </span>
         </div>
       );
@@ -58,7 +73,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.bookingDetails?.truckNumber}
+            {row.original.bookingDetails?.containers?.map(container => container.truckNumber).join(", ")}
           </span>
         </div>
       );
@@ -73,7 +88,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.bookingDetails?.truckDriverNumber}
+            {row.original.bookingDetails?.containers?.map(container => container.trukDriverContactNumber).join(", ")}
           </span>
         </div>
       );
@@ -119,7 +134,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-          
+
             {moment(row.original?.bookingDetails?.vesselSailingDate).format(
               "MMM Do YY"
             )}
@@ -169,7 +184,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.forwarder}
+            {row.original?.shippingDetails?.shippingLine}
           </span>
         </div>
       );
@@ -183,16 +198,16 @@ export const columns: ColumnDef<shipment>[] = [
       <ColumnHeader column={column} title="Forwarder Invoice" />
     ),
     cell: ({ row }) => {
-        const fileUrl = row.original?.shippingDetails?.forwarderInvoice;
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="truncate font-medium">{fileUrl}</span>
-            {fileUrl && (
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-              </a>
-            )}
-          </div>
+      const fileUrl = row.original?.shippingDetails?.forwarderInvoice;
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
       );
     },
   },
@@ -232,17 +247,17 @@ export const columns: ColumnDef<shipment>[] = [
       <ColumnHeader column={column} title="Transporter Invoice" />
     ),
     cell: ({ row }) => {
-        const fileUrl = row.original?.shippingDetails?.transporterInvoice;
+      const fileUrl = row.original?.shippingDetails?.transporterInvoice;
 
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="truncate font-medium">{fileUrl}</span>
-            {fileUrl && (
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-              </a>
-            )}
-          </div>
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
       );
     },
   },
@@ -272,12 +287,59 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.shippingBillNumber}
+            {row.original?.shippingBillDetails?.ShippingBills.map(bill => bill.shippingBillNumber).join(", ")}
           </span>
         </div>
       );
     },
   },
+  {
+    accessorKey: "Port Code",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Port Code" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.portCode}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "CB Name",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="CB Name" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.cbName}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "CB Code",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="CB Code" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.shippingBillDetails?.cbCode}
+          </span>
+        </div>
+      );
+    },
+  },
+
+
 
   {
     accessorKey: "shippingBillDate",
@@ -288,9 +350,9 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {moment(row.original?.shippingBillDetails?.shippingBillDate).format(
-              "MMM Do YY"
-            )}
+            {row.original?.shippingBillDetails?.ShippingBills.map(bill =>
+              moment(bill.shippingBillDate).format("MMM Do YY")
+            ).join(", ")}
           </span>
         </div>
       );
@@ -303,17 +365,17 @@ export const columns: ColumnDef<shipment>[] = [
       <ColumnHeader column={column} title="Upload Shipping Bill" />
     ),
     cell: ({ row }) => {
-        const fileUrl = row.original?.shippingBillDetails?.uploadShippingBill;
+      const fileUrl = row.original?.shippingBillDetails?.ShippingBills.map(bill => bill.shippingBillUrl).join(", ");
 
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="truncate font-medium">{fileUrl}</span>
-            {fileUrl && (
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-              </a>
-            )}
-          </div>
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
       );
     },
   },
@@ -327,28 +389,14 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.supplierName}
+            {row.original?.supplierDetails?.clearance?.supplierName}
           </span>
         </div>
       );
     },
   },
 
-  {
-    accessorKey: "actualSupplierName",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Actual Supplier Name " />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actualSupplierName}
-          </span>
-        </div>
-      );
-    },
-  },
+
 
   {
     accessorKey: "supplierGSTIN",
@@ -359,7 +407,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.supplierGSTIN}
+            {row.original?.supplierDetails?.clearance?.supplierGSTN}
           </span>
         </div>
       );
@@ -375,7 +423,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.supplierInvoiceNumber}
+            {row.original?.supplierDetails?.clearance?.supplierInvoiceNumber}
           </span>
         </div>
       );
@@ -391,8 +439,8 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-          
-            {moment(row.original?.supplierDetails?.supplierInvoiceDate).format(
+
+            {moment(row.original?.supplierDetails?.clearance?.supplierInvoiceDate).format(
               "MMM Do YY"
             )}
           </span>
@@ -413,7 +461,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.supplierInvoiceValueWithOutGST}
+            {row.original?.supplierDetails?.clearance?.supplierInvoiceValueWithOutGST}
           </span>
         </div>
       );
@@ -429,7 +477,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.supplierInvoiceValueWithOutGST}
+            {row.original?.supplierDetails?.clearance?.supplierInvoiceValueWithOutGST}
           </span>
         </div>
       );
@@ -441,17 +489,52 @@ export const columns: ColumnDef<shipment>[] = [
       <ColumnHeader column={column} title="Upload Supplier Invoice" />
     ),
     cell: ({ row }) => {
-        const fileUrl = row.original?.supplierDetails?.uploadSupplierInvoice;
+      const fileUrl = row.original?.supplierDetails?.clearance?.clearanceSupplierInvoiceUrl;
 
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="truncate font-medium">{fileUrl}</span>
-            {fileUrl && (
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-              </a>
-            )}
-          </div>
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "ClearanceSupplierInvoice",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Upload Clearance Supplier Invoice" />
+    ),
+    cell: ({ row }) => {
+      const fileUrl = row.original?.supplierDetails?.clearance?.clearanceSupplierInvoiceUrl;
+
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "actualSupplierName",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Actual Supplier Name " />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.supplierDetails?.actual?.actualSupplierName}
+          </span>
+        </div>
       );
     },
   },
@@ -465,7 +548,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actualSupplierInvoice}
+            {row.original?.supplierDetails?.actual?.actualSupplierInvoiceUrl}
           </span>
         </div>
       );
@@ -480,7 +563,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actualSupplierInvoiceValue}
+            {row.original?.supplierDetails?.actual?.actualSupplierInvoiceValue}
           </span>
         </div>
       );
@@ -496,7 +579,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.saleInvoiceDetails?.commercialInvoiceNumber}
+            {row.original?.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber}
           </span>
         </div>
       );
@@ -512,8 +595,8 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-          
-          {moment(row.original?.saleInvoiceDetails?.commercialInvoiceDate).format(
+
+            {moment(row.original?.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber).format(
               "MMM Do YY"
             )}
           </span>
@@ -528,17 +611,17 @@ export const columns: ColumnDef<shipment>[] = [
       <ColumnHeader column={column} title="Commercial Invoice" />
     ),
     cell: ({ row }) => {
-        const fileUrl = row.original?.saleInvoiceDetails?.commercialInvoice;
+      const fileUrl = row.original?.saleInvoiceDetails?.commercialInvoices?.actualCommercialInvoiceUrl;
 
-        return (
-          <div className="flex items-center space-x-2">
-            <span className="truncate font-medium">{fileUrl}</span>
-            {fileUrl && (
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-              </a>
-            )}
-          </div>
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
       );
     },
   },
@@ -551,7 +634,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            {row.original?.saleInvoiceDetails?.consigneeDetails}
+            {row.original?.saleInvoiceDetails?.consignee}
           </span>
         </div>
       );
@@ -594,7 +677,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            
+
             {moment(row.original?.blDetails?.blDate).format(
               "MMM Do YY"
             )}
@@ -611,7 +694,7 @@ export const columns: ColumnDef<shipment>[] = [
       return (
         <div className="flex space-x-2">
           <span className=" truncate font-medium">
-            
+
             {moment(row.original?.blDetails?.telexDate).format(
               "MMM Do YY"
             )}
@@ -638,6 +721,70 @@ export const columns: ColumnDef<shipment>[] = [
       );
     },
   },
+  {
+    accessorKey: "CertificateOfOriginNumber",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Certificate Of Origin Number" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.OtherDetails?.certificateOfOriginNumber}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "OriginDate",
+    header: ({ column }) => <ColumnHeader column={column} title="OriginDate" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+
+            {moment(row.original?.OtherDetails?.date).format(
+              "MMM Do YY"
+            )}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "IssuerOfCertificateOfOrigin",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Issuer Of Certificate Of Origin" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className=" truncate font-medium">
+            {row.original?.OtherDetails?.issuerOfCOO}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "Upload Copy Of Fumigation",
+    header: ({ column }) => <ColumnHeader column={column} title="Upload Copy Of Fumigation" />,
+    cell: ({ row }) => {
+      const fileUrl = row.original?.OtherDetails?.uploadCopyOfFumigationCertificate;
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl && (
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+            </a>
+          )}
+        </div>
+      );
+    },
+  },
+
 
   {
     id: "actions",
