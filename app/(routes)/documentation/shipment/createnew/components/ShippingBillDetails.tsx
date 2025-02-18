@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext} from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -18,14 +18,28 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
 
 export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
-  const [shippingBills, setShippingBills] = useState<{ uploadShippingBill: string; shippingBillNumber: string; shippingBillDate: string; drawbackValue: string; roadtepValue: string; }[]>([]);
+  const [shippingBills, setShippingBills] = useState<
+    {
+      uploadShippingBill: string;
+      shippingBillNumber: string;
+      shippingBillDate: string;
+      drawbackValue: string;
+      rodtepValue: string;
+    }[]
+  >([]);
   const { handleSubmit } = useFormContext();
-
 
   const handleShippingBillCountChange = (value: string) => {
     const count = parseInt(value, 10);
@@ -35,7 +49,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
         shippingBillNumber: "",
         shippingBillDate: "",
         drawbackValue: "",
-        roadtepValue: "",
+        rodtepValue: "",
       }));
       setShippingBills(newShippingBills);
       setValue("shippingBillDetails.Bills", newShippingBills);
@@ -45,9 +59,14 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
     }
   };
 
-  const handleDelete = (index: number) => {
+  const handleDeleteBill = (index: number) => {
+    // Remove the selected index from shippingBills
     const updatedShippingBills = shippingBills.filter((_, i) => i !== index);
+
+    // Update local state
     setShippingBills(updatedShippingBills);
+
+    // Reset form value for the updated shipping bill list
     setValue("shippingBillDetails.bills", updatedShippingBills);
   };
 
@@ -61,7 +80,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>Port Code</FormLabel>
             <FormControl>
-              <Input placeholder="eg. 123456" className="uppercase" {...field} />
+              <Input
+                placeholder="eg. 123456"
+                className="uppercase"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -75,7 +98,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
-              <Input placeholder="eg. 123456" className="uppercase" {...field} />
+              <Input
+                placeholder="eg. 123456"
+                className="uppercase"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -89,7 +116,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>CB Code</FormLabel>
             <FormControl>
-              <Input placeholder="eg. 123456" className="uppercase" {...field} />
+              <Input
+                placeholder="eg. 123456"
+                className="uppercase"
+                {...field}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -126,7 +157,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                 <TableHead>Shipping Bill Number</TableHead>
                 <TableHead>Shipping Bill Date</TableHead>
                 <TableHead>Drawback Value</TableHead>
-                <TableHead>Roadtep Value</TableHead>
+                <TableHead>Rodtep Value</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -140,7 +171,12 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input type="file" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                            <Input
+                              type="file"
+                              onChange={(e) =>
+                                field.onChange(e.target.files?.[0])
+                              }
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -154,7 +190,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input placeholder="Bill Number" className="uppercase" {...field} />
+                            <Input
+                              placeholder="Bill Number"
+                              className="uppercase"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -171,13 +211,19 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                  {field.value
+                                    ? format(field.value, "PPPP")
+                                    : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent align="start">
-                              <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                              />
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
@@ -202,7 +248,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].roadtepValue`}
+                      name={`shippingBillDetails.bills[${index}].rodtepValue`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -213,8 +259,14 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                       )}
                     />
                   </TableCell>
+                  {/* Delete Button */}
                   <TableCell>
-                    <Button variant="destructive" size="sm" type="button" onClick={() => handleDelete(index)}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      type="button"
+                      onClick={() => handleDeleteBill(index)}
+                    >
                       <Trash className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -224,10 +276,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-      <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
-        Save Progress
-      </Button></div>
-
+      <div className="m-2">
+        <Button type="button" onClick={handleSubmit(saveProgress)}>
+          Save Progress
+        </Button>
+      </div>
     </div>
   );
 }

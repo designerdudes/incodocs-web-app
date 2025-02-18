@@ -135,7 +135,7 @@ function consigneeForm() {
           name="ConsigneeName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ConsigneeName</FormLabel>
+              <FormLabel>Consignee Name</FormLabel>
               <FormControl>
                 <Input placeholder="Eg:  ABC" {...field} />
               </FormControl>
@@ -149,7 +149,7 @@ function consigneeForm() {
           name="ConsigneeEmail"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ConsigneeEmail</FormLabel>
+              <FormLabel>Consignee Email</FormLabel>
               <FormControl>
                 <Input placeholder="Eg:  ABC123@gmail.com" {...field} />
               </FormControl>
@@ -163,7 +163,7 @@ function consigneeForm() {
           name="ConsigneeNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>ConsigneeNumber</FormLabel>
+              <FormLabel>Consignee Number</FormLabel>
               <FormControl>
                 <Input placeholder="Eg:123456789" {...field} />
               </FormControl>

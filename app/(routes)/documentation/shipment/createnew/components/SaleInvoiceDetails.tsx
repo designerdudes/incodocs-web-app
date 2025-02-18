@@ -26,12 +26,15 @@ import {
   TableCell,
   Table,
 } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import AddConsigneeButton from "./AddConsigneebutton";
 import { SaveDetailsProps } from "./BookingDetails";
-
-
-
 
 const consignee = [
   { id: "1", name: "consigneeNo23" },
@@ -41,7 +44,6 @@ const consignee = [
 export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
   const { handleSubmit } = useFormContext();
-
 
   // Renamed state variable for clarity
   const [invoices, setInvoices] = useState<any[]>([]);
@@ -101,13 +103,10 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                       {Details.name}
                     </SelectItem>
                   ))}
+                  <div>
+                    <AddConsigneeButton />
+                  </div>
                 </SelectContent>
-                <div>
-
-                  {/* <button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white">Add factory</button> */}
-
-                  <AddConsigneeButton />
-                </div>
               </Select>
             </FormControl>
             <FormMessage />
@@ -178,7 +177,8 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                         <FormControl>
                           <Input placeholder="Eg:123456898" {...field} />
                         </FormControl>
-                      )} />
+                      )}
+                    />
                   </TableCell>
 
                   {/* Clearance Commercial Invoice */}
@@ -190,7 +190,8 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                         <FormControl>
                           <Input placeholder="Eg:123456898" {...field} />
                         </FormControl>
-                      )} />
+                      )}
+                    />
                   </TableCell>
 
                   {/* Actual Commercial Invoice */}
@@ -202,7 +203,8 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                         <FormControl>
                           <Input placeholder="Eg:123456898" {...field} />
                         </FormControl>
-                      )} />
+                      )}
+                    />
                   </TableCell>
 
                   {/* SABER Invoice */}
@@ -214,7 +216,8 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                         <FormControl>
                           <Input placeholder="Eg:123456898" {...field} />
                         </FormControl>
-                      )} />
+                      )}
+                    />
                   </TableCell>
 
                   {/* Add Invoice */}
@@ -228,9 +231,11 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                             <Input
                               placeholder="Add Invoice"
                               {...field}
-                              onBlur={() => setShowInvoiceForm(false)} />
+                              onBlur={() => setShowInvoiceForm(false)}
+                            />
                           </FormControl>
-                        )} />
+                        )}
+                      />
                     ) : (
                       <Button
                         variant="default"
@@ -260,11 +265,11 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-      <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
-        Save Progress
-      </Button></div><Button type="button" onClick={handleSubmit(saveProgress)}>
-        Save Progress
-      </Button>
+      <div className="">
+        <Button type="button" onClick={handleSubmit(saveProgress)}>
+          Save Progress
+        </Button>
+      </div>
     </div>
   );
 }

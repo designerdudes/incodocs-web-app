@@ -21,10 +21,10 @@ export default function AddConsigneeButton() {
 
   return (
     <Button
-      className="mt-3 px-4 py-3 default"
+      className="mt-3 px-4 py-3 primary"
       onClick={openConsigneeForm} // Trigger modal open
     >
-      Add New Consignee
+      Add Consignee
     </Button>
   );
 }
