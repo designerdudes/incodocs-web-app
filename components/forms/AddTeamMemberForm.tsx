@@ -44,7 +44,8 @@ const formSchema = z.object({
     phoneNumber: z.string().min(1, { message: "Enter phone number" }),
     alternatePhone: z
       .string()
-      .min(1, { message: "Enter alternate phone number" }),
+      .min(1, { message: "Enter alternate phone number" })
+      .optional(),
   }),
 });
 
@@ -74,18 +75,28 @@ export default function TeamFormPage() {
 
   const router = useRouter();
 
-  const handleSubmit = async (values:any) => {
+  const handleSubmit = async (values: any) => {
     setIsLoading(true);
     try {
-      await postData("/employers/add/", values);
-      toast.success("Employee added successfully");
-      router.push("./");
-    } catch (error) {
-      console.error("Error creating/updating employee:", error);
-      toast.error("Error creating/updating employee");
+        await postData("/employers/add/", values);
+        toast.success("Employee added successfully");
+        router.push("./");
+    } catch (error: any) {
+        console.error("Error creating/updating employee:", error);
+
+        if (error.response && error.response.status === 400) {
+            if (error.response.data.message === "Employee ID exists, please try a unique ID") {
+                toast.error("Employee already exists, please use a unique ID.");
+            } else {
+                toast.error(error.response.data.message || "Bad Request");
+            }
+        } else {
+            toast.error("Error creating/updating employee");
+        }
     }
     setIsLoading(false);
-  };
+};
+
 
   return (
     <div className="space-y-6">

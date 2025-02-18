@@ -233,7 +233,7 @@ export default function EditFactoryForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Emloyee Id</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 741852963" type="text" {...field} />
+                  <Input placeholder="Eg: 741852963" disabled={true} type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

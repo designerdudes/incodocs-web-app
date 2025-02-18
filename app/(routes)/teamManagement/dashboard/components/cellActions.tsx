@@ -52,7 +52,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           {/* View Lot Details */}
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./teamManagement/dashboard/${data._id}/team`);
+              router.push(`./dashboard/view/${data._id}`);
             }}
           >
             <EyeIcon className="mr-2 h-4 w-4" />
