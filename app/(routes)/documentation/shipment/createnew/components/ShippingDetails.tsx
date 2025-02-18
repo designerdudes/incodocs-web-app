@@ -35,6 +35,9 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import AddshippinglineButton from "./Addshippinglinebutton";
+import AddForwarderButton from "./Addforwarderbutton";
+import AddtransporterButton from "../Addtransporterbutton";
 
 const ShippingName = [
   { id: "1", name: "Ahmed" },
@@ -101,7 +104,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                           ?.name || "Select a Name"}
                       </span>
                     ) : (
-                      <span>Select a Shipping Name</span>
+                      <span>Select a Shipping Line</span>
                     )}
                   </SelectTrigger>
                   <SelectContent>
@@ -110,6 +113,11 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                         {Details.name}
                       </SelectItem>
                     ))}
+
+<div>
+                   <AddshippinglineButton/>
+                  </div>
+
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -292,13 +300,23 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                     ) : (
                       <span>Select a Forwarder Name</span>
                     )}
+
+
                   </SelectTrigger>
+
+
+
                   <SelectContent>
                     {ForwarderName.map((Details) => (
                       <SelectItem key={Details.id} value={Details.id}>
                         {Details.name}
                       </SelectItem>
                     ))}
+
+<div>
+<AddForwarderButton/>
+
+</div>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -487,6 +505,11 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                         {Details.name}
                       </SelectItem>
                     ))}
+
+                    <div>
+<AddtransporterButton/>
+
+                    </div>
                   </SelectContent>
                 </Select>
               </FormControl>
