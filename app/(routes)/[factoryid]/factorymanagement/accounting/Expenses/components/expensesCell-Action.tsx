@@ -15,10 +15,9 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { expense } from "../page";
-import EditExpenseForm from "./editExpense";
 
 interface Props {
-  data : expense
+    data: expense
 }
 
 
@@ -63,7 +62,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = "Edit Expense Details"; // Set modal title
-                            GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
+                            // GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >
@@ -74,7 +73,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete expense details - ${data.ExpenseName}`;
+                            GlobalModal.title = `Delete expense details - ${data.expenseName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this Lot?";
                             GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;
