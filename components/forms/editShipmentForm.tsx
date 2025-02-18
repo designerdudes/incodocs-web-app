@@ -261,16 +261,16 @@ export function EditShipmentForm() {
       shippingDetails: {
         shippingLine: "",
         forwarder: "",
-        forwarderInvoice: null,
+        forwarderInvoice: undefined,
         valueOfForwarderInvoice: "",
         transporter: "",
-        transporterInvoice: null,
+        transporterInvoice: undefined,
         valueOfTransporterInvoice: "",
       },
       shippingBillDetails: {
         shippingBillNumber: "",
         shippingBillDate: new Date(),
-        uploadShippingBill: null,
+        uploadShippingBill: undefined,
       },
       supplierDetails: {
         supplierName: "",
@@ -280,8 +280,8 @@ export function EditShipmentForm() {
         supplierInvoiceDate: new Date(),
         supplierInvoiceValueWithOutGST: "",
         supplierInvoiceValueWithGST: "",
-        uploadSupplierInvoice: null,
-        actualSupplierInvoice: null,
+        uploadSupplierInvoice: undefined,
+        actualSupplierInvoice: undefined,
         actualSupplierInvoiceValue: "",
       },
       saleInvoiceDetails: {
@@ -294,7 +294,7 @@ export function EditShipmentForm() {
         blNumber: "",
         blDate: new Date(),
         telexDate: new Date(),
-        uploadBL: null,
+        uploadBL: undefined,
       },
     },
   });
@@ -684,7 +684,7 @@ export function EditShipmentForm() {
                         type="file"
                         disabled={isLoading}
                         onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                        
+
                       />
                     </FormControl>
                     <Button
@@ -739,7 +739,7 @@ export function EditShipmentForm() {
                         type="file"
                         disabled={isLoading}
                         onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                        
+
                       />
                     </FormControl>
                     <Button
@@ -1000,7 +1000,7 @@ export function EditShipmentForm() {
                         type="file"
                         disabled={isLoading}
                         onChange={(e) => field.onChange(e.target.files?.[0] || null)}
-                    
+
                       />
                     </FormControl>
                     <Button
@@ -1027,7 +1027,7 @@ export function EditShipmentForm() {
                       <Input
                         disabled={isLoading}
                         type="file"
-                        onChange={(e) => field.onChange(e.target.files?.[0] || null)}                />
+                        onChange={(e) => field.onChange(e.target.files?.[0] || null)} />
                     </FormControl>
                     <Button
                       type="button"

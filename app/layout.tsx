@@ -22,7 +22,7 @@ export default function RootLayout({
     const getThemePreference = async () => {
       if (typeof window !== 'undefined') {
         const theme = localStorage.getItem('theme')
-        console.log(theme)
+        // console.log(theme)
         if (theme) {
           setDefaultTheme(theme)
         } else {

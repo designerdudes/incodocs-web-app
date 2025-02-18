@@ -11,25 +11,25 @@ import { fetchData } from '@/axiosUtility/api';
 
 
 export type expense = {
-  _id: string;
-  expenseName: string;
-  expenseValue : string;
-  gstPercentage: number;
-  expenseDate: string;
+    _id: string;
+    expenseName: string;
+    expenseValue: string;
+    gstPercentage: number;
+    expenseDate: string;
 }
 
 
 function Page() {
-    const [expenseData, setExpenseData] = useState<any[]>([]); 
+    const [expenseData, setExpenseData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchExpenseData = async () => { 
+        const fetchExpenseData = async () => {
             try {
                 setLoading(true);
                 const data = await fetchData("/expense/getall");
                 setExpenseData(data);
-                console.log(expenseData)
+                // console.log(expenseData)
 
             } catch (error) {
                 console.error("Error fetching expense data:", error);
@@ -37,10 +37,10 @@ function Page() {
                 setLoading(false);
             }
         };
-    
+
         fetchExpenseData();
     }, []);
-    
+
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -63,15 +63,15 @@ function Page() {
             </div>
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
-                        <DataTable
-                            bulkDeleteIdName="order_id"
-                            bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
-                            bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
-                            bulkDeleteToastMessage="Selected slabs deleted successfully"
-                            searchKey="ExpenseName"
-                            columns={expensecolumns}
-                            data={expenseData}
-                        />
+                <DataTable
+                    bulkDeleteIdName="order_id"
+                    bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
+                    bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
+                    bulkDeleteToastMessage="Selected slabs deleted successfully"
+                    searchKey="ExpenseName"
+                    columns={expensecolumns}
+                    data={expenseData}
+                />
             </div>
         </div>
     );

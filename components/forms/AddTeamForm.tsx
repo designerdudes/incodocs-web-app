@@ -122,7 +122,6 @@ export default function TeamForm() {
                                 setIsLoading(false);
                                 GlobalModal.onClose();
                                 toast.success(" Employee added successfully");
-                                console.log(values);
                             } catch (error) {
                                 console.error("Error creating/updating employee:", error);
                                 setIsLoading(false);

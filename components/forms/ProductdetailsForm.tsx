@@ -29,7 +29,7 @@ import toast from "react-hot-toast";
 const formSchema = z.object({
   productCategory: z.string().min(1, { message: "Category is required" }),
   subcategory: z.string().optional(),
-  
+
   // Tile Details
   numBoxes: z.string().optional(),
   piecesPerBox: z.string().optional(),
@@ -72,9 +72,9 @@ function ProductDetailsForm() {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    
+
     try {
-      console.log("Product Data:", values);
+      // console.log("Product Data:", values);
       toast.success("Product added successfully!");
       GlobalModal.onClose();
     } catch (error) {
@@ -88,7 +88,7 @@ function ProductDetailsForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        
+
         {/* Product Category */}
         <FormField
           control={form.control}

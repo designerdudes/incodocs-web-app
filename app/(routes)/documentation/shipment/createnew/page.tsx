@@ -19,7 +19,6 @@ import { OtherDetails } from "./components/OtherDetails";
 
 
 const saveProgress = (data: any) => {
-    console.log("Saving progress...", data);
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
     alert("Progress saved!");
 };

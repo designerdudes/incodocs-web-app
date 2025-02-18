@@ -27,7 +27,7 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
                 const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
                 setBlockData(GetData);
                 if (Array.isArray(GetData?.SlabsId)) {
-                    console.log("All Slabs:", GetData.SlabsId);
+                    // console.log("All Slabs:", GetData.SlabsId);
 
                     const filteredSlabs = GetData.SlabsId.filter(
                         (slab: { status?: string }) => slab.status === "readyForPolish"
@@ -85,8 +85,8 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
                 payload
             );
 
-            console.log("Response:", response);
-            console.log("Payload", payload);
+            // console.log("Response:", response);
+            // console.log("Payload", payload);
             setIsLoading(false);
             GlobalModal.onClose();
             toast.success("Slabs updated successfully.");
@@ -105,8 +105,6 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
         }
         window.location.reload();
     };
-
-    console.log("These are ready for polish", readyForPolishSlabs);
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>

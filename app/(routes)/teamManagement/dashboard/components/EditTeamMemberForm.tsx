@@ -55,7 +55,6 @@ export default function EditFactoryForm({ params }: Props) {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
-  console.log(params);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
