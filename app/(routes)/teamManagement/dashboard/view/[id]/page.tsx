@@ -1,12 +1,10 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { columns } from "../../../blocks/components/columns";
 import {
   Card,
   CardContent,
@@ -27,18 +25,35 @@ import moment from "moment";
 interface Props {
   params: {
     id: any;
-    factoryid: any;
-    lotid: string;
   };
+
+  address: {
+    location: string;
+    pincode: number;
+  };
+  contactInformation: {
+    contactPerson: string;
+    email: string;
+    phoneNumber: number;
+    alternatePhone: number;
+  };
+  _id: string;
+  teamMemberName: string;
+  employeeId: string;
+  organizationId: string;
+  role: string;
+  position: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default async function BlocksPage({ params }: Props) {
-  let BlocksData = null;
+  let TeamData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.lotid}`,
+    `http://localhost:4080/employers/getone/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -50,22 +65,7 @@ export default async function BlocksPage({ params }: Props) {
     return response.json();
   });
 
-  BlocksData = res;
-
-  let LotData = null;
-  const resp = await fetch(
-    `http://localhost:4080/factory-management/inventory/lot/getbyid/${params?.lotid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
-  LotData = resp;
+  TeamData = res;
 
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
@@ -80,12 +80,12 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of ${BlocksData[0]?.lotName}'s Blocks`}
+            title={`Details of ${TeamData?.teamMemberName}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
-            This section allows you to send blocks from your inventory for
-            cutting. Select the block and initiate the cutting process as the
-            next step in its preparation.
+            Include personal and professional information such as name, employee
+            ID, role, position, contact details, address, and organization ID,
+            along with timestamps for record creation and updates.
           </p>
         </div>
       </div>
@@ -94,11 +94,10 @@ export default async function BlocksPage({ params }: Props) {
 
       {/* Content Area */}
       <div className="flex flex-1 gap-6">
-        {/* Lot Details Card */}
-        <Card className="w-2/5">
+        <Card className="w-3/5">
           <CardHeader>
-            <CardTitle>Lot Details</CardTitle>
-            <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
+            <CardTitle>Employee Details</CardTitle>
+            <CardDescription>{`Details of ${TeamData?.employeeId}`}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -110,79 +109,87 @@ export default async function BlocksPage({ params }: Props) {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">Lot Name</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
-                </TableRow>
-                <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Material Type
+                    Employee Id
                   </TableCell>
-                  <TableCell>{LotData?.materialType}</TableCell>
+                  <TableCell>{TeamData?.employeeId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Total Blocks
+                    Employee Name
                   </TableCell>
-                  <TableCell>{LotData?.blocksId?.length}</TableCell>
+                  <TableCell>{TeamData?.teamMemberName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Transport Cost:
+                    Organization Id
                   </TableCell>
-                  <TableCell>{LotData?.transportCost}</TableCell>
+                  <TableCell>{TeamData?.organizationId}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Role</TableCell>
+                  <TableCell>{TeamData?.role}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Position</TableCell>
+                  <TableCell>{TeamData?.position}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Location</TableCell>
+                  <TableCell>{TeamData?.address?.location}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Pincode</TableCell>
+                  <TableCell>{TeamData?.address?.pincode}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Material Cost:
-                  </TableCell>
-                  <TableCell>{LotData?.materialCost}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Marker Cost:
-                  </TableCell>
-                  <TableCell>{LotData?.markerCost}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Marker Operator:
-                  </TableCell>
-                  <TableCell>{LotData?.markerOperatorName}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Created At
+                    Contact Person
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.createdAt).format("YYYY-MM-DD")}
+                    {TeamData?.contactInformation?.contactPerson}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Email</TableCell>
+                  <TableCell>{TeamData?.contactInformation?.email}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Phone Number
+                  </TableCell>
+                  <TableCell>
+                    {TeamData?.contactInformation?.phoneNumber}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Block Updated At
+                    Alternate Number
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.updatedAt).format("YYYY-MM-DD")}
+                    {TeamData?.contactInformation?.alternatePhone}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Created At
+                  </TableCell>
+                  <TableCell>
+                    {moment(TeamData.createdAt).format("YYYY-MM-DD")}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Updated At
+                  </TableCell>
+                  <TableCell>
+                    {moment(TeamData.updatedAt).format("YYYY-MM-DD")}
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
-
-        {/* Block's DataTable */}
-        <div className="w-3/5">
-          <DataTable
-            bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-            bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-            deleteRoute="/factory-management/inventory/deletemultipleblocks"
-            searchKey="blockNumber"
-            columns={columns}
-            data={BlocksData as any}
-          />
-        </div>
       </div>
     </div>
   );
