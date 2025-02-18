@@ -33,6 +33,8 @@ const formSchema = z.object({
     city: z.string().min(2).max(50),
     state: z.string().min(2).max(50),
     pincode: z.string().min(6).max(6),
+    customerType: z.string(),
+    country: z.string().min(2).max(50),
 
 })
 
@@ -81,7 +83,7 @@ export function GetOrganisationDetaisForm({ className, gap, ...props }: GetOrgan
 
             const response = await postData('/auth/register', data);
             // const response2 = await postData(`/auth/editAddress`, data)
-            console.log('API Response:', response);
+            // console.log('API Response:', response);
 
             setIsLoading(false);
             toast.success('Item created successfully');

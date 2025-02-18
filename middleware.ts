@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest) {
             if (response.ok) {
                 const factories = await response.json();
 
-                console.log(factories)
+                // console.log(factories)
 
                 if (factories && factories.length > 0) {
                     const firstFactoryId = factories[0]?._id; // Adjust based on the response structure

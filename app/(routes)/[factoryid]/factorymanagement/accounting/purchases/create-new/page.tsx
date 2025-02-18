@@ -7,8 +7,9 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { PurchaseCreateNewForm } from "@/components/forms/PurchaseCreateNewForm";
 
- 
-console.log(Button, Heading, PurchaseCreateNewForm); // Debug undefined components
+
+// console.log(Button, Heading, PurchaseCreateNewForm); 
+// Debug undefined components
 
 export default function CreateNewFormPage() {
     return (

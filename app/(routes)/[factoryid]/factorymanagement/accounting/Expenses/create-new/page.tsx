@@ -4,12 +4,12 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import ExpenseForm  from "@/components/forms/ExpenseForm";
+import ExpenseForm from "@/components/forms/ExpenseForm";
 
 // Debug each import
-console.log("Button:", Button);
-console.log("Heading:", Heading);
-console.log("ExpenseForm:", ExpenseForm);
+// console.log("Button:", Button);
+// console.log("Heading:", Heading);
+// console.log("ExpenseForm:", ExpenseForm);
 
 export default function CreateNewFormPage() {
     return (

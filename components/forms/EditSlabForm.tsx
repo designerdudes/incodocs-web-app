@@ -56,7 +56,6 @@ export default function EditSlabForm({ id
     const fetchSlabData = async () => {
       try {
         const data = await fetchData(`/factory-management/inventory/raw/get/${id}`);
-        console.log("Fetched Data:", data);
         setSlabs(data.SlabsId || []);
         form.reset({ slabs: data.SlabsId || [] });
       } catch (error) {
@@ -79,7 +78,6 @@ export default function EditSlabForm({ id
 
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log("Form data:", values);
     setIsLoading(true);
 
     try {

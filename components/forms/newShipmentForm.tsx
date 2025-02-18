@@ -255,24 +255,24 @@ export function NewShipmentForm() {
 
   const handleFileUpload = async (file: File | undefined): Promise<string | undefined> => {
     if (!file) return undefined;
-  
+
     const formData = new FormData();
     formData.append("file", file);
-  
+
     try {
       const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
-  
+
       // Ensure the response is OK before parsing JSON
       if (!response.ok) {
         throw new Error(`File upload failed: ${response.statusText}`);
       }
-  
+
       const result = await response.json(); // Parse once
       console.log("✅ File Upload Response:", result);
-  
+
       return result.filePath || undefined; // Ensure correct key
     } catch (error) {
       console.error("❌ Error uploading file:", error);
@@ -280,16 +280,16 @@ export function NewShipmentForm() {
       return undefined;
     }
   };
-  
-  
+
+
 
 
   // console.log("form values:", form.getValues());
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log("📨 Form submitted with values:", values);
-  
+    // console.log("📨 Form submitted with values:", values);
+
     try {
       const uploadFields = [
         "shippingDetails.forwarderInvoice",
@@ -300,15 +300,15 @@ export function NewShipmentForm() {
         "saleInvoiceDetails.commercialInvoice",
         "blDetails.uploadBL",
       ] as const; // Ensure correct type inference
-  
+
       const uploadedFiles: Record<string, string | undefined> = {};
-  
+
       // Upload files sequentially
       // for (const field of uploadFields) {
       //   // Extract file from nested object structure
       //   const pathSegments = field.split(".");
       //   let file: any = values;
-  
+
       //   for (const segment of pathSegments) {
       //     if (file && typeof file === "object") {
       //       file = file[segment];
@@ -317,12 +317,12 @@ export function NewShipmentForm() {
       //       break;
       //     }
       //   }
-  
+
       //   if (file instanceof File) {
       //     console.log(`📤 Uploading file for: ${field}`, file);
-  
+
       //     const filePath = await handleFileUpload(file);
-  
+
       //     if (filePath) {
       //       uploadedFiles[field] = filePath;
       //       console.log(`✅ File uploaded successfully: ${field} → ${filePath}`);
@@ -333,7 +333,7 @@ export function NewShipmentForm() {
       //     }
       //   }
       // }
-  
+
       // ✅ Build the updated values with uploaded file URLs
       const updatedValues = {
         ...values,
@@ -361,13 +361,13 @@ export function NewShipmentForm() {
         },
         organization, // Ensure organization is included
       };
-  
+
       console.log("📦 Final Payload before submission:", updatedValues);
-  
+
       // ✅ Submit final form data
       const res = await postData("/shipment/add", updatedValues);
       console.log("✅ Response:", res);
-  
+
       toast.success("Shipment created successfully");
       router.push("./");
     } catch (error) {
@@ -378,8 +378,8 @@ export function NewShipmentForm() {
       router.refresh();
     }
   }
-  
-  
+
+
 
   return (
     <Form {...form}>
@@ -627,7 +627,7 @@ export function NewShipmentForm() {
               )}
             />
 
-<FormField
+            <FormField
               control={form.control}
               name="shippingDetails.forwarderInvoice"
               render={({ field }) => (
@@ -649,7 +649,7 @@ export function NewShipmentForm() {
                             }
                           }
                         }
-                      }
+                        }
                       />
                     </FormControl>
                     <Button
@@ -733,7 +733,7 @@ export function NewShipmentForm() {
                             }
                           }
                         }
-                      }
+                        }
                       />
                     </FormControl>
                     <Button
@@ -1096,7 +1096,7 @@ export function NewShipmentForm() {
                   <FormLabel>Actual Supplier Invoice</FormLabel>
                   <div className="flex items-center gap-2">
                     <FormControl>
-                    <Input
+                      <Input
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}
@@ -1175,7 +1175,7 @@ export function NewShipmentForm() {
                   <FormLabel>commercial Invoice</FormLabel>
                   <div className="flex items-center gap-2">
                     <FormControl>
-                    <Input
+                      <Input
                         className="cursor-pointer"
                         type="file"
                         disabled={isLoading}

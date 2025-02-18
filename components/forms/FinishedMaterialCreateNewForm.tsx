@@ -61,7 +61,6 @@ function FinishedMaterialCreateNewForm({ className, gap }: NewFormProps) {
 
     function onSubmit(values: z.infer<typeof formSchema>) {
         try {
-            console.log(values);
         } catch (error) {
             console.error("Form submission error", error);
         }

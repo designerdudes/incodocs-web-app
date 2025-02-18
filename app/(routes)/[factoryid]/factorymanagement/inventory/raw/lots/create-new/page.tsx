@@ -7,7 +7,8 @@ import { Separator } from "@/components/ui/separator";
 import { RawMaterialCreateNewForm } from "@/components/forms/RawMaterialCreateNewForm";
 
 
-console.log(Button, Heading, RawMaterialCreateNewForm); // Debug undefined components
+// console.log(Button, Heading, RawMaterialCreateNewForm);
+// Debug undefined components
 
 export default function CreateNewFormPage() {
     return (
@@ -25,7 +26,7 @@ export default function CreateNewFormPage() {
                         title="Create new Lot Inventory"
                     />
                     <p className="text-muted-foreground text-sm">
-                    Complete the form below to add a new lot to your inventory. Provide essential information like material type, dimensions, quantity, and any additional details.
+                        Complete the form below to add a new lot to your inventory. Provide essential information like material type, dimensions, quantity, and any additional details.
                     </p>
                 </div>
             </div>

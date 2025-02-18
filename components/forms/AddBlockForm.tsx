@@ -106,7 +106,6 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
     resolver: zodResolver(formSchema),
   });
   let lotId = params.lotId;
-  console.log("this is lot id", params.lotId);
 
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
@@ -145,8 +144,6 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
       organizationId,
       status: "active",
     };
-
-    console.log("Submitting data:", submissionData); // Debugging
 
     try {
       await putData(

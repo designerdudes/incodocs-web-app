@@ -59,8 +59,8 @@ export type FinishedMaterial = {
 
   createdAt: string; // ISO 8601 timestamp
   updatedAt: string; // ISO 8601 timestamp
-  workersCuttingPay:number;
-  workersPolishingPay:number;
+  workersCuttingPay: number;
+  workersPolishingPay: number;
 };
 
 interface Props {
@@ -132,9 +132,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
-
-    console.log(slabsData)
-
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -289,7 +286,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
                   data={slabsData}
                 />
               </TabsContent>
-              
+
               <TabsContent value="CuttinginchesWithOutAllowance">
                 <DataTable
                   bulkDeleteIdName="_id"

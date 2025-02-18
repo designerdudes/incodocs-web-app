@@ -5,48 +5,35 @@ import { Button } from "@/components/ui/button";
 import { Trash } from "lucide-react";
 import { Plus } from 'lucide-react';
 import * as z from "zod";
-import { useForm } from "react-hook-form";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useGlobalModal } from "@/hooks/GlobalModal";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Icons } from "@/components/ui/icons";
-import { fetchData, putData } from "@/axiosUtility/api";
-import toast from "react-hot-toast";
+
 
 const formSchema = z.object({
-    trim: z.object({
-        length: z.object({
-            value: z
-                .number()
-                .min(0.1, { message: "Length must be greater than zero" }),
-            units: z.literal("inch").default("inch"),
-        }),
-        height: z.object({
-            value: z
-                .number()
-                .min(0.1, { message: "Height must be greater than zero" }),
-            units: z.literal("inch").default("inch"),
-        }),
+  trim: z.object({
+    length: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Length must be greater than zero" }),
+      units: z.literal("inch").default("inch"),
     }),
+    height: z.object({
+      value: z
+        .number()
+        .min(0.1, { message: "Height must be greater than zero" }),
+      units: z.literal("inch").default("inch"),
+    }),
+  }),
 });
 
 interface Props {
-    params: { id: string };
+  params: { id: string };
 }
 
 const EditLotDetailsForm: React.FC = () => {
-  const [slabs, setSlabs] = useState<number[]>([0]); 
-  const [newSlabCount, setNewSlabCount] = useState<number>(1); 
+  const [slabs, setSlabs] = useState<number[]>([0]);
+  const [newSlabCount, setNewSlabCount] = useState<number>(1);
 
- 
+
   const addSlab = () => {
     if (newSlabCount <= 0) return;
     setSlabs((prevSlabs) => [...prevSlabs, newSlabCount]);
@@ -58,9 +45,9 @@ const EditLotDetailsForm: React.FC = () => {
     setSlabs((prevSlabs) => prevSlabs.filter((_, i) => i !== index));
   };
 
- 
+
   const saveSlabs = () => {
-    console.log("Updated slab numbers:", slabs);
+    // console.log("Updated slab numbers:", slabs);
     alert("Slab numbers updated successfully!");
   };
 
@@ -77,7 +64,7 @@ const EditLotDetailsForm: React.FC = () => {
               onClick={() => deleteSlab(index)}
               className="text-sm"
             >
-            <Trash />
+              <Trash />
             </Button>
           </div>
         ))}
@@ -95,7 +82,7 @@ const EditLotDetailsForm: React.FC = () => {
 
         {/* Save slabs */}
         <Button onClick={saveSlabs} className="w-half mt-4">
-        Submit
+          Submit
         </Button>
       </div>
     </div>
