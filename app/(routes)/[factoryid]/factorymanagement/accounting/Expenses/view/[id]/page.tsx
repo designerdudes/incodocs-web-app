@@ -29,11 +29,11 @@ interface Props {
 }
 
 export default async function ExpensePage({ params }: Props) {
-  
+
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(`http://localhost:4080/expense/getbyid/${params.id}`, {
+  const res = await fetch(`https://incodocs-server.onrender.com/expense/getbyid/${params.id}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -42,7 +42,7 @@ export default async function ExpensePage({ params }: Props) {
   });
 
   const expenseData = await res.json();
-  
+
   // Display data after fetching
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

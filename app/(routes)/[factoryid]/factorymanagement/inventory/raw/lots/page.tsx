@@ -32,7 +32,7 @@ export default async function LotManagement({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
     {
       method: "GET",
       headers: {

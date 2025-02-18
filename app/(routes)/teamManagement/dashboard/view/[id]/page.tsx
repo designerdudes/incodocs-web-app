@@ -59,7 +59,7 @@ export default function BlocksPage() {
           ?.split("=")[1];
 
         const res = await fetch(
-          `http://localhost:4080/employers/getone/${id}`,
+          `https://incodocs-server.onrender.com/employers/getone/${id}`,
           {
             method: "GET",
             headers: {

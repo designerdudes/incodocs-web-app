@@ -79,7 +79,7 @@ export default function EditBlockForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/raw/get/${blockId}`
+          `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${blockId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch block data");

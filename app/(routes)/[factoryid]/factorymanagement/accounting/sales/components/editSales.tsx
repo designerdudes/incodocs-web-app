@@ -25,17 +25,17 @@ const formSchema = z.object({
     .string()
     .min(3, { message: " name must be at least 3 characters long" })
     .optional(),
-    customerGSTN: z
+  customerGSTN: z
     .string()
     .min(3, { message: "Enter GSTNumber " })
     .optional(),
-    NumberOfSlabs: z
+  NumberOfSlabs: z
     .union([
       z.string().min(1, { message: " Enter NumberOfSlabs" }),
       z.number(),
     ])
     .optional(),
-    saleDate: z
+  saleDate: z
     .union([
       z.string().min(1, { message: "Enter date" }),
       z.number(),
@@ -49,7 +49,7 @@ interface Props {
   };
 }
 
-export default function EditLotForm({ params }: Props){
+export default function EditLotForm({ params }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
@@ -58,7 +58,7 @@ export default function EditLotForm({ params }: Props){
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customerName:"",
+      customerName: "",
       customerGSTN: "",
       NumberOfSlabs: "",
       saleDate: "",
@@ -73,7 +73,7 @@ export default function EditLotForm({ params }: Props){
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/lot/getbyid/${lotId}`
+          `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch lot data");
@@ -82,10 +82,10 @@ export default function EditLotForm({ params }: Props){
 
         // Reset form with fetched values
         form.reset({
-           customerName: data.customerName || "",
-           customerGSTN: data.customerGSTN|| "",
-           NumberOfSlabs: data.NumberOfSlabs || "",
-           saleDate: data.saleDate || "",
+          customerName: data.customerName || "",
+          customerGSTN: data.customerGSTN || "",
+          NumberOfSlabs: data.NumberOfSlabs || "",
+          saleDate: data.saleDate || "",
         });
       } catch (error) {
         console.error("Error fetching lot data:", error);

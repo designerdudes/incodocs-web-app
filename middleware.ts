@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
         
         
         request.url.includes('/register') || request.url.includes('/forgot-password') ){
-            const response = await fetch('http://localhost:4080/factory/getfactorybyuser', {
+            const response = await fetch('https://incodocs-server.onrender.com/factory/getfactorybyuser', {
                 headers: {
                     'Authorization': `Bearer ${request.cookies.get('AccessToken')?.value}`, // Add token for authorization if needed
                     'Content-Type': 'application/json',

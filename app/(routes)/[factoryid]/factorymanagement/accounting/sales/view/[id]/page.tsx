@@ -34,7 +34,7 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params?.blockid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
     {
       method: "GET",
       headers: {

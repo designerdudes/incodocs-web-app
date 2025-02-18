@@ -19,7 +19,7 @@ export default async function EditPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params.id}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params.id}`,
     {
       method: "GET",
       headers: {

@@ -20,27 +20,27 @@ import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-    supplierName: z
+  supplierName: z
     .string()
     .min(3, { message: "Lot name must be at least 3 characters long" })
     .optional(),
-    supplierGSTN: z
+  supplierGSTN: z
     .string()
     .min(3, { message: "required GSTN" })
     .optional(),
-    ratePerSqft: z
+  ratePerSqft: z
     .union([
       z.string().min(1, { message: " cost must be a valid number" }),
       z.number(),
     ])
     .optional(),
-    numberofSlabs: z
+  numberofSlabs: z
     .union([
       z.string().min(1, { message: "Enter number of Slabs" }),
       z.number(),
     ])
     .optional(),
-    purchaseDate: z
+  purchaseDate: z
     .union([
       z.string().min(1, { message: "Enter Date" }),
       z.number(),
@@ -79,7 +79,7 @@ export default function EditLotForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/lot/getbyid/${lotId}`
+          `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch lot data");
@@ -88,12 +88,12 @@ export default function EditLotForm({ params }: Props) {
 
         // Reset form with fetched values
         form.reset({
-            supplierName: data.supplierName || "",
-            supplierGSTN: data.supplierGSTN || "",
-            ratePerSqft: data.ratePerSqft || "",
-            numberofSlabs: data.numberofSlabs || "",
-            purchaseDate: data.purchaseDate || "",
-        //   markerOperatorName: data.markerOperatorName || "",
+          supplierName: data.supplierName || "",
+          supplierGSTN: data.supplierGSTN || "",
+          ratePerSqft: data.ratePerSqft || "",
+          numberofSlabs: data.numberofSlabs || "",
+          purchaseDate: data.purchaseDate || "",
+          //   markerOperatorName: data.markerOperatorName || "",
         });
       } catch (error) {
         console.error("Error fetching lot data:", error);

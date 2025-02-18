@@ -39,7 +39,7 @@ export default async function BlocksPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/raw/get/${params?.id}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -55,7 +55,7 @@ export default async function BlocksPage({ params }: Props) {
   // console.log(BlockData)
 
   const resp = await fetch(
-    `http://localhost:4080/factory-management/inventory/slabsbyblock/get/${params?.id}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -68,7 +68,7 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   SlabData = resp;
-// console.log(SlabData)
+  // console.log(SlabData)
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

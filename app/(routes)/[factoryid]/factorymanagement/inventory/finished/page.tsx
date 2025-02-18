@@ -56,7 +56,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get('AccessToken')?.value || "";
 
-    const res = await fetch(`http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `, {
+    const res = await fetch(`https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid} `, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const Polished = Array.isArray(slabsData)
         ? slabsData.filter((data: any) => data.status === "polished")
         : [];
-        
+
 
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>

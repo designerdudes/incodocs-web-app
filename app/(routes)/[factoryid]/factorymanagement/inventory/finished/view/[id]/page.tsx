@@ -65,7 +65,7 @@ export default async function ViewFinishedPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/finished/get/${params?.id}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/finished/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -79,9 +79,9 @@ export default async function ViewFinishedPage({ params }: Props) {
   // console.log(FinishedMaterial);
   const adjustedDimensions = FinishedMaterial?.dimensions
     ? calculateDimensions(
-        FinishedMaterial.dimensions.length.value,
-        FinishedMaterial.dimensions.height.value
-      )
+      FinishedMaterial.dimensions.length.value,
+      FinishedMaterial.dimensions.height.value
+    )
     : null;
 
   function calculateDimensions(
@@ -145,7 +145,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Cutting Inches With Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -247,7 +247,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Cutting Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -344,7 +344,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Polishing Inches With Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -461,7 +461,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Polishing Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
