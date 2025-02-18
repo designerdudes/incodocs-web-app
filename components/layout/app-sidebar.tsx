@@ -17,6 +17,7 @@ import {
     PieChart,
     Settings2,
     SquareTerminal,
+    User,
 } from "lucide-react"
 
 import NavMain from "@/components/layout/nav-main"
@@ -134,6 +135,12 @@ const data = {
                     url: "/documentation/quotes",
                 },
             ],
+        },
+        {
+            title: "Team Management",
+            url: "teamManagement/dashboard",
+            icon: User,
+            isActive: true,
         },
         {
             title: "Intergration",
