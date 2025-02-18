@@ -43,8 +43,7 @@ function page({ params }: Props) {
               stat={card.value}
               icon={card.icon}
               desc=""
-              href={card.buttonUrl}
-            />
+              href={card.buttonUrl} factoryId={''} />
           ))
         }
       </div>
