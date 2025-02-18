@@ -171,11 +171,6 @@ const data = {
                     url: "/settings/general",
                 },
                 {
-
-                    title: "Team",
-                    url: "/settings/team",
-                },
-                {
                     title: "Factory",
                     url: "/settings/factory",
                 },
