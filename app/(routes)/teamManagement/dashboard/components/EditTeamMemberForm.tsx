@@ -84,7 +84,7 @@ export default function EditFactoryForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/employers/getone/${EmployeeId}`
+          `https://incodocs-server.onrender.com/employers/getone/${EmployeeId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch Employee data");

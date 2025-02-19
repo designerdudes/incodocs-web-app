@@ -38,7 +38,7 @@ export default async function BlocksPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/blocksbylot/get/${params?.lotid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/blocksbylot/get/${params?.lotid}`,
     {
       method: "GET",
       headers: {
@@ -54,7 +54,7 @@ export default async function BlocksPage({ params }: Props) {
 
   let LotData = null;
   const resp = await fetch(
-    `http://localhost:4080/factory-management/inventory/lot/getbyid/${params?.lotid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${params?.lotid}`,
     {
       method: "GET",
       headers: {

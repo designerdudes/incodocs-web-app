@@ -260,7 +260,7 @@ export function NewShipmentForm() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });

@@ -65,7 +65,7 @@ export default async function ViewFinishedPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/finished/get/${params?.id}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/finished/get/${params?.id}`,
     {
       method: "GET",
       headers: {
@@ -74,18 +74,18 @@ export default async function ViewFinishedPage({ params }: Props) {
       },
     }
   );
-  
-  
+
+
   const FinishedMaterial = await res.json();
 
   // console.log(FinishedMaterial);
   const adjustedDimensions = FinishedMaterial?.dimensions
     ? calculateDimensions(
-        FinishedMaterial.dimensions.length.value,
-        FinishedMaterial.dimensions.height.value
-      )
+      FinishedMaterial.dimensions.length.value,
+      FinishedMaterial.dimensions.height.value
+    )
     : null;
-    
+
 
   function calculateDimensions(
     length: number,
@@ -148,7 +148,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Cutting Inches With Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -250,7 +250,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Cutting Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -304,10 +304,10 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableRow>
                         <TableCell className="whitespace-nowrap">Total SQF</TableCell>
                         <TableCell>
-                        {(
+                          {(
                             ((FinishedMaterial?.dimensions?.length?.value *
                               FinishedMaterial?.dimensions?.height?.value) /
-                              144) ).toFixed(2)}
+                              144)).toFixed(2)}
 
                         </TableCell>
                       </TableRow>
@@ -354,7 +354,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Polishing Inches With Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -432,10 +432,10 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableRow>
                         <TableCell className="whitespace-nowrap">Total SQF</TableCell>
                         <TableCell>
-                        {(
+                          {(
                             ((FinishedMaterial?.dimensions?.length?.value *
                               FinishedMaterial?.dimensions?.height?.value) /
-                              144) ).toFixed(2)}
+                              144)).toFixed(2)}
 
                         </TableCell>
                       </TableRow>
@@ -480,7 +480,7 @@ export default async function ViewFinishedPage({ params }: Props) {
               <Card x-chunk="dashboard-07-chunk-0">
                 <CardHeader>
                   <CardTitle>Polishing Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{}</CardDescription>
+                  <CardDescription>{ }</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -558,10 +558,10 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableRow>
                         <TableCell className="whitespace-nowrap">Total SQF</TableCell>
                         <TableCell>
-                        {(
+                          {(
                             ((FinishedMaterial?.dimensions?.length?.value *
                               FinishedMaterial?.dimensions?.height?.value) /
-                              144) ).toFixed(2)}
+                              144)).toFixed(2)}
 
                         </TableCell>
                       </TableRow>

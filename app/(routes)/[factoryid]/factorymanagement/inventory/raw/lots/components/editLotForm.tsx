@@ -84,7 +84,7 @@ export default function EditLotForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/factory-management/inventory/lot/getbyid/${lotId}`
+          `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch lot data");

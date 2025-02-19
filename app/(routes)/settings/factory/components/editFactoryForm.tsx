@@ -69,7 +69,7 @@ export default function EditFactoryForm({ params }: Props) {
             try {
                 setIsFetching(true);
                 const response = await fetch(
-                    `http://localhost:4080/factory/getSingle/${factoryId}`
+                    `https://incodocs-server.onrender.com/factory/getSingle/${factoryId}`
                 );
                 if (!response.ok) {
                     throw new Error("Failed to fetch lot data");

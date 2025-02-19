@@ -20,7 +20,7 @@ export default async function Home({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
   const res = await fetch(
-    `http://localhost:4080/factory/getSingle/${params?.factoryid}`,
+    `https://incodocs-server.onrender.com/factory/getSingle/${params?.factoryid}`,
     {
       method: "GET",
       headers: {

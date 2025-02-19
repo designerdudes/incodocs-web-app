@@ -19,7 +19,7 @@ export default async function page({ params }: Props) {
 
   // Fetch Lots Data
   const Lotres = await fetch(
-    `http://localhost:4080/factory-management/inventory/factory-lot/get/${params.factoryid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params.factoryid}`,
     {
       method: "GET",
       headers: {
@@ -31,7 +31,7 @@ export default async function page({ params }: Props) {
 
   // Fetch Slabs Data
   const Slabres = await fetch(
-    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid}`,
     {
       method: "GET",
       headers: {

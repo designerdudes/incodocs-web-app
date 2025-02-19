@@ -27,7 +27,7 @@ export default async function FactoryPage() {
   const token = (await cookieStore).get("AccessToken")?.value || "";
   let factories: Factory[] = [];
   try {
-    const res = await fetch("http://localhost:4080/factory/getAll", {
+    const res = await fetch("https://incodocs-server.onrender.com/factory/getAll", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

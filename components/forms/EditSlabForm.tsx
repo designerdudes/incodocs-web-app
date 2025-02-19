@@ -68,7 +68,7 @@ export default function EditSlabForm({ id
 
   const handleDelete = async (slabId: string) => {
     try {
-      await axios.delete(`http://localhost:4080/factory-management/inventory/finished/delete/${slabId}`);
+      await axios.delete(`https://incodocs-server.onrender.com/factory-management/inventory/finished/delete/${slabId}`);
       setSlabs((prev) => prev.filter((slab) => slab._id !== slabId));
       toast.success("Slab Deleted Successfully");
     } catch (error) {

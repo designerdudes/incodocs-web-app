@@ -20,7 +20,7 @@ export default async function MarkCutPage(params: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get('AccessToken')?.value || ""
 
-    const res = await fetch(`http://localhost:4080/factory-management/inventory/raw/get/${params.params.blockid}`, {
+    const res = await fetch(`https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params.params.blockid}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',

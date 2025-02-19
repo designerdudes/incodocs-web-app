@@ -75,7 +75,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
 
   // Fetch the data for blocks and slabs
   const blockRes = await fetch(
-    `http://localhost:4080/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`,
     {
       method: "GET",
       headers: {
@@ -88,7 +88,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
   });
 
   const slabRes = await fetch(
-    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`,
     {
       method: "GET",
       headers: {
@@ -101,7 +101,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
   });
 
   const res = await fetch(
-    `http://localhost:4080/factory-management/inventory/getslabsbyfactory/${params.factoryid} `,
+    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid} `,
     {
       method: "GET",
       headers: {
