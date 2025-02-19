@@ -114,9 +114,9 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                       </SelectItem>
                     ))}
 
-<div>
-                   <AddshippinglineButton/>
-                  </div>
+                    <div>
+                      <AddshippinglineButton />
+                    </div>
 
                   </SelectContent>
                 </Select>
@@ -313,10 +313,10 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                       </SelectItem>
                     ))}
 
-<div>
-<AddForwarderButton/>
+                    <div>
+                      <AddForwarderButton />
 
-</div>
+                    </div>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -507,7 +507,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                     ))}
 
                     <div>
-<AddtransporterButton/>
+                      <AddtransporterButton />
 
                     </div>
                   </SelectContent>
