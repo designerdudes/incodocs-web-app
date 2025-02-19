@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
         if (isLoggedIn) {
             // Allow access to protected routes
             if (request.url.includes('/login') ||
-             request.url == 'http://localhost:3000/' ||
+             request.url == 'https://incodocs-server.onrender.com/user/login  ' ||
     
             
             
