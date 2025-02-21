@@ -6,7 +6,6 @@ import Link from "next/link";
 export default function SettingsPage() {
     const settingsOptions = [
         { name: "Factory Settings", path: "/settings/factory" },
-        { name: "Team Settings", path: "/settings/team" },
         { name: "General Settings", path: "/settings/general" },
     ];
 

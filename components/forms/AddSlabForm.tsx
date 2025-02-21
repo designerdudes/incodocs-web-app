@@ -26,9 +26,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
-import { preload } from "react-dom";
 
-interface MarkCutAndCreateSlabsFormProps {
+interface AddSlabsFormProps {
   gap: number;
   BlockData: any;
 }
@@ -61,10 +60,7 @@ const formSchema = z.object({
     .min(1, { message: "You must define at least one slab" }),
 });
 
-export function MarkCutAndCreateSlabsForm({
-  BlockData,
-  gap,
-}: MarkCutAndCreateSlabsFormProps) {
+export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [slabsCount, setSlabsCount] = React.useState(0);
@@ -144,7 +140,7 @@ export function MarkCutAndCreateSlabsForm({
         }
       );
 
-      toast.success("Block data updated successfully");
+      toast.success("Slab Added successfully");
 
       // Navigate back to the Processing page
       router.back();
@@ -335,7 +331,7 @@ export function MarkCutAndCreateSlabsForm({
             </Table>
           )}
           <Button type="submit" disabled={isLoading}>
-            Update Slabs
+            Add Slabs
           </Button>
         </form>
       </Form>
