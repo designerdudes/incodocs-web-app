@@ -53,6 +53,8 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
     const updatedInvoices = invoices.filter((_, i) => i !== index);
     setInvoices(updatedInvoices);
     setValue("saleInvoiceDetails.invoice", updatedInvoices); // Update form value
+
+    setValue("NumberOfSalesInvoices", updatedInvoices.length);
   };
 
   // Function to handle change in number of Commercial Invoices
@@ -132,7 +134,7 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
       {/* Number of Commercial Invoices */}
       <FormField
         control={control}
-        name="NumberOfCommercialInvoices"
+        name="NumberOfSalesInvoices"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Commercial Invoices</FormLabel>
@@ -140,9 +142,13 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number of Commercial Invoices"
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(e);
+                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
                   handleInvoiceNumberCountChange(e.target.value);
                 }}
               />
@@ -157,6 +163,7 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead>
                 <TableHead>Commercial Invoice Number</TableHead>
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
@@ -168,7 +175,7 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
             <TableBody>
               {invoices.map((_, index) => (
                 <TableRow key={index}>
-                  {/* Commercial Invoice Number */}
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
@@ -265,11 +272,12 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-      <div className="">
+      <div className="mt-8">
         <Button type="button" onClick={handleSubmit(saveProgress)}>
           Save Progress
         </Button>
       </div>
+      {/* Save Button */}
     </div>
   );
 }
