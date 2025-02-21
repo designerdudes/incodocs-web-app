@@ -55,9 +55,9 @@ const TransporterName = [
 
 export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue } = useFormContext();
-  const [Shippinginvoices, setShippingInvoices] = useState([]);
-  const [Forwarderinvoices, setForwarderInvoices] = useState([]);
-  const [Transporterinvoices, setTransporterInvoices] = useState([]);
+  const [Shippinginvoices, setShippingInvoices] = useState<{ InvoiceNumber: string; UploadShippingLineInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
+  const [Forwarderinvoices, setForwarderInvoices] = useState<{ InvoiceNumber: string; UploadForwarderInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
+  const [Transporterinvoices, setTransporterInvoices] = useState<{ InvoiceNumber: string; UploadTransporterInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
 
   const { handleSubmit } = useFormContext();
 
@@ -194,12 +194,12 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   type="number"
                   placeholder="Enter number of Shipping Line Invoices"
                   value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                    if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                    field.onChange(value);
                     handleShippingCountChange(e.target.value);
                   }}
                 />
@@ -394,12 +394,12 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   type="number"
                   placeholder="Enter number of Forwarder Line Invoices"
                   value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                    if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                    field.onChange(value);
                     handleForwarderCountChange(e.target.value);
                   }}
                 />
@@ -565,12 +565,12 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   type="number"
                   placeholder="Enter number of Transporter Invoices"
                   value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                    if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                    field.onChange(value);
                     handleTransporterCountChange(e.target.value);
                   }}
                 />
