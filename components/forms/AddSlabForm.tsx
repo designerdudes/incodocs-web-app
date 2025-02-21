@@ -26,7 +26,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
-import { preload } from "react-dom";
 
 interface AddSlabsFormProps {
   gap: number;

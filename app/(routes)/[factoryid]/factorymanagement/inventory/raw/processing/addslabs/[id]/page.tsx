@@ -15,7 +15,6 @@ interface Props {
 }
   
 export default async function AddSlabPage({ params }: Props) {
-console.log(params)
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
