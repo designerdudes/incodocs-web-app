@@ -34,9 +34,9 @@ interface AddSlabsFormProps {
 
 const formSchema = z.object({
   _id: z.string().optional(),
-  numberofSlabs: z.string().regex(/^[1-9]\d*$/, {
-    message: "Number of slabs must be a positive number",
-  }),
+  numberofSlabs: z
+    .number()
+    .min(1, { message: "Number of slabs must be a positive number" }),
   slabs: z
     .array(
       z.object({
@@ -78,7 +78,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
     },
   });
 
-  function handleSlabsInputChange(value: string) {
+  function handleSlabsInputChange(value: any) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
       setSlabsCount(count);
@@ -182,11 +182,14 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                       type="number"
                       placeholder="Enter number of slabs"
                       disabled={isLoading}
-                      value={field.value}
+                      value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
                       onChange={(e) => {
                         const value = parseInt(e.target.value, 10);
-                        field.onChange(value.toString());
-                        handleSlabsInputChange(value.toString());
+
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
+                        handleSlabsInputChange(value);
                       }}
                     />
                   </FormControl>

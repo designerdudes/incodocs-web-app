@@ -22,26 +22,29 @@ import toast from "react-hot-toast";
 const formSchema = z.object({
   trim: z.object({
     height: z.object({
-      value: z
-        .number()
-        .positive({ message: "Height must be greater than zero" }),
+      value: z.preprocess(
+        (val) => (val ? parseFloat(val as string) : undefined),
+        z.number().min(0.1, { message: "Height must be greater than zero" })
+      ),
       units: z.literal("inch"),
     }),
     length: z.object({
-      value: z
-        .number()
-        .positive({ message: "Length must be greater than zero" }),
+      value: z.preprocess(
+        (val) => (val ? parseFloat(val as string) : undefined),
+        z.number().min(0.1, { message: "Length must be greater than zero" })
+      ),
       units: z.literal("inch"),
     }),
   }),
   status: z.literal("polished"),
 });
 
+
 interface Props {
   params: { id: string };
 }
 
-function  CardWithForm(params: Props) {
+function CardWithForm(params: Props) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [slabData, setSlabData] = React.useState<Slab>();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -101,24 +104,22 @@ function  CardWithForm(params: Props) {
           </Button>
           <Button
             onClick={async () => {
-
               try {
                 const response = await putData(
                   `/factory-management/inventory/addtrim/${params.params.id}`,
                   values
                 );
-               
+
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Trim values added successfully");
               } catch (error) {
-               
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.error("Error updating trim values");
-            }
-            window.location.reload();
-        }}
+              }
+              window.location.reload();
+            }}
           >
             Confirm
           </Button>
@@ -143,9 +144,16 @@ function  CardWithForm(params: Props) {
                   <Input
                     placeholder="Eg: 54"
                     type="number"
+                    step="any" // Allows decimal values
                     {...field}
                     value={field.value || ""}
-                    onChange={(e) => field.onChange(+e.target.value)}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        field.onChange(value);
+                      }
+                    }}
+                    min="0"
                   />
                 </FormControl>
                 <FormMessage />
@@ -163,9 +171,16 @@ function  CardWithForm(params: Props) {
                   <Input
                     placeholder="Eg: 120"
                     type="number"
+                    step="any" // Allows decimal values
                     {...field}
                     value={field.value || ""}
-                    onChange={(e) => field.onChange(+e.target.value)}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        field.onChange(value);
+                      }
+                    }}
+                    min="0"
                   />
                 </FormControl>
                 <FormMessage />
