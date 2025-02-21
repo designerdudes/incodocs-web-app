@@ -26,15 +26,22 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SaveDetailsProps } from "./BookingDetails";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 
-const SupplierName =[
+const SupplierName = [
   { id: "1", name: "Ahmed" },
   { id: "2", name: "Arshad" },
 ];
 
-const shippingbill =[
+const shippingbill = [
   { id: "1", name: "Ahmed" },
   { id: "2", name: "Arshad" },
 ];
@@ -50,6 +57,8 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     const updatedInvoices = invoices.filter((_, i) => i !== index);
     setInvoices(updatedInvoices);
     setValue("SupplierDetails.invoice", updatedInvoices);
+
+    setValue("NumberOfSupplierInvoices", updatedInvoices.length);
   };
 
   const handleInvoiceNumberCountChange = (value: string) => {
@@ -117,9 +126,13 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                 <Input
                   type="number"
                   placeholder="Enter number of Supplier Invoices"
-                  value={field.value}
-                  onChange={(e) => {
-                    field.onChange(e);
+                  value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
                     handleInvoiceNumberCountChange(e.target.value);
                   }}
                 />
@@ -134,6 +147,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>#</TableHead> {/* New Index Column */}
                   <TableHead>Supplier GSTIN</TableHead>
                   <TableHead>Upload Invoice</TableHead>
                   <TableHead>Date</TableHead>
@@ -146,6 +160,8 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
               <TableBody>
                 {invoices.map((_, index) => (
                   <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>{" "}
+                    {/* Display 1-based Index */}
                     <TableCell>
                       <FormField
                         control={control}
@@ -157,7 +173,6 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-
                     <TableCell>
                       <FormField
                         control={control}
@@ -191,7 +206,6 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-
                     <TableCell>
                       <FormField
                         control={control}
@@ -222,7 +236,6 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-
                     <TableCell>
                       <FormField
                         control={control}
@@ -252,7 +265,6 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-
                     <TableCell>
                       <Button
                         variant="destructive"
@@ -271,13 +283,13 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
         )}
       </div>
       <Separator className="mt-2" />
-      <div  className="text-xl font-bold my-3">
-         <h2>Actual</h2>
+      <div className="text-xl font-bold my-3">
+        <h2>Actual</h2>
       </div>
-      
+
       <div className="grid grid-cols-4 gap-3">
-         {/* Actual Supplier Name */}
-         <FormField
+        {/* Actual Supplier Name */}
+        <FormField
           control={control}
           name="supplierDetails.actualSupplierName"
           render={({ field }) => (
@@ -362,11 +374,12 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
-        <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
-          Save Progress
-        </Button>
+        <div className="m-2">
+          <Button type="button" onClick={handleSubmit(saveProgress)}>
+            Save Progress
+          </Button>
         </div>
       </div>
     </div>
   );
-};
+}

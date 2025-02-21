@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useFormContext} from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -68,6 +68,8 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
 
     // Reset form value for the updated shipping bill list
     setValue("shippingBillDetails.bills", updatedShippingBills);
+
+    setValue("numberOFShippingBill", updatedShippingBills.length);
   };
 
   return (
@@ -128,7 +130,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
       />
       <FormField
         control={control}
-        name="noOfShippingBills"
+        name="numberOFShippingBill"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Shipping Bills</FormLabel>
@@ -136,9 +138,13 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number"
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(e);
+                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
                   handleShippingBillCountChange(e.target.value);
                 }}
               />
@@ -153,6 +159,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead> {/* New Index Column */}
                 <TableHead>Upload Shipping</TableHead>
                 <TableHead>Shipping Bill Number</TableHead>
                 <TableHead>Shipping Bill Date</TableHead>
@@ -164,6 +171,8 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
             <TableBody>
               {shippingBills.map((_, index) => (
                 <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>{" "}
+                  {/* Display 1-based Index */}
                   <TableCell>
                     <FormField
                       control={control}
