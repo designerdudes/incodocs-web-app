@@ -36,15 +36,17 @@ const formSchema = z.object({
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
     pincode: z
-      .string()
+      .number()
       .min(6, { message: "Pincode must be at least 6 characters" }),
   }),
-  workersCuttingPay: z
-    .number()
-    .min(1, { message: "Cutting Pay must be a positive number" }),
-  workersPolishingPay: z
-    .number()
-    .min(1, { message: "Polishing Pay must be a positive number" }),
+  workersCuttingPay: z.preprocess(
+    (val) => (typeof val === "string" ? parseFloat(val) : val),
+    z.number().min(0, { message: "Cutting Pay must be a positive number" })
+  ),
+  workersPolishingPay: z.preprocess(
+    (val) => (typeof val === "string" ? parseFloat(val) : val),
+    z.number().min(0, { message: "Polishing Pay must be a positive number" })
+  ),
 });
 
 const organizations = [
@@ -62,7 +64,7 @@ function FactoryForm() {
       gstNo: "",
       address: {
         location: "",
-        pincode: "",
+        pincode: 0,
       },
       workersCuttingPay: 0,
       workersPolishingPay: 0,
@@ -95,8 +97,9 @@ function FactoryForm() {
           <strong>Pincode:</strong> {values.address.pincode}
         </p>
         <p>
-          <strong>Workers Cutting Pay:</strong>{values.workersCuttingPay}
-          </p>
+          <strong>Workers Cutting Pay:</strong>
+          {values.workersCuttingPay}
+        </p>
         <p>
           <strong>Workers Polishing Pay:</strong>
           {values.workersPolishingPay}
@@ -211,7 +214,18 @@ function FactoryForm() {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input placeholder="Eg: 500081" {...field} />
+                <Input
+                  placeholder="Eg: 500081"
+                  type="number"
+                  value={field.value === 0 ? "" : field.value}
+                  onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      field.onChange(value);
+                    }
+                  }}
+                  min="0"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -219,45 +233,58 @@ function FactoryForm() {
         />
         {/* Workers Cutting Pay */}
         <div className="grid grid-cols-2 gap-4">
-
-        <FormField
-          control={form.control}
-          name="workersCuttingPay"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Workers Cutting Pay</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Eg: 1500"
-                  value={field.value === 0 ? "" : field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+          <FormField
+            control={form.control}
+            name="workersCuttingPay"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Workers Cutting Pay</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Eg: 1500"
+                    step="any" // Allows decimal values
+                    value={field.value === 0 ? "" : field.value}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        field.onChange(value);
+                      }
+                    }}
+                    min="0" // Prevents negative numbers from being input manually
                   />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        {/* Workers Polishing Pay */}
-        <FormField
-          control={form.control}
-          name="workersPolishingPay"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Workers Polishing Pay</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Eg: 1200"
-                  value={field.value === 0 ? "" : field.value}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+          {/* Workers Polishing Pay */}
+          <FormField
+            control={form.control}
+            name="workersPolishingPay"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Workers Polishing Pay</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Eg: 1200"
+                    step="any" // Allows decimal values
+                    value={field.value === 0 ? "" : field.value}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) {
+                        field.onChange(value);
+                      }
+                    }}
+                    min="0" // Prevents negative numbers from being input manually
                   />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-          </div>
+        </div>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit

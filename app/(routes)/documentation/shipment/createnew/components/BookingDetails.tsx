@@ -28,6 +28,10 @@ import {
 } from "@/components/ui/table"; // ShadCN Table components
 import ProductButton from "./ProductButton";
 
+
+
+
+
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
 }
@@ -42,6 +46,8 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
     const updatedContainers = containers.filter((_, i) => i !== index); // Remove container at the given index
     setContainers(updatedContainers);
     setValue("bookingDetails.containers", updatedContainers); // Update form value
+
+    setValue("NumberOfContainer", updatedContainers.length);
   };
 
   // Function to handle change in number of containers
@@ -194,7 +200,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
       {/* Number of Containers */}
       <FormField
         control={control}
-        name="noOfContainers"
+        name="NumberOfContainer"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Containers</FormLabel>
@@ -202,11 +208,17 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number of Containers"
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(e);
+                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
+
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
+
                   handleContainerCountChange(e.target.value);
                 }}
+              
               />
             </FormControl>
             <FormMessage />
@@ -219,6 +231,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead>#</TableHead> {/* New Index Column */}
                 <TableHead>Container Number</TableHead>
                 <TableHead>Truck Number</TableHead>
                 <TableHead>Truck Driver Contact Number</TableHead>
@@ -227,10 +240,11 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {containers.map((_, index) => (
-                <TableRow key={index}>
-                  {/* Container Number */}
-                  <TableCell>
+                {containers.map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>{" "}
+                    {/* Display 1-based Index */}
+                    <TableCell>
                     <FormField
                       control={control}
                       name={`bookingDetails.containers[${index}].containerNumber`}

@@ -14,6 +14,7 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
+  Plus,
   ScissorsIcon,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -35,7 +36,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
   const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
-
+console.log(data._id)
 
   return (
     <div>
@@ -50,6 +51,16 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {/* Add Lot */}
+          <DropdownMenuItem
+            onClick={() => {
+              router.push(`./processing/addslabs/${data._id}`);
+            }}
+            className="focus:bg-green-500 focus:text-destructive-foreground"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Slabs
+          </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;

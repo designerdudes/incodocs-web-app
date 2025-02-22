@@ -17,10 +17,10 @@ export default function SettingsAppearancePage() {
             <span className="sr-only">Back</span>
           </Button>
         </Link>
-        <div className="flex-1 mb-3">
+        <div className="flex-1 ">
           <Heading
             className="leading-tight"
-            title="general setting"
+            title="General Setting"
           />
           <p className="text-muted-foreground text-sm">
           Customize the appearance of the app. Automatically switch between day

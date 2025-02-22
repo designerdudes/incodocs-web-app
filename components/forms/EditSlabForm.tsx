@@ -41,9 +41,7 @@ const formSchema = z.object({
   ),
 });
 
-
-export default function EditSlabForm({ id
-}: Props) {
+export default function EditSlabForm({ id }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [slabs, setSlabs] = useState<any[]>([]);
   const router = useRouter();
@@ -55,7 +53,9 @@ export default function EditSlabForm({ id
   useEffect(() => {
     const fetchSlabData = async () => {
       try {
-        const data = await fetchData(`/factory-management/inventory/raw/get/${id}`);
+        const data = await fetchData(
+          `/factory-management/inventory/raw/get/${id}`
+        );
         setSlabs(data.SlabsId || []);
         form.reset({ slabs: data.SlabsId || [] });
       } catch (error) {
@@ -65,17 +65,17 @@ export default function EditSlabForm({ id
     fetchSlabData();
   }, [id]);
 
-
   const handleDelete = async (slabId: string) => {
     try {
-      await axios.delete(`https://incodocs-server.onrender.com/factory-management/inventory/finished/delete/${slabId}`);
+      await axios.delete(
+        `https://incodocs-server.onrender.com/factory-management/inventory/finished/delete/${slabId}`
+      );
       setSlabs((prev) => prev.filter((slab) => slab._id !== slabId));
       toast.success("Slab Deleted Successfully");
     } catch (error) {
       console.error("Error deleting slab:", error);
     }
   };
-
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -87,15 +87,16 @@ export default function EditSlabForm({ id
 
       toast.success("Slab Values Updated Successfully");
       router.back();
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
     } catch (error) {
       console.error("Validation or API error:", error);
       toast.error("An error occurred while updating data");
-    }
-    finally {
+    } finally {
       setIsLoading(false);
     }
-  };
-
+  }
 
   return (
     <div className="space-y-6">
@@ -141,7 +142,13 @@ export default function EditSlabForm({ id
                   </FormItem>
                 )}
               />
-              <Button onClick={() => handleDelete(slab._id)} className="bg-red-500 text-white">
+              <Button
+                onClick={(e) => {
+                  e.preventDefault(); // Prevent form submission
+                  handleDelete(slab._id);
+                }}
+                className="bg-red-500 text-white"
+              >
                 Delete
               </Button>
             </div>
