@@ -14,7 +14,7 @@ import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { z } from "zod";
-import { CertificateOfOrigin } from "./components/CertificateOfOrigin";
+import { OtherDetails } from "./components/OtherDetails";
 
 const totalSteps = 7;
 
@@ -25,7 +25,7 @@ const steps = [
     { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
     { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
     { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
-    { id: 7, name: "Certificate Of Origin ", component: <CertificateOfOrigin /> },
+    { id: 7, name: "Other Details ", component: <OtherDetails /> },
 ];
 
 const formSchema = z.object({
