@@ -95,31 +95,32 @@ export function OtherDetails() {
         )}
       />
 
-      {/* Upload Copy Of Formagation  */}
       <FormField
         control={control}
         name="CertificateOfOrigin.Upload Copy Of Formagation"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Upload Copy Of Formagation</FormLabel>
-            <FormControl>
-              <Input
-                type="file"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setFile(file);
-                  field.onChange(file);
-                }}
-              />
-            </FormControl>
-            <Button
-              type="button"
-              variant="secondary"
-              className="text-white bg-blue-500 hover:bg-blue-600"
-            >
-              <UploadCloud className="w-5 h-10 mr-2" />
-              Upload
-            </Button>
+            <FormLabel>Upload Copy Of Fumigation</FormLabel>
+            <div className="flex items-center gap-2">
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null;
+                    setFile(file);
+                    field.onChange(file);
+                  }}
+                />
+              </FormControl>
+              <Button
+                type="button"
+                variant="secondary"
+                className="text-white bg-blue-500 hover:bg-blue-600"
+              >
+                <UploadCloud className="w-5 h-10 mr-2" />
+                Upload
+              </Button>
+            </div>
             <FormMessage />
           </FormItem>
         )}
