@@ -16,11 +16,15 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { OtherDetails } from "./components/OtherDetails";
+import toast from "react-hot-toast";
+import { postData } from "@/axiosUtility/api";
+import { useRouter } from "next/navigation";
+import { Icons } from "@/components/ui/icons";
 
 
 const saveProgress = (data: any) => {
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
-    alert("Progress saved!");
+    toast.success("Progress saved!");
 };
 
 
@@ -37,151 +41,167 @@ const steps = [
 
 const formSchema = z.object({
     bookingDetails: z.object({
-        bookingNumber: z.string().min(3, { message: "Required name" }),
-        portOfLoading: z.string().min(3, { message: "Required name" }),
-        destinationPort: z.string().min(3, { message: "Required name" }),
-        vesselSailingDate: z.date(),
-        vesselArrivingDate: z.date(),
+        bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
+        portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
+        destinationPort: z.string().min(3, { message: "Required name" }).optional(),
+        vesselSailingDate: z.date().optional(),
+        vesselArrivingDate: z.date().optional(),
         containers: z.array(z.object({
-            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }),
-            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }),
-            trukDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }),
+            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }).optional(),
+            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }).optional(),
+            trukDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }).optional(),
             addProductDetails: z.object({
-                productCategory: z.string().min(3, { message: "Required category" }),
-                graniteAndMarble: z.string().min(3, { message: "Required type" }),
+                productCategory: z.string().min(3, { message: "Required category" }).optional(),
+                graniteAndMarble: z.string().min(3, { message: "Required type" }).optional(),
                 tiles: z.object({
-                    noOfBoxes: z.number().min(1, { message: "Required value" }),
-                    noOfPiecesPerBoxes: z.number().min(1, { message: "Required value" }),
+                    noOfBoxes: z.number().min(1, { message: "Required value" }).optional(),
+                    noOfPiecesPerBoxes: z.number().min(1, { message: "Required value" }).optional(),
                     sizePerTile: z.object({
                         length: z.object({
-                            value: z.number(),
-                            units: z.string()
-                        }),
+                            value: z.number().optional(),
+                            units: z.string().optional()
+                        }).optional(),
                         breadth: z.object({
-                            value: z.number(),
-                            units: z.string()
-                        })
-                    })
-                })
-            })
-        }))
-    }),
+                            value: z.number().optional(),
+                            units: z.string().optional()
+                        }).optional()
+                    }).optional()
+                }).optional()
+            }).optional()
+        })).optional()
+    }).optional(),
 
     shippingDetails: z.object({
-        shippingLine: z.string().min(3, { message: "Required name" }),
-        noOfShipmentinvoices: z.number(),
+        shippingLine: z.string().min(3, { message: "Required name" }).optional(),
+        noOfShipmentinvoices: z.number().optional(),
         shippingLineInvoices: z.array(z.object({
-            invoiceNumber: z.string(),
-            uploadInvoiceUrl: z.string(),
-            date: z.date(),
-            valueWithGst: z.number(),
-            valueWithoutGst: z.number()
-        })),
-        transporterName: z.string().min(3, { message: "Required name" }),
-        noOftransportinvoices: z.number(),
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().optional(),
+            date: z.date().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional()
+        })).optional(),
+        transporterName: z.string().min(3, { message: "Required name" }).optional(),
+        noOftransportinvoices: z.number().optional(),
         transporterInvoices: z.array(z.object({
-            invoiceNumber: z.string(),
-            uploadInvoiceUrl: z.string(),
-            date: z.date(),
-            valueWithGst: z.number(),
-            valueWithoutGst: z.number()
-        })),
-        forwarderName: z.string().min(3, { message: "Required name" }),
-        noOfForwarderinvoices: z.number(),
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().optional(),
+            date: z.date().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional()
+        })).optional(),
+        forwarderName: z.string().min(3, { message: "Required name" }).optional(),
+        noOfForwarderinvoices: z.number().optional(),
         forwarderInvoices: z.array(z.object({
-            invoiceNumber: z.string(),
-            uploadInvoiceUrl: z.string(),
-            date: z.date(),
-            valueWithGst: z.number(),
-            valueWithoutGst: z.number()
-        }))
-    }),
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().optional(),
+            date: z.date().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional()
+        })).optional()
+    }).optional(),
 
     shippingBillDetails: z.object({
-        portCode: z.string(),
-        cbName: z.date(),
-        cdCode: z.string(),
+        portCode: z.string().optional(),
+        cbName: z.string().optional(),
+        cdCode: z.string().optional(),
         ShippingBills: z.object({
-            shippingBillUrl: z.string(),
-            shippingBillNumber: z.string(),
-            shippingBillDate: z.date(),
-            drawbackValue: z.string(),
-            rodtepValue: z.string()
-        })
-    }),
+            shippingBillUrl: z.string().optional(),
+            shippingBillNumber: z.string().optional(),
+            shippingBillDate: z.date().optional(),
+            drawbackValue: z.string().optional(),
+            rodtepValue: z.string().optional()
+        }).optional()
+    }).optional(),
 
     supplierDetails: z.object({
         clearance: z.object({
-            supplierName: z.string().min(3, { message: "Required name" }),
-            noOfInvoices: z.number(),
+            supplierName: z.string().min(3, { message: "Required name" }).optional(),
+            noOfInvoices: z.number().optional(),
             invoices: z.array(z.object({
-                supplierGSTN: z.string().min(3, { message: "Required GSTIN" }),
-                supplierInvoiceNumber: z.string(),
-                supplierInvoiceDate: z.date(),
-                supplierInvoiceValueWithGST: z.string(),
-                supplierInvoiceValueWithOutGST: z.string(),
-                clearanceSupplierInvoiceUrl: z.string()
-            }))
-        }),
+                supplierGSTN: z.string().min(3, { message: "Required GSTIN" }).optional(),
+                supplierInvoiceNumber: z.string().optional(),
+                supplierInvoiceDate: z.date().optional(),
+                supplierInvoiceValueWithGST: z.string().optional(),
+                supplierInvoiceValueWithOutGST: z.string().optional(),
+                clearanceSupplierInvoiceUrl: z.string().optional()
+            })).optional()
+        }).optional(),
         actual: z.object({
-            actualSupplierName: z.string(),
-            actualSupplierInvoiceValue: z.string(),
-            actualSupplierInvoiceUrl: z.string(),
-            shippingBillUrl: z.string()
-        })
-    }),
+            actualSupplierName: z.string().optional(),
+            actualSupplierInvoiceValue: z.string().optional(),
+            actualSupplierInvoiceUrl: z.string().optional(),
+            shippingBillUrl: z.string().optional()
+        }).optional()
+    }).optional(),
 
     saleInvoiceDetails: z.object({
-        consignee: z.string(),
-        actualBuyer: z.string(),
+        consignee: z.string().optional(),
+        actualBuyer: z.string().optional(),
         commercialInvoices: z.object({
-            commercialInvoiceNumber: z.string(),
-            clearanceCommercialInvoiceUrl: z.string(),
-            actualCommercialInvoiceUrl: z.string(),
-            saberInvoiceUrl: z.string()
-        })
-    }),
+            commercialInvoiceNumber: z.string().optional(),
+            clearanceCommercialInvoiceUrl: z.string().optional(),
+            actualCommercialInvoiceUrl: z.string().optional(),
+            saberInvoiceUrl: z.string().optional()
+        }).optional()
+    }).optional(),
 
     blDetails: z.object({
-        blNumber: z.string(),
-        blDate: z.date(),
-        telexDate: z.date(),
-        uploadBL: z.string()
-    }),
+        blNumber: z.string().optional(),
+        blDate: z.date().optional(),
+        telexDate: z.date().optional(),
+        uploadBL: z.string().optional()
+    }).optional(),
 
     otherDetails: z.object({
-        certificateOfOriginNumber: z.string(),
-        date: z.date(),
-        issuerOfCOO: z.string(),
-        uploadCopyOfFumigationCertificate: z.string()
-    }),
+        certificateOfOriginNumber: z.string().optional(),
+        date: z.date().optional(),
+        issuerOfCOO: z.string().optional(),
+        uploadCopyOfFumigationCertificate: z.string().optional()
+    }).optional(),
 
-    organizationId: z.string()
+    organizationId: z.string().optional()
 });
+
 
 export default function CreateNewFormPage() {
     const [currentStep, setCurrentStep] = useState(0);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const router = useRouter();
+    const organizationId = "674b0a687d4f4b21c6c980ba";
+
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+    });
+
+
+
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        console.log(values)
+        setIsLoading(true);
+        try {
+            await postData("/shipment/add/", {
+                ...values,
+                organizationId,
+                status: "active",
+            });
+            setIsLoading(false);
+            toast.success("shipment created/updated successfully");
+            router.push("./");
+        } catch (error) {
+            console.error("Error creating/updating shipment:", error);
+            setIsLoading(false);
+            toast.error("Error creating/updating shipment");
+        }
+        router.refresh();
+    }
+
     const nextStep = () => {
         if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
     };
-
     const prevStep = () => {
         if (currentStep > 0) setCurrentStep(currentStep - 1);
     };
-
-
-    const methods = useForm({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            bookingDetails: {},
-            shippingDetails: {},
-            shippingBillDetails: {},
-            supplierDetails: {},
-            saleInvoiceDetails: {},
-            blDetails: {},
-            CertificateOfOrigin: {},
-        },
-    });
 
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -210,26 +230,29 @@ export default function CreateNewFormPage() {
                 <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
             </div>
 
-            <FormProvider {...methods}>
+            <FormProvider {...form}>
                 <form
-                    onSubmit={methods.handleSubmit((data) => console.log(data))}
+                    onSubmit={form.handleSubmit(onSubmit)}
                     className="flex flex-col gap-3 w-full p-3"
                 >
                     {/* Buttons at the top */}
                     <div className="flex justify-between mt-4">
                         {/* "Previous" button (always on the left, but hidden on the first step) */}
                         <Button
+
                             type="button"
                             onClick={prevStep}
                             disabled={currentStep === 0}
-                            className={currentStep === 0 ? "invisible" : ""}
+                            className={`${currentStep === 0 ? "invisible" : ""} h-8`}
                         >
                             Previous
                         </Button>
 
                         {/* "Next" button (always on the right) */}
                         {currentStep < steps.length - 1 && (
-                            <Button type="button" onClick={nextStep}>
+                            <Button
+                                className="h-8"
+                                type="button" onClick={nextStep}>
                                 Next
                             </Button>
                         )}
@@ -248,6 +271,14 @@ export default function CreateNewFormPage() {
 
                     {/* Step Content */}
                     {steps[currentStep].component}
+                    <div className="mt-4">
+                        {currentStep === steps.length - 1 && (
+                            <Button size="lg" disabled={isLoading} type="submit">
+                                Submit
+                                {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+                            </Button>
+                        )}
+                    </div>
                 </form>
             </FormProvider>
         </div>

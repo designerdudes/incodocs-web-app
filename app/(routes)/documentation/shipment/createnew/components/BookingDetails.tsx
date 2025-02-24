@@ -28,10 +28,6 @@ import {
 } from "@/components/ui/table"; // ShadCN Table components
 import ProductButton from "./ProductButton";
 
-
-
-
-
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
 }
@@ -209,16 +205,16 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                 type="number"
                 placeholder="Enter number of Containers"
                 value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                  if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                  field.onChange(value);
 
                   handleContainerCountChange(e.target.value);
                 }}
-              
+
               />
             </FormControl>
             <FormMessage />
@@ -240,48 +236,55 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-                {containers.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>{" "}
-                    {/* Display 1-based Index */}
-                    <TableCell>
+              {containers.map((_, index) => (
+                <TableRow key={index}>
+                  <TableCell>{index + 1}</TableCell>{" "}
+                  {/* Display 1-based Index */}
+                  <TableCell>
                     <FormField
                       control={control}
                       name={`bookingDetails.containers[${index}].containerNumber`}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="7858784698986" {...field} />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input placeholder="7858784698986" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
-
                   {/* Truck Number */}
                   <TableCell>
                     <FormField
                       control={control}
                       name={`bookingDetails.containers[${index}].truckNumber`}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="BH 08 5280" {...field} />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input placeholder="BH 08 5280" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
-
                   {/* Truck Driver Contact Number */}
                   <TableCell>
                     <FormField
                       control={control}
                       name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="+918520785200"
-                            {...field}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="+918520785200"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
@@ -303,32 +306,11 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     ) :
-
                       <div>
                         <ProductButton />
-
                       </div>
-
-                      // (
-
-
-
-
-
-
-                      //   <Button
-                      //     variant="default"
-                      //     size="lg"
-                      //     type="button"
-                      //     // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
-                      //   >
-                      //     Add Product
-                      //   </Button>
-                      // ) 
-
                     }
                   </TableCell>
-
                   {/* Delete Action */}
                   <TableCell>
                     <Button
@@ -350,7 +332,6 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
         Save Progress
       </Button></div>
       {/* Save Button */}
-
     </div>
   );
 }
