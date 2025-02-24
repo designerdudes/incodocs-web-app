@@ -101,7 +101,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>CB Name</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. 123456"
+                placeholder="eg. CB NAME"
                 className="uppercase"
                 {...field}
               />
@@ -139,12 +139,12 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                 type="number"
                 placeholder="Enter number"
                 value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                  if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                  field.onChange(value);
                   handleShippingBillCountChange(e.target.value);
                 }}
               />
@@ -285,7 +285,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-      <div className="m-2">
+      <div className="mt-2">
         <Button type="button" onClick={handleSubmit(saveProgress)}>
           Save Progress
         </Button>

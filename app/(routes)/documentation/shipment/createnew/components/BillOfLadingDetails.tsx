@@ -135,7 +135,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-      <div className="m-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
+      <div className="mt-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
         Save Progress
       </Button></div>
     </div>

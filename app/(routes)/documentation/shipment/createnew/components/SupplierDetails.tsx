@@ -127,12 +127,12 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                   type="number"
                   placeholder="Enter number of Supplier Invoices"
                   value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+                    if (isNaN(value) || value < 0) return; // Prevents negative values
 
-                        field.onChange(value);
+                    field.onChange(value);
                     handleInvoiceNumberCountChange(e.target.value);
                   }}
                 />
@@ -374,7 +374,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
-        <div className="m-2">
+        <div className="mt-2">
           <Button type="button" onClick={handleSubmit(saveProgress)}>
             Save Progress
           </Button>
