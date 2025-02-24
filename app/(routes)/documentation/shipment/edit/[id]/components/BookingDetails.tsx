@@ -38,37 +38,37 @@ interface BookingDetailsProps {
 export function BookingDetails({ shipmentId }: BookingDetailsProps) {
   const { control, setValue, handleSubmit, getValues } = useFormContext();
   const [containers, setContainers] = useState<
-  { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }[]
->([]);
+    { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }[]
+  >([]);
 
 
-useEffect(() => {
-  if (shipmentId) {
-    fetch(`http://localhost:4080/shipment/getbyid/${shipmentId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log("Fetched Data:", data); // Debugging: Check API Response
+  useEffect(() => {
+    if (shipmentId) {
+      fetch(`http://localhost:4080/shipment/getbyid/${shipmentId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched Data:", data); // Debugging: Check API Response
 
-        if (data) {
-          setValue("bookingDetails.bookingNumber", data.bookingNumber || "");
-          setValue("bookingDetails.portOfLoading", data.portOfLoading || "");
-          setValue("bookingDetails.destinationPort", data.destinationPort || "");
-          setValue("bookingDetails.vesselSailingDate", data.vesselSailingDate ? new Date(data.vesselSailingDate) : null);
-          setValue("noOfContainers", data.containers?.length || 0);
-          
-          const formattedContainers = data.containers?.map((container) => ({
-            containerNumber: container.containerNumber || "",
-            truckNumber: container.truckNumber || "",
-            truckDriverContactNumber: container.truckDriverContactNumber || "",
-          })) || [];
+          if (data) {
+            setValue("bookingDetails.bookingNumber", data.bookingNumber || "");
+            setValue("bookingDetails.portOfLoading", data.portOfLoading || "");
+            setValue("bookingDetails.destinationPort", data.destinationPort || "");
+            setValue("bookingDetails.vesselSailingDate", data.vesselSailingDate ? new Date(data.vesselSailingDate) : null);
+            setValue("noOfContainers", data.containers?.length || 0);
 
-          setContainers(formattedContainers);
-          setValue("containers", formattedContainers);
-        }
-      })
-      .catch((error) => console.error("Error fetching shipment details:", error));
-  }
-}, [shipmentId, setValue]);
+            const formattedContainers = data.containers?.map((container: { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }) => ({
+              containerNumber: container.containerNumber || "",
+              truckNumber: container.truckNumber || "",
+              truckDriverContactNumber: container.truckDriverContactNumber || "",
+            })) || [];
+
+            setContainers(formattedContainers);
+            setValue("containers", formattedContainers);
+          }
+        })
+        .catch((error) => console.error("Error fetching shipment details:", error));
+    }
+  }, [shipmentId, setValue]);
 
 
 
@@ -91,7 +91,7 @@ useEffect(() => {
       console.error("Error updating shipment details:", error);
     }
   };
-  
+
   const handleContainerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const count = Number(e.target.value);
     setContainers(
@@ -102,9 +102,9 @@ useEffect(() => {
       }))
     );
   };
-  
 
-  
+
+
   return (
     <form onSubmit={handleSubmit(handleUpdate)}>
       <div className="grid grid-cols-4 gap-3">
@@ -182,27 +182,27 @@ useEffect(() => {
           )}
         />
 
-<FormField
-  control={control}
-  name="noOfContainers"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Number of Containers</FormLabel>
-      <FormControl>
-        <Input
-          type="number"
-          placeholder="Enter number of Containers"
-          value={field.value}
-          onChange={(e) => {
-            field.onChange(e);
-            handleContainerChange(e);
-          }}
+        <FormField
+          control={control}
+          name="noOfContainers"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Containers</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of Containers"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleContainerChange(e);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
 
 
         {containers.length > 0 && (
