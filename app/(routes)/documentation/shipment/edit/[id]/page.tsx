@@ -188,60 +188,66 @@ export default function CreateNewFormPage() {
   };
   const methods = useForm();
 
-    return (
-        <div className="w-full space-y-2 h-full flex p-6 flex-col">
-            <div className="topbar w-full flex items-center justify-between">
-                <Link href="../">
-                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </Link>
-                <div className="flex-1">
-                    <Heading
-                        className="leading-tight"
-                        title="Edit Shipment Details"
-                    />
-                    <p className="text-muted-foreground text-sm">
-                        Complete the form below to Edit shipment details. Edit essential information like  container.no, trucks.no, invoices, and any additional details.
-                    </p>
-                </div>
-            </div>
-            <Separator orientation="horizontal" />
-            <div className="w-full">
-                <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+  return (
+    <div className="w-full space-y-2 h-full flex p-6 flex-col">
+      <div className="topbar w-full flex items-center justify-between">
+        <Link href="../">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Edit Shipment Details" />
+          <p className="text-muted-foreground text-sm">
+            Complete the form below to Edit shipment details. Edit essential
+            information like container.no, trucks.no, invoices, and any
+            additional details.
+          </p>
+        </div>
+      </div>
+      <Separator orientation="horizontal" />
+      <div className="flex justify-between mt-4">
+        {/* "Previous" button (always on the left, but hidden on the first step) */}
+        <Button
+          type="button"
+          onClick={prevStep}
+          disabled={currentStep === 0}
+          className={currentStep === 0 ? "invisible" : ""}
+        >
+          Previous
+        </Button>
 
-                <div className="flex justify-between mt-4">
-                    <Button onClick={prevStep} disabled={currentStep === 0}>
-                        Previous
-                    </Button>
-                    <Button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-                        Next
-                    </Button>
-                </div>
-
-            </div>
-            <FormProvider {...methods}>
-    <form 
-        onSubmit={methods.handleSubmit((data) => console.log(data))} 
-        className="flex flex-col gap-3 w-full p-3"
-    >
-        {/* Step heading */}
-        <div className="flex justify-between">
+        {/* "Next" button (always on the right) */}
+        {currentStep < steps.length - 1 && (
+          <Button type="button" onClick={nextStep}>
+            Next
+          </Button>
+        )}
+      </div>
+      <FormProvider {...methods}>
+        <form
+          onSubmit={methods.handleSubmit((data) => console.log(data))}
+          className="flex flex-col gap-3 w-full p-3"
+        >
+          {/* Step heading */}
+          <div className="flex justify-between">
             <Heading
-                className="text-xl"
-                title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
+              className="text-xl"
+              title={
+                steps.find((step) => step.id === currentStep + 1)?.name ||
+                "Step"
+              }
             />
             <p className="text-sm text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
+              Step {currentStep + 1} of {steps.length}
             </p>
-        </div>
+          </div>
 
-        {/* Step Content */}
-        {steps[currentStep].component}
-    </form>
-</FormProvider>
-
-        </div>
-    );
+          {/* Step Content */}
+          {steps[currentStep].component}
+        </form>
+      </FormProvider>
+    </div>
+  );
 }
