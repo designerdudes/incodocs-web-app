@@ -70,7 +70,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Booking Number */}
+      {/* Booking number  */}
       <FormField
         control={control}
         name="bookingDetails.bookingNumber"
