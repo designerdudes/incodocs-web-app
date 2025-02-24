@@ -14,230 +14,240 @@ import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { z } from "zod";
-import { CertificateOfOrigin } from "./components/CertificateOfOrigin";
+import { OtherDetails } from "./components/OtherDetails";
 
 const totalSteps = 7;
 
 const steps = [
-    { id: 1, name: "Booking Details", component: <BookingDetails /> },
-    { id: 2, name: "Shipping Details", component: <ShippingDetails /> },
-    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails /> },
-    { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
-    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
-    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
-    { id: 7, name: "Certificate Of Origin ", component: <CertificateOfOrigin /> },
+  { id: 1, name: "Booking Details", component: <BookingDetails /> },
+  { id: 2, name: "Shipping Details", component: <ShippingDetails /> },
+  { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails /> },
+  { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
+  { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails /> },
+  { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails /> },
+  { id: 7, name: "Other Details ", component: <OtherDetails /> },
 ];
 
 const formSchema = z.object({
-    bookingDetails: z.object({
-        containerNumber: z
-            .string()
-            .min(3, {
-                message: "Container Number must be at least 3 characters long",
-            })
-            .optional(),
-        portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-        destinationPort: z.string().min(3, { message: "Required name" }).optional(),
-        vesselSailingDate: z.date().optional(),
-        vesselArrivingDate: z.date().optional(),
-        truckNumber: z
-            .string()
-            .min(10, { message: "Number should be 10 characters long" })
-            .optional(),
-        truckDriverNumber: z
-            .string()
-            .min(10, { message: "Truck driver number should be 10 characters long" })
-            .optional(),
-    }),
+  bookingDetails: z.object({
+    containerNumber: z
+      .string()
+      .min(3, {
+        message: "Container Number must be at least 3 characters long",
+      })
+      .optional(),
+    portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
+    destinationPort: z.string().min(3, { message: "Required name" }).optional(),
+    vesselSailingDate: z.date().optional(),
+    vesselArrivingDate: z.date().optional(),
+    truckNumber: z
+      .string()
+      .min(10, { message: "Number should be 10 characters long" })
+      .optional(),
+    truckDriverNumber: z
+      .string()
+      .min(10, { message: "Truck driver number should be 10 characters long" })
+      .optional(),
+  }),
 
-    shippingDetails: z.object({
-        shippingLine: z.string().min(3, { message: "Required name" }).optional(),
-        forwarder: z
-            .string()
-            .min(3, { message: "Name must be at least 3 characters long" })
-            .optional(),
-        forwarderInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        valueOfForwarderInvoice: z
-            .string()
-            .min(1, { message: "Required value" })
-            .optional(),
-        transporter: z.string().min(3, { message: "Required name" }).optional(),
-        transporterInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        valueOfTransporterInvoice: z
-            .string()
-            .min(1, { message: "Required value" })
-            .optional(),
-    }),
+  shippingDetails: z.object({
+    shippingLine: z.string().min(3, { message: "Required name" }).optional(),
+    forwarder: z
+      .string()
+      .min(3, { message: "Name must be at least 3 characters long" })
+      .optional(),
+    forwarderInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+    valueOfForwarderInvoice: z
+      .string()
+      .min(1, { message: "Required value" })
+      .optional(),
+    transporter: z.string().min(3, { message: "Required name" }).optional(),
+    transporterInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+    valueOfTransporterInvoice: z
+      .string()
+      .min(1, { message: "Required value" })
+      .optional(),
+  }),
 
-    shippingBillDetails: z.object({
-        shippingBillNumber: z
-            .string()
-            .min(1, { message: "Shipping bill number is required" })
-            .optional(),
-        shippingBillDate: z.date().optional(),
-        uploadShippingBill: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-    }),
+  shippingBillDetails: z.object({
+    shippingBillNumber: z
+      .string()
+      .min(1, { message: "Shipping bill number is required" })
+      .optional(),
+    shippingBillDate: z.date().optional(),
+    uploadShippingBill: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+  }),
 
-    supplierDetails: z.object({
-        supplierName: z.string().min(3, { message: "Required name" }).optional(),
-        actualSupplierName: z
-            .string()
-            .min(3, { message: "Required name" })
-            .optional(),
-        supplierGSTIN: z.string().min(3, { message: "Required GSTIN" }).optional(),
-        supplierInvoiceNumber: z
-            .string()
-            .min(10, { message: "Number should be 10 characters long" })
-            .optional(),
-        supplierInvoiceDate: z.date().optional(),
-        supplierInvoiceValueWithOutGST: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        supplierInvoiceValueWithGST: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        uploadSupplierInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        actualSupplierInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-        actualSupplierInvoiceValue: z
-            .string()
-            .min(1, { message: "Enter some value" })
-            .optional(),
-        shippingbill: z.string().min(1, { message: "shippingbill must be selected" }),
+  supplierDetails: z.object({
+    supplierName: z.string().min(3, { message: "Required name" }).optional(),
+    actualSupplierName: z
+      .string()
+      .min(3, { message: "Required name" })
+      .optional(),
+    supplierGSTIN: z.string().min(3, { message: "Required GSTIN" }).optional(),
+    supplierInvoiceNumber: z
+      .string()
+      .min(10, { message: "Number should be 10 characters long" })
+      .optional(),
+    supplierInvoiceDate: z.date().optional(),
+    supplierInvoiceValueWithOutGST: z
+      .string()
+      .min(1, { message: "Enter some value" })
+      .optional(),
+    supplierInvoiceValueWithGST: z
+      .string()
+      .min(1, { message: "Enter some value" })
+      .optional(),
+    uploadSupplierInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+    actualSupplierInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+    actualSupplierInvoiceValue: z
+      .string()
+      .min(1, { message: "Enter some value" })
+      .optional(),
+    shippingbill: z
+      .string()
+      .min(1, { message: "shippingbill must be selected" }),
+  }),
 
-    }),
+  saleInvoiceDetails: z.object({
+    commercialInvoiceNumber: z
+      .string()
+      .min(3, { message: "Number must be at least 3 characters long" })
+      .optional(),
+    commercialInvoiceDate: z.date().optional(),
+    consigneeDetails: z
+      .string()
+      .min(1, { message: "Enter some details" })
+      .optional(),
+    actualBuyer: z.string().min(3, { message: "Required name" }).optional(),
+    commercialInvoice: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+  }),
 
-    saleInvoiceDetails: z.object({
-        commercialInvoiceNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-        commercialInvoiceDate: z.date().optional(),
-        consigneeDetails: z
-            .string()
-            .min(1, { message: "Enter some details" })
-            .optional(),
-        actualBuyer: z.string().min(3, { message: "Required name" }).optional(),
-        commercialInvoice: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-    }),
-
-    blDetails: z.object({
-        blNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-        blDate: z.date().optional(),
-        telexDate: z.date().optional(),
-        uploadBL: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-    }),
-    CertificateOfOrigin: z.object({
-        CertificateOfOriginNumber: z
-            .string()
-            .min(3, { message: "Number must be at least 3 characters long" })
-            .optional(),
-        CertificateOfOriginDate: z.date().optional(), Date: z.date().optional(),
-        IssuerOFCertificateOfOrigin: z.string().min(3, { message: "Required name" }).optional(),
-        uploadCopyOfFormagation: z
-            .any()
-            .refine((file) => file instanceof File, { message: "Upload required" })
-            .optional(),
-    }),
+  blDetails: z.object({
+    blNumber: z
+      .string()
+      .min(3, { message: "Number must be at least 3 characters long" })
+      .optional(),
+    blDate: z.date().optional(),
+    telexDate: z.date().optional(),
+    uploadBL: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+  }),
+  CertificateOfOrigin: z.object({
+    CertificateOfOriginNumber: z
+      .string()
+      .min(3, { message: "Number must be at least 3 characters long" })
+      .optional(),
+    CertificateOfOriginDate: z.date().optional(),
+    Date: z.date().optional(),
+    IssuerOFCertificateOfOrigin: z
+      .string()
+      .min(3, { message: "Required name" })
+      .optional(),
+    uploadCopyOfFormagation: z
+      .any()
+      .refine((file) => file instanceof File, { message: "Upload required" })
+      .optional(),
+  }),
 });
 
 export default function CreateNewFormPage() {
-    const [currentStep, setCurrentStep] = useState(0);
-    const totalSteps = steps.length;
+  const [currentStep, setCurrentStep] = useState(0);
+  const totalSteps = steps.length;
 
-    const nextStep = () => {
-        if (currentStep < steps.length - 1) {
-            setCurrentStep(currentStep + 1);
-        }
-    };
+  const nextStep = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
 
-    const prevStep = () => {
-        if (currentStep > 0) {
-            setCurrentStep(currentStep - 1);
-        }
-    };
-    const methods = useForm();
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+  const methods = useForm();
 
-    return (
-        <div className="w-full space-y-2 h-full flex p-6 flex-col">
-            <div className="topbar w-full flex items-center justify-between">
-                <Link href="../">
-                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </Link>
-                <div className="flex-1">
-                    <Heading
-                        className="leading-tight"
-                        title="Edit Shipment Details"
-                    />
-                    <p className="text-muted-foreground text-sm">
-                        Complete the form below to Edit shipment details. Edit essential information like  container.no, trucks.no, invoices, and any additional details.
-                    </p>
-                </div>
-            </div>
-            <Separator orientation="horizontal" />
-            <div className="w-full">
-                <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+  return (
+    <div className="w-full space-y-2 h-full flex p-6 flex-col">
+      <div className="topbar w-full flex items-center justify-between">
+        <Link href="../">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Edit Shipment Details" />
+          <p className="text-muted-foreground text-sm">
+            Complete the form below to Edit shipment details. Edit essential
+            information like container.no, trucks.no, invoices, and any
+            additional details.
+          </p>
+        </div>
+      </div>
+      <Separator orientation="horizontal" />
+      <div className="flex justify-between mt-4">
+        {/* "Previous" button (always on the left, but hidden on the first step) */}
+        <Button
+          type="button"
+          onClick={prevStep}
+          disabled={currentStep === 0}
+          className={currentStep === 0 ? "invisible" : ""}
+        >
+          Previous
+        </Button>
 
-                <div className="flex justify-between mt-4">
-                    <Button onClick={prevStep} disabled={currentStep === 0}>
-                        Previous
-                    </Button>
-                    <Button onClick={nextStep} disabled={currentStep === steps.length - 1}>
-                        Next
-                    </Button>
-                </div>
-
-            </div>
-            <FormProvider {...methods}>
-    <form 
-        onSubmit={methods.handleSubmit((data) => console.log(data))} 
-        className="flex flex-col gap-3 w-full p-3"
-    >
-        {/* Step heading */}
-        <div className="flex justify-between">
+        {/* "Next" button (always on the right) */}
+        {currentStep < steps.length - 1 && (
+          <Button type="button" onClick={nextStep}>
+            Next
+          </Button>
+        )}
+      </div>
+      <FormProvider {...methods}>
+        <form
+          onSubmit={methods.handleSubmit((data) => console.log(data))}
+          className="flex flex-col gap-3 w-full p-3"
+        >
+          {/* Step heading */}
+          <div className="flex justify-between">
             <Heading
-                className="text-xl"
-                title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
+              className="text-xl"
+              title={
+                steps.find((step) => step.id === currentStep + 1)?.name ||
+                "Step"
+              }
             />
             <p className="text-sm text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
+              Step {currentStep + 1} of {steps.length}
             </p>
-        </div>
+          </div>
 
-        {/* Step Content */}
-        {steps[currentStep].component}
-    </form>
-</FormProvider>
-
-        </div>
-    );
+          {/* Step Content */}
+          {steps[currentStep].component}
+        </form>
+      </FormProvider>
+    </div>
+  );
 }
-

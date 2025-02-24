@@ -85,22 +85,7 @@ export function DataTableCellActions({ row }: DataTableCellActionsProps) {
 
 
 
-          {/* upload metrics */}
-          <DropdownMenuItem
-            onClick={() => router.push(`./shipment/view`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            {/* <EyeIcon className="mr-2 h-4 w-4" /> */}
-            Upload Metrics
-          </DropdownMenuItem>
-          {/* change to Inactive */}
-          <DropdownMenuItem
-            onClick={() => router.push(`./shipment/view`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            {/* <EyeIcon className="mr-2 h-4 w-4" /> */}
-            Change to inactive
-          </DropdownMenuItem>
+         
 
           {/* Delete Shipment */}
           <DropdownMenuItem
