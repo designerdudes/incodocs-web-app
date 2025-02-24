@@ -290,23 +290,22 @@ const dropdownOptions = getAllKeys(formData);
       </div>
 
       <div className="rounded-md border">
-        <Table>
+      <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, index) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={header.column.id === "actions" ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10" : ""}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
                             header.getContext()
                           )}
-                      {/* Add the 'fixed' class to the last column header */}
-                      {index === columns.length - 1 && (
-                        <div className="fixed" />
-                      )}
                     </TableHead>
                   );
                 })}
@@ -321,7 +320,10 @@ const dropdownOptions = getAllKeys(formData);
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell className="h-fit py-2 text-sm" key={cell.id}>
+                    <TableCell
+                      className={`h-fit py-2 text-sm ${cell.column.id === "actions" ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10" : ""}`}
+                      key={cell.id}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -344,12 +346,11 @@ const dropdownOptions = getAllKeys(formData);
           <tfoot>
             {table.getFooterGroups().map((footerGroup) => (
               <TableRow key={footerGroup.id} className="pt-4">
-                {" "}
-                {/* Added padding-bottom */}
                 {footerGroup.headers.map((header) => (
-                  <TableCell key={header.id} className="font-medium pb-4">
-                    {" "}
-                    {/* Applied font-medium and padding-bottom */}
+                  <TableCell
+                    key={header.id}
+                    className={`font-medium pb-4 ${header.column.id === "actions" ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10" : ""}`}
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -362,6 +363,7 @@ const dropdownOptions = getAllKeys(formData);
             ))}
           </tfoot>
         </Table>
+
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div>

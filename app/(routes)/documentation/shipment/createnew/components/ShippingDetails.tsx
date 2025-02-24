@@ -170,8 +170,13 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                       <SelectItem key={Details.id} value={Details.id}>
                         {Details.name}
                       </SelectItem>
+
                     ))}
-                    <div>
+                    <button>
+                      + Add Shipping Line
+                    </button>
+
+                    <div className="h-8 rounded-md px-3 text-sm bg-primary text-primary-foreground shadow hover:bg-primary/90">
                       <AddshippinglineButton />
                     </div>
                   </SelectContent>

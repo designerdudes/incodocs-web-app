@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
+
 import {
   FormField,
   FormItem,
@@ -25,290 +26,223 @@ import {
   TableRow,
   TableCell,
   TableHead,
-} from "@/components/ui/table"; // ShadCN Table components
+} from "@/components/ui/table";
 
-export function BookingDetails() {
-  const { control, setValue } = useFormContext();
-  const [containers, setContainers] = React.useState<any[]>([]); // Store containers as an array
-  const [showProductForm, setShowProductForm] = useState<boolean>(false);
 
-  const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter((_, i) => i !== index); // Remove container at the given index
-    setContainers(updatedContainers);
-    setValue("bookingDetails.containers", updatedContainers); // Update form value
-  };
+interface BookingDetailsProps {
+  shipmentId: string | undefined;
+}
 
-  // Function to handle change in number of containers
-  const handleContainerCountChange = (value: string) => {
-    const count = parseInt(value, 10);
 
-    if (!isNaN(count) && count > 0) {
-      const newContainerData = Array.from({ length: count }, (_, index) => ({
-        containerNumber: "",
-        truckNumber: "",
-        truckDriverContactNumber: "",
-        addProductDetails: "",
-      }));
 
-      setContainers(newContainerData);
-      setValue("bookingDetails.containers", newContainerData); // Set containers data in the form
-    } else {
-      setContainers([]);
-      setValue("bookingDetails.containers", []); // Clear containers data if the value is invalid
+export function BookingDetails({ shipmentId }: BookingDetailsProps) {
+  const { control, setValue, handleSubmit, getValues } = useFormContext();
+  const [containers, setContainers] = useState<
+    { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }[]
+  >([]);
+
+
+  useEffect(() => {
+    if (shipmentId) {
+      fetch(`http://localhost:4080/shipment/getbyid/${shipmentId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Fetched Data:", data); // Debugging: Check API Response
+
+          if (data) {
+            setValue("bookingDetails.bookingNumber", data.bookingNumber || "");
+            setValue("bookingDetails.portOfLoading", data.portOfLoading || "");
+            setValue("bookingDetails.destinationPort", data.destinationPort || "");
+            setValue("bookingDetails.vesselSailingDate", data.vesselSailingDate ? new Date(data.vesselSailingDate) : null);
+            setValue("noOfContainers", data.containers?.length || 0);
+
+            const formattedContainers = data.containers?.map((container: { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }) => ({
+              containerNumber: container.containerNumber || "",
+              truckNumber: container.truckNumber || "",
+              truckDriverContactNumber: container.truckDriverContactNumber || "",
+            })) || [];
+
+            setContainers(formattedContainers);
+            setValue("containers", formattedContainers);
+          }
+        })
+        .catch((error) => console.error("Error fetching shipment details:", error));
+    }
+  }, [shipmentId, setValue]);
+
+
+
+
+  const handleUpdate = async (formData: any) => {
+    try {
+      const response = await fetch("http://localhost:4080/shipment/booking-details", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        alert("Booking details updated successfully!");
+      } else {
+        console.error("Error updating shipment details:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error updating shipment details:", error);
     }
   };
 
+  const handleContainerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const count = Number(e.target.value);
+    setContainers(
+      Array.from({ length: count }, () => ({
+        containerNumber: "",
+        truckNumber: "",
+        truckDriverContactNumber: "",
+      }))
+    );
+  };
+
+
+
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {/* Booking Number */}
-      <FormField
-        control={control}
-        name="bookingDetails.bookingNumber"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Booking Number</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. MRKU6998040"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <form onSubmit={handleSubmit(handleUpdate)}>
+      <div className="grid grid-cols-4 gap-3">
+        {/* Booking Number */}
+        <FormField
+          control={control}
+          name="bookingDetails.bookingNumber"
+          defaultValue=""
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Booking Number</FormLabel>
+              <FormControl>
+                <Input className="uppercase" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {/* Port of Loading */}
-      <FormField
-        control={control}
-        name="bookingDetails.portOfLoading"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Port Of Loading</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. CHENNAI"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        {/* Port of Loading */}
+        <FormField
+          control={control}
+          name="bookingDetails.portOfLoading"
+          defaultValue=""
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Port Of Loading</FormLabel>
+              <FormControl>
+                <Input className="uppercase" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {/* Destination Port */}
-      <FormField
-        control={control}
-        name="bookingDetails.destinationPort"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Destination Port</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. UMM QASAR"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        {/* Destination Port */}
+        <FormField
+          control={control}
+          name="bookingDetails.destinationPort"
+          defaultValue=""
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Destination Port</FormLabel>
+              <FormControl>
+                <Input className="uppercase" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {/* Vessel Sailing Date */}
-      <FormField
-        control={control}
-        name="bookingDetails.vesselSailingDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-2">
-            <FormLabel>Vessel Sailing Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* Vessel Arriving Date */}
-      <FormField
-        control={control}
-        name="bookingDetails.vesselArrivingDate"
-        render={({ field }) => (
-          <FormItem className="flex flex-col gap-2">
-            <FormLabel>Vessel Arriving Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* Number of Containers */}
-      <FormField
-        control={control}
-        name="noOfContainers"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Containers</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter number of Containers"
-                value={field.value}
-                onChange={(e) => {
-                  field.onChange(e);
-                  handleContainerCountChange(e.target.value);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {containers.length > 0 && (
-        <div className="col-span-4 overflow-x-auto mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Container Number</TableHead>
-                <TableHead>Truck Number</TableHead>
-                <TableHead>Truck Driver Contact Number</TableHead>
-                <TableHead>Add Product Details</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {containers.map((_, index) => (
-                <TableRow key={index}>
-                  {/* Container Number */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].containerNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="7858784698986" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Truck Number */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].truckNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="BH 08 5280" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Truck Driver Contact Number */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="tel"
-                            placeholder="+918520785200"
-                            {...field}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  <TableCell>
-                    {/* Add Product Details */}
-                    {showProductForm ? (
-                      <FormField
-                        control={control}
-                        name={`bookingDetails.containers[${index}].addProductDetails`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input
-                              placeholder="Add Product"
-                              {...field}
-                              onBlur={() => setShowProductForm(false)} // Optionally close the form when blurred
-                            />
-                          </FormControl>
-                        )}
-                      />
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="lg"
-                        type="button"
-                        // onClick={() => setShowProductForm(true)} // Commented out the onClick handler to not show the form
-                      >
-                        Add Product
-                      </Button>
-                    )}
-                  </TableCell>
-
-                  {/* Delete Action */}
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDelete(index)} // Delete container row
-                    >
-                      <Trash className="h-4 w-4" />
+        {/* Vessel Sailing Date */}
+        <FormField
+          control={control}
+          name="bookingDetails.vesselSailingDate"
+          defaultValue={null}
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Vessel Sailing Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className="w-full">
+                      {field.value ? format(field.value, "PPPP") : <span>Pick a date</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
-                  </TableCell>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={control}
+          name="noOfContainers"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Containers</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of Containers"
+                  value={field.value}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    handleContainerChange(e);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+
+        {containers.length > 0 && (
+          <div className="col-span-4 overflow-x-auto mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Container Number</TableHead>
+                  <TableHead>Truck Number</TableHead>
+                  <TableHead>Truck Driver Contact Number</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
+              </TableHeader>
+              <TableBody>
+                {containers.map((_, index) => (
+                  <TableRow key={index}>
+                    <TableCell>
+                      <FormField control={control} name={`containers[${index}].containerNumber`} defaultValue="" render={({ field }) => <Input {...field} />} />
+                    </TableCell>
+                    <TableCell>
+                      <FormField control={control} name={`containers[${index}].truckNumber`} defaultValue="" render={({ field }) => <Input {...field} />} />
+                    </TableCell>
+                    <TableCell>
+                      <FormField control={control} name={`containers[${index}].truckDriverContactNumber`} defaultValue="" render={({ field }) => <Input type="tel" {...field} />} />
+                    </TableCell>
+                    <TableCell>
+                      <Button variant="destructive" size="sm" type="button" onClick={() => setContainers(containers.filter((_, i) => i !== index))}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+      <div className="col-span-4 flex justify-end mt-4">
+        <Button type="submit">Update Booking</Button>
+      </div>
+    </form>
   );
 }
