@@ -19,7 +19,7 @@ import { OtherDetails } from "./components/OtherDetails";
 const totalSteps = 7;
 
 const steps = [
-  { id: 1, name: "Booking Details", component: <BookingDetails /> },
+  { id: 1, name: "Booking Details", component: <BookingDetails shipmentId={undefined} /> },
   { id: 2, name: "Shipping Details", component: <ShippingDetails /> },
   { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails /> },
   { id: 4, name: "Supplier Details", component: <SupplierDetails /> },
