@@ -43,46 +43,51 @@ export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.ContainerNumber}
+        {row.original.bookingDetails?.containers.map((container, index) => (
+          <div key={index}>{container.containerNumber}</div>
+        ))}
       </div>
     ),
     filterFn: "includesString",
   },
   {
     accessorKey: "Truck Number",
-    header:({column}) =>(
+    header: ({ column }) => (
       <Button
-      variant="ghost"
-      onClick={() =>column.toggleSorting(column.getIsSorted() === "asc")}
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Truck Number
-      <ArrowUpDown className="ml-2 h-4 w-4"/>
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) =>(
+    cell: ({ row }) => (
       <div className="capitalize">
-        { shipmentData?.bookingDetails?.TruckName}
-
+        {row.original.bookingDetails?.containers.map((container, index) => (
+          <div key={index}>{container.truckNumber}</div>
+        ))}
       </div>
     )
   },
   {
     accessorKey: "Truck Driver Number",
-    header:({column}) =>(
+    header: ({ column }) => (
       <Button
-      variant="ghost"
-      onClick={() =>column.toggleSorting(column.getIsSorted() === "asc")}
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
         Truck Driver Number
-      <ArrowUpDown className="ml-2 h-4 w-4"/>
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) =>(
+    cell: ({ row }) => (
       <div className="capitalize">
-        { shipmentData?.bookingDetails?.TruckDriverName}
+        {row.original.bookingDetails?.containers.map((container, index) => (
+          <div key={index}>{container.trukDriverContactNumber}</div>
+        ))}
 
       </div>
     )
   }
-  
+
 ];
