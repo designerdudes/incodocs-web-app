@@ -3,9 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shipment } from "../../../data/schema";
 
-export const ShippingDetailsColumn: ColumnDef<Shipment>[] = [
+export interface ShipmentshippingDetails {
+  invoiceNumber: string;
+  uploadInvoiceUrl: string;
+  date: number;
+  valueWithGst: string
+  valueWithoutGst: string
+}
+
+export const ShippingDetailsColumn: ColumnDef<ShipmentshippingDetails>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -43,7 +50,7 @@ export const ShippingDetailsColumn: ColumnDef<Shipment>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.invoiceNumber}
+        {row.original?.invoiceNumber}
       </div>
     ),
     filterFn: "includesString",
@@ -61,7 +68,7 @@ export const ShippingDetailsColumn: ColumnDef<Shipment>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.uploadInvoiceUrl}
+        {row.original?.uploadInvoiceUrl}
       </div>
     ),
     filterFn: "includesString",
@@ -79,7 +86,7 @@ export const ShippingDetailsColumn: ColumnDef<Shipment>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.date}
+        {row.original?.date}
       </div>
     ),
     filterFn: "includesString",
@@ -91,51 +98,33 @@ export const ShippingDetailsColumn: ColumnDef<Shipment>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        valueWithGst
+        Value With GST
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.valueWithGst}
+        {row.original?.valueWithGst}
       </div>
     ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "Transporter Invoice",
+    accessorKey: "valueWithGst",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Transporter Invoice
+        Value Without GST
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {shipmentData?.bookingDetails?.TransporterInvoice}
+        {row.original?.valueWithoutGst}
       </div>
     ),
     filterFn: "includesString",
-  },
-  {
-    accessorKey: "Value Of Transporter Invoicer",
-    header:({column}) =>(
-      <Button
-      variant="ghost"
-      onClick={() =>column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Value Of Transporter Invoicer
-      <ArrowUpDown className="ml-2 h-4 w-4"/>
-      </Button>
-    ),
-    cell: ({ row }) =>(
-      <div className="capitalize">
-        { shipmentData?.bookingDetails?.ValueOfTransporterInvoicer}
-
-      </div>
-    )
-  },
+  }
 ];

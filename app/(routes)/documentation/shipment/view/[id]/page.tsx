@@ -37,7 +37,7 @@ export default async function Page({ params }: Props) {
   // console.log(params);
 
   const res = await fetch(
-    `http://localhost:4080/shipment/getbyid/${params.id}`,
+    `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
     {
       method: "GET",
       headers: {
@@ -50,7 +50,8 @@ export default async function Page({ params }: Props) {
   });
   let shipmentData;
   shipmentData = res;
-  // console.log(shipmentData);
+  console.log(shipmentData);
+
   return (
     <div>
       <div className="w-full h-full flex  flex-col p-8">
@@ -122,21 +123,21 @@ export default async function Page({ params }: Props) {
                               Booking Number
                             </TableCell>
                             <TableCell>
-                              {shipmentData?.bookingDetails?.ContainerNumber}
+                              {shipmentData?.bookingDetails?.bookingNumber}
                             </TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell className="whitespace-nowrap">
                               Port Of Loading
                             </TableCell>
-                            <TableCell>{shipmentData?.PortOfLoading}</TableCell>
+                            <TableCell>{shipmentData?.bookingDetails?.portOfLoading}</TableCell>
                           </TableRow>
                           <TableRow>
                             <TableCell className="whitespace-nowrap">
                               Destination Port
                             </TableCell>
                             <TableCell>
-                              {shipmentData?.DestinationPort}
+                              {shipmentData?.bookingDetails?.destinationPort}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -144,7 +145,7 @@ export default async function Page({ params }: Props) {
                               Vessel Sailing Date
                             </TableCell>
                             <TableCell>
-                              {shipmentData?.VesselSailingDate}
+                              {shipmentData?.bookingDetails?.vesselSailingDate}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -152,7 +153,7 @@ export default async function Page({ params }: Props) {
                               Vessel Arriving Date
                             </TableCell>
                             <TableCell>
-                              {shipmentData?.VesselArrivingDate}
+                              {shipmentData?.bookingDetails?.vesselArrivingDate}
                             </TableCell>
                           </TableRow>
                           <TableRow>
@@ -160,7 +161,7 @@ export default async function Page({ params }: Props) {
                               Number Of Container
                             </TableCell>
                             <TableCell>
-                              {shipmentData?.NumberOfContainer}
+                              {shipmentData?.bookingDetails?.containers.length}
                             </TableCell>
                           </TableRow>
                         </TableBody>
@@ -176,7 +177,7 @@ export default async function Page({ params }: Props) {
                       bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                       deleteRoute="shipment/deleteall"
                       searchKey="containerNumber"
-                      data={shipmentData}
+                      data={shipmentData?.bookingDetails?.containers || []}  // Pass the containers array
                       columns={BookingDetailsColumn}
                       showDropdown={true} // ✅ Enable dropdown for Shipment Page
                     />
@@ -207,7 +208,7 @@ export default async function Page({ params }: Props) {
                                 Shipping Name
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.ShippingDetails?.ShippingName}
+                                {shipmentData?.shippingDetails?.noOfShipmentinvoices}
                               </TableCell>
                             </TableRow>
                             <TableRow>
@@ -215,7 +216,7 @@ export default async function Page({ params }: Props) {
                                 Number Of Shipping Invoices
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.NumberOfShippingInvoices}
+                                {shipmentData?.shippingDetails?.shippingLineInvoices.length}
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -232,7 +233,7 @@ export default async function Page({ params }: Props) {
                         bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                         deleteRoute="shipment/deleteall"
                         searchKey="ShippingName"
-                        data={shipmentData}
+                        data={shipmentData?.shippingDetails?.shippingLineInvoices || []}
                         columns={ShippingDetailsColumn}
                         showDropdown={true} // ✅ Enable dropdown for Shipment Page
                       />
@@ -260,7 +261,7 @@ export default async function Page({ params }: Props) {
                                 Forwarder Name
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.ShippingDetails?.ForwarderName}
+                                {shipmentData?.shippingDetails?.forwarderName}
                               </TableCell>
                             </TableRow>
                             <TableRow>
@@ -268,7 +269,7 @@ export default async function Page({ params }: Props) {
                                 Number Of Forwarder Invoices
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.NumberOfforwarderInvoices}
+                                {shipmentData?.shippingDetails?.forwarderInvoices.length}
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -285,7 +286,7 @@ export default async function Page({ params }: Props) {
                         bulkDeleteToastMessage="Selected Raw Material deleted successfully"
                         deleteRoute="shipment/deleteall"
                         searchKey="Forwarder"
-                        data={shipmentData}
+                        data={shipmentData?.shippingDetails?.forwarderInvoices || []}
                         columns={ForwarderDetailsColumn}
                         showDropdown={true} // ✅ Enable dropdown for Shipment Page
                       />
@@ -313,7 +314,7 @@ export default async function Page({ params }: Props) {
                                 Transporter Name
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.ShippingDetails?.transporterName}
+                                {shipmentData?.shippingDetails?.transporterName}
                               </TableCell>
                             </TableRow>
                             <TableRow>
@@ -321,7 +322,7 @@ export default async function Page({ params }: Props) {
                                 Number Of Transporter Invoices
                               </TableCell>
                               <TableCell>
-                                {shipmentData?.NumberOftransporterInvoices}
+                                {shipmentData?.shippingDetails?.transporterInvoices.length}
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -571,7 +572,7 @@ export default async function Page({ params }: Props) {
                         <TableBody>
                           <TableRow>
                             <TableCell className="whitespace-nowrap">
-                            Bill Number
+                              Bill Number
                             </TableCell>
                             <TableCell>
                               {shipmentData?.bookingDetails?.BillNumber}
