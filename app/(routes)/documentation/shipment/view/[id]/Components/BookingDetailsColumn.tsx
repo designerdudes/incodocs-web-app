@@ -3,9 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shipment } from "../../../data/schema";
 
-export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
+// Define the type for containers, assuming a separate schema if needed
+export interface ShipmentContainer {
+  containerNumber: string;
+  truckNumber: string;
+  trukDriverContactNumber: number;
+}
+
+// Columns Definition
+export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -31,7 +38,7 @@ export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "Container Number",
+    accessorKey: "containerNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -41,17 +48,11 @@ export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.bookingDetails?.containers.map((container, index) => (
-          <div key={index}>{container.containerNumber}</div>
-        ))}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.containerNumber}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "Truck Number",
+    accessorKey: "truckNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -61,16 +62,10 @@ export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.bookingDetails?.containers.map((container, index) => (
-          <div key={index}>{container.truckNumber}</div>
-        ))}
-      </div>
-    )
+    cell: ({ row }) => <div>{row.original.truckNumber}</div>,
   },
   {
-    accessorKey: "Truck Driver Number",
+    accessorKey: "trukDriverContactNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -80,14 +75,6 @@ export const BookingDetailsColumn: ColumnDef<Shipment>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.bookingDetails?.containers.map((container, index) => (
-          <div key={index}>{container.trukDriverContactNumber}</div>
-        ))}
-
-      </div>
-    )
-  }
-
+    cell: ({ row }) => <div>{row.original.trukDriverContactNumber}</div>,
+  },
 ];
