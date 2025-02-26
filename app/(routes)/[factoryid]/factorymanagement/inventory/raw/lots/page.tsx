@@ -69,8 +69,8 @@ export default async function LotManagement({ params }: Props) {
         </Link>
         {/* <CreateNewLotButton /> */}
       </div>
-      <Separator orientation="horizontal" />
-      <div className="w-250 container mx-auto py-10">
+      <Separator className="my-2" />
+            <div >
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected Lots?"
