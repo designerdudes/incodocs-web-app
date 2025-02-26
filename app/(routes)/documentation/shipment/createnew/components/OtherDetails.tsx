@@ -8,6 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+
 import {
   Popover,
   PopoverTrigger,
@@ -128,6 +130,25 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
+  {/* Review Field
+      <FormField
+        control={control}
+        name="blDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for BL details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      /> */}
+
     </div>
   );
 }

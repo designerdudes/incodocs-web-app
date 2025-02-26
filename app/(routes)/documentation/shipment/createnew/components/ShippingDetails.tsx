@@ -8,6 +8,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Textarea } from "@/components/ui/textarea"; // Added for review field
+
 import {
   Popover,
   PopoverTrigger,
@@ -524,36 +526,62 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
-                        render={({ field }) => (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file)
-                                  handleFileUpload(
-                                    file,
-                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
-                                  );
-                              }}
-                              disabled={uploading}
-                            />
-                            <Button
-                              variant="secondary"
-                              className="bg-blue-500 text-white"
-                              disabled={uploading}
-                            >
-                              <UploadCloud className="w-5 h-5 mr-2" />
-                              {uploading ? "Uploading..." : "Upload"}
-                            </Button>
-                          </div>
-                        )}
-                      />
-                    </TableCell>
+
+{/* updated the upload button */}
+
+
+<TableCell>
+  <FormField
+    control={control}
+    name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
+    render={({ field }) => {
+      const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+      return (
+        <div className="flex items-center gap-2">
+          <Input
+            type="file"
+            accept=".pdf,.jpg,.png,.jpeg" // Restrict file types
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                setSelectedFile(file);
+              }
+            }}
+            disabled={uploading} // Disable file input while uploading
+          />
+          <Button
+            variant="secondary"
+            className="bg-blue-500 text-white"
+            disabled={uploading || !selectedFile} // Disable button if no file is selected
+            onClick={() => {
+              if (!selectedFile) {
+                console.error("No file selected!");
+                return;
+              }
+
+              handleFileUpload(
+                selectedFile,
+                `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
+              )
+                .then(() => {
+                  console.log("Upload successful!");
+                  setSelectedFile(null); // ✅ Reset file after upload
+                })
+                .catch((error) => {
+                  console.error("Upload error:", error);
+                });
+            }}
+          >
+            <UploadCloud className="w-5 h-5 mr-2" />
+            {uploading ? "Uploading..." : "Upload"}
+          </Button>
+        </div>
+      );
+    }}
+  />
+</TableCell>;
+
                     <TableCell>
                       <FormField
                         control={control}
@@ -824,9 +852,30 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                 ))}
               </TableBody>
             </Table>
+            
           </div>
         )}
+
+       
       </div>
+       {/* Review */}
+       <FormField
+        control={control}
+        name="shippingBillDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
