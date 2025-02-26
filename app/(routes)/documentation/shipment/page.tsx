@@ -47,7 +47,6 @@ export default async function Page() {
             </div>
             <Separator className="my-2" />
             <div >
-
                 <DataTable
                     bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
@@ -59,7 +58,6 @@ export default async function Page() {
                     columns={columns}
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 />
-
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash } from "lucide-react"; // Removed Table from here
+import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import {
   TableHeader,
@@ -36,73 +37,127 @@ import {
 import AddConsigneeButton from "./AddConsigneebutton";
 import { SaveDetailsProps } from "./BookingDetails";
 
-const consignee = [
-  { id: "1", name: "consigneeNo23" },
-  { id: "2", name: "consigneeNo24" },
-];
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
 
 export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue } = useFormContext();
-  const { handleSubmit } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
+  const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
+  const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
+  const [uploading, setUploading] = useState(false);
+  const [consignees, setConsignees] = useState<any[]>([]);
 
-  // Renamed state variable for clarity
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
+  // Fetch consignees on mount
+  useEffect(() => {
+    const fetchConsignees = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:4080/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+        );
+        const data = await response.json();
+        setConsignees(data);
+      } catch (error) {
+        console.error("Error fetching consignees:", error);
+      }
+    };
+    fetchConsignees();
+  }, []);
 
   const handleDelete = (index: number) => {
     const updatedInvoices = invoices.filter((_, i) => i !== index);
     setInvoices(updatedInvoices);
-    setValue("saleInvoiceDetails.invoice", updatedInvoices); // Update form value
-
-    setValue("NumberOfSalesInvoices", updatedInvoices.length);
+    setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
+    saveProgressSilently(getValues());
   };
 
-  // Function to handle change in number of Commercial Invoices
   const handleInvoiceNumberCountChange = (value: string) => {
     const count = parseInt(value, 10);
-
     if (!isNaN(count) && count > 0) {
-      const newInvoiceData = Array.from({ length: count }, () => ({
-        CommercialInvoiceNumber: "",
-        ClearanceCommercialInvoice: "",
-        ActualCommercialInvoice: "",
-        SABERInvoice: "",
-        addProductDetails: "",
-      }));
-
-      setInvoices(newInvoiceData);
-      setValue("saleInvoiceDetails.invoice", newInvoiceData); // Set invoice data in the form
+      const currentInvoices = watch("saleInvoiceDetails.commercialInvoices") || [];
+      const newInvoices = Array.from({ length: count }, (_, i) =>
+        currentInvoices[i] || {
+          commercialInvoiceNumber: "",
+          clearanceCommercialInvoiceUrl: "",
+          actualCommercialInvoiceUrl: "",
+          saberInvoiceUrl: "",
+        }
+      );
+      setInvoices(newInvoices);
+      setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
+      saveProgressSilently(getValues());
     } else {
       setInvoices([]);
-      setValue("saleInvoiceDetails.invoice", []); // Clear invoice data if the value is invalid
+      setValue("saleInvoiceDetails.commercialInvoices", []);
+      saveProgressSilently(getValues());
+    }
+  };
+
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      setValue(fieldName, storageUrl);
+      saveProgressSilently(getValues());
+    } catch (error) {
+      alert("Failed to upload file. Please try again.");
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
     <div className="grid grid-cols-4 gap-3">
+      {/* Review Field */}
+      <FormField
+        control={control}
+        name="saleInvoiceDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for sale invoice details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       {/* Select Consignee */}
       <FormField
         control={control}
-        name="saleInvoiceDetails.consigneeDetails"
+        name="saleInvoiceDetails.consignee"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Select Consignee</FormLabel>
             <FormControl>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  saveProgressSilently(getValues());
+                }}
+                value={field.value}
+              >
                 <SelectTrigger>
-                  {field.value ? (
-                    <span>
-                      {consignee.find((item) => item.id === field.value)
-                        ?.name || "Select a Consignee"}
-                    </span>
-                  ) : (
-                    <span>Select a Consignee</span>
-                  )}
+                  <SelectValue placeholder="Select a Consignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  {consignee.map((Details) => (
-                    <SelectItem key={Details.id} value={Details.id}>
-                      {Details.name}
+                  {consignees.map((details: any) => (
+                    <SelectItem key={details._id} value={details._id}>
+                      {details.name || details.consigneeName} {/* Adjust based on API response */}
                     </SelectItem>
                   ))}
                   <div>
@@ -115,7 +170,6 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
       {/* Actual Buyer */}
       <FormField
         control={control}
@@ -124,13 +178,16 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>Actual Buyer</FormLabel>
             <FormControl>
-              <Input placeholder="Enter buyer name" {...field} />
+              <Input
+                placeholder="e.g., khan"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
       {/* Number of Commercial Invoices */}
       <FormField
         control={control}
@@ -142,13 +199,11 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number of Commercial Invoices"
-                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
-
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                        field.onChange(value);
+                value={field.value === 0 ? "" : field.value}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  if (isNaN(value) || value < 0) return;
+                  field.onChange(value);
                   handleInvoiceNumberCountChange(e.target.value);
                 }}
               />
@@ -168,94 +223,133 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
                 <TableHead>SABER Invoice</TableHead>
-                <TableHead>Add Invoice Details</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((_, index) => (
+              {invoices.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].CommercialInvoiceNumber`}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceNumber`}
                       render={({ field }) => (
                         <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
+                          <Input
+                            placeholder="e.g., 3458h4"
+                            {...field}
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
                         </FormControl>
                       )}
                     />
                   </TableCell>
-
-                  {/* Clearance Commercial Invoice */}
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].ClearanceCommercialInvoice`}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Actual Commercial Invoice */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].ActualCommercialInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* SABER Invoice */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].SABERInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Add Invoice */}
-                  <TableCell>
-                    {showInvoiceForm ? (
-                      <FormField
-                        control={control}
-                        name={`saleInvoiceDetails.invoice[${index}].addProductDetails`}
-                        render={({ field }) => (
+                        <FormItem>
                           <FormControl>
-                            <Input
-                              placeholder="Add Invoice"
-                              {...field}
-                              onBlur={() => setShowInvoiceForm(false)}
-                            />
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleFileUpload(
+                                      file,
+                                      `saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`
+                                    );
+                                }}
+                                disabled={uploading}
+                              />
+                              <Button
+                                variant="secondary"
+                                className="bg-blue-500 text-white"
+                                disabled={uploading}
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                {uploading ? "Uploading..." : "Upload"}
+                              </Button>
+                            </div>
                           </FormControl>
-                        )}
-                      />
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="lg"
-                        type="button"
-                        onClick={() => setShowInvoiceForm(true)}
-                      >
-                        Add Invoice
-                      </Button>
-                    )}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </TableCell>
-
-                  {/* Delete Action */}
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleFileUpload(
+                                      file,
+                                      `saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`
+                                    );
+                                }}
+                                disabled={uploading}
+                              />
+                              <Button
+                                variant="secondary"
+                                className="bg-blue-500 text-white"
+                                disabled={uploading}
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                {uploading ? "Uploading..." : "Upload"}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleFileUpload(
+                                      file,
+                                      `saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`
+                                    );
+                                }}
+                                disabled={uploading}
+                              />
+                              <Button
+                                variant="secondary"
+                                className="bg-blue-500 text-white"
+                                disabled={uploading}
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                {uploading ? "Uploading..." : "Upload"}
+                              </Button>
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Button
                       variant="destructive"
@@ -273,11 +367,10 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
         </div>
       )}
       <div className="mt-8">
-        <Button type="button" onClick={handleSubmit(saveProgress)}>
+        <Button type="button" onClick={() => saveProgress(getValues())}>
           Save Progress
         </Button>
       </div>
-      {/* Save Button */}
     </div>
   );
 }

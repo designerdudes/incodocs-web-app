@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; // Added for review
 import {
   Popover,
   PopoverTrigger,
@@ -36,76 +37,133 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 
-const SupplierName = [
-  { id: "1", name: "Ahmed" },
-  { id: "2", name: "Arshad" },
-];
-
-const shippingbill = [
-  { id: "1", name: "Ahmed" },
-  { id: "2", name: "Arshad" },
-];
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
 
 export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue } = useFormContext();
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const { handleSubmit } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
+  const invoicesFromForm = watch("supplierDetails.clearance.invoices") || [];
+  const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
+  const [uploading, setUploading] = useState(false);
+  const [supplierNames, setSupplierNames] = useState<{ id: string; name: string }[]>([]); // Placeholder for dynamic fetch
+  const [shippingBills, setShippingBills] = useState<{ id: string; name: string }[]>([]); // Placeholder for dynamic fetch
 
-  // const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
+  // Fetch supplier names and shipping bills (placeholder - replace with actual APIs)
+  useEffect(() => {
+    // Example APIs (adjust as needed):
+    // fetch("http://localhost:4080/shipment/supplier/getall").then(res => res.json()).then(data => setSupplierNames(data));
+    // fetch("http://localhost:4080/shipment/shippingbill/getall").then(res => res.json()).then(data => setShippingBills(data));
+    setSupplierNames([
+      { id: "1", name: "Ahmed" },
+      { id: "2", name: "Arshad" },
+    ]);
+    setShippingBills([
+      { id: "1", name: "Bill 1" },
+      { id: "2", name: "Bill 2" },
+    ]);
+  }, []);
 
   const handleDelete = (index: number) => {
     const updatedInvoices = invoices.filter((_, i) => i !== index);
     setInvoices(updatedInvoices);
-    setValue("SupplierDetails.invoice", updatedInvoices);
-
-    setValue("NumberOfSupplierInvoices", updatedInvoices.length);
+    setValue("supplierDetails.clearance.invoices", updatedInvoices);
+    setValue("supplierDetails.clearance.noOfInvoices", updatedInvoices.length);
+    saveProgressSilently(getValues());
   };
 
   const handleInvoiceNumberCountChange = (value: string) => {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
-      const newInvoiceData = Array.from({ length: count }, () => ({
-        InvoiceNumber: "",
-        UploadSupplierDetailsInvoice: "",
-        Date: "",
-        ValueWithGST: "",
-        ValueWithOutGST: "",
-      }));
-
-      setInvoices(newInvoiceData);
-      setValue("SupplierDetails.invoice", newInvoiceData);
+      const currentInvoices = watch("supplierDetails.clearance.invoices") || [];
+      const newInvoices = Array.from({ length: count }, (_, i) =>
+        currentInvoices[i] || {
+          supplierGSTN: "",
+          supplierInvoiceNumber: "",
+          supplierInvoiceDate: "",
+          supplierInvoiceValueWithGST: "",
+          supplierInvoiceValueWithOutGST: "",
+          clearanceSupplierInvoiceUrl: "",
+        }
+      );
+      setInvoices(newInvoices);
+      setValue("supplierDetails.clearance.invoices", newInvoices);
+      setValue("supplierDetails.clearance.noOfInvoices", newInvoices.length);
+      saveProgressSilently(getValues());
     } else {
       setInvoices([]);
-      setValue("SupplierDetails.invoice", []);
+      setValue("supplierDetails.clearance.invoices", []);
+      setValue("supplierDetails.clearance.noOfInvoices", 0);
+      saveProgressSilently(getValues());
+    }
+  };
+
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      setValue(fieldName, storageUrl);
+      saveProgressSilently(getValues());
+    } catch (error) {
+      alert("Failed to upload file. Please try again.");
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
     <div>
+      {/* Review Field */}
+      <FormField
+        control={control}
+        name="supplierDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for supplier details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <div className="grid grid-cols-4 gap-3">
-        {/* Select Supplier Name */}
+        {/* Clearance Supplier Name */}
         <FormField
           control={control}
-          name="SupplierDetails.SupplierDetails"
+          name="supplierDetails.clearance.supplierName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Supplier Name</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    saveProgressSilently(getValues());
+                  }}
+                  value={field.value}
+                >
                   <SelectTrigger>
-                    {field.value ? (
-                      <span>
-                        {SupplierName.find((item) => item.id === field.value)
-                          ?.name || "Select a Name"}
-                      </span>
-                    ) : (
-                      <span>Select a Supplier Name</span>
-                    )}
+                    <SelectValue placeholder="Select a Supplier Name" />
                   </SelectTrigger>
                   <SelectContent>
-                    {SupplierName.map((Details) => (
-                      <SelectItem key={Details.id} value={Details.id}>
-                        {Details.name}
+                    {supplierNames.map((details: any) => (
+                      <SelectItem key={details.id} value={details.id}>
+                        {details.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -115,10 +173,10 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
-
+        {/* Number of Supplier Invoices */}
         <FormField
           control={control}
-          name="NumberOfSupplierInvoices"
+          name="supplierDetails.clearance.noOfInvoices"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Number of Supplier Invoices</FormLabel>
@@ -126,12 +184,10 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                 <Input
                   type="number"
                   placeholder="Enter number of Supplier Invoices"
-                  value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                  value={field.value === 0 ? "" : field.value}
                   onChange={(e) => {
                     const value = parseInt(e.target.value, 10);
-
-                    if (isNaN(value) || value < 0) return; // Prevents negative values
-
+                    if (isNaN(value) || value < 0) return;
                     field.onChange(value);
                     handleInvoiceNumberCountChange(e.target.value);
                   }}
@@ -147,28 +203,31 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>#</TableHead> {/* New Index Column */}
+                  <TableHead>#</TableHead>
                   <TableHead>Supplier GSTIN</TableHead>
+                  <TableHead>Invoice Number</TableHead>
                   <TableHead>Upload Invoice</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Value With GST</TableHead>
                   <TableHead>Value Without GST</TableHead>
-                  <TableHead>Clearence Supplier Invoice</TableHead>
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {invoices.map((_, index) => (
+                {invoices.map((_: any, index: number) => (
                   <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>{" "}
-                    {/* Display 1-based Index */}
+                    <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`SupplierDetails.SupplierGSTIN[${index}].SupplierGSTIN`}
+                        name={`supplierDetails.clearance.invoices[${index}].supplierGSTN`}
                         render={({ field }) => (
                           <FormControl>
-                            <Input placeholder="Eg: GST123456898" {...field} />
+                            <Input
+                              placeholder="e.g., GSTIN456"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
                           </FormControl>
                         )}
                       />
@@ -176,28 +235,45 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`SupplierDetails.invoice[${index}].UploadSupplierInvoice`}
+                        name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., INV789"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`supplierDetails.clearance.invoices[${index}].clearanceSupplierInvoiceUrl`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <div className="flex items-center justify-between gap-2">
-                                {/* File Input */}
+                              <div className="flex items-center gap-2">
                                 <Input
                                   type="file"
-                                  className="flex-1" // Ensures input takes available space
-                                  onChange={(e) =>
-                                    field.onChange(e.target.files?.[0])
-                                  }
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file)
+                                      handleFileUpload(
+                                        file,
+                                        `supplierDetails.clearance.invoices[${index}].clearanceSupplierInvoiceUrl`
+                                      );
+                                  }}
+                                  disabled={uploading}
                                 />
-
-                                {/* Upload Button */}
                                 <Button
-                                  type="button"
                                   variant="secondary"
-                                  className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
+                                  className="bg-blue-500 text-white"
+                                  disabled={uploading}
                                 >
                                   <UploadCloud className="w-5 h-5 mr-2" />
-                                  Upload
+                                  {uploading ? "Uploading..." : "Upload"}
                                 </Button>
                               </div>
                             </FormControl>
@@ -209,7 +285,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`SupplierDetails.invoice[${index}].supplierDate`}
+                        name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceDate`}
                         render={({ field }) => (
                           <FormItem>
                             <Popover>
@@ -217,7 +293,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                                 <FormControl>
                                   <Button variant="outline">
                                     {field.value
-                                      ? format(field.value, "PPPP")
+                                      ? format(new Date(field.value), "PPPP")
                                       : "Pick a date"}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
@@ -226,8 +302,11 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                               <PopoverContent align="start">
                                 <Calendar
                                   mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={(date) => {
+                                    field.onChange(date?.toISOString());
+                                    saveProgressSilently(getValues());
+                                  }}
                                 />
                               </PopoverContent>
                             </Popover>
@@ -239,29 +318,26 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`SupplierDetails.invoice[${index}].ValueWithGST`}
+                        name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceValueWithGST`}
                         render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
+                          <Input
+                            placeholder="e.g., 1000"
+                            {...field}
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
                         )}
                       />
                     </TableCell>
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`SupplierDetails.invoice[${index}].ValueWithOutGST`}
+                        name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceValueWithOutGST`}
                         render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`SupplierDetails.ClearenceSupplierInvoice[${index}].ClearenceSupplierInvoice`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Eg: C123456898" {...field} />
-                          </FormControl>
+                          <Input
+                            placeholder="e.g., 900"
+                            {...field}
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
                         )}
                       />
                     </TableCell>
@@ -282,24 +358,24 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
           </div>
         )}
       </div>
-      <Separator className="mt-2" />
+      <Separator className="my-4" />
       <div className="text-xl font-bold my-3">
         <h2>Actual</h2>
       </div>
-
       <div className="grid grid-cols-4 gap-3">
         {/* Actual Supplier Name */}
         <FormField
           control={control}
-          name="supplierDetails.actualSupplierName"
+          name="supplierDetails.actual.actualSupplierName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Actual Supplier Name</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="eg. XYZ Suppliers"
+                  placeholder="e.g., ASI101"
                   className="uppercase"
                   {...field}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -309,60 +385,74 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
         {/* Actual Supplier Invoice */}
         <FormField
           control={control}
-          name="supplierDetails.actualSupplierInvoice"
+          name="supplierDetails.actual.actualSupplierInvoiceUrl"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Actual Supplier Invoice</FormLabel>
               <div className="flex items-center gap-2">
                 <FormControl>
-                  <Input type="file" {...field} />
+                  <Input
+                    type="file"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file)
+                        handleFileUpload(file, "supplierDetails.actual.actualSupplierInvoiceUrl");
+                    }}
+                    disabled={uploading}
+                  />
                 </FormControl>
                 <Button
                   type="button"
                   variant="secondary"
-                  className="text-white bg-blue-500 hover:bg-blue-600"
+                  className="bg-blue-500 text-white"
+                  disabled={uploading}
                 >
-                  <UploadCloud className="w-5 h-10 mr-2" />
-                  Upload
+                  <UploadCloud className="w-5 h-5 mr-2" />
+                  {uploading ? "Uploading..." : "Upload"}
                 </Button>
               </div>
               <FormMessage />
             </FormItem>
           )}
         />
-
         {/* Actual Supplier Invoice Value */}
         <FormField
           control={control}
-          name="supplierDetails.actualSupplierInvoiceValue"
+          name="supplierDetails.actual.actualSupplierInvoiceValue"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Actual Supplier Invoice Value</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="eg. 11800"
-                  className="uppercase"
+                  placeholder="e.g., 1100"
                   {...field}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* select shipping bill */}
+        {/* Select Shipping Bill */}
         <FormField
           control={control}
-          name="supplierDetails.shippingbill"
+          name="supplierDetails.actual.shippingBillUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Select shipping bill</FormLabel>
+              <FormLabel>Select Shipping Bill</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    saveProgressSilently(getValues());
+                  }}
+                  value={field.value}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a shipping bill" />
                   </SelectTrigger>
                   <SelectContent>
-                    {shippingbill.map((bill) => (
+                    {shippingBills.map((bill: any) => (
                       <SelectItem key={bill.id} value={bill.id}>
                         {bill.name}
                       </SelectItem>
@@ -375,7 +465,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
           )}
         />
         <div className="mt-2">
-          <Button type="button" onClick={handleSubmit(saveProgress)}>
+          <Button type="button" onClick={() => saveProgress(getValues())}>
             Save Progress
           </Button>
         </div>

@@ -1,5 +1,6 @@
 "use client";
 import { useFormContext } from "react-hook-form";
+import React, { useState } from "react";
 import {
   FormField,
   FormItem,
@@ -8,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; // Added for review
 import {
   Popover,
   PopoverTrigger,
@@ -19,13 +21,57 @@ import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import { SaveDetailsProps } from "./BookingDetails";
 
-export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
-  const { control } = useFormContext();
-  const { handleSubmit } = useFormContext();
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
 
+export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
+  const { control, setValue, getValues } = useFormContext();
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      setValue(fieldName, storageUrl);
+      saveProgressSilently(getValues());
+    } catch (error) {
+      alert("Failed to upload file. Please try again.");
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <div className="grid grid-cols-4 gap-3">
+      {/* Review Field */}
+      <FormField
+        control={control}
+        name="blDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for BL details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       {/* BL Number */}
       <FormField
         control={control}
@@ -35,16 +81,16 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>BL Number</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. BL123456"
+                placeholder="e.g., BL456"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
       {/* BL Date */}
       <FormField
         control={control}
@@ -56,11 +102,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -68,8 +110,11 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -77,7 +122,6 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
       {/* Telex Date */}
       <FormField
         control={control}
@@ -89,11 +133,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -101,8 +141,11 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -110,7 +153,6 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
       {/* Upload BL */}
       <FormField
         control={control}
@@ -120,24 +162,34 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>Upload BL</FormLabel>
             <div className="flex items-center gap-2">
               <FormControl>
-                <Input type="file" {...field} />
+                <Input
+                  type="file"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleFileUpload(file, "blDetails.uploadBL");
+                  }}
+                  disabled={uploading}
+                />
               </FormControl>
               <Button
                 type="button"
                 variant="secondary"
-                className="text-white bg-blue-500 hover:bg-blue-600"
+                className="bg-blue-500 text-white"
+                disabled={uploading}
               >
-                <UploadCloud className="w-5 h-10 mr-2" />
-                Upload
+                <UploadCloud className="w-5 h-5 mr-2" />
+                {uploading ? "Uploading..." : "Upload"}
               </Button>
             </div>
             <FormMessage />
           </FormItem>
         )}
       />
-      <div className="mt-2"><Button type="button" onClick={handleSubmit(saveProgress)}>
-        Save Progress
-      </Button></div>
+      <div className="mt-2">
+        <Button type="button" onClick={() => saveProgress(getValues())}>
+          Save Progress
+        </Button>
+      </div>
     </div>
   );
 }
