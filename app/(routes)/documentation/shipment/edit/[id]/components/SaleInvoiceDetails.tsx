@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useFieldArray } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -9,22 +9,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash } from "lucide-react"; // Removed Table from here
-import { format } from "date-fns";
+
 import {
+  Table,
   TableHeader,
   TableRow,
   TableHead,
   TableBody,
   TableCell,
-  Table,
 } from "@/components/ui/table";
 import {
   Select,
@@ -33,251 +27,282 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import AddConsigneeButton from "./AddConsigneebutton";
-// import { SaveDetailsProps } from "./BookingDetails";
 
-const consignee = [
-  { id: "1", name: "consigneeNo23" },
+const consigneeOptions = [
+  { id: "67acfa7f7dabb67dd56d34c5", name: "khan" }, // Match API _id
   { id: "2", name: "consigneeNo24" },
 ];
 
-export function SaleInvoiceDetails( ) {
-  const { control, setValue } = useFormContext();
-  const { handleSubmit } = useFormContext();
+interface SaleInvoiceDetailsProps {
+  shipmentId: string;
+}
 
-  // Renamed state variable for clarity
-  const [invoices, setInvoices] = useState<any[]>([]);
+export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
+  const { control, setValue, handleSubmit, watch } = useFormContext();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "saleInvoiceDetails.invoice",
+  });
+
   const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
 
-  const handleDelete = (index: number) => {
-    const updatedInvoices = invoices.filter((_, i) => i !== index);
-    setInvoices(updatedInvoices);
-    setValue("saleInvoiceDetails.invoice", updatedInvoices); // Update form value
+  // Watch form values for debugging
+  const formValues = watch("saleInvoiceDetails");
+  console.log("Current Sale Invoice Details Values:", formValues);
 
-    setValue("NumberOfSalesInvoices", updatedInvoices.length);
-  };
-
-  // Function to handle change in number of Commercial Invoices
-  const handleInvoiceNumberCountChange = (value: string) => {
-    const count = parseInt(value, 10);
-
-    if (!isNaN(count) && count > 0) {
-      const newInvoiceData = Array.from({ length: count }, () => ({
-        CommercialInvoiceNumber: "",
-        ClearanceCommercialInvoice: "",
-        ActualCommercialInvoice: "",
-        SABERInvoice: "",
+  // Handle Number of Invoices Change
+  const handleInvoiceNumberCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", value, { shouldDirty: true });
+    const currentInvoices = formValues.invoice || [];
+    if (value > currentInvoices.length) {
+      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
+        commercialInvoiceNumber: "",
+        clearanceCommercialInvoice: "",
+        actualCommercialInvoice: "",
+        saberInvoice: "",
         addProductDetails: "",
       }));
+      append(newInvoices);
+    } else if (value < currentInvoices.length) {
+      for (let i = currentInvoices.length - 1; i >= value; i--) {
+        remove(i);
+      }
+    }
+  };
 
-      setInvoices(newInvoiceData);
-      setValue("saleInvoiceDetails.invoice", newInvoiceData); // Set invoice data in the form
-    } else {
-      setInvoices([]);
-      setValue("saleInvoiceDetails.invoice", []); // Clear invoice data if the value is invalid
+  // Update API Call
+  const onSubmit = async (data: any) => {
+    console.log("Submitting Sale Invoice Details:", data.saleInvoiceDetails);
+    try {
+      const response = await fetch("http://localhost:4080/shipment/sale-invoice-details", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ shipmentId, saleInvoiceDetails: data.saleInvoiceDetails }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update sale invoice details: ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      alert("Sale invoice details updated successfully!");
+    } catch (error) {
+      console.error("Error updating sale invoice details:", error);
+      alert(`Failed to update sale invoice details: ${error.message}`);
     }
   };
 
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {/* Select Consignee */}
-      <FormField
-        control={control}
-        name="saleInvoiceDetails.consigneeDetails"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Select Consignee</FormLabel>
-            <FormControl>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  {field.value ? (
-                    <span>
-                      {consignee.find((item) => item.id === field.value)
-                        ?.name || "Select a Consignee"}
-                    </span>
-                  ) : (
-                    <span>Select a Consignee</span>
-                  )}
-                </SelectTrigger>
-                <SelectContent>
-                  {consignee.map((Details) => (
-                    <SelectItem key={Details.id} value={Details.id}>
-                      {Details.name}
-                    </SelectItem>
-                  ))}
-                  <div>
-                    {/* <AddConsigneeButton /> */}
-                  </div>
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-4 gap-3">
+        {/* Select Consignee */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.consignee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Select Consignee</FormLabel>
+              <FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a Consignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {consigneeOptions.map((Details) => (
+                      <SelectItem key={Details.id} value={Details.id}>
+                        {Details.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {/* Actual Buyer */}
-      <FormField
-        control={control}
-        name="saleInvoiceDetails.actualBuyer"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Actual Buyer</FormLabel>
-            <FormControl>
-              <Input placeholder="Enter buyer name" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        {/* Actual Buyer */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.actualBuyer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual Buyer</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Enter buyer name"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {/* Number of Commercial Invoices */}
-      <FormField
-        control={control}
-        name="NumberOfSalesInvoices"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Commercial Invoices</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter number of Commercial Invoices"
-                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+        {/* Number of Commercial Invoices */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.numberOfSalesInvoices"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Commercial Invoices</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of Commercial Invoices"
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
+                    field.onChange(value);
+                    handleInvoiceNumberCountChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                        field.onChange(value);
-                  handleInvoiceNumberCountChange(e.target.value);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {invoices.length > 0 && (
-        <div className="col-span-4 overflow-x-auto mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Commercial Invoice Number</TableHead>
-                <TableHead>Clearance Commercial Invoice</TableHead>
-                <TableHead>Actual Commercial Invoice</TableHead>
-                <TableHead>SABER Invoice</TableHead>
-                <TableHead>Add Invoice Details</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].CommercialInvoiceNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Clearance Commercial Invoice */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].ClearanceCommercialInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Actual Commercial Invoice */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].ActualCommercialInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* SABER Invoice */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].SABERInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input placeholder="Eg:123456898" {...field} />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-
-                  {/* Add Invoice */}
-                  <TableCell>
-                    {showInvoiceForm ? (
+        {/* Invoices Table */}
+        {fields.length > 0 && (
+          <div className="col-span-4 overflow-x-auto mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Commercial Invoice Number</TableHead>
+                  <TableHead>Clearance Commercial Invoice</TableHead>
+                  <TableHead>Actual Commercial Invoice</TableHead>
+                  <TableHead>SABER Invoice</TableHead>
+                  <TableHead>Add Invoice Details</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {fields.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
                       <FormField
                         control={control}
-                        name={`saleInvoiceDetails.invoice[${index}].addProductDetails`}
+                        name={`saleInvoiceDetails.invoice[${index}].commercialInvoiceNumber`}
                         render={({ field }) => (
                           <FormControl>
                             <Input
-                              placeholder="Add Invoice"
+                              placeholder="Eg: 123456898"
                               {...field}
-                              onBlur={() => setShowInvoiceForm(false)}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
                             />
                           </FormControl>
                         )}
                       />
-                    ) : (
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.invoice[${index}].clearanceCommercialInvoice`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="Eg: 123456898"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.invoice[${index}].actualCommercialInvoice`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="Eg: 123456898"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.invoice[${index}].saberInvoice`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="Eg: 123456898"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {showInvoiceForm ? (
+                        <FormField
+                          control={control}
+                          name={`saleInvoiceDetails.invoice[${index}].addProductDetails`}
+                          render={({ field }) => (
+                            <FormControl>
+                              <Input
+                                placeholder="Add Invoice"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                                onBlur={() => setShowInvoiceForm(false)}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      ) : (
+                        <Button
+                          variant="default"
+                          size="lg"
+                          type="button"
+                          onClick={() => setShowInvoiceForm(true)}
+                        >
+                          Add Invoice
+                        </Button>
+                      )}
+                    </TableCell>
+                    <TableCell>
                       <Button
-                        variant="default"
-                        size="lg"
+                        variant="destructive"
+                        size="sm"
                         type="button"
-                        onClick={() => setShowInvoiceForm(true)}
+                        onClick={() => remove(index)}
                       >
-                        Add Invoice
+                        <Trash className="h-4 w-4" />
                       </Button>
-                    )}
-                  </TableCell>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
 
-                  {/* Delete Action */}
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-      {/* <div className="mt-8">
-        <Button type="button" onClick={handleSubmit(saveProgress)}>
-          Save Progress
-        </Button>
-      </div> */}
-      {/* Save Button */}
-    </div>
+      <Button type="submit" className="mt-4">
+        Update Sale Invoice Details
+      </Button>
+    </form>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
-import React, { useState } from "react";
-import { useFormContext } from "react-hook-form";
+import React from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { format } from "date-fns";
 import {
   FormField,
   FormItem,
@@ -17,7 +18,6 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash } from "lucide-react";
-import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -26,266 +26,305 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { SaveDetailsProps } from "./BookingDetails";
 
-export function ShippingBillDetails() {
-  const { control, setValue } = useFormContext();
-  const [shippingBills, setShippingBills] = useState<
-    {
-      uploadShippingBill: string;
-      shippingBillNumber: string;
-      shippingBillDate: string;
-      drawbackValue: string;
-      rodtepValue: string;
-    }[]
-  >([]);
-  const { handleSubmit } = useFormContext();
+interface ShippingBillDetailsProps {
+  shipmentId: string;
+}
 
-  const handleShippingBillCountChange = (value: string) => {
-    const count = parseInt(value, 10);
-    if (!isNaN(count) && count > 0) {
-      const newShippingBills = Array.from({ length: count }, () => ({
+export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
+  const { control, setValue, handleSubmit, watch } = useFormContext();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "shippingBillDetails.bills",
+  });
+
+  // Watch form values for debugging
+  const formValues = watch("shippingBillDetails");
+  console.log("Current Shipping Bill Details Values:", formValues);
+
+  // Handle Number of Shipping Bills Change
+  const handleShippingBillCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+
+    setValue("shippingBillDetails.numberOFShippingBill", value, { shouldDirty: true });
+
+    const currentBills = formValues.bills || [];
+    if (value > currentBills.length) {
+      const newBills = Array(value - currentBills.length).fill(null).map(() => ({
         uploadShippingBill: "",
         shippingBillNumber: "",
-        shippingBillDate: "",
+        shippingBillDate: undefined,
         drawbackValue: "",
         rodtepValue: "",
       }));
-      setShippingBills(newShippingBills);
-      setValue("shippingBillDetails.Bills", newShippingBills);
-    } else {
-      setShippingBills([]);
-      setValue("shippingBillDetails.Bills", []);
+      append(newBills);
+    } else if (value < currentBills.length) {
+      for (let i = currentBills.length - 1; i >= value; i--) {
+        remove(i);
+      }
     }
   };
 
-  const handleDeleteBill = (index: number) => {
-    // Remove the selected index from shippingBills
-    const updatedShippingBills = shippingBills.filter((_, i) => i !== index);
+  // Update API Call
+  const onSubmit = async (data: any) => {
+    console.log("Submitting Shipping Bill Details:", data.shippingBillDetails);
+    try {
+      const response = await fetch("http://localhost:4080/shipment/shipping-bill-details", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ shipmentId, shippingBillDetails: data.shippingBillDetails }),
+      });
 
-    // Update local state
-    setShippingBills(updatedShippingBills);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update shipping bill details: ${errorText}`);
+      }
 
-    // Reset form value for the updated shipping bill list
-    setValue("shippingBillDetails.bills", updatedShippingBills);
-
-    setValue("numberOFShippingBill", updatedShippingBills.length);
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      alert("Shipping bill details updated successfully!");
+    } catch (error) {
+      console.error("Error updating shipping bill details:", error);
+      alert(`Failed to update shipping bill details: ${error.message}`);
+    }
   };
 
   return (
-    <div className="grid grid-cols-4 gap-3">
-      {/* Port Code */}
-      <FormField
-        control={control}
-        name="shippingBillDetails.portCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Port Code</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. 123456"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      {/* CB Name */}
-      <FormField
-        control={control}
-        name="shippingBillDetails.cbName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>CB Name</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. 123456"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      {/* CB Code */}
-      <FormField
-        control={control}
-        name="shippingBillDetails.cbCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>CB Code</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. 123456"
-                className="uppercase"
-                {...field}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
-        name="numberOFShippingBill"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Shipping Bills</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter number"
-                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                      onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div className="grid grid-cols-4 gap-3">
+        {/* Port Code */}
+        <FormField
+          control={control}
+          name="shippingBillDetails.portCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Port Code</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="eg. 123456"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
+        {/* CB Name */}
+        <FormField
+          control={control}
+          name="shippingBillDetails.cbName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CB Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="eg. John Doe"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-                        field.onChange(value);
-                  handleShippingBillCountChange(e.target.value);
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        {/* CB Code */}
+        <FormField
+          control={control}
+          name="shippingBillDetails.cbCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CB Code</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="eg. CB123"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      {shippingBills.length > 0 && (
-        <div className="col-span-4 overflow-x-auto mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead> {/* New Index Column */}
-                <TableHead>Upload Shipping</TableHead>
-                <TableHead>Shipping Bill Number</TableHead>
-                <TableHead>Shipping Bill Date</TableHead>
-                <TableHead>Drawback Value</TableHead>
-                <TableHead>Rodtep Value</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {shippingBills.map((_, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>{" "}
-                  {/* Display 1-based Index */}
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`shippingBillDetails.bills[${index}].uploadShippingBill`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="file"
-                              onChange={(e) =>
-                                field.onChange(e.target.files?.[0])
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`shippingBillDetails.bills[${index}].shippingBillNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="Bill Number"
-                              className="uppercase"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`shippingBillDetails.bills[${index}].shippingBillDate`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button variant="outline">
-                                  {field.value
-                                    ? format(field.value, "PPPP")
-                                    : "Pick a date"}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`shippingBillDetails.bills[${index}].drawbackValue`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="525121" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`shippingBillDetails.bills[${index}].rodtepValue`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input placeholder="446656  " {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  {/* Delete Button */}
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDeleteBill(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        {/* Number of Shipping Bills */}
+        <FormField
+          control={control}
+          name="shippingBillDetails.numberOFShippingBill"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Shipping Bills</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value, 10);
+                    field.onChange(value);
+                    handleShippingBillCountChange(value);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Shipping Bills Table */}
+        {fields.length > 0 && (
+          <div className="col-span-4 overflow-x-auto mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Upload Shipping Bill</TableHead>
+                  <TableHead>Shipping Bill Number</TableHead>
+                  <TableHead>Shipping Bill Date</TableHead>
+                  <TableHead>Drawback Value</TableHead>
+                  <TableHead>Rodtep Value</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-   
-    </div>
+              </TableHeader>
+              <TableBody>
+                {fields.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingBillDetails.bills[${index}].uploadShippingBill`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="file"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingBillDetails.bills[${index}].shippingBillNumber`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Bill Number"
+                                className="uppercase"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingBillDetails.bills[${index}].shippingBillDate`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button variant="outline">
+                                    {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingBillDetails.bills[${index}].drawbackValue`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="525121"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingBillDetails.bills[${index}].rodtepValue`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="446656"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+      <Button type="submit" className="mt-4">
+        Update Shipping Bill Details
+      </Button>
+    </form>
   );
 }

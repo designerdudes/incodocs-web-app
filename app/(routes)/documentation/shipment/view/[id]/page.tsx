@@ -50,7 +50,6 @@ export default async function Page({ params }: Props) {
   });
   let shipmentData;
   shipmentData = res;
-  console.log(shipmentData);
 
   return (
     <div>
@@ -168,7 +167,6 @@ export default async function Page({ params }: Props) {
                       </Table>
                     </CardContent>
                   </Card>
-
                   <div className="mt-4 w-1/2">
                     <DataTable
                       bulkDeleteIdName="_id"
