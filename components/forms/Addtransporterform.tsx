@@ -15,101 +15,93 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useRouter } from "next/navigation";
-import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
-// Transporter Form Schema
 const formSchema = z.object({
-  Address: z.string().min(1, { message: "Address is required" }),
-  ResponsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
-  MobileNumber: z.string().min(10, { message: "Enter a valid Mobile Number" }),
-  Email: z.string().email({ message: "Enter a valid Email" }),
+  transporterName: z.string().min(1, { message: "Shipping Line Name is required" }),
+  address: z.string().min(1, { message: "Address is required" }),
+  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  mobileNo: z
+    .string()
+    .min(7, { message: "Mobile number must be at least 7 digits" })
+    .transform((val) => parseInt(val, 10)) // Convert to number
+    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
+  email: z.string().email({ message: "Enter a valid Email" }),
 });
 
-function TransporterForm() {
+interface TransporterFormProps {
+  onSuccess?: () => void;
+}
+
+function TransporterForm({ onSuccess }: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      Address: "",
-      ResponsiblePerson: "",
-      MobileNumber: "",
-      Email: "",
+      transporterName: "",
+      address: "",
+      responsiblePerson: "",
+      mobileNo: undefined,
+      email: "",
     },
   });
 
   const GlobalModal = useGlobalModal();
-  const router = useRouter();
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    GlobalModal.title = "Confirm Transporter Details";
-    GlobalModal.description = "Please review the entered details:";
-    GlobalModal.children = (
-      <div className="space-y-4">
-        <p>
-          <strong>Address:</strong> {values.Address}
-        </p>
-        <p>
-          <strong>Responsible Person:</strong> {values.ResponsiblePerson}
-        </p>
-        <p>
-          <strong>Mobile Number:</strong> {values.MobileNumber}
-        </p>
-        <p>
-          <strong>Email:</strong> {values.Email}
-        </p>
-        <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              GlobalModal.onClose();
-              setIsLoading(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              try {
-                await postData("/Transporter/add", {
-                  ...values,
-                  status: "active",
-                });
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.success("Transporter created/updated successfully");
-              } catch (error) {
-                console.error("Error creating/updating:", error);
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.error("Error creating/updating");
-              }
-              window.location.reload();
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
-      </div>
-    );
-    GlobalModal.onOpen();
+    try {
+      const response = await fetch("http://localhost:4080/shipment/transporter/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transporterName: values.transporterName,
+          address: values.address,
+          responsiblePerson: values.responsiblePerson,
+          mobileNo: values.mobileNo,
+          email: values.email,
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to create Transporter");
+      const data = await response.json();
+      setIsLoading(false);
+      GlobalModal.onClose();
+      toast.success("Transporter created successfully");
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error creating Transporter:", error);
+      setIsLoading(false);
+      toast.error("Error creating Transporter");
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+        {/* Shipping Line Name */}
+        <FormField
+          control={form.control}
+          name="transporterName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Forwarder Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., Name1" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {/* Address */}
         <FormField
           control={form.control}
-          name="Address"
+          name="address"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="Enter Address" {...field} />
+                <Input placeholder="e.g., Sanatnagar" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -118,12 +110,12 @@ function TransporterForm() {
         {/* Responsible Person */}
         <FormField
           control={form.control}
-          name="ResponsiblePerson"
+          name="responsiblePerson"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Responsible Person</FormLabel>
               <FormControl>
-                <Input placeholder="Enter Responsible Person Name" {...field} />
+                <Input placeholder="e.g., Ahmed" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -132,12 +124,18 @@ function TransporterForm() {
         {/* Mobile Number */}
         <FormField
           control={form.control}
-          name="MobileNumber"
+          name="mobileNo"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mobile Number</FormLabel>
               <FormControl>
-                <Input placeholder="Enter Mobile Number" {...field} />
+                <Input
+                  type="tel"
+                  placeholder="e.g., 7545345"
+                  {...field}
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)} // Keep as string until transform
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -146,12 +144,12 @@ function TransporterForm() {
         {/* Email */}
         <FormField
           control={form.control}
-          name="Email"
+          name="email"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="Enter Email" {...field} />
+                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

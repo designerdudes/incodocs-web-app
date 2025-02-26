@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea"; // Added for review field
 import {
   Popover,
   PopoverTrigger,
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -28,52 +29,89 @@ import {
 } from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
 
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
 export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue } = useFormContext();
-  const [shippingBills, setShippingBills] = useState<
-    {
-      uploadShippingBill: string;
-      shippingBillNumber: string;
-      shippingBillDate: string;
-      drawbackValue: string;
-      rodtepValue: string;
-    }[]
-  >([]);
-  const { handleSubmit } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
+  const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
+  const [shippingBills, setShippingBills] = useState(shippingBillsFromForm);
+  const [uploading, setUploading] = useState(false);
 
   const handleShippingBillCountChange = (value: string) => {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
-      const newShippingBills = Array.from({ length: count }, () => ({
-        uploadShippingBill: "",
-        shippingBillNumber: "",
-        shippingBillDate: "",
-        drawbackValue: "",
-        rodtepValue: "",
-      }));
+      const currentBills = watch("shippingBillDetails.ShippingBills") || [];
+      const newShippingBills = Array.from({ length: count }, (_, i) =>
+        currentBills[i] || {
+          shippingBillUrl: "",
+          shippingBillNumber: "",
+          shippingBillDate: "",
+          drawbackValue: "",
+          rodtepValue: "",
+        }
+      );
       setShippingBills(newShippingBills);
-      setValue("shippingBillDetails.Bills", newShippingBills);
+      setValue("shippingBillDetails.ShippingBills", newShippingBills);
+      saveProgressSilently(getValues());
     } else {
       setShippingBills([]);
-      setValue("shippingBillDetails.Bills", []);
+      setValue("shippingBillDetails.ShippingBills", []);
+      saveProgressSilently(getValues());
     }
   };
 
   const handleDeleteBill = (index: number) => {
-    // Remove the selected index from shippingBills
-    const updatedShippingBills = shippingBills.filter((_, i) => i !== index);
-
-    // Update local state
+    const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
     setShippingBills(updatedShippingBills);
+    setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
+    saveProgressSilently(getValues());
+  };
 
-    // Reset form value for the updated shipping bill list
-    setValue("shippingBillDetails.bills", updatedShippingBills);
-
-    setValue("numberOFShippingBill", updatedShippingBills.length);
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      setValue(fieldName, storageUrl);
+      saveProgressSilently(getValues());
+    } catch (error) {
+      alert("Failed to upload file. Please try again.");
+      console.error("Upload error:", error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
     <div className="grid grid-cols-4 gap-3">
+      {/* Review */}
+      <FormField
+        control={control}
+        name="shippingBillDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       {/* Port Code */}
       <FormField
         control={control}
@@ -83,9 +121,10 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>Port Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. 123456"
+                placeholder="e.g., SB101"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -101,33 +140,36 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>CB Name</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. CB NAME"
+                placeholder="e.g., xyz"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-      {/* CB Code */}
+      {/* CD Code */}
       <FormField
         control={control}
-        name="shippingBillDetails.cbCode"
+        name="shippingBillDetails.cdCode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CB Code</FormLabel>
+            <FormLabel>CD Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. 123456"
+                placeholder="e.g., randomcode"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {/* Number of Shipping Bills */}
       <FormField
         control={control}
         name="numberOFShippingBill"
@@ -138,12 +180,10 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number"
-                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                value={field.value === 0 ? "" : field.value}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
-
-                  if (isNaN(value) || value < 0) return; // Prevents negative values
-
+                  if (isNaN(value) || value < 0) return;
                   field.onChange(value);
                   handleShippingBillCountChange(e.target.value);
                 }}
@@ -159,33 +199,48 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead> {/* New Index Column */}
-                <TableHead>Upload Shipping</TableHead>
+                <TableHead>#</TableHead>
+                <TableHead>Upload Shipping Bill</TableHead>
                 <TableHead>Shipping Bill Number</TableHead>
                 <TableHead>Shipping Bill Date</TableHead>
                 <TableHead>Drawback Value</TableHead>
-                <TableHead>Rodtep Value</TableHead>
+                <TableHead>RODTEP Value</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shippingBills.map((_, index) => (
+              {shippingBills.map((_: any, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>{" "}
-                  {/* Display 1-based Index */}
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].uploadShippingBill`}
+                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input
-                              type="file"
-                              onChange={(e) =>
-                                field.onChange(e.target.files?.[0])
-                              }
-                            />
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="file"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleFileUpload(
+                                      file,
+                                      `shippingBillDetails.ShippingBills[${index}].shippingBillUrl`
+                                    );
+                                }}
+                                disabled={uploading}
+                              />
+                              <Button
+                                variant="secondary"
+                                className="bg-blue-500 text-white"
+                                disabled={uploading}
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                {uploading ? "Uploading..." : "Upload"}
+                              </Button>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -195,14 +250,15 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].shippingBillNumber`}
+                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillNumber`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="Bill Number"
+                              placeholder="e.g., 34583"
                               className="uppercase"
                               {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -213,7 +269,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].shippingBillDate`}
+                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillDate`}
                       render={({ field }) => (
                         <FormItem>
                           <Popover>
@@ -221,7 +277,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value
-                                    ? format(field.value, "PPPP")
+                                    ? format(new Date(field.value), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -230,8 +286,11 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
+                                selected={field.value ? new Date(field.value) : undefined}
+                                onSelect={(date) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
                               />
                             </PopoverContent>
                           </Popover>
@@ -243,11 +302,15 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].drawbackValue`}
+                      name={`shippingBillDetails.ShippingBills[${index}].drawbackValue`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input placeholder="525121" {...field} />
+                            <Input
+                              placeholder="e.g., 2394"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -257,18 +320,21 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].rodtepValue`}
+                      name={`shippingBillDetails.ShippingBills[${index}].rodtepValue`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input placeholder="446656  " {...field} />
+                            <Input
+                              placeholder="e.g., 8934"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </TableCell>
-                  {/* Delete Button */}
                   <TableCell>
                     <Button
                       variant="destructive"
@@ -286,7 +352,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
         </div>
       )}
       <div className="mt-2">
-        <Button type="button" onClick={handleSubmit(saveProgress)}>
+        <Button type="button" onClick={() => saveProgress(getValues())}>
           Save Progress
         </Button>
       </div>

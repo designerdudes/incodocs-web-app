@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -25,52 +25,69 @@ import {
   TableRow,
   TableCell,
   TableHead,
-} from "@/components/ui/table"; // ShadCN Table components
-import ProductButton from "./ProductButton";
+} from "@/components/ui/table";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import ProductDetailsForm from "@/components/forms/ProductdetailsForm";
 
 export interface SaveDetailsProps {
-  saveProgress: (data: any) => void;
+  saveProgress: (data: any) => void; // This will only trigger toast when called
+}
+
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
 export function BookingDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue } = useFormContext();
-  const [containers, setContainers] = React.useState<any[]>([]); // Store containers as an array
-  const [showProductForm, setShowProductForm] = useState<boolean>(false);
-  const { handleSubmit } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
+  const containersFromForm = watch("bookingDetails.containers") || [];
+  const [containers, setContainers] = React.useState(containersFromForm);
+  const GlobalModal = useGlobalModal();
 
   const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter((_, i) => i !== index); // Remove container at the given index
+    const updatedContainers = containers.filter((_: any, i: number) => i !== index);
     setContainers(updatedContainers);
-    setValue("bookingDetails.containers", updatedContainers); // Update form value
-
+    setValue("bookingDetails.containers", updatedContainers);
     setValue("NumberOfContainer", updatedContainers.length);
+    saveProgressSilently(getValues());
   };
 
-  // Function to handle change in number of containers
   const handleContainerCountChange = (value: string) => {
-    const count = parseInt(value, 10);
-
-    if (!isNaN(count) && count > 0) {
-      const newContainerData = Array.from({ length: count }, (_, index) => ({
+    const count = parseInt(value, 10) || 0;
+    const currentContainers = watch("bookingDetails.containers") || [];
+    const newContainers = Array.from({ length: count }, (_, i) =>
+      currentContainers[i] || {
         containerNumber: "",
         truckNumber: "",
-        truckDriverContactNumber: "",
-        addProductDetails: "",
-      }));
-
-      setContainers(newContainerData);
-      setValue("bookingDetails.containers", newContainerData); // Set containers data in the form
-    } else {
-      setContainers([]);
-      setValue("bookingDetails.containers", []); // Clear containers data if the value is invalid
-    }
+        trukDriverContactNumber: "",
+        addProductDetails: {},
+      }
+    );
+    setContainers(newContainers);
+    setValue("bookingDetails.containers", newContainers);
+    saveProgressSilently(getValues());
   };
 
-
+  const openProductForm = (index: number) => {
+    GlobalModal.title = "Add Product Details";
+    GlobalModal.description = "Fill in the details to add product information for this container.";
+    GlobalModal.children = (
+      <ProductDetailsForm
+        onSubmit={(productData: any) => {
+          const updatedContainers = [...containers];
+          updatedContainers[index].addProductDetails = productData;
+          setContainers(updatedContainers);
+          setValue("bookingDetails.containers", updatedContainers);
+          saveProgressSilently(getValues());
+          GlobalModal.onClose();
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Booking number  */}
       <FormField
         control={control}
         name="bookingDetails.bookingNumber"
@@ -79,36 +96,34 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>Booking Number</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. MRKU6998040"
+                placeholder="e.g., MRKU6998040"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
-      {/* Port of Loading */}
       <FormField
         control={control}
         name="bookingDetails.portOfLoading"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Port Of Loading</FormLabel>
+            <FormLabel>Port of Loading</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. CHENNAI"
+                placeholder="e.g., CHENNAI"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
-      {/* Destination Port */}
       <FormField
         control={control}
         name="bookingDetails.destinationPort"
@@ -117,17 +132,16 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
             <FormLabel>Destination Port</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. UMM QASAR"
+                placeholder="e.g., UMM QASAR"
                 className="uppercase"
                 {...field}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
-      {/* Vessel Sailing Date */}
       <FormField
         control={control}
         name="bookingDetails.vesselSailingDate"
@@ -138,11 +152,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -150,8 +160,11 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -159,8 +172,6 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
-      {/* Vessel Arriving Date */}
       <FormField
         control={control}
         name="bookingDetails.vesselArrivingDate"
@@ -171,11 +182,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
+                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -183,8 +190,11 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -192,8 +202,6 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
-      {/* Number of Containers */}
       <FormField
         control={control}
         name="NumberOfContainer"
@@ -203,43 +211,38 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
             <FormControl>
               <Input
                 type="number"
-                placeholder="Enter number of Containers"
-                value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                placeholder="Enter number of containers"
+                value={field.value || ""}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
-
-                  if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                  field.onChange(value);
-
-                  handleContainerCountChange(e.target.value);
+                  if (!isNaN(value) && value >= 0) {
+                    field.onChange(value);
+                    handleContainerCountChange(e.target.value);
+                  }
                 }}
-
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
       {containers.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead> {/* New Index Column */}
+                <TableHead>#</TableHead>
                 <TableHead>Container Number</TableHead>
                 <TableHead>Truck Number</TableHead>
-                <TableHead>Truck Driver Contact Number</TableHead>
-                <TableHead>Add Product Details</TableHead>
+                <TableHead>Truck Driver Contact</TableHead>
+                <TableHead>Product Details</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {containers.map((_, index) => (
+              {containers.map((container: any, index: number) => (
                 <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>{" "}
-                  {/* Display 1-based Index */}
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
@@ -247,14 +250,17 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input placeholder="7858784698986" {...field} />
+                            <Input
+                              placeholder="e.g., 7858784698986"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </TableCell>
-                  {/* Truck Number */}
                   <TableCell>
                     <FormField
                       control={control}
@@ -262,25 +268,31 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Input placeholder="BH 08 5280" {...field} />
+                            <Input
+                              placeholder="e.g., BH 08 5280"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
                   </TableCell>
-                  {/* Truck Driver Contact Number */}
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
+                      name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="+918520785200"
+                              placeholder="e.g., 7702791728"
                               {...field}
+                              value={field.value || ""}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || "")}
+                              onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -288,36 +300,23 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                       )}
                     />
                   </TableCell>
-
                   <TableCell>
-                    {/* Add Product Details */}
-                    {showProductForm ? (
-                      <FormField
-                        control={control}
-                        name={`bookingDetails.containers[${index}].addProductDetails`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input
-                              placeholder="Add Product"
-                              {...field}
-                              onBlur={() => setShowProductForm(false)} // Optionally close the form when blurred
-                            />
-                          </FormControl>
-                        )}
-                      />
-                    ) :
-                      <div>
-                        <ProductButton />
-                      </div>
-                    }
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openProductForm(index)}
+                    >
+                      {container.addProductDetails?.productCategory
+                        ? "Edit Product Details"
+                        : "Add Product Details"}
+                    </Button>
                   </TableCell>
-                  {/* Delete Action */}
                   <TableCell>
                     <Button
                       variant="destructive"
                       size="sm"
                       type="button"
-                      onClick={() => handleDelete(index)} // Delete container row
+                      onClick={() => handleDelete(index)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -328,10 +327,6 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-      <div className="mt-8"><Button type="button" onClick={handleSubmit(saveProgress)}>
-        Save Progress
-      </Button></div>
-      {/* Save Button */}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ProgressBar from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
@@ -20,164 +20,200 @@ import toast from "react-hot-toast";
 import { postData } from "@/axiosUtility/api";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
+import { debounce } from "lodash";
 
-
-const saveProgress = (data: any) => {
+// Save progress functions
+const saveProgressSilently = (data: any) => {
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+};
+
+const saveProgressWithFeedback = (data: any) => {
+    saveProgressSilently(data);
     toast.success("Progress saved!");
 };
 
-
-const steps = [
-    { id: 1, name: "Booking Details", component: <BookingDetails saveProgress={saveProgress} /> },
-    { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgress} /> },
-    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgress} /> },
-    { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgress} /> },
-    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails saveProgress={saveProgress} /> },
-    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgress} /> },
-    { id: 7, name: "Other Details", component: <OtherDetails saveProgress={saveProgress} /> },
-];
-
-
+// Updated Zod Schema with all fields optional
 const formSchema = z.object({
     bookingDetails: z.object({
-        bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
-        portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-        destinationPort: z.string().min(3, { message: "Required name" }).optional(),
-        vesselSailingDate: z.date().optional(),
-        vesselArrivingDate: z.date().optional(),
-        containers: z.array(z.object({
-            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }).optional(),
-            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }).optional(),
-            trukDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }).optional(),
-            addProductDetails: z.object({
-                productCategory: z.string().min(3, { message: "Required category" }).optional(),
-                graniteAndMarble: z.string().min(3, { message: "Required type" }).optional(),
-                tiles: z.object({
-                    noOfBoxes: z.number().min(1, { message: "Required value" }).optional(),
-                    noOfPiecesPerBoxes: z.number().min(1, { message: "Required value" }).optional(),
-                    sizePerTile: z.object({
-                        length: z.object({
-                            value: z.number().optional(),
-                            units: z.string().optional()
+        review: z.string().optional(),
+        bookingNumber: z.string().optional(),
+        portOfLoading: z.string().optional(),
+        destinationPort: z.string().optional(),
+        vesselSailingDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+        vesselArrivingDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+        containers: z.array(
+            z.object({
+                containerNumber: z.string().optional(),
+                truckNumber: z.string().optional(),
+                trukDriverContactNumber: z.number().optional(),
+                addProductDetails: z.object({
+                    productCategory: z.string().optional(),
+                    graniteAndMarble: z.string().optional(),
+                    tiles: z.object({
+                        noOfBoxes: z.number().optional(),
+                        noOfPiecesPerBoxes: z.number().optional(),
+                        sizePerTile: z.object({
+                            length: z.object({
+                                value: z.number().optional(),
+                                units: z.string().optional(),
+                            }).optional(),
+                            breadth: z.object({
+                                value: z.number().optional(),
+                                units: z.string().optional(),
+                            }).optional(),
                         }).optional(),
-                        breadth: z.object({
-                            value: z.number().optional(),
-                            units: z.string().optional()
-                        }).optional()
-                    }).optional()
-                }).optional()
-            }).optional()
-        })).optional()
+                    }).optional(),
+                }).optional(),
+            })
+        ).optional(),
     }).optional(),
-
     shippingDetails: z.object({
-        shippingLine: z.string().min(3, { message: "Required name" }).optional(),
+        review: z.string().optional(),
+        shippingLineName: z.string().optional(),
         noOfShipmentinvoices: z.number().optional(),
-        shippingLineInvoices: z.array(z.object({
-            invoiceNumber: z.string().optional(),
-            uploadInvoiceUrl: z.string().optional(),
-            date: z.date().optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional()
-        })).optional(),
-        transporterName: z.string().min(3, { message: "Required name" }).optional(),
+        shippingLineInvoices: z.array(
+            z.object({
+                invoiceNumber: z.string().optional(),
+                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+                date: z.string().datetime({ message: "Invalid date format" }).optional(),
+                valueWithGst: z.number().optional(),
+                valueWithoutGst: z.number().optional(),
+            })
+        ).optional(),
+        transporterName: z.string().optional(),
         noOftransportinvoices: z.number().optional(),
-        transporterInvoices: z.array(z.object({
-            invoiceNumber: z.string().optional(),
-            uploadInvoiceUrl: z.string().optional(),
-            date: z.date().optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional()
-        })).optional(),
-        forwarderName: z.string().min(3, { message: "Required name" }).optional(),
+        transporterInvoices: z.array(
+            z.object({
+                invoiceNumber: z.string().optional(),
+                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+                date: z.string().datetime({ message: "Invalid date format" }).optional(),
+                valueWithGst: z.number().optional(),
+                valueWithoutGst: z.number().optional(),
+            })
+        ).optional(),
+        forwarderName: z.string().optional(),
         noOfForwarderinvoices: z.number().optional(),
-        forwarderInvoices: z.array(z.object({
-            invoiceNumber: z.string().optional(),
-            uploadInvoiceUrl: z.string().optional(),
-            date: z.date().optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional()
-        })).optional()
+        forwarderInvoices: z.array(
+            z.object({
+                invoiceNumber: z.string().optional(),
+                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+                date: z.string().datetime({ message: "Invalid date format" }).optional(),
+                valueWithGst: z.number().optional(),
+                valueWithoutGst: z.number().optional(),
+            })
+        ).optional(),
     }).optional(),
-
     shippingBillDetails: z.object({
+        review: z.string().optional(),
         portCode: z.string().optional(),
         cbName: z.string().optional(),
         cdCode: z.string().optional(),
         ShippingBills: z.object({
-            shippingBillUrl: z.string().optional(),
+            shippingBillUrl: z.string().url("Invalid URL").optional(),
             shippingBillNumber: z.string().optional(),
-            shippingBillDate: z.date().optional(),
+            shippingBillDate: z.string().datetime({ message: "Invalid date format" }).optional(),
             drawbackValue: z.string().optional(),
-            rodtepValue: z.string().optional()
-        }).optional()
+            rodtepValue: z.string().optional(),
+        }).optional(),
     }).optional(),
-
     supplierDetails: z.object({
+        review: z.string().optional(),
         clearance: z.object({
-            supplierName: z.string().min(3, { message: "Required name" }).optional(),
+            supplierName: z.string().optional(),
             noOfInvoices: z.number().optional(),
-            invoices: z.array(z.object({
-                supplierGSTN: z.string().min(3, { message: "Required GSTIN" }).optional(),
-                supplierInvoiceNumber: z.string().optional(),
-                supplierInvoiceDate: z.date().optional(),
-                supplierInvoiceValueWithGST: z.string().optional(),
-                supplierInvoiceValueWithOutGST: z.string().optional(),
-                clearanceSupplierInvoiceUrl: z.string().optional()
-            })).optional()
+            invoices: z.array(
+                z.object({
+                    supplierGSTN: z.string().optional(),
+                    supplierInvoiceNumber: z.string().optional(),
+                    supplierInvoiceDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+                    supplierInvoiceValueWithGST: z.string().optional(),
+                    supplierInvoiceValueWithOutGST: z.string().optional(),
+                    clearanceSupplierInvoiceUrl: z.string().url("Invalid URL").optional(),
+                })
+            ).optional(),
         }).optional(),
         actual: z.object({
             actualSupplierName: z.string().optional(),
             actualSupplierInvoiceValue: z.string().optional(),
-            actualSupplierInvoiceUrl: z.string().optional(),
-            shippingBillUrl: z.string().optional()
-        }).optional()
+            actualSupplierInvoiceUrl: z.string().url("Invalid URL").optional(),
+            shippingBillUrl: z.string().optional(),
+        }).optional(),
     }).optional(),
-
     saleInvoiceDetails: z.object({
+        review: z.string().optional(),
         consignee: z.string().optional(),
         actualBuyer: z.string().optional(),
         commercialInvoices: z.object({
             commercialInvoiceNumber: z.string().optional(),
-            clearanceCommercialInvoiceUrl: z.string().optional(),
-            actualCommercialInvoiceUrl: z.string().optional(),
-            saberInvoiceUrl: z.string().optional()
-        }).optional()
+            clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            saberInvoiceUrl: z.string().optional(),
+        }).optional(),
     }).optional(),
-
     blDetails: z.object({
+        review: z.string().optional(),
         blNumber: z.string().optional(),
-        blDate: z.date().optional(),
-        telexDate: z.date().optional(),
-        uploadBL: z.string().optional()
+        blDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+        telexDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+        uploadBL: z.string().url("Invalid URL").optional(),
     }).optional(),
-
-    otherDetails: z.object({
-        certificateOfOriginNumber: z.string().optional(),
-        date: z.date().optional(),
-        issuerOfCOO: z.string().optional(),
-        uploadCopyOfFumigationCertificate: z.string().optional()
-    }).optional(),
-
-    organizationId: z.string().optional()
+    otherDetails: z.array(
+        z.object({
+            review: z.string().optional(),
+            certificateName: z.string().optional(),
+            certificateNumber: z.string().optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            issuerOfCertificate: z.string().optional(),
+            uploadCopyOfCertificate: z.string().url("Invalid URL").optional(),
+        })
+    ).optional(),
+    organizationId: z.string().optional(),
 });
 
+const steps = [
+    { id: 1, name: "Booking Details", component: <BookingDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 7, name: "Other Details", component: <OtherDetails saveProgress={saveProgressWithFeedback} /> },
+];
 
 export default function CreateNewFormPage() {
     const [currentStep, setCurrentStep] = useState(0);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const organizationId = "674b0a687d4f4b21c6c980ba";
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
+        defaultValues: {
+            bookingDetails: { containers: [] },
+            shippingDetails: {
+                shippingLineInvoices: [],
+                transporterInvoices: [],
+                forwarderInvoices: [],
+            },
+            shippingBillDetails: { ShippingBills: {} },
+            supplierDetails: { clearance: { invoices: [] }, actual: {} },
+            saleInvoiceDetails: { commercialInvoices: {} },
+            blDetails: {},
+            otherDetails: [],
+            organizationId,
+        },
     });
 
-
+    const watchedValues = form.watch();
+    const debouncedSave = debounce(saveProgressSilently, 1000);
+    useEffect(() => {
+        debouncedSave(watchedValues);
+        return () => debouncedSave.cancel();
+    }, [watchedValues]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        console.log(values);
         setIsLoading(true);
         try {
             await postData("/shipment/add/", {
@@ -185,20 +221,22 @@ export default function CreateNewFormPage() {
                 organizationId,
                 status: "active",
             });
-            setIsLoading(false);
-            toast.success("shipment created/updated successfully");
+            toast.success("Shipment created successfully");
             router.push("./");
         } catch (error) {
-            console.error("Error creating/updating shipment:", error);
+            console.error("Error creating shipment:", error);
+            toast.error("Error creating shipment");
+        } finally {
             setIsLoading(false);
-            toast.error("Error creating/updating shipment");
         }
-        router.refresh();
     }
 
     const nextStep = () => {
-        if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
+        if (currentStep < steps.length - 1) {
+            setCurrentStep(currentStep + 1);
+        }
     };
+
     const prevStep = () => {
         if (currentStep > 0) setCurrentStep(currentStep - 1);
     };
@@ -213,63 +251,50 @@ export default function CreateNewFormPage() {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading
-                        className="leading-tight"
-                        title="Create New Shipment"
-                    />
+                    <Heading className="leading-tight" title="Create New Shipment" />
                     <p className="text-muted-foreground text-sm">
-                        Complete the form below to add a new shipment. Provide essential information like  container.no, trucks.no, invoices, and any additional details.
+                        Complete the form below to add a new shipment.
                     </p>
                 </div>
             </div>
             <Separator orientation="horizontal" />
-            {/* <div className="container mx-auto">
-                <NewShipmentForm />
-            </div> */}
             <div className="w-full">
                 <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
             </div>
 
             <FormProvider {...form}>
-                <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="flex flex-col gap-3 w-full p-3"
-                >
-                    {/* Buttons at the top */}
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-3 w-full p-3">
                     <div className="flex justify-between mt-4">
-                        {/* "Previous" button (always on the left, but hidden on the first step) */}
                         <Button
-
                             type="button"
                             onClick={prevStep}
-                            disabled={currentStep === 0}
+                            disabled={currentStep === 0 || isLoading}
                             className={`${currentStep === 0 ? "invisible" : ""} h-8`}
                         >
                             Previous
                         </Button>
-
-                        {/* "Next" button (always on the right) */}
+                        <Button
+                            type="button"
+                            onClick={() => saveProgressWithFeedback(form.getValues())}
+                            className="h-8"
+                            disabled={isLoading}
+                        >
+                            Save Progress
+                        </Button>
                         {currentStep < steps.length - 1 && (
-                            <Button
-                                className="h-8"
-                                type="button" onClick={nextStep}>
+                            <Button className="h-8" type="button" onClick={nextStep} disabled={isLoading}>
                                 Next
                             </Button>
                         )}
                     </div>
 
-                    {/* Step heading */}
                     <div className="flex justify-between">
-                        <Heading
-                            className="text-xl"
-                            title={steps.find((step) => step.id === currentStep + 1)?.name || "Step"}
-                        />
+                        <Heading className="text-xl" title={steps[currentStep].name} />
                         <p className="text-sm text-muted-foreground">
                             Step {currentStep + 1} of {steps.length}
                         </p>
                     </div>
 
-                    {/* Step Content */}
                     {steps[currentStep].component}
                     <div className="mt-4">
                         {currentStep === steps.length - 1 && (
@@ -284,4 +309,3 @@ export default function CreateNewFormPage() {
         </div>
     );
 }
-

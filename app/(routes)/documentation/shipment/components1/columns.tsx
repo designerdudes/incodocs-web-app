@@ -35,173 +35,180 @@ export const columns: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "BookingNumber",
+    accessorKey: "shipmentId",
+    header: ({ column }) => <ColumnHeader column={column} title="Shipment ID" />,
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">{row.original.shipmentId}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "bookingDetails.bookingNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Booking Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.bookingDetails?.bookingNumber}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.bookingNumber || "N/A"}
+        </span>
+      </div>
+    ),
   },
   {
-    accessorKey: "bookingDetailsSchema.containerNumber",
+    accessorKey: "bookingDetails.containers",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Container Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.bookingDetails?.containers?.map(container => container.containerNumber).join(", ")}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.containers?.length > 0
+            ? row.original.bookingDetails.containers
+              .map((container) => container.containerNumber)
+              .join(", ")
+            : "N/A"}
+        </span>
+      </div>
+    ),
   },
   {
-    accessorKey: "Truck Number",
+    accessorKey: "bookingDetails.containers",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Truck Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.bookingDetails?.containers?.map(container => container.truckNumber).join(", ")}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.containers?.length > 0
+            ? row.original.bookingDetails.containers
+              .map((container) => container.truckNumber)
+              .join(", ")
+            : "N/A"}
+        </span>
+      </div>
+    ),
   },
   {
-    accessorKey: "Truck Driver Number",
+    accessorKey: "bookingDetails.containers",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Truck Driver Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.bookingDetails?.containers?.map(container => container.trukDriverContactNumber).join(", ")}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.containers?.length > 0
+            ? row.original.bookingDetails.containers
+              .map((container) => container.trukDriverContactNumber)
+              .join(", ")
+            : "N/A"}
+        </span>
+      </div>
+    ),
   },
   {
-    accessorKey: "bookingDetailsSchema.destinationPort",
+    accessorKey: "bookingDetails.portOfLoading",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Port of Loading" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.portOfLoading || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "bookingDetails.destinationPort",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Destination Port" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original.bookingDetails?.destinationPort}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "bookingDetailsSchema.portOfLoading",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Port Of Loading" />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.destinationPort || "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original.bookingDetails?.portOfLoading}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "Vessel Sailing Date",
+    accessorKey: "bookingDetails.vesselSailingDate",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Sailing Date" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.bookingDetails?.vesselSailingDate).format(
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.vesselSailingDate
+            ? moment(row.original.bookingDetails.vesselSailingDate).format(
               "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
+            )
+            : "N/A"}
+        </span>
+      </div>
+    ),
   },
   {
-    accessorKey: "vessel Arriving Date",
+    accessorKey: "bookingDetails.vesselArrivingDate",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Arriving Date" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {moment(row.original?.bookingDetails?.vesselArrivingDate).format(
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.vesselArrivingDate
+            ? moment(row.original.bookingDetails.vesselArrivingDate).format(
               "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "shippingLine",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Shipping Line" />
+            )
+            : "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.shippingLine}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "forwarder",
+    accessorKey: "shippingDetails.transporterName",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Transporter Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingDetails?.transporterName?.transporterName ||
+            "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "shippingDetails.forwarderName",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Forwarder Name" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.shippingLine}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingDetails?.forwarderName?.forwarderName || "N/A"}
+        </span>
+      </div>
+    ),
   },
-
-
   {
-    accessorKey: "forwarderInvoice",
+    accessorKey: "shippingDetails.shippingLineInvoices",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Forwarder Invoice" />
+      <ColumnHeader column={column} title="Shipping Line Invoice" />
     ),
     cell: ({ row }) => {
-      const fileUrl = row.original?.shippingDetails?.forwarderInvoice;
+      const fileUrl =
+        row.original.shippingDetails?.shippingLineInvoices?.length > 0
+          ? row.original.shippingDetails.shippingLineInvoices[0].uploadInvoiceUrl
+          : null;
       return (
         <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
+          <span className="truncate font-medium">
+            {fileUrl || "No Invoice"}
+          </span>
           {fileUrl && (
             <a href={fileUrl} target="_blank" rel="noopener noreferrer">
               <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
@@ -212,580 +219,171 @@ export const columns: ColumnDef<Shipment>[] = [
     },
   },
   {
-    accessorKey: "valueOfForwarderInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Value Of Forwarder Invoice " />
+    accessorKey: "shippingBillDetails.portCode",
+    header: ({ column }) => <ColumnHeader column={column} title="Port Code" />,
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingBillDetails?.portCode || "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.valueOfForwarderInvoice}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "transporter",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Transporter" />
+    accessorKey: "shippingBillDetails.cbName",
+    header: ({ column }) => <ColumnHeader column={column} title="CB Name" />,
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingBillDetails?.cbName || "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.transporter}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "transporterInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Transporter Invoice" />
-    ),
-    cell: ({ row }) => {
-      const fileUrl = row.original?.shippingDetails?.transporterInvoice;
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "valueOfTransporterInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Value Of Transporter Invoice" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingDetails?.valueOfTransporterInvoice}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "shippingBillNumber",
+    accessorKey: "shippingBillDetails.ShippingBills",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Bill Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.ShippingBills.map(bill => bill.shippingBillNumber).join(", ")}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "Port Code",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Port Code" />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingBillDetails?.ShippingBills?.length > 0
+            ? row.original.shippingBillDetails.ShippingBills.map(
+              (bill) => bill.shippingBillNumber
+            ).join(", ")
+            : "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.portCode}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "CB Name",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="CB Name" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.cbName}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "CB Code",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="CB Code" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.cbCode}
-          </span>
-        </div>
-      );
-    },
-  },
-
-
-
-  {
-    accessorKey: "shippingBillDate",
+    accessorKey: "shippingBillDetails.ShippingBills",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Bill Date" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.shippingBillDetails?.ShippingBills.map(bill =>
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingBillDetails?.ShippingBills?.length > 0
+            ? row.original.shippingBillDetails.ShippingBills.map((bill) =>
               moment(bill.shippingBillDate).format("MMM Do YY")
-            ).join(", ")}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "uploadShippingBill",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Upload Shipping Bill" />
+            ).join(", ")
+            : "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      const fileUrl = row.original?.shippingBillDetails?.ShippingBills.map(bill => bill.shippingBillUrl).join(", ");
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
   },
-
   {
-    accessorKey: "supplierName",
+    accessorKey: "supplierDetails.clearance",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Supplier Name " />
+      <ColumnHeader column={column} title="Supplier Name" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.clearance?.supplierName}
-          </span>
-        </div>
-      );
-    },
-  },
-
-
-
-  {
-    accessorKey: "supplierGSTIN",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Supplier GSTIN " />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.supplierDetails?.clearance?.supplierName?.supplierName ||
+            row.original.supplierDetails?.actual?.actualSupplierName ||
+            "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.clearance?.supplierGSTN}
-          </span>
-        </div>
-      );
-    },
   },
-
   {
-    accessorKey: "supplierInvoiceNumber",
+    accessorKey: "supplierDetails.clearance.invoices",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Supplier Invoice Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.clearance?.supplierInvoiceNumber}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "supplierInvoiceDate",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Supplier Invoice Date" />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.supplierDetails?.clearance?.invoices?.length > 0
+            ? row.original.supplierDetails.clearance.invoices[0]
+              .supplierInvoiceNumber
+            : "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.supplierDetails?.clearance?.supplierInvoiceDate).format(
-              "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
   },
-
   {
-    accessorKey: "supplierInvoiceValueWithOutGST",
+    accessorKey: "saleInvoiceDetails.consignee",
     header: ({ column }) => (
-      <ColumnHeader
-        column={column}
-        title="Supplier Invoice Value WithOut GST "
-      />
+      <ColumnHeader column={column} title="Consignee Name" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.clearance?.supplierInvoiceValueWithOutGST}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "supplierInvoiceValueWithGST",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Supplier Invoice Value With GST " />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.clearance?.supplierInvoiceValueWithOutGST}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "uploadSupplierInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Upload Supplier Invoice" />
-    ),
-    cell: ({ row }) => {
-      const fileUrl = row.original?.supplierDetails?.clearance?.clearanceSupplierInvoiceUrl;
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "ClearanceSupplierInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Upload Clearance Supplier Invoice" />
-    ),
-    cell: ({ row }) => {
-      const fileUrl = row.original?.supplierDetails?.clearance?.clearanceSupplierInvoiceUrl;
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actualSupplierName",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Actual Supplier Name " />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actual?.actualSupplierName}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "actualSupplierInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Actual Supplier Invoice" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actual?.actualSupplierInvoiceUrl}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actualSupplierInvoiceValue",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Actual Supplier Invoice Value" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.supplierDetails?.actual?.actualSupplierInvoiceValue}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "commercialInvoiceNumber",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Commercial Invoice Number" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "commercialInvoiceDate",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Commercial Invoice Date" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber).format(
-              "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "commercialInvoice",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Commercial Invoice" />
-    ),
-    cell: ({ row }) => {
-      const fileUrl = row.original?.saleInvoiceDetails?.commercialInvoices?.actualCommercialInvoiceUrl;
-
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "consigneeDetails",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Consignee Details" />
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.saleInvoiceDetails?.consignee}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "actualBuyer",
+    accessorKey: "saleInvoiceDetails.actualBuyer",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Actual Buyer" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.saleInvoiceDetails?.actualBuyer}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.actualBuyer || "N/A"}
+        </span>
+      </div>
+    ),
   },
-
   {
-    accessorKey: "blNumber",
+    accessorKey: "saleInvoiceDetails.commercialInvoices",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Commercial Invoice Number" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.commercialInvoices
+            ?.commercialInvoiceNumber || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "blDetails.blNumber",
     header: ({ column }) => <ColumnHeader column={column} title="BL Number" />,
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.blDetails?.blNumber}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.blDetails?.blNumber || "N/A"}
+        </span>
+      </div>
+    ),
   },
-
   {
-    accessorKey: "blDate",
+    accessorKey: "blDetails.blDate",
     header: ({ column }) => <ColumnHeader column={column} title="BL Date" />,
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.blDetails?.blDate).format(
-              "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "telexDate",
-    header: ({ column }) => <ColumnHeader column={column} title="Telex Date" />,
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.blDetails?.telexDate).format(
-              "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
-  },
-
-  {
-    accessorKey: "uploadBL",
-    header: ({ column }) => <ColumnHeader column={column} title="Upload BL" />,
-    cell: ({ row }) => {
-      const fileUrl = row.original?.blDetails?.uploadBL;
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "CertificateOfOriginNumber",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Certificate Of Origin Number" />
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.blDetails?.blDate
+            ? moment(row.original.blDetails.blDate).format("MMM Do YY")
+            : "N/A"}
+        </span>
+      </div>
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.OtherDetails?.certificateOfOriginNumber}
-          </span>
-        </div>
-      );
-    },
   },
   {
-    accessorKey: "OriginDate",
-    header: ({ column }) => <ColumnHeader column={column} title="OriginDate" />,
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-
-            {moment(row.original?.OtherDetails?.date).format(
-              "MMM Do YY"
-            )}
-          </span>
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "IssuerOfCertificateOfOrigin",
+    accessorKey: "otherDetails",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Issuer Of Certificate Of Origin" />
+      <ColumnHeader column={column} title="Certificate Number" />
     ),
-    cell: ({ row }) => {
-      return (
-        <div className="flex space-x-2">
-          <span className=" truncate font-medium">
-            {row.original?.OtherDetails?.issuerOfCOO}
-          </span>
-        </div>
-      );
-    },
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.otherDetails?.length > 0
+            ? row.original.otherDetails[0].certificateNumber || "N/A"
+            : "N/A"}
+        </span>
+      </div>
+    ),
   },
-  {
-    accessorKey: "Upload Copy Of Fumigation",
-    header: ({ column }) => <ColumnHeader column={column} title="Upload Copy Of Fumigation" />,
-    cell: ({ row }) => {
-      const fileUrl = row.original?.OtherDetails?.uploadCopyOfFumigationCertificate;
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-
-
   {
     id: "actions",
     header: ({ column }) => <ColumnHeader column={column} title="Action" />,
