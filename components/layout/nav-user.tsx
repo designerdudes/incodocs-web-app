@@ -50,7 +50,7 @@ export default function NavUser({
             // Remove the AccessToken cookie
             Cookies.remove('AccessToken')
             // Show success message
-            toast.error('Logged out')
+            toast.success('Logged out')
             // Redirect to login page
             router.push('/login')
             router.refresh()
