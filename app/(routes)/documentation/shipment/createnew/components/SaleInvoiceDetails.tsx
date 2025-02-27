@@ -118,24 +118,7 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Review Field */}
-      <FormField
-        control={control}
-        name="saleInvoiceDetails.review"
-        render={({ field }) => (
-          <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., this is some random comment for sale invoice details"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      
       {/* Select Consignee */}
       <FormField
         control={control}
@@ -162,6 +145,10 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                   ))}
                   <div>
                     <AddConsigneeButton />
+
+
+
+                    
                   </div>
                 </SelectContent>
               </Select>
@@ -196,7 +183,7 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>Number of Commercial Invoices</FormLabel>
             <FormControl>
-              <Input
+              {/* <Input
                 type="number"
                 placeholder="Enter number of Commercial Invoices"
                 value={field.value === 0 ? "" : field.value}
@@ -206,7 +193,26 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
                   field.onChange(value);
                   handleInvoiceNumberCountChange(e.target.value);
                 }}
-              />
+              /> */}
+
+<Input
+  type="number"
+  placeholder="Enter number of Commercial Invoices"
+  value={field.value === 0 ? "" : field.value}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      field.onChange(""); 
+      handleInvoiceNumberCountChange("");
+      return;
+    }
+
+    const numericValue = Math.max(0, Number(value));
+    field.onChange(numericValue.toString());
+    handleInvoiceNumberCountChange(numericValue.toString());
+  }}
+/>
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -366,6 +372,24 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
+      {/* Review Field */}
+      <FormField
+        control={control}
+        name="saleInvoiceDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for sale invoice details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <div className="mt-8">
         <Button type="button" onClick={() => saveProgress(getValues())}>
           Save Progress

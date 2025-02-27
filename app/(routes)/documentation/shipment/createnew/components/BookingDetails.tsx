@@ -209,18 +209,24 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>Number of Containers</FormLabel>
             <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter number of containers"
-                value={field.value || ""}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (!isNaN(value) && value >= 0) {
-                    field.onChange(value);
-                    handleContainerCountChange(e.target.value);
-                  }
-                }}
-              />
+            <Input
+  type="number"
+  placeholder="Enter number of containers"
+  value={field.value || ""}
+  onChange={(e) => {
+    const value = e.target.value;
+
+    if (value === "") {
+      field.onChange("");
+      handleContainerCountChange("");
+      return;
+    }
+
+    const numericValue = Math.max(0, Number(value));
+    field.onChange(numericValue.toString());
+    handleContainerCountChange(numericValue.toString());
+  }}
+/>
             </FormControl>
             <FormMessage />
           </FormItem>
