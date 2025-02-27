@@ -3,15 +3,26 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { format } from "date-fns";
 
-// Define the type for containers, assuming a separate schema if needed
 export interface ShipmentContainer {
   containerNumber: string;
   truckNumber: string;
-  trukDriverContactNumber: number;
+  truckDriverContactNumber: number; // Fixed typo
+  addProductDetails?: {
+    productCategory: string;
+    graniteAndMarble?: string;
+    tiles?: {
+      noOfBoxes: number;
+      noOfPiecesPerBoxes: number;
+      sizePerTile: {
+        length: { value: number; units: string };
+        breadth: { value: number; units: string };
+      };
+    };
+  };
 }
 
-// Columns Definition
 export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
   {
     id: "select",
@@ -21,16 +32,14 @@ export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -63,18 +72,42 @@ export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
       </Button>
     ),
     cell: ({ row }) => <div>{row.original.truckNumber}</div>,
+    filterFn: "includesString",
   },
   {
-    accessorKey: "trukDriverContactNumber",
+    accessorKey: "truckDriverContactNumber", // Fixed typo
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Truck Driver Number
+        Truck Driver Contact
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.trukDriverContactNumber}</div>,
+    cell: ({ row }) => <div>{row.original.truckDriverContactNumber}</div>,
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "addProductDetails",
+    header: "Product Details",
+    cell: ({ row }) => {
+      const product = row.original.addProductDetails;
+      return product ? (
+        <div>
+          {product.productCategory}{" "}
+          {product.tiles && (
+            <span>
+              ({product.tiles.noOfBoxes} boxes,{" "}
+              {product.tiles.sizePerTile.length.value}x{product.tiles.sizePerTile.breadth.value}{" "}
+              {product.tiles.sizePerTile.length.units})
+            </span>
+          )}
+        </div>
+      ) : (
+        "N/A"
+      );
+    },
+    enableSorting: false,
   },
 ];
