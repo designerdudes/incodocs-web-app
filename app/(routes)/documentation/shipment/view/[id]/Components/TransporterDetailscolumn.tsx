@@ -3,9 +3,17 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shipment } from "../../../data/schema";
+import { format } from "date-fns";
 
-export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
+export interface ShipmentTransporterInvoices {
+  invoiceNumber: string;
+  uploadInvoiceUrl: string;
+  date: string; // Updated to string for ISO date
+  valueWithGst: number;
+  valueWithoutGst: number;
+}
+
+export const TransporterDetailsColumn: ColumnDef<ShipmentTransporterInvoices>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -14,16 +22,14 @@ export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -37,15 +43,11 @@ export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        invoiceNumber
+        Invoice Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.invoiceNumber}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.invoiceNumber}</div>,
     filterFn: "includesString",
   },
   {
@@ -55,15 +57,18 @@ export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        uploadInvoiceUrl
+        Uploaded Invoice
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.uploadInvoiceUrl}
-      </div>
-    ),
+    cell: ({ row }) =>
+      row.original.uploadInvoiceUrl ? (
+        <a href={row.original.uploadInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
     filterFn: "includesString",
   },
   {
@@ -73,13 +78,13 @@ export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        date
+        Date
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.date}
+      <div>
+        {row.original.date ? format(new Date(row.original.date), "PPP") : "N/A"}
       </div>
     ),
     filterFn: "includesString",
@@ -91,51 +96,25 @@ export const TransporterDetailsColumn: ColumnDef<Shipment>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        valueWithGst
+        Value With GST
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.valueWithGst}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.valueWithGst}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "Transporter Invoice",
+    accessorKey: "valueWithoutGst", // Fixed duplicate
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Transporter Invoice
+        Value Without GST
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.TransporterInvoice}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.valueWithoutGst}</div>,
     filterFn: "includesString",
-  },
-  {
-    accessorKey: "Value Of Transporter Invoicer",
-    header:({column}) =>(
-      <Button
-      variant="ghost"
-      onClick={() =>column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Value Of Transporter Invoicer
-      <ArrowUpDown className="ml-2 h-4 w-4"/>
-      </Button>
-    ),
-    cell: ({ row }) =>(
-      <div className="capitalize">
-        { shipmentData?.bookingDetails?.ValueOfTransporterInvoicer}
-
-      </div>
-    )
   },
 ];

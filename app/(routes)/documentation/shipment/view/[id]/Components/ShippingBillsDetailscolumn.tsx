@@ -3,9 +3,17 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shipment } from "../../../data/schema";
+import { format } from "date-fns";
 
-export const ShippingBillsDetailscolumn: ColumnDef<Shipment>[] = [
+export interface ShipmentShippingBill {
+  shippingBillUrl: string;
+  shippingBillNumber: string;
+  shippingBillDate: string;
+  drawbackValue: string;
+  rodtepValue: string;
+}
+
+export const ShippingBillsDetailscolumn: ColumnDef<ShipmentShippingBill>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -14,16 +22,14 @@ export const ShippingBillsDetailscolumn: ColumnDef<Shipment>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -31,93 +37,86 @@ export const ShippingBillsDetailscolumn: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "Upload Shipping Bill",
+    accessorKey: "shippingBillUrl",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Upload Shipping Bill
+        Uploaded Bill
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) =>
+      row.original.shippingBillUrl ? (
+        <a href={row.original.shippingBillUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "shippingBillNumber",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Bill Number
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.shippingBillNumber}</div>,
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "shippingBillDate",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Bill Date
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.UploadShippingBill}
+      <div>
+        {row.original.shippingBillDate
+          ? format(new Date(row.original.shippingBillDate), "PPP")
+          : "N/A"}
       </div>
     ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "Shipping Bill Number",
+    accessorKey: "drawbackValue",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Shipping Bill Number
+        Drawback Value
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.ShippingBillNumber}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.drawbackValue}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "Shipping Bill Date",
+    accessorKey: "rodtepValue",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Shipping Bill Date
+        RODTEP Value
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.ShippingBillDate}
-      </div>
-    ),
-    filterFn: "includesString",
-  },
-  {
-    accessorKey: "drawback Value",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        drawback Value
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.drawbackValue}
-      </div>
-    ),
-    filterFn: "includesString",
-  },
-  {
-    accessorKey: "rodtep Value",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        rodtep Value
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.rodtepValue}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.rodtepValue}</div>,
     filterFn: "includesString",
   },
 ];
