@@ -33,13 +33,8 @@ import {
 import FactorySwitcher from "./factory-switcher"
 import { fetchData } from "@/axiosUtility/api"
 
-// This is sample data.
+// Static navigation data (excluding user data)
 const data = {
-    user: {
-        name: "Hasan Abu Jabal",
-        email: "Hasan@example.com",
-        avatar: "/avatars/shadcn.jpg",
-    },
     Factories: [
         {
             factoryName: "JabalExim Pvt. Ltd.",
@@ -79,7 +74,7 @@ const data = {
                         },
                         {
                             title: "Finished Goods",
-                            url: "/factorymanagement/inventory/finished"
+                            url: "/factorymanagement/inventory/finished",
                         },
                     ],
                     url: "/factorymanagement/inventory",
@@ -103,8 +98,7 @@ const data = {
                         {
                             title: "GST Ledger",
                             url: "/factorymanagement/accounting/GSTLedger",
-
-                        }
+                        },
                     ],
                 },
             ],
@@ -143,23 +137,9 @@ const data = {
             isActive: true,
         },
         {
-            title: "Intergration",
+            title: "Integration",
             url: "",
             icon: SquareTerminal,
-            // items: [
-            //     {
-            //         title: "Company Info",
-            //         url: "#",
-            //     },
-            //     {
-            //         title: "Manage Team",
-            //         url: "#",
-            //     },
-            //     {
-            //         title: "Plans $ Billing",
-            //         url: "#",
-            //     },
-            // ],
         },
         {
             title: "Settings",
@@ -174,7 +154,6 @@ const data = {
                     title: "Factory",
                     url: "/settings/factory",
                 },
-
             ],
         },
     ],
@@ -196,42 +175,64 @@ const data = {
         },
     ],
 }
+
 function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const [factoryData, setFactoryData] = useState<any[]>([])
+    const [userData, setUserData] = useState<any>(null) // State for current user data
 
-    const [FactoryData, setFactoryData] = useState<any[]>([]);
-
+    // Fetch factory data
     const getFactoryData = async () => {
         try {
-            const res = await fetchData("/factory/getAll");
-            // Transform data to include `logo` and `plan`
+            const res = await fetchData("/factory/getAll")
             const transformedData = res.map((factory: any) => ({
                 factoryName: factory.factoryName,
                 factoryId: factory._id,
-                logo: FactoryIcon, // Assign a placeholder or dynamic React component here
-                plan: "Standard Plan", // Placeholder, update this as needed
-            }));
-            setFactoryData(transformedData);
-            // console.log("Factory data fetched successfully", transformedData);
+                logo: FactoryIcon,
+                plan: "Standard Plan",
+            }))
+            setFactoryData(transformedData)
         } catch (error) {
-            console.error("Error fetching Factory data", error);
+            console.error("Error fetching Factory data", error)
         }
-    };
+    }
+
+    // Fetch current user data
+    const getCurrentUserData = async () => {
+        try {
+            const res = await fetchData("/user/currentUser")
+            // Assuming the API returns user data in the format { name, email, avatar }
+            setUserData({
+                name: res.fullName,
+                email: res.email,
+                avatar: res.avatar || "/avatars/default.jpg", // Fallback avatar
+            })
+        } catch (error) {
+            console.error("Error fetching current user data", error)
+            setUserData({
+                name: "Guest",
+                email: "guest@example.com",
+                avatar: "/avatars/default.jpg",
+            }) // Fallback user data in case of error
+        }
+    }
 
     useEffect(() => {
-        getFactoryData();
-    }, []);
+        getFactoryData()
+        getCurrentUserData()
+    }, [])
 
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <FactorySwitcher FactoriesData={FactoryData} />
+                <FactorySwitcher FactoriesData={factoryData} />
             </SidebarHeader>
             <SidebarContent>
                 <NavMain items={data.navMain} />
                 {/* <NavProjects projects={data.projects} /> */}
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                {/* Pass fetched user data to NavUser, fallback to loading state if null */}
+                <NavUser user={userData || { name: "Loading...", email: "", avatar: "" }} />
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
