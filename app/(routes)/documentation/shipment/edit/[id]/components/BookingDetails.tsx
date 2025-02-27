@@ -1,7 +1,7 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
-
+import React from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { format } from "date-fns";
 import {
   FormField,
   FormItem,
@@ -11,14 +11,9 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Trash } from "lucide-react";
-import { format } from "date-fns";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import {
   Table,
   TableHeader,
@@ -28,96 +23,91 @@ import {
   TableHead,
 } from "@/components/ui/table";
 
-
 interface BookingDetailsProps {
-  shipmentId: string | undefined;
+  shipmentId: string;
 }
 
-
-
 export function BookingDetails({ shipmentId }: BookingDetailsProps) {
-  const { control, setValue, handleSubmit, getValues } = useFormContext();
-  const [containers, setContainers] = useState<
-    { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }[]
-  >([]);
+  const { control, setValue, handleSubmit, watch, trigger } = useFormContext();
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "bookingDetails.containers",
+  });
 
-  useEffect(() => {
-    if (shipmentId) {
-      fetch(`http://localhost:4080/shipment/getbyid/${shipmentId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Fetched Data:", data); // Debugging: Check API Response
+  // Watch form values for debugging
+  const formValues = watch("bookingDetails");
+  // console.log("Current Booking Details Values:", formValues);
 
-          if (data) {
-            setValue("bookingDetails.bookingNumber", data.bookingNumber || "");
-            setValue("bookingDetails.portOfLoading", data.portOfLoading || "");
-            setValue("bookingDetails.destinationPort", data.destinationPort || "");
-            setValue("bookingDetails.vesselSailingDate", data.vesselSailingDate ? new Date(data.vesselSailingDate) : null);
-            setValue("noOfContainers", data.containers?.length || 0);
+  // Handle Container Count Change
+  const handleContainerCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+    setValue("bookingDetails.numberOfContainer", value, { shouldDirty: true, shouldValidate: true });
 
-            const formattedContainers = data.containers?.map((container: { containerNumber: string; truckNumber: string; truckDriverContactNumber: string }) => ({
-              containerNumber: container.containerNumber || "",
-              truckNumber: container.truckNumber || "",
-              truckDriverContactNumber: container.truckDriverContactNumber || "",
-            })) || [];
-
-            setContainers(formattedContainers);
-            setValue("containers", formattedContainers);
-          }
-        })
-        .catch((error) => console.error("Error fetching shipment details:", error));
+    const currentContainers = formValues.containers || [];
+    if (value > currentContainers.length) {
+      const newContainers = Array(value - currentContainers.length).fill(null).map(() => ({
+        containerNumber: "",
+        truckNumber: "",
+        truckDriverContactNumber: "",
+      }));
+      setValue("bookingDetails.containers", [...currentContainers, ...newContainers], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    } else if (value < currentContainers.length) {
+      setValue("bookingDetails.containers", currentContainers.slice(0, value), {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
     }
-  }, [shipmentId, setValue]);
+  };
 
-
-
-
-  const handleUpdate = async (formData: any) => {
+  // Update API Call
+  const onSubmit = async (data: any) => {
+    // console.log("Submitting Data:", data); // Debug before submission
     try {
       const response = await fetch("http://localhost:4080/shipment/booking-details", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ shipmentId, bookingDetails: data.bookingDetails }),
       });
-      if (response.ok) {
-        alert("Booking details updated successfully!");
-      } else {
-        console.error("Error updating shipment details:", response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update booking details: ${errorText}`);
       }
+
+      alert("Booking details updated successfully!");
     } catch (error) {
-      console.error("Error updating shipment details:", error);
+      console.error("Error updating booking details:", error);
+      alert("Failed to update booking details: " + error.message);
     }
   };
 
-  const handleContainerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const count = Number(e.target.value);
-    setContainers(
-      Array.from({ length: count }, () => ({
-        containerNumber: "",
-        truckNumber: "",
-        truckDriverContactNumber: "",
-      }))
-    );
-  };
-
-
-
   return (
-    <form onSubmit={handleSubmit(handleUpdate)}>
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-4 gap-3">
         {/* Booking Number */}
         <FormField
           control={control}
           name="bookingDetails.bookingNumber"
-          defaultValue=""
           render={({ field }) => (
             <FormItem>
               <FormLabel>Booking Number</FormLabel>
               <FormControl>
-                <Input className="uppercase" {...field} />
+                <Input
+                  placeholder="eg. MRKU6998040"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    trigger("bookingDetails.bookingNumber"); // Trigger validation
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -128,12 +118,20 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
         <FormField
           control={control}
           name="bookingDetails.portOfLoading"
-          defaultValue=""
           render={({ field }) => (
             <FormItem>
               <FormLabel>Port Of Loading</FormLabel>
               <FormControl>
-                <Input className="uppercase" {...field} />
+                <Input
+                  placeholder="eg. CHENNAI"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    trigger("bookingDetails.portOfLoading");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,12 +142,20 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
         <FormField
           control={control}
           name="bookingDetails.destinationPort"
-          defaultValue=""
           render={({ field }) => (
             <FormItem>
               <FormLabel>Destination Port</FormLabel>
               <FormControl>
-                <Input className="uppercase" {...field} />
+                <Input
+                  placeholder="eg. UMM QASAR"
+                  className="uppercase"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => {
+                    field.onChange(e.target.value);
+                    trigger("bookingDetails.destinationPort");
+                  }}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -160,7 +166,6 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
         <FormField
           control={control}
           name="bookingDetails.vesselSailingDate"
-          defaultValue={null}
           render={({ field }) => (
             <FormItem className="flex flex-col gap-2">
               <FormLabel>Vessel Sailing Date</FormLabel>
@@ -182,9 +187,35 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
           )}
         />
 
+        {/* Vessel Arriving Date */}
         <FormField
           control={control}
-          name="noOfContainers"
+          name="bookingDetails.vesselArrivingDate"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Vessel Arriving Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className="w-full">
+                      {field.value ? format(field.value, "PPPP") : <span>Pick a date</span>}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Number of Containers */}
+        <FormField
+          control={control}
+          name="bookingDetails.numberOfContainer"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Number of Containers</FormLabel>
@@ -192,10 +223,12 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
                 <Input
                   type="number"
                   placeholder="Enter number of Containers"
-                  value={field.value}
+                  {...field}
+                  value={field.value ?? ""}
                   onChange={(e) => {
-                    field.onChange(e);
-                    handleContainerChange(e);
+                    const value = parseInt(e.target.value, 10);
+                    field.onChange(value);
+                    handleContainerCountChange(value);
                   }}
                 />
               </FormControl>
@@ -204,32 +237,88 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
           )}
         />
 
-
-        {containers.length > 0 && (
+        {/* Containers Table */}
+        {fields.length > 0 && (
           <div className="col-span-4 overflow-x-auto mt-4">
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>#</TableHead>
                   <TableHead>Container Number</TableHead>
                   <TableHead>Truck Number</TableHead>
-                  <TableHead>Truck Driver Contact Number</TableHead>
+                  <TableHead>Truck Driver Contact</TableHead>
                   <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {containers.map((_, index) => (
-                  <TableRow key={index}>
+                {fields.map((item, index) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{index + 1}</TableCell>
                     <TableCell>
-                      <FormField control={control} name={`containers[${index}].containerNumber`} defaultValue="" render={({ field }) => <Input {...field} />} />
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers.${index}.containerNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="Container #"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                trigger(`bookingDetails.containers.${index}.containerNumber`);
+                              }}
+                            />
+                          </FormControl>
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
-                      <FormField control={control} name={`containers[${index}].truckNumber`} defaultValue="" render={({ field }) => <Input {...field} />} />
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers.${index}.truckNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="Truck #"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                trigger(`bookingDetails.containers.${index}.truckNumber`);
+                              }}
+                            />
+                          </FormControl>
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
-                      <FormField control={control} name={`containers[${index}].truckDriverContactNumber`} defaultValue="" render={({ field }) => <Input type="tel" {...field} />} />
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers.${index}.truckDriverContactNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="Contact #"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                trigger(`bookingDetails.containers.${index}.truckDriverContactNumber`);
+                              }}
+                            />
+                          </FormControl>
+                        )}
+                      />
                     </TableCell>
                     <TableCell>
-                      <Button variant="destructive" size="sm" type="button" onClick={() => setContainers(containers.filter((_, i) => i !== index))}>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => remove(index)}
+                      >
                         <Trash className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -240,9 +329,9 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
           </div>
         )}
       </div>
-      <div className="col-span-4 flex justify-end mt-4">
-        <Button type="submit">Update Booking</Button>
-      </div>
+      <Button type="submit" className="mt-4">
+        Update Booking Details
+      </Button>
     </form>
   );
 }

@@ -78,7 +78,6 @@ export default async function Page({ params }: Props) {
         </div>
       </div>
       <Separator />
-
       <div className="flex flex-col gap-10 w-full mt-4">
         <Tabs defaultValue="Booking details" className="w-full">
           <TabsList className="gap-3 flex-wrap">
@@ -158,7 +157,6 @@ export default async function Page({ params }: Props) {
               </div>
             </div>
           </TabsContent>
-
           {/* Shipping Details */}
           <TabsContent value="Shipping Details">
             <div className="space-y-6">

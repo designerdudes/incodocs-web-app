@@ -1,7 +1,7 @@
 "use client";
-
-import { useFormContext } from "react-hook-form";
-import { Key, useState } from "react";
+import React from "react";
+import { useFormContext, useFieldArray } from "react-hook-form";
+import { format } from "date-fns";
 import {
   FormControl,
   FormField,
@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon, UploadCloud, Trash } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,17 +26,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { SaveDetailsProps } from "./BookingDetails";
 import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-// import AddshippinglineButton from "./Addshippinglinebutton";
-// import AddForwarderButton from "./Addforwarderbutton";
-// import AddtransporterButton from "../Addtransporterbutton";
 
 const ShippingName = [
   { id: "1", name: "Ahmed" },
@@ -45,662 +41,697 @@ const ShippingName = [
 ];
 
 const ForwarderName = [
-  { id: "1", name: "Amair" },
+  { id: "67b3389cae0701f457cce215", name: "name02" }, // Match API _id
   { id: "2", name: "Syed" },
 ];
+
 const TransporterName = [
-  { id: "1", name: "Adnan" },
+  { id: "67b33170e70496525d88f081", name: "name1" }, // Match API _id
   { id: "2", name: "Aameer" },
 ];
 
-export function ShippingDetails() {
-  const { control, setValue } = useFormContext();
-  const [Shippinginvoices, setShippingInvoices] = useState<{ InvoiceNumber: string; UploadShippingLineInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
-  const [Forwarderinvoices, setForwarderInvoices] = useState<{ InvoiceNumber: string; UploadForwarderInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
-  const [Transporterinvoices, setTransporterInvoices] = useState<{ InvoiceNumber: string; UploadTransporterInvoice: string; Date: string; ValueWithGST: string; ValueWithOutGST: string; }[]>([]);
+interface ShippingDetailsProps {
+  shipmentId: string;
+}
 
-  const { handleSubmit } = useFormContext();
+export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
+  const { control, setValue, handleSubmit, watch } = useFormContext();
 
-  // const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
+  const { fields: shippingLineFields, append: appendShippingLine, remove: removeShippingLine } = useFieldArray({
+    control,
+    name: "shippingDetails.shippingLineInvoices",
+  });
 
-  const handleShippingDelete = (index: number) => {
-    const updatedInvoices = Shippinginvoices.filter((_, i) => i !== index);
-    setShippingInvoices(updatedInvoices);
-    setValue("shippingDetails.shippingLineInvoices", updatedInvoices);
+  const { fields: forwarderFields, append: appendForwarder, remove: removeForwarder } = useFieldArray({
+    control,
+    name: "shippingDetails.forwarderInvoices",
+  });
 
-    // Update the input field for the number of invoices
-    setValue("NumberOfShippingLineInvoices", updatedInvoices.length);
-  };
+  const { fields: transporterFields, append: appendTransporter, remove: removeTransporter } = useFieldArray({
+    control,
+    name: "shippingDetails.transporterInvoices",
+  });
 
-  const handleShippingCountChange = (value: string) => {
-    let count = parseInt(value, 10);
-    if (isNaN(count) || count <= 0) {
-      count = 0;
+  // Watch form values for debugging
+  const formValues = watch("shippingDetails");
+  console.log("Current Shipping Details Values:", formValues);
+
+  // Handle Count Changes
+  const handleShippingCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+    setValue("shippingDetails.numberOfShippingLineInvoices", value, { shouldDirty: true });
+    const currentInvoices = formValues.shippingLineInvoices || [];
+    if (value > currentInvoices.length) {
+      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
+        invoiceNumber: "",
+        uploadShippingLineInvoice: "",
+        date: undefined,
+        valueWithGST: "",
+        valueWithoutGST: "",
+      }));
+      appendShippingLine(newInvoices);
+    } else if (value < currentInvoices.length) {
+      for (let i = currentInvoices.length - 1; i >= value; i--) {
+        removeShippingLine(i);
+      }
     }
-
-    const newInvoiceData = Array.from({ length: count }, () => ({
-      InvoiceNumber: "",
-      UploadShippingLineInvoice: "",
-      Date: "",
-      ValueWithGST: "",
-      ValueWithOutGST: "",
-    }));
-
-    setShippingInvoices(newInvoiceData);
-    setValue("shippingDetails.shippingLineInvoices", newInvoiceData);
   };
 
-  const handleForwarderDelete = (index: number) => {
-    const updatedInvoices = Forwarderinvoices.filter((_, i) => i !== index);
-    setForwarderInvoices(updatedInvoices);
-    setValue("forwarderDetails.forwarderInvoices", updatedInvoices);
-
-    // Update the input field for the number of invoices
-    setValue("NumberOfForwarderInvoices", updatedInvoices.length);
-  };
-
-  const handleForwarderCountChange = (value: string) => {
-    let count = parseInt(value, 10);
-    if (isNaN(count) || count <= 0) {
-      count = 0;
+  const handleForwarderCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+    setValue("shippingDetails.numberOfForwarderInvoices", value, { shouldDirty: true });
+    const currentInvoices = formValues.forwarderInvoices || [];
+    if (value > currentInvoices.length) {
+      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
+        invoiceNumber: "",
+        uploadForwarderInvoice: "",
+        date: undefined,
+        valueWithGST: "",
+        valueWithoutGST: "",
+      }));
+      appendForwarder(newInvoices);
+    } else if (value < currentInvoices.length) {
+      for (let i = currentInvoices.length - 1; i >= value; i--) {
+        removeForwarder(i);
+      }
     }
-
-    const newInvoiceData = Array.from({ length: count }, () => ({
-      InvoiceNumber: "",
-      UploadForwarderInvoice: "",
-      Date: "",
-      ValueWithGST: "",
-      ValueWithOutGST: "",
-    }));
-
-    setForwarderInvoices(newInvoiceData);
-    setValue("forwarderDetails.forwarderInvoices", newInvoiceData);
   };
 
-  const handleTransporterDelete = (index: number) => {
-    const updatedInvoices = Transporterinvoices.filter((_, i) => i !== index);
-    setTransporterInvoices(updatedInvoices);
-    setValue("transporterDetails.transporterInvoices", updatedInvoices);
-
-    // Update the input field for the number of invoices
-    setValue("NumberOfTransporterInvoices", updatedInvoices.length);
-  };
-
-  const handleTransporterCountChange = (value: string) => {
-    let count = parseInt(value, 10);
-    if (isNaN(count) || count <= 0) {
-      count = 0;
+  const handleTransporterCountChange = (value: number) => {
+    if (isNaN(value) || value < 0) return;
+    setValue("shippingDetails.numberOfTransporterInvoices", value, { shouldDirty: true });
+    const currentInvoices = formValues.transporterInvoices || [];
+    if (value > currentInvoices.length) {
+      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
+        invoiceNumber: "",
+        uploadTransporterInvoice: "",
+        date: undefined,
+        valueWithGST: "",
+        valueWithoutGST: "",
+      }));
+      appendTransporter(newInvoices);
+    } else if (value < currentInvoices.length) {
+      for (let i = currentInvoices.length - 1; i >= value; i--) {
+        removeTransporter(i);
+      }
     }
-
-    const newInvoiceData = Array.from({ length: count }, () => ({
-      InvoiceNumber: "",
-      UploadTransporterInvoice: "",
-      Date: "",
-      ValueWithGST: "",
-      ValueWithOutGST: "",
-    }));
-
-    setTransporterInvoices(newInvoiceData);
-    setValue("transporterDetails.transporterLineInvoices", newInvoiceData);
   };
+
+  // Update API Call
+  const onSubmit = async (data: any) => {
+    console.log("Submitting Shipping Details:", data.shippingDetails);
+    try {
+      const response = await fetch("http://localhost:4080/shipment/shipping-details", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ shipmentId, shippingDetails: data.shippingDetails }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update shipping details: ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      alert("Shipping details updated successfully!");
+    } catch (error) {
+      console.error("Error updating shipping details:", error);
+      alert(`Failed to update shipping details: ${error.message}`);
+    }
+  };
+
   return (
-    <div>
-      <div className="grid grid-cols-4 gap-3">
-        {/* Select Shipping Name */}
-        <FormField
-          control={control}
-          name="saleInvoiceDetailss.ShippingDetails"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Shipping Name</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    {field.value ? (
-                      <span>
-                        {ShippingName.find((item) => item.id === field.value)
-                          ?.name || "Select a Name"}
-                      </span>
-                    ) : (
-                      <span>Select a Shipping Line</span>
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ShippingName.map((Details) => (
-                      <SelectItem key={Details.id} value={Details.id}>
-                        {Details.name}
-                      </SelectItem>
-                    ))}
-                    <div>
-                      {/* <AddshippinglineButton /> */}
-                    </div>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
+        <div className="grid grid-cols-4 gap-3">
+          {/* Select Shipping Name */}
+          <FormField
+            control={control}
+            name="shippingDetails.shippingLine"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Shipping Name</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Shipping Line" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ShippingName.map((Details) => (
+                        <SelectItem key={Details.id} value={Details.id}>
+                          {Details.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        {/* Number of Shipping Line Invoices */}
-        <FormField
-          control={control}
-          name="NumberOfShippingLineInvoices"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Number of Shipping Invoices</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Enter number of Shipping Line Invoices"
-                  value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
+          {/* Number of Shipping Line Invoices */}
+          <FormField
+            control={control}
+            name="shippingDetails.numberOfShippingLineInvoices"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Number of Shipping Invoices</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter number"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      field.onChange(value);
+                      handleShippingCountChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                    if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                    field.onChange(value);
-                    handleShippingCountChange(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Shipping Invoices Table */}
-        {Shippinginvoices.length > 0 && (
-          <div className="col-span-4 overflow-x-auto mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead> {/* New Index Column */}
-                  <TableHead>Invoice Number</TableHead>
-                  <TableHead>Upload Invoice</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Value With GST</TableHead>
-                  <TableHead>Value Without GST</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Shippinginvoices.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>{" "}
-                    {/* Display 1-based Index */}
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.shippingLineInvoices.${index}.InvoiceNumber`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Eg: 123456898" {...field} />
-                          </FormControl>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.shippingLineInvoices.${index}.UploadShippingLineInvoice`}
-                        render={({ field }) => (
-                          <FormItem>
+          {/* Shipping Invoices Table */}
+          {shippingLineFields.length > 0 && (
+            <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Invoice Number</TableHead>
+                    <TableHead>Upload Invoice</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Value With GST</TableHead>
+                    <TableHead>Value Without GST</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {shippingLineFields.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.shippingLineInvoices.${index}.invoiceNumber`}
+                          render={({ field }) => (
                             <FormControl>
-                              <div className="flex items-center justify-between gap-2">
-                                <Input
-                                  type="file"
-                                  className="flex-1"
-                                  onChange={(e) =>
-                                    field.onChange(e.target.files?.[0])
-                                  }
-                                />
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                                >
-                                  <UploadCloud className="w-5 h-5 mr-2" />
-                                  Upload
-                                </Button>
-                              </div>
+                              <Input
+                                placeholder="Eg: 123456898"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
                             </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.shippingLineInvoices.${index}.Date`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button variant="outline">
-                                    {field.value
-                                      ? format(field.value, "PPPP")
-                                      : "Pick a date"}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.shippingLineInvoices.${index}.uploadShippingLineInvoice`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="flex items-center justify-between gap-2">
+                                  <Input
+                                    type="file"
+                                    className="flex-1"
+                                    onChange={(e) => field.onChange(e.target.files?.[0])}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
+                                  >
+                                    <UploadCloud className="w-5 h-5 mr-2" />
+                                    Upload
                                   </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.shippingLineInvoices.${index}.ValueWithGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`shippingDetails.shippingLineInvoices.${index}.ValueWithOutGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        type="button"
-                        onClick={() => handleShippingDelete(index)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
-      <div className="mt-4">
-        <Button type="button">
-          Save Progress
-        </Button>
-      </div>
-      <Separator className="mt-2" />
-      <div className="text-xl font-bold my-3">
-        <h2>Forwarder Details</h2>
-      </div>
-      <div className="grid grid-cols-4 gap-3">
-        {/* Select Forwarder Name */}
-        <FormField
-          control={control}
-          name="ShippingDetails.ForwarderDetails"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Forwarder Name</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    {field.value ? (
-                      <span>
-                        {ForwarderName.find((item) => item.id === field.value)
-                          ?.name || "Select a Name"}
-                      </span>
-                    ) : (
-                      <span>Select a Forwarder Name</span>
-                    )}
-                  </SelectTrigger>
-
-                  <SelectContent>
-                    {ForwarderName.map((Details) => (
-                      <SelectItem key={Details.id} value={Details.id}>
-                        {Details.name}
-                      </SelectItem>
-                    ))}
-
-                    <div>
-                      {/* <AddForwarderButton /> */}
-                    </div>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* Number of Forwarder  Invoices */}
-        <FormField
-          control={control}
-          name="NumberOfForwarderInvoices"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Number of Forwarder Invoices</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Enter number of Forwarder Line Invoices"
-                  value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
-
-                    if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                    field.onChange(value);
-                    handleForwarderCountChange(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Forwarder Invoices Table */}
-        {Forwarderinvoices.length > 0 && (
-          <div className="col-span-4 overflow-x-auto mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Invoice Number</TableHead>
-                  <TableHead>Upload Invoice</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Value With GST</TableHead>
-                  <TableHead>Value Without GST</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Forwarderinvoices.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>{" "}
-                    {/* Display 1-based Index */}
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`forwarderDetails.forwarderInvoices.${index}.InvoiceNumber`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Eg: 123456898" {...field} />
-                          </FormControl>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`forwarderDetails.forwarderInvoices.${index}.UploadForwarderInvoice`}
-                        render={({ field }) => (
-                          <div className="flex items-center justify-between gap-2">
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.shippingLineInvoices.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button variant="outline">
+                                      {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.shippingLineInvoices.${index}.valueWithGST`}
+                          render={({ field }) => (
                             <Input
-                              type="file"
-                              className="flex-1"
-                              onChange={(e) =>
-                                field.onChange(e.target.files?.[0])
-                              }
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
                             />
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                            >
-                              <UploadCloud className="w-5 h-5 mr-2" />
-                              Upload
-                            </Button>
-                          </div>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`forwarderDetails.forwarderInvoices.${index}.Date`}
-                        render={({ field }) => <Input type="date" {...field} />}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`forwarderDetails.forwarderInvoices.${index}.ValueWithGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`forwarderDetails.forwarderInvoices.${index}.ValueWithOutGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        type="button"
-                        onClick={() => handleForwarderDelete(index)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
-      </div>
-      
-      <Separator className="mt-3 " />
-      <div className="text-xl font-bold my-2">
-        <h2>Transporter Details</h2>
-      </div>
-      <div className="grid grid-cols-4 gap-3">
-        {/* // Select Transporter Name */}
-        <FormField
-          control={control}
-          name="shippingDetails.TransporterDetails"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Select Transporter Name</FormLabel>
-              <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <SelectTrigger>
-                    {field.value ? (
-                      <span>
-                        {TransporterName.find((item) => item.id === field.value)
-                          ?.name || "Select a Name"}
-                      </span>
-                    ) : (
-                      <span>Select a Transporter Name</span>
-                    )}
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TransporterName.map((Details) => (
-                      <SelectItem key={Details.id} value={Details.id}>
-                        {Details.name}
-                      </SelectItem>
-                    ))}
-
-                    <div>
-                      {/* <AddtransporterButton /> */}
-                    </div>
-                  </SelectContent>
-                </Select>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* // Input for Number of Transporter Invoices */}
-        <FormField
-          control={control}
-          name="NumberOfTransporterInvoices"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Number of Transporter Invoices</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  placeholder="Enter number of Transporter Invoices"
-                  value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
-
-                    if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                    field.onChange(value);
-                    handleTransporterCountChange(e.target.value);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        {/* // Transporter Invoices Table */}
-        {Transporterinvoices.length > 0 && (
-          <div className="col-span-4 overflow-x-auto mt-4">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Invoice Number</TableHead>
-                  <TableHead>Upload Invoice</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Value With GST</TableHead>
-                  <TableHead>Value Without GST</TableHead>
-                  <TableHead>Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Transporterinvoices.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`transporterDetails.transporterInvoices.${index}.InvoiceNumber`}
-                        render={({ field }) => (
-                          <FormControl>
-                            <Input placeholder="Eg: 123456898" {...field} />
-                          </FormControl>
-                        )}
-                      />
-                    </TableCell>
-
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`transporterDetails.transporterInvoices.${index}.UploadTransporterInvoice`}
-                        render={({ field }) => (
-                          <div className="flex items-center justify-between gap-2">
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.shippingLineInvoices.${index}.valueWithoutGST`}
+                          render={({ field }) => (
                             <Input
-                              type="file"
-                              className="flex-1"
-                              onChange={(e) =>
-                                field.onChange(e.target.files?.[0])
-                              }
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
                             />
-                            <Button
-                              type="button"
-                              variant="secondary"
-                              className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                            >
-                              <UploadCloud className="w-5 h-5 mr-2" />
-                              Upload
-                            </Button>
-                          </div>
-                        )}
-                      />
-                    </TableCell>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeShippingLine(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
 
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`transporterDetails.transporterInvoices.${index}.Date`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button variant="outline">
-                                    {field.value
-                                      ? format(field.value, "PPPP")
-                                      : "Pick a date"}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent align="start">
-                                <Calendar
-                                  mode="single"
-                                  selected={field.value}
-                                  onSelect={field.onChange}
-                                />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
+        <Separator className="mt-2" />
+        <div className="text-xl font-bold my-3">
+          <h2>Forwarder Details</h2>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {/* Select Forwarder Name */}
+          <FormField
+            control={control}
+            name="shippingDetails.forwarderName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Forwarder Name</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Forwarder Name" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ForwarderName.map((Details) => (
+                        <SelectItem key={Details.id} value={Details.id}>
+                          {Details.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`transporterDetails.transporterInvoices.${index}.ValueWithGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
+          {/* Number of Forwarder Invoices */}
+          <FormField
+            control={control}
+            name="shippingDetails.numberOfForwarderInvoices"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Number of Forwarder Invoices</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter number"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      field.onChange(value);
+                      handleForwarderCountChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                    <TableCell>
-                      <FormField
-                        control={control}
-                        name={`transporterDetails.transporterInvoices.${index}.ValueWithOutGST`}
-                        render={({ field }) => (
-                          <Input placeholder="eg. 11800" {...field} />
-                        )}
-                      />
-                    </TableCell>
-
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        type="button"
-                        onClick={() => handleTransporterDelete(index)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+          {/* Forwarder Invoices Table */}
+          {forwarderFields.length > 0 && (
+            <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Invoice Number</TableHead>
+                    <TableHead>Upload Invoice</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Value With GST</TableHead>
+                    <TableHead>Value Without GST</TableHead>
+                    <TableHead>Action</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+                </TableHeader>
+                <TableBody>
+                  {forwarderFields.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.forwarderInvoices.${index}.invoiceNumber`}
+                          render={({ field }) => (
+                            <FormControl>
+                              <Input
+                                placeholder="Eg: 123456898"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.forwarderInvoices.${index}.uploadForwarderInvoice`}
+                          render={({ field }) => (
+                            <div className="flex items-center justify-between gap-2">
+                              <Input
+                                type="file"
+                                className="flex-1"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                              />
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                Upload
+                              </Button>
+                            </div>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.forwarderInvoices.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button variant="outline">
+                                      {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.forwarderInvoices.${index}.valueWithGST`}
+                          render={({ field }) => (
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.forwarderInvoices.${index}.valueWithoutGST`}
+                          render={({ field }) => (
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeForwarder(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        <Separator className="mt-3" />
+        <div className="text-xl font-bold my-2">
+          <h2>Transporter Details</h2>
+        </div>
+        <div className="grid grid-cols-4 gap-3">
+          {/* Select Transporter Name */}
+          <FormField
+            control={control}
+            name="shippingDetails.transporterName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Select Transporter Name</FormLabel>
+                <FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a Transporter Name" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TransporterName.map((Details) => (
+                        <SelectItem key={Details.id} value={Details.id}>
+                          {Details.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Number of Transporter Invoices */}
+          <FormField
+            control={control}
+            name="shippingDetails.numberOfTransporterInvoices"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Number of Transporter Invoices</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Enter number"
+                    value={field.value ?? ""}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value, 10);
+                      field.onChange(value);
+                      handleTransporterCountChange(value);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Transporter Invoices Table */}
+          {transporterFields.length > 0 && (
+            <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Invoice Number</TableHead>
+                    <TableHead>Upload Invoice</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Value With GST</TableHead>
+                    <TableHead>Value Without GST</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transporterFields.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.transporterInvoices.${index}.invoiceNumber`}
+                          render={({ field }) => (
+                            <FormControl>
+                              <Input
+                                placeholder="Eg: 123456898"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) => field.onChange(e.target.value)}
+                              />
+                            </FormControl>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.transporterInvoices.${index}.uploadTransporterInvoice`}
+                          render={({ field }) => (
+                            <div className="flex items-center justify-between gap-2">
+                              <Input
+                                type="file"
+                                className="flex-1"
+                                onChange={(e) => field.onChange(e.target.files?.[0])}
+                              />
+                              <Button
+                                type="button"
+                                variant="secondary"
+                                className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
+                              >
+                                <UploadCloud className="w-5 h-5 mr-2" />
+                                Upload
+                              </Button>
+                            </div>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.transporterInvoices.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button variant="outline">
+                                      {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent align="start">
+                                  <Calendar
+                                    mode="single"
+                                    selected={field.value}
+                                    onSelect={field.onChange}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.transporterInvoices.${index}.valueWithGST`}
+                          render={({ field }) => (
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`shippingDetails.transporterInvoices.${index}.valueWithoutGST`}
+                          render={({ field }) => (
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => removeTransporter(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4">
+          <Button type="submit">Update Shipping Details</Button>
+        </div>
       </div>
-      
-    </div>
+    </form>
   );
 }
