@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+
 import {
   FormField,
   FormItem,
@@ -9,7 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Added for review
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -36,6 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import SupplierForm from "@/components/forms/Addsupplierform";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -47,14 +50,13 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
   const invoicesFromForm = watch("supplierDetails.clearance.invoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
-  const [supplierNames, setSupplierNames] = useState<{ id: string; name: string }[]>([]); // Placeholder for dynamic fetch
-  const [shippingBills, setShippingBills] = useState<{ id: string; name: string }[]>([]); // Placeholder for dynamic fetch
+  const [supplierNames, setSupplierNames] = useState<{ id: string; name: string }[]>([]);
+  const [shippingBills, setShippingBills] = useState<{ id: string; name: string }[]>([]);
+  const GlobalModal = useGlobalModal(); // Moved inside the component
 
-  // Fetch supplier names and shipping bills (placeholder - replace with actual APIs)
+  // Fetch supplier names and shipping bills
   useEffect(() => {
-    // Example APIs (adjust as needed):
-    // fetch("http://localhost:4080/shipment/supplier/getall").then(res => res.json()).then(data => setSupplierNames(data));
-    // fetch("http://localhost:4080/shipment/shippingbill/getall").then(res => res.json()).then(data => setShippingBills(data));
+    // Replace with actual API calls when ready
     setSupplierNames([
       { id: "1", name: "Ahmed" },
       { id: "2", name: "Arshad" },
@@ -110,7 +112,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
@@ -121,26 +123,22 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     }
   };
 
+  const openSupplierForm = () => {
+    GlobalModal.title = "Add New Supplier";
+    GlobalModal.children = (
+      <SupplierForm
+        onSuccess={() => {
+          fetch("http://localhost:4080/supplier/getall")
+            .then((res) => res.json())
+            .then((data) => setSupplierNames(data));
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
   return (
     <div>
-      {/* Review Field */}
-      <FormField
-        control={control}
-        name="supplierDetails.review"
-        render={({ field }) => (
-          <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., this is some random comment for supplier details"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       <div className="grid grid-cols-4 gap-3">
         {/* Clearance Supplier Name */}
         <FormField
@@ -166,6 +164,13 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         {details.name}
                       </SelectItem>
                     ))}
+                    <Button
+                      variant="ghost"
+                      className="w-full text-blue-500"
+                      onClick={openSupplierForm}
+                    >
+                      + Add New Supplier
+                    </Button>
                   </SelectContent>
                 </Select>
               </FormControl>
@@ -173,6 +178,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
+
         {/* Number of Supplier Invoices */}
         <FormField
           control={control}
@@ -464,6 +470,25 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
+        {/* Review */}
+        <FormField
+          control={control}
+          name="shippingBillDetails.review"
+          render={({ field }) => (
+            <FormItem className="col-span-4">
+              <FormLabel>Review</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="e.g., this is some random comment"
+                  {...field}
+                  onBlur={() => saveProgressSilently(getValues())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="mt-2">
           <Button type="button" onClick={() => saveProgress(getValues())}>
             Save Progress

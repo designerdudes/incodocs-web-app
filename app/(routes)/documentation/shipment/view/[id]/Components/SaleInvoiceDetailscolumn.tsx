@@ -3,9 +3,16 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Shipment } from "../../../data/schema";
 
-export const SaleInvoiceDetailscolumn: ColumnDef<Shipment>[] = [
+export interface ShipmentCommercialInvoice {
+  commercialInvoiceNumber: string;
+  clearanceCommercialInvoiceUrl: string;
+  actualCommercialInvoiceUrl: string;
+  saberInvoiceUrl: string;
+  _id?: string; // Optional, added from backend data
+}
+
+export const SaleInvoiceDetailscolumn: ColumnDef<ShipmentCommercialInvoice>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -14,16 +21,14 @@ export const SaleInvoiceDetailscolumn: ColumnDef<Shipment>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -31,75 +36,95 @@ export const SaleInvoiceDetailscolumn: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "Commercial Invoice Number",
+    accessorKey: "commercialInvoiceNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Commercial Invoice Number
+        Invoice Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.commercialInvoiceNumber}
-      </div>
-    ),
+    cell: ({ row }) => <div>{row.original.commercialInvoiceNumber}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "Clearance Commercial Invoice Url",
+    accessorKey: "clearanceCommercialInvoiceUrl",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-       Clearance Commercial Invoice Url
+        Clearance Invoice
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.ClearanceCommercialInvoiceUrl}
-      </div>
-    ),
+    cell: ({ row }) =>
+      row.original.clearanceCommercialInvoiceUrl ? (
+        <a
+          href={row.original.clearanceCommercialInvoiceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "Actual Commercial Invoice Url",
+    accessorKey: "actualCommercialInvoiceUrl",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-       Actual Commercial Invoice Url
+        Actual Invoice
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.ActualCommercialInvoiceUrl}
-      </div>
-    ),
+    cell: ({ row }) =>
+      row.original.actualCommercialInvoiceUrl ? (
+        <a
+          href={row.original.actualCommercialInvoiceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "Saber Invoice Url",
+    accessorKey: "saberInvoiceUrl",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Saber Invoice Url
+        SABER Invoice
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {shipmentData?.bookingDetails?.SaberInvoiceUrl}
-      </div>
-    ),
+    cell: ({ row }) =>
+      row.original.saberInvoiceUrl ? (
+        <a
+          href={row.original.saberInvoiceUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
     filterFn: "includesString",
   },
 ];

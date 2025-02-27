@@ -29,6 +29,9 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
+import { useRouter } from "next/navigation"
+import Cookies from 'js-cookie'
+import toast from "react-hot-toast"
 
 export default function NavUser({
     user,
@@ -40,6 +43,22 @@ export default function NavUser({
     }
 }) {
     const { isMobile } = useSidebar()
+    const router = useRouter()
+
+    const handleLogout = () => {
+        try {
+            // Remove the AccessToken cookie
+            Cookies.remove('AccessToken')
+            // Show success message
+            toast.success('Logged out')
+            // Redirect to login page
+            router.push('/login')
+            router.refresh()
+        } catch (error) {
+            console.error('Logout failed:', error)
+            toast.error('Failed to log out')
+        }
+    }
 
     return (
         <SidebarMenu>
@@ -102,7 +121,7 @@ export default function NavUser({
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                             <LogOut />
                             Log out
                         </DropdownMenuItem>

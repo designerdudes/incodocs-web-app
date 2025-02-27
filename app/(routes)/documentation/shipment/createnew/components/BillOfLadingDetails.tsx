@@ -54,24 +54,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Review Field */}
-      <FormField
-        control={control}
-        name="blDetails.review"
-        render={({ field }) => (
-          <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., this is some random comment for BL details"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+    
       {/* BL Number */}
       <FormField
         control={control}
@@ -185,6 +168,25 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
+{/* Review Field */}
+<FormField
+        control={control}
+        name="saleInvoiceDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mb-4">
+            <FormLabel>Review</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for sale invoice details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <div className="mt-2">
         <Button type="button" onClick={() => saveProgress(getValues())}>
           Save Progress

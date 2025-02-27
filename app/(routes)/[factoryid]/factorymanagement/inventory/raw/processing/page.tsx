@@ -153,8 +153,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
           </p>
         </div>
       </div>
-      <Separator orientation="horizontal" />
-      <div className="w-250 container mx-auto py-10">
+      <Separator className="my-2" />
+      <div>
         <Tabs defaultValue="inCutting" className="w-full">
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="inCutting">
