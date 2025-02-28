@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface OtherDetailsProps {
   shipmentId: string;
@@ -64,10 +65,10 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Other details updated successfully!");
+      toast.success("Other details updated successfully!");
     } catch (error) {
       console.error("Error updating other details:", error);
-      alert(`Failed to update other details: ${error.message}`);
+      toast.error(`Failed to update other details`);
     }
   };
 

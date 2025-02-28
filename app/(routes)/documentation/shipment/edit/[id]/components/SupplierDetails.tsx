@@ -23,6 +23,7 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
+import toast from "react-hot-toast";
 
 interface SupplierDetailsProps {
   shipmentId: string;
@@ -81,10 +82,10 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Supplier details updated successfully!");
+      toast.success("Supplier details updated successfully!");
     } catch (error) {
       console.error("Error updating supplier details:", error);
-      alert(`Failed to update supplier details: ${error.message}`);
+      toast.error(`Failed to update supplier details`);
     }
   };
 

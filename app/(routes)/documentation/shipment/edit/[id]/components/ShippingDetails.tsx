@@ -34,6 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import toast from "react-hot-toast";
 
 const ShippingName = [
   { id: "1", name: "Ahmed" },
@@ -156,10 +157,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Shipping details updated successfully!");
+      toast.success("Shipping details updated successfully!");
     } catch (error) {
       console.error("Error updating shipping details:", error);
-      alert(`Failed to update shipping details: ${error.message}`);
+      toast.error(`Failed to update shipping details`);
     }
   };
 
