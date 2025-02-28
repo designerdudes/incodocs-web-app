@@ -9,11 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
+import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { CalendarIcon, UploadCloud, Trash } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -28,18 +24,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SaveDetailsProps } from "./BookingDetails";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
+import EntityCombobox from "@/components/ui/EntityCombobox"; // Import the new component
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -101,16 +91,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   };
 
   const handleShippingCountChange = (value: string) => {
-    const count = parseInt(value, 10) || 0;
+    const count = Number.parseInt(value, 10) || 0;
     const currentInvoices = watch("shippingDetails.shippingLineInvoices") || [];
-    const newInvoices = Array.from({ length: count }, (_, i) =>
-      currentInvoices[i] || {
-        invoiceNumber: "",
-        uploadInvoiceUrl: "",
-        date: null,
-        valueWithGst: "",
-        valueWithoutGst: "",
-      }
+    const newInvoices = Array.from(
+      { length: count },
+      (_, i) =>
+        currentInvoices[i] || {
+          invoiceNumber: "",
+          uploadInvoiceUrl: "",
+          date: null,
+          valueWithGst: "",
+          valueWithoutGst: "",
+        },
     );
     setShippingInvoices(newInvoices);
     setValue("shippingDetails.shippingLineInvoices", newInvoices);
@@ -127,16 +119,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   };
 
   const handleForwarderCountChange = (value: string) => {
-    const count = parseInt(value, 10) || 0;
+    const count = Number.parseInt(value, 10) || 0;
     const currentInvoices = watch("shippingDetails.forwarderInvoices") || [];
-    const newInvoices = Array.from({ length: count }, (_, i) =>
-      currentInvoices[i] || {
-        invoiceNumber: "",
-        uploadInvoiceUrl: "",
-        date: null,
-        valueWithGst: "",
-        valueWithoutGst: "",
-      }
+    const newInvoices = Array.from(
+      { length: count },
+      (_, i) =>
+        currentInvoices[i] || {
+          invoiceNumber: "",
+          uploadInvoiceUrl: "",
+          date: null,
+          valueWithGst: "",
+          valueWithoutGst: "",
+        },
     );
     setForwarderInvoices(newInvoices);
     setValue("shippingDetails.forwarderInvoices", newInvoices);
@@ -153,16 +147,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   };
 
   const handleTransporterCountChange = (value: string) => {
-    const count = parseInt(value, 10) || 0;
+    const count = Number.parseInt(value, 10) || 0;
     const currentInvoices = watch("shippingDetails.transporterInvoices") || [];
-    const newInvoices = Array.from({ length: count }, (_, i) =>
-      currentInvoices[i] || {
-        invoiceNumber: "",
-        uploadInvoiceUrl: "",
-        date: null,
-        valueWithGst: "",
-        valueWithoutGst: "",
-      }
+    const newInvoices = Array.from(
+      { length: count },
+      (_, i) =>
+        currentInvoices[i] || {
+          invoiceNumber: "",
+          uploadInvoiceUrl: "",
+          date: null,
+          valueWithGst: "",
+          valueWithoutGst: "",
+        },
     );
     setTransporterInvoices(newInvoices);
     setValue("shippingDetails.transporterInvoices", newInvoices);
@@ -244,31 +240,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
             <FormItem>
               <FormLabel>Select Shipping Line</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
+                <EntityCombobox
+                  entities={shippingLines}
+                  value={field.value || ""}
+                  onChange={(value) => {
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Shipping Line" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {shippingLines.map((details: any) => (
-                      <SelectItem key={details._id} value={details._id}>
-                        {details.shippingLineName}
-                      </SelectItem>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      className="w-full text-blue-500"
-                      onClick={openShippingLineForm}
-                    >
-                      + Add New Shipping Line
-                    </Button>
-                  </SelectContent>
-                </Select>
+                  displayProperty="shippingLineName"
+                  placeholder="Select a Shipping Line"
+                  onAddNew={openShippingLineForm}
+                  addNewLabel="Add New Shipping Line"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -286,7 +269,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   placeholder="Enter number of invoices"
                   value={field.value || ""}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
+                    const value = Number.parseInt(e.target.value, 10);
                     if (!isNaN(value) && value >= 0) {
                       field.onChange(value);
                       handleShippingCountChange(e.target.value);
@@ -360,7 +343,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                                 if (selectedShippingFiles[index]) {
                                   handleFileUpload(
                                     selectedShippingFiles[index]!,
-                                    `shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`
+                                    `shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`,
                                   ).then(() => {
                                     setSelectedShippingFiles((prev) => {
                                       const newFiles = [...prev];
@@ -461,31 +444,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
             <FormItem>
               <FormLabel>Select Forwarder Name</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
+                <EntityCombobox
+                  entities={forwarders}
+                  value={field.value || ""}
+                  onChange={(value) => {
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Forwarder" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {forwarders.map((details: any) => (
-                      <SelectItem key={details._id} value={details._id}>
-                        {details.forwarderName || details.responsiblePerson}
-                      </SelectItem>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      className="w-full text-blue-500"
-                      onClick={openForwarderForm}
-                    >
-                      + Add New Forwarder
-                    </Button>
-                  </SelectContent>
-                </Select>
+                  displayProperty="forwarderName"
+                  placeholder="Select a Forwarder"
+                  onAddNew={openForwarderForm}
+                  addNewLabel="Add New Forwarder"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -503,7 +473,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   placeholder="Enter number of invoices"
                   value={field.value || ""}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
+                    const value = Number.parseInt(e.target.value, 10);
                     if (!isNaN(value) && value >= 0) {
                       field.onChange(value);
                       handleForwarderCountChange(e.target.value);
@@ -577,7 +547,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                                 if (selectedForwarderFiles[index]) {
                                   handleFileUpload(
                                     selectedForwarderFiles[index]!,
-                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
+                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`,
                                   ).then(() => {
                                     setSelectedForwarderFiles((prev) => {
                                       const newFiles = [...prev];
@@ -678,31 +648,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
             <FormItem>
               <FormLabel>Select Transporter Name</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
+                <EntityCombobox
+                  entities={transporters}
+                  value={field.value || ""}
+                  onChange={(value) => {
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Transporter" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {transporters.map((details: any) => (
-                      <SelectItem key={details._id} value={details._id}>
-                        {details.transporterName || details.responsiblePerson}
-                      </SelectItem>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      className="w-full text-blue-500"
-                      onClick={openTransporterForm}
-                    >
-                      + Add New Transporter
-                    </Button>
-                  </SelectContent>
-                </Select>
+                  displayProperty="transporterName"
+                  placeholder="Select a Transporter"
+                  onAddNew={openTransporterForm}
+                  addNewLabel="Add New Transporter"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -720,7 +677,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   placeholder="Enter number of invoices"
                   value={field.value || ""}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value, 10);
+                    const value = Number.parseInt(e.target.value, 10);
                     if (!isNaN(value) && value >= 0) {
                       field.onChange(value);
                       handleTransporterCountChange(e.target.value);
@@ -794,7 +751,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                                 if (selectedTransporterFiles[index]) {
                                   handleFileUpload(
                                     selectedTransporterFiles[index]!,
-                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
+                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`,
                                   ).then(() => {
                                     setSelectedTransporterFiles((prev) => {
                                       const newFiles = [...prev];

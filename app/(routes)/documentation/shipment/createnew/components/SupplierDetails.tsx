@@ -2,7 +2,6 @@
 import { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-
 import {
   FormField,
   FormItem,
@@ -21,13 +20,6 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { SaveDetailsProps } from "./BookingDetails";
 import {
   Table,
@@ -39,6 +31,7 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import SupplierForm from "@/components/forms/Addsupplierform";
+import EntityCombobox from "@/components/ui/EntityCombobox";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -50,20 +43,33 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
   const invoicesFromForm = watch("supplierDetails.clearance.invoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
-  const [supplierNames, setSupplierNames] = useState<{ id: string; name: string }[]>([]);
-  const [shippingBills, setShippingBills] = useState<{ id: string; name: string }[]>([]);
-  const GlobalModal = useGlobalModal(); // Moved inside the component
+  const [supplierNames, setSupplierNames] = useState<{ _id: string; name: string }[]>([]);
+  const [shippingBills, setShippingBills] = useState<{ _id: string; name: string }[]>([]);
+  const GlobalModal = useGlobalModal();
 
   // Fetch supplier names and shipping bills
   useEffect(() => {
-    // Replace with actual API calls when ready
-    setSupplierNames([
-      { id: "1", name: "Ahmed" },
-      { id: "2", name: "Arshad" },
-    ]);
+    const fetchData = async () => {
+      try {
+        const supplierResponse = await fetch(
+          "http://localhost:4080/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+        );
+        const supplierData = await supplierResponse.json();
+        // Map API data to match Entity interface
+        const mappedSuppliers = supplierData.map((supplier: any) => ({
+          _id: supplier._id,
+          name: supplier.name,
+        }));
+        setSupplierNames(mappedSuppliers);
+      } catch (error) {
+        console.error("Error fetching supplier data:", error);
+      }
+    };
+    fetchData();
+    // Placeholder for shipping bills until API is provided, updated to use _id
     setShippingBills([
-      { id: "1", name: "Bill 1" },
-      { id: "2", name: "Bill 2" },
+      { _id: "1", name: "Bill 1" },
+      { _id: "2", name: "Bill 2" },
     ]);
   }, []);
 
@@ -128,9 +134,15 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <SupplierForm
         onSuccess={() => {
-          fetch("http://localhost:4080/supplier/getall")
+          fetch("http://localhost:4080/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
-            .then((data) => setSupplierNames(data));
+            .then((data) => {
+              const mappedSuppliers = data.map((supplier: any) => ({
+                _id: supplier._id,
+                name: supplier.name,
+              }));
+              setSupplierNames(mappedSuppliers);
+            });
         }}
       />
     );
@@ -148,31 +160,18 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             <FormItem>
               <FormLabel>Select Supplier Name</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
+                <EntityCombobox
+                  entities={supplierNames}
+                  value={field.value || ""}
+                  onChange={(value) => {
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Supplier Name" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {supplierNames.map((details: any) => (
-                      <SelectItem key={details.id} value={details.id}>
-                        {details.name}
-                      </SelectItem>
-                    ))}
-                    <Button
-                      variant="ghost"
-                      className="w-full text-blue-500"
-                      onClick={openSupplierForm}
-                    >
-                      + Add New Supplier
-                    </Button>
-                  </SelectContent>
-                </Select>
+                  displayProperty="name"
+                  placeholder="Select a Supplier Name"
+                  onAddNew={openSupplierForm}
+                  addNewLabel="Add New Supplier"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -447,24 +446,18 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             <FormItem>
               <FormLabel>Select Shipping Bill</FormLabel>
               <FormControl>
-                <Select
-                  onValueChange={(value) => {
+                <EntityCombobox
+                  entities={shippingBills}
+                  value={field.value || ""}
+                  onChange={(value) => {
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
-                  value={field.value}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a shipping bill" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {shippingBills.map((bill: any) => (
-                      <SelectItem key={bill.id} value={bill.id}>
-                        {bill.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  displayProperty="name"
+                  placeholder="Select a Shipping Bill"
+                  onAddNew={() => { }} // Placeholder; add functionality if needed
+                  addNewLabel="Add New Shipping Bill" // Optional, can be removed if not needed
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -473,7 +466,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
         {/* Review */}
         <FormField
           control={control}
-          name="shippingBillDetails.review"
+          name="supplierDetails.review"
           render={({ field }) => (
             <FormItem className="col-span-4">
               <FormLabel>Review</FormLabel>
