@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { BrandName } from "@/lib/constants";
 import Link from "next/link";
 import { postData } from "@/axiosUtility/api";
+import toast from "react-hot-toast";
 
 export function RegisterForm() {
   const [fullName, setFullName] = useState("");
@@ -41,13 +42,13 @@ export function RegisterForm() {
     mobileNumber,
     address: {
       location,
-    //   coordinates: {
-    //     type: "Point",
-        // coordinates: [
-        //   parseFloat(latitude) || 0, // Default to 0 if invalid
-        //   parseFloat(longitude) || 0,
-        // ],
-    //   },
+      //   coordinates: {
+      //     type: "Point",
+      // coordinates: [
+      //   parseFloat(latitude) || 0, // Default to 0 if invalid
+      //   parseFloat(longitude) || 0,
+      // ],
+      //   },
       pincode,
     },
     password,
@@ -77,14 +78,14 @@ export function RegisterForm() {
       setLoading(false);
       return;
     }
-    
+
     if (!location) {
       setError(true);
       setMessage("Location is required");
       setLoading(false);
       return;
     }
-    
+
     if (!pincode) {
       setError(true);
       setMessage("Pincode is required");
@@ -98,7 +99,6 @@ export function RegisterForm() {
       return;
     }
 
-    // Enhanced password validation
     if (password.length < 6) {
       setError(true);
       setMessage("Password must be at least 6 characters long");
@@ -144,11 +144,11 @@ export function RegisterForm() {
 
     try {
       setLoading(true);
-      const res = await postData("http://localhost:4080/user/add", user);
+      const res = await postData("/user/add", user);
       console.log("Account Created Successfully");
       console.log(res.token);
-
       router.refresh();
+      toast.success("registration successful");
       router.push("/login");
     } catch (error: any) {
       setError(true);
@@ -160,7 +160,7 @@ export function RegisterForm() {
   };
 
   return (
-    <Card className="shadow-sm shadow-[#00000042] dark:shadow-[#ffffff42]">
+    <Card className="shadow-sm shadow-[#00000042] dark:shadow-[#ffffff42] max-w-xl w-full">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">
           Create an Account at <span className="text-primary">{BrandName}</span>
@@ -210,15 +210,27 @@ export function RegisterForm() {
             placeholder="Enter your role (e.g., admin, user)"
           />
         </div> */}
-        <div className="grid gap-2">
-          <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
-            disabled={loading}
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="Enter your location"
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              disabled={loading}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter your location"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="pincode">Pincode</Label>
+            <Input
+              id="pincode"
+              disabled={loading}
+              value={pincode}
+              onChange={(e) => setPincode(e.target.value)}
+              placeholder="Enter your pincode"
+            />
+          </div>
         </div>
         {/* <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
@@ -246,16 +258,6 @@ export function RegisterForm() {
             />
           </div>
         </div> */}
-        <div className="grid gap-2">
-          <Label htmlFor="pincode">Pincode</Label>
-          <Input
-            id="pincode"
-            disabled={loading}
-            value={pincode}
-            onChange={(e) => setPincode(e.target.value)}
-            placeholder="Enter your pincode"
-          />
-        </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
           <Input
