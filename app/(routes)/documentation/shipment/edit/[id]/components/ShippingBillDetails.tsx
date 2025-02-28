@@ -90,6 +90,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
     } catch (error) {
       console.error("Error updating shipping bill details:", error);
       toast.error(`Failed to update shipping bill details`);
+
     }
   };
 
