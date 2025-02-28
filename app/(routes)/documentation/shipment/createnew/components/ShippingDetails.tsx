@@ -8,8 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Textarea } from "@/components/ui/textarea"; // Added for review field
-
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -59,23 +58,30 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   const [shippingLines, setShippingLines] = useState([]);
   const [forwarders, setForwarders] = useState([]);
   const [transporters, setTransporters] = useState([]);
+  const [selectedShippingFiles, setSelectedShippingFiles] = useState<(File | null)[]>([]);
+  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>([]);
+  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>([]);
   const GlobalModal = useGlobalModal();
+
+  // Sync selected files arrays with invoice arrays
+  useEffect(() => {
+    setSelectedShippingFiles(Array(shippingInvoices.length).fill(null));
+    setSelectedForwarderFiles(Array(forwarderInvoices.length).fill(null));
+    setSelectedTransporterFiles(Array(transporterInvoices.length).fill(null));
+  }, [shippingInvoices.length, forwarderInvoices.length, transporterInvoices.length]);
 
   // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch Shipping Lines
         const shippingResponse = await fetch("http://localhost:4080/shipment/shippingline/getall");
         const shippingData = await shippingResponse.json();
         setShippingLines(shippingData);
 
-        // Fetch Forwarders
         const forwarderResponse = await fetch("http://localhost:4080/shipment/forwarder/getall");
         const forwarderData = await forwarderResponse.json();
         setForwarders(forwarderData);
 
-        // Fetch Transporters
         const transporterResponse = await fetch("http://localhost:4080/shipment/transporter/getall");
         const transporterData = await transporterResponse.json();
         setTransporters(transporterData);
@@ -175,7 +181,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
@@ -191,7 +197,6 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <ShippinglineForm
         onSuccess={() => {
-          // Refetch shipping lines after successful creation
           fetch("http://localhost:4080/shipment/shippingline/getall")
             .then((res) => res.json())
             .then((data) => setShippingLines(data));
@@ -334,20 +339,37 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                           <div className="flex items-center gap-2">
                             <Input
                               type="file"
+                              accept=".pdf,.jpg,.png,.jpeg"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file)
-                                  handleFileUpload(
-                                    file,
-                                    `shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`
-                                  );
+                                if (file) {
+                                  setSelectedShippingFiles((prev) => {
+                                    const newFiles = [...prev];
+                                    newFiles[index] = file;
+                                    return newFiles;
+                                  });
+                                }
                               }}
                               disabled={uploading}
                             />
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={uploading}
+                              disabled={uploading || !selectedShippingFiles[index]}
+                              onClick={() => {
+                                if (selectedShippingFiles[index]) {
+                                  handleFileUpload(
+                                    selectedShippingFiles[index]!,
+                                    `shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`
+                                  ).then(() => {
+                                    setSelectedShippingFiles((prev) => {
+                                      const newFiles = [...prev];
+                                      newFiles[index] = null;
+                                      return newFiles;
+                                    });
+                                  });
+                                }
+                              }}
                             >
                               <UploadCloud className="w-5 h-5 mr-2" />
                               {uploading ? "Uploading..." : "Upload"}
@@ -452,7 +474,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   <SelectContent>
                     {forwarders.map((details: any) => (
                       <SelectItem key={details._id} value={details._id}>
-                        {details.forwarderName || details.responsiblePerson} {/* Adjust based on API */}
+                        {details.forwarderName || details.responsiblePerson}
                       </SelectItem>
                     ))}
                     <Button
@@ -526,62 +548,53 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                         )}
                       />
                     </TableCell>
-
-{/* updated the upload button */}
-
-
-<TableCell>
-  <FormField
-    control={control}
-    name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
-    render={({ field }) => {
-      const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
-      return (
-        <div className="flex items-center gap-2">
-          <Input
-            type="file"
-            accept=".pdf,.jpg,.png,.jpeg" // Restrict file types
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) {
-                setSelectedFile(file);
-              }
-            }}
-            disabled={uploading} // Disable file input while uploading
-          />
-          <Button
-            variant="secondary"
-            className="bg-blue-500 text-white"
-            disabled={uploading || !selectedFile} // Disable button if no file is selected
-            onClick={() => {
-              if (!selectedFile) {
-                console.error("No file selected!");
-                return;
-              }
-
-              handleFileUpload(
-                selectedFile,
-                `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
-              )
-                .then(() => {
-                  console.log("Upload successful!");
-                  setSelectedFile(null); // ✅ Reset file after upload
-                })
-                .catch((error) => {
-                  console.error("Upload error:", error);
-                });
-            }}
-          >
-            <UploadCloud className="w-5 h-5 mr-2" />
-            {uploading ? "Uploading..." : "Upload"}
-          </Button>
-        </div>
-      );
-    }}
-  />
-</TableCell>;
-
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
+                        render={({ field }) => (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png,.jpeg"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  setSelectedForwarderFiles((prev) => {
+                                    const newFiles = [...prev];
+                                    newFiles[index] = file;
+                                    return newFiles;
+                                  });
+                                }
+                              }}
+                              disabled={uploading}
+                            />
+                            <Button
+                              variant="secondary"
+                              className="bg-blue-500 text-white"
+                              disabled={uploading || !selectedForwarderFiles[index]}
+                              onClick={() => {
+                                if (selectedForwarderFiles[index]) {
+                                  handleFileUpload(
+                                    selectedForwarderFiles[index]!,
+                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
+                                  ).then(() => {
+                                    setSelectedForwarderFiles((prev) => {
+                                      const newFiles = [...prev];
+                                      newFiles[index] = null;
+                                      return newFiles;
+                                    });
+                                  });
+                                }
+                              }}
+                            >
+                              <UploadCloud className="w-5 h-5 mr-2" />
+                              {uploading ? "Uploading..." : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      />
+                    </TableCell>
                     <TableCell>
                       <FormField
                         control={control}
@@ -678,7 +691,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                   <SelectContent>
                     {transporters.map((details: any) => (
                       <SelectItem key={details._id} value={details._id}>
-                        {details.transporterName || details.responsiblePerson} {/* Adjust based on API */}
+                        {details.transporterName || details.responsiblePerson}
                       </SelectItem>
                     ))}
                     <Button
@@ -760,20 +773,37 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                           <div className="flex items-center gap-2">
                             <Input
                               type="file"
+                              accept=".pdf,.jpg,.png,.jpeg"
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
-                                if (file)
-                                  handleFileUpload(
-                                    file,
-                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
-                                  );
+                                if (file) {
+                                  setSelectedTransporterFiles((prev) => {
+                                    const newFiles = [...prev];
+                                    newFiles[index] = file;
+                                    return newFiles;
+                                  });
+                                }
                               }}
                               disabled={uploading}
                             />
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={uploading}
+                              disabled={uploading || !selectedTransporterFiles[index]}
+                              onClick={() => {
+                                if (selectedTransporterFiles[index]) {
+                                  handleFileUpload(
+                                    selectedTransporterFiles[index]!,
+                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
+                                  ).then(() => {
+                                    setSelectedTransporterFiles((prev) => {
+                                      const newFiles = [...prev];
+                                      newFiles[index] = null;
+                                      return newFiles;
+                                    });
+                                  });
+                                }
+                              }}
                             >
                               <UploadCloud className="w-5 h-5 mr-2" />
                               {uploading ? "Uploading..." : "Upload"}
@@ -852,16 +882,13 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
                 ))}
               </TableBody>
             </Table>
-            
           </div>
         )}
-
-       
       </div>
-       {/* Review */}
-       <FormField
+      {/* Review */}
+      <FormField
         control={control}
-        name="shippingBillDetails.review"
+        name="shippingDetails.review"
         render={({ field }) => (
           <FormItem className="col-span-4">
             <FormLabel>Review</FormLabel>

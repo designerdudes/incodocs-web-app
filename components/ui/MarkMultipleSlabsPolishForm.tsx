@@ -72,23 +72,23 @@ function MarkMultipleSlabsPolishForm({
 
   // Update selectedIds whenever table selection changes
   React.useEffect(() => {
-    const ids = table
-      .getFilteredSelectedRowModel()
-      .rows.map((row: any) => row.original[bulkPolishIdName as string]);
+    const selectedRows = table.getFilteredSelectedRowModel().rows;
+    const ids = selectedRows.map((row: any) => row.original[bulkPolishIdName as string]);
     setSelectedIds(ids);
-  }, [table.getFilteredSelectedRowModel().rows, bulkPolishIdName]);
+  }, [table, bulkPolishIdName]); // Added 'table' as a dependency
 
   // Fetch slabs data when selectedIds changes
   React.useEffect(() => {
     const fetchSlabsData = async () => {
       try {
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) {
+          setSlabsData([]); // Clear slabs data if no IDs are selected
+          return;
+        }
 
-        // Fetch data for each selected ID
         const promises = selectedIds.map((id) =>
           fetchData(`/factory-management/inventory/finished/get/${id}`)
         );
-
         const results = await Promise.all(promises);
         setSlabsData(results);
       } catch (error) {
@@ -106,7 +106,6 @@ function MarkMultipleSlabsPolishForm({
       return;
     }
 
-    // Show confirmation modal
     modal.title = "Confirm Details";
     modal.description = "Please review the entered details:";
     modal.children = (
@@ -117,8 +116,7 @@ function MarkMultipleSlabsPolishForm({
             <ul className="mt-1 space-y-1">
               {slabsData.map((slab, index) => (
                 <li key={index}>
-                  Slab Number : {slab.slabNumber}{" "}
-                  {/* Assuming slabNumber is the property name */}
+                  Slab Number: {slab.slabNumber}
                 </li>
               ))}
             </ul>
@@ -187,7 +185,7 @@ function MarkMultipleSlabsPolishForm({
                     <Input
                       placeholder="Eg: 54"
                       type="number"
-                      step="any" // Allows decimal values
+                      step="any"
                       {...field}
                       value={field.value || ""}
                       onChange={(e) => {
@@ -213,7 +211,7 @@ function MarkMultipleSlabsPolishForm({
                     <Input
                       placeholder="Eg: 120"
                       type="number"
-                      step="any" // Allows decimal values
+                      step="any"
                       {...field}
                       value={field.value || ""}
                       onChange={(e) => {

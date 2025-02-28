@@ -72,7 +72,7 @@ function CardWithForm(params: Props) {
       }
     };
     fetchSlabData();
-  }, []);
+  },);
 
   const GlobalModal = useGlobalModal();
 

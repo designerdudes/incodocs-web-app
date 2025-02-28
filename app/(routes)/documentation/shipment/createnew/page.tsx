@@ -210,7 +210,7 @@ export default function CreateNewFormPage() {
     useEffect(() => {
         debouncedSave(watchedValues);
         return () => debouncedSave.cancel();
-    }, [watchedValues]);
+    }, [watchedValues, debouncedSave]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);

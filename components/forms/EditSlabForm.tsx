@@ -63,7 +63,7 @@ export default function EditSlabForm({ id }: Props) {
       }
     };
     fetchSlabData();
-  }, [id]);
+  }, [id, form]);
 
   const handleDelete = async (slabId: string) => {
     try {

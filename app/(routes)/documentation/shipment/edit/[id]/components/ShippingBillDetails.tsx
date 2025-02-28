@@ -26,6 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import toast from "react-hot-toast";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
@@ -85,10 +86,10 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Shipping bill details updated successfully!");
+      toast.success("Shipping bill details updated successfully!");
     } catch (error) {
       console.error("Error updating shipping bill details:", error);
-      alert(`Failed to update shipping bill details: ${error.message}`);
+      toast.error(`Failed to update shipping bill details`);
     }
   };
 
