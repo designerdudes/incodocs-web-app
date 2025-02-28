@@ -17,129 +17,165 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
 
+// Define the schema
 const formSchema = z.object({
-  bookingDetails: z.object({
-    bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
-    portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-    destinationPort: z.string().min(3, { message: "Required name" }).optional(),
-    vesselSailingDate: z.date().optional(),
-    vesselArrivingDate: z.date().optional(),
-    numberOfContainer: z.number().optional(),
-    containers: z.array(
-      z.object({
-        containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }).optional(),
-        truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }).optional(),
-        truckDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }).optional(),
-      })
-    ).optional(),
-  }).optional(),
-  shippingBillDetails: z.object({
-    portCode: z.string().optional(),
-    cbName: z.string().optional(),
-    cbCode: z.string().optional(),
-    numberOFShippingBill: z.number().optional(),
-    bills: z.array(
-      z.object({
-        uploadShippingBill: z.any().optional(),
-        shippingBillNumber: z.string().optional(),
-        shippingBillDate: z.date().optional(),
-        drawbackValue: z.string().optional(),
-        rodtepValue: z.string().optional(),
-      })
-    ).optional(),
-  }).optional(),
-  shippingDetails: z.object({
-    shippingLine: z.string().optional(),
-    numberOfShippingLineInvoices: z.number().optional(),
-    shippingLineInvoices: z.array(
-      z.object({
-        invoiceNumber: z.string().optional(),
-        uploadShippingLineInvoice: z.any().optional(),
-        date: z.date().optional(),
-        valueWithGST: z.string().optional(),
-        valueWithoutGST: z.string().optional(),
-      })
-    ).optional(),
-    forwarderName: z.string().optional(),
-    numberOfForwarderInvoices: z.number().optional(),
-    forwarderInvoices: z.array(
-      z.object({
-        invoiceNumber: z.string().optional(),
-        uploadForwarderInvoice: z.any().optional(),
-        date: z.date().optional(),
-        valueWithGST: z.string().optional(),
-        valueWithoutGST: z.string().optional(),
-      })
-    ).optional(),
-    transporterName: z.string().optional(),
-    numberOfTransporterInvoices: z.number().optional(),
-    transporterInvoices: z.array(
-      z.object({
-        invoiceNumber: z.string().optional(),
-        uploadTransporterInvoice: z.any().optional(),
-        date: z.date().optional(),
-        valueWithGST: z.string().optional(),
-        valueWithoutGST: z.string().optional(),
-      })
-    ).optional(),
-  }).optional(),
-  supplierDetails: z.object({
-    clearance: z.object({
-      supplierName: z.string().optional(),
-      noOfInvoices: z.number().optional(),
-      invoices: z.array(
-        z.object({
-          supplierGSTN: z.string().optional(),
-          supplierInvoiceNumber: z.string().optional(),
-          supplierInvoiceDate: z.date().optional(),
-          supplierInvoiceValueWithGST: z.string().optional(),
-          supplierInvoiceValueWithOutGST: z.string().optional(),
-          clearanceSupplierInvoiceUrl: z.any().optional(),
-        })
-      ).optional(),
-    }).optional(),
-    actual: z.object({
-      actualSupplierName: z.string().optional(),
-      actualSupplierInvoiceValue: z.string().optional(),
-      actualSupplierInvoiceUrl: z.any().optional(),
-      shippingBillUrl: z.string().optional(),
-    }).optional(),
-  }).optional(),
-  saleInvoiceDetails: z.object({
-    consignee: z.string().optional(),
-    actualBuyer: z.string().optional(),
-    numberOfSalesInvoices: z.number().optional(),
-    invoice: z.array(
-      z.object({
-        commercialInvoiceNumber: z.string().optional(),
-        clearanceCommercialInvoice: z.string().optional(),
-        actualCommercialInvoice: z.string().optional(),
-        saberInvoice: z.string().optional(),
-        addProductDetails: z.string().optional(),
-      })
-    ).optional(),
-  }).optional(),
-  blDetails: z.object({
-    blNumber: z.string().optional(),
-    blDate: z.date().optional(),
-    telexDate: z.date().optional(),
-    uploadBL: z.any().optional(),
-  }).optional(),
-  otherDetails: z.array(
-    z.object({
-      review: z.string().optional(),
-      certificateName: z.string().optional(),
-      certificateNumber: z.string().optional(),
-      date: z.date().optional(),
-      issuerOfCertificate: z.string().optional(),
-      uploadCopyOfCertificate: z.any().optional(),
+  bookingDetails: z
+    .object({
+      bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
+      portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
+      destinationPort: z.string().min(3, { message: "Required name" }).optional(),
+      vesselSailingDate: z.date().optional(),
+      vesselArrivingDate: z.date().optional(),
+      numberOfContainer: z.number().optional(),
+      containers: z
+        .array(
+          z.object({
+            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }).optional(),
+            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }).optional(),
+            truckDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }).optional(),
+          })
+        )
+        .optional(),
     })
-  ).optional(),
+    .optional(),
+  shippingBillDetails: z
+    .object({
+      portCode: z.string().optional(),
+      cbName: z.string().optional(),
+      cbCode: z.string().optional(),
+      numberOFShippingBill: z.number().optional(),
+      bills: z
+        .array(
+          z.object({
+            uploadShippingBill: z.any().optional(),
+            shippingBillNumber: z.string().optional(),
+            shippingBillDate: z.date().optional(),
+            drawbackValue: z.string().optional(),
+            rodtepValue: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  shippingDetails: z
+    .object({
+      shippingLine: z.string().optional(),
+      numberOfShippingLineInvoices: z.number().optional(),
+      shippingLineInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadShippingLineInvoice: z.any().optional(),
+            date: z.date().optional(),
+            valueWithGST: z.string().optional(),
+            valueWithoutGST: z.string().optional(),
+          })
+        )
+        .optional(),
+      forwarderName: z.string().optional(),
+      numberOfForwarderInvoices: z.number().optional(),
+      forwarderInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadForwarderInvoice: z.any().optional(),
+            date: z.date().optional(),
+            valueWithGST: z.string().optional(),
+            valueWithoutGST: z.string().optional(),
+          })
+        )
+        .optional(),
+      transporterName: z.string().optional(),
+      numberOfTransporterInvoices: z.number().optional(),
+      transporterInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadTransporterInvoice: z.any().optional(),
+            date: z.date().optional(),
+            valueWithGST: z.string().optional(),
+            valueWithoutGST: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  supplierDetails: z
+    .object({
+      clearance: z
+        .object({
+          supplierName: z.string().optional(),
+          noOfInvoices: z.number().optional(),
+          invoices: z
+            .array(
+              z.object({
+                supplierGSTN: z.string().optional(),
+                supplierInvoiceNumber: z.string().optional(),
+                supplierInvoiceDate: z.date().optional(),
+                supplierInvoiceValueWithGST: z.string().optional(),
+                supplierInvoiceValueWithOutGST: z.string().optional(),
+                clearanceSupplierInvoiceUrl: z.any().optional(),
+              })
+            )
+            .optional(),
+        })
+        .optional(),
+      actual: z
+        .object({
+          actualSupplierName: z.string().optional(),
+          actualSupplierInvoiceValue: z.string().optional(),
+          actualSupplierInvoiceUrl: z.any().optional(),
+          shippingBillUrl: z.string().optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  saleInvoiceDetails: z
+    .object({
+      consignee: z.string().optional(),
+      actualBuyer: z.string().optional(),
+      numberOfSalesInvoices: z.number().optional(),
+      invoice: z
+        .array(
+          z.object({
+            commercialInvoiceNumber: z.string().optional(),
+            clearanceCommercialInvoice: z.string().optional(),
+            actualCommercialInvoice: z.string().optional(),
+            saberInvoice: z.string().optional(),
+            addProductDetails: z.string().optional(),
+          })
+        )
+        .optional(),
+    })
+    .optional(),
+  blDetails: z
+    .object({
+      blNumber: z.string().optional(),
+      blDate: z.date().optional(),
+      telexDate: z.date().optional(),
+      uploadBL: z.any().optional(),
+    })
+    .optional(),
+  otherDetails: z
+    .array(
+      z.object({
+        review: z.string().optional(),
+        certificateName: z.string().optional(),
+        certificateNumber: z.string().optional(),
+        date: z.date().optional(),
+        issuerOfCertificate: z.string().optional(),
+        uploadCopyOfCertificate: z.any().optional(),
+      })
+    )
+    .optional(),
 });
+
+// Infer the type from the schema
+type FormValues = z.infer<typeof formSchema>;
 
 interface Props {
   params: {
-    id: string; // shipment ID
+    id: string;
   };
 }
 
@@ -147,7 +183,7 @@ export default function CreateNewFormPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
 
-  const methods = useForm({
+  const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       bookingDetails: {
@@ -249,7 +285,7 @@ export default function CreateNewFormPage({ params }: Props) {
         const data = await response.json();
         console.log("Fetched Data:", JSON.stringify(data, null, 2));
 
-        const updatedValues = {
+        const updatedValues: FormValues = {
           bookingDetails: {
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
@@ -261,7 +297,7 @@ export default function CreateNewFormPage({ params }: Props) {
               ? parseISO(data.bookingDetails.vesselArrivingDate)
               : undefined,
             numberOfContainer: data.bookingDetails?.containers?.length || 0,
-            containers: data.bookingDetails?.containers?.map(container => ({
+            containers: data.bookingDetails?.containers?.map((container: any) => ({
               containerNumber: container.containerNumber || "",
               truckNumber: container.truckNumber || "",
               truckDriverContactNumber: container.truckDriverContactNumber || container.trukDriverContactNumber || "",
@@ -272,7 +308,7 @@ export default function CreateNewFormPage({ params }: Props) {
             cbName: data.shippingBillDetails?.cbName || "",
             cbCode: data.shippingBillDetails?.cbCode || "",
             numberOFShippingBill: data.shippingBillDetails?.bills?.length || 0,
-            bills: data.shippingBillDetails?.bills?.map(bill => ({
+            bills: data.shippingBillDetails?.bills?.map((bill: any) => ({
               uploadShippingBill: bill.uploadShippingBill || "",
               shippingBillNumber: bill.shippingBillNumber || "",
               shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
@@ -281,33 +317,33 @@ export default function CreateNewFormPage({ params }: Props) {
             })) || [],
           },
           shippingDetails: {
-            shippingLine: typeof data.shippingDetails?.shippingLine === "object" 
-              ? data.shippingDetails?.shippingLine?._id || "" 
+            shippingLine: typeof data.shippingDetails?.shippingLine === "object"
+              ? data.shippingDetails?.shippingLine?._id || ""
               : data.shippingDetails?.shippingLine || "",
             numberOfShippingLineInvoices: data.shippingDetails?.shippingLineInvoices?.length || 0,
-            shippingLineInvoices: data.shippingDetails?.shippingLineInvoices?.map(invoice => ({
+            shippingLineInvoices: data.shippingDetails?.shippingLineInvoices?.map((invoice: any) => ({
               invoiceNumber: invoice.invoiceNumber || "",
               uploadShippingLineInvoice: invoice.uploadShippingLineInvoice || "",
               date: invoice.date ? parseISO(invoice.date) : undefined,
               valueWithGST: invoice.valueWithGST || "",
               valueWithoutGST: invoice.valueWithoutGST || "",
             })) || [],
-            forwarderName: typeof data.shippingDetails?.forwarderName === "object" 
-              ? data.shippingDetails?.forwarderName?._id || "" 
+            forwarderName: typeof data.shippingDetails?.forwarderName === "object"
+              ? data.shippingDetails?.forwarderName?._id || ""
               : data.shippingDetails?.forwarderName || "",
             numberOfForwarderInvoices: data.shippingDetails?.forwarderInvoices?.length || 0,
-            forwarderInvoices: data.shippingDetails?.forwarderInvoices?.map(invoice => ({
+            forwarderInvoices: data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
               invoiceNumber: invoice.invoiceNumber || "",
               uploadForwarderInvoice: invoice.uploadForwarderInvoice || "",
               date: invoice.date ? parseISO(invoice.date) : undefined,
               valueWithGST: invoice.valueWithGST || "",
               valueWithoutGST: invoice.valueWithoutGST || "",
             })) || [],
-            transporterName: typeof data.shippingDetails?.transporterName === "object" 
-              ? data.shippingDetails?.transporterName?._id || "" 
+            transporterName: typeof data.shippingDetails?.transporterName === "object"
+              ? data.shippingDetails?.transporterName?._id || ""
               : data.shippingDetails?.transporterName || "",
             numberOfTransporterInvoices: data.shippingDetails?.transporterInvoices?.length || 0,
-            transporterInvoices: data.shippingDetails?.transporterInvoices?.map(invoice => ({
+            transporterInvoices: data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
               invoiceNumber: invoice.invoiceNumber || "",
               uploadTransporterInvoice: invoice.uploadTransporterInvoice || "",
               date: invoice.date ? parseISO(invoice.date) : undefined,
@@ -319,7 +355,7 @@ export default function CreateNewFormPage({ params }: Props) {
             clearance: {
               supplierName: data.supplierDetails?.clearance?.supplierName ?? "",
               noOfInvoices: data.supplierDetails?.clearance?.invoices?.length || 0,
-              invoices: data.supplierDetails?.clearance?.invoices?.map(invoice => ({
+              invoices: data.supplierDetails?.clearance?.invoices?.map((invoice: any) => ({
                 supplierGSTN: invoice.supplierGSTN || "",
                 supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
                 supplierInvoiceDate: invoice.supplierInvoiceDate ? parseISO(invoice.supplierInvoiceDate) : undefined,
@@ -336,12 +372,12 @@ export default function CreateNewFormPage({ params }: Props) {
             },
           },
           saleInvoiceDetails: {
-            consignee: typeof data.saleInvoiceDetails?.consignee === "object" 
-              ? data.saleInvoiceDetails?.consignee?._id || "" 
+            consignee: typeof data.saleInvoiceDetails?.consignee === "object"
+              ? data.saleInvoiceDetails?.consignee?._id || ""
               : data.saleInvoiceDetails?.consignee || "",
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
             numberOfSalesInvoices: data.saleInvoiceDetails?.invoice?.length || 0,
-            invoice: data.saleInvoiceDetails?.invoice?.map(inv => ({
+            invoice: data.saleInvoiceDetails?.invoice?.map((inv: any) => ({
               commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
               clearanceCommercialInvoice: inv.clearanceCommercialInvoice || "",
               actualCommercialInvoice: inv.actualCommercialInvoice || "",
@@ -357,23 +393,23 @@ export default function CreateNewFormPage({ params }: Props) {
           },
           otherDetails: data.otherDetails?.length > 0
             ? data.otherDetails.map((item: any) => ({
-                review: item.review || "",
-                certificateName: item.certificateName || "",
-                certificateNumber: item.certificateNumber || "",
-                date: item.date ? parseISO(item.date) : undefined,
-                issuerOfCertificate: item.issuerOfCertificate || "",
-                uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
-              }))
+              review: item.review || "",
+              certificateName: item.certificateName || "",
+              certificateNumber: item.certificateNumber || "",
+              date: item.date ? parseISO(item.date) : undefined,
+              issuerOfCertificate: item.issuerOfCertificate || "",
+              uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
+            }))
             : [
-                {
-                  review: "",
-                  certificateName: "",
-                  certificateNumber: "",
-                  date: undefined,
-                  issuerOfCertificate: "",
-                  uploadCopyOfCertificate: "",
-                },
-              ],
+              {
+                review: "",
+                certificateName: "",
+                certificateNumber: "",
+                date: undefined,
+                issuerOfCertificate: "",
+                uploadCopyOfCertificate: "",
+              },
+            ],
         };
 
         methods.reset(updatedValues);
