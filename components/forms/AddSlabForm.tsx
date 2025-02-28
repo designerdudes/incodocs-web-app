@@ -113,7 +113,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
       }));
       form.setValue("slabs", newSlabs, { shouldValidate: true });
     }
-  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll]);
+  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, form]);
 
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;

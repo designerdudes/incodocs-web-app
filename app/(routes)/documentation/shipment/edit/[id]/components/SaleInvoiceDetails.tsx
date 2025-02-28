@@ -27,6 +27,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Trash } from "lucide-react";
+import toast from "react-hot-toast";
 
 const consigneeOptions = [
   { id: "67acfa7f7dabb67dd56d34c5", name: "khan" }, // Match API _id
@@ -91,10 +93,14 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Sale invoice details updated successfully!");
+      toast.success("Sale invoice details updated successfully!");
     } catch (error) {
       console.error("Error updating sale invoice details:", error);
-      alert(`Failed to update sale invoice details: ${error.message}`);
+      if (error instanceof Error) {
+        toast.error(`Failed to update sale invoice details: ${error.message}`);
+      } else {
+        toast.error("Failed to update sale invoice details");
+      }
     }
   };
 
