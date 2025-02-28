@@ -18,6 +18,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
@@ -55,10 +56,14 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
 
       const responseData = await response.json();
       console.log("API Response:", responseData);
-      alert("Bill of lading details updated successfully!");
+      toast.success("Bill of lading details updated successfully!");
     } catch (error) {
       console.error("Error updating bill of lading details:", error);
-      alert(`Failed to update bill of lading details: ${error.message}`);
+      if (error instanceof Error) {
+        toast.error(`Failed to update bill of lading details: ${error.message}`);
+      } else {
+        toast.error("Failed to update bill of lading details: An unknown error occurred.");
+      }
     }
   };
 

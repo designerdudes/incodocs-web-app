@@ -22,6 +22,7 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
+import toast from "react-hot-toast";
 
 interface BookingDetailsProps {
   shipmentId: string;
@@ -80,10 +81,10 @@ export function BookingDetails({ shipmentId }: BookingDetailsProps) {
         throw new Error(`Failed to update booking details: ${errorText}`);
       }
 
-      alert("Booking details updated successfully!");
+      toast.success("Booking details updated successfully!");
     } catch (error) {
       console.error("Error updating booking details:", error);
-      alert("Failed to update booking details: " + error.message);
+      toast.error("Failed to update booking details");
     }
   };
 
