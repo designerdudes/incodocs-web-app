@@ -25,6 +25,7 @@ import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscol
 import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
+import ExportPDFButton from "./Components/ExportPDFButton"
 
 interface Props {
   params: {
@@ -35,6 +36,7 @@ interface Props {
 export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
+  
 
   const res = await fetch(
     `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
@@ -65,15 +67,20 @@ export default async function Page({ params }: Props) {
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`Shipment: ${shipmentData?.bookingDetails?.bookingNumber || "N/A"}`}
+              title={`Shipment: ${
+                shipmentData?.bookingDetails?.bookingNumber || "N/A"
+              }`}
             />
             <p className="text-muted-foreground text-sm mt-2">
-              View and manage shipment details with insights into tracking, delivery status, and logistics.
+              View and manage shipment details with insights into tracking,
+              delivery status, and logistics.
             </p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">Edit</Button>
-            <Button>Export PDF</Button>
+            <Link href={`../edit/${params.id}`}>
+              <Button variant="outline">Edit</Button>
+            </Link>
+            <ExportPDFButton shipmentData={shipmentData} />
           </div>
         </div>
       </div>
@@ -83,11 +90,19 @@ export default async function Page({ params }: Props) {
           <TabsList className="gap-3 flex-wrap">
             <TabsTrigger value="Booking details">Booking Details</TabsTrigger>
             <TabsTrigger value="Shipping Details">Shipping Details</TabsTrigger>
-            <TabsTrigger value="Shipping Bills Details">Shipping Bills Details</TabsTrigger>
+            <TabsTrigger value="Shipping Bills Details">
+              Shipping Bills Details
+            </TabsTrigger>
             <TabsTrigger value="Supplier Details">Supplier Details</TabsTrigger>
-            <TabsTrigger value="Sale Invoice Details">Sale Invoice Details</TabsTrigger>
-            <TabsTrigger value="Bill Of Lading Details">Bill Of Lading Details</TabsTrigger>
-            <TabsTrigger value="Certificate Of Origin">Other details</TabsTrigger>
+            <TabsTrigger value="Sale Invoice Details">
+              Sale Invoice Details
+            </TabsTrigger>
+            <TabsTrigger value="Bill Of Lading Details">
+              Bill Of Lading Details
+            </TabsTrigger>
+            <TabsTrigger value="Certificate Of Origin">
+              Other details
+            </TabsTrigger>
           </TabsList>
 
           {/* Booking Details */}
@@ -108,21 +123,32 @@ export default async function Page({ params }: Props) {
                     <TableBody>
                       <TableRow>
                         <TableCell>Booking Number</TableCell>
-                        <TableCell>{shipmentData?.bookingDetails?.bookingNumber}</TableCell>
+                        <TableCell>
+                          {shipmentData?.bookingDetails?.bookingNumber}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Port Of Loading</TableCell>
-                        <TableCell>{shipmentData?.bookingDetails?.portOfLoading}</TableCell>
+                        <TableCell>
+                          {shipmentData?.bookingDetails?.portOfLoading}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Destination Port</TableCell>
-                        <TableCell>{shipmentData?.bookingDetails?.destinationPort}</TableCell>
+                        <TableCell>
+                          {shipmentData?.bookingDetails?.destinationPort}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Vessel Sailing Date</TableCell>
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselSailingDate
-                            ? format(new Date(shipmentData.bookingDetails.vesselSailingDate), "PPP")
+                            ? format(
+                                new Date(
+                                  shipmentData.bookingDetails.vesselSailingDate
+                                ),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -130,13 +156,20 @@ export default async function Page({ params }: Props) {
                         <TableCell>Vessel Arriving Date</TableCell>
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselArrivingDate
-                            ? format(new Date(shipmentData.bookingDetails.vesselArrivingDate), "PPP")
+                            ? format(
+                                new Date(
+                                  shipmentData.bookingDetails.vesselArrivingDate
+                                ),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Review</TableCell>
-                        <TableCell>{shipmentData?.bookingDetails?.review || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.bookingDetails?.review || "N/A"}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -152,7 +185,7 @@ export default async function Page({ params }: Props) {
                   searchKey="containerNumber"
                   data={shipmentData?.bookingDetails?.containers || []}
                   columns={BookingDetailsColumn}
-                // showDropdown={true}
+                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -177,15 +210,23 @@ export default async function Page({ params }: Props) {
                       <TableBody>
                         <TableRow>
                           <TableCell>Shipping Line Name</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.shippingLineName?.shippingLineName || "N/A"}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.shippingLineName
+                              ?.shippingLineName || "N/A"}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.shippingLineInvoices?.length || 0}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.shippingLineInvoices
+                              ?.length || 0}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Review</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.review || "N/A"}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.review || "N/A"}
+                          </TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
@@ -199,9 +240,11 @@ export default async function Page({ params }: Props) {
                     bulkDeleteToastMessage="Selected invoices deleted successfully"
                     deleteRoute="shipment/deleteall"
                     searchKey="invoiceNumber"
-                    data={shipmentData?.shippingDetails?.shippingLineInvoices || []}
+                    data={
+                      shipmentData?.shippingDetails?.shippingLineInvoices || []
+                    }
                     columns={ShippingDetailsColumn}
-                    showDropdown={true}
+                    // showDropdown={true}
                   />
                 </div>
               </div>
@@ -223,11 +266,17 @@ export default async function Page({ params }: Props) {
                       <TableBody>
                         <TableRow>
                           <TableCell>Forwarder Name</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.forwarderName?.forwarderName || "N/A"}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.forwarderName
+                              ?.forwarderName || "N/A"}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.forwarderInvoices?.length || 0}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.forwarderInvoices
+                              ?.length || 0}
+                          </TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
@@ -241,9 +290,11 @@ export default async function Page({ params }: Props) {
                     bulkDeleteToastMessage="Selected invoices deleted successfully"
                     deleteRoute="shipment/deleteall"
                     searchKey="invoiceNumber"
-                    data={shipmentData?.shippingDetails?.forwarderInvoices || []}
+                    data={
+                      shipmentData?.shippingDetails?.forwarderInvoices || []
+                    }
                     columns={ForwarderDetailsColumn}
-                    showDropdown={true}
+                    // showDropdown={true}
                   />
                 </div>
               </div>
@@ -265,11 +316,17 @@ export default async function Page({ params }: Props) {
                       <TableBody>
                         <TableRow>
                           <TableCell>Transporter Name</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.transporterName?.transporterName || "N/A"}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.transporterName
+                              ?.transporterName || "N/A"}
+                          </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>{shipmentData?.shippingDetails?.transporterInvoices?.length || 0}</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.transporterInvoices
+                              ?.length || 0}
+                          </TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>
@@ -283,9 +340,11 @@ export default async function Page({ params }: Props) {
                     bulkDeleteToastMessage="Selected invoices deleted successfully"
                     deleteRoute="shipment/deleteall"
                     searchKey="invoiceNumber"
-                    data={shipmentData?.shippingDetails?.transporterInvoices || []}
+                    data={
+                      shipmentData?.shippingDetails?.transporterInvoices || []
+                    }
                     columns={TransporterDetailsColumn}
-                    showDropdown={true}
+                    // showDropdown={true}
                   />
                 </div>
               </div>
@@ -310,23 +369,34 @@ export default async function Page({ params }: Props) {
                     <TableBody>
                       <TableRow>
                         <TableCell>Port Code</TableCell>
-                        <TableCell>{shipmentData?.shippingBillDetails?.portCode || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingBillDetails?.portCode || "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>CB Name</TableCell>
-                        <TableCell>{shipmentData?.shippingBillDetails?.cbName || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingBillDetails?.cbName || "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>CD Code</TableCell>
-                        <TableCell>{shipmentData?.shippingBillDetails?.cdCode || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingBillDetails?.cdCode || "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Number Of Bills</TableCell>
-                        <TableCell>{shipmentData?.shippingBillDetails?.ShippingBills?.length || 0}</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingBillDetails?.ShippingBills
+                            ?.length || 0}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Review</TableCell>
-                        <TableCell>{shipmentData?.shippingBillDetails?.review || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingBillDetails?.review || "N/A"}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -342,7 +412,7 @@ export default async function Page({ params }: Props) {
                   searchKey="shippingBillNumber"
                   data={shipmentData?.shippingBillDetails?.ShippingBills || []}
                   columns={ShippingBillsDetailscolumn}
-                  showDropdown={true}
+                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -356,52 +426,101 @@ export default async function Page({ params }: Props) {
                   <CardTitle>Supplier Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Supplier Name</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.clearance?.supplierName || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Number Of Invoices</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.clearance?.invoices?.length || 0}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Actual Supplier Name</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.actual?.actualSupplierName || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Actual Invoice Value</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.actual?.actualSupplierInvoiceValue || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Actual Invoice URL</TableCell>
-                        <TableCell>
-                          {shipmentData?.supplierDetails?.actual?.actualSupplierInvoiceUrl ? (
-                            <a href={shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                              View
-                            </a>
-                          ) : (
-                            "N/A"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Shipping Bill URL</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.actual?.shippingBillUrl || "N/A"}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Review</TableCell>
-                        <TableCell>{shipmentData?.supplierDetails?.review || "N/A"}</TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+                  {/* Clearance Supplier Details Section */}
+                  <div className="mb-6">
+                    <h3 className="text-lg font-semibold mb-2">
+                      Clearance Supplier Details
+                    </h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Supplier Name</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.clearance
+                              ?.supplierName || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Number Of Invoices</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.clearance?.invoices
+                              ?.length || 0}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Actual Supplier Details Section */}
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">
+                      Actual Supplier Details
+                    </h3>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Actual Supplier Name</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.actual
+                              ?.actualSupplierName || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Actual Invoice Value</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.actual
+                              ?.actualSupplierInvoiceValue || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Actual Invoice URL</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.actual
+                              ?.actualSupplierInvoiceUrl ? (
+                              <a
+                                href={
+                                  shipmentData.supplierDetails.actual
+                                    .actualSupplierInvoiceUrl
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                              >
+                                View
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Shipping Bill URL</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.actual
+                              ?.shippingBillUrl || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Review</TableCell>
+                          <TableCell>
+                            {shipmentData?.supplierDetails?.review || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
               <div className="w-full md:w-2/3">
@@ -412,9 +531,11 @@ export default async function Page({ params }: Props) {
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
                   searchKey="supplierInvoiceNumber"
-                  data={shipmentData?.supplierDetails?.clearance?.invoices || []}
+                  data={
+                    shipmentData?.supplierDetails?.clearance?.invoices || []
+                  }
                   columns={SupplierDetailscolumn}
-                  showDropdown={true}
+                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -438,19 +559,30 @@ export default async function Page({ params }: Props) {
                     <TableBody>
                       <TableRow>
                         <TableCell>Consignee</TableCell>
-                        <TableCell>{shipmentData?.saleInvoiceDetails?.consignee?.name || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.saleInvoiceDetails?.consignee?.name ||
+                            "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Actual Buyer</TableCell>
-                        <TableCell>{shipmentData?.saleInvoiceDetails?.actualBuyer || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.saleInvoiceDetails?.actualBuyer ||
+                            "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Number Of Invoices</TableCell>
-                        <TableCell>{shipmentData?.saleInvoiceDetails?.commercialInvoices?.length || 0}</TableCell>
+                        <TableCell>
+                          {shipmentData?.saleInvoiceDetails?.commercialInvoices
+                            ?.length || 0}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Review</TableCell>
-                        <TableCell>{shipmentData?.saleInvoiceDetails?.review || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.saleInvoiceDetails?.review || "N/A"}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -464,9 +596,11 @@ export default async function Page({ params }: Props) {
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
                   searchKey="commercialInvoiceNumber"
-                  data={shipmentData?.saleInvoiceDetails?.commercialInvoices || []}
+                  data={
+                    shipmentData?.saleInvoiceDetails?.commercialInvoices || []
+                  }
                   columns={SaleInvoiceDetailscolumn}
-                  showDropdown={true}
+                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -490,13 +624,18 @@ export default async function Page({ params }: Props) {
                     <TableBody>
                       <TableRow>
                         <TableCell>BL Number</TableCell>
-                        <TableCell>{shipmentData?.blDetails?.blNumber || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.blDetails?.blNumber || "N/A"}
+                        </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>BL Date</TableCell>
                         <TableCell>
                           {shipmentData?.blDetails?.blDate
-                            ? format(new Date(shipmentData.blDetails.blDate), "PPP")
+                            ? format(
+                                new Date(shipmentData.blDetails.blDate),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -504,7 +643,10 @@ export default async function Page({ params }: Props) {
                         <TableCell>Telex Date</TableCell>
                         <TableCell>
                           {shipmentData?.blDetails?.telexDate
-                            ? format(new Date(shipmentData.blDetails.telexDate), "PPP")
+                            ? format(
+                                new Date(shipmentData.blDetails.telexDate),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -512,7 +654,12 @@ export default async function Page({ params }: Props) {
                         <TableCell>Uploaded BL</TableCell>
                         <TableCell>
                           {shipmentData?.blDetails?.uploadBL ? (
-                            <a href={shipmentData.blDetails.uploadBL} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                            <a
+                              href={shipmentData.blDetails.uploadBL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:underline"
+                            >
                               View
                             </a>
                           ) : (
@@ -522,7 +669,9 @@ export default async function Page({ params }: Props) {
                       </TableRow>
                       <TableRow>
                         <TableCell>Review</TableCell>
-                        <TableCell>{shipmentData?.blDetails?.review || "N/A"}</TableCell>
+                        <TableCell>
+                          {shipmentData?.blDetails?.review || "N/A"}
+                        </TableCell>
                       </TableRow>
                     </TableBody>
                   </Table>
@@ -543,7 +692,7 @@ export default async function Page({ params }: Props) {
                   searchKey="certificateNumber"
                   data={shipmentData?.otherDetails || []}
                   columns={OtherDetailsColumn}
-                  showDropdown={true}
+                  // showDropdown={true}
                 />
               </div>
             </div>
