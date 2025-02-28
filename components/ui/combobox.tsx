@@ -19,7 +19,6 @@ const Combobox: React.FC<ComboboxProps> = ({ value, onChange, options, placehold
       >
         <RadixSelect.Value placeholder={placeholder} />
       </RadixSelect.Trigger>
-
       <RadixSelect.Portal>
         <RadixSelect.Content className="w-full bg-white border border-gray-300 rounded-md shadow-lg">
           <RadixSelect.ScrollUpButton />
