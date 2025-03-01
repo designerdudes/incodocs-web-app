@@ -25,7 +25,8 @@ import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscol
 import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
-import ExportPDFButton from "./Components/ExportPDFButton"
+import ExportCsvButton from "./Components/ExportCsvButton"
+
 
 interface Props {
   params: {
@@ -68,8 +69,10 @@ export default async function Page({ params }: Props) {
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`Shipment: ${shipmentData?.bookingDetails?.bookingNumber || "N/A"
-                }`}
+              title={`Shipment: ${
+                shipmentData?.shipmentId || "N/A"
+              }`}
+
             />
             <p className="text-muted-foreground text-sm mt-2">
               View and manage shipment details with insights into tracking,
@@ -80,7 +83,7 @@ export default async function Page({ params }: Props) {
             <Link href={`../edit/${params.id}`}>
               <Button variant="outline">Edit</Button>
             </Link>
-            <ExportPDFButton shipmentData={shipmentData} />
+            <ExportCsvButton shipmentData={shipmentData} />
           </div>
         </div>
       </div>

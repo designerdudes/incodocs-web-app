@@ -128,6 +128,10 @@ const data = {
                     title: "Quotes",
                     url: "/documentation/quotes",
                 },
+                {
+                    title:"Parties",
+                    url:"/documentation/parties"
+                }
             ],
         },
         {
