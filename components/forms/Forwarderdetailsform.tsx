@@ -52,15 +52,17 @@ function ForwarderForm({ onSuccess }: ForwarderFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:4080/shipment/forwarder/create", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipment/forwarder/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          shippingLineName: values.forwarderName,
+          forwarderName: values.forwarderName,
           address: values.address,
           responsiblePerson: values.responsiblePerson,
           mobileNo: values.mobileNo,
           email: values.email,
+          organizationId: "674b0a687d4f4b21c6c980ba"
+
         }),
       });
       if (!response.ok) throw new Error("Failed to create Forwarder");

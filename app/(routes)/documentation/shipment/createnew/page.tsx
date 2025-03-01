@@ -273,14 +273,6 @@ export default function CreateNewFormPage() {
                         >
                             Previous
                         </Button>
-                        <Button
-                            type="button"
-                            onClick={() => saveProgressWithFeedback(form.getValues())}
-                            className="h-8"
-                            disabled={isLoading}
-                        >
-                            Save Progress
-                        </Button>
                         {currentStep < steps.length - 1 && (
                             <Button className="h-8" type="button" onClick={nextStep} disabled={isLoading}>
                                 Next
@@ -296,6 +288,16 @@ export default function CreateNewFormPage() {
                     </div>
 
                     {steps[currentStep].component}
+                    <div className="flex justify-between mt-4">
+                        <Button
+                            type="button"
+                            onClick={() => saveProgressWithFeedback(form.getValues())}
+                            className="h-8"
+                            disabled={isLoading}
+                        >
+                            Save Progress
+                        </Button>
+                    </div>
                     <div className="mt-4">
                         {currentStep === steps.length - 1 && (
                             <Button size="lg" disabled={isLoading} type="submit">

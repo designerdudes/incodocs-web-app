@@ -22,8 +22,13 @@ import { format } from "date-fns";
 import { useState } from "react";
 import { SaveDetailsProps } from "./BookingDetails";
 
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
 export function OtherDetails({ saveProgress }: SaveDetailsProps) {
-  const { control } = useFormContext();
+  const { control, getValues } = useFormContext();
   const [file, setFile] = useState<File | null>(null);
   const { handleSubmit } = useFormContext();
 
@@ -130,13 +135,13 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-  {/* Review Field
+      Review Field
       <FormField
         control={control}
         name="blDetails.review"
         render={({ field }) => (
           <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
+            <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment for BL details"
@@ -147,7 +152,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
             <FormMessage />
           </FormItem>
         )}
-      /> */}
+      />
 
     </div>
   );
