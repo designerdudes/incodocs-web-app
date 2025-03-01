@@ -59,9 +59,9 @@ export function EntityCombobox({
                             {entities.map((entity) => (
                                 <CommandItem
                                     key={entity._id}
-                                    value={entity._id}
-                                    onSelect={(currentValue) => {
-                                        onChange(currentValue === value ? "" : currentValue);
+                                    value={entity[displayProperty]} // Search by displayProperty (e.g., supplierName)
+                                    onSelect={() => {
+                                        onChange(entity._id === value ? "" : entity._id); // Pass _id to onChange
                                         setOpen(false);
                                     }}
                                 >

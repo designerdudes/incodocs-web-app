@@ -64,15 +64,15 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const shippingResponse = await fetch("http://localhost:4080/shipment/shippingline/getall");
+        const shippingResponse = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba");
         const shippingData = await shippingResponse.json();
         setShippingLines(shippingData);
 
-        const forwarderResponse = await fetch("http://localhost:4080/shipment/forwarder/getall");
+        const forwarderResponse = await fetch("https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba");
         const forwarderData = await forwarderResponse.json();
         setForwarders(forwarderData);
 
-        const transporterResponse = await fetch("http://localhost:4080/shipment/transporter/getall");
+        const transporterResponse = await fetch("https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba");
         const transporterData = await transporterResponse.json();
         setTransporters(transporterData);
       } catch (error) {
@@ -172,7 +172,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
@@ -193,7 +193,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <ShippinglineForm
         onSuccess={() => {
-          fetch("http://localhost:4080/shipment/shippingline/getall")
+          fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
             .then((data) => setShippingLines(data));
         }}
@@ -207,9 +207,10 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <ForwarderForm
         onSuccess={() => {
-          fetch("http://localhost:4080/shipment/forwarder/getall")
+          fetch("https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
             .then((data) => setForwarders(data));
+          console.log(forwarders)
         }}
       />
     );
@@ -221,7 +222,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <TransporterForm
         onSuccess={() => {
-          fetch("http://localhost:4080/shipment/transporter/getall")
+          fetch("https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
             .then((data) => setTransporters(data));
         }}
@@ -848,7 +849,7 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
         name="shippingDetails.review"
         render={({ field }) => (
           <FormItem className="col-span-4">
-            <FormLabel>Review</FormLabel>
+            <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment"
