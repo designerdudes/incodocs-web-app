@@ -52,7 +52,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:4080/shipment/transporter/create", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipment/transporter/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,6 +61,8 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
           responsiblePerson: values.responsiblePerson,
           mobileNo: values.mobileNo,
           email: values.email,
+          organizationId: "674b0a687d4f4b21c6c980ba"
+
         }),
       });
       if (!response.ok) throw new Error("Failed to create Transporter");

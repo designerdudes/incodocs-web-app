@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useFormContext } from "react-hook-form";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 import {
   FormField,
   FormItem,
@@ -27,15 +28,9 @@ import {
   TableCell,
   Table,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import AddConsigneeButton from "./AddConsigneebutton";
 import { SaveDetailsProps } from "./BookingDetails";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -47,17 +42,22 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
-  const [consignees, setConsignees] = useState<any[]>([]);
+  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
+  const GlobalModal = useGlobalModal();
 
   // Fetch consignees on mount
   useEffect(() => {
     const fetchConsignees = async () => {
       try {
         const response = await fetch(
-          "http://localhost:4080/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+          "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const data = await response.json();
-        setConsignees(data);
+        const mappedConsignees = data.map((consignee: any) => ({
+          _id: consignee._id,
+          name: consignee.name || consignee.consigneeName,
+        }));
+        setConsignees(mappedConsignees);
       } catch (error) {
         console.error("Error fetching consignees:", error);
       }
@@ -100,12 +100,12 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
@@ -116,269 +116,267 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
     }
   };
 
+  const openConsigneeForm = () => {
+    GlobalModal.title = "Add New Consignee";
+    GlobalModal.children = (
+      <AddConsigneeForm
+        onSuccess={() => {
+          fetch("https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba")
+            .then((res) => res.json())
+            .then((data) => {
+              const mappedConsignees = data.map((consignee: any) => ({
+                _id: consignee._id,
+                name: consignee.name || consignee.consigneeName,
+              }));
+              setConsignees(mappedConsignees);
+            });
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
   return (
-    <div className="grid grid-cols-4 gap-3">
-      
-      {/* Select Consignee */}
-      <FormField
-        control={control}
-        name="saleInvoiceDetails.consignee"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Select Consignee</FormLabel>
-            <FormControl>
-              <Select
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  saveProgressSilently(getValues());
-                }}
-                value={field.value}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a Consignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {consignees.map((details: any) => (
-                    <SelectItem key={details._id} value={details._id}>
-                      {details.name || details.consigneeName} {/* Adjust based on API response */}
-                    </SelectItem>
-                  ))}
-                  <div>
-                    <AddConsigneeButton />
+    <div>
+      <div className="grid grid-cols-4 gap-3">
+        {/* Select Consignee */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.consignee"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Select Consignee</FormLabel>
+              <FormControl>
+                <EntityCombobox
+                  entities={consignees}
+                  value={field.value || ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    saveProgressSilently(getValues());
+                  }}
+                  displayProperty="name"
+                  placeholder="Select a Consignee"
+                  onAddNew={openConsigneeForm}
+                  addNewLabel="Add New Consignee"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Actual Buyer */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.actualBuyer"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual Buyer</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="e.g., Khan"
+                  {...field}
+                  onBlur={() => saveProgressSilently(getValues())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Number of Commercial Invoices */}
+        <FormField
+          control={control}
+          name="saleInvoiceDetails.numberOfSalesInvoices"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Commercial Invoices</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of invoices"
+                  value={field.value === 0 ? "" : field.value}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange("");
+                      handleInvoiceNumberCountChange("");
+                      return;
+                    }
+                    const numericValue = Math.max(0, Number(value));
+                    field.onChange(numericValue.toString());
+                    handleInvoiceNumberCountChange(numericValue.toString());
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-
-
-                    
-                  </div>
-                </SelectContent>
-              </Select>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      {/* Actual Buyer */}
-      <FormField
-        control={control}
-        name="saleInvoiceDetails.actualBuyer"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Actual Buyer</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., khan"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      {/* Number of Commercial Invoices */}
-      <FormField
-        control={control}
-        name="NumberOfSalesInvoices"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Commercial Invoices</FormLabel>
-            <FormControl>
-              {/* <Input
-                type="number"
-                placeholder="Enter number of Commercial Invoices"
-                value={field.value === 0 ? "" : field.value}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (isNaN(value) || value < 0) return;
-                  field.onChange(value);
-                  handleInvoiceNumberCountChange(e.target.value);
-                }}
-              /> */}
-
-<Input
-  type="number"
-  placeholder="Enter number of Commercial Invoices"
-  value={field.value === 0 ? "" : field.value}
-  onChange={(e) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      field.onChange(""); 
-      handleInvoiceNumberCountChange("");
-      return;
-    }
-
-    const numericValue = Math.max(0, Number(value));
-    field.onChange(numericValue.toString());
-    handleInvoiceNumberCountChange(numericValue.toString());
-  }}
-/>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {invoices.length > 0 && (
-        <div className="col-span-4 overflow-x-auto mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Commercial Invoice Number</TableHead>
-                <TableHead>Clearance Commercial Invoice</TableHead>
-                <TableHead>Actual Commercial Invoice</TableHead>
-                <TableHead>SABER Invoice</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoices.map((_: any, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., 3458h4"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
+        {invoices.length > 0 && (
+          <div className="col-span-4 overflow-x-auto mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Commercial Invoice Number</TableHead>
+                  <TableHead>Clearance Commercial Invoice</TableHead>
+                  <TableHead>Actual Commercial Invoice</TableHead>
+                  <TableHead>SABER Invoice</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+              </TableHeader>
+              <TableBody>
+                {invoices.map((_: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 3458H4"
+                              {...field}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="file"
+                                  accept=".pdf,.jpg,.png,.jpeg"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file)
+                                      handleFileUpload(
+                                        file,
+                                        `saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`
+                                      );
+                                  }}
+                                  disabled={uploading}
+                                />
+                                <Button
+                                  variant="secondary"
+                                  className="bg-blue-500 text-white"
+                                  disabled={uploading}
+                                >
+                                  <UploadCloud className="w-5 h-5 mr-2" />
+                                  {uploading ? "Uploading..." : "Upload"}
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="file"
+                                  accept=".pdf,.jpg,.png,.jpeg"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file)
+                                      handleFileUpload(
+                                        file,
+                                        `saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`
+                                      );
+                                  }}
+                                  disabled={uploading}
+                                />
+                                <Button
+                                  variant="secondary"
+                                  className="bg-blue-500 text-white"
+                                  disabled={uploading}
+                                >
+                                  <UploadCloud className="w-5 h-5 mr-2" />
+                                  {uploading ? "Uploading..." : "Upload"}
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="file"
+                                  accept=".pdf,.jpg,.png,.jpeg"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file)
+                                      handleFileUpload(
+                                        file,
+                                        `saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`
+                                      );
+                                  }}
+                                  disabled={uploading}
+                                />
+                                <Button
+                                  variant="secondary"
+                                  className="bg-blue-500 text-white"
+                                  disabled={uploading}
+                                >
+                                  <UploadCloud className="w-5 h-5 mr-2" />
+                                  {uploading ? "Uploading..." : "Upload"}
+                                </Button>
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => handleDelete(index)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+
       {/* Review Field */}
       <FormField
         control={control}
         name="saleInvoiceDetails.review"
         render={({ field }) => (
-          <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
+          <FormItem className="mt-4">
+            <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment for sale invoice details"
@@ -390,11 +388,6 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-      <div className="mt-8">
-        <Button type="button" onClick={() => saveProgress(getValues())}>
-          Save Progress
-        </Button>
-      </div>
     </div>
   );
 }

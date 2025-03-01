@@ -51,8 +51,9 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    console.log(values)
     try {
-      const response = await fetch("http://localhost:4080/shipment/shippingline/create", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -61,6 +62,7 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
           responsiblePerson: values.responsiblePerson,
           mobileNo: values.mobileNo,
           email: values.email,
+          organizationId: "674b0a687d4f4b21c6c980ba"
         }),
       });
       if (!response.ok) throw new Error("Failed to create shipping line");
