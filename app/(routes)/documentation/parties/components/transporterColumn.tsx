@@ -41,7 +41,7 @@ export const transportercolumns: ColumnDef<Transporter>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: " transporterName",
+    accessorKey: "transporterName",
     header: ({ column }) => (
       <Button
         variant="ghost"

@@ -18,6 +18,7 @@ import { TbFileExport } from "react-icons/tb";
 import { LiaShippingFastSolid, LiaFileInvoiceSolid } from "react-icons/lia";
 import { BiPurchaseTag } from "react-icons/bi";
 import { HiOutlineDocumentCurrencyRupee } from "react-icons/hi2";
+import { HiOutlineUserGroup } from "react-icons/hi";
 
 function FactoryManagementPage() {
   const params = useParams();
@@ -136,6 +137,26 @@ function FactoryManagementPage() {
                 Generate and manage quotes quickly with accurate pricing and
                 product details. Track quote status and ensure timely follow-ups
                 for seamless customer engagement.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/parties`} passHref>
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Parties</CardTitle>
+              <HiOutlineUserGroup className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
+              <CardDescription className="text-base text-gray-600">
+                Easily track and modify details of stakeholders, ensuring
+                efficient coordination and up-to-date records.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                A streamlined system for parties within an organization. Users
+                can add, update details like name, address, and contact info, or
+                delete entries as needed, ensuring accurate and flexible
+                tracking.
               </p>
             </CardContent>
           </Card>

@@ -41,7 +41,7 @@ export const shippingLinecolumns: ColumnDef<ShippingLine>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: " shippingLineName",
+    accessorKey: "shippingLineName",
     header: ({ column }) => (
       <Button
         variant="ghost"

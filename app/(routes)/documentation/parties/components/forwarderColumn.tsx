@@ -41,7 +41,7 @@ export const forwardercolumns: ColumnDef<Forwarder>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: " forwarderName",
+    accessorKey: "forwarderName",
     header: ({ column }) => (
       <Button
         variant="ghost"
