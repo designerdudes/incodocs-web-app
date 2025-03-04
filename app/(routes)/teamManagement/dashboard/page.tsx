@@ -31,7 +31,6 @@ interface Props {
 export default async function TeamMemberPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
   const res = await fetch(`https://incodocs-server.onrender.com/employers/getall`, {
     method: "GET",
     headers: {
