@@ -100,7 +100,7 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {row.original.bookingDetails?.containers?.length > 0
             ? row.original.bookingDetails.containers
-              .map((container) => container.trukDriverContactNumber)
+              .map((container) => container.truckDriverContactNumber)
               .join(", ")
             : "N/A"}
         </span>
