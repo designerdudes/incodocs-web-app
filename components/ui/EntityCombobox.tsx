@@ -55,32 +55,40 @@ export function EntityCombobox({
                     <CommandInput placeholder={`Search ${placeholder.toLowerCase()}...`} className="h-9" />
                     <CommandList>
                         <CommandEmpty>No results found.</CommandEmpty>
+
+                        
                         <CommandGroup>
-                            {entities.map((entity) => (
-                                <CommandItem
-                                    key={entity._id}
-                                    value={entity[displayProperty]} // Search by displayProperty (e.g., supplierName)
-                                    onSelect={() => {
-                                        onChange(entity._id === value ? "" : entity._id); // Pass _id to onChange
-                                        setOpen(false);
-                                    }}
-                                >
-                                    {entity[displayProperty]}
-                                    <Check
-                                        className={cn("ml-auto h-4 w-4", value === entity._id ? "opacity-100" : "opacity-0")}
-                                    />
-                                </CommandItem>
-                            ))}
-                            <CommandItem
-                                onSelect={() => {
-                                    onAddNew();
-                                    setOpen(false);
-                                }}
-                                className="text-blue-500"
-                            >
-                                + {addNewLabel}
-                            </CommandItem>
-                        </CommandGroup>
+  {Array.isArray(entities) ? (
+    entities.map((entity) => (
+      <CommandItem
+        key={entity._id}
+        value={entity[displayProperty]} // Search by displayProperty (e.g., supplierName)
+        onSelect={() => {
+          onChange(entity._id === value ? "" : entity._id); // Pass _id to onChange
+          setOpen(false);
+        }}
+      >
+        {entity[displayProperty]}
+        <Check
+          className={cn("ml-auto h-4 w-4", value === entity._id ? "opacity-100" : "opacity-0")}
+        />
+      </CommandItem>
+    ))
+  ) : (
+    <p className="text-gray-500 p-2">No entities available</p>
+  )}
+
+  <CommandItem
+    onSelect={() => {
+      onAddNew();
+      setOpen(false);
+    }}
+    className="text-blue-500"
+  >
+    + {addNewLabel}
+  </CommandItem>
+</CommandGroup>
+
                     </CommandList>
                 </Command>
             </PopoverContent>

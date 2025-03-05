@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea"; // Added for review field
+
 import {
   Popover,
   PopoverTrigger,
@@ -333,6 +335,25 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
+
+        {/* Review */}
+            <FormField
+              control={control}
+              name="BookingDetails.review"
+              render={({ field }) => (
+                <FormItem className="col-span-4">
+                  <FormLabel>Remarks</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="e.g., this is some random comment"
+                      {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
     </div>
   );
 }

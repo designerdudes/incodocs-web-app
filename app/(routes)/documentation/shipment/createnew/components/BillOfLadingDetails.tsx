@@ -171,7 +171,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
       {/* Review Field */}
       <FormField
         control={control}
-        name="saleInvoiceDetails.review"
+        name="BillOfLandingDetails.review"
         render={({ field }) => (
           <FormItem className="col-span-4 mb-4">
             <FormLabel>Remarks</FormLabel>
