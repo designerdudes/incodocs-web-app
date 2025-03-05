@@ -15,16 +15,17 @@ import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
 
 interface Props {
-    params: {
-      organizationId: string;
-    };
-  }
+  params: {
+    organizationId: string;
+  };
+}
 
 export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
+  const orgaanisationID = "674b0a687d4f4b21c6c980ba";
   const token = cookieStore.get("AccessToken")?.value || "";
   const shippingLineRes = await fetch(
-    `http://localhost:4080/shipment/shippingline/getbyorg/${params?.organizationId}`,
+    `http://localhost:4080/shipment/shippingline/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -35,10 +36,11 @@ export default async function PartiesPage({ params }: Props) {
   ).then((response) => {
     return response.json();
   });
-  const shippingLine=shippingLineRes;
+  const shippingLine = shippingLineRes;
+  console.log(shippingLine);
 
   const ForwarderRes = await fetch(
-    `http://localhost:4080/shipment/forwarder/getbyorg/${params?.organizationId}`,
+    `http://localhost:4080/shipment/forwarder/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -49,10 +51,10 @@ export default async function PartiesPage({ params }: Props) {
   ).then((response) => {
     return response.json();
   });
-  const forwarder=ForwarderRes;
+  const forwarder = ForwarderRes;
 
   const transporterRes = await fetch(
-    `http://localhost:4080/shipment/transporter/getbyorg/${params?.organizationId}`,
+    `http://localhost:4080/shipment/transporter/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -63,10 +65,10 @@ export default async function PartiesPage({ params }: Props) {
   ).then((response) => {
     return response.json();
   });
-  const transporter=transporterRes;
+  const transporter = transporterRes;
 
   const supplierRes = await fetch(
-    `http://localhost:4080/shipment//supplier/getbyorg/${params?.organizationId}`,
+    `http://localhost:4080/shipment//supplier/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -77,9 +79,9 @@ export default async function PartiesPage({ params }: Props) {
   ).then((response) => {
     return response.json();
   });
-  const supplier=supplierRes;
+  const supplier = supplierRes;
   const consigneeRes = await fetch(
-    `http://localhost:4080/shipment/consignee/getbyorg/${params?.organizationId}`,
+    `http://localhost:4080/shipment/consignee/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -90,8 +92,8 @@ export default async function PartiesPage({ params }: Props) {
   ).then((response) => {
     return response.json();
   });
-  const consignee=consigneeRes;
-  
+  const consignee = consigneeRes;
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -111,7 +113,9 @@ export default async function PartiesPage({ params }: Props) {
       </div>
       <Separator className="my-2" />
       <div>
-        <Tabs defaultValue="shippingLine" className="w-full"> {/* Changed defaultValue */}
+        <Tabs defaultValue="shippingLine" className="w-full">
+          {" "}
+          {/* Changed defaultValue */}
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="shippingLine">
               Shipping Line
@@ -144,8 +148,9 @@ export default async function PartiesPage({ params }: Props) {
               </Badge>
             </TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="shippingLine"> {/* Match value with trigger */}
+          <TabsContent value="shippingLine">
+            {" "}
+            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
@@ -157,7 +162,9 @@ export default async function PartiesPage({ params }: Props) {
               data={shippingLine as any}
             />
           </TabsContent>
-          <TabsContent value="forwarder"> {/* Match value with trigger */}
+          <TabsContent value="forwarder">
+            {" "}
+            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected forwarders?"
@@ -169,7 +176,9 @@ export default async function PartiesPage({ params }: Props) {
               data={forwarder as any}
             />
           </TabsContent>
-          <TabsContent value="transporter"> {/* Match value with trigger */}
+          <TabsContent value="transporter">
+            {" "}
+            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected transporters?"
@@ -181,7 +190,9 @@ export default async function PartiesPage({ params }: Props) {
               data={transporter as any}
             />
           </TabsContent>
-          <TabsContent value="supplier"> {/* Match value with trigger */}
+          <TabsContent value="supplier">
+            {" "}
+            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected suppliers?"
@@ -193,7 +204,9 @@ export default async function PartiesPage({ params }: Props) {
               data={supplier as any}
             />
           </TabsContent>
-          <TabsContent value="consignee"> {/* Match value with trigger */}
+          <TabsContent value="consignee">
+            {" "}
+            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected consignees?"
