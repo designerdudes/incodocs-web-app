@@ -21,7 +21,16 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Transporter } from "./transporterColumn";
+import EditTransporterForm from "./EditTransporterForm"; // Import the EditTransporterForm component
+
+interface Transporter {
+  _id: string;
+  transporterName: string;
+  address: string;
+  responsiblePerson: string;
+  email: string;
+  mobileNo: string;
+}
 
 interface Props {
   data: Transporter;
@@ -30,22 +39,23 @@ interface Props {
 const TransporterCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
   const deleteTransporter = async () => {
     try {
       const result = await deleteData(
         `http://localhost:4080/shipment/transporter/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
+      );
+      toast.success("Transporter Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error deleting transporter:", error);
+      toast.error("Error deleting transporter");
     }
   };
+
   return (
     <div>
-      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -58,28 +68,22 @@ const TransporterCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./`);
-            }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Add Shipping Line
-          </DropdownMenuItem>
-
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./`);
+              GlobalModal.title = `Edit Transporter - ${data.transporterName}`;
+              GlobalModal.description = "Update the details of the transporter below.";
+              GlobalModal.children = (
+                <EditTransporterForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Shipping Line
+            Edit Transporter
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Lot - ${data.transporterName}`;
+              GlobalModal.title = `Delete Transporter - ${data.transporterName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Lot?";
+                "Are you sure you want to delete this transporter?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteTransporter} actionType={"delete"} />
               );
@@ -96,4 +100,4 @@ const TransporterCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default  TransporterCellActions;
+export default TransporterCellActions;

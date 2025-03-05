@@ -21,8 +21,15 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Supplier } from "./supplierColumn";
-import { Consignee } from "./consigneeColumn";
+import EditConsigneeForm from "./EditConsigneeForm"; // Import the EditConsigneeForm component
+
+interface Consignee {
+  _id: string;
+  name: string;
+  address: string;
+  telephoneNo: number;
+  email: string;
+}
 
 interface Props {
   data: Consignee;
@@ -31,22 +38,23 @@ interface Props {
 const ConsigneeCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
   const deleteConsignee = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/consignee/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
+        `http://localhost:4080/shipment/consignee/delete/${data._id}` // Placeholder endpoint
+      );
+      toast.success("Consignee Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error deleting consignee:", error);
+      toast.error("Error deleting consignee");
     }
   };
+
   return (
     <div>
-      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -59,28 +67,22 @@ const ConsigneeCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./`);
-            }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Add Shipping Line
-          </DropdownMenuItem>
-
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./`);
+              GlobalModal.title = `Edit Consignee - ${data.name}`;
+              GlobalModal.description = "Update the details of the consignee below.";
+              GlobalModal.children = (
+                <EditConsigneeForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Shipping Line
+            Edit Consignee
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Lot - ${data.name}`;
+              GlobalModal.title = `Delete Consignee - ${data.name}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Lot?";
+                "Are you sure you want to delete this consignee?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteConsignee} actionType={"delete"} />
               );
@@ -97,4 +99,4 @@ const ConsigneeCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default  ConsigneeCellActions;
+export default ConsigneeCellActions;

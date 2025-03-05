@@ -21,7 +21,17 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Supplier } from "./supplierColumn";
+import EditSupplierForm from "./EditSupplier"; // Import the EditSupplierForm component
+
+interface Supplier {
+  _id: string;
+  supplierName: string;
+  address: string;
+  responsiblePerson: string;
+  mobileNumber: string;
+  state: string;
+  factoryAddress: string;
+}
 
 interface Props {
   data: Supplier;
@@ -30,22 +40,23 @@ interface Props {
 const SupplierCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
   const deleteSupplier = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment//supplier/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
+        `http://localhost:4080/shipment/supplier/delete/${data._id}` // Placeholder endpoint
+      );
+      toast.success("Supplier Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error deleting supplier:", error);
+      toast.error("Error deleting supplier");
     }
   };
+
   return (
     <div>
-      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -58,28 +69,22 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./`);
-            }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Add Shipping Line
-          </DropdownMenuItem>
-
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./`);
+              GlobalModal.title = `Edit Supplier - ${data.supplierName}`;
+              GlobalModal.description = "Update the details of the supplier below.";
+              GlobalModal.children = (
+                <EditSupplierForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Shipping Line
+            Edit Supplier
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Lot - ${data.supplierName}`;
+              GlobalModal.title = `Delete Supplier - ${data.supplierName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Lot?";
+                "Are you sure you want to delete this supplier?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteSupplier} actionType={"delete"} />
               );
@@ -96,4 +101,4 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default  SupplierCellActions;
+export default SupplierCellActions;

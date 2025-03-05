@@ -5,12 +5,10 @@ import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import ConsigneeCellActions from "./consigneeCellAction";
 
-
 export type Consignee = {
   _id: string;
   name: string;
   address: string;
-  responsiblePerson: string;
   telephoneNo: number;
   email: string;
   organizationId: string;
@@ -52,9 +50,7 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original?.name}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.original?.name}</div>,
     filterFn: "includesString",
   },
   {
@@ -73,22 +69,6 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
     ),
     filterFn: "includesString",
     // ensures it filters by includes method (you can define custom filter functions)
-  },
-
-  {
-    accessorKey: "responsiblePerson",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Responsible Person
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original?.responsiblePerson}</div>
-    ),
   },
   {
     accessorKey: "mobileNo",
@@ -119,16 +99,9 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
     cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
   },
   {
-          header: ({ column }) => (
-              <Button
-                  variant="ghost"
-              >
-                  Action
-              </Button>
-          ),
-  
-          id: "actions",
-          cell: ({ row }) => <ConsigneeCellActions data={row.original} />
-      },
-  
+    header: ({ column }) => <Button variant="ghost">Action</Button>,
+
+    id: "actions",
+    cell: ({ row }) => <ConsigneeCellActions data={row.original} />,
+  },
 ];

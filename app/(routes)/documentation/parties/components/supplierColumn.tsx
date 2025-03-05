@@ -5,14 +5,14 @@ import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import SupplierCellActions from "./supplierCellAction";
 
-
 export type Supplier = {
   _id: string;
   supplierName: string;
   address: string;
   responsiblePerson: string;
-  mobileNo: number;
-  email: string;
+  mobileNumber: number;
+  state: string;
+  factoryAddress: string;
   organizationId: string;
 };
 
@@ -102,33 +102,41 @@ export const suppliercolumns: ColumnDef<Supplier>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.mobileNo}</div>
+      <div className="capitalize">{row.original?.mobileNumber}</div>
     ),
   },
   {
-    accessorKey: "email",
+    accessorKey: "state",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Email
+        State
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.original?.state}</div>,
   },
   {
-          header: ({ column }) => (
-              <Button
-                  variant="ghost"
-              >
-                  Action
-              </Button>
-          ),
-  
-          id: "actions",
-          cell: ({ row }) => <SupplierCellActions data={row.original} />
-      },
-  
+    accessorKey: "factoryAddress",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Factory Address
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.factoryAddress}</div>
+    ),
+  },
+  {
+    header: ({ column }) => <Button variant="ghost">Action</Button>,
+
+    id: "actions",
+    cell: ({ row }) => <SupplierCellActions data={row.original} />,
+  },
 ];
