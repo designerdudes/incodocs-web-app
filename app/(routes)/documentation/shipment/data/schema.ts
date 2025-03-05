@@ -13,7 +13,7 @@ export const shipmentSchema = z.object({
       z.object({
         containerNumber: z.string().optional(),
         truckNumber: z.string().optional(),
-        trukDriverContactNumber: z.number().optional(), // Optional since not always present
+        truckDriverContactNumber: z.number().optional(), // Optional since not always present
         addProductDetails: z
           .object({
             tiles: z.object({
