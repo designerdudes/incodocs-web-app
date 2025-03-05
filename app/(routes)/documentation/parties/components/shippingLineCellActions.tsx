@@ -22,6 +22,7 @@ import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { ShippingLine } from "./shippingLineColumn";
 import { Alert } from "@/components/forms/Alert";
+import EditShippingLineForm from "./EditShippingLine"; // Import the EditShippingLine component
 
 interface Props {
   data: ShippingLine;
@@ -30,19 +31,21 @@ interface Props {
 const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
   const deleteShippingLine = async () => {
     try {
       const result = await deleteData(
         `http://localhost:4080/shipment/shippingline/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
+      );
+      toast.success("Shipping Line Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
       console.error("Error deleting data:", error);
+      toast.error("Error deleting shipping line");
     }
   };
+
   return (
     <div>
       {/* Dropdown Menu */}
@@ -58,18 +61,13 @@ const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./`);
-            }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Add Shipping Line
-          </DropdownMenuItem>
-
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./`);
+              // Open the EditShippingLine form in a modal
+              GlobalModal.title = `Edit Shipping Line - ${data.shippingLineName}`;
+              GlobalModal.description = "Update the details of the shipping line below.";
+              GlobalModal.children = (
+                <EditShippingLineForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
@@ -77,9 +75,9 @@ const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Lot - ${data.shippingLineName}`;
+              GlobalModal.title = `Delete Shipping Line - ${data.shippingLineName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Lot?";
+                "Are you sure you want to delete this shipping line?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteShippingLine} actionType={"delete"} />
               );

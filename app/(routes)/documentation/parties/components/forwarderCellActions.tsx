@@ -21,7 +21,16 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Forwarder } from "./forwarderColumn";
+import EditForwarderForm from "./EditForwarderForm"; // Import the EditForwarderForm component
+
+interface Forwarder {
+  _id: string;
+  forwarderName: string;
+  address: string;
+  responsiblePerson: string;
+  email: string;
+  mobileNo: string;
+}
 
 interface Props {
   data: Forwarder;
@@ -30,22 +39,23 @@ interface Props {
 const ForwarderCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
   const deleteForwarder = async () => {
     try {
       const result = await deleteData(
         `http://localhost:4080/shipment/forwarder/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
+      );
+      toast.success("Forwarder Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Error deleting forwarder:", error);
+      toast.error("Error deleting forwarder");
     }
   };
+
   return (
     <div>
-      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -58,28 +68,22 @@ const ForwarderCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              router.push(`./`);
-            }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Add Shipping Line
-          </DropdownMenuItem>
-
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./`);
+              GlobalModal.title = `Edit Forwarder - ${data.forwarderName}`;
+              GlobalModal.description = "Update the details of the forwarder below.";
+              GlobalModal.children = (
+                <EditForwarderForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Shipping Line
+            Edit Forwarder
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Lot - ${data.forwarderName}`;
+              GlobalModal.title = `Delete Forwarder - ${data.forwarderName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Lot?";
+                "Are you sure you want to delete this forwarder?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteForwarder} actionType={"delete"} />
               );
@@ -96,4 +100,4 @@ const ForwarderCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default  ForwarderCellActions;
+export default ForwarderCellActions;
