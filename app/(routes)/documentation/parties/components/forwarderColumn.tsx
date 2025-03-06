@@ -10,7 +10,7 @@ export type Forwarder = {
   forwarderName: string;
   address: string;
   responsiblePerson: string;
-  mobileNo: number;
+  mobileNo: string;
   email: string;
   organizationId: string;
 };
@@ -118,16 +118,16 @@ export const forwardercolumns: ColumnDef<Forwarder>[] = [
     cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
   },
   {
-          header: ({ column }) => (
-              <Button
-                  variant="ghost"
-              >
-                  Action
-              </Button>
-          ),
-  
-          id: "actions",
-          cell: ({ row }) => <ForwarderCellActions data={row.original} />
-      },
-  
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+      >
+        Action
+      </Button>
+    ),
+
+    id: "actions",
+    cell: ({ row }) => <ForwarderCellActions data={row.original} />
+  },
+
 ];
