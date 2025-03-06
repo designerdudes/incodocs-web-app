@@ -10,7 +10,7 @@ export type Transporter = {
   transporterName: string;
   address: string;
   responsiblePerson: string;
-  mobileNo: number;
+  mobileNo: string;
   email: string;
   organizationId: string;
 };
@@ -118,16 +118,16 @@ export const transportercolumns: ColumnDef<Transporter>[] = [
     cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
   },
   {
-          header: ({ column }) => (
-              <Button
-                  variant="ghost"
-              >
-                  Action
-              </Button>
-          ),
-  
-          id: "actions",
-          cell: ({ row }) => <TransporterCellActions data={row.original} />
-      },
-  
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+      >
+        Action
+      </Button>
+    ),
+
+    id: "actions",
+    cell: ({ row }) => <TransporterCellActions data={row.original} />
+  },
+
 ];

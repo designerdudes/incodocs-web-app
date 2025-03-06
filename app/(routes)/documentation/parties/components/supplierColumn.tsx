@@ -10,7 +10,7 @@ export type Supplier = {
   supplierName: string;
   address: string;
   responsiblePerson: string;
-  mobileNumber: number;
+  mobileNumber: string;
   state: string;
   factoryAddress: string;
   organizationId: string;
