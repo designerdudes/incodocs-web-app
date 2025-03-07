@@ -730,7 +730,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         </div>
 
         <div className="mt-4">
-          <Button type="submit">Update Shipping Details</Button>
+          <Button type="submit">Update</Button>
         </div>
       </div>
     </form>

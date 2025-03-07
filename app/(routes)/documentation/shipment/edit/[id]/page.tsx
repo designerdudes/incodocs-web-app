@@ -19,20 +19,39 @@ import { parseISO } from "date-fns";
 
 // Define the schema
 const formSchema = z.object({
+  shipmentId: z.string().optional(),
   bookingDetails: z
     .object({
       bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
       portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-      destinationPort: z.string().min(3, { message: "Required name" }).optional(),
+      destinationPort: z
+        .string()
+        .min(3, { message: "Required name" })
+        .optional(),
       vesselSailingDate: z.date().optional(),
       vesselArrivingDate: z.date().optional(),
       numberOfContainer: z.number().optional(),
       containers: z
         .array(
           z.object({
-            containerNumber: z.string().min(3, { message: "Container Number must be at least 3 characters long" }).optional(),
-            truckNumber: z.string().min(3, { message: "Truck Number must be at least 3 characters long" }).optional(),
-            truckDriverContactNumber: z.string().min(10, { message: "Truck driver number should be 10 characters long" }).optional(),
+            containerNumber: z
+              .string()
+              .min(3, {
+                message: "Container Number must be at least 3 characters long",
+              })
+              .optional(),
+            truckNumber: z
+              .string()
+              .min(3, {
+                message: "Truck Number must be at least 3 characters long",
+              })
+              .optional(),
+            truckDriverContactNumber: z
+              .string()
+              .min(10, {
+                message: "Truck driver number should be 10 characters long",
+              })
+              .optional(),
           })
         )
         .optional(),
@@ -186,6 +205,7 @@ export default function CreateNewFormPage({ params }: Props) {
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      shipmentId: "",
       bookingDetails: {
         bookingNumber: "",
         portOfLoading: "",
@@ -250,15 +270,45 @@ export default function CreateNewFormPage({ params }: Props) {
       ],
     },
   });
-
+  const { watch } = methods;
+  const shipmentId = watch("shipmentId");
   const steps = [
-    { id: 1, name: "Booking Details", component: <BookingDetails shipmentId={params.id} /> },
-    { id: 2, name: "Shipping Bill Details", component: <ShippingBillDetails shipmentId={params.id} /> },
-    { id: 3, name: "Shipping Details", component: <ShippingDetails shipmentId={params.id} /> },
-    { id: 4, name: "Supplier Details", component: <SupplierDetails shipmentId={params.id} /> },
-    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails shipmentId={params.id} /> },
-    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails shipmentId={params.id} /> },
-    { id: 7, name: "Other Details", component: <OtherDetails shipmentId={params.id} /> },
+    {
+      id: 1,
+      name: "Booking Details",
+      component: <BookingDetails shipmentId={params.id} />,
+    },
+    {
+      id: 2,
+      name: "Shipping Details",
+      component: <ShippingDetails shipmentId={params.id} />,
+    },
+    {
+      id: 3,
+      name: "Shipping Bill Details",
+      component: <ShippingBillDetails shipmentId={params.id} />,
+    },
+
+    {
+      id: 4,
+      name: "Supplier Details",
+      component: <SupplierDetails shipmentId={params.id} />,
+    },
+    {
+      id: 5,
+      name: "Sale Invoice Details",
+      component: <SaleInvoiceDetails shipmentId={params.id} />,
+    },
+    {
+      id: 6,
+      name: "Bill of Lading Details",
+      component: <BillOfLadingDetails shipmentId={params.id} />,
+    },
+    {
+      id: 7,
+      name: "Other Details",
+      component: <OtherDetails shipmentId={params.id} />,
+    },
   ];
 
   const totalSteps = steps.length;
@@ -279,13 +329,16 @@ export default function CreateNewFormPage({ params }: Props) {
     async function fetchShipmentData() {
       try {
         setIsFetching(true);
-        const response = await fetch(`http://localhost:4080/shipment/getbyid/${params.id}`);
+        const response = await fetch(
+          `http://localhost:4080/shipment/getbyid/${params.id}`
+        );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
 
         const data = await response.json();
-        console.log("Fetched Data:", JSON.stringify(data, null, 2));
+        // console.log("Fetched Data:", JSON.stringify(data, null, 2));
 
         const updatedValues: FormValues = {
+          shipmentId: data.shipmentId || "",
           bookingDetails: {
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
@@ -297,119 +350,163 @@ export default function CreateNewFormPage({ params }: Props) {
               ? parseISO(data.bookingDetails.vesselArrivingDate)
               : undefined,
             numberOfContainer: data.bookingDetails?.containers?.length || 0,
-            containers: data.bookingDetails?.containers?.map((container: any) => ({
-              containerNumber: container.containerNumber || "",
-              truckNumber: container.truckNumber || "",
-              truckDriverContactNumber: container.truckDriverContactNumber || container.trukDriverContactNumber || "",
-            })) || [],
+            containers:
+              data.bookingDetails?.containers?.map((container: any) => ({
+                containerNumber: container.containerNumber || "",
+                truckNumber: container.truckNumber || "",
+                truckDriverContactNumber:
+                  container.truckDriverContactNumber ||
+                  container.trukDriverContactNumber ||
+                  "",
+              })) || [],
           },
           shippingBillDetails: {
             portCode: data.shippingBillDetails?.portCode || "",
             cbName: data.shippingBillDetails?.cbName || "",
             cbCode: data.shippingBillDetails?.cbCode || "",
             numberOFShippingBill: data.shippingBillDetails?.bills?.length || 0,
-            bills: data.shippingBillDetails?.bills?.map((bill: any) => ({
-              uploadShippingBill: bill.uploadShippingBill || "",
-              shippingBillNumber: bill.shippingBillNumber || "",
-              shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
-              drawbackValue: bill.drawbackValue || "",
-              rodtepValue: bill.rodtepValue || "",
-            })) || [],
+            bills:
+              data.shippingBillDetails?.bills?.map((bill: any) => ({
+                uploadShippingBill: bill.uploadShippingBill || "",
+                shippingBillNumber: bill.shippingBillNumber || "",
+                shippingBillDate: bill.shippingBillDate
+                  ? parseISO(bill.shippingBillDate)
+                  : undefined,
+                drawbackValue: bill.drawbackValue || "",
+                rodtepValue: bill.rodtepValue || "",
+              })) || [],
           },
           shippingDetails: {
-            shippingLine: typeof data.shippingDetails?.shippingLine === "object"
-              ? data.shippingDetails?.shippingLine?._id || ""
-              : data.shippingDetails?.shippingLine || "",
-            numberOfShippingLineInvoices: data.shippingDetails?.shippingLineInvoices?.length || 0,
-            shippingLineInvoices: data.shippingDetails?.shippingLineInvoices?.map((invoice: any) => ({
-              invoiceNumber: invoice.invoiceNumber || "",
-              uploadShippingLineInvoice: invoice.uploadShippingLineInvoice || "",
-              date: invoice.date ? parseISO(invoice.date) : undefined,
-              valueWithGST: invoice.valueWithGST || "",
-              valueWithoutGST: invoice.valueWithoutGST || "",
-            })) || [],
-            forwarderName: typeof data.shippingDetails?.forwarderName === "object"
-              ? data.shippingDetails?.forwarderName?._id || ""
-              : data.shippingDetails?.forwarderName || "",
-            numberOfForwarderInvoices: data.shippingDetails?.forwarderInvoices?.length || 0,
-            forwarderInvoices: data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
-              invoiceNumber: invoice.invoiceNumber || "",
-              uploadForwarderInvoice: invoice.uploadForwarderInvoice || "",
-              date: invoice.date ? parseISO(invoice.date) : undefined,
-              valueWithGST: invoice.valueWithGST || "",
-              valueWithoutGST: invoice.valueWithoutGST || "",
-            })) || [],
-            transporterName: typeof data.shippingDetails?.transporterName === "object"
-              ? data.shippingDetails?.transporterName?._id || ""
-              : data.shippingDetails?.transporterName || "",
-            numberOfTransporterInvoices: data.shippingDetails?.transporterInvoices?.length || 0,
-            transporterInvoices: data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
-              invoiceNumber: invoice.invoiceNumber || "",
-              uploadTransporterInvoice: invoice.uploadTransporterInvoice || "",
-              date: invoice.date ? parseISO(invoice.date) : undefined,
-              valueWithGST: invoice.valueWithGST || "",
-              valueWithoutGST: invoice.valueWithoutGST || "",
-            })) || [],
+            shippingLine:
+              typeof data.shippingDetails?.shippingLine === "object"
+                ? data.shippingDetails?.shippingLine?._id || ""
+                : data.shippingDetails?.shippingLine || "",
+            numberOfShippingLineInvoices:
+              data.shippingDetails?.shippingLineInvoices?.length || 0,
+            shippingLineInvoices:
+              data.shippingDetails?.shippingLineInvoices?.map(
+                (invoice: any) => ({
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  uploadShippingLineInvoice:
+                    invoice.uploadShippingLineInvoice || "",
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGST: invoice.valueWithGST || "",
+                  valueWithoutGST: invoice.valueWithoutGST || "",
+                })
+              ) || [],
+            forwarderName:
+              typeof data.shippingDetails?.forwarderName === "object"
+                ? data.shippingDetails?.forwarderName?._id || ""
+                : data.shippingDetails?.forwarderName || "",
+            numberOfForwarderInvoices:
+              data.shippingDetails?.forwarderInvoices?.length || 0,
+            forwarderInvoices:
+              data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
+                invoiceNumber: invoice.invoiceNumber || "",
+                uploadForwarderInvoice: invoice.uploadForwarderInvoice || "",
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+                valueWithGST: invoice.valueWithGST || "",
+                valueWithoutGST: invoice.valueWithoutGST || "",
+              })) || [],
+            transporterName:
+              typeof data.shippingDetails?.transporterName === "object"
+                ? data.shippingDetails?.transporterName?._id || ""
+                : data.shippingDetails?.transporterName || "",
+            numberOfTransporterInvoices:
+              data.shippingDetails?.transporterInvoices?.length || 0,
+            transporterInvoices:
+              data.shippingDetails?.transporterInvoices?.map(
+                (invoice: any) => ({
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  uploadTransporterInvoice:
+                    invoice.uploadTransporterInvoice || "",
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGST: invoice.valueWithGST || "",
+                  valueWithoutGST: invoice.valueWithoutGST || "",
+                })
+              ) || [],
           },
           supplierDetails: {
             clearance: {
               supplierName: data.supplierDetails?.clearance?.supplierName ?? "",
-              noOfInvoices: data.supplierDetails?.clearance?.invoices?.length || 0,
-              invoices: data.supplierDetails?.clearance?.invoices?.map((invoice: any) => ({
-                supplierGSTN: invoice.supplierGSTN || "",
-                supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
-                supplierInvoiceDate: invoice.supplierInvoiceDate ? parseISO(invoice.supplierInvoiceDate) : undefined,
-                supplierInvoiceValueWithGST: invoice.supplierInvoiceValueWithGST || "",
-                supplierInvoiceValueWithOutGST: invoice.supplierInvoiceValueWithOutGST || "",
-                clearanceSupplierInvoiceUrl: invoice.clearanceSupplierInvoiceUrl || "",
-              })) || [],
+              noOfInvoices:
+                data.supplierDetails?.clearance?.invoices?.length || 0,
+              invoices:
+                data.supplierDetails?.clearance?.invoices?.map(
+                  (invoice: any) => ({
+                    supplierGSTN: invoice.supplierGSTN || "",
+                    supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
+                    supplierInvoiceDate: invoice.supplierInvoiceDate
+                      ? parseISO(invoice.supplierInvoiceDate)
+                      : undefined,
+                    supplierInvoiceValueWithGST:
+                      invoice.supplierInvoiceValueWithGST || "",
+                    supplierInvoiceValueWithOutGST:
+                      invoice.supplierInvoiceValueWithOutGST || "",
+                    clearanceSupplierInvoiceUrl:
+                      invoice.clearanceSupplierInvoiceUrl || "",
+                  })
+                ) || [],
             },
             actual: {
-              actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
-              actualSupplierInvoiceValue: data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
-              actualSupplierInvoiceUrl: data.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
-              shippingBillUrl: data.supplierDetails?.actual?.shippingBillUrl || "",
+              actualSupplierName:
+                data.supplierDetails?.actual?.actualSupplierName || "",
+              actualSupplierInvoiceValue:
+                data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
+              actualSupplierInvoiceUrl:
+                data.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
+              shippingBillUrl:
+                data.supplierDetails?.actual?.shippingBillUrl || "",
             },
           },
           saleInvoiceDetails: {
-            consignee: typeof data.saleInvoiceDetails?.consignee === "object"
-              ? data.saleInvoiceDetails?.consignee?._id || ""
-              : data.saleInvoiceDetails?.consignee || "",
+            consignee:
+              typeof data.saleInvoiceDetails?.consignee === "object"
+                ? data.saleInvoiceDetails?.consignee?._id || ""
+                : data.saleInvoiceDetails?.consignee || "",
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
-            numberOfSalesInvoices: data.saleInvoiceDetails?.invoice?.length || 0,
-            invoice: data.saleInvoiceDetails?.invoice?.map((inv: any) => ({
-              commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
-              clearanceCommercialInvoice: inv.clearanceCommercialInvoice || "",
-              actualCommercialInvoice: inv.actualCommercialInvoice || "",
-              saberInvoice: inv.saberInvoice || "",
-              addProductDetails: inv.addProductDetails || "",
-            })) || [],
+            numberOfSalesInvoices:
+              data.saleInvoiceDetails?.invoice?.length || 0,
+            invoice:
+              data.saleInvoiceDetails?.invoice?.map((inv: any) => ({
+                commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
+                clearanceCommercialInvoice:
+                  inv.clearanceCommercialInvoice || "",
+                actualCommercialInvoice: inv.actualCommercialInvoice || "",
+                saberInvoice: inv.saberInvoice || "",
+                addProductDetails: inv.addProductDetails || "",
+              })) || [],
           },
           blDetails: {
             blNumber: data.blDetails?.blNumber || "",
-            blDate: data.blDetails?.blDate ? parseISO(data.blDetails.blDate) : undefined,
-            telexDate: data.blDetails?.telexDate ? parseISO(data.blDetails.telexDate) : undefined,
+            blDate: data.blDetails?.blDate
+              ? parseISO(data.blDetails.blDate)
+              : undefined,
+            telexDate: data.blDetails?.telexDate
+              ? parseISO(data.blDetails.telexDate)
+              : undefined,
             uploadBL: data.blDetails?.uploadBL || "",
           },
-          otherDetails: data.otherDetails?.length > 0
-            ? data.otherDetails.map((item: any) => ({
-              review: item.review || "",
-              certificateName: item.certificateName || "",
-              certificateNumber: item.certificateNumber || "",
-              date: item.date ? parseISO(item.date) : undefined,
-              issuerOfCertificate: item.issuerOfCertificate || "",
-              uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
-            }))
-            : [
-              {
-                review: "",
-                certificateName: "",
-                certificateNumber: "",
-                date: undefined,
-                issuerOfCertificate: "",
-                uploadCopyOfCertificate: "",
-              },
-            ],
+          otherDetails:
+            data.otherDetails?.length > 0
+              ? data.otherDetails.map((item: any) => ({
+                  review: item.review || "",
+                  certificateName: item.certificateName || "",
+                  certificateNumber: item.certificateNumber || "",
+                  date: item.date ? parseISO(item.date) : undefined,
+                  issuerOfCertificate: item.issuerOfCertificate || "",
+                  uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
+                }))
+              : [
+                  {
+                    review: "",
+                    certificateName: "",
+                    certificateNumber: "",
+                    date: undefined,
+                    issuerOfCertificate: "",
+                    uploadCopyOfCertificate: "",
+                  },
+                ],
         };
 
         methods.reset(updatedValues);
@@ -434,7 +531,10 @@ export default function CreateNewFormPage({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Edit Shipment Details" />
+          <Heading
+            className="leading-tight"
+            title={`Edit Shipment: ${shipmentId || "N/A"}`}
+          />
           <p className="text-muted-foreground text-sm">
             Complete the form below to Edit shipment details.
           </p>
@@ -461,7 +561,9 @@ export default function CreateNewFormPage({ params }: Props) {
       ) : (
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit((data) => console.log("Parent Form Submitted:", data))}
+            onSubmit={methods.handleSubmit((data) =>
+              console.log("Parent Form Submitted:", data)
+            )}
             className="flex flex-col gap-3 w-full p-3"
           >
             <div className="flex justify-between">

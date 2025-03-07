@@ -180,7 +180,7 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
       </div>
 
       <Button type="submit" className="mt-4">
-        Update Other Details
+        Update 
       </Button>
     </form>
   );
