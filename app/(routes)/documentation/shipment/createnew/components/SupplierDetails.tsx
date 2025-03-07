@@ -52,13 +52,12 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     const fetchData = async () => {
       try {
         const supplierResponse = await fetch(
-          "http://localhost:4080/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+          "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const supplierData = await supplierResponse.json();
-        // Map API data to match Entity interface
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
-          name: supplier.name,
+          name: supplier.supplierName, // Matches API response
         }));
         setSupplierNames(mappedSuppliers);
       } catch (error) {
@@ -66,7 +65,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
       }
     };
     fetchData();
-    // Placeholder for shipping bills until API is provided, updated to use _id
+    // Placeholder for shipping bills until API is provided
     setShippingBills([
       { _id: "1", name: "Bill 1" },
       { _id: "2", name: "Bill 2" },
@@ -113,7 +112,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
@@ -134,12 +133,12 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
     GlobalModal.children = (
       <SupplierForm
         onSuccess={() => {
-          fetch("http://localhost:4080/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba")
+          fetch("https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
             .then((data) => {
               const mappedSuppliers = data.map((supplier: any) => ({
                 _id: supplier._id,
-                name: supplier.name,
+                name: supplier.supplierName,
               }));
               setSupplierNames(mappedSuppliers);
             });
@@ -229,7 +228,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                         render={({ field }) => (
                           <FormControl>
                             <Input
-                              placeholder="e.g., GSTIN456"
+                              placeholder="e.g., hsdfjkghog89r"
                               {...field}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
@@ -456,7 +455,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                   displayProperty="name"
                   placeholder="Select a Shipping Bill"
                   onAddNew={() => { }} // Placeholder; add functionality if needed
-                  addNewLabel="Add New Shipping Bill" // Optional, can be removed if not needed
+                  addNewLabel="Add New Shipping Bill"
                 />
               </FormControl>
               <FormMessage />
@@ -469,7 +468,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
           name="supplierDetails.review"
           render={({ field }) => (
             <FormItem className="col-span-4">
-              <FormLabel>Review</FormLabel>
+              <FormLabel>Remarks</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="e.g., this is some random comment"
@@ -481,12 +480,6 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
-
-        <div className="mt-2">
-          <Button type="button" onClick={() => saveProgress(getValues())}>
-            Save Progress
-          </Button>
-        </div>
       </div>
     </div>
   );

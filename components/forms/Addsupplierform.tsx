@@ -12,55 +12,64 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+
 
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
+  gstNo: z.string().min(1, { message: "GST Number is required" }),
   address: z.string().min(1, { message: "Address is required" }),
-  contactPerson: z.string().min(1, { message: "Contact Person is required" }),
-  mobileNo: z
+  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  mobileNumber: z
     .string()
     .min(7, { message: "Mobile number must be at least 7 digits" })
     .transform((val) => parseInt(val, 10))
     .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+  state: z.string().min(1, { message: "State is required" }),
+  factoryAddress: z.string().min(1, { message: "Factory Address is required" }),
 });
 
 interface SupplierFormProps {
   onSuccess?: () => void;
 }
 
-function SupplierForm({ onSuccess }: SupplierFormProps) {
+export default function SupplierForm({ onSuccess }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       supplierName: "",
+      gstNo: "",
       address: "",
-      contactPerson: "",
-      mobileNo: undefined,
-      email: "",
+      responsiblePerson: "",
+      mobileNumber: undefined,
+      state: "",
+      factoryAddress: "",
     },
   });
 
   const GlobalModal = useGlobalModal();
 
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:4080/supplier/create", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipment/supplier/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           supplierName: values.supplierName,
+          gstNo: values.gstNo,
           address: values.address,
-          contactPerson: values.contactPerson,
-          mobileNo: values.mobileNo,
-          email: values.email,
+          responsiblePerson: values.responsiblePerson,
+          mobileNumber: values.mobileNumber,
+          state: values.state,
+          factoryAddress: values.factoryAddress,
+          organizationId: "674b0a687d4f4b21c6c980ba",
         }),
       });
       if (!response.ok) throw new Error("Failed to create supplier");
@@ -79,6 +88,7 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+        {/* Supplier Name */}
         <FormField
           control={form.control}
           name="supplierName"
@@ -86,12 +96,27 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Supplier Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Supplier1" {...field} />
+                <Input placeholder="e.g., ahmed" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {/* GST Number */}
+        <FormField
+          control={form.control}
+          name="gstNo"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>GST Number</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., hsdfjkghog89r" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Address */}
         <FormField
           control={form.control}
           name="address"
@@ -99,35 +124,37 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Sanatnagar" {...field} />
+                <Input placeholder="e.g., hyd" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {/* Responsible Person */}
         <FormField
           control={form.control}
-          name="contactPerson"
+          name="responsiblePerson"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Contact Person</FormLabel>
+              <FormLabel>Responsible Person</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Ahmed" {...field} />
+                <Input placeholder="e.g., khaja" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {/* Mobile Number */}
         <FormField
           control={form.control}
-          name="mobileNo"
+          name="mobileNumber"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Mobile Number</FormLabel>
               <FormControl>
                 <Input
                   type="tel"
-                  placeholder="e.g., 7545345"
+                  placeholder="e.g., 89734"
                   {...field}
                   value={field.value || ""}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -137,19 +164,35 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
+        {/* State */}
         <FormField
           control={form.control}
-          name="email"
+          name="state"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>State</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input placeholder="e.g., telangana" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+        {/* Factory Address */}
+        <FormField
+          control={form.control}
+          name="factoryAddress"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Factory Address</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., mehdipatnam" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
@@ -158,5 +201,3 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
     </Form>
   );
 }
-
-export default SupplierForm;

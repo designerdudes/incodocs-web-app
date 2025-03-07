@@ -4,156 +4,166 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
-import StatsCard from "@/components/statsCard";
-import { documentationCards, FactoryCards } from "@/lib/constants";
 import { useParams } from "next/navigation";
 import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardContent,
-    CardDescription,
-  } from "@/components/ui/card";
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
 import { FiBriefcase, FiFileText, FiGrid } from "react-icons/fi";
 import { MdAccountBalance } from "react-icons/md";
 import { TbFileExport } from "react-icons/tb";
 import { LiaShippingFastSolid, LiaFileInvoiceSolid } from "react-icons/lia";
 import { BiPurchaseTag } from "react-icons/bi";
 import { HiOutlineDocumentCurrencyRupee } from "react-icons/hi2";
+import { HiOutlineUserGroup } from "react-icons/hi";
 
 function FactoryManagementPage() {
-    const params = useParams();
-    const factoryId = params.factoryid as string; // Extract factory ID from route
+  const params = useParams();
+  const factoryId = params.factoryid as string; // Extract factory ID from route
 
-    return (
-        <div className="p-8 bg-gray-50 min-h-screen">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-8">
-                <Link href={`/${factoryId}/dashboard`}>
-                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </Link>
-                <div className="flex-1">
-                    <Heading className="leading-tight" title="Documentation" />
-                    <p className="mt-2 text-gray-600">
-                        Oversee your organisation details efficiently.
-                    </p>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-            <Link href={`/documentation/exportdocs`} passHref>
-          <Card className="bg-white dark:bg-card">
+  return (
+    <div className="p-8 bg-gray-50 min-h-screen">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <Link href={`/${factoryId}/dashboard`}>
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Documentation" />
+          <p className="mt-2 text-gray-600">
+            Oversee your organisation details efficiently.
+          </p>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <Link href={`/documentation/exportdocs`} passHref>
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Export Docs
-              </CardTitle>
-              <TbFileExport  className="w-6 h-6 text-muted-foreground" />
+              <CardTitle className="text-lg font-medium">Export Docs</CardTitle>
+              <TbFileExport className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
-                A comprehensive solution for managing exportdocs, monitoring efficiently.
+                A comprehensive solution for managing exportdocs, monitoring
+                efficiently.
               </CardDescription>
               <p className="text-sm text-gray-700">
-              Track and manage all your export documents with ease, ensuring seamless communication and compliance. Stay updated with real-time status and access essential documents like invoices and packing lists.
+                Track and manage all your export documents with ease, ensuring
+                seamless communication and compliance. Stay updated with
+                real-time status and access essential documents like invoices
+                and packing lists.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href={`/documentation/shipment`} passHref>
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Shipments
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Shipments</CardTitle>
               <LiaShippingFastSolid className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
-                Effortlessly manage your business shipments,
-                ensuring accuracy and easy retrieval.
+                Effortlessly manage your business shipments, ensuring accuracy
+                and easy retrieval.
               </CardDescription>
               <p className="text-sm text-gray-700">
-              Track and manage your shipments efficiently with real-time updates on delivery status and progress. Ensure timely deliveries by monitoring all stages of shipment from dispatch to arrival.
+                Track and manage your shipments efficiently with real-time
+                updates on delivery status and progress. Ensure timely
+                deliveries by monitoring all stages of shipment from dispatch to
+                arrival.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href={`/documentation/invoices`} passHref>
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-              Invoices
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Invoices</CardTitle>
               <LiaFileInvoiceSolid className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
-                Effortlessly manage your business invoices,
-                ensuring accuracy and easy retrieval.
+                Effortlessly manage your business invoices, ensuring accuracy
+                and easy retrieval.
               </CardDescription>
               <p className="text-sm text-gray-700">
-              Easily generate and manage invoices with accurate details and real-time tracking. Stay on top of payments and ensure smooth financial transactions with organized invoice records.
+                Easily generate and manage invoices with accurate details and
+                real-time tracking. Stay on top of payments and ensure smooth
+                financial transactions with organized invoice records.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href={`/documentation/purchaseorder`} passHref>
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">
                 Purchase Order
               </CardTitle>
               <BiPurchaseTag className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
-                Effortlessly manage your business purchaseorder,
-                ensuring accuracy and easy retrieval.
+                Effortlessly manage your business purchaseorder, ensuring
+                accuracy and easy retrieval.
               </CardDescription>
               <p className="text-sm text-gray-700">
-              Efficiently manage and track your purchase orders from creation to delivery. Stay updated with real-time status and ensure timely fulfillment of all orders.
+                Efficiently manage and track your purchase orders from creation
+                to delivery. Stay updated with real-time status and ensure
+                timely fulfillment of all orders.
               </p>
             </CardContent>
           </Card>
         </Link>
         <Link href={`/documentation/quotes`} passHref>
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Quotes
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Quotes</CardTitle>
               <HiOutlineDocumentCurrencyRupee className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
-            <CardContent className="space-y-3">
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
-                Effortlessly manage your business quotes,
-                ensuring accuracy and easy retrieval.
+                Effortlessly manage your business quotes, ensuring accuracy and
+                easy retrieval.
               </CardDescription>
               <p className="text-sm text-gray-700">
-              Generate and manage quotes quickly with accurate pricing and product details. Track quote status and ensure timely follow-ups for seamless customer engagement.
+                Generate and manage quotes quickly with accurate pricing and
+                product details. Track quote status and ensure timely follow-ups
+                for seamless customer engagement.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/documentation/parties`} passHref>
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Parties</CardTitle>
+              <HiOutlineUserGroup className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
+              <CardDescription className="text-base text-gray-600">
+                Easily track and modify details of stakeholders, ensuring
+                efficient coordination and up-to-date records.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                A streamlined system for parties within an organization. Users
+                can add, update details like name, address, and contact info, or
+                delete entries as needed, ensuring accurate and flexible
+                tracking.
               </p>
             </CardContent>
           </Card>
         </Link>
       </div>
-
-                {/* {documentationCards.map((card, index) => (
-                    <StatsCard
-                        key={index}
-                        title={card.title}
-                        stat={card.value}
-                        icon={card.icon}
-                        desc="Detailed insights and analytics"
-                        href={card.buttonUrl}
-                        factoryId="" // Pass dynamic factory ID
-                    />
-                ))} */}
-            </div>
-        
-    );
+    </div>
+  );
 }
 
 export default FactoryManagementPage;

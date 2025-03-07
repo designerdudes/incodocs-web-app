@@ -25,7 +25,8 @@ import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscol
 import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
-import ExportPDFButton from "./Components/ExportPDFButton"
+import ExportCsvButton from "./Components/ExportCsvButton"
+
 
 interface Props {
   params: {
@@ -36,7 +37,7 @@ interface Props {
 export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  
+
 
   const res = await fetch(
     `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
@@ -53,6 +54,7 @@ export default async function Page({ params }: Props) {
     return <div>Error loading shipment data</div>;
   }
   const shipmentData = await res.json();
+  console.log(shipmentData)
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -68,8 +70,9 @@ export default async function Page({ params }: Props) {
             <Heading
               className="leading-tight"
               title={`Shipment: ${
-                shipmentData?.bookingDetails?.bookingNumber || "N/A"
+                shipmentData?.shipmentId || "N/A"
               }`}
+
             />
             <p className="text-muted-foreground text-sm mt-2">
               View and manage shipment details with insights into tracking,
@@ -80,7 +83,7 @@ export default async function Page({ params }: Props) {
             <Link href={`../edit/${params.id}`}>
               <Button variant="outline">Edit</Button>
             </Link>
-            <ExportPDFButton shipmentData={shipmentData} />
+            <ExportCsvButton shipmentData={shipmentData} />
           </div>
         </div>
       </div>
@@ -144,11 +147,11 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselSailingDate
                             ? format(
-                                new Date(
-                                  shipmentData.bookingDetails.vesselSailingDate
-                                ),
-                                "PPP"
-                              )
+                              new Date(
+                                shipmentData.bookingDetails.vesselSailingDate
+                              ),
+                              "PPP"
+                            )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -157,11 +160,11 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselArrivingDate
                             ? format(
-                                new Date(
-                                  shipmentData.bookingDetails.vesselArrivingDate
-                                ),
-                                "PPP"
-                              )
+                              new Date(
+                                shipmentData.bookingDetails.vesselArrivingDate
+                              ),
+                              "PPP"
+                            )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -185,7 +188,7 @@ export default async function Page({ params }: Props) {
                   searchKey="containerNumber"
                   data={shipmentData?.bookingDetails?.containers || []}
                   columns={BookingDetailsColumn}
-                  // showDropdown={true}
+                // showDropdown={true}
                 />
               </div>
             </div>
@@ -244,7 +247,7 @@ export default async function Page({ params }: Props) {
                       shipmentData?.shippingDetails?.shippingLineInvoices || []
                     }
                     columns={ShippingDetailsColumn}
-                    // showDropdown={true}
+                  // showDropdown={true}
                   />
                 </div>
               </div>
@@ -294,7 +297,7 @@ export default async function Page({ params }: Props) {
                       shipmentData?.shippingDetails?.forwarderInvoices || []
                     }
                     columns={ForwarderDetailsColumn}
-                    // showDropdown={true}
+                  // showDropdown={true}
                   />
                 </div>
               </div>
@@ -344,7 +347,7 @@ export default async function Page({ params }: Props) {
                       shipmentData?.shippingDetails?.transporterInvoices || []
                     }
                     columns={TransporterDetailsColumn}
-                    // showDropdown={true}
+                  // showDropdown={true}
                   />
                 </div>
               </div>
@@ -412,7 +415,7 @@ export default async function Page({ params }: Props) {
                   searchKey="shippingBillNumber"
                   data={shipmentData?.shippingBillDetails?.ShippingBills || []}
                   columns={ShippingBillsDetailscolumn}
-                  // showDropdown={true}
+                // showDropdown={true}
                 />
               </div>
             </div>
@@ -443,7 +446,7 @@ export default async function Page({ params }: Props) {
                           <TableCell>Supplier Name</TableCell>
                           <TableCell>
                             {shipmentData?.supplierDetails?.clearance
-                              ?.supplierName || "N/A"}
+                              ?.supplierName?.supplierName || "N/A"}
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -535,7 +538,7 @@ export default async function Page({ params }: Props) {
                     shipmentData?.supplierDetails?.clearance?.invoices || []
                   }
                   columns={SupplierDetailscolumn}
-                  // showDropdown={true}
+                // showDropdown={true}
                 />
               </div>
             </div>
@@ -600,7 +603,7 @@ export default async function Page({ params }: Props) {
                     shipmentData?.saleInvoiceDetails?.commercialInvoices || []
                   }
                   columns={SaleInvoiceDetailscolumn}
-                  // showDropdown={true}
+                // showDropdown={true}
                 />
               </div>
             </div>
@@ -633,9 +636,9 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.blDetails?.blDate
                             ? format(
-                                new Date(shipmentData.blDetails.blDate),
-                                "PPP"
-                              )
+                              new Date(shipmentData.blDetails.blDate),
+                              "PPP"
+                            )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -644,9 +647,9 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.blDetails?.telexDate
                             ? format(
-                                new Date(shipmentData.blDetails.telexDate),
-                                "PPP"
-                              )
+                              new Date(shipmentData.blDetails.telexDate),
+                              "PPP"
+                            )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -692,7 +695,7 @@ export default async function Page({ params }: Props) {
                   searchKey="certificateNumber"
                   data={shipmentData?.otherDetails || []}
                   columns={OtherDetailsColumn}
-                  // showDropdown={true}
+                // showDropdown={true}
                 />
               </div>
             </div>

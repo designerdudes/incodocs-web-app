@@ -29,7 +29,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     const deleteLot = async () => {
         try {
             const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
-            toast.success('Lot Deleted Successfully');
+            toast.success('Purchase Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
         } catch (error) {

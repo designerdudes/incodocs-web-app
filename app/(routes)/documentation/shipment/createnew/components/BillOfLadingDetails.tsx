@@ -54,7 +54,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-    
+
       {/* BL Number */}
       <FormField
         control={control}
@@ -168,13 +168,13 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-{/* Review Field */}
-<FormField
+      {/* Review Field */}
+      <FormField
         control={control}
-        name="saleInvoiceDetails.review"
+        name="BillOfLandingDetails.review"
         render={({ field }) => (
           <FormItem className="col-span-4 mb-4">
-            <FormLabel>Review</FormLabel>
+            <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment for sale invoice details"
@@ -186,12 +186,6 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
-
-      <div className="mt-2">
-        <Button type="button" onClick={() => saveProgress(getValues())}>
-          Save Progress
-        </Button>
-      </div>
     </div>
   );
 }
