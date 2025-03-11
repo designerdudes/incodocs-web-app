@@ -179,7 +179,7 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
       </div>
 
       <Button type="submit" className="mt-4">
-        Update Bill of Lading Details
+        Update
       </Button>
     </form>
   );

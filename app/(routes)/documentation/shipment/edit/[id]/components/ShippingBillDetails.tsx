@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { format } from "date-fns";
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,6 +34,7 @@ interface ShippingBillDetailsProps {
 
 export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
   const { control, setValue, handleSubmit, watch } = useFormContext();
+  const [uploading, setUploading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -53,7 +54,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
     const currentBills = formValues.bills || [];
     if (value > currentBills.length) {
       const newBills = Array(value - currentBills.length).fill(null).map(() => ({
-        uploadShippingBill: "",
+        shippingBillUrl: "", // Changed to match UI field
         shippingBillNumber: "",
         shippingBillDate: undefined,
         drawbackValue: "",
@@ -64,6 +65,30 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
       for (let i = currentBills.length - 1; i >= value; i--) {
         remove(i);
       }
+    }
+  };
+
+  // Handle File Upload
+  const handleFileUpload = async (file: File, fieldName: string) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!response.ok) throw new Error("File upload failed");
+      const data = await response.json();
+      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      setValue(fieldName, storageUrl, { shouldDirty: true });
+      toast.success("File uploaded successfully!");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload file. Please try again.");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -89,8 +114,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
       toast.success("Shipping bill details updated successfully!");
     } catch (error) {
       console.error("Error updating shipping bill details:", error);
-      toast.error(`Failed to update shipping bill details`);
-
+      toast.error("Failed to update shipping bill details");
     }
   };
 
@@ -171,7 +195,6 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                 <Input
                   type="number"
                   placeholder="Enter number"
-                  {...field}
                   value={field.value ?? ""}
                   onChange={(e) => {
                     const value = parseInt(e.target.value, 10);
@@ -207,14 +230,52 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingBillDetails.bills[${index}].uploadShippingBill`}
+                        name={`shippingBillDetails.bills[${index}].shippingBillUrl`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <Input
-                                type="file"
-                                onChange={(e) => field.onChange(e.target.files?.[0])}
-                              />
+                              <div className="flex items-center gap-2">
+                                {field.value ? (
+                                  <div className="flex flex-col gap-2">
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-500 underline"
+                                    >
+                                      Uploaded File
+                                    </a>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => setValue(`shippingBillDetails.bills[${index}].shippingBillUrl`, "", { shouldDirty: true })}
+                                    >
+                                      Remove
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <>
+                                    <Input
+                                      type="file"
+                                      onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                          handleFileUpload(file, `shippingBillDetails.bills[${index}].shippingBillUrl`);
+                                        }
+                                      }}
+                                      disabled={uploading}
+                                    />
+                                    <Button
+                                      variant="secondary"
+                                      className="bg-blue-500 text-white"
+                                      disabled={uploading}
+                                    >
+                                      <UploadCloud className="w-5 h-5 mr-2" />
+                                      {uploading ? "Uploading..." : "Upload"}
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -325,7 +386,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
         )}
       </div>
       <Button type="submit" className="mt-4">
-        Update Shipping Bill Details
+        Update
       </Button>
     </form>
   );

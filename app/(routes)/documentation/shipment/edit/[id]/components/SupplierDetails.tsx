@@ -360,7 +360,7 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
       </div>
 
       <Button type="submit" className="mt-4">
-        Update Supplier Details
+        Update  
       </Button>
     </form>
   );

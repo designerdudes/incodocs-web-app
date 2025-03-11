@@ -307,7 +307,7 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
       </div>
 
       <Button type="submit" className="mt-4">
-        Update Sale Invoice Details
+        Update  
       </Button>
     </form>
   );

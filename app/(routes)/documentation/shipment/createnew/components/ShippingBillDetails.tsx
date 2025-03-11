@@ -82,6 +82,8 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
       });
       const data = await response.json();
       const storageUrl = data.storageLink; // Adjust based on actual API response key
+      console.log(data)
+      console.log(storageUrl)
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
