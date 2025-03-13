@@ -10,7 +10,7 @@ export type Forwarder = {
   forwarderName: string;
   address: string;
   responsiblePerson: string;
-  mobileNo: string;
+  mobileNo: number;
   email: string;
   organizationId: string;
 };
