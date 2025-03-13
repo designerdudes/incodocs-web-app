@@ -31,7 +31,7 @@ export default async function PartiesPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const shippingLineRes = await fetch(
-    `http://localhost:4080/shipment/shippingline/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -45,7 +45,7 @@ export default async function PartiesPage({ params }: Props) {
   const shippingLine = shippingLineRes;
 
   const ForwarderRes = await fetch(
-    `http://localhost:4080/shipment/forwarder/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -59,7 +59,7 @@ export default async function PartiesPage({ params }: Props) {
   const forwarder = ForwarderRes;
 
   const transporterRes = await fetch(
-    `http://localhost:4080/shipment/transporter/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -73,7 +73,7 @@ export default async function PartiesPage({ params }: Props) {
   const transporter = transporterRes;
 
   const supplierRes = await fetch(
-    `http://localhost:4080/shipment//supplier/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment//supplier/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -87,7 +87,7 @@ export default async function PartiesPage({ params }: Props) {
   const supplier = supplierRes;
 
   const consigneeRes = await fetch(
-    `http://localhost:4080/shipment/consignee/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
