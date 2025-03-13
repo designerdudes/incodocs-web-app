@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, useForm } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormField,
@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/table";
 import toast from "react-hot-toast";
 import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+
 
 interface BookingDetailsProps {
   shipmentId: string;
@@ -72,6 +74,9 @@ const formSchema = z.object({
     })
     .optional(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
 export function BookingDetails({ shipmentId }: BookingDetailsProps) {
   const { control, setValue, handleSubmit, watch, trigger } = useFormContext();
   const organizationId = "674b0a687d4f4b21c6c980ba";
