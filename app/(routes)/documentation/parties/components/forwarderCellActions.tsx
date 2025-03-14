@@ -22,15 +22,7 @@ import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
 import EditForwarderForm from "./EditForwarderForm"; // Import the EditForwarderForm component
-
-interface Forwarder {
-  _id: string;
-  forwarderName: string;
-  address: string;
-  responsiblePerson: string;
-  email: string;
-  mobileNo: string;
-}
+import { Forwarder } from "./forwarderColumn";
 
 interface Props {
   data: Forwarder;
