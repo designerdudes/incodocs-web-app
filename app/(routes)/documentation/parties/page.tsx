@@ -1,11 +1,10 @@
 import { DataTable } from "@/components/ui/data-table";
 import { Separator } from "@/components/ui/separator";
-import React from "react";
 import Heading from "@/components/ui/heading";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Plus } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ChevronLeft } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cookies } from "next/headers";
 import { shippingLinecolumns } from "./components/shippingLineColumn";
@@ -13,11 +12,7 @@ import { forwardercolumns } from "./components/forwarderColumn";
 import { transportercolumns } from "./components/transporterColumn";
 import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import PartiesDropdown from "./components/PartiesDropdown";
 
 interface Props {
   params: {
@@ -27,9 +22,10 @@ interface Props {
 
 export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
-  const orgaanisationID = "674b0a687d4f4b21c6c980ba";
+  const orgaanisationID = "674b0a687d4f4b21c6c980ba"; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
 
+  // Fetch data (unchanged)
   const shippingLineRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgaanisationID}`,
     {
@@ -39,9 +35,7 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const shippingLine = shippingLineRes;
 
   const ForwarderRes = await fetch(
@@ -53,9 +47,7 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const forwarder = ForwarderRes;
 
   const transporterRes = await fetch(
@@ -67,13 +59,11 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const transporter = transporterRes;
 
   const supplierRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment//supplier/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -81,9 +71,7 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const supplier = supplierRes;
 
   const consigneeRes = await fetch(
@@ -95,9 +83,7 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const consignee = consigneeRes;
 
   return (
@@ -117,44 +103,11 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
       </div>
-      <Separator className="my-2" />
+      {/* Moved PartiesDropdown here */}
       <div className="flex justify-end mb-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="default" className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Parties
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-2 flex flex-col gap-2">
-            <Link href={`/parties/${orgaanisationID}/shipping-line/add`}>
-              <Button variant="ghost" className="w-full justify-start">
-                Shipping Line
-              </Button>
-            </Link>
-            <Link href={`/parties/${orgaanisationID}/forwarder/add`}>
-              <Button variant="ghost" className="w-full justify-start">
-                Forwarder
-              </Button>
-            </Link>
-            <Link href={`/parties/${orgaanisationID}/transporter/add`}>
-              <Button variant="ghost" className="w-full justify-start">
-                Transporter
-              </Button>
-            </Link>
-            <Link href={`/parties/${orgaanisationID}/supplier/add`}>
-              <Button variant="ghost" className="w-full justify-start">
-                Supplier
-              </Button>
-            </Link>
-            <Link href={`/parties/${orgaanisationID}/consignee/add`}>
-              <Button variant="ghost" className="w-full justify-start">
-                Consignee
-              </Button>
-            </Link>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <PartiesDropdown organizationId={orgaanisationID} />
       </div>
+      <Separator className="my-2" />
       <div>
         <Tabs defaultValue="shippingLine" className="w-full">
           <TabsList className="gap-3">
@@ -231,7 +184,7 @@ export default async function PartiesPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected suppliers?"
               bulkDeleteDescription="This will delete the selected suppliers, and they will not be recoverable."
               bulkDeleteToastMessage="Selected suppliers deleted successfully"
-              deleteRoute="/shipment//supplier/deletemany"
+              deleteRoute="/shipment/supplier/deletemany"
               searchKey="name"
               columns={suppliercolumns}
               data={supplier as any}
