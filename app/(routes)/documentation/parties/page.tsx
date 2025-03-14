@@ -1,11 +1,10 @@
 import { DataTable } from "@/components/ui/data-table";
 import { Separator } from "@/components/ui/separator";
-import React from "react";
 import Heading from "@/components/ui/heading";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { cookies } from "next/headers";
 import { shippingLinecolumns } from "./components/shippingLineColumn";
@@ -13,6 +12,7 @@ import { forwardercolumns } from "./components/forwarderColumn";
 import { transportercolumns } from "./components/transporterColumn";
 import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
+import PartiesDropdown from "./components/PartiesDropdown";
 
 interface Props {
   params: {
@@ -22,10 +22,12 @@ interface Props {
 
 export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
-  const orgaanisationID = "674b0a687d4f4b21c6c980ba";
+  const orgaanisationID = "674b0a687d4f4b21c6c980ba"; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
+
+  // Fetch data (unchanged)
   const shippingLineRes = await fetch(
-    `http://localhost:4080/shipment/shippingline/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -33,14 +35,11 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const shippingLine = shippingLineRes;
-  console.log(shippingLine);
 
   const ForwarderRes = await fetch(
-    `http://localhost:4080/shipment/forwarder/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -48,13 +47,11 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const forwarder = ForwarderRes;
 
   const transporterRes = await fetch(
-    `http://localhost:4080/shipment/transporter/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -62,13 +59,11 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const transporter = transporterRes;
 
   const supplierRes = await fetch(
-    `http://localhost:4080/shipment//supplier/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -76,12 +71,11 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const supplier = supplierRes;
+
   const consigneeRes = await fetch(
-    `http://localhost:4080/shipment/consignee/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgaanisationID}`,
     {
       method: "GET",
       headers: {
@@ -89,9 +83,7 @@ export default async function PartiesPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
   const consignee = consigneeRes;
 
   return (
@@ -111,108 +103,100 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
       </div>
+      {/* Moved PartiesDropdown here */}
+      <div className="flex justify-end mb-4">
+        <PartiesDropdown organizationId={orgaanisationID} />
+      </div>
       <Separator className="my-2" />
       <div>
         <Tabs defaultValue="shippingLine" className="w-full">
-          {" "}
-          {/* Changed defaultValue */}
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="shippingLine">
               Shipping Line
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {shippingLine?.length}
+                {shippingLine?.length ?? 0}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="forwarder">
               Forwarder
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {forwarder?.length}
+                {forwarder?.length ?? 0}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="transporter">
               Transporter
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {transporter?.length}
+                {transporter?.length ?? 0}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="supplier">
               Supplier
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {supplier?.length}
+                {supplier?.length ?? 0}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="consignee">
               Consignee
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {consignee?.length}
+                {consignee?.length ?? 0}
               </Badge>
             </TabsTrigger>
           </TabsList>
           <TabsContent value="shippingLine">
-            {" "}
-            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
               bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
               bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-              deleteRoute="/shipment/shippingline/deletemultiple"
+              deleteRoute="/shipment/shippingline/deletemany"
               searchKey="name"
               columns={shippingLinecolumns}
               data={shippingLine as any}
             />
           </TabsContent>
           <TabsContent value="forwarder">
-            {" "}
-            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected forwarders?"
               bulkDeleteDescription="This will delete the selected forwarders, and they will not be recoverable."
               bulkDeleteToastMessage="Selected forwarders deleted successfully"
-              deleteRoute="/shipment/forwarder/deletemultiple"
+              deleteRoute="/shipment/forwarder/deletemany"
               searchKey="name"
               columns={forwardercolumns}
               data={forwarder as any}
             />
           </TabsContent>
           <TabsContent value="transporter">
-            {" "}
-            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected transporters?"
               bulkDeleteDescription="This will delete the selected transporters, and they will not be recoverable."
               bulkDeleteToastMessage="Selected transporters deleted successfully"
-              deleteRoute="/shipment/transporter/deletemultiple"
+              deleteRoute="/shipment/transporter/deletemany"
               searchKey="name"
               columns={transportercolumns}
               data={transporter as any}
             />
           </TabsContent>
           <TabsContent value="supplier">
-            {" "}
-            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected suppliers?"
               bulkDeleteDescription="This will delete the selected suppliers, and they will not be recoverable."
               bulkDeleteToastMessage="Selected suppliers deleted successfully"
-              deleteRoute="/shipment/supplier/deletemultiple"
+              deleteRoute="/shipment/supplier/deletemany"
               searchKey="name"
               columns={suppliercolumns}
               data={supplier as any}
             />
           </TabsContent>
           <TabsContent value="consignee">
-            {" "}
-            {/* Match value with trigger */}
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected consignees?"
               bulkDeleteDescription="This will delete the selected consignees, and they will not be recoverable."
               bulkDeleteToastMessage="Selected consignees deleted successfully"
-              deleteRoute="/shipment/consignee/deletemultiple"
+              deleteRoute="/shipment/consignee/deletemany"
               searchKey="name"
               columns={consigneecolumns}
               data={consignee as any}

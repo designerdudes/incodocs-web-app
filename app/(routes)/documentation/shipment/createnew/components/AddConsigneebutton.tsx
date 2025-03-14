@@ -1,30 +1,29 @@
-"use client"; // Ensures the component is client-side
+"use client";
 
-import { Button } from "@/components/ui/button"; // Button component
-import { useGlobalModal } from "@/hooks/GlobalModal"; // Zustand store hook
+import { Button } from "@/components/ui/button";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 
-// AddFactoryButton Component
-export default function AddConsigneeButton() {
-  const { onOpen, setTitle, setChildren } = useGlobalModal((state) => ({
-    onOpen: state.onOpen,
-    setTitle: state.setTitle,
-    setChildren: state.setChildren,
-  }));
+interface AddConsigneeButtonProps {
+  onSuccess?: () => void;
+}
 
-  // Function to open the modal and set content
+export default function AddConsigneeButton({ onSuccess }: AddConsigneeButtonProps) {
+  const { onOpen, setTitle, setChildren } = useGlobalModal();
+
   const openConsigneeForm = () => {
-    setTitle("Enter Consignee Details"); // Set the title of the modal
-    setChildren(<AddConsigneeForm />); // Set the form (or any component) as modal content
-    onOpen(); // Open the modal
+    setTitle("Enter Consignee Details");
+    setChildren(<AddConsigneeForm onSuccess={onSuccess} />);
+    onOpen();
   };
 
   return (
     <Button
-      className="mt-3 px-4 py-3 primary"
-      onClick={openConsigneeForm} // Trigger modal open
+      variant="ghost"
+      className="w-full justify-start hover:bg-gray-100"
+      onClick={openConsigneeForm}
     >
-      Add Consignee
+      Consignee
     </Button>
   );
 }
