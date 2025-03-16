@@ -20,10 +20,16 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.string().email({ message: "Enter a valid email" }),
-  telephoneNo: z
-    .string()
-    .min(10, { message: "Number must be at least 10 digits" })
-    .max(15, { message: "Number cannot exceed 15 digits" }),
+  mobileNo: z.union([z.string(), z.number()]).refine(
+    (val) => {
+      const strVal = val.toString();
+      return strVal.length >= 10 && /^\d+$/.test(strVal);
+    },
+    {
+      message:
+        "Mobile number must be at least 10 digits and contain only numbers",
+    }
+  ),
   address: z.string().min(1, { message: "Address is required" }),
 });
 
@@ -39,7 +45,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
     defaultValues: {
       name: "",
       email: "",
-      telephoneNo: undefined,
+      mobileNo: "",
       address: "",
     },
   });
@@ -51,15 +57,18 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
       const payload = {
         name: values.name,
         email: values.email,
-        telephoneNo: values.telephoneNo,
+        mobileNo: values.mobileNo,
         address: values.address,
         organizationId: "674b0a687d4f4b21c6c980ba",
       };
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/consignee/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/consignee/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create consignee");
       await response.json();
       setIsLoading(false);
@@ -108,7 +117,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
         {/* Consignee Number */}
         <FormField
           control={form.control}
-          name="telephoneNo"
+          name="mobileNo"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Consignee Number</FormLabel>

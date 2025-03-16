@@ -26,7 +26,7 @@ const formSchema = z.object({
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
-  telephoneNo: z
+  mobileNo: z
     .union([z.string(), z.number()])
     .refine((val) => {
       const strVal = val.toString();
@@ -54,7 +54,7 @@ export default function EditConsigneeForm({ params }: Props) {
     defaultValues: {
       name: "",
       address: "",
-      telephoneNo: "",
+      mobileNo: "",
       email: "",
     },
   });
@@ -78,7 +78,7 @@ export default function EditConsigneeForm({ params }: Props) {
         form.reset({
           name: data.name || "",
           address: data.address || "",
-          telephoneNo: data.telephoneNo || "",
+          mobileNo: data.mobileNo || "",
           email: data.email || "",
         });
       } catch (error) {
@@ -100,7 +100,7 @@ export default function EditConsigneeForm({ params }: Props) {
       <div className="space-y-4">
         <p>Consignee Name: {values.name}</p>
         <p>Address: {values.address}</p>
-        <p>Mobile No: {values.telephoneNo}</p>
+        <p>Mobile No: {values.mobileNo}</p>
         <p>Email: {values.email}</p>
         <div className="flex justify-end space-x-2">
           <Button
@@ -184,7 +184,7 @@ export default function EditConsigneeForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="telephoneNo"
+            name="mobileNo"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Mobile No</FormLabel>
