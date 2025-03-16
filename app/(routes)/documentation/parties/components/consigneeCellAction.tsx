@@ -27,7 +27,7 @@ interface Consignee {
   _id: string;
   name: string;
   address: string;
-  telephoneNo: number;
+  mobileNo: number;
   email: string;
 }
 
