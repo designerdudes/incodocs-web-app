@@ -35,7 +35,7 @@ const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
   const deleteShippingLine = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/shippingline/delete/${data._id}`
+        `https://incodocs-server.onrender.com/shipment/shippingline/delete/${data._id}`
       );
       toast.success("Shipping Line Deleted Successfully");
       GlobalModal.onClose();

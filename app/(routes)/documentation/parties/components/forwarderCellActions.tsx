@@ -35,7 +35,7 @@ const ForwarderCellActions: React.FC<Props> = ({ data }) => {
   const deleteForwarder = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/forwarder/delete/${data._id}`
+        `https://incodocs-server.onrender.com/shipment/forwarder/delete/${data._id}`
       );
       toast.success("Forwarder Deleted Successfully");
       GlobalModal.onClose();
