@@ -65,6 +65,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Consignee created successfully");
+      window.location.reload();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating consignee:", error);
