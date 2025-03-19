@@ -3,6 +3,9 @@ import * as React from "react";
 import * as z from "zod";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 import {
   FormControl,
   FormField,
@@ -20,7 +23,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, Trash ,ChevronsUpDown} from "lucide-react";
 import {
   Table,
   TableBody,
@@ -99,7 +102,6 @@ const formSchema = z
       .number()
       .min(1, { message: "No of Blocks must be greater than 0" })
       .optional(),
-
     slabs: z
       .array(
         z.object({
@@ -139,38 +141,76 @@ const formSchema = z
 export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [purchaseType, setPurchaseType] = React.useState<"Raw" | "Finished">(
-    "Raw"
-  );
+  const [supplierLoading, setSupplierLoading] = React.useState(false);
+  const [purchaseType, setPurchaseType] = React.useState<"Raw" | "Finished">("Raw");
   const [blocks, setBlocks] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyWeightToAll, setApplyWeightToAll] =
-    React.useState<boolean>(false);
-  const [applyLengthToAll, setApplyLengthToAll] =
-    React.useState<boolean>(false);
-  const [applyBreadthToAll, setApplyBreadthToAll] =
-    React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] =
-    React.useState<boolean>(false);
+  const [applyWeightToAll, setApplyWeightToAll] = React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
+  const [applyBreadthToAll, setApplyBreadthToAll] = React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
+  const [supplierNames, setSupplierNames] = React.useState<{ _id: string; name: string }[]>([]);
+
+  // Define purchaseTypeOptions
+  const purchaseTypeOptions = [
+    { _id: "1", name: "Raw" },
+    { _id: "2", name: "Finished" },
+  ];
+
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       SupplierName: "",
+      SupplierId: "",
       supplierGSTN: "",
       purchaseDate: "",
       purchaseType: "Raw",
       rate: 0,
+      invoiceNo: "",
+      invoiceValue: 0,
+      gstPercentage: "0%",
       blocks: [],
     },
   });
+
+  React.useEffect(() => {
+    const fetchSuppliers = async () => {
+      setSupplierLoading(true);
+      try {
+        const response = await fetch(
+          "https://incodocs-server.onrender.com/accounting/supplier/getall"
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const supplierData = await response.json();
+        const mappedSuppliers = supplierData.map((supplier: any) => ({
+          _id: supplier._id,
+          name: supplier.supplierName,
+        }));
+        setSupplierNames(mappedSuppliers);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        toast.error("Failed to load suppliers");
+      } finally {
+        setSupplierLoading(false);
+      }
+    };
+    fetchSuppliers();
+  }, []);
+
+  const handleAddNewSupplier = () => {
+    toast("Add new supplier functionality to be implemented");
+  };
+
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
-
     if (!isNaN(count) && count > 0) {
       const newBlocks = Array.from({ length: count }, (_, index) => ({
         dimensions: {
@@ -180,17 +220,18 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
           height: { value: 0, units: "inch" as "inch" },
         },
       }));
-
       setBlocks(newBlocks);
       form.setValue("blocks", newBlocks);
+      form.setValue("noOfBlocks", count);
     } else {
       setBlocks([]);
       form.setValue("blocks", []);
+      form.setValue("noOfBlocks", undefined);
     }
   }
+
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
-
     if (!isNaN(count) && count > 0) {
       const newSlabs = Array.from({ length: count }, (_, index) => ({
         dimensions: {
@@ -198,12 +239,13 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
           height: { value: 0, units: "inch" as "inch" },
         },
       }));
-
       setBlocks(newSlabs);
       form.setValue("slabs", newSlabs);
+      form.setValue("noOfSlabs", count);
     } else {
       setBlocks([]);
       form.setValue("slabs", []);
+      form.setValue("noOfSlabs", undefined);
     }
   }
 
@@ -223,6 +265,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
     }
     router.refresh();
   }
+
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
@@ -233,12 +276,14 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
       inM: totalVolumeInM,
     };
   }
+
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
+
   function calculateTotalSqft(): string {
     const slabs = form.getValues("slabs") || [];
     const totalSqft = slabs.reduce((sum, slab) => {
@@ -246,7 +291,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
       const heightInFeet = (slab.dimensions.height.value || 0) / 12;
       return sum + lengthInFeet * heightInFeet;
     }, 0);
-    return totalSqft.toFixed(2); // Round to 2 decimal places
+    return totalSqft.toFixed(2);
   }
 
   return (
@@ -260,51 +305,27 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Supplier Name</FormLabel>
+                  <FormLabel>Select Supplier</FormLabel>
                   <FormControl>
-                    <Input placeholder="Xyz" disabled={isLoading} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Supplier ID */}
-            <FormField
-              name="SupplierId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supplier ID</FormLabel>
-                  <FormControl>
-                    <select
-                      disabled={isLoading}
-                      {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
-                    >
-                      <option value="674ed28087fc4dd914ea444d">
-                        674ed28087fc4dd914ea444d
-                      </option>
-                    </select>
+                    <EntityCombobox
+                      entities={supplierNames}
+                      value={field.value || ""}
+                      onChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      displayProperty="name"
+                      placeholder="Select a Supplier Name"
+                      onAddNew={handleAddNewSupplier}
+                      addNewLabel="Add New Supplier"
+                      disabled={isLoading || supplierLoading}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Supplier GSTN */}
-            <FormField
-              name="supplierGSTN"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supplier GSTN</FormLabel>
-                  <FormControl>
-                    <Input placeholder="GSTN" disabled={isLoading} {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           
 
             {/* Purchase Date */}
             <FormField
@@ -368,6 +389,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 </FormItem>
               )}
             />
+
             {/* Invoice Value */}
             <FormField
               name="invoiceValue"
@@ -381,12 +403,14 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             {/* GST Percentage */}
             <FormField
               name="gstPercentage"
@@ -412,32 +436,33 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
               )}
             />
 
-            {/* Purchase Type */}
-            <FormField
-              name="purchaseType"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Purchase Type</FormLabel>
-                  <FormControl>
-                    <select
-                      disabled={isLoading}
-                      {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
-                      onChange={(e) => {
-                        field.onChange(e);
-                        setPurchaseType(e.target.value as "Raw" | "Finished");
-                      }}
-                    >
-                      <option value="Raw">Raw</option>
-                      <option value="Finished">Finished</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
+{/* Purchase Type */}
+<FormField
+  name="purchaseType"
+  control={form.control}
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Purchase Type</FormLabel>
+      <FormControl>
+        <div className="relative w-full">
+          <Select
+            disabled={isLoading}
+            onValueChange={(value) => setPurchaseType(value as "Raw" | "Finished")}
+          >
+            <SelectTrigger className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-2 px-3 bg-white text-black hover:bg-gray-200 hover:text-blue-600 transition-all duration-150 ease-in-out">
+              <SelectValue placeholder="Select Purchase Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Raw">Raw</SelectItem>
+              <SelectItem value="Finished">Finished</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
             {/* Rate (Dynamic Field) */}
             <FormField
               name="rate"
@@ -445,9 +470,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    {purchaseType === "Raw"
-                      ? "Rate per Cubic Meter"
-                      : "Rate per Sqft"}
+                    {purchaseType === "Raw" ? "Rate per Cubic Meter" : "Rate per Sqft"}
                   </FormLabel>
                   <FormControl>
                     <Input
@@ -458,7 +481,8 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       }
                       type="number"
                       disabled={isLoading}
-                      value={field.value === 0 ? "" : field.value}
+                      {...field}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -484,10 +508,10 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                           type="number"
                           disabled={isLoading}
                           onChange={(e) => {
-                            field.onChange(e); // Updates form state
-                            handleBlocksInputChange(e.target.value); // Calls the function
+                            field.onChange(parseInt(e.target.value) || undefined);
+                            handleBlocksInputChange(e.target.value);
                           }}
-                          value={field.value}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -576,7 +600,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                     <TableHead>Breadth (cm)</TableHead>
                     <TableHead>Height (cm)</TableHead>
                     <TableHead>Volume(m³)</TableHead>
-                    <TableHead> Vehicle Number </TableHead>
+                    <TableHead>Vehicle Number</TableHead>
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -668,7 +692,6 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                             const updatedBlocks = blocks.filter(
                               (_, i) => i !== index
                             );
-
                             setBlocks(updatedBlocks);
                             form.setValue("blocks", updatedBlocks);
                           }}
@@ -685,7 +708,6 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                       Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                     </TableCell>
                   </TableRow>
-                  <TableRow></TableRow>
                 </TableFooter>
               </Table>
             </>
@@ -708,10 +730,10 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                           type="number"
                           disabled={isLoading}
                           onChange={(e) => {
-                            field.onChange(e); // Updates form state
-                            handleSlabsInputChange(e.target.value); // Calls the function
+                            field.onChange(parseInt(e.target.value) || undefined);
+                            handleSlabsInputChange(e.target.value);
                           }}
-                          value={field.value}
+                          value={field.value || ""}
                         />
                       </FormControl>
                       <FormMessage />
@@ -766,7 +788,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                               },
                             }));
                             setBlocks(updatedBlocks);
-                            form.setValue("blocks", updatedBlocks);
+                            form.setValue("slabs", updatedBlocks);
                           }
                         }}
                       />{" "}
@@ -779,12 +801,9 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
-
                     <TableHead>Length (inch)</TableHead>
-
                     <TableHead>Height (inch)</TableHead>
                     <TableHead>Area (sqft)</TableHead>
-
                     <TableHead>Action</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -792,7 +811,6 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                   {blocks.map((slab, index) => (
                     <TableRow key={index}>
                       <TableCell>{index + 1}</TableCell>
-
                       <TableCell>
                         <Input
                           type="number"
@@ -803,7 +821,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                             updatedSlabs[index].dimensions.length.value =
                               parseFloat(e.target.value) || 0;
                             setBlocks(updatedSlabs);
-                            form.setValue("blocks", updatedSlabs);
+                            form.setValue("slabs", updatedSlabs);
                           }}
                           disabled={isLoading}
                         />
@@ -818,7 +836,7 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                             updatedBlocks[index].dimensions.height.value =
                               parseFloat(e.target.value) || 0;
                             setBlocks(updatedBlocks);
-                            form.setValue("blocks", updatedBlocks);
+                            form.setValue("slabs", updatedBlocks);
                           }}
                           disabled={isLoading}
                         />
@@ -838,9 +856,8 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                             const updatedBlocks = blocks.filter(
                               (_, i) => i !== index
                             );
-
                             setBlocks(updatedBlocks);
-                            form.setValue("blocks", updatedBlocks);
+                            form.setValue("slabs", updatedBlocks);
                           }}
                         >
                           <Trash className="h-4 w-4" />
@@ -851,18 +868,17 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    <TableCell colSpan={8} className="text-right font-bold">
+                    <TableCell colSpan={5} className="text-right font-bold">
                       Total Area (sqft): {calculateTotalSqft()}
                     </TableCell>
                   </TableRow>
-                  <TableRow></TableRow>
                 </TableFooter>
               </Table>
             </>
           )}
 
           <Button type="submit" disabled={isLoading}>
-            Submit
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </form>
       </Form>
