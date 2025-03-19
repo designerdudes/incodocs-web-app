@@ -9,7 +9,7 @@ export type Consignee = {
   _id: string;
   name: string;
   address: string;
-  telephoneNo: number;
+  mobileNo: number;
   email: string;
   organizationId: string;
 };
@@ -82,7 +82,7 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.telephoneNo}</div>
+      <div className="capitalize">{row.original?.mobileNo}</div>
     ),
   },
   {

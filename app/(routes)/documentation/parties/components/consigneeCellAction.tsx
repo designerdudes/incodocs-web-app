@@ -27,7 +27,7 @@ interface Consignee {
   _id: string;
   name: string;
   address: string;
-  telephoneNo: number;
+  mobileNo: number;
   email: string;
 }
 
@@ -42,7 +42,7 @@ const ConsigneeCellActions: React.FC<Props> = ({ data }) => {
   const deleteConsignee = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/consignee/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/shipment/consignee/delete/${data._id}` // Placeholder endpoint
       );
       toast.success("Consignee Deleted Successfully");
       GlobalModal.onClose();

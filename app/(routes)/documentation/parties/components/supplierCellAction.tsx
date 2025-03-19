@@ -44,7 +44,7 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
   const deleteSupplier = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/supplier/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/shipment/supplier/delete/${data._id}` // Placeholder endpoint
       );
       toast.success("Supplier Deleted Successfully");
       GlobalModal.onClose();
