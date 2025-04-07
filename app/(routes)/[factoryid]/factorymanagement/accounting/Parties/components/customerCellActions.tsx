@@ -21,30 +21,29 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import EditSupplierForm from "./EditSupplier"; // Import the EditSupplierForm component
+import EditCustomerForm from "./forms/CustomerEditForm";
 
 interface Supplier {
   _id: string;
-  supplierName: string;
-  address: string;
-  responsiblePerson: string;
-  mobileNumber: string;
+  customerName: string;
+  gstNo: string;
+  mobileNumber: number;
   state: string;
-  factoryAddress: string;
+  address: string;
 }
 
 interface Props {
   data: Supplier;
 }
 
-const SupplierCellActions: React.FC<Props> = ({ data }) => {
+const Customercellactions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
 
-  const deleteSupplier = async () => {
+  const deleteCustomer = async () => {
     try {
       const result = await deleteData(
-        `https://incodocs-server.onrender.com/shipment/supplier/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/accounting//customer/delete/${data._id}` // Placeholder endpoint
       );
       toast.success("Supplier Deleted Successfully");
       GlobalModal.onClose();
@@ -69,24 +68,25 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Supplier - ${data.supplierName}`;
-              GlobalModal.description = "Update the details of the supplier below.";
+              GlobalModal.title = `Edit Customer - ${data.customerName}`;
+              GlobalModal.description =
+                "Update the details of the Customer below.";
               GlobalModal.children = (
-                <EditSupplierForm params={{ _id: data._id }} />
+                <EditCustomerForm params={{ _id: data._id }} />
               );
               GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Supplier
+            Edit Customer
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Supplier - ${data.supplierName}`;
+              GlobalModal.title = `Delete Supplier - ${data.customerName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this supplier?";
+                "Are you sure you want to delete this Customer?";
               GlobalModal.children = (
-                <Alert onConfirm={deleteSupplier} actionType={"delete"} />
+                <Alert onConfirm={deleteCustomer} actionType={"delete"} />
               );
               GlobalModal.onOpen();
             }}
@@ -101,4 +101,4 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default SupplierCellActions;
+export default Customercellactions;

@@ -99,6 +99,10 @@ const data = {
                             title: "GST Ledger",
                             url: "/factorymanagement/accounting/GSTLedger",
                         },
+                        {
+                            title: "Ledger",
+                            url: "/factorymanagement/accounting/Parties",
+                        },
                     ],
                 },
             ],

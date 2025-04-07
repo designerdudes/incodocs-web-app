@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import ConsigneeCellActions from "./consigneeCellAction";
+import CustomerCellActions from "./customerCellActions"; // Fixed naming
 
-export type Consignee = {
+export type Customer = {
   _id: string;
-  name: string;
+  customerName: string;
+  gstNo: string;
+  mobileNumber: number;
+  state: string;
   address: string;
-  mobileNo: number;
-  email: string;
-  organizationId: string;
 };
 
-export const consigneecolumns: ColumnDef<Consignee>[] = [
+export const customercolumns: ColumnDef<Customer>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,38 +40,37 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "customerName",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Consignee Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.name}</div>,
-    filterFn: "includesString",
-  },
-  {
-    accessorKey: "address",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Address
+        Customer Name
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.address}</div>
+      <div className="capitalize">{row.original.customerName}</div>
     ),
     filterFn: "includesString",
-    // ensures it filters by includes method (you can define custom filter functions)
   },
   {
-    accessorKey: "mobileNo",
+    accessorKey: "gstNo",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        GST NO
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.gstNo}</div>,
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "mobileNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -82,26 +81,38 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.mobileNo}</div>
+      <div className="capitalize">{row.original.mobileNumber}</div>
     ),
   },
   {
-    accessorKey: "email",
+    accessorKey: "state",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Email
+        State
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.original.state}</div>,
   },
   {
-    header: ({ column }) => <Button variant="ghost">Action</Button>,
-
+    accessorKey: "address", // Fixed accessorKey to match Customer type
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Address
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.address}</div>,
+  },
+  {
     id: "actions",
-    cell: ({ row }) => <ConsigneeCellActions data={row.original} />,
+    header: () => <Button variant="ghost">Action</Button>,
+    cell: ({ row }) => <CustomerCellActions data={row.original} />,
   },
 ];

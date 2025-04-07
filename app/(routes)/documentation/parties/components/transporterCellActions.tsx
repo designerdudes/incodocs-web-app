@@ -43,7 +43,7 @@ const TransporterCellActions: React.FC<Props> = ({ data }) => {
   const deleteTransporter = async () => {
     try {
       const result = await deleteData(
-        `http://localhost:4080/shipment/transporter/delete/${data._id}`
+        `https://incodocs-server.onrender.com/shipment/transporter/delete/${data._id}`
       );
       toast.success("Transporter Deleted Successfully");
       GlobalModal.onClose();

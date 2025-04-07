@@ -3,18 +3,18 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import ConsigneeCellActions from "./consigneeCellAction";
+import SupplierCellActions from "./supplierCellActions"; // Fixed naming
 
-export type Consignee = {
+export type Supplier = {
   _id: string;
-  name: string;
-  address: string;
-  mobileNo: number;
-  email: string;
-  organizationId: string;
+  supplierName: string;
+  gstNo: string;
+  mobileNumber: number;
+  state: string;
+  factoryAddress: string;
 };
 
-export const consigneecolumns: ColumnDef<Consignee>[] = [
+export const suppliercolumns: ColumnDef<Supplier>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -23,9 +23,7 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
     ),
@@ -40,38 +38,35 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "supplierName",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Consignee Name
+        Supplier Name
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.name}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.original.supplierName}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "address",
+    accessorKey: "gstNo",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Address
+        GST NO
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original?.address}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.gstNo}</div>,
     filterFn: "includesString",
-    // ensures it filters by includes method (you can define custom filter functions)
   },
   {
-    accessorKey: "mobileNo",
+    accessorKey: "mobileNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -81,27 +76,37 @@ export const consigneecolumns: ColumnDef<Consignee>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original?.mobileNo}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.mobileNumber}</div>,
   },
   {
-    accessorKey: "email",
+    accessorKey: "state",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Email
+        State
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.original.state}</div>,
   },
   {
-    header: ({ column }) => <Button variant="ghost">Action</Button>,
-
+    accessorKey: "factoryAddress",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Factory Address
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.factoryAddress}</div>,
+  },
+  {
     id: "actions",
-    cell: ({ row }) => <ConsigneeCellActions data={row.original} />,
+    header: () => <Button variant="ghost">Action</Button>,
+    cell: ({ row }) => <SupplierCellActions data={row.original} />,
   },
 ];

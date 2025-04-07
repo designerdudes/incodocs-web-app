@@ -21,14 +21,13 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import EditSupplierForm from "./EditSupplier"; // Import the EditSupplierForm component
+import EditSupplierForm from "./forms/SupplierEditForm";
 
 interface Supplier {
   _id: string;
   supplierName: string;
-  address: string;
-  responsiblePerson: string;
-  mobileNumber: string;
+  gstNo: string;
+  mobileNumber: number;
   state: string;
   factoryAddress: string;
 }
@@ -37,14 +36,14 @@ interface Props {
   data: Supplier;
 }
 
-const SupplierCellActions: React.FC<Props> = ({ data }) => {
+const Suppliercellactions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
 
   const deleteSupplier = async () => {
     try {
       const result = await deleteData(
-        `https://incodocs-server.onrender.com/shipment/supplier/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/accounting/suplier/delete/${data._id}` // Placeholder endpoint
       );
       toast.success("Supplier Deleted Successfully");
       GlobalModal.onClose();
@@ -70,7 +69,8 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Edit Supplier - ${data.supplierName}`;
-              GlobalModal.description = "Update the details of the supplier below.";
+              GlobalModal.description =
+                "Update the details of the supplier below.";
               GlobalModal.children = (
                 <EditSupplierForm params={{ _id: data._id }} />
               );
@@ -101,4 +101,4 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
   );
 };
 
-export default SupplierCellActions;
+export default Suppliercellactions;

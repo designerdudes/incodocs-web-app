@@ -20,30 +20,23 @@ import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  name: z
-    .string()
-    .min(3, { message: "Consignee name must be at least 3 characters long" }),
-  address: z
-    .string()
-    .min(5, { message: "Address must be at least 5 characters long" }),
-  mobileNo: z
+  customerName: z.string().min(3, { message: "Customer name must be at least 3 characters long" }),
+  gstNo: z.string().min(1, { message: "GST Number is required" }),
+  mobileNumber: z
     .union([z.string(), z.number()])
     .refine((val) => {
       const strVal = val.toString();
       return strVal.length >= 10 && /^\d+$/.test(strVal);
     }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email address" }),
+  state: z.string().min(1, { message: "State is required" }),
+  address: z.string().min(5, { message: "Address must be at least 5 characters long" }),
 });
 
-interface Props {
-  params: {
-    _id: string; // Consignee ID
-  };
+interface EditCustomerFormProps {
+  params: { _id: string };
 }
 
-export default function EditConsigneeForm({ params }: Props) {
+export default function EditCustomerForm({ params }: EditCustomerFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
@@ -52,56 +45,55 @@ export default function EditConsigneeForm({ params }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      customerName: "",
+      gstNo: "",
+      mobileNumber: "",
+      state: "",
       address: "",
-      mobileNo: "",
-      email: "",
     },
   });
 
-  const consigneeId = params._id;
+  const customerId = params._id;
 
-  // Fetch existing consignee data and reset form values
+  // Fetch existing customer data
   useEffect(() => {
-    async function fetchConsigneeData() {
+    async function fetchCustomerData() {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/consignee/getone/${consigneeId}`
+          `https://incodocs-server.onrender.com/accounting/customer/getsingle/${customerId}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch consignee data");
-        }
+        if (!response.ok) throw new Error("Failed to fetch customer data");
         const data = await response.json();
-
-        // Reset form with fetched values
         form.reset({
-          name: data.name || "",
+          customerName: data.customerName || "",
+          gstNo: data.gstNo || "",
+          mobileNumber: data.mobileNumber?.toString() || "",
+          state: data.state || "",
           address: data.address || "",
-          mobileNo: data.mobileNo || "",
-          email: data.email || "",
         });
       } catch (error) {
-        console.error("Error fetching consignee data:", error);
-        toast.error("Failed to fetch consignee data");
+        console.error("Error fetching customer data:", error);
+        toast.error("Failed to fetch customer data");
       } finally {
         setIsFetching(false);
       }
     }
-    fetchConsigneeData();
-  }, [consigneeId, form]);
+    fetchCustomerData();
+  }, [customerId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
-    GlobalModal.title = "Confirm Consignee Update";
-    GlobalModal.description = "Are you sure you want to update this consignee?";
+    GlobalModal.title = "Confirm Customer Update";
+    GlobalModal.description = "Are you sure you want to update this customer?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>Consignee Name: {values.name}</p>
+        <p>Customer Name: {values.customerName}</p>
+        <p>GST No: {values.gstNo}</p>
+        <p>Mobile Number: {values.mobileNumber}</p>
+        <p>State: {values.state}</p>
         <p>Address: {values.address}</p>
-        <p>Mobile No: {values.mobileNo}</p>
-        <p>Email: {values.email}</p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -115,19 +107,16 @@ export default function EditConsigneeForm({ params }: Props) {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/shipment/consignee/update/${consigneeId}`,
-                  values
-                );
+                await putData(`/accounting/customer/update/${customerId}`, values);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("Consignee updated successfully");
+                toast.success("Customer updated successfully");
                 window.location.reload();
               } catch (error) {
-                console.error("Error updating consignee:", error);
+                console.error("Error updating customer:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error("Error updating consignee");
+                toast.error("Error updating customer");
               }
             }}
           >
@@ -143,7 +132,7 @@ export default function EditConsigneeForm({ params }: Props) {
     return (
       <div className="flex items-center justify-center h-60">
         <Icons.spinner className="h-6 w-6 animate-spin" />
-        <p className="ml-2 text-gray-500">Loading consignee details...</p>
+        <p className="ml-2 text-gray-500">Loading customer details...</p>
       </div>
     );
   }
@@ -154,12 +143,12 @@ export default function EditConsigneeForm({ params }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="customerName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Consignee Name</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: Ahmed" type="text" {...field} />
+                  <Input placeholder="e.g., Customer 2" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,16 +156,12 @@ export default function EditConsigneeForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="address"
+            name="gstNo"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel>GST Number</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: Hyderabad"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="e.g., 36fdsf34dsf" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -184,14 +169,16 @@ export default function EditConsigneeForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="mobileNo"
+            name="mobileNumber"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Mobile No</FormLabel>
+                <FormLabel>Mobile Number</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Eg: 7013396624"
+                    placeholder="e.g., 9876543210"
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
                   />
@@ -202,16 +189,25 @@ export default function EditConsigneeForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="email"
+            name="state"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>State</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: Ahmedkhan@gmail.com"
-                    type="email"
-                    {...field}
-                  />
+                  <Input placeholder="e.g., Andhra" type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem className="col-span-2">
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., Address One Two Three" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

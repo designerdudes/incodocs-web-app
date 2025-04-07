@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cookies } from 'next/headers';
 import { Polishedcolumns } from './components/polishedColumns';
 import { Badge } from '@/components/ui/badge';
+import { SoldColumns } from './components/SoldColumns';
 
 export type FinishedMaterial = {
     _id: string; // Unique identifier
@@ -71,7 +72,10 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const Polished = Array.isArray(slabsData)
         ? slabsData.filter((data: any) => data.status === "polished")
         : [];
-
+        const Sold = Array.isArray(slabsData)
+        ? slabsData.filter((data: any) =>data.inStock==="false")
+        : [];
+    
 
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>
@@ -115,6 +119,29 @@ export default async function FinishedMaterialPage({ params }: Props) {
                             data={Polished}
                         />
                     </TabsContent>
+
+
+
+                    <TabsTrigger className="gap-2" value="Sold">
+                                Sold Slab Data
+                                <Badge className="text-bg-primary-foreground" variant="outline">
+                                    {Polished?.length}
+                                </Badge>
+                            </TabsTrigger>
+                            <TabsContent value="Sold">
+                        <DataTable
+                            bulkDeleteIdName="order_id"
+                            bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
+                            bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
+                            bulkDeleteToastMessage="Selected slabs deleted successfully"
+                            searchKey="slabNumber"
+                            columns={SoldColumns}
+                            data={Sold}
+                        />
+                    </TabsContent>
+
+
+                    
                 </Tabs>
             </div>
         </div>
