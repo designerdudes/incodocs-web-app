@@ -72,10 +72,12 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const Polished = Array.isArray(slabsData)
         ? slabsData.filter((data: any) => data.status === "polished")
         : [];
-        const Sold = Array.isArray(slabsData)
-        ? slabsData.filter((data: any) =>data.inStock==="false")
+    const Sold = Array.isArray(slabsData)
+        ? slabsData.filter((data: any) => data.inStock === "false")
         : [];
-    
+    console.log("Polished", Polished)
+    console.log("Sold", Sold)
+
 
     return (
         <div className='w-full space-y-2 h-full flex p-6 flex-col'>
@@ -106,6 +108,9 @@ export default async function FinishedMaterialPage({ params }: Props) {
                             <TabsTrigger className="gap-2" value="Sold">
                                 Sold Slab Data
                             </TabsTrigger>
+                            <Badge className="text-bg-primary-foreground" variant="outline">
+                                {Sold?.length}
+                            </Badge>
                         </TabsList>
                     </div>
                     <TabsContent value="Polished">
@@ -119,16 +124,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
                             data={Polished}
                         />
                     </TabsContent>
-
-
-
-                    <TabsTrigger className="gap-2" value="Sold">
-                                Sold Slab Data
-                                <Badge className="text-bg-primary-foreground" variant="outline">
-                                    {Polished?.length}
-                                </Badge>
-                            </TabsTrigger>
-                            <TabsContent value="Sold">
+                    <TabsContent value="Sold">
                         <DataTable
                             bulkDeleteIdName="order_id"
                             bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
@@ -139,9 +135,6 @@ export default async function FinishedMaterialPage({ params }: Props) {
                             data={Sold}
                         />
                     </TabsContent>
-
-
-                    
                 </Tabs>
             </div>
         </div>
