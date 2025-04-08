@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea"; // Added for review field
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   Popover,
@@ -32,7 +32,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import ProductDetailsForm from "@/components/forms/ProductdetailsForm";
 
 export interface SaveDetailsProps {
-  saveProgress: (data: any) => void; // This will only trigger toast when called
+  saveProgress: (data: any) => void;
 }
 
 function saveProgressSilently(data: any) {
@@ -47,7 +47,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
   const GlobalModal = useGlobalModal();
 
   const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter((_: any, i: number) => i !== index);
+    const updatedContainers = containers.filter((_, i) => i !== index);
     setContainers(updatedContainers);
     setValue("bookingDetails.containers", updatedContainers);
     setValue("NumberOfContainer", updatedContainers.length);
@@ -72,7 +72,8 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
 
   const openProductForm = (index: number) => {
     GlobalModal.title = "Add Product Details";
-    GlobalModal.description = "Fill in the details to add product information for this container.";
+    GlobalModal.description =
+      "Fill in the details to add product information for this container.";
     GlobalModal.children = (
       <ProductDetailsForm
         onSubmit={(productData: any) => {
@@ -211,24 +212,22 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           <FormItem>
             <FormLabel>Number of Containers</FormLabel>
             <FormControl>
-            <Input
-  type="number"
-  placeholder="Enter number of containers"
-  value={field.value || ""}
-  onChange={(e) => {
-    const value = e.target.value;
-
-    if (value === "") {
-      field.onChange("");
-      handleContainerCountChange("");
-      return;
-    }
-
-    const numericValue = Math.max(0, Number(value));
-    field.onChange(numericValue.toString());
-    handleContainerCountChange(numericValue.toString());
-  }}
-/>
+              <Input
+                type="number"
+                placeholder="Enter number of containers"
+                value={field.value || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    field.onChange("");
+                    handleContainerCountChange("");
+                    return;
+                  }
+                  const numericValue = Math.max(0, Number(value));
+                  field.onChange(numericValue.toString());
+                  handleContainerCountChange(numericValue.toString());
+                }}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -248,7 +247,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {containers.map((container: any, index: number) => (
+              {containers.map((_, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
@@ -299,7 +298,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                               placeholder="e.g., 7702791728"
                               {...field}
                               value={field.value || ""}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || "")}
+                              onChange={(e) => field.onChange(e.target.value)}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -309,24 +308,13 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                     />
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openProductForm(index)}
-                    >
-                      {container.addProductDetails?.productCategory
-                        ? "Edit Product Details"
-                        : "Add Product Details"}
+                    <Button type="button" variant="secondary" onClick={() => openProductForm(index)}>
+                      Add product
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <Trash className="h-4 w-4" />
+                    <Button type="button" variant="destructive" onClick={() => handleDelete(index)}>
+                      <Trash size={16} />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -335,25 +323,6 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
-
-        {/* Review */}
-            <FormField
-              control={control}
-              name="BookingDetails.review"
-              render={({ field }) => (
-                <FormItem className="col-span-4">
-                  <FormLabel>Remarks</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., this is some random comment"
-                      {...field}
-                      onBlur={() => saveProgressSilently(getValues())}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
     </div>
   );
 }
