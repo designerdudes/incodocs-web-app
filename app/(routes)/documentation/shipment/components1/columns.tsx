@@ -44,14 +44,26 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.bookingNumber",
+    accessorKey: "saleInvoiceDetails.commercialInvoices",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Booking Number" />
+      <ColumnHeader column={column} title=" Invoice Number" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.bookingDetails?.bookingNumber || "N/A"}
+          {row.original.saleInvoiceDetails?.commercialInvoices
+            ?.commercialInvoiceNumber || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "blDetails.blNumber",
+    header: ({ column }) => <ColumnHeader column={column} title="BL Number" />,
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.blDetails?.blNumber || "N/A"}
         </span>
       </div>
     ),
@@ -73,6 +85,101 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
+  {
+    accessorKey: "saleInvoiceDetails.consignee",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Consignee Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "saleInvoiceDetails.DescriptionofGoods",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Description of Goods" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "saleInvoiceDetails.commercialInvoicesValue",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title=" Invoice Value " />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.commercialInvoices
+            ?.commercialInvoiceNumber || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "supplierDetails.Actualinvoicevalue",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title=" Actual invoice value" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.supplierDetails?.clearance?.supplierName?.supplierName ||
+            row.original.supplierDetails?.actual?.actualSupplierName ||
+            "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "bookingDetails.portOfLoading",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Port of Loading" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.portOfLoading || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "bookingDetails.destinationPort",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title=" Port Of Destination " />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.destinationPort || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "bookingDetails.bookingNumber",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Booking Number" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.bookingDetails?.bookingNumber || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  
   {
     accessorKey: "bookingDetails.containers",
     header: ({ column }) => (
@@ -107,32 +214,8 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "bookingDetails.portOfLoading",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Port of Loading" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.portOfLoading || "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "bookingDetails.destinationPort",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Destination Port" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.destinationPort || "N/A"}
-        </span>
-      </div>
-    ),
-  },
+  
+  
   {
     accessorKey: "bookingDetails.vesselSailingDate",
     header: ({ column }) => (
@@ -305,19 +388,7 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "saleInvoiceDetails.consignee",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Consignee Name" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
-        </span>
-      </div>
-    ),
-  },
+  
   {
     accessorKey: "saleInvoiceDetails.actualBuyer",
     header: ({ column }) => (
@@ -331,31 +402,8 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "saleInvoiceDetails.commercialInvoices",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Commercial Invoice Number" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.commercialInvoices
-            ?.commercialInvoiceNumber || "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "blDetails.blNumber",
-    header: ({ column }) => <ColumnHeader column={column} title="BL Number" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.blDetails?.blNumber || "N/A"}
-        </span>
-      </div>
-    ),
-  },
+  
+  
   {
     accessorKey: "blDetails.blDate",
     header: ({ column }) => <ColumnHeader column={column} title="BL Date" />,
