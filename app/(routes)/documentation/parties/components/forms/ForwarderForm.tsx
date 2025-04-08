@@ -17,16 +17,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
+// ✅ Schema - Only forwarderName is required
 const formSchema = z.object({
-  forwarderName: z.string().min(1, { message: "Shipping Line Name is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
+  address: z.string().optional(),
+  responsiblePerson: z.string().optional(),
   mobileNo: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
-    .transform((val) => parseInt(val, 10)) // Convert to number
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+    .optional()
+    .refine(
+      (val) => !val || /^[0-9]{7,}$/.test(val),
+      { message: "Mobile number must be at least 7 digits" }
+    ),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      { message: "Enter a valid email" }
+    ),
 });
 
 interface ForwarderFormProps {
@@ -35,14 +44,13 @@ interface ForwarderFormProps {
 
 function Forwarderform({ onSuccess }: ForwarderFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       forwarderName: "",
       address: "",
       responsiblePerson: "",
-      mobileNo: undefined,
+      mobileNo: "",
       email: "",
     },
   });
@@ -52,26 +60,29 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/forwarder/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          forwarderName: values.forwarderName,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo,
-          email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba"
-
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/forwarder/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            forwarderName: values.forwarderName,
+            address: values.address,
+            responsiblePerson: values.responsiblePerson,
+            mobileNo: values.mobileNo,
+            email: values.email,
+            organizationId: "674b0a687d4f4b21c6c980ba",
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create Forwarder");
-      const data = await response.json();
+
+      await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Forwarder created successfully");
       window.location.reload();
-      if (onSuccess) onSuccess();// Reload to reflect new data (temporary solution)
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating Forwarder:", error);
       setIsLoading(false);
@@ -82,7 +93,7 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        {/* Shipping Line Name */}
+        {/* Forwarder Name (Required) */}
         <FormField
           control={form.control}
           name="forwarderName"
@@ -96,7 +107,7 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
             </FormItem>
           )}
         />
-        {/* Address */}
+        {/* Address (Optional) */}
         <FormField
           control={form.control}
           name="address"
@@ -110,7 +121,7 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
             </FormItem>
           )}
         />
-        {/* Responsible Person */}
+        {/* Responsible Person (Optional) */}
         <FormField
           control={form.control}
           name="responsiblePerson"
@@ -124,7 +135,7 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
             </FormItem>
           )}
         />
-        {/* Mobile Number */}
+        {/* Mobile Number (Optional) */}
         <FormField
           control={form.control}
           name="mobileNo"
@@ -137,14 +148,14 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
                   placeholder="e.g., 7545345"
                   {...field}
                   value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)} // Keep as string until transform
+                  onChange={(e) => field.onChange(e.target.value)}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* Email */}
+        {/* Email (Optional) */}
         <FormField
           control={form.control}
           name="email"
@@ -152,15 +163,21 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="e.g., unknownname@123.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* Submit Button */}
+        {/* Submit */}
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+          {isLoading && (
+            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+          )}
           Submit
         </Button>
       </form>

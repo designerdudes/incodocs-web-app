@@ -17,19 +17,19 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 
-
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
-  gstNo: z.string().min(1, { message: "GST Number is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  gstNo: z.string().optional(),
+  address: z.string().optional(),
+  responsiblePerson: z.string().optional(),
   mobileNumber: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
-    .transform((val) => parseInt(val, 10))
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  state: z.string().min(1, { message: "State is required" }),
-  factoryAddress: z.string().min(1, { message: "Factory Address is required" }),
+    .optional()
+    .refine((val) => !val || /^\d{7,}$/.test(val), {
+      message: "Enter a valid mobile number with at least 7 digits",
+    }),
+  state: z.string().optional(),
+  factoryAddress: z.string().optional(),
 });
 
 interface SupplierFormProps {
@@ -46,14 +46,13 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
       gstNo: "",
       address: "",
       responsiblePerson: "",
-      mobileNumber: undefined,
+      mobileNumber: "",
       state: "",
       factoryAddress: "",
     },
   });
 
   const GlobalModal = useGlobalModal();
-
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -62,13 +61,8 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          supplierName: values.supplierName,
-          gstNo: values.gstNo,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNumber: values.mobileNumber,
-          state: values.state,
-          factoryAddress: values.factoryAddress,
+          ...values,
+          mobileNumber: values.mobileNumber ? parseInt(values.mobileNumber, 10) : undefined,
           organizationId: "674b0a687d4f4b21c6c980ba",
         }),
       });
@@ -89,7 +83,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        {/* Supplier Name */}
         <FormField
           control={form.control}
           name="supplierName"
@@ -103,7 +96,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* GST Number */}
         <FormField
           control={form.control}
           name="gstNo"
@@ -117,7 +109,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* Address */}
         <FormField
           control={form.control}
           name="address"
@@ -131,7 +122,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* Responsible Person */}
         <FormField
           control={form.control}
           name="responsiblePerson"
@@ -145,7 +135,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* Mobile Number */}
         <FormField
           control={form.control}
           name="mobileNumber"
@@ -165,7 +154,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* State */}
         <FormField
           control={form.control}
           name="state"
@@ -179,7 +167,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* Factory Address */}
         <FormField
           control={form.control}
           name="factoryAddress"
@@ -193,7 +180,6 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
-        {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
