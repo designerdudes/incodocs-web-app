@@ -19,14 +19,22 @@ import toast from "react-hot-toast";
 
 const formSchema = z.object({
   shippingLineName: z.string().min(1, { message: "Shipping Line Name is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  address: z.string().optional(),
+  responsiblePerson: z.string().optional(),
   mobileNo: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
-    .transform((val) => parseInt(val, 10))
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+    .optional()
+    .refine(
+      (val) => !val || (!isNaN(Number(val)) && val.length >= 7),
+      { message: "Enter a valid mobile number with at least 7 digits" }
+    ),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+      { message: "Enter a valid Email" }
+    ),
 });
 
 interface ShippinglineFormProps {
@@ -42,7 +50,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
       shippingLineName: "",
       address: "",
       responsiblePerson: "",
-      mobileNo: undefined,
+      mobileNo: "",
       email: "",
     },
   });
@@ -51,7 +59,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values)
+    console.log(values);
     try {
       const response = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/create", {
         method: "POST",
@@ -60,9 +68,9 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
           shippingLineName: values.shippingLineName,
           address: values.address,
           responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo,
+          mobileNo: values.mobileNo ? parseInt(values.mobileNo) : undefined,
           email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba"
+          organizationId: "674b0a687d4f4b21c6c980ba",
         }),
       });
       if (!response.ok) throw new Error("Failed to create shipping line");
@@ -71,7 +79,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
       GlobalModal.onClose();
       toast.success("Shipping line created successfully");
       window.location.reload();
-      if (onSuccess) onSuccess(); // Trigger refetch
+      if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating shipping line:", error);
       setIsLoading(false);
@@ -147,7 +155,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input type="email" placeholder="e.g., someone@example.com" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

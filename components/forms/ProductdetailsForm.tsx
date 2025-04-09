@@ -23,25 +23,25 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
-// Schema for ProductDetailsForm aligned with main schema
+// Schema for ProductDetailsForm
 const formSchema = z.object({
   productCategory: z.string().optional(),
   graniteAndMarble: z.string().optional(),
   tiles: z
     .object({
-      noOfBoxes: z.number().optional(),
-      noOfPiecesPerBoxes: z.number().optional(),
+      noOfBoxes: z.number().nonnegative().optional(),
+      noOfPiecesPerBoxes: z.number().nonnegative().optional(),
       sizePerTile: z
         .object({
           length: z
             .object({
-              value: z.number().optional(),
+              value: z.number().nonnegative().optional(),
               units: z.string().optional(),
             })
             .optional(),
           breadth: z
             .object({
-              value: z.number().optional(),
+              value: z.number().nonnegative().optional(),
               units: z.string().optional(),
             })
             .optional(),
@@ -59,6 +59,7 @@ function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubcategory, setSelectedSubcategory] = useState("");
+  const [tileSizeInput, setTileSizeInput] = useState("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,14 +80,6 @@ function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      // Parse tile size into length and breadth if provided
-      if (values.tiles?.sizePerTile) {
-        const [length, breadth] = values.tiles.sizePerTile.toString().split("x");
-        values.tiles.sizePerTile = {
-          length: { value: parseInt(length) || undefined, units: "inch" },
-          breadth: { value: parseInt(breadth) || undefined, units: "inch" },
-        };
-      }
       onSubmit(values);
       toast.success("Product details added successfully!");
     } catch (error) {
@@ -183,9 +176,15 @@ function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps) {
                     <Input
                       type="number"
                       placeholder="e.g., 50"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                      min="0"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : Math.max(0, parseInt(e.target.value))
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -202,9 +201,15 @@ function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps) {
                     <Input
                       type="number"
                       placeholder="e.g., 4"
-                      {...field}
-                      value={field.value || ""}
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || undefined)}
+                      min="0"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value === ""
+                            ? undefined
+                            : Math.max(0, parseInt(e.target.value))
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -221,17 +226,35 @@ function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps) {
                     <Input
                       type="text"
                       placeholder="e.g., 120x60"
-                      value={
-                        field.value?.length?.value && field.value?.breadth?.value
-                          ? `${field.value.length.value}x${field.value.breadth.value}`
-                          : ""
-                      }
+                      value={tileSizeInput}
                       onChange={(e) => {
-                        const [length, breadth] = e.target.value.split("x");
-                        field.onChange({
-                          length: { value: parseInt(length) || undefined, units: "inch" },
-                          breadth: { value: parseInt(breadth) || undefined, units: "inch" },
-                        });
+                        const value = e.target.value;
+                        setTileSizeInput(value);
+
+                        const [lengthStr, breadthStr] = value
+                          .split("x")
+                          .map((val) => val.trim());
+
+                        const length = parseInt(lengthStr);
+                        const breadth = parseInt(breadthStr);
+
+                        const isValid =
+                          !isNaN(length) &&
+                          !isNaN(breadth) &&
+                          length >= 0 &&
+                          breadth >= 0;
+
+                        field.onChange(
+                          isValid
+                            ? {
+                                length: { value: length, units: "inch" },
+                                breadth: { value: breadth, units: "inch" },
+                              }
+                            : {
+                                length: { value: undefined, units: "inch" },
+                                breadth: { value: undefined, units: "inch" },
+                              }
+                        );
                       }}
                     />
                   </FormControl>

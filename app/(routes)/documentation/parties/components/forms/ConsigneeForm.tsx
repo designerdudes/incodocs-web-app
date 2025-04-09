@@ -19,18 +19,27 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
-  email: z.string().email({ message: "Enter a valid email" }),
-  mobileNo: z.union([z.string(), z.number()]).refine(
-    (val) => {
-      const strVal = val.toString();
-      return strVal.length >= 10 && /^\d+$/.test(strVal);
-    },
-    {
-      message:
-        "Mobile number must be at least 10 digits and contain only numbers",
-    }
-  ),
-  address: z.string().min(1, { message: "Address is required" }),
+  email: z
+    .string()
+    .optional()
+    .refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
+      message: "Enter a valid email",
+    }),
+  mobileNo: z
+    .union([z.string(), z.number()])
+    .optional()
+    .refine(
+      (val) => {
+        if (!val) return true;
+        const strVal = val.toString();
+        return strVal.length >= 10 && /^\d+$/.test(strVal);
+      },
+      {
+        message:
+          "Mobile number must be at least 10 digits and contain only numbers",
+      }
+    ),
+  address: z.string().optional(),
 });
 
 interface AddConsigneeFormProps {
@@ -49,6 +58,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
       address: "",
     },
   });
+
   const GlobalModal = useGlobalModal();
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {

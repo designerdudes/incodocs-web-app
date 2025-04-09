@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import EntityCombobox from "@/components/ui/EntityCombobox";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -49,7 +50,6 @@ const formSchema = z.object({
   noOfSlabs: z
     .number()
     .min(1, { message: "No of Slabs must be greater than 0" }),
-  // ✅ Slabs Array (with its own length & height inside dimensions)
   slabs: z
     .array(
       z.object({
@@ -83,12 +83,13 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] =
-    React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] =
-    React.useState<boolean>(false);
-  const router = useRouter();
+  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [customerLoading, setCustomerLoading] = React.useState(false);
+  const [customers, setCustomers] = React.useState<{ _id: string; name: string }[]>([]);
+  
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -101,12 +102,53 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       salesDate: "",
       gstPercentage: "0",
       invoiceValue: 0,
+      slabs: [],
     },
   });
 
+  React.useEffect(() => {
+    const fetchCustomers = async () => {
+      setCustomerLoading(true);
+      try {
+        const response = await fetch(
+          "https://incodocs-server.onrender.com/accounting/customer/getall"
+        );
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status}`);
+        }
+        const customerData = await response.json();
+  
+        // Validate response before mapping
+        if (Array.isArray(customerData)) {
+          const mappedCustomers = customerData.map((customer: any) => ({
+            _id: customer._id,
+            name: customer.customerName, // Make sure this key exists in the response
+          }));
+          setCustomers(mappedCustomers);
+          console.log(customers); // ✅ Check if customer data is available here
+
+        } else {
+          console.error("Invalid response format:", customerData);
+          toast.error("Unexpected response format");
+        }
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        toast.error("Failed to load customers");
+      } finally {
+        setCustomerLoading(false);
+      }
+    };
+    fetchCustomers();
+  }, []);
+  
+
+  const handleAddNewCustomer = () => {
+    toast("Add new customer functionality to be implemented");
+    // For full implementation, you could add a modal here similar to your supplier form
+  };
+
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
-
     if (!isNaN(count) && count > 0) {
       const newSlabs = Array.from({ length: count }, (_, index) => ({
         dimensions: {
@@ -115,14 +157,16 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
           height: { value: 0, units: "inch" as "inch" },
         },
       }));
-
       setSlabs(newSlabs);
       form.setValue("slabs", newSlabs);
+      form.setValue("noOfSlabs", count);
     } else {
       setSlabs([]);
       form.setValue("slabs", []);
+      form.setValue("noOfSlabs", 0);
     }
   }
+
   React.useEffect(() => {
     form.setValue("noOfSlabs", slabs.length);
   }, [slabs, form]);
@@ -142,12 +186,14 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       setIsLoading(false);
     }
   }
+
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
     const area = lengthInFeet * heightInFeet;
     return area > 0 ? area.toFixed(2) : "0.00";
   }
+
   function calculateTotalSqft(): string {
     const slabs = form.getValues("slabs") || [];
     const totalSqft = slabs.reduce((sum, slab) => {
@@ -155,7 +201,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       const heightInFeet = (slab.dimensions.height.value || 0) / 12;
       return sum + lengthInFeet * heightInFeet;
     }, 0);
-    return totalSqft.toFixed(2); // Round to 2 decimal places
+    return totalSqft.toFixed(2);
   }
 
   return (
@@ -169,12 +215,19 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Customer Name</FormLabel>
+                  <FormLabel>Select Customer</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter Customer Name"
-                      disabled={isLoading}
-                      {...field}
+                    <EntityCombobox
+                      entities={customers}
+                      value={field.value || ""}
+                      onChange={(value) => {
+                        field.onChange(value);
+                      }}
+                      displayProperty="name"
+                      placeholder="Select a Customer"
+                      onAddNew={handleAddNewCustomer}
+                      addNewLabel="Add New Customer"
+                      disabled={isLoading || customerLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -182,48 +235,12 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
 
-            <FormField
-              name="customerId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Customer ID</FormLabel>
-                  <FormControl>
-                    <select
-                      disabled={isLoading}
-                      {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
-                    >
-                      <option value="674774f016639ce732baba5b">
-                        674774f016639ce732baba5b
-                      </option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           
 
-            <FormField
-              name="customerAddress"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Customer Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter Customer Address"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           
           </div>
 
-          {/* Row 2: GST Number, No of Slabs, Height */}
+          {/* Row 2: GST Number, No of Slabs */}
           <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="gstNumber"
@@ -255,10 +272,10 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
+                        field.onChange(parseInt(e.target.value) || 0);
                         handleSlabsInputChange(e.target.value);
                       }}
-                      value={field.value === 0 ? "" : field.value} // Calls the function
+                      value={field.value === 0 ? "" : field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -267,7 +284,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
             />
           </div>
 
-          {/* Row 3: Length, GST Percentage, Invoice Value */}
+          {/* Row 3: GST Percentage, Invoice Value, Sales Date */}
           <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="gstPercentage"
@@ -305,12 +322,14 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       value={field.value === 0 ? "" : field.value}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               name="salesDate"
               control={form.control}
@@ -354,9 +373,9 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
           </div>
+
           {/* Dimensions Inputs */}
           <div className="grid grid-cols-4 gap-3 mt-3">
-            {/* ✅ Length Input & Apply Checkbox */}
             <div>
               <Input
                 value={globalLength}
@@ -373,11 +392,11 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                     setApplyLengthToAll(e.target.checked);
                     if (e.target.checked) {
                       const updatedSlabs = slabs.map((slab) => ({
-                        ...slab, // ✅ Spread only the current slab, not the whole slabs array
+                        ...slab,
                         dimensions: {
                           ...slab.dimensions,
                           length: {
-                            ...slab.dimensions.length, // ✅ Only update length, keeping height unchanged
+                            ...slab.dimensions.length,
                             value: parseFloat(globalLength) || 0,
                           },
                         },
@@ -391,7 +410,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               </label>
             </div>
 
-            {/* ✅ Height Input & Apply Checkbox */}
             <div>
               <Input
                 value={globalHeight}
@@ -408,11 +426,11 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                     setApplyHeightToAll(e.target.checked);
                     if (e.target.checked) {
                       const updatedSlabs = slabs.map((slab) => ({
-                        ...slab, // ✅ Spread only the current slab
+                        ...slab,
                         dimensions: {
                           ...slab.dimensions,
                           height: {
-                            ...slab.dimensions.height, // ✅ Only update height, keeping length unchanged
+                            ...slab.dimensions.height,
                             value: parseFloat(globalHeight) || 0,
                           },
                         },
@@ -431,12 +449,9 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-
                 <TableHead>Length (inch)</TableHead>
-
                 <TableHead>Height (inch)</TableHead>
                 <TableHead>Area (sqft)</TableHead>
-
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -444,7 +459,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               {slabs.map((slab, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
-
                   <TableCell>
                     <FormField
                       name={`slabs.${index}.dimensions.length.value`}
@@ -480,9 +494,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              value={slab.dimensions.height
-                                
-                                .value}
+                              value={slab.dimensions.height.value}
                               placeholder="Enter height"
                               onChange={(e) => {
                                 const updatedBlocks = [...slabs];
@@ -499,7 +511,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-
                   <TableCell>
                     {calculateSqft(
                       slab?.dimensions?.length?.value,
@@ -515,7 +526,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                         const updatedBlocks = slabs.filter(
                           (_, i) => i !== index
                         );
-
                         setSlabs(updatedBlocks);
                         form.setValue("slabs", updatedBlocks);
                       }}
@@ -528,16 +538,15 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={8} className="text-right font-bold">
+                <TableCell colSpan={5} className="text-right font-bold">
                   Total Area (sqft): {calculateTotalSqft()}
                 </TableCell>
               </TableRow>
-              <TableRow></TableRow>
             </TableFooter>
           </Table>
 
           <Button type="submit" disabled={isLoading}>
-            Submit
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
         </form>
       </Form>

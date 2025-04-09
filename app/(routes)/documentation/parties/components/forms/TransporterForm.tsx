@@ -18,15 +18,20 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  transporterName: z.string().min(1, { message: "Shipping Line Name is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  transporterName: z.string().min(1, { message: "Forwarder Name is required" }),
+  address: z.string().optional(),
+  responsiblePerson: z.string().optional(),
   mobileNo: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
-    .transform((val) => parseInt(val, 10)) // Convert to number
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+    .optional()
+    .refine(
+      (val) => !val || /^\d{7,}$/.test(val),
+      { message: "Mobile number must be at least 7 digits" }
+    ),
+  email: z.string().optional().refine(
+    (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
+    { message: "Enter a valid email address" }
+  ),
 });
 
 interface TransporterFormProps {
@@ -42,7 +47,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
       transporterName: "",
       address: "",
       responsiblePerson: "",
-      mobileNo: undefined,
+      mobileNo: "",
       email: "",
     },
   });
@@ -56,33 +61,29 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          transporterName: values.transporterName,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo,
-          email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba"
-
+          ...values,
+          organizationId: "674b0a687d4f4b21c6c980ba",
         }),
       });
+
       if (!response.ok) throw new Error("Failed to create Transporter");
-      const data = await response.json();
-      setIsLoading(false);
-      GlobalModal.onClose();
+      await response.json();
       toast.success("Transporter created successfully");
+      GlobalModal.onClose();
       window.location.reload();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating Transporter:", error);
-      setIsLoading(false);
       toast.error("Error creating Transporter");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        {/* Shipping Line Name */}
+        {/* Forwarder Name */}
         <FormField
           control={form.control}
           name="transporterName"
@@ -96,6 +97,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
             </FormItem>
           )}
         />
+
         {/* Address */}
         <FormField
           control={form.control}
@@ -110,6 +112,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
             </FormItem>
           )}
         />
+
         {/* Responsible Person */}
         <FormField
           control={form.control}
@@ -124,6 +127,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
             </FormItem>
           )}
         />
+
         {/* Mobile Number */}
         <FormField
           control={form.control}
@@ -136,14 +140,13 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
                   type="tel"
                   placeholder="e.g., 7545345"
                   {...field}
-                  value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)} // Keep as string until transform
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         {/* Email */}
         <FormField
           control={form.control}
@@ -158,6 +161,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
             </FormItem>
           )}
         />
+
         {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
