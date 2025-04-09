@@ -77,9 +77,6 @@ export default async function FinishedMaterialPage({ params }: Props) {
     ? slabsData.filter((data: any) => data.inStock === false) // Updated filter for sold slabs
     : [];
 
-  console.log("Polished", Polished);
-  console.log("Sold", Sold);
-
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -126,6 +123,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
+              deleteRoute="https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/delete/67379aa605825e752133c639"
               searchKey="slabNumber"
               columns={Polishedcolumns}
               data={Polished}
@@ -137,6 +135,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
+              deleteRoute="https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/delete/67379aa605825e752133c639"
               searchKey="slabNumber"
               columns={SoldColumns}
               data={Sold}
