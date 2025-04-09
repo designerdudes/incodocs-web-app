@@ -47,7 +47,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
   const GlobalModal = useGlobalModal();
 
   const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter((_, i) => i !== index);
+    const updatedContainers = containers.filter((_: any, i: number) => i !== index);
     setContainers(updatedContainers);
     setValue("bookingDetails.containers", updatedContainers);
     setValue("NumberOfContainer", updatedContainers.length);
@@ -247,7 +247,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {containers.map((_, index) => (
+              {containers.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
