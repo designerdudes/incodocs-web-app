@@ -77,8 +77,8 @@ export default async function FinishedMaterialPage({ params }: Props) {
     ? slabsData.filter((data: any) => data.inStock === false) // Updated filter for sold slabs
     : [];
 
-  console.log("Polished", Polished);
-  console.log("Sold", Sold);
+  // console.log("Polished", Polished);
+  // console.log("Sold", Sold);
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
