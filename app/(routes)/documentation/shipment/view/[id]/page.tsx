@@ -383,9 +383,9 @@ export default async function Page({ params }: Props) {
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell>CD Code</TableCell>
+                        <TableCell>CB Code</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingBillDetails?.cdCode || "N/A"}
+                          {shipmentData?.shippingBillDetails?.cbCode || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>

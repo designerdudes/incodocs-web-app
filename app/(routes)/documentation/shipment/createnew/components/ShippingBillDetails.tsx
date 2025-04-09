@@ -141,7 +141,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
         name="shippingBillDetails.cdCode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CD Code</FormLabel>
+            <FormLabel>CB Code</FormLabel>
             <FormControl>
               <Input
                 placeholder="e.g., randomcode"

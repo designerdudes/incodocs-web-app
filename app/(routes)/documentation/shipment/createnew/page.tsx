@@ -176,7 +176,7 @@ const steps = [
     { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgressWithFeedback} /> },
     { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgressWithFeedback} /> },
     { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 5, name: "Sale Invoice Details", component: <SaleInvoiceDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 5, name: "Commercial Invoice", component: <SaleInvoiceDetails saveProgress={saveProgressWithFeedback} /> },
     { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgressWithFeedback} /> },
     { id: 7, name: "Other Details", component: <OtherDetails saveProgress={saveProgressWithFeedback} /> },
 ];
