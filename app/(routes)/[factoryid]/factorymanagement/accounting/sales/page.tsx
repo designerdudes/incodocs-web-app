@@ -199,7 +199,7 @@ export default async function Purchases({ params }: Props) {
                     bulkDeleteTitle='Are you sure you want to delete the selected sales?'
                     bulkDeleteDescription='This will delete the selected sales, and they will not be recoverable.'
                     bulkDeleteToastMessage='Selected sales deleted successfully'
-                    searchKey='customerName' columns={Columns} data={SalesData} />
+                    searchKey='title' columns={Columns} data={SalesData} />
             </div>
         </div>
     );
