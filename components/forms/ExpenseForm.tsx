@@ -51,13 +51,14 @@ export default function ExpenseCreateNewForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    console.log(values)
     try {
-      await postData("/factory-management/expenses/addexpense", {
+      await postData("/expense/add", {
         ...values,
         status: "active",
       });
       toast.success("Expense Record Added Successfully");
-      router.push("./factorymanagement/expenses/records");
+      router.push("./");
     } catch (error) {
       toast.error("Error creating/updating Expense Record");
     } finally {
@@ -103,6 +104,7 @@ export default function ExpenseCreateNewForm() {
                     disabled={isLoading}
                     className="w-[40%]" // Limit width to 40%
                     {...field}
+                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
                   />
                 </FormControl>
                 <FormMessage />
