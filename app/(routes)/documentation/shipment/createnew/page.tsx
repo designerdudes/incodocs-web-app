@@ -68,19 +68,6 @@ const formSchema = z.object({
             })
         ).optional(),
     }).optional(),
-    shippingDetails: z.object({
-        review: z.string().optional(),
-        shippingLineName: z.string().optional(),
-        noOfShipmentinvoices: z.number().optional(),
-        shippingLineInvoices: z.array(
-            z.object({
-                invoiceNumber: z.string().optional(),
-                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-                date: z.string().datetime({ message: "Invalid date format" }).optional(),
-                valueWithGst: z.number().optional(),
-                valueWithoutGst: z.number().optional(),
-            })
-        ).optional(),
         transporterName: z.string().optional(),
         noOftransportinvoices: z.number().optional(),
         transporterInvoices: z.array(
@@ -101,9 +88,8 @@ const formSchema = z.object({
                 date: z.string().datetime({ message: "Invalid date format" }).optional(),
                 valueWithGst: z.number().optional(),
                 valueWithoutGst: z.number().optional(),
-            })
+            }),
         ).optional(),
-    }).optional(),
     shippingBillDetails: z.object({
         review: z.string().optional(),
         portCode: z.string().optional(),
@@ -151,7 +137,20 @@ const formSchema = z.object({
             saberInvoiceUrl: z.string().optional(),
         }).optional(),
     }).optional(),
-    blDetails: z.object({
+    shippingDetails: z.object({
+        review: z.string().optional(),
+        shippingLineName: z.string().optional(),
+        noOfShipmentinvoices: z.number().optional(),
+        shippingLineInvoices: z.array(
+            z.object({
+                invoiceNumber: z.string().optional(),
+                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+                date: z.string().datetime({ message: "Invalid date format" }).optional(),
+                valueWithGst: z.number().optional(),
+                valueWithoutGst: z.number().optional(),
+            }),
+)}).optional(),
+        blDetails: z.object({
         review: z.string().optional(),
         blNumber: z.string().optional(),
         blDate: z.string().datetime({ message: "Invalid date format" }).optional(),
@@ -191,15 +190,13 @@ export default function CreateNewFormPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             bookingDetails: { containers: [] },
-            shippingDetails: {
-                shippingLineInvoices: [],
-                transporterInvoices: [],
-                forwarderInvoices: [],
-            },
+            transporterInvoices: [],
+            forwarderInvoices: [],
             shippingBillDetails: { ShippingBills: {} },
             supplierDetails: { clearance: { invoices: [] }, actual: {} },
             saleInvoiceDetails: { commercialInvoices: {} },
-            blDetails: {},
+            shippingDetails:{},
+            blDetails: { },
             otherDetails: [],
             organizationId,
         },

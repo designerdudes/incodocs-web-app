@@ -21,6 +21,7 @@ import {
 import moment from "moment";
 import { cookies } from "next/headers";
 import Heading from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: {
@@ -79,9 +80,9 @@ export default async function ViewFinishedPage({ params }: Props) {
   // console.log(FinishedMaterial);
   const adjustedDimensions = FinishedMaterial?.dimensions
     ? calculateDimensions(
-      FinishedMaterial.dimensions.length.value,
-      FinishedMaterial.dimensions.height.value
-    )
+        FinishedMaterial.dimensions.length.value,
+        FinishedMaterial.dimensions.height.value
+      )
     : null;
 
   function calculateDimensions(
@@ -104,28 +105,26 @@ export default async function ViewFinishedPage({ params }: Props) {
   }
 
   return (
-    <div>
-      <div className="w-full h-full flex flex-col p-8">
-        <div className="flex items-center justify-between mb-4">
-          <div className="topbar flex items-center justify-between w-full">
-            <Link href="../">
-              <Button variant="outline" size="icon" className="h-7 w-7">
-                <ChevronLeft className="h-4 w-4" />
-                <span className="sr-only">Back</span>
-              </Button>
-            </Link>
-            <div className="flex-1">
-              <Heading
-                className="leading-tight "
-                title="View and Manage Finished Products Details"
-              />
-              <p className="text-muted-foreground text-sm mt-2">
-                View and manage finished product materials with detailed
-                insights into quantity, specifications, and status, ensuring
-                efficient tracking and streamlined operations.
-              </p>
-            </div>
-            {/* <div className="hidden items-center gap-2 md:ml-auto md:flex">
+    <div className="w-full space-y-2 h-full flex p-6 flex-col">
+      <div className="topbar w-full flex justify-between items-center">
+        <Link href="../">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading
+            className="leading-tight "
+            title="View and Manage Finished Products Details"
+          />
+          <p className="text-muted-foreground text-sm mt-2 ">
+            View and manage finished product materials with detailed insights
+            into quantity, specifications, and status, ensuring efficient
+            tracking and streamlined operations.
+          </p>
+        </div>
+        {/* <div className="hidden items-center gap-2 md:ml-auto md:flex">
               <Link
                 href={`/factorymanagement/inventory/finishedmaterial/edit/${FinishedMaterialID}`}
               >
@@ -135,445 +134,443 @@ export default async function ViewFinishedPage({ params }: Props) {
                 </Button>
               </Link>
             </div> */}
-          </div>
-        </div>
+      </div>
+      <Separator orientation="horizontal" />
+      {/* New parent div to hold both sections */}
+      <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full  pb-5">
+        <div className="flex-1">
+        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+            <Card x-chunk="dashboard-07-chunk-0">
+              <CardHeader>
+                <CardTitle>Cutting Inches With Allowance</CardTitle>
+                <CardDescription>{}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Field</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Block Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Slab Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.length?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.height?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Amount
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          ((FinishedMaterial?.dimensions?.length?.value *
+                            FinishedMaterial?.dimensions?.height?.value) /
+                            144) *
+                          3.75
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.createdAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.updatedAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
-        {/* New parent div to hold both sections */}
-        <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
-          <div className="flex-1">
-            <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-              <Card x-chunk="dashboard-07-chunk-0">
-                <CardHeader>
-                  <CardTitle>Cutting Inches With Allowance</CardTitle>
-                  <CardDescription>{ }</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Block Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Slab Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial.slabNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.length?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.height?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.length?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.height?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Amount
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            ((FinishedMaterial?.dimensions?.length?.value *
-                              FinishedMaterial?.dimensions?.height?.value) /
-                              144) *
-                            3.75
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Created At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Updated At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+            {/* cutting WithOut Allowance */}
 
-              {/* cutting WithOut Allowance */}
+            <Card x-chunk="dashboard-07-chunk-0">
+              <CardHeader>
+                <CardTitle>Cutting Inches WithOut Allowance</CardTitle>
+                <CardDescription>{}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Field</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Block Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Slab Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (inch)
+                      </TableCell>
+                      <TableCell>
+                        {adjustedDimensions?.adjustedLength}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (inch)
+                      </TableCell>
+                      <TableCell>
+                        {adjustedDimensions?.adjustedHeight}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (cm)
+                      </TableCell>
+                      <TableCell>{adjustedDimensions?.lengthInCm}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (cm)
+                      </TableCell>
+                      <TableCell>{adjustedDimensions?.heightInCm}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Total SQF</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Amount
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          ((FinishedMaterial?.dimensions?.length?.value *
+                            FinishedMaterial?.dimensions?.height?.value) /
+                            144) *
+                          3.75
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.createdAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.updatedAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
 
-              <Card x-chunk="dashboard-07-chunk-0">
-                <CardHeader>
-                  <CardTitle>Cutting Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{ }</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Block Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Slab Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial.slabNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (inch)
-                        </TableCell>
-                        <TableCell>
-                          {adjustedDimensions?.adjustedLength}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (inch)
-                        </TableCell>
-                        <TableCell>
-                          {adjustedDimensions?.adjustedHeight}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (cm)
-                        </TableCell>
-                        <TableCell>{adjustedDimensions?.lengthInCm}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (cm)
-                        </TableCell>
-                        <TableCell>{adjustedDimensions?.heightInCm}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Total SQF</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Amount
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            ((FinishedMaterial?.dimensions?.length?.value *
-                              FinishedMaterial?.dimensions?.height?.value) /
-                              144) *
-                            3.75
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Created At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Updated At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+            {/* polishingInchesWithAllowance */}
 
-              {/* polishingInchesWithAllowance */}
+            <Card x-chunk="dashboard-07-chunk-0">
+              <CardHeader>
+                <CardTitle>Polishing Inches With Allowance</CardTitle>
+                <CardDescription>{}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Field</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Block Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Slab Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Trim Length(inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial.trim?.length?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Trim Height(inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial.trim?.height?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.length?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.height?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
 
-              <Card x-chunk="dashboard-07-chunk-0">
-                <CardHeader>
-                  <CardTitle>Polishing Inches With Allowance</CardTitle>
-                  <CardDescription>{ }</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Block Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Slab Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial.slabNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Trim Length(inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial.trim?.length?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Trim Height(inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial.trim?.height?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.length?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.height?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.length?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.height?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Created At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Amount
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            ((FinishedMaterial?.dimensions?.length?.value *
-                              FinishedMaterial?.dimensions?.height?.value) /
-                              144) *
-                            3.75
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Updated At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-              {/* polishingInchesWithOutAllowance */}
-              <Card x-chunk="dashboard-07-chunk-0">
-                <CardHeader>
-                  <CardTitle>Polishing Inches WithOut Allowance</CardTitle>
-                  <CardDescription>{ }</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Block Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Slab Number
-                        </TableCell>
-                        <TableCell>{FinishedMaterial.slabNumber}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Trim Length(inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial.trim?.length?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Trim Height(inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial.trim?.height?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.length?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (inch)
-                        </TableCell>
-                        <TableCell>
-                          {FinishedMaterial?.dimensions?.height?.value}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Length (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.length?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Height (cm)
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            FinishedMaterial?.dimensions?.height?.value * 2.54
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Amount
-                        </TableCell>
-                        <TableCell>
-                          {(
-                            ((FinishedMaterial?.dimensions?.length?.value *
-                              FinishedMaterial?.dimensions?.height?.value) /
-                              144) *
-                            3.75
-                          ).toFixed(2)}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Created At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Category Updated At
-                        </TableCell>
-                        <TableCell>
-                          {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </div>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.createdAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Amount
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          ((FinishedMaterial?.dimensions?.length?.value *
+                            FinishedMaterial?.dimensions?.height?.value) /
+                            144) *
+                          3.75
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.updatedAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+            {/* polishingInchesWithOutAllowance */}
+            <Card x-chunk="dashboard-07-chunk-0">
+              <CardHeader>
+                <CardTitle>Polishing Inches WithOut Allowance</CardTitle>
+                <CardDescription>{}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Field</TableHead>
+                      <TableHead>Details</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Block Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial?.blockNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Slab Number
+                      </TableCell>
+                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Trim Length(inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial.trim?.length?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Trim Height(inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial.trim?.height?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.length?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (inch)
+                      </TableCell>
+                      <TableCell>
+                        {FinishedMaterial?.dimensions?.height?.value}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Length (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Height (cm)
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Amount
+                      </TableCell>
+                      <TableCell>
+                        {(
+                          ((FinishedMaterial?.dimensions?.length?.value *
+                            FinishedMaterial?.dimensions?.height?.value) /
+                            144) *
+                          3.75
+                        ).toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.createdAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Category Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(FinishedMaterial.updatedAt).format(
+                          "YYYY-MM-DD"
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
