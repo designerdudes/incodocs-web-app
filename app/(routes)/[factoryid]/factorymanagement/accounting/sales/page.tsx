@@ -9,6 +9,8 @@ import { cookies } from "next/headers";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Columns } from "./components/columns";
+import { FinishedPurchaseColumns } from "../purchases/components/finishedPurchaseColumns";
+
 
 export type Sales = {
     _id: string;
@@ -197,8 +199,7 @@ export default async function Purchases({ params }: Props) {
                     bulkDeleteTitle='Are you sure you want to delete the selected sales?'
                     bulkDeleteDescription='This will delete the selected sales, and they will not be recoverable.'
                     bulkDeleteToastMessage='Selected sales deleted successfully'
-                    searchKey='title' columns={Columns} data={SalesData} />
-
+                    searchKey='customerName' columns={Columns} data={SalesData} />
             </div>
         </div>
     );
