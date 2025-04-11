@@ -12,6 +12,14 @@ import { FiDollarSign, FiGrid } from "react-icons/fi";
 import { MdAccountBalance } from "react-icons/md";
 import { SiCodeblocks } from "react-icons/si";
 import { FcProcess } from "react-icons/fc";
+import { BiPurchaseTagAlt } from "react-icons/bi";
+import { MdOutlineAttachMoney } from "react-icons/md";
+import { GiExpense } from "react-icons/gi";
+import { MdManageAccounts } from "react-icons/md";
+import { FaBookReader } from "react-icons/fa";
+
+
+
 
 
 
@@ -228,7 +236,7 @@ const FinishedPageCards = [
 const AccountingCard = [
   {
     title: "Purchases",
-    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    icon: <BiPurchaseTagAlt className="w-6 h-6" />,
     value: 50,
     color: "bg-primary",
     showButton: false,
@@ -236,7 +244,7 @@ const AccountingCard = [
   },
   {
     title: "Sales",
-    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    icon: <MdOutlineAttachMoney className="w-6 h-6" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
@@ -244,7 +252,7 @@ const AccountingCard = [
   },
   {
     title: "Expenses",
-    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    icon: <GiExpense className="w-6 h-6" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
@@ -252,12 +260,20 @@ const AccountingCard = [
   },
   {
     title: "GST Ledger",
-    icon: <ScissorsLineDashed className="w-6 h-6" />,
+    icon: <FaBookReader className="w-6 h-6" />,
     value: 40,
     color: "bg-primary",
     showButton: false,
     buttonUrl: "/factorymanagement/accounting/GSTLedger",
   },
+  {
+    title: "Ledger",
+    icon: <MdManageAccounts className="w-6 h-6" />,
+    value: 40,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/accounting/Parties",
+  }
 ];
 
 export {
