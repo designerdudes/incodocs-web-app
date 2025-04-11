@@ -122,6 +122,19 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
       );
       GlobalModal.onOpen();
     };
+    // Fetch data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const shippingResponse = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba");
+        const shippingData = await shippingResponse.json();
+        setShippingLines(shippingData);
+} catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
   return (
     <div>
       <div className="grid grid-cols-4 gap-3">
