@@ -22,7 +22,7 @@ export default function CreateNewFormPage() {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title="Create new Lot Inventory"
+                        title="Add Your Team Member"
                     />
                     <p className="text-muted-foreground text-sm">
                     Complete the form below to add a new member to your team.

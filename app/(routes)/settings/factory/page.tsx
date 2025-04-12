@@ -5,9 +5,9 @@ import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
 import { cookies } from "next/headers";
 import CellAction from "./components/cell-actions";
-
 import FactoryForm from "@/components/forms/AddFactoryForm";
 import AddFactoryButton from "./components/AddFactoryButton";
+import { Separator } from "@/components/ui/separator";
 
 export interface Factory {
   _id: string;
@@ -46,7 +46,7 @@ export default async function FactoryPage() {
 
 
   return (
-    <div className="max-w-2xl mx-10 p-6 ">
+    <div className="space-y-6 ml-7 ">
       <div className="topbar w-full flex items-center justify-between">
         <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
@@ -64,6 +64,10 @@ export default async function FactoryPage() {
           </p>
         </div>
       </div>
+      <div>
+        <Separator/>
+        </div>
+      
       <div className="space-y-4 mt-4 mb-1">
         {factories.length > 0 ? (
           factories.map((factory) => (
