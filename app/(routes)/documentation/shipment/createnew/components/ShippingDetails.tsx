@@ -32,14 +32,19 @@ import { SaveDetailsProps } from "./BookingDetails";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
-import EntityCombobox from "@/components/ui/EntityCombobox"; // Import the new component
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Icons } from "@/components/ui/icons";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
+interface ShippingDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
+}
+
+export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
 
   const forwarderInvoicesFromForm =
@@ -651,6 +656,18 @@ export function ShippingDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit 
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }

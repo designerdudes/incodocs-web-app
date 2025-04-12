@@ -120,11 +120,11 @@ export default async function FinishedMaterialPage({ params }: Props) {
           </div>
           <TabsContent value="Polished">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              deleteRoute="/"
+              deleteRoute="/factory-management/inventory/deletemultipleslabs  "
               searchKey="slabNumber"
               columns={Polishedcolumns}
               data={Polished}
@@ -132,11 +132,11 @@ export default async function FinishedMaterialPage({ params }: Props) {
           </TabsContent>
           <TabsContent value="Sold">
             <DataTable
-              bulkDeleteIdName="order_id"
+              bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              deleteRoute="/"
+              deleteRoute="/factory-management/inventory/deletemultipleslabs"
               searchKey="slabNumber"
               columns={SoldColumns}
               data={Sold}

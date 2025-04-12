@@ -68,28 +68,28 @@ const formSchema = z.object({
             })
         ).optional(),
     }).optional(),
-        transporterName: z.string().optional(),
-        noOftransportinvoices: z.number().optional(),
-        transporterInvoices: z.array(
-            z.object({
-                invoiceNumber: z.string().optional(),
-                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-                date: z.string().datetime({ message: "Invalid date format" }).optional(),
-                valueWithGst: z.number().optional(),
-                valueWithoutGst: z.number().optional(),
-            })
-        ).optional(),
-        forwarderName: z.string().optional(),
-        noOfForwarderinvoices: z.number().optional(),
-        forwarderInvoices: z.array(
-            z.object({
-                invoiceNumber: z.string().optional(),
-                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-                date: z.string().datetime({ message: "Invalid date format" }).optional(),
-                valueWithGst: z.number().optional(),
-                valueWithoutGst: z.number().optional(),
-            }),
-        ).optional(),
+    transporterName: z.string().optional(),
+    noOftransportinvoices: z.number().optional(),
+    transporterInvoices: z.array(
+        z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+        })
+    ).optional(),
+    forwarderName: z.string().optional(),
+    noOfForwarderinvoices: z.number().optional(),
+    forwarderInvoices: z.array(
+        z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+        }),
+    ).optional(),
     shippingBillDetails: z.object({
         review: z.string().optional(),
         portCode: z.string().optional(),
@@ -149,8 +149,8 @@ const formSchema = z.object({
                 valueWithGst: z.number().optional(),
                 valueWithoutGst: z.number().optional(),
             }),
-)}).optional(),
-        blDetails: z.object({
+    )}).optional(),
+    blDetails: z.object({
         review: z.string().optional(),
         blNumber: z.string().optional(),
         blDate: z.string().datetime({ message: "Invalid date format" }).optional(),
@@ -172,11 +172,21 @@ const formSchema = z.object({
 
 const steps = [
     { id: 1, name: "Booking Details", component: <BookingDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 5, name: "Commercial Invoice", component: <SaleInvoiceDetails saveProgress={saveProgressWithFeedback} /> },
-    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgressWithFeedback} /> },
+    { id: 2, name: "Shipping Details", component: <ShippingDetails saveProgress={saveProgressWithFeedback} onSectionSubmit={function (): void {
+        throw new Error("Function not implemented.");
+    } } /> },
+    { id: 3, name: "Shipping Bill Details", component: <ShippingBillDetails saveProgress={saveProgressWithFeedback} onSectionSubmit={function (): void {
+        throw new Error("Function not implemented.");
+    } } /> },
+    { id: 4, name: "Supplier Details", component: <SupplierDetails saveProgress={saveProgressWithFeedback} onSectionSubmit={function (): void {
+        throw new Error("Function not implemented.");
+    } } /> },
+    { id: 5, name: "Commercial Invoice", component: <SaleInvoiceDetails saveProgress={saveProgressWithFeedback} onSectionSubmit={function (): void {
+        throw new Error("Function not implemented.");
+    } } /> },
+    { id: 6, name: "Bill of Lading Details", component: <BillOfLadingDetails saveProgress={saveProgressWithFeedback} onSectionSubmit={function (): void {
+        throw new Error("Function not implemented.");
+    } } /> },
     { id: 7, name: "Other Details", component: <OtherDetails saveProgress={saveProgressWithFeedback} /> },
 ];
 
@@ -210,7 +220,6 @@ export default function CreateNewFormPage() {
     }, [watchedValues, debouncedSave]);
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
         setIsLoading(true);
         try {
             await postData("/shipment/add/", {
@@ -227,6 +236,26 @@ export default function CreateNewFormPage() {
             setIsLoading(false);
         }
     }
+
+    // Handle section-specific submission
+    const handleSectionSubmit = async () => {
+        setIsLoading(true);
+        try {
+            const values = form.getValues();
+            await postData("/shipment/add/", {
+                ...values,
+                organizationId,
+                status: "active",
+            });
+            toast.success(`${steps[currentStep].name} submitted successfully`);
+            nextStep();
+        } catch (error) {
+            console.error(`Error submitting ${steps[currentStep].name}:`, error);
+            toast.error(`Error submitting ${steps[currentStep].name}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const nextStep = () => {
         if (currentStep < steps.length - 1) {
@@ -284,7 +313,44 @@ export default function CreateNewFormPage() {
                         </p>
                     </div>
 
-                    {steps[currentStep].component}
+                    {/* Pass handleSectionSubmit to relevant components */}
+                    {steps[currentStep].id === 1 && (
+                        <BookingDetails saveProgress={saveProgressWithFeedback} />
+                    )}
+                    {steps[currentStep].id === 2 && (
+                        <ShippingDetails
+                            saveProgress={saveProgressWithFeedback}
+                            onSectionSubmit={handleSectionSubmit}
+                        />
+                    )}
+                    {steps[currentStep].id === 3 && (
+                        <ShippingBillDetails
+                            saveProgress={saveProgressWithFeedback}
+                            onSectionSubmit={handleSectionSubmit}
+                        />
+                    )}
+                    {steps[currentStep].id === 4 && (
+                        <SupplierDetails
+                            saveProgress={saveProgressWithFeedback}
+                            onSectionSubmit={handleSectionSubmit}
+                        />
+                    )}
+                    {steps[currentStep].id === 5 && (
+                        <SaleInvoiceDetails
+                            saveProgress={saveProgressWithFeedback}
+                            onSectionSubmit={handleSectionSubmit}
+                        />
+                    )}
+                    {steps[currentStep].id === 6 && (
+                        <BillOfLadingDetails
+                            saveProgress={saveProgressWithFeedback}
+                            onSectionSubmit={handleSectionSubmit}
+                        />
+                    )}
+                    {steps[currentStep].id === 7 && (
+                        <OtherDetails saveProgress={saveProgressWithFeedback} />
+                    )}
+
                     <div className="flex justify-between mt-4">
                         <Button
                             type="button"

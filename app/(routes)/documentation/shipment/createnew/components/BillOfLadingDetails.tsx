@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Added for review
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -27,19 +27,24 @@ import {
   TableHead,
   TableBody,
   TableCell,
-  Table
+  Table,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { Icons } from "@/components/ui/icons";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue,watch, getValues } = useFormContext();
+interface BillOfLadingDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
+}
+
+export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLadingDetailsProps) {
+  const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
   const GlobalModal = useGlobalModal();
   const shippingInvoicesFromForm = watch("shippingDetails.shippingLineInvoices") || [];
@@ -47,11 +52,9 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
   const [shippingLines, setShippingLines] = useState([]);
   const [selectedShippingFiles, setSelectedShippingFiles] = useState<(File | null)[]>([]);
 
-
   useEffect(() => {
-    setSelectedShippingFiles(Array(setShippingInvoices.length).fill(null));
-}, [setSelectedShippingFiles]);
-
+    setSelectedShippingFiles(Array(shippingInvoices.length).fill(null));
+  }, [shippingInvoices.length]);
 
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
@@ -67,7 +70,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
         }
       );
       const data = await response.json();
-      const storageUrl = data.storageLink; // Adjust based on actual API response key
+      const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
@@ -77,11 +80,13 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
       setUploading(false);
     }
   };
+
   interface ShippingInvoice {
     invoiceNumber: string;
     date: string;
     amount: number;
   }
+
   const handleShippingCountChange = (value: string) => {
     const count = Number.parseInt(value, 10) || 0;
     const currentInvoices = watch("shippingDetails.shippingLineInvoices") || [];
@@ -101,6 +106,7 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
     setValue("shippingDetails.noOfShipmentinvoices", newInvoices.length);
     saveProgressSilently(getValues());
   };
+
   const handleShippingDelete = (index: number) => {
     const updatedInvoices = shippingInvoices.filter((_: any, i: number) => i !== index);
     setShippingInvoices(updatedInvoices);
@@ -110,31 +116,33 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
   };
 
   const openShippingLineForm = () => {
-      GlobalModal.title = "Add New Shipping Line";
-      GlobalModal.children = (
-        <ShippinglineForm
-          onSuccess={() => {
-            fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba")
-              .then((res) => res.json())
-              .then((data) => setShippingLines(data));
-          }}
-        />
-      );
-      GlobalModal.onOpen();
-    };
-    // Fetch data on component mount
+    GlobalModal.title = "Add New Shipping Line";
+    GlobalModal.children = (
+      <ShippinglineForm
+        onSuccess={() => {
+          fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba")
+            .then((res) => res.json())
+            .then((data) => setShippingLines(data));
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
+  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
         const shippingResponse = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba");
         const shippingData = await shippingResponse.json();
         setShippingLines(shippingData);
-} catch (error) {
+      } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
     fetchData();
   }, []);
+
   return (
     <div>
       <div className="grid grid-cols-4 gap-3">
@@ -481,9 +489,18 @@ export function BillOfLadingDetails({ saveProgress }: SaveDetailsProps) {
           )}
         />
       </div>
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit 
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }
-
-
-
