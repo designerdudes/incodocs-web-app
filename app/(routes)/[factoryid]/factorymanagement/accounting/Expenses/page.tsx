@@ -1,4 +1,3 @@
-"use client";
 import { DataTable } from '@/components/ui/data-table';
 import { Separator } from '@/components/ui/separator';
 import React, { useEffect, useState } from 'react';
@@ -7,7 +6,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { expensecolumns } from './components/expenseColumns';
-import { fetchData } from '@/axiosUtility/api';
+import { cookies } from "next/headers";
+
 
 
 export type expense = {
@@ -19,27 +19,24 @@ export type expense = {
 }
 
 
-function Page() {
-    const [expenseData, setExpenseData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchExpenseData = async () => {
-            try {
-                setLoading(true);
-                const data = await fetchData("/expense/getall");
-                setExpenseData(data);
-                // console.log(expenseData)
-
-            } catch (error) {
-                console.error("Error fetching expense data:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchExpenseData();
-    }, []);
+export default async function Page() {
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+    const res = await fetch(
+        "https://incodocs-server.onrender.com/expense/getall",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      ).then((response) => {
+        return response.json();
+      });
+      let expenseData;
+      expenseData = res;
+      
 
 
     return (
@@ -68,7 +65,7 @@ function Page() {
                     bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
                     bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected slabs deleted successfully"
-                    searchKey="ExpenseName"
+                    searchKey="expenseName"
                     columns={expensecolumns}
                     data={expenseData}
                 />
@@ -76,4 +73,3 @@ function Page() {
         </div>
     );
 }
-export default Page;

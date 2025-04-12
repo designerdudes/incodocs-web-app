@@ -4,6 +4,7 @@ export const shipmentSchema = z.object({
   _id: z.string(),
   shipmentId: z.string(), // Added based on real data
   bookingDetails: z.object({
+    invoiceNumber: z.string(),
     bookingNumber: z.string(),
     portOfLoading: z.string(),
     destinationPort: z.string(),

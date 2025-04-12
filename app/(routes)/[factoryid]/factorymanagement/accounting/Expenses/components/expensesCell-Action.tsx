@@ -15,6 +15,7 @@ import { Alert } from "@/components/forms/Alert";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { expense } from "../page";
+import EditExpenseForm from "./EditExpenseForm";
 
 interface Props {
     data: expense
@@ -27,7 +28,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
     const deleteLot = async () => {
         try {
-            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
+            const result = await deleteData(`http://localhost:4080/expense/delete/${data._id}`);
             toast.success('Lot Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
@@ -62,7 +63,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = "Edit Expense Details"; // Set modal title
-                            // GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
+                            GlobalModal.children = <EditExpenseForm params={{ _id: data._id }} />; // Render Edit Form
                             GlobalModal.onOpen();
                         }}
                     >
