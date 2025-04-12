@@ -25,6 +25,7 @@ export default async function Page() {
     });
     let shipmentData;
     shipmentData = res;
+    console.log("shipmentData", shipmentData);
 
     return (
         <div className="flex flex-col p-6">
