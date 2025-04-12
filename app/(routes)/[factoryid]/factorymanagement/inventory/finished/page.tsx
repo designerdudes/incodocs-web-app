@@ -123,7 +123,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              deleteRoute="https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/delete/67379aa605825e752133c639"
+              deleteRoute="/"
               searchKey="slabNumber"
               columns={Polishedcolumns}
               data={Polished}
@@ -135,7 +135,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
               bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
               bulkDeleteToastMessage="Selected slabs deleted successfully"
-              deleteRoute="https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/delete/67379aa605825e752133c639"
+              deleteRoute="/"
               searchKey="slabNumber"
               columns={SoldColumns}
               data={Sold}
