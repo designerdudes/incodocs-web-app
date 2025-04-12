@@ -31,7 +31,8 @@ const formSchema = z.object({
     .min(1, { message: "Organization must be selected" }),
   employeeId: z.string().min(1, { message: "Employee ID is required" }),
   role: z.string().min(1, { message: "Role is required" }),
-  position: z.string().min(1, { message: "Position is required" }),
+  position: z.string().optional(),
+  // min(1, { message: "Position is required" }),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
     pincode: z
@@ -44,7 +45,7 @@ const formSchema = z.object({
     phoneNumber: z.string().min(1, { message: "Enter phone number" }),
     alternatePhone: z
       .string()
-      .min(1, { message: "Enter alternate phone number" })
+      // .min(1, { message: "Enter alternate phone number" })
       .optional(),
   }),
 });
@@ -281,9 +282,43 @@ export default function TeamFormPage() {
             />
           </div>
 
-          <Button type="submit" disabled={isLoading}>
+          {/* <Button type="submit" disabled={isLoading}>
             Submit
-          </Button>
+          </Button> */}
+
+<Button
+  disabled={isLoading}
+  onClick={form.handleSubmit(async (values) => {
+    setIsLoading(true);
+    try {
+      await postData("/employers/add/", {
+        ...values,
+        status: "active", 
+      });
+
+      toast.success("Team member added successfully");
+
+      router.push("./"); 
+
+    
+      //  setTimeout(() => {
+      // }, 500);
+    } catch (error: any) {
+      console.error("Error creating team member:", error);
+      if (error.response?.status === 400) {
+        toast.error(error.response.data.message || "Bad Request");
+      } else {
+        toast.error("Failed to create team member");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  })}
+>
+  Confirm
+</Button>
+
+
         </form>
       </Form>
     </div>
