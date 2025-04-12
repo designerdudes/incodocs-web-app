@@ -44,15 +44,40 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "saleInvoiceDetails.commercialInvoices",
+    accessorKey: "bookingDetails.invoiceNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title=" Invoice Number" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.commercialInvoices
-            ?.commercialInvoiceNumber || "N/A"}
+          {row.original.bookingDetails?.invoiceNumber || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "saleInvoiceDetails.consignee",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Consignee Name" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "saleInvoiceDetails.DescriptionofGoods",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Description of Goods" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
         </span>
       </div>
     ),
@@ -86,27 +111,27 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "saleInvoiceDetails.consignee",
+    accessorKey: "bookingDetails.portOfLoading",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Consignee Name" />
+      <ColumnHeader column={column} title="Port of Loading" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+          {row.original.bookingDetails?.portOfLoading || "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "saleInvoiceDetails.DescriptionofGoods",
+    accessorKey: "bookingDetails.destinationPort",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Description of Goods" />
+      <ColumnHeader column={column} title=" Port Of Destination " />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+          {row.original.bookingDetails?.destinationPort || "N/A"}
         </span>
       </div>
     ),
@@ -141,32 +166,6 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.portOfLoading",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Port of Loading" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.portOfLoading || "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "bookingDetails.destinationPort",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title=" Port Of Destination " />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.destinationPort || "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
     accessorKey: "bookingDetails.bookingNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Booking Number" />
@@ -179,7 +178,7 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  
+
   {
     accessorKey: "bookingDetails.containers",
     header: ({ column }) => (
@@ -214,8 +213,8 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  
-  
+
+
   {
     accessorKey: "bookingDetails.vesselSailingDate",
     header: ({ column }) => (
@@ -388,7 +387,7 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  
+
   {
     accessorKey: "saleInvoiceDetails.actualBuyer",
     header: ({ column }) => (
@@ -402,8 +401,8 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  
-  
+
+
   {
     accessorKey: "blDetails.blDate",
     header: ({ column }) => <ColumnHeader column={column} title="BL Date" />,

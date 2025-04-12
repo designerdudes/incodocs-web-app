@@ -75,25 +75,25 @@ interface DataTableProps<TData, TValue> {
   bulkPolisToastMessage?: string;
 }
 
-export function 
-DataTable<TData, TValue>({
-  columns,
-  data,
-  searchKey,
-  bulkDeleteIdName,
-  bulkDeleteTitle,
-  bulkDeleteDescription,
-  bulkDeleteToastMessage,
-  deleteRoute,
-  showDropdown = false, // ✅ Set a default value (false)
+export function
+  DataTable<TData, TValue>({
+    columns,
+    data,
+    searchKey,
+    bulkDeleteIdName,
+    bulkDeleteTitle,
+    bulkDeleteDescription,
+    bulkDeleteToastMessage,
+    deleteRoute,
+    showDropdown = false, // ✅ Set a default value (false)
 
-  tab, // Get the tab name from props
-  bulkPolishTitle,
-  bulkPOlishDescription,
-  bulkPolishIdName,
-  updateRoute,
-  bulkPolisToastMessage,
-}: DataTableProps<TData, TValue>) {
+    tab, // Get the tab name from props
+    bulkPolishTitle,
+    bulkPOlishDescription,
+    bulkPolishIdName,
+    updateRoute,
+    bulkPolisToastMessage,
+  }: DataTableProps<TData, TValue>) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -154,65 +154,65 @@ DataTable<TData, TValue>({
   };
 
 
-// Function to extract all nested keys
-const getAllKeys = (obj: Record<string, any>, prefix = ""): string[] => {
-  return Object.entries(obj).flatMap(([key, value]) =>
-    value && typeof value === "object" && !Array.isArray(value)
-      ? getAllKeys(value, `${prefix}${key}.`) // Recursively get nested keys
-      : `${prefix}${key}` // Add the key with prefix for clarity
-  );
-};
+  // Function to extract all nested keys
+  const getAllKeys = (obj: Record<string, any>, prefix = ""): string[] => {
+    return Object.entries(obj).flatMap(([key, value]) =>
+      value && typeof value === "object" && !Array.isArray(value)
+        ? getAllKeys(value, `${prefix}${key}.`) // Recursively get nested keys
+        : `${prefix}${key}` // Add the key with prefix for clarity
+    );
+  };
 
-// Defined data for the shipping page dropdown
-const formData = {
-  bookingDetails: {
-    containerNumber: "",
-    portOfLoading: "",
-    destinationPort: "",
-    vesselSailingDate: new Date(),
-    vesselArrivingDate: new Date(),
-    truckNumber: "",
-    truckDriverNumber: "",
-  },
-  shippingDetails: {
-    shippingLine: "",
-    forwarder: "",
-    forwarderInvoice: null,
-    valueOfForwarderInvoice: "",
-    transporter: "",
-    valueOfTransporterInvoice: "",
-  },
-  shippingBillDetails: {
-    shippingBillNumber: "",
-    shippingBillDate: new Date(),
- 
-  },
-  supplierDetails: {
-    supplierName: "",
-    actualSupplierName: "",
-    supplierGSTIN: "",
-    supplierInvoiceNumber: "",
-    supplierInvoiceDate: new Date(),
-    supplierInvoiceValueWithOutGST: "",
-    supplierInvoiceValueWithGST: "",
-  
-    actualSupplierInvoiceValue: "",
-  },
-  saleInvoiceDetails: {
-    commercialInvoiceNumber: "",
-    commercialInvoiceDate: new Date(),
-    consigneeDetails: "",
-    actualBuyer: "",
-  },
-  blDetails: {
-    blNumber: "",
-    blDate: new Date(),
+  // Defined data for the shipping page dropdown
+  const formData = {
+    bookingDetails: {
+      containerNumber: "",
+      portOfLoading: "",
+      destinationPort: "",
+      vesselSailingDate: new Date(),
+      vesselArrivingDate: new Date(),
+      truckNumber: "",
+      truckDriverNumber: "",
+    },
+    shippingDetails: {
+      shippingLine: "",
+      forwarder: "",
+      forwarderInvoice: null,
+      valueOfForwarderInvoice: "",
+      transporter: "",
+      valueOfTransporterInvoice: "",
+    },
+    shippingBillDetails: {
+      shippingBillNumber: "",
+      shippingBillDate: new Date(),
 
-  },
-};
+    },
+    supplierDetails: {
+      supplierName: "",
+      actualSupplierName: "",
+      supplierGSTIN: "",
+      supplierInvoiceNumber: "",
+      supplierInvoiceDate: new Date(),
+      supplierInvoiceValueWithOutGST: "",
+      supplierInvoiceValueWithGST: "",
 
-// Get all dropdown options (nested keys)
-const dropdownOptions = getAllKeys(formData);
+      actualSupplierInvoiceValue: "",
+    },
+    saleInvoiceDetails: {
+      commercialInvoiceNumber: "",
+      commercialInvoiceDate: new Date(),
+      consigneeDetails: "",
+      actualBuyer: "",
+    },
+    blDetails: {
+      blNumber: "",
+      blDate: new Date(),
+
+    },
+  };
+
+  // Get all dropdown options (nested keys)
+  const dropdownOptions = getAllKeys(formData);
 
 
   return (
@@ -233,34 +233,30 @@ const dropdownOptions = getAllKeys(formData);
           />
         </div>
 
-<div className=" ml-3 ">
+        <div className=" ml-3 ">
 
- {/* dropdown Only visible on Shipment Page */}
- {showDropdown && (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <Button variant="outline">Select Field</Button>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
-      {dropdownOptions.map((option) => (
-        <DropdownMenuCheckboxItem
-          key={option}
-          checked={table.getColumn(option)?.getIsVisible() ?? false}
-          onCheckedChange={(value) =>
-            table.getColumn(option)?.toggleVisibility(!!value)
-          }
-        >
-          {option}
-        </DropdownMenuCheckboxItem>
-      ))}
-    </DropdownMenuContent>
-  </DropdownMenu>
-)}
-
-
-</div>
-
-
+          {/* dropdown Only visible on Shipment Page */}
+          {showDropdown && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">Select Field</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
+                {dropdownOptions.map((option) => (
+                  <DropdownMenuCheckboxItem
+                    key={option}
+                    checked={table.getColumn(option)?.getIsVisible() ?? false}
+                    onCheckedChange={(value) =>
+                      table.getColumn(option)?.toggleVisibility(!!value)
+                    }
+                  >
+                    {option}
+                  </DropdownMenuCheckboxItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -288,9 +284,8 @@ const dropdownOptions = getAllKeys(formData);
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
       <div className="rounded-md border">
-      <Table>
+        <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -303,9 +298,9 @@ const dropdownOptions = getAllKeys(formData);
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -354,16 +349,15 @@ const dropdownOptions = getAllKeys(formData);
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.footer,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.footer,
+                        header.getContext()
+                      )}
                   </TableCell>
                 ))}
               </TableRow>
             ))}
           </tfoot>
         </Table>
-
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div>
@@ -401,7 +395,6 @@ const dropdownOptions = getAllKeys(formData);
               Delete Selected
             </Button>
           )}
-
           {tab === "inPolishing" &&
             table.getFilteredSelectedRowModel().rows.length > 1 && (
               <Button
