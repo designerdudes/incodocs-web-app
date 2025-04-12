@@ -91,6 +91,25 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
+
+<FormField
+        control={control}
+        name="bookingDetails.invoiceNumber"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Invoice Number</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="e.g., 99808541234"
+                className="uppercase"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
       <FormField
         control={control}
         name="bookingDetails.bookingNumber"
@@ -287,26 +306,26 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                     />
                   </TableCell>
                   <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="tel"
-                              placeholder="e.g., 7702791728"
-                              {...field}
-                              value={field.value || ""}
-                              onChange={(e) => field.onChange(e.target.value)}
-                              onBlur={() => saveProgressSilently(getValues())}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
+  <FormField
+    control={control}
+    name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
+    render={({ field }) => (
+      <FormItem>
+        <FormControl>
+          <Input
+            type="tel"
+            placeholder="e.g., 7702791728"
+            {...field}
+            value={field.value}
+            onChange={(e) => field.onChange(e.target.value)}
+            onBlur={() => saveProgressSilently(getValues())}
+          />
+        </FormControl>
+        <FormMessage />
+      </FormItem>
+    )}
+  />
+</TableCell>
                   <TableCell>
                     <Button type="button" variant="secondary" onClick={() => openProductForm(index)}>
                       Add product
