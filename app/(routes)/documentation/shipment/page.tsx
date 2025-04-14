@@ -37,13 +37,13 @@ export default async function Page() {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Shipment Page" />
+                    <Heading className="leading-tight" title="Shipments" />
                     <p className="text-muted-foreground text-sm">
                         Track and manage shipments with real-time visibility of container details, status, and progress through the logistics cycle.
                     </p>
                 </div>
                 <Link href={`./shipment/createnew`}>
-                    <Button className="bg-primary text-white">New Shipment</Button>
+                    <Button className="bg-primary text-white">Add New Shipment</Button>
                 </Link>
             </div>
             <Separator className="my-2" />
