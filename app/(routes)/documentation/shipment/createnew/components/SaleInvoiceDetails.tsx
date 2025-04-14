@@ -31,13 +31,18 @@ import {
 import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
+import { Icons } from "@/components/ui/icons";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
+interface SaleInvoiceDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
+}
+
+export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
@@ -388,6 +393,18 @@ export function SaleInvoiceDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit 
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }

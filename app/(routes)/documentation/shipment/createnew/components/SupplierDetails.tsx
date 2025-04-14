@@ -32,13 +32,18 @@ import {
 import { Separator } from "@/components/ui/separator";
 import SupplierForm from "@/components/forms/Addsupplierform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Icons } from "@/components/ui/icons";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
+interface SupplierDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
+}
+
+export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const invoicesFromForm = watch("supplierDetails.clearance.invoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
@@ -57,7 +62,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
         const supplierData = await supplierResponse.json();
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
-          name: supplier.supplierName, // Matches API response
+          name: supplier.supplierName,
         }));
         setSupplierNames(mappedSuppliers);
       } catch (error) {
@@ -454,7 +459,7 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
                   }}
                   displayProperty="name"
                   placeholder="Select a Shipping Bill"
-                  onAddNew={() => { }} // Placeholder; add functionality if needed
+                  onAddNew={() => { }}
                   addNewLabel="Add New Shipping Bill"
                 />
               </FormControl>
@@ -480,6 +485,18 @@ export function SupplierDetails({ saveProgress }: SaveDetailsProps) {
             </FormItem>
           )}
         />
+      </div>
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
       </div>
     </div>
   );

@@ -124,10 +124,11 @@ export function
   const modal = useGlobalModal();
 
   const handleBulkDelete = async () => {
+  
     const selectedIds = table
       .getFilteredSelectedRowModel()
       .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
-
+console.log(bulkDeleteIdName)
     if (selectedIds.length === 0) {
       toast.error("No product selected for deletion.");
       return;

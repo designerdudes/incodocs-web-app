@@ -11,7 +11,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-
 import {
   Popover,
   PopoverTrigger,
@@ -30,9 +29,14 @@ import {
 } from "@/components/ui/table";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ProductDetailsForm from "@/components/forms/ProductdetailsForm";
+import { Icons } from "@/components/ui/icons";
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
+}
+
+interface BookingDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
 }
 
 function saveProgressSilently(data: any) {
@@ -40,7 +44,7 @@ function saveProgressSilently(data: any) {
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function BookingDetails({ saveProgress }: SaveDetailsProps) {
+export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
   const [containers, setContainers] = React.useState(containersFromForm);
@@ -91,8 +95,7 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-
-<FormField
+      <FormField
         control={control}
         name="bookingDetails.invoiceNumber"
         render={({ field }) => (
@@ -306,26 +309,26 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
                     />
                   </TableCell>
                   <TableCell>
-  <FormField
-    control={control}
-    name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
-    render={({ field }) => (
-      <FormItem>
-        <FormControl>
-          <Input
-            type="tel"
-            placeholder="e.g., 7702791728"
-            {...field}
-            value={field.value}
-            onChange={(e) => field.onChange(e.target.value)}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-</TableCell>
+                    <FormField
+                      control={control}
+                      name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              placeholder="e.g., 7702791728"
+                              {...field}
+                              value={field.value}
+                              onChange={(e) => field.onChange(e.target.value)}
+                              onBlur={() => saveProgressSilently(getValues())}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Button type="button" variant="secondary" onClick={() => openProductForm(index)}>
                       Add product
@@ -342,6 +345,16 @@ export function BookingDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4 col-span-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+        >
+          Submit 
+        </Button>
+      </div>
     </div>
   );
 }

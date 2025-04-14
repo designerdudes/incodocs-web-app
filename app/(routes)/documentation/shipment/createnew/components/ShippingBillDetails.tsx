@@ -9,7 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Added for review field
+import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -28,13 +28,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
+import { Icons } from "@/components/ui/icons";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
+interface ShippingBillDetailsProps extends SaveDetailsProps {
+  onSectionSubmit: () => void;
+}
+
+export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingBillDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
   const [shippingBills, setShippingBills] = useState(shippingBillsFromForm);
@@ -81,9 +86,7 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink; // Adjust based on actual API response key
-      console.log(data)
-      console.log(storageUrl)
+      const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
@@ -96,7 +99,6 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
 
   return (
     <div className="grid grid-cols-4 gap-3">
-
       {/* Port Code */}
       <FormField
         control={control}
@@ -334,7 +336,6 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
               ))}
             </TableBody>
           </Table>
-
         </div>
       )}
       {/* Review */}
@@ -355,6 +356,18 @@ export function ShippingBillDetails({ saveProgress }: SaveDetailsProps) {
           </FormItem>
         )}
       />
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4 col-span-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }
