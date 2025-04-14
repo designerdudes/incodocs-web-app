@@ -42,7 +42,7 @@ function FactoryManagementPage() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link href={`/documentation/exportdocs`} passHref>
+        <Link href={`/documentation/expodocs`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Export Docs</CardTitle>
@@ -101,7 +101,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/purchaseorder`} passHref>
+        <Link href={`/documentation/purchaseOrders`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">

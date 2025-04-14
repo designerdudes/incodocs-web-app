@@ -114,7 +114,7 @@ const data = {
             items: [
                 {
                     title: "Export Docs",
-                    url: "#",
+                    url: "/documentation/expodocs",
                 },
                 {
                     title: "Shipments",
@@ -126,7 +126,7 @@ const data = {
                 },
                 {
                     title: "Purchase Orders",
-                    url: "/documentation/purchaseorders",
+                    url: "/documentation/purchaseOrders",
                 },
                 {
                     title: "Quotes",
