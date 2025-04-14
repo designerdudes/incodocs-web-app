@@ -46,10 +46,11 @@ export default async function QuotesPage({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Quotes" />
           <p className="text-muted-foreground text-sm mt-2">
-            Easily track and modify details of stakeholders, ensuring efficient
-            coordination and up-to-date records.
+          Effortlessly manage your business quotes, ensuring accuracy and
+          easy retrieval.
           </p>
         </div>
+        <Button className="bg-primary text-white">Add Quote</Button>
       </div>
       {/* Moved PartiesDropdown here */}
       
