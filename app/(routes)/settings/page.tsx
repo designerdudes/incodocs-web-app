@@ -7,6 +7,7 @@ export default function SettingsPage() {
     const settingsOptions = [
         { name: "Factory Settings", path: "/settings/factory" },
         { name: "General Settings", path: "/settings/general" },
+        { name: "Organisation", path: "/settings/organisation" }
     ];
 
     return (

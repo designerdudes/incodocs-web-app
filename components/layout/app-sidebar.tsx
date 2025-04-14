@@ -162,6 +162,10 @@ const data = {
                     title: "Factory",
                     url: "/settings/factory",
                 },
+                {
+                    title: "Organisation",
+                    url: "/settings/organisation",
+                }
             ],
         },
     ],
