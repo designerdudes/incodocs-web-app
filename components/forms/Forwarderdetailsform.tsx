@@ -18,15 +18,19 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  forwarderName: z.string().min(1, { message: "Shipping Line Name is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  forwarderName: z
+    .string()
+    .min(1, { message: "Shipping Line Name is required" }),
+  address: z.string().optional(),
+  responsiblePerson: z
+    .string()
+    .optional(),
   mobileNo: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
     .transform((val) => parseInt(val, 10)) // Convert to number
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+    .refine((val) => !isNaN(val))
+    .optional(),
+  email: z.string().optional(),
 });
 
 interface ForwarderFormProps {
@@ -52,25 +56,27 @@ function ForwarderForm({ onSuccess }: ForwarderFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/forwarder/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          forwarderName: values.forwarderName,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo,
-          email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba"
-
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/forwarder/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            forwarderName: values.forwarderName,
+            address: values.address,
+            responsiblePerson: values.responsiblePerson,
+            mobileNo: values.mobileNo,
+            email: values.email,
+            organizationId: "674b0a687d4f4b21c6c980ba",
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create Forwarder");
       const data = await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Forwarder created successfully");
-      if (onSuccess) onSuccess();// Reload to reflect new data (temporary solution)
+      if (onSuccess) onSuccess(); // Reload to reflect new data (temporary solution)
     } catch (error) {
       console.error("Error creating Forwarder:", error);
       setIsLoading(false);
@@ -151,7 +157,11 @@ function ForwarderForm({ onSuccess }: ForwarderFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="e.g., unknownname@123.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -17,19 +17,22 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 
-
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
-  gstNo: z.string().min(1, { message: "GST Number is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  gstNo: z.string().optional(),
+  address: z.string().optional(),
+  responsiblePerson: z
+    .string()
+    .optional(),
   mobileNumber: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
     .transform((val) => parseInt(val, 10))
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  state: z.string().min(1, { message: "State is required" }),
-  factoryAddress: z.string().min(1, { message: "Factory Address is required" }),
+    .refine((val) => !isNaN(val))
+    .optional(),
+  state: z.string().optional(),
+  factoryAddress: z
+    .string()
+    .optional(),
 });
 
 interface SupplierFormProps {
@@ -54,24 +57,26 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
 
   const GlobalModal = useGlobalModal();
 
-
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/supplier/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          supplierName: values.supplierName,
-          gstNo: values.gstNo,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNumber: values.mobileNumber,
-          state: values.state,
-          factoryAddress: values.factoryAddress,
-          organizationId: "674b0a687d4f4b21c6c980ba",
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/supplier/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            supplierName: values.supplierName,
+            gstNo: values.gstNo,
+            address: values.address,
+            responsiblePerson: values.responsiblePerson,
+            mobileNumber: values.mobileNumber,
+            state: values.state,
+            factoryAddress: values.factoryAddress,
+            organizationId: "674b0a687d4f4b21c6c980ba",
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create supplier");
       await response.json();
       setIsLoading(false);

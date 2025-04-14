@@ -19,12 +19,9 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
-  email: z.string().email({ message: "Enter a valid email" }),
-  telephoneNo: z
-    .string()
-    .min(10, { message: "Number must be at least 10 digits" })
-    .max(15, { message: "Number cannot exceed 15 digits" }),
-  address: z.string().min(1, { message: "Address is required" }),
+  email: z.string().optional(),
+  telephoneNo: z.string().optional(),
+  address: z.string().optional(),
 });
 
 interface AddConsigneeFormProps {
@@ -55,11 +52,14 @@ export default function AddConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
         address: values.address,
         organizationId: "674b0a687d4f4b21c6c980ba",
       };
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/consignee/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/consignee/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create consignee");
       await response.json();
       setIsLoading(false);

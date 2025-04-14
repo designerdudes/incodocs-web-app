@@ -18,15 +18,17 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  shippingLineName: z.string().min(1, { message: "Shipping Line Name is required" }),
-  address: z.string().min(1, { message: "Address is required" }),
-  responsiblePerson: z.string().min(1, { message: "Responsible Person is required" }),
+  shippingLineName: z
+    .string()
+    .min(1, { message: "Shipping Line Name is required" }),
+  address: z.string().optional(),
+  responsiblePerson: z.string().optional(),
   mobileNo: z
     .string()
-    .min(7, { message: "Mobile number must be at least 7 digits" })
     .transform((val) => parseInt(val, 10))
-    .refine((val) => !isNaN(val), { message: "Enter a valid mobile number" }),
-  email: z.string().email({ message: "Enter a valid Email" }),
+    .refine((val) => !isNaN(val))
+    .optional(),
+  email: z.string().optional(),
 });
 
 interface ShippinglineFormProps {
@@ -51,20 +53,23 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values)
+    console.log(values);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shippingLineName: values.shippingLineName,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo,
-          email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba"
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/shippingline/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            shippingLineName: values.shippingLineName,
+            address: values.address,
+            responsiblePerson: values.responsiblePerson,
+            mobileNo: values.mobileNo,
+            email: values.email,
+            organizationId: "674b0a687d4f4b21c6c980ba",
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create shipping line");
       await response.json();
       setIsLoading(false);
@@ -146,7 +151,11 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="e.g., unknownname@123.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
