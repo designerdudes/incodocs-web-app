@@ -7,10 +7,10 @@ import Heading from "@/components/ui/heading";
 
 
 
-export default function SettingsAppearancePage() {
-    return (
-        <div className="space-y-6 ml-7">
-            <div className="topbar w-full flex items-center justify-between mb-2">
+export default function GeneralSettingPage() {
+  return (
+    <div className="space-y-6 ml-7">
+      <div className="topbar w-full flex items-center justify-between mb-2">
         <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
@@ -23,13 +23,15 @@ export default function SettingsAppearancePage() {
             title="General Setting"
           />
           <p className="text-muted-foreground text-sm">
-          Customize the appearance of the app. Automatically switch between day
-          and night themes.
+            Customize the appearance of the app. Automatically switch between day
+            and night themes.
           </p>
         </div>
       </div>
-            <Separator />
-            <AppearanceForm />
-        </div>
-    )
+      <Separator />
+      <div className="space-y-4 mr-6">
+        <AppearanceForm />
+      </div>
+    </div>
+  )
 }

@@ -46,7 +46,7 @@ export default async function FactoryPage() {
 
 
   return (
-    <div className="space-y-6 ml-7 ">
+    <div className="space-y-6 ml-7">
       <div className="topbar w-full flex items-center justify-between">
         <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
@@ -65,10 +65,10 @@ export default async function FactoryPage() {
         </div>
       </div>
       <div>
-        <Separator/>
-        </div>
-      
-      <div className="space-y-4 mt-4 mb-1">
+        <Separator />
+      </div>
+
+      <div className="space-y-4 mr-6">
         {factories.length > 0 ? (
           factories.map((factory) => (
             <div key={factory._id} className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">

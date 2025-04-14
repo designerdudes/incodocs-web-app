@@ -1,77 +1,70 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { ChevronDownIcon } from "@radix-ui/react-icons"
-import { useForm } from "react-hook-form"
-import * as z from "zod"
-
-import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import {
-    Form,
-    FormControl,
-    FormDescription,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import toast from "react-hot-toast"
-import { useEffect, useState } from "react"
-import { get } from "http"
-
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
+import { useEffect, useState } from "react";
 
 const appearanceFormSchema = z.object({
     theme: z.enum(["light", "dark"], {
         required_error: "Please select a theme.",
     }),
-})
+});
 
-type AppearanceFormValues = z.infer<typeof appearanceFormSchema>
-
+type AppearanceFormValues = z.infer<typeof appearanceFormSchema>;
 
 export function AppearanceForm() {
-    const [defaultTheme, setDefaultTheme] = useState(
-        typeof window !== 'undefined' ? localStorage.getItem('theme') : 'dark'
-    )
+    const [defaultTheme, setDefaultTheme] = useState<"light" | "dark">("dark");
+
+    // Load theme from localStorage only on client-side
+    useEffect(() => {
+        const storedTheme = localStorage.getItem("theme");
+        setDefaultTheme(storedTheme === "light" ? "light" : "dark");
+    }, []);
 
     const form = useForm<AppearanceFormValues>({
         resolver: zodResolver(appearanceFormSchema),
         defaultValues: {
-            theme: defaultTheme === "dark" ? "dark" : "light"
-        }
-    })
+            theme: defaultTheme,
+        },
+    });
+
+    // Update form default value when defaultTheme changes
+    useEffect(() => {
+        form.reset({ theme: defaultTheme });
+    }, [defaultTheme, form]);
 
     function onSubmit(data: AppearanceFormValues) {
-        const { theme } = data
-        localStorage.setItem("theme", theme)
-        updateTheme(theme)
-        toast("Preferences updated.")
+        const { theme } = data;
+        localStorage.setItem("theme", theme);
+        updateTheme(theme);
+        toast.success("Preferences updated.");
     }
-    const updateTheme = (theme: string) => {
-        document.documentElement.setAttribute('class', theme);
-    };
 
+    const updateTheme = (theme: string) => {
+        document.documentElement.setAttribute("class", theme);
+    };
 
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-
                 <FormField
                     control={form.control}
                     name="theme"
                     render={({ field }) => (
                         <FormItem className="space-y-1 ml-9">
-                            <FormLabel className="text-2xl font-medium mb-1e">Theme</FormLabel>
+                            <FormLabel className="text-2xl font-medium mb-1">Theme</FormLabel>
                             <FormDescription>
                                 Select the theme for the dashboard.
                             </FormDescription>
                             <FormMessage />
                             <RadioGroup
                                 onValueChange={field.onChange}
-                                defaultValue={field.value}
+                                value={field.value}
                                 className="grid max-w-md grid-cols-2 gap-8 pt-2"
                             >
                                 <FormItem>
@@ -130,9 +123,10 @@ export function AppearanceForm() {
                         </FormItem>
                     )}
                 />
-
-                <Button type="submit" className="ml-9">Update preferences</Button>
+                <Button type="submit" className="ml-9">
+                    Update preferences
+                </Button>
             </form>
         </Form>
-    )
+    );
 }
