@@ -196,62 +196,7 @@ export default async function Page({ params }: Props) {
           {/* Shipping Details */}
           <TabsContent value="Shipping Details">
             <div className="space-y-6">
-              {/* Shipping Line Details */}
-              <div className="flex flex-col md:flex-row gap-4">
-                <Card className="mt-4 w-full md:w-1/3">
-                  <CardHeader>
-                    <CardTitle>Shipping Line Details</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Field</TableHead>
-                          <TableHead>Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Shipping Line Name</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.shippingLineName
-                              ?.shippingLineName || "N/A"}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.shippingLineInvoices
-                              ?.length || 0}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Review</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.review || "N/A"}
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-                <div className="w-full md:w-2/3">
-                  <DataTable
-                    bulkDeleteIdName="_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
-                    bulkDeleteDescription="This will delete the selected shipping line invoices."
-                    bulkDeleteToastMessage="Selected invoices deleted successfully"
-                    deleteRoute="shipment/deleteall"
-                    searchKey="invoiceNumber"
-                    data={
-                      shipmentData?.shippingDetails?.shippingLineInvoices || []
-                    }
-                    columns={ShippingDetailsColumn}
-                  // showDropdown={true}
-                  />
-                </div>
-              </div>
-
+             
               {/* Forwarder Details */}
               <div className="flex flex-col md:flex-row gap-4">
                 <Card className="mt-4 w-full md:w-1/3">
@@ -610,8 +555,68 @@ export default async function Page({ params }: Props) {
           </TabsContent>
 
           {/* Bill Of Lading Details */}
+
+          <div className="flex flex-col md:flex-row gap-4 mt-4">
+          <Card className="mt-4 w-full md:w-1/3">
+                  <CardHeader>
+                    <CardTitle>Shipping Line Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Shipping Line Name</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.shippingLineName
+                              ?.shippingLineName || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Number Of Invoices</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.shippingLineInvoices
+                              ?.length || 0}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Review</TableCell>
+                          <TableCell>
+                            {shipmentData?.shippingDetails?.review || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+                <div className="w-full md:w-2/3">
+                  <DataTable
+                    bulkDeleteIdName="_id"
+                    bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
+                    bulkDeleteDescription="This will delete the selected shipping line invoices."
+                    bulkDeleteToastMessage="Selected invoices deleted successfully"
+                    deleteRoute="shipment/deleteall"
+                    searchKey="invoiceNumber"
+                    data={
+                      shipmentData?.shippingDetails?.shippingLineInvoices || []
+                    }
+                    columns={ShippingDetailsColumn}
+                  // showDropdown={true}
+                  />
+                </div>
+                    </div>
+
+
+
+
           <TabsContent value="Bill Of Lading Details">
             <div className="flex flex-col md:flex-row gap-4">
+              
               <Card className="mt-4 w-full md:w-1/2">
                 <CardHeader>
                   <CardTitle>Bill Of Lading Details</CardTitle>
