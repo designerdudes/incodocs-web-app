@@ -101,7 +101,7 @@ export default function TeamFormPage() {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold mb-4">Add Team Member</h2>
+      {/* <h2 className="text-2xl font-bold mb-4">Add Team Member</h2> */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
