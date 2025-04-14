@@ -47,10 +47,11 @@ export default async function InvoicesPage({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Invoices" />
           <p className="text-muted-foreground text-sm mt-2">
-            Easily track and modify details of stakeholders, ensuring efficient
-            coordination and up-to-date records.
+          Effortlessly manage your business invoices, ensuring accuracy
+          and easy retrieval.
           </p>
         </div>
+        <Button className="bg-primary text-white">Add Invoice</Button>
       </div>
       {/* Moved PartiesDropdown here */}
       

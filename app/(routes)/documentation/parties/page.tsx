@@ -102,11 +102,12 @@ export default async function PartiesPage({ params }: Props) {
             coordination and up-to-date records.
           </p>
         </div>
-      </div>
-      {/* Moved PartiesDropdown here */}
-      <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4">
         <PartiesDropdown organizationId={orgaanisationID} />
       </div>
+      </div>
+      {/* Moved PartiesDropdown here */}
+      
       <Separator className="my-2" />
       <div>
         <Tabs defaultValue="shippingLine" className="w-full">

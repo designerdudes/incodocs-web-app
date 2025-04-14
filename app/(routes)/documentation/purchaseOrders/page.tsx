@@ -47,10 +47,11 @@ export default async function PurchasePage({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Purchase Orders" />
           <p className="text-muted-foreground text-sm mt-2">
-            Easily track and modify details of stakeholders, ensuring efficient
-            coordination and up-to-date records.
+          Effortlessly manage your business purchaseorder, ensuring
+          accuracy and easy retrieval.
           </p>
         </div>
+        <Button className="bg-primary text-white">Add New Order</Button>
       </div>
       {/* Moved PartiesDropdown here */}
       

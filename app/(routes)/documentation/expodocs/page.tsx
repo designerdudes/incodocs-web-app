@@ -45,12 +45,13 @@ export default async function ExportDocsPage({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="ExpoDocs" />
+          <Heading className="leading-tight" title="Export Docs" />
           <p className="text-muted-foreground text-sm mt-2">
-            Easily track and modify details of stakeholders, ensuring efficient
-            coordination and up-to-date records.
+          A comprehensive solution for managing exportdocs, monitoring
+          efficiently.
           </p>
         </div>
+        <Button className="bg-primary text-white">Export</Button>
       </div>
       {/* Moved PartiesDropdown here */}
       
