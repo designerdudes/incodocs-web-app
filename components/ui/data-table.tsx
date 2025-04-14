@@ -86,7 +86,6 @@ export function
     bulkDeleteToastMessage,
     deleteRoute,
     showDropdown = false, // ✅ Set a default value (false)
-
     tab, // Get the tab name from props
     bulkPolishTitle,
     bulkPOlishDescription,

@@ -65,12 +65,12 @@ export default async function LotManagement({ params }: Props) {
         </div>
         {/* Move the interactivity to the client-side button component */}
         <Link href="./lots/create-new">
-          <Button> Create New Lot</Button>
+          <Button> Add New Lot</Button>
         </Link>
         {/* <CreateNewLotButton /> */}
       </div>
       <Separator className="my-2" />
-            <div >
+      <div >
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected Lots?"
