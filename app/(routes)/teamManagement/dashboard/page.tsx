@@ -5,22 +5,8 @@ import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-
 import { cookies } from "next/headers";
 import { columns } from "./components/columns";
-
-interface Lots {
-  _id: string;
-  lotName: string;
-  factoryId: string;
-  organizationId: string;
-  materialType: string;
-  noOfBlocks: number;
-  blocksId: string[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
 
 interface Props {
   params: {
@@ -47,12 +33,6 @@ export default async function TeamMemberPage({ params }: Props) {
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href="/">
-          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-            <ChevronLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-          </Button>
-        </Link>
         <div className="flex-1">
           <Heading className="leading-tight" title="Team Management" />
           <p className="text-muted-foreground text-sm mt-2">
