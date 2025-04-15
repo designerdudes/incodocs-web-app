@@ -206,7 +206,7 @@ export default function EditExpenseForm({ params }: Props) {
                   <select
                     disabled={isLoading}
                     {...field}
-                    className="w-[40%] block border-slate-500 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 sm:text-sm py-3 bg-transparent"
+                    className="w-[100%] block border-slate-500 rounded-md shadow-sm focus:ring-slate-500 focus:border-slate-500 sm:text-sm py-3 bg-transparent"
                   >
                     <option value="0">0%</option>
                     <option value="1">1%</option>
@@ -234,7 +234,7 @@ export default function EditExpenseForm({ params }: Props) {
                         <Button
                           variant="outline"
                           className={cn(
-                            "w-[40%] justify-start text-left font-normal",
+                            "w-[100%] justify-start text-left font-normal",
                             !field.value && "text-muted-foreground"
                           )}
                         >

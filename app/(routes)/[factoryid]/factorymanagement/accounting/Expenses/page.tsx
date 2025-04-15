@@ -49,7 +49,7 @@ export default async function Page() {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Expenses page" />
+                    <Heading className="leading-tight" title="Expenses " />
                     <p className="text-muted-foreground text-sm mt-2">
                         Efficiently track, manage, and analyze your expenses effortlessly with our user-friendly interface.
                     </p>
@@ -62,9 +62,10 @@ export default async function Page() {
             <div className="w-250 container mx-auto py-10">
                 <DataTable
                     bulkDeleteIdName="order_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
-                    bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
-                    bulkDeleteToastMessage="Selected slabs deleted successfully"
+                    bulkDeleteTitle="Are you sure you want to delete the Details?"
+                    bulkDeleteDescription="This will delete the selected Details, and they will not be recoverable."
+                    bulkDeleteToastMessage="Selected Details deleted successfully"
+                    deleteRoute="expense/delete-multiple"
                     searchKey="expenseName"
                     columns={expensecolumns}
                     data={expenseData}

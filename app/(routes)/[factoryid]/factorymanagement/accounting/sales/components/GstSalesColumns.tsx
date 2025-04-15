@@ -7,7 +7,7 @@ import moment from "moment"
 import { Sales } from "../page"
 import CellAction from "./cell-actions"
 
-export const Columns: ColumnDef<Sales>[] = [
+export const GstSalesColumns: ColumnDef<Sales>[] = [
     {
         id: "select",
         header: ({ table }) => (
