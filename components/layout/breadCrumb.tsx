@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/select";
 import { usePathname, useRouter } from "next/navigation";
 import { fetchData } from "@/axiosUtility/api";
+import { set } from "lodash";
+import { assert } from "console";
 
 interface Organization {
   _id: string;
@@ -34,7 +36,8 @@ function BreadCrumb() {
 
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [factories, setFactories] = useState<Factory[]>([]);
-  const [orgName, setOrgName] = useState<string>("");
+
+  const [currentOrg, setCurrentOrg] = useState<any>();
   const [currentFactoryName, setCurrentFactoryName] = useState<string>("")
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -62,7 +65,7 @@ function BreadCrumb() {
           return;
         }
 
-        const orgResponse = await fetchData("http://localhost:4080/organizations/token")
+        const orgResponse = await fetchData("/organizations/token")
         console.log("Organizations:", orgResponse);
         setOrganizations(orgResponse);
 
@@ -100,7 +103,7 @@ function BreadCrumb() {
         const currentOrgResponses = await fetchData(`/organizations/get/${organizationId}`)
 
 
-        setOrgName(currentOrgResponses.name || organizationId);
+        setCurrentOrg(currentOrgResponses || organizationId);
 
         if (organizationId) {
           const factoryResponse = await fetchData(`/factory/getbyorg/${organizationId}`)
@@ -144,7 +147,7 @@ function BreadCrumb() {
     getData();
   }, [organizationId]);
 
-  const handleOrgChange = (newOrgId: string) => {
+  const handleOrgChange =  (newOrgId: string) => {
     const newOrg = organizations.find((org) => org._id === newOrgId);
     if (!newOrg) return;
 
@@ -161,25 +164,28 @@ function BreadCrumb() {
         },
       }
     )
+    fetchData(`/factory/getbyorg/${newOrgId}`)
       .then((res) => res.json())
       .then((factories) => {
+        setFactories(factories);
+       setCurrentOrg(newOrg);
         const defaultFactoryId = factories[0]?._id || "";
-        if (factories.length > 0) {
-        const newRoute = `/${newOrgId}/${defaultFactoryId}/${remainingSegments.join("/")}/dashboard`;
+
+        const newRoute = `/${newOrgId}/${defaultFactoryId}/dashboard`;
         router.push(newRoute);
-        } 
-        // else {
-        //   const newRoute = `/${newOrgId}/dashboard`;
-        //   router.push(newRoute);
-        // }
+     
       })
       .catch((error) => {
         console.error("Error fetching factories for new org:", error);
+        const newRoute = `/${newOrgId}/dashboard`;
+        router.push(newRoute); 
       });
+    // const newFactories = await fetchData(`/factory/getbyorg/${newOrgId}`);
+    // setFactories(newFactories);
   };
 
   const handleFactoryChange = (newFactoryId: string) => {
-    const newRoute = `/${organizationId}/${newFactoryId}/${remainingSegments.join("/")}`;
+    const newRoute = `/${organizationId}/${newFactoryId}/dashboard`;
     router.push(newRoute);
   };
 
@@ -197,7 +203,7 @@ function BreadCrumb() {
           {isLoading ? (
             <span>Loading...</span>
           ) : organizations.length > 0 ? (
-            <Select value={organizationId} onValueChange={handleOrgChange}>
+            <Select value={organizationId} onValueChange={(newOrgId) => handleOrgChange(newOrgId)}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Select organization" />
               </SelectTrigger>
@@ -210,7 +216,7 @@ function BreadCrumb() {
               </SelectContent>
             </Select>
           ) : (
-            <span>{orgName}</span>
+            <span>{currentOrg?.name}</span>
           )}
         </BreadcrumbItem>
         <BreadcrumbSeparator className="hidden md:block" />
@@ -231,8 +237,10 @@ function BreadCrumb() {
               </SelectContent>
             </Select>
           ) : (
-            <span>{currentFactoryName || "Unknown Factory"}</span>
+            <span>{currentFactoryName || "No Factory Available"}</span>
           )}
+            {/* <span>{currentFactoryName || "No Factory Available"}</span> */}
+
         </BreadcrumbItem>
         {remainingSegments.map((segment, index) => {
           const route = `/${organizationId}/${factoryId}/${remainingSegments
