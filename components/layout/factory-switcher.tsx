@@ -20,7 +20,7 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "../forms/AddFactoryForm";
 import { usePathname, useRouter } from "next/navigation";
-import AddFactoryButton from "@/app/(routes)/settings/factory/components/AddFactoryButton";
+import AddFactoryButton from "@/app/(routes)/[organizationId]/settings/factory/components/AddFactoryButton";
 
 interface Factory {
     factoryName: string;
@@ -34,7 +34,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
     const pathname = usePathname();
     const { isMobile } = useSidebar();
     const [activeFactory, setActiveFactory] = React.useState<Factory | null>(
-        FactoriesData.length > 0 ? FactoriesData[0] : null // Default to the first factory
+        FactoriesData?.length > 0 ? FactoriesData[0] : null // Default to the first factory
     );
 
     const handleFactorySelect = (factory: Factory) => {
@@ -45,12 +45,12 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
     // Update activeFactory when FactoriesData changes
     React.useEffect(() => {
         const storedFactoryId = localStorage.getItem("activeFactoryId");
-        if (storedFactoryId && FactoriesData.length > 0) {
+        if (storedFactoryId && FactoriesData?.length > 0) {
             const foundFactory = FactoriesData.find((factory) => factory.factoryId === storedFactoryId);
             if (foundFactory) {
                 setActiveFactory(foundFactory); // Set the active factory from localStorage
             }
-        } else if (FactoriesData.length > 0) {
+        } else if (FactoriesData?.length > 0) {
             setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
         }
     }, [FactoriesData]);
@@ -98,7 +98,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                 <DropdownMenuLabel className="text-xs text-muted-foreground">
                                     Factories
                                 </DropdownMenuLabel>
-                                {FactoriesData.map((factory, index) => (
+                                {FactoriesData?.map((factory, index) => (
                                     <DropdownMenuItem
                                         key={factory.factoryId}
                                         onClick={() => handleFactorySelect(factory)}

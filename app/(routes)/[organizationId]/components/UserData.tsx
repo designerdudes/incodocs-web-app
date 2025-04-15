@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // Import useRouter for redirection
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Heading from "@/components/ui/heading";
 import {
   Card,
@@ -55,7 +55,8 @@ interface User {
 }
 
 interface UserDataProps {
-  id: string;
+  token: string;
+  userData: User | null;
 }
 
 // Form component for the modal
@@ -186,18 +187,18 @@ const CreateOrgForm: React.FC<{
   );
 };
 
-const UserData: React.FC<UserDataProps> = ({ id }) => {
+const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
   const modal = useGlobalModal();
-  const router = useRouter(); // Initialize useRouter
-  const [userData, setUserData] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
+  const [organizations, setOrganizations] = useState<Organization[]>(
+    userData?.ownedOrganizations || []
+  );
 
   const [newOrg, setNewOrg] = useState({
     name: "",
     description: "",
-    owner: id,
+    owner: userData?._id || "",
     address: {
       location: "",
       coordinates: { type: "Point", coordinates: [0, 0] as [number, number] },
@@ -205,35 +206,12 @@ const UserData: React.FC<UserDataProps> = ({ id }) => {
     },
   });
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/user/populate/${id}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-        const data: User = await response.json();
-        setUserData(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, [id]);
-
   const handleCreateOrg = async (formData: {
     name: string;
     description: string;
     address: Address;
     owner: string;
   }) => {
-    console.log("Submitting:", formData);
     try {
       const response = await fetch(
         "https://incodocs-server.onrender.com/organizations/add",
@@ -241,6 +219,7 @@ const UserData: React.FC<UserDataProps> = ({ id }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         }
@@ -249,10 +228,7 @@ const UserData: React.FC<UserDataProps> = ({ id }) => {
         throw new Error("Failed to create organization");
       }
       const createdOrg = await response.json();
-      setUserData((prev) => ({
-        ...prev!,
-        ownedOrganizations: [...(prev?.ownedOrganizations || []), createdOrg],
-      }));
+      setOrganizations((prev) => [...prev, createdOrg]);
       setCreateOrgError(null);
       modal.onClose();
     } catch (err) {
@@ -278,33 +254,37 @@ const UserData: React.FC<UserDataProps> = ({ id }) => {
   const handleCardClick = async (orgId: string) => {
     try {
       const factoryResponse = await fetch(
-        `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`
+        `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+      if (!factoryResponse.ok) {
+        throw new Error("Failed to fetch factory data");
+      }
       const factoryData = await factoryResponse.json();
       const factories = factoryData;
-      console.log("Factory data for organization", orgId, ":", factories);
+      console.log("factories", factories);
+      if (factories.length === 0) {
+        console.log("No factories found for this organization.");
+        router.push(`/${orgId}/dashboard`);
+      }
+      const firstFactoryId = factories[0]._id
+      router.push(`/${orgId}/${firstFactoryId}/dashboard`);
 
-      router.push(`/${factories[0]._id}/dashboard`);
     } catch (err) {
       console.error("Error fetching factory data:", err);
-      // Optionally handle the error (show a message to user)
-      // For now, proceed with navigation even if factory fetch fails
-      // router.push(`/${orgId}/dashboard`);
+      // Fallback navigation if factory fetch fails
+      router.push(`/${orgId}/dashboard`);
     }
   };
 
-  if (loading) {
+  if (!userData) {
     return (
       <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
-        <p className="text-lg text-gray-600">Loading...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
-        <p className="text-lg text-red-600">Error: {error}</p>
+        <p className="text-lg text-gray-600">No user data available</p>
       </div>
     );
   }
@@ -324,52 +304,44 @@ const UserData: React.FC<UserDataProps> = ({ id }) => {
         </Button>
       </div>
 
-      {userData ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {userData.ownedOrganizations &&
-          userData.ownedOrganizations.length > 0 ? (
-            userData.ownedOrganizations.map((org) => (
-              <Card
-                key={org._id}
-                className="bg-white dark:bg-card h-full flex flex-col cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => handleCardClick(org._id)}
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">
-                    {org.name}
-                  </CardTitle>
-                  <FiUser className="h-6 w-6 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-3 flex-grow">
-                  <CardDescription className="text-base text-gray-600">
-                    Owner ID: {org.owner}
-                  </CardDescription>
-                  <p className="text-sm text-gray-700">
-                    Address: {org.address.location}, {org.address.pincode}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Coordinates:{" "}
-                    {org.address.coordinates.coordinates.join(", ")}
-                  </p>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <div className="col-span-full text-center">
-              <p className="text-lg text-gray-600">
-                No organizations found for this user.
-              </p>
-              {createOrgError && (
-                <p className="text-sm text-red-600 mt-2">{createOrgError}</p>
-              )}
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="text-center">
-          <p className="text-lg text-gray-600">No user data available</p>
-        </div>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {organizations && organizations.length > 0 ? (
+          organizations.map((org) => (
+            <Card
+              key={org._id}
+              className="bg-white dark:bg-card h-full flex flex-col cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              onClick={() => handleCardClick(org._id)}
+            >
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-lg font-medium">
+                  {org.name}
+                </CardTitle>
+                <FiUser className="h-6 w-6 text-muted-foreground" />
+              </CardHeader>
+              <CardContent className="space-y-3 flex-grow">
+                <CardDescription className="text-base text-gray-600">
+                  Organisation ID: {org._id}
+                </CardDescription>
+                <p className="text-sm text-gray-700">
+                  Address: {org.address.location}, {org.address.pincode}
+                </p>
+                <p className="text-sm text-gray-700">
+                  Coordinates: {org.address.coordinates.coordinates.join(", ")}
+                </p>
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <div className="col-span-full text-center">
+            <p className="text-lg text-gray-600">
+              No organizations found for this user.
+            </p>
+            {createOrgError && (
+              <p className="text-sm text-red-600 mt-2">{createOrgError}</p>
+            )}
+          </div>
+        )}
+      </div>
     </main>
   );
 };

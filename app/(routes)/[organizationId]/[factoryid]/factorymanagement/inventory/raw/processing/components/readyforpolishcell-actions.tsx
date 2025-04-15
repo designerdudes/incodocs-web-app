@@ -18,7 +18,7 @@ import {
   ScissorsIcon,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Block } from "././incuttingcolumns";
+import { Block } from "./incuttingcolumns";
 import SendForPolish from "./sendForPolsih";
 interface Slab {
   _id: string;

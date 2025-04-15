@@ -15,7 +15,7 @@ function BreadCrumb() {
       <BreadcrumbList>
         {/* Add Home or Root as the first item */}
         <BreadcrumbItem>
-          <BreadcrumbLink href="/">Home</BreadcrumbLink>
+          <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
         </BreadcrumbItem>
         {segments.length > 0 && <BreadcrumbSeparator className="hidden md:block" />}
         
