@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 interface DashboardLayoutProps {
   children: React.ReactNode
   params: {
-    organizationId: string;
-  };
+      organizationId: string;
+    };
 }
 
 export default function DashboardLayout({
@@ -26,7 +26,7 @@ export default function DashboardLayout({
     <>
       <div className='flex flex-row h-screen'>
         <SidebarProvider>
-          <AppSidebar params={{ ...params, factoryid: 'defaultFactoryId' }} />
+          <AppSidebar params={params} />
           <SidebarInset className='w-[70vw]'>
             <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
               <div className="flex items-center gap-2 px-4">
