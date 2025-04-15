@@ -27,6 +27,7 @@ interface Factory {
     logo: React.ElementType;
     plan: string;
     factoryId: string;
+    organizationId: string;
 }
 
 function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
@@ -40,7 +41,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
     const handleFactorySelect = (factory: Factory) => {
         setActiveFactory(factory);
         localStorage.setItem("activeFactoryId", factory.factoryId); // Store the selected factory ID
-        router.push(`/${factory.factoryId}/dashboard`);
+        router.push(`/${factory?.organizationId}/${factory.factoryId}/dashboard`);
     };
     // Update activeFactory when FactoriesData changes
     React.useEffect(() => {
@@ -53,18 +54,18 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
         } else if (FactoriesData?.length > 0) {
             setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
         }
-    }, [FactoriesData]);
+    }, [FactoriesData, localStorage.getItem("activeFactoryId")]);
 
     React.useEffect(() => {
         const storedFactoryId = localStorage.getItem("activeFactoryId");
 
         // If navigating to a page without a factory ID, redirect to the last used one
         if (pathname.includes("undefined") || pathname.includes("null")) {
-            router.replace(`/${storedFactoryId}/dashboard`);
+            router.replace(`/${FactoriesData[0].organizationId}/${storedFactoryId}/dashboard`);
         }
-    }, [pathname, router]);
+    }, [pathname, router, localStorage.getItem("activeFactoryId")]);
 
-    // const GlobalModal = useGlobalModal();
+    const GlobalModal = useGlobalModal();
 
     return (
         <div>
@@ -84,7 +85,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                         <span className="truncate font-semibold">
                                             {activeFactory?.factoryName}
                                         </span>
-                                        <span className="truncate text-xs">{activeFactory?.plan}</span>
+                                        <span className="truncate text-xs">{activeFactory?.organizationId}</span>
                                     </div>
                                     <ChevronsUpDown className="ml-auto" />
                                 </SidebarMenuButton>
@@ -94,6 +95,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                 align="start"
                                 side={isMobile ? "bottom" : "right"}
                                 sideOffset={4}
+                                
                             >
                                 <DropdownMenuLabel className="text-xs text-muted-foreground">
                                     Factories
@@ -103,6 +105,8 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                         key={factory.factoryId}
                                         onClick={() => handleFactorySelect(factory)}
                                         className="gap-2 p-2"
+                                        
+                                        
                                     >
                                         <div className="flex size-6 items-center justify-center rounded-sm border">
                                             <factory.logo className="size-4 shrink-0" />
@@ -112,7 +116,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                     </DropdownMenuItem>
                                 ))}
                                 <DropdownMenuSeparator />
-                                {/* <DropdownMenuItem
+                                <DropdownMenuItem
                             className="gap-2 p-2"
                             onSelect={() => {
                                 GlobalModal.title = `Enter Factory Details`;
@@ -125,9 +129,9 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                             </div>
                             <div className="font-medium text-muted-foreground">Add Factory</div>
                             
-                        </DropdownMenuItem> */}
-                                <div>                                <AddFactoryButton />
-                                </div>
+                        </DropdownMenuItem>
+                                {/* <div>                                <AddFactoryButton />
+                                </div> */}
                             </DropdownMenuContent>
                         </div>
                     </DropdownMenu>
