@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import '../globals.css'
+import '../../../app/globals.css'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import AppSidebar from '@/components/layout/app-sidebar'
 import { Separator } from '@/components/ui/separator'
@@ -12,16 +12,21 @@ export const metadata: Metadata = {
 
 interface DashboardLayoutProps {
   children: React.ReactNode
+  params: {
+      organizationId: string;
+    };
 }
 
 export default function DashboardLayout({
-  children
+  children,
+  params, // Destructure params to get organizationId and factoryId
 }: DashboardLayoutProps) {
+  console.log("Params:", params); // Debug params
   return (
     <>
       <div className='flex flex-row h-screen'>
         <SidebarProvider>
-          <AppSidebar />
+          <AppSidebar params={params} />
           <SidebarInset className='w-[70vw]'>
             <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
               <div className="flex items-center gap-2 px-4">
