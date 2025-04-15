@@ -38,13 +38,13 @@ const data = {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: HomeIcon, // Use component directly
+      icon: "HomeIcon", // Use string identifier instead of component
       isActive: true,
     },
     {
       title: "Factory Management",
       url: "/factorymanagement",
-      icon: FactoryIcon,
+      icon: "FactoryIcon",
       isActive: true,
       items: [
         {
@@ -92,7 +92,7 @@ const data = {
     {
       title: "Documentation",
       url: "/documentation/dashboard",
-      icon: BookOpen,
+      icon: "BookOpen",
       items: [
         {
           title: "Shipments",
@@ -107,13 +107,13 @@ const data = {
     {
       title: "Team Management",
       url: "teamManagement/dashboard",
-      icon: User,
+      icon: "User",
       isActive: true,
     },
     {
       title: "Settings",
       url: "/settings",
-      icon: Settings2,
+      icon: "Settings2",
       items: [
         {
           title: "General",
@@ -133,8 +133,8 @@ const data = {
 };
 
 interface Params {
-  organizationId: string; // Match the [orgid] route
-  factoryid: string; // Match the [factoryid] route
+    organizationId: string; // Match the [orgid] route
+    factoryid: string; // Match the [factoryid] route
 }
 
 export default async function AppSidebar({ params }: { params: Params }) {
@@ -222,22 +222,22 @@ export default async function AppSidebar({ params }: { params: Params }) {
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        {transformedFactories.length > 0 ? (
-          <FactorySwitcher FactoriesData={transformedFactories} />
-        ) : (
-          <div className="">
-            <Button variant="default" className=" mr-4 flex items-center  gap-2 w-full">
-              <Plus className="h-4 w-4" />
-              <span >Add Factory</span>
+      {transformedFactories.length > 0 ? (
+        <FactorySwitcher FactoriesData={transformedFactories} />
+      ) : (
+        <div className="">
+          <Button variant="default"  className=" mr-4 flex items-center  gap-2 w-full">
+            <Plus className="h-4 w-4" />
+            <span >Add Factory</span>
             </Button>
-            <div className="text-muted-foreground text-xs mt-2">
-              No factories found. Please add a factory to get started.
+        <div className="text-muted-foreground text-xs mt-2">
+            No factories found. Please add a factory to get started.
             </div>
-          </div>
-        )}
+        </div>
+      )}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} orgId={organizationId} factoryId={factoryid} />
+        <NavMain items={data.navMain} orgid={organizationId} factoryId={factoryid} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />
