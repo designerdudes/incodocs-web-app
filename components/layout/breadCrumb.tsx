@@ -129,6 +129,9 @@ function BreadCrumb() {
   };
 
   const handleFactoryChange = (newFactoryId: string) => {
+    const storeFact = localStorage.setItem("activeFactoryId", newFactoryId);
+    console.log("Stored Factory ID:", storeFact);
+    
     const newRoute = `/${organizationId}/${newFactoryId}/dashboard`;
     router.push(newRoute);
   };
