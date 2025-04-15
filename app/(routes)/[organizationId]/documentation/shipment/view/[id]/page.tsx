@@ -556,6 +556,13 @@ export default async function Page({ params }: Props) {
 
           {/* Bill Of Lading Details */}
 
+          
+
+
+
+
+          <TabsContent value="Bill Of Lading Details">
+
           <div className="flex flex-col md:flex-row gap-4 mt-4">
           <Card className="mt-4 w-full md:w-1/3">
                   <CardHeader>
@@ -612,9 +619,6 @@ export default async function Page({ params }: Props) {
                     </div>
 
 
-
-
-          <TabsContent value="Bill Of Lading Details">
             <div className="flex flex-col md:flex-row gap-4">
               
               <Card className="mt-4 w-full md:w-1/2">
