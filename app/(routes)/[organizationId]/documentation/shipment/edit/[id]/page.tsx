@@ -13,20 +13,22 @@ import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { OtherDetails } from "./components/OtherDetails";
+import ProgressBar from "./components/ProgressBar";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
+import toast from "react-hot-toast";
 
 // Define the schema
 const formSchema = z.object({
   shipmentId: z.string().optional(),
   bookingDetails: z
     .object({
-      bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
-      portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
+      invoiceNumber: z.string(),
+      bookingNumber: z.string().optional(),
+      portOfLoading: z.string().optional(),
       destinationPort: z
         .string()
-        .min(3, { message: "Required name" })
         .optional(),
       vesselSailingDate: z.date().optional(),
       vesselArrivingDate: z.date().optional(),
@@ -36,21 +38,12 @@ const formSchema = z.object({
           z.object({
             containerNumber: z
               .string()
-              .min(3, {
-                message: "Container Number must be at least 3 characters long",
-              })
               .optional(),
             truckNumber: z
               .string()
-              .min(3, {
-                message: "Truck Number must be at least 3 characters long",
-              })
               .optional(),
             truckDriverContactNumber: z
               .string()
-              .min(10, {
-                message: "Truck driver number should be 10 characters long",
-              })
               .optional(),
           })
         )
@@ -207,6 +200,7 @@ export default function CreateNewFormPage({ params }: Props) {
     defaultValues: {
       shipmentId: "",
       bookingDetails: {
+        invoiceNumber: "",
         bookingNumber: "",
         portOfLoading: "",
         destinationPort: "",
@@ -271,51 +265,84 @@ export default function CreateNewFormPage({ params }: Props) {
     },
   });
   const { watch } = methods;
-  const shipmentId = watch("shipmentId");
+  const invoiceNumber = watch("bookingDetails.invoiceNumber");
+
   const steps = [
     {
       id: 1,
       name: "Booking Details",
       component: <BookingDetails shipmentId={params.id} />,
+      field: "bookingDetails" as keyof FormValues,
     },
     {
       id: 2,
       name: "Shipping Details",
       component: <ShippingDetails shipmentId={params.id} />,
+      field: "shippingDetails" as keyof FormValues,
     },
     {
       id: 3,
       name: "Shipping Bill Details",
       component: <ShippingBillDetails shipmentId={params.id} />,
+      field: "shippingBillDetails" as keyof FormValues,
     },
-
     {
       id: 4,
       name: "Supplier Details",
       component: <SupplierDetails shipmentId={params.id} />,
+      field: "supplierDetails" as keyof FormValues,
     },
     {
       id: 5,
       name: "Sale Invoice Details",
       component: <SaleInvoiceDetails shipmentId={params.id} />,
+      field: "saleInvoiceDetails" as keyof FormValues,
     },
     {
       id: 6,
       name: "Bill of Lading Details",
       component: <BillOfLadingDetails shipmentId={params.id} />,
+      field: "blDetails" as keyof FormValues,
     },
     {
       id: 7,
       name: "Other Details",
       component: <OtherDetails shipmentId={params.id} />,
+      field: "otherDetails" as keyof FormValues,
     },
   ];
 
-  const totalSteps = steps.length;
+  const handleUpdateAndNext = async (data: FormValues) => {
+    try {
+      const currentField = steps[currentStep].field;
+      const sectionData = { [currentField]: data[currentField] };
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+      // Update specific section data
+      const response = await fetch(
+        `http://localhost:4080/shipment/update/${params.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(sectionData),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update ${currentField}: ${errorText}`);
+      }
+
+      toast.success(`${steps[currentStep].name} updated successfully!`);
+
+      // Move to next step if not at the last step
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } catch (error) {
+      console.error(`Error updating ${steps[currentStep].field}:`, error);
+      toast.error(`Failed to update ${steps[currentStep].name}`);
     }
   };
 
@@ -335,11 +362,11 @@ export default function CreateNewFormPage({ params }: Props) {
         if (!response.ok) throw new Error("Failed to fetch shipment data");
 
         const data = await response.json();
-        // console.log("Fetched Data:", JSON.stringify(data, null, 2));
 
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
           bookingDetails: {
+            invoiceNumber: data.bookingDetails?.invoiceNumber || "",
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
             destinationPort: data.bookingDetails?.destinationPort || "",
@@ -367,7 +394,7 @@ export default function CreateNewFormPage({ params }: Props) {
             numberOFShippingBill: data.shippingBillDetails?.bills?.length || 0,
             bills:
               data.shippingBillDetails?.bills?.map((bill: any) => ({
-                uploadShippingBill: bill.uploadShippingBill || "",
+                uploadShippingBill: bill.uploadShippingBill || bill.shippingBillUrl || "",
                 shippingBillNumber: bill.shippingBillNumber || "",
                 shippingBillDate: bill.shippingBillDate
                   ? parseISO(bill.shippingBillDate)
@@ -510,9 +537,9 @@ export default function CreateNewFormPage({ params }: Props) {
         };
 
         methods.reset(updatedValues);
-        console.log("Form Values After Reset:", methods.getValues());
       } catch (error) {
         console.error("Error fetching shipment data:", error);
+        toast.error("Failed to load shipment data");
       } finally {
         setIsFetching(false);
       }
@@ -533,15 +560,18 @@ export default function CreateNewFormPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Edit Shipment: ${shipmentId || "N/A"}`}
+            title={`Edit Shipment: ${invoiceNumber || "N/A"}`}
           />
           <p className="text-muted-foreground text-sm">
-            Complete the form below to Edit shipment details.
+            Complete the form below to edit shipment details.
           </p>
         </div>
       </div>
       <Separator orientation="horizontal" />
-      <div className="flex justify-between mt-4">
+      <div className="w-full">
+        <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+      </div>
+      <div className="flex justify-between mt-8">
         <Button
           type="button"
           onClick={prevStep}
@@ -550,20 +580,19 @@ export default function CreateNewFormPage({ params }: Props) {
         >
           Previous
         </Button>
-        {currentStep < steps.length - 1 && (
-          <Button type="button" onClick={nextStep}>
-            Next
-          </Button>
-        )}
+        <Button
+          type="submit"
+          onClick={methods.handleSubmit(handleUpdateAndNext)}
+        >
+          {currentStep < steps.length - 1 ? "Update & Next" : "Update & Finish"}
+        </Button>
       </div>
       {isFetching ? (
         <p>Loading...</p>
       ) : (
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit((data) =>
-              console.log("Parent Form Submitted:", data)
-            )}
+            onSubmit={methods.handleSubmit(handleUpdateAndNext)}
             className="flex flex-col gap-3 w-full p-3"
           >
             <div className="flex justify-between">
