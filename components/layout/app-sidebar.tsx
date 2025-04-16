@@ -31,106 +31,10 @@ import {
 import FactorySwitcher from "./factory-switcher";
 import { cookies } from "next/headers";
 import { Button } from "../ui/button";
+import { sidebarTabs } from "@/lib/constants";
 
 // Static navigation data (use strings for icons to avoid serialization issues)
-const data = {
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: "HomeIcon", // Use string identifier instead of component
-      isActive: true,
-    },
-    {
-      title: "Factory Management",
-      url: "/factorymanagement",
-      icon: "FactoryIcon",
-      isActive: true,
-      items: [
-        {
-          title: "Inventory",
-          items: [
-            {
-              title: "Raw Inventory",
-              url: "/factorymanagement/inventory/raw", // Placeholder for dynamic params
-            },
-            {
-              title: "Finished Goods",
-              url: "/factorymanagement/inventory/finished",
-            },
-          ],
-          url: "/factorymanagement/inventory",
-        },
-        {
-          title: "Accounting",
-          url: "/factorymanagement/accounting",
-          items: [
-            {
-              title: "Purchases",
-              url: "/factorymanagement/accounting/purchases",
-            },
-            {
-              title: "Sales",
-              url: "/factorymanagement/accounting/sales",
-            },
-            {
-              title: "Expenses",
-              url: "/factorymanagement/accounting/Expenses",
-            },
-            {
-              title: "GST Ledger",
-              url: "/factorymanagement/accounting/GSTLedger",
-            },
-            {
-              title: "Ledger",
-              url: "/factorymanagement/accounting/Parties",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "/documentation/dashboard",
-      icon: "BookOpen",
-      items: [
-        {
-          title: "Shipments",
-          url: "/documentation/shipment",
-        },
-        {
-          title: "Parties",
-          url: "/documentation/parties",
-        },
-      ],
-    },
-    {
-      title: "Team Management",
-      url: "teamManagement/dashboard",
-      icon: "User",
-      isActive: true,
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: "Settings2",
-      items: [
-        {
-          title: "General",
-          url: "/settings/general",
-        },
-        {
-          title: "Factory",
-          url: "/settings/factory",
-        },
-        {
-          title: "Organisation",
-          url: "/settings/organisation",
-        },
-      ],
-    },
-  ],
-};
+
 
 interface Params {
     organizationId: string; // Match the [orgid] route
@@ -237,7 +141,7 @@ export default async function AppSidebar({ params }: { params: Params }) {
       )}
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} orgid={organizationId} factoryId={factoryid} />
+        <NavMain orgId={organizationId} factoryId={factoryid} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />
