@@ -17,24 +17,24 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
+import { sidebarTabs } from "@/lib/constants";
 
 type NavItem = {
     title: string;
     url: string;
-    icon?: LucideIcon;
+    icon?: any;
     isActive?: boolean;
     items?: NavItem[]; // Nested items
 };
 
 interface NavMainProps {
-    items: NavItem[];
     orgId: string;
     factoryId?: string;
 }
 
 
 
-export default function NavMain({ items, orgId, factoryId }: NavMainProps) {
+export default function NavMain({  orgId, factoryId }: NavMainProps) {
     
     const RenderNavTabs = (navItems: NavItem[], orgId: string) => {
         const factoryId = useParams().factoryid;
@@ -88,7 +88,8 @@ export default function NavMain({ items, orgId, factoryId }: NavMainProps) {
                     <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                             <SidebarMenuButton tooltip={item.title}>
-                                {item.icon && <item.icon />}
+                                {item.icon &&
+                                 <item.icon />}
                                 <a href={itemUrl}>
                                     <span>{item.title}</span>
                                 </a>
@@ -110,10 +111,25 @@ export default function NavMain({ items, orgId, factoryId }: NavMainProps) {
         });
     };
 
+    const items = sidebarTabs.navMain.map((item) => {
+        if (item.items) {
+            return {
+                ...item,
+                items: item.items.map((subItem) => ({
+                    ...subItem,
+                    url: subItem.url || "",
+                })),
+            };
+        }
+        return item;
+    }
+    );
+    
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel>Platform</SidebarGroupLabel>
-            <SidebarMenu>{RenderNavTabs(items, orgId)}</SidebarMenu>
+            <SidebarMenu>{RenderNavTabs(items as any, orgId)}</SidebarMenu>
         </SidebarGroup>
     );
 }

@@ -14,6 +14,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode
   params: {
       organizationId: string;
+      factoryid: string;
     };
 }
 

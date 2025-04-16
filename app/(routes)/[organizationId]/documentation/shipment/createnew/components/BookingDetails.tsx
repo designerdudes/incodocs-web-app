@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -30,7 +30,8 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ProductDetailsForm from "@/components/forms/ProductdetailsForm";
 import { Icons } from "@/components/ui/icons";
-
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
 }
@@ -44,14 +45,32 @@ function saveProgressSilently(data: any) {
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetailsProps) {
+export function BookingDetails({
+  saveProgress,
+  onSectionSubmit,
+}: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
-  const [containers, setContainers] = React.useState(containersFromForm);
   const GlobalModal = useGlobalModal();
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [containerCountToBeDeleted, setContainerCountToBeDeleted] = useState<
+    number | null
+  >(null);
+
+  const initialCount = 1;
+  const [containers, setContainers] = useState(
+    Array.from({ length: initialCount }, () => ({
+      containerNumber: "",
+      truckNumber: "",
+      truckDriverContactNumber: "",
+      addProductDetails: {},
+    }))
+  );
 
   const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter((_: any, i: number) => i !== index);
+    const updatedContainers = containers.filter(
+      (_: any, i: number) => i !== index
+    );
     setContainers(updatedContainers);
     setValue("bookingDetails.containers", updatedContainers);
     setValue("NumberOfContainer", updatedContainers.length);
@@ -59,19 +78,48 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
   };
 
   const handleContainerCountChange = (value: string) => {
-    const count = parseInt(value, 10) || 0;
-    const currentContainers = watch("bookingDetails.containers") || [];
-    const newContainers = Array.from({ length: count }, (_, i) =>
-      currentContainers[i] || {
-        containerNumber: "",
-        truckNumber: "",
-        trukDriverContactNumber: "",
-        addProductDetails: {},
-      }
-    );
-    setContainers(newContainers);
-    setValue("bookingDetails.containers", newContainers);
-    saveProgressSilently(getValues());
+    const newCount = Number(value);
+
+    if (newCount < containers.length) {
+      // If the new count is less than the current containers, show confirmation dialog
+      setShowConfirmation(true);
+      setContainerCountToBeDeleted(newCount); // Store the count to be deleted
+    } else {
+      // Handling for adding new containers
+      handleDynamicArrayCountChange({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "bookingDetails.containers",
+        createNewItem: () => ({
+          containerNumber: "",
+          truckNumber: "",
+          truckDriverContactNumber: "",
+          addProductDetails: {},
+        }),
+        customFieldSetters: {
+          "bookingDetails.containers": (items, setValue) => {
+            setValue("NumberOfContainer", items.length);
+            setContainers(items); // Sync the local state too!
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  };
+
+  // Handle Confirm action after the dialog is triggered
+  const handleConfirmChange = () => {
+    if (containerCountToBeDeleted !== null) {
+      const updatedContainers = containers.slice(0, containerCountToBeDeleted);
+      setContainers(updatedContainers);
+      setValue("bookingDetails.containers", updatedContainers);
+      setValue("NumberOfContainer", updatedContainers.length);
+      saveProgressSilently(getValues());
+      setContainerCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
   };
 
   const openProductForm = (index: number) => {
@@ -177,7 +225,11 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
+                    {field.value ? (
+                      format(new Date(field.value), "PPPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -207,7 +259,11 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? format(new Date(field.value), "PPPP") : <span>Pick a date</span>}
+                    {field.value ? (
+                      format(new Date(field.value), "PPPP")
+                    ) : (
+                      <span>Pick a date</span>
+                    )}
                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                   </Button>
                 </FormControl>
@@ -237,15 +293,15 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
               <Input
                 type="number"
                 placeholder="Enter number of containers"
-                value={field.value || ""}
+                value={field.value || 1}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === "") {
-                    field.onChange("");
-                    handleContainerCountChange("");
+                    field.onChange(1);
+                    handleContainerCountChange("1");
                     return;
                   }
-                  const numericValue = Math.max(0, Number(value));
+                  const numericValue = Number(value);
                   field.onChange(numericValue.toString());
                   handleContainerCountChange(numericValue.toString());
                 }}
@@ -255,6 +311,7 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
           </FormItem>
         )}
       />
+
       {containers.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
@@ -330,12 +387,20 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
                     />
                   </TableCell>
                   <TableCell>
-                    <Button type="button" variant="secondary" onClick={() => openProductForm(index)}>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      onClick={() => openProductForm(index)}
+                    >
                       Add product
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Button type="button" variant="destructive" onClick={() => handleDelete(index)}>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={() => handleDelete(index)}
+                    >
                       <Trash size={16} />
                     </Button>
                   </TableCell>
@@ -347,14 +412,17 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
       )}
       {/* Submit Button */}
       <div className="flex justify-end mt-4 col-span-4">
-        <Button
-          type="button"
-          onClick={onSectionSubmit}
-          className="h-8"
-        >
-          Submit 
+        <Button type="button" onClick={onSectionSubmit} className="h-8">
+          Submit
         </Button>
       </div>
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of containers. This action cannot be undone."
+      />
     </div>
   );
 }
