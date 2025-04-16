@@ -345,16 +345,6 @@ export function BookingDetails({ saveProgress, onSectionSubmit }: BookingDetails
           </Table>
         </div>
       )}
-      {/* Submit Button */}
-      <div className="flex justify-end mt-4 col-span-4">
-        <Button
-          type="button"
-          onClick={onSectionSubmit}
-          className="h-8"
-        >
-          Submit 
-        </Button>
-      </div>
     </div>
   );
 }
