@@ -23,7 +23,7 @@ export default function CreateNewFormPage() {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title="Create new Sale"
+                        title="Create new sale"
                     />
                     <p className="text-muted-foreground text-sm">
                         Fill in the form below to sale the product.

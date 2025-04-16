@@ -234,32 +234,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-
-           
-
-           
-          </div>
-
-          {/* Row 2: GST Number, No of Slabs */}
-          <div className={`grid grid-cols-3 gap-3`}>
-            <FormField
-              name="gstNumber"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>GST Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter GST Number"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               name="noOfSlabs"
               control={form.control}
@@ -282,6 +256,10 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+
+           
+
+           
           </div>
 
           {/* Row 3: GST Percentage, Invoice Value, Sales Date */}
@@ -296,7 +274,8 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                     <select
                       disabled={isLoading}
                       {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                      className=" block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500
+                       focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
                     >
                       <option value="0">0%</option>
                       <option value="1">1%</option>
@@ -343,7 +322,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-[40%] justify-start text-left font-normal",
+                              "w-[100%] justify-start text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
                           >

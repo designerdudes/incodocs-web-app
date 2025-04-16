@@ -59,6 +59,9 @@ export default function ExpenseCreateNewForm() {
       });
       toast.success("Expense Record Added Successfully");
       router.push("./");
+      setTimeout(() => {
+        window.location.reload();
+      }, 3000); // Reloads after 3 seconds
     } catch (error) {
       toast.error("Error creating/updating Expense Record");
     } finally {

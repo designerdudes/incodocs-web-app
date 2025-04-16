@@ -8,8 +8,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import {GstSalesColumns} from "./components/GstSalesColumns";
-import {ActualSalesColumns} from "./components/ActualSalesColumns";
+import { GstSalesColumns } from "./components/GstSalesColumns";
+import { ActualSalesColumns } from "./components/ActualSalesColumns";
 
 export type Sales = {
   actualInvoiceValue: ReactNode;
@@ -30,123 +30,40 @@ interface Props {
 }
 
 export default async function Purchases({ params }: Props) {
-  //   const cookieStore = cookies();
-  //   const token = cookieStore.get('AccessToken')?.value || ""
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
 
-  //   const res = await fetch(`https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params?.factoryid}`, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer ' + token
-  //     }
-  //   }).then(response => {
-  //     return response.json()
-  //   })
+  const res = await fetch(
+    `http://localhost:4080/transaction/sale/getgstsale/${params?.factoryid}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
 
-  //   let PurchasesData
-  //   PurchasesData = res
-  const SalesData = [
+  let SalesData;
+  SalesData = res;
+
+  const Actualres = await fetch(
+    `http://localhost:4080/transaction/sale/getsale/${params?.factoryid}`,
     {
-      _id: "1",
-      customerName: "Ramesh Singh",
-      customerGSTN: "18AABCT2341Q2ZX",
-      noOfSlabs: 15,
-      length: "120",
-      height: "80",
-      saleDate: "02/12/2024",
-      GstPercentage: 18,
-    },
-    {
-      _id: "2",
-      customerName: "Suresh Verma",
-      customerGSTN: "27AAGFG6789P1ZY",
-      noOfSlabs: 20,
-      length: "110",
-      height: "75",
-      saleDate: "03/12/2024",
-      GstPercentage: 12,
-    },
-    {
-      _id: "3",
-      customerName: "Kamlesh Yadav",
-      customerGSTN: "10AACFT1234K1Z5",
-      noOfSlabs: 12,
-      length: "115",
-      height: "85",
-      saleDate: "01/12/2024",
-      GstPercentage: 18,
-    },
-    {
-      _id: "4",
-      customerName: "Anita Enterprises",
-      customerGSTN: "09AADCF5698L1ZM",
-      noOfSlabs: 10,
-      length: "100",
-      height: "70",
-      saleDate: "29/11/2024",
-      GstPercentage: 5,
-    },
-    {
-      _id: "5",
-      customerName: "Global Stones Ltd.",
-      customerGSTN: "06AADBG4517H1ZX",
-      noOfSlabs: 18,
-      length: "118",
-      height: "90",
-      saleDate: "30/11/2024",
-      GstPercentage: 18,
-    },
-    {
-      _id: "6",
-      customerName: "Om Marble Suppliers",
-      customerGSTN: "33AABCX2345N1Z2",
-      noOfSlabs: 22,
-      length: "105",
-      height: "80",
-      saleDate: "28/11/2024",
-      GstPercentage: 12,
-    },
-    {
-      _id: "7",
-      customerName: "Shree Traders",
-      customerGSTN: "24AACDF1256R1Z9",
-      noOfSlabs: 25,
-      length: "95",
-      height: "75",
-      saleDate: "27/11/2024",
-      GstPercentage: 5,
-    },
-    {
-      _id: "8",
-      customerName: "Nandi Marble Mart",
-      customerGSTN: "29AAACD2567Q1ZY",
-      noOfSlabs: 14,
-      length: "98",
-      height: "85",
-      saleDate: "26/11/2024",
-      GstPercentage: 18,
-    },
-    {
-      _id: "9",
-      customerName: "Galaxy Exports",
-      customerGSTN: "07AADFG6732P1ZY",
-      noOfSlabs: 16,
-      length: "120",
-      height: "92",
-      saleDate: "25/11/2024",
-      GstPercentage: 12,
-    },
-    {
-      _id: "10",
-      customerName: "StoneCrafts Ltd.",
-      customerGSTN: "04AACDF4536T1ZX",
-      noOfSlabs: 8,
-      length: "115",
-      height: "88",
-      saleDate: "24/11/2024",
-      GstPercentage: 5,
-    },
-  ];
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+
+  let GetSalesData;
+  GetSalesData = Actualres;
 
   const InvoiceValue = SalesData.filter(
     (data: any) => data.purchaseType === "Raw"
@@ -178,42 +95,42 @@ export default async function Purchases({ params }: Props) {
       </div>
       <Separator orientation="horizontal" />
       <div className="w-250 container mx-auto py-10">
-        <Tabs defaultValue="sales" className="w-full">
+        <Tabs defaultValue="Gstsales" className="w-full">
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="Gstsales">
               Gst sales
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {}
+                {SalesData.length}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="Actualsales">
               Actual sales
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {}
+                {SalesData.length}
               </Badge>
             </TabsTrigger>
           </TabsList>
           <TabsContent value="Gstsales">
-          <DataTable
-          bulkDeleteIdName="order_id"
-          bulkDeleteTitle="Are you sure you want to delete the selected sales?"
-          bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
-          bulkDeleteToastMessage="Selected sales deleted successfully"
-          searchKey="title"
-          columns={GstSalesColumns}
-          data={SalesData}
-        />
+            <DataTable
+              bulkDeleteIdName="order_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected sales?"
+              bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected sales deleted successfully"
+              searchKey="title"
+              columns={GstSalesColumns}
+              data={SalesData as any}
+            />
           </TabsContent>
           <TabsContent value="Actualsales">
-          <DataTable
-          bulkDeleteIdName="order_id"
-          bulkDeleteTitle="Are you sure you want to delete the selected sales?"
-          bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
-          bulkDeleteToastMessage="Selected sales deleted successfully"
-          searchKey="title"
-          columns={ActualSalesColumns}
-          data={SalesData}
-        />
+            <DataTable
+              bulkDeleteIdName="order_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected sales?"
+              bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected sales deleted successfully"
+              searchKey="title"
+              columns={ActualSalesColumns}
+              data={GetSalesData as any}
+            />
           </TabsContent>
         </Tabs>
       </div>

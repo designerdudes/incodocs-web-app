@@ -36,9 +36,8 @@ export default async function Page() {
       });
       let expenseData;
       expenseData = res;
+    
       
-
-
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex justify-between items-center">
@@ -61,7 +60,7 @@ export default async function Page() {
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
                 <DataTable
-                    bulkDeleteIdName="order_id"
+                    bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the Details?"
                     bulkDeleteDescription="This will delete the selected Details, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected Details deleted successfully"
