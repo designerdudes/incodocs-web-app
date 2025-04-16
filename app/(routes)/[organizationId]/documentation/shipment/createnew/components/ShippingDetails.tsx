@@ -47,28 +47,18 @@ interface ShippingDetailsProps extends SaveDetailsProps {
 export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
 
-  const forwarderInvoicesFromForm =
-    watch("shippingDetails.forwarderInvoices") || [];
-  const transporterInvoicesFromForm =
-    watch("shippingDetails.transporterInvoices") || [];
+  const forwarderInvoicesFromForm = watch("shippingDetails.forwarderInvoices") || [];
+  const transporterInvoicesFromForm = watch("shippingDetails.transporterInvoices") || [];
 
-  const [forwarderInvoices, setForwarderInvoices] = useState(
-    forwarderInvoicesFromForm
-  );
-  const [transporterInvoices, setTransporterInvoices] = useState(
-    transporterInvoicesFromForm
-  );
+  const [forwarderInvoices, setForwarderInvoices] = useState(forwarderInvoicesFromForm);
+  const [transporterInvoices, setTransporterInvoices] = useState(transporterInvoicesFromForm);
   const [uploading, setUploading] = useState(false);
 
   const [forwarders, setForwarders] = useState([]);
   const [transporters, setTransporters] = useState([]);
 
-  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<
-    (File | null)[]
-  >([]);
-  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<
-    (File | null)[]
-  >([]);
+  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>([]);
+  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>([]);
   const GlobalModal = useGlobalModal();
 
   // Sync selected files arrays with invoice arrays
@@ -100,9 +90,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
   }, []);
 
   const handleForwarderDelete = (index: number) => {
-    const updatedInvoices = forwarderInvoices.filter(
-      (_: any, i: number) => i !== index
-    );
+    const updatedInvoices = forwarderInvoices.filter((_: any, i: number) => i !== index);
     setForwarderInvoices(updatedInvoices);
     setValue("shippingDetails.forwarderInvoices", updatedInvoices);
     setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length);
@@ -130,9 +118,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
   };
 
   const handleTransporterDelete = (index: number) => {
-    const updatedInvoices = transporterInvoices.filter(
-      (_: any, i: number) => i !== index
-    );
+    const updatedInvoices = transporterInvoices.filter((_: any, i: number) => i !== index);
     setTransporterInvoices(updatedInvoices);
     setValue("shippingDetails.transporterInvoices", updatedInvoices);
     setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length);
@@ -194,7 +180,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
           )
             .then((res) => res.json())
             .then((data) => setForwarders(data));
-          console.log(forwarders);
         }}
       />
     );
@@ -223,7 +208,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.forwarderName"
+          name="shippingDetails.forwarder"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Forwarder Name</FormLabel>
@@ -326,9 +311,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={
-                                uploading || !selectedForwarderFiles[index]
-                              }
+                              disabled={uploading || !selectedForwarderFiles[index]}
                               onClick={() => {
                                 if (selectedForwarderFiles[index]) {
                                   handleFileUpload(
@@ -370,11 +353,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={
-                                  field.value
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
+                                selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -433,7 +412,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.transporterName"
+          name="shippingDetails.transporter"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Transporter Name</FormLabel>
@@ -536,9 +515,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={
-                                uploading || !selectedTransporterFiles[index]
-                              }
+                              disabled={uploading || !selectedTransporterFiles[index]}
                               onClick={() => {
                                 if (selectedTransporterFiles[index]) {
                                   handleFileUpload(
@@ -580,11 +557,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={
-                                  field.value
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
+                                selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -664,7 +637,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
           className="h-8"
           disabled={uploading}
         >
-          Submit 
+          Submit
           {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>

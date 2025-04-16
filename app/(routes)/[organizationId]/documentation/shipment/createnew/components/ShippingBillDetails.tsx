@@ -30,11 +30,6 @@ import {
 import { SaveDetailsProps } from "./BookingDetails";
 import { Icons } from "@/components/ui/icons";
 
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
-
 interface ShippingBillDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
 }
@@ -60,11 +55,11 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
       );
       setShippingBills(newShippingBills);
       setValue("shippingBillDetails.ShippingBills", newShippingBills);
-      saveProgressSilently(getValues());
+      saveProgress(getValues()); // Use parent saveProgress
     } else {
       setShippingBills([]);
       setValue("shippingBillDetails.ShippingBills", []);
-      saveProgressSilently(getValues());
+      saveProgress(getValues()); // Use parent saveProgress
     }
   };
 
@@ -72,7 +67,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
     const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
     setShippingBills(updatedShippingBills);
     setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
-    saveProgressSilently(getValues());
+    saveProgress(getValues()); // Use parent saveProgress
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -88,7 +83,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
       const data = await response.json();
       const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
-      saveProgressSilently(getValues());
+      saveProgress(getValues()); // Use parent saveProgress
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -111,7 +106,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., SB101"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgressSilently(getValues())}
+                onBlur={() => saveProgress(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -130,7 +125,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., xyz"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgressSilently(getValues())}
+                onBlur={() => saveProgress(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -149,7 +144,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., randomcode"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgressSilently(getValues())}
+                onBlur={() => saveProgress(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -245,7 +240,8 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                               placeholder="e.g., 34583"
                               className="uppercase"
                               {...field}
-                              onBlur={() => saveProgressSilently(getValues())}
+                              onBlur={() => saveProgress(getValues())}
+                              required // Enforce required field
                             />
                           </FormControl>
                           <FormMessage />
@@ -276,7 +272,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
-                                  saveProgressSilently(getValues());
+                                  saveProgress(getValues());
                                 }}
                               />
                             </PopoverContent>
@@ -296,7 +292,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                             <Input
                               placeholder="e.g., 2394"
                               {...field}
-                              onBlur={() => saveProgressSilently(getValues())}
+                              onBlur={() => saveProgress(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -314,7 +310,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                             <Input
                               placeholder="e.g., 8934"
                               {...field}
-                              onBlur={() => saveProgressSilently(getValues())}
+                              onBlur={() => saveProgress(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -349,7 +345,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
               <Textarea
                 placeholder="e.g., this is some random comment"
                 {...field}
-                onBlur={() => saveProgressSilently(getValues())}
+                onBlur={() => saveProgress(getValues())}
               />
             </FormControl>
             <FormMessage />
