@@ -1,9 +1,12 @@
 import {
   BlocksIcon,
+  BookOpen,
+  FactoryIcon,
   HelpCircle,
   HomeIcon,
   ScissorsLineDashed,
   Settings,
+  Settings2,
   Sheet,
   SparkleIcon,
   User,
@@ -25,33 +28,33 @@ import { FaBookReader } from "react-icons/fa";
 
 const BrandName = "IncoDocs";
 
-const sidebarTabs = [
-  {
-    title: "Home",
-    path: "/dashboard",
-    icon: <HomeIcon className="w-4 mr-2" />,
-    showButton: false,
-  },
-  {
-    title: "Shipments",
-    path: "/documentation/shipments/dashboard",
-    icon: <Sheet className="w-4 mr-2" />,
-    showButton: true,
-    buttonUrl: "/shipments/new",
-  },
-  {
-    title: "Settings",
-    path: "/settings",
-    icon: <Settings className="w-4 mr-2" />,
-    showButton: false,
-  },
-  {
-    title: "Help Center",
-    path: "/hel[-center",
-    icon: <HelpCircle className="w-4 mr-2" />,
-    showButton: false,
-  },
-];
+// const sidebarTabs = [
+//   {
+//     title: "Home",
+//     path: "/dashboard",
+//     icon: <HomeIcon className="w-4 mr-2" />,
+//     showButton: false,
+//   },
+//   {
+//     title: "Shipments",
+//     path: "/documentation/shipments/dashboard",
+//     icon: <Sheet className="w-4 mr-2" />,
+//     showButton: true,
+//     buttonUrl: "/shipments/new",
+//   },
+//   {
+//     title: "Settings",
+//     path: "/settings",
+//     icon: <Settings className="w-4 mr-2" />,
+//     showButton: false,
+//   },
+//   {
+//     title: "Help Center",
+//     path: "/hel[-center",
+//     icon: <HelpCircle className="w-4 mr-2" />,
+//     showButton: false,
+//   },
+// ];
 
 const factoryManagementSidebarTabs = [
   {
@@ -275,6 +278,105 @@ const AccountingCard = [
     buttonUrl: "/factorymanagement/accounting/Parties",
   }
 ];
+
+ const sidebarTabs = {
+  navMain: [
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: HomeIcon, // Component function
+      isActive: true,
+    },
+    {
+      title: "Factory Management",
+      url: "/factorymanagement",
+      icon: FactoryIcon,
+      isActive: true,
+      items: [
+        {
+          title: "Inventory",
+          items: [
+            {
+              title: "Raw Inventory",
+              url: "/factorymanagement/inventory/raw",
+            },
+            {
+              title: "Finished Goods",
+              url: "/factorymanagement/inventory/finished",
+            },
+          ],
+          url: "/factorymanagement/inventory",
+        },
+        {
+          title: "Accounting",
+          url: "/factorymanagement/accounting",
+          items: [
+            {
+              title: "Purchases",
+              url: "/factorymanagement/accounting/purchases",
+            },
+            {
+              title: "Sales",
+              url: "/factorymanagement/accounting/sales",
+            },
+            {
+              title: "Expenses",
+              url: "/factorymanagement/accounting/Expenses",
+            },
+            {
+              title: "GST Ledger",
+              url: "/factorymanagement/accounting/GSTLedger",
+            },
+            {
+              title: "Ledger",
+              url: "/factorymanagement/accounting/Parties",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      title: "Documentation",
+      url: "/documentation/dashboard",
+      icon: BookOpen,
+      items: [
+        {
+          title: "Shipments",
+          url: "/documentation/shipment",
+        },
+        {
+          title: "Parties",
+          url: "/documentation/parties",
+        },
+      ],
+    },
+    {
+      title: "Team Management",
+      url: "/teamManagement/dashboard",
+      icon: User,
+      isActive: true,
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings2,
+      items: [
+        {
+          title: "General",
+          url: "/settings/general",
+        },
+        {
+          title: "Factory",
+          url: "/settings/factory",
+        },
+        {
+          title: "Organisation",
+          url: "/settings/organisation",
+        },
+      ],
+    },
+  ],
+};
 
 export {
   sidebarTabs,
