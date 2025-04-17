@@ -1,8 +1,11 @@
-type CreateItemFunction<T> = () => T;
+type CreateItemFunction<ItemType> = () => ItemType;
 
-type CustomFieldSetter<T> = (items: T[], setValue: (field: string, value: any) => void) => void;
+type CustomFieldSetter<ItemType> = (
+  items: ItemType[],
+  setValue: (field: string, value: any) => void
+) => void;
 
-export function handleDynamicArrayCountChange<T>({
+export function handleDynamicArrayCountChange<T, ItemType>({
   value,
   watch,
   setValue,
@@ -11,19 +14,19 @@ export function handleDynamicArrayCountChange<T>({
   createNewItem,
   saveCallback,
   customFieldSetters = {},
-  isDataFilled = (item: T) => !!item,
+  isDataFilled = (item: ItemType) => !!item,
   onRequireConfirmation,
 }: {
   value: string;
-  watch: (field: string) => T[];
+  watch: (field: string) => ItemType[];
   setValue: (field: string, value: any) => void;
-  getValues: () => any;
+  getValues: () => T;
   fieldName: string;
-  createNewItem: CreateItemFunction<T>;
-  saveCallback?: (data: any) => void;
-  customFieldSetters?: Record<string, CustomFieldSetter<T>>;
-  isDataFilled?: (item: T) => boolean;
-  onRequireConfirmation?: (pendingItemsToRemove: T[], confirmedCallback: () => void) => void;
+  createNewItem: CreateItemFunction<ItemType>;
+  saveCallback?: (data: T) => void;
+  customFieldSetters?: Record<string, CustomFieldSetter<ItemType>>;
+  isDataFilled?: (item: ItemType) => boolean;
+  onRequireConfirmation?: (pendingItemsToRemove: ItemType[], confirmedCallback: () => void) => void;
 }) {
   const count = Math.max(1, Math.min(parseInt(value, 10) || 1, 50));
   const currentItems = watch(fieldName) || [];
@@ -32,14 +35,11 @@ export function handleDynamicArrayCountChange<T>({
     const removedItems = currentItems.slice(count);
     const hasFilledData = removedItems.some(isDataFilled);
 
-    if (hasFilledData) {
-      if (onRequireConfirmation) {
-        // Let the component show a confirmation modal
-        onRequireConfirmation(removedItems, () => {
-          applyNewItemList();
-        });
-        return;
-      }
+    if (hasFilledData && onRequireConfirmation) {
+      onRequireConfirmation(removedItems, () => {
+        applyNewItemList();
+      });
+      return;
     }
   }
 
