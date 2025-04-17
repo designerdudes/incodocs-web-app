@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingBillDetails } from "./components/ShippingBillDetails";
@@ -22,28 +22,49 @@ import toast from "react-hot-toast";
 // Define the schema
 const formSchema = z.object({
   shipmentId: z.string().optional(),
+  organizationId: z.string().optional(),
   bookingDetails: z
     .object({
-      invoiceNumber: z.string(),
+      invoiceNumber: z.string().min(1, "Invoice Number is required"),
       bookingNumber: z.string().optional(),
       portOfLoading: z.string().optional(),
-      destinationPort: z
-        .string()
-        .optional(),
-      vesselSailingDate: z.date().optional(),
-      vesselArrivingDate: z.date().optional(),
-      numberOfContainer: z.number().optional(),
+      destinationPort: z.string().optional(),
+      vesselSailingDate: z.any().optional(),
+      vesselArrivingDate: z.any().optional(),
+      numberOfContainer: z.number().min(0).optional(),
       containers: z
         .array(
           z.object({
-            containerNumber: z
-              .string()
-              .optional(),
-            truckNumber: z
-              .string()
-              .optional(),
-            truckDriverContactNumber: z
-              .string()
+            containerNumber: z.string().optional(),
+            truckNumber: z.string().optional(),
+            truckDriverContactNumber: z.string().optional(),
+            addProductDetails: z
+              .object({
+                productCategory: z.string().optional(),
+                graniteAndMarble: z.string().optional(),
+                tiles: z
+                  .object({
+                    noOfBoxes: z.number().optional(),
+                    noOfPiecesPerBoxes: z.number().optional(),
+                    sizePerTile: z
+                      .object({
+                        length: z
+                          .object({
+                            value: z.number().optional(),
+                            units: z.string().optional(),
+                          })
+                          .optional(),
+                        breadth: z
+                          .object({
+                            value: z.number().optional(),
+                            units: z.string().optional(),
+                          })
+                          .optional(),
+                      })
+                      .optional(),
+                  })
+                  .optional(),
+              })
               .optional(),
           })
         )
@@ -61,7 +82,7 @@ const formSchema = z.object({
           z.object({
             uploadShippingBill: z.any().optional(),
             shippingBillNumber: z.string().optional(),
-            shippingBillDate: z.date().optional(),
+            shippingBillDate: z.any().optional(),
             drawbackValue: z.string().optional(),
             rodtepValue: z.string().optional(),
           })
@@ -71,40 +92,40 @@ const formSchema = z.object({
     .optional(),
   shippingDetails: z
     .object({
-      shippingLine: z.string().optional(),
+      shippingLine: z.any().optional(), // Relaxed to handle objects
       numberOfShippingLineInvoices: z.number().optional(),
       shippingLineInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
             uploadShippingLineInvoice: z.any().optional(),
-            date: z.date().optional(),
+            date: z.any().optional(),
             valueWithGST: z.string().optional(),
             valueWithoutGST: z.string().optional(),
           })
         )
         .optional(),
-      forwarderName: z.string().optional(),
+      forwarderName: z.any().optional(), // Relaxed to handle objects
       numberOfForwarderInvoices: z.number().optional(),
       forwarderInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
             uploadForwarderInvoice: z.any().optional(),
-            date: z.date().optional(),
+            date: z.any().optional(),
             valueWithGST: z.string().optional(),
             valueWithoutGST: z.string().optional(),
           })
         )
         .optional(),
-      transporterName: z.string().optional(),
+      transporterName: z.any().optional(), // Relaxed to handle objects
       numberOfTransporterInvoices: z.number().optional(),
       transporterInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
             uploadTransporterInvoice: z.any().optional(),
-            date: z.date().optional(),
+            date: z.any().optional(),
             valueWithGST: z.string().optional(),
             valueWithoutGST: z.string().optional(),
           })
@@ -116,14 +137,14 @@ const formSchema = z.object({
     .object({
       clearance: z
         .object({
-          supplierName: z.string().optional(),
+          supplierName: z.string().optional(), // Made optional to avoid strict validation
           noOfInvoices: z.number().optional(),
           invoices: z
             .array(
               z.object({
                 supplierGSTN: z.string().optional(),
                 supplierInvoiceNumber: z.string().optional(),
-                supplierInvoiceDate: z.date().optional(),
+                supplierInvoiceDate: z.any().optional(),
                 supplierInvoiceValueWithGST: z.string().optional(),
                 supplierInvoiceValueWithOutGST: z.string().optional(),
                 clearanceSupplierInvoiceUrl: z.any().optional(),
@@ -144,7 +165,7 @@ const formSchema = z.object({
     .optional(),
   saleInvoiceDetails: z
     .object({
-      consignee: z.string().optional(),
+      consignee: z.any().optional(), // Relaxed to handle objects
       actualBuyer: z.string().optional(),
       numberOfSalesInvoices: z.number().optional(),
       invoice: z
@@ -163,8 +184,8 @@ const formSchema = z.object({
   blDetails: z
     .object({
       blNumber: z.string().optional(),
-      blDate: z.date().optional(),
-      telexDate: z.date().optional(),
+      blDate: z.any().optional(),
+      telexDate: z.any().optional(),
       uploadBL: z.any().optional(),
     })
     .optional(),
@@ -174,7 +195,7 @@ const formSchema = z.object({
         review: z.string().optional(),
         certificateName: z.string().optional(),
         certificateNumber: z.string().optional(),
-        date: z.date().optional(),
+        date: z.any().optional(),
         issuerOfCertificate: z.string().optional(),
         uploadCopyOfCertificate: z.any().optional(),
       })
@@ -191,14 +212,16 @@ interface Props {
   };
 }
 
-export default function CreateNewFormPage({ params }: Props) {
+export default function EditShipmentPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
+  const [organizationId] = useState("674b0a687d4f4b21c6c980ba"); // Replace with dynamic value
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       shipmentId: "",
+      organizationId: "",
       bookingDetails: {
         invoiceNumber: "",
         bookingNumber: "",
@@ -264,85 +287,234 @@ export default function CreateNewFormPage({ params }: Props) {
       ],
     },
   });
-  const { watch } = methods;
+  const { watch, formState: { errors } } = methods;
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
 
-  const steps = [
-    {
-      id: 1,
-      name: "Booking Details",
-      component: <BookingDetails shipmentId={params.id} />,
-      field: "bookingDetails" as keyof FormValues,
-    },
-    {
-      id: 2,
-      name: "Shipping Details",
-      component: <ShippingDetails shipmentId={params.id} />,
-      field: "shippingDetails" as keyof FormValues,
-    },
-    {
-      id: 3,
-      name: "Shipping Bill Details",
-      component: <ShippingBillDetails shipmentId={params.id} />,
-      field: "shippingBillDetails" as keyof FormValues,
-    },
-    {
-      id: 4,
-      name: "Supplier Details",
-      component: <SupplierDetails shipmentId={params.id} />,
-      field: "supplierDetails" as keyof FormValues,
-    },
-    {
-      id: 5,
-      name: "Sale Invoice Details",
-      component: <SaleInvoiceDetails shipmentId={params.id} />,
-      field: "saleInvoiceDetails" as keyof FormValues,
-    },
-    {
-      id: 6,
-      name: "Bill of Lading Details",
-      component: <BillOfLadingDetails shipmentId={params.id} />,
-      field: "blDetails" as keyof FormValues,
-    },
-    {
-      id: 7,
-      name: "Other Details",
-      component: <OtherDetails shipmentId={params.id} />,
-      field: "otherDetails" as keyof FormValues,
-    },
-  ];
+  const steps = useMemo(
+    () => [
+      {
+        id: 1,
+        name: "Booking Details",
+        component: <BookingDetails shipmentId={params.id} />,
+        field: "bookingDetails" as keyof FormValues,
+      },
+      {
+        id: 2,
+        name: "Shipping Details",
+        component: <ShippingDetails shipmentId={params.id} />,
+        field: "shippingDetails" as keyof FormValues,
+      },
+      {
+        id: 3,
+        name: "Shipping Bill Details",
+        component: <ShippingBillDetails shipmentId={params.id} />,
+        field: "shippingBillDetails" as keyof FormValues,
+      },
+      {
+        id: 4,
+        name: "Supplier Details",
+        component: <SupplierDetails shipmentId={params.id} />,
+        field: "supplierDetails" as keyof FormValues,
+      },
+      {
+        id: 5,
+        name: "Commercial Invoices",
+        component: <SaleInvoiceDetails shipmentId={params.id} />,
+        field: "saleInvoiceDetails" as keyof FormValues,
+      },
+      {
+        id: 6,
+        name: "Bill of Lading Details",
+        component: <BillOfLadingDetails shipmentId={params.id} />,
+        field: "blDetails" as keyof FormValues,
+      },
+      {
+        id: 7,
+        name: "Other Details",
+        component: <OtherDetails shipmentId={params.id} />,
+        field: "otherDetails" as keyof FormValues,
+      },
+    ],
+    [params.id]
+  );
 
   const handleUpdateAndNext = async (data: FormValues) => {
+    console.log("handleUpdateAndNext called with data:", JSON.stringify(data, null, 2));
+    const currentField = steps[currentStep].field;
+    console.log("Current field:", currentField);
+  
     try {
-      const currentField = steps[currentStep].field;
-      const sectionData = { [currentField]: data[currentField] };
-
-      // Update specific section data
-      const response = await fetch(
-        `http://localhost:4080/shipment/update/${params.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(sectionData),
+      console.log("Starting validation for:", currentField);
+      // Validate only the current step's field
+      const isValid = await methods.trigger(currentField, { shouldFocus: true });
+      console.log("Validation result:", isValid);
+      console.log("Form errors:", JSON.stringify(errors, null, 2));
+  
+      if (!isValid) {
+        // Safely extract error message
+        let errorMessage = "Please fix errors in the form";
+        if (errors[currentField as keyof FormValues]) {
+          const fieldErrors = errors[currentField as keyof FormValues] as any;
+          errorMessage =
+            fieldErrors?.message ||
+            fieldErrors?.[Object.keys(fieldErrors)[0]]?.message ||
+            errorMessage;
         }
-      );
-
+        toast.error(`Validation failed for ${steps[currentStep].name}: ${errorMessage}`);
+        return;
+      }
+  
+      console.log("Validation passed, proceeding to API call");
+  
+      // Define API endpoints for each section
+      const apiEndpoints: Record<keyof FormValues, string> = {
+        bookingDetails: "http://localhost:4080/shipment/booking-details",
+        shippingDetails: "http://localhost:4080/shipment/shipping-details",
+        shippingBillDetails: "http://localhost:4080/shipment/shipping-bill-details",
+        supplierDetails: "http://localhost:4080/shipment/supplier-details",
+        saleInvoiceDetails: "http://localhost:4080/shipment/sale-invoice-details",
+        blDetails: "http://localhost:4080/shipment/bl-details",
+        otherDetails: "http://localhost:4080/shipment/other-details",
+        shipmentId: "",
+        organizationId: "",
+      };
+  
+      // Prepare payload for the current section
+      let payload: any = {
+        shipmentId: params.id,
+        organizationId,
+        [currentField]: data[currentField],
+      };
+  
+      // Special handling for bookingDetails to transform container data
+      if (currentField === "bookingDetails") {
+        payload.bookingDetails = {
+          ...data.bookingDetails,
+          containers: data.bookingDetails?.containers?.map((container) => ({
+            ...container,
+            trukDriverContactNumber: container.truckDriverContactNumber || "",
+            truckDriverContactNumber: undefined,
+          })) || [],
+        };
+      }
+  
+      // Make API call to the specific endpoint
+      const apiUrl = apiEndpoints[currentField as keyof FormValues];
+      console.log(`Calling API: ${apiUrl} with payload:`, JSON.stringify(payload, null, 2));
+  
+      const response = await fetch(apiUrl, {
+        method: "POST", // Adjust if other endpoints require PUT
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to update ${currentField}: ${errorText}`);
+        throw new Error(`API error: ${errorText || response.statusText}`);
       }
-
+  
+      const updatedData = await response.json();
+      console.log("API response:", updatedData);
+  
+      // Update form state with the response data for the current section
+      if (updatedData[currentField]) {
+        let updatedSectionData: any;
+  
+        // Handle object-based sections (bookingDetails, shippingDetails, etc.)
+        if (currentField !== "otherDetails" && currentField !== "shipmentId" && currentField !== "organizationId") {
+          updatedSectionData = {
+            ...(data[currentField] as object),
+            ...(updatedData[currentField] as object),
+          };
+  
+          // Handle date parsing for specific fields
+          if (currentField === "bookingDetails") {
+            updatedSectionData.vesselSailingDate = updatedData.bookingDetails.vesselSailingDate
+              ? parseISO(updatedData.bookingDetails.vesselSailingDate)
+              : undefined;
+            updatedSectionData.vesselArrivingDate = updatedData.bookingDetails.vesselArrivingDate
+              ? parseISO(updatedData.bookingDetails.vesselArrivingDate)
+              : undefined;
+            updatedSectionData.containers = updatedData.bookingDetails.containers?.map(
+              (container: any) => ({
+                ...container,
+                truckDriverContactNumber: container.trukDriverContactNumber || "",
+                trukDriverContactNumber: undefined,
+              })
+            ) || [];
+          } else if (currentField === "shippingBillDetails") {
+            updatedSectionData.bills = updatedData.shippingBillDetails.bills?.map((bill: any) => ({
+              ...bill,
+              shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
+            })) || [];
+          } else if (currentField === "shippingDetails") {
+            updatedSectionData.shippingLineInvoices = updatedData.shippingDetails.shippingLineInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+            updatedSectionData.forwarderInvoices = updatedData.shippingDetails.forwarderInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+            updatedSectionData.transporterInvoices = updatedData.shippingDetails.transporterInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+          } else if (currentField === "supplierDetails") {
+            updatedSectionData.clearance.invoices = updatedData.supplierDetails.clearance.invoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                supplierInvoiceDate: invoice.supplierInvoiceDate
+                  ? parseISO(invoice.supplierInvoiceDate)
+                  : undefined,
+              })
+            ) || [];
+          } else if (currentField === "blDetails") {
+            updatedSectionData.blDate = updatedData.blDetails.blDate
+              ? parseISO(updatedData.blDetails.blDate)
+              : undefined;
+            updatedSectionData.telexDate = updatedData.blDetails.telexDate
+              ? parseISO(updatedData.blDetails.telexDate)
+              : undefined;
+          }
+        } else if (currentField === "otherDetails") {
+          // Handle array-based section (otherDetails)
+          updatedSectionData = updatedData.otherDetails?.map((item: any) => ({
+            ...item,
+            date: item.date ? parseISO(item.date) : undefined,
+          })) || [];
+        } else {
+          // Handle string fields (shipmentId, organizationId)
+          updatedSectionData = updatedData[currentField];
+        }
+  
+        methods.setValue(currentField as keyof FormValues, updatedSectionData);
+      }
+  
       toast.success(`${steps[currentStep].name} updated successfully!`);
-
-      // Move to next step if not at the last step
+  
+      // Navigate to next step
       if (currentStep < steps.length - 1) {
+        console.log("Navigating to step:", currentStep + 1);
         setCurrentStep(currentStep + 1);
+      } else {
+        console.log("At last step, no navigation");
       }
     } catch (error) {
-      console.error(`Error updating ${steps[currentStep].field}:`, error);
-      toast.error(`Failed to update ${steps[currentStep].name}`);
+      console.error(`Error in ${steps[currentStep].field}:`, error);
+      toast.error(
+        `Failed to update ${steps[currentStep].name}: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -356,15 +528,18 @@ export default function CreateNewFormPage({ params }: Props) {
     async function fetchShipmentData() {
       try {
         setIsFetching(true);
+        console.log("Fetching shipment data for ID:", params.id);
         const response = await fetch(
           `http://localhost:4080/shipment/getbyid/${params.id}`
         );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
 
         const data = await response.json();
+        console.log("Fetched shipment data:", data);
 
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
+          organizationId: organizationId || "",
           bookingDetails: {
             invoiceNumber: data.bookingDetails?.invoiceNumber || "",
             bookingNumber: data.bookingDetails?.bookingNumber || "",
@@ -382,9 +557,21 @@ export default function CreateNewFormPage({ params }: Props) {
                 containerNumber: container.containerNumber || "",
                 truckNumber: container.truckNumber || "",
                 truckDriverContactNumber:
-                  container.truckDriverContactNumber ||
                   container.trukDriverContactNumber ||
+                  container.truckDriverContactNumber ||
                   "",
+                addProductDetails: container.addProductDetails || {
+                  productCategory: "",
+                  graniteAndMarble: "",
+                  tiles: {
+                    noOfBoxes: 0,
+                    noOfPiecesPerBoxes: 0,
+                    sizePerTile: {
+                      length: { value: 0, units: "" },
+                      breadth: { value: 0, units: "" },
+                    },
+                  },
+                },
               })) || [],
           },
           shippingBillDetails: {
@@ -406,7 +593,7 @@ export default function CreateNewFormPage({ params }: Props) {
           shippingDetails: {
             shippingLine:
               typeof data.shippingDetails?.shippingLine === "object"
-                ? data.shippingDetails?.shippingLine?._id || ""
+                ? data.shippingDetails?.shippingLine?._id || data.shippingDetails?.shippingLine?.name || ""
                 : data.shippingDetails?.shippingLine || "",
             numberOfShippingLineInvoices:
               data.shippingDetails?.shippingLineInvoices?.length || 0,
@@ -423,7 +610,7 @@ export default function CreateNewFormPage({ params }: Props) {
               ) || [],
             forwarderName:
               typeof data.shippingDetails?.forwarderName === "object"
-                ? data.shippingDetails?.forwarderName?._id || ""
+                ? data.shippingDetails?.forwarderName?._id || data.shippingDetails?.forwarderName?.name || ""
                 : data.shippingDetails?.forwarderName || "",
             numberOfForwarderInvoices:
               data.shippingDetails?.forwarderInvoices?.length || 0,
@@ -437,7 +624,7 @@ export default function CreateNewFormPage({ params }: Props) {
               })) || [],
             transporterName:
               typeof data.shippingDetails?.transporterName === "object"
-                ? data.shippingDetails?.transporterName?._id || ""
+                ? data.shippingDetails?.transporterName?._id || data.shippingDetails?.transporterName?.name || ""
                 : data.shippingDetails?.transporterName || "",
             numberOfTransporterInvoices:
               data.shippingDetails?.transporterInvoices?.length || 0,
@@ -455,7 +642,12 @@ export default function CreateNewFormPage({ params }: Props) {
           },
           supplierDetails: {
             clearance: {
-              supplierName: data.supplierDetails?.clearance?.supplierName ?? "",
+              supplierName:
+                typeof data.supplierDetails?.clearance?.supplierName === "object"
+                  ? data.supplierDetails?.clearance?.supplierName?._id ||
+                    data.supplierDetails?.clearance?.supplierName?.name ||
+                    ""
+                  : data.supplierDetails?.clearance?.supplierName || "",
               noOfInvoices:
                 data.supplierDetails?.clearance?.invoices?.length || 0,
               invoices:
@@ -477,7 +669,11 @@ export default function CreateNewFormPage({ params }: Props) {
             },
             actual: {
               actualSupplierName:
-                data.supplierDetails?.actual?.actualSupplierName || "",
+                typeof data.supplierDetails?.actual?.actualSupplierName === "object"
+                  ? data.supplierDetails?.actual?.actualSupplierName?._id ||
+                    data.supplierDetails?.actual?.actualSupplierName?.name ||
+                    ""
+                  : data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceValue:
                 data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
               actualSupplierInvoiceUrl:
@@ -489,7 +685,9 @@ export default function CreateNewFormPage({ params }: Props) {
           saleInvoiceDetails: {
             consignee:
               typeof data.saleInvoiceDetails?.consignee === "object"
-                ? data.saleInvoiceDetails?.consignee?._id || ""
+                ? data.saleInvoiceDetails?.consignee?._id ||
+                  data.saleInvoiceDetails?.consignee?.name ||
+                  ""
                 : data.saleInvoiceDetails?.consignee || "",
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
             numberOfSalesInvoices:
@@ -546,7 +744,7 @@ export default function CreateNewFormPage({ params }: Props) {
     }
 
     fetchShipmentData();
-  }, [params.id, methods]);
+  }, [params.id, methods, organizationId]);
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -581,8 +779,17 @@ export default function CreateNewFormPage({ params }: Props) {
           Previous
         </Button>
         <Button
-          type="submit"
-          onClick={methods.handleSubmit(handleUpdateAndNext)}
+          type="button"
+          onClick={() => {
+            console.log("Update & Next button clicked");
+            methods.handleSubmit(
+              handleUpdateAndNext,
+              (err) => {
+                console.log("Form submission errors:", JSON.stringify(err, null, 2));
+                toast.error(`Please fix errors in ${steps[currentStep].name}`);
+              }
+            )();
+          }}
         >
           {currentStep < steps.length - 1 ? "Update & Next" : "Update & Finish"}
         </Button>
@@ -592,7 +799,11 @@ export default function CreateNewFormPage({ params }: Props) {
       ) : (
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit(handleUpdateAndNext)}
+            onSubmit={(e) => {
+              e.preventDefault();
+              console.log("Form submitted via Enter key");
+              methods.handleSubmit(handleUpdateAndNext)();
+            }}
             className="flex flex-col gap-3 w-full p-3"
           >
             <div className="flex justify-between">
