@@ -54,7 +54,7 @@ export default async function Page({ params }: Props) {
     return <div>Error loading shipment data</div>;
   }
   const shipmentData = await res.json();
-  console.log(shipmentData)
+  console.log("this is shipment",shipmentData)
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -70,7 +70,7 @@ export default async function Page({ params }: Props) {
             <Heading
               className="leading-tight"
               title={`Shipment: ${
-                shipmentData?.shipmentId || "N/A"
+                shipmentData?.bookingDetails.invoiceNumber || "N/A"
               }`}
 
             />
@@ -124,6 +124,15 @@ export default async function Page({ params }: Props) {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
+
+                    <TableRow>
+                        <TableCell>Invoice Number</TableCell>
+                        <TableCell>
+                          {shipmentData?.bookingDetails.invoiceNumber}
+                        </TableCell>
+                      </TableRow>
+                    
+
                       <TableRow>
                         <TableCell>Booking Number</TableCell>
                         <TableCell>
@@ -556,6 +565,13 @@ export default async function Page({ params }: Props) {
 
           {/* Bill Of Lading Details */}
 
+          
+
+
+
+
+          <TabsContent value="Bill Of Lading Details">
+
           <div className="flex flex-col md:flex-row gap-4 mt-4">
           <Card className="mt-4 w-full md:w-1/3">
                   <CardHeader>
@@ -612,9 +628,6 @@ export default async function Page({ params }: Props) {
                     </div>
 
 
-
-
-          <TabsContent value="Bill Of Lading Details">
             <div className="flex flex-col md:flex-row gap-4">
               
               <Card className="mt-4 w-full md:w-1/2">
