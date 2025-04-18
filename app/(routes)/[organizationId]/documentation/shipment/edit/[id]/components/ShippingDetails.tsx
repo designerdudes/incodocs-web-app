@@ -32,13 +32,14 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingDetailsProps {
   shipmentId: string;
 }
 
 export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
   const [forwarders, setForwarders] = useState([]);
   const [transporters, setTransporters] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -674,6 +675,24 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
           </div>
         )}
       </div>
+      {/* Review */}
+      <FormField
+        control={control}
+        name="shippingDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                onBlur={() => (getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }

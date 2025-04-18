@@ -137,9 +137,6 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
     }
   };
 
-  function saveProgressSilently(arg0: FieldValues): void {
-    throw new Error("Function not implemented.");
-  }
   const openSupplierForm = () => {
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
@@ -178,7 +175,7 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
-                    saveProgressSilently(getValues());
+                    (getValues());
                   }}
                   displayProperty="name"
                   placeholder="Select a Supplier Name"
@@ -451,7 +448,7 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
                 <Textarea
                   placeholder="e.g., this is some random comment"
                   {...field}
-                  onBlur={() => saveProgressSilently(getValues())}
+                  onBlur={() => (getValues())}
                 />
               </FormControl>
               <FormMessage />

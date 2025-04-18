@@ -18,8 +18,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation"; // Import useRouter
 
-// Define the schema
 const formSchema = z.object({
   shipmentId: z.string().optional(),
   organizationId: z.string().optional(),
@@ -37,7 +37,7 @@ const formSchema = z.object({
           z.object({
             containerNumber: z.string().optional(),
             truckNumber: z.string().optional(),
-            truckDriverContactNumber: z.string().optional(),
+            truckDriverContactNumber: z.any().optional(),
             addProductDetails: z
               .object({
                 productCategory: z.string().optional(),
@@ -92,42 +92,30 @@ const formSchema = z.object({
     .optional(),
   shippingDetails: z
     .object({
-      shippingLine: z.any().optional(), // Relaxed to handle objects
-      numberOfShippingLineInvoices: z.number().optional(),
-      shippingLineInvoices: z
-        .array(
-          z.object({
-            invoiceNumber: z.string().optional(),
-            uploadShippingLineInvoice: z.any().optional(),
-            date: z.any().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
-          })
-        )
-        .optional(),
-      forwarderName: z.any().optional(), // Relaxed to handle objects
-      numberOfForwarderInvoices: z.number().optional(),
-      forwarderInvoices: z
-        .array(
-          z.object({
-            invoiceNumber: z.string().optional(),
-            uploadForwarderInvoice: z.any().optional(),
-            date: z.any().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
-          })
-        )
-        .optional(),
-      transporterName: z.any().optional(), // Relaxed to handle objects
-      numberOfTransporterInvoices: z.number().optional(),
+      review: z.string().optional(),
+      transporterName: z.any().optional(),
+      noOftransportinvoices: z.number().optional(),
       transporterInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
-            uploadTransporterInvoice: z.any().optional(),
+            uploadInvoiceUr: z.any().optional(),
             date: z.any().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+          })
+        )
+        .optional(),
+      forwarderName: z.any().optional(),
+      noOfForwarderinvoices: z.number().optional(),
+      forwarderInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUr: z.any().optional(),
+            date: z.any().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
           })
         )
         .optional(),
@@ -137,7 +125,7 @@ const formSchema = z.object({
     .object({
       clearance: z
         .object({
-          supplierName: z.string().optional(), // Made optional to avoid strict validation
+          supplierName: z.string().optional(),
           noOfInvoices: z.number().optional(),
           invoices: z
             .array(
@@ -165,7 +153,7 @@ const formSchema = z.object({
     .optional(),
   saleInvoiceDetails: z
     .object({
-      consignee: z.any().optional(), // Relaxed to handle objects
+      consignee: z.any().optional(),
       actualBuyer: z.string().optional(),
       numberOfSalesInvoices: z.number().optional(),
       invoice: z
@@ -216,6 +204,7 @@ export default function EditShipmentPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
   const [organizationId] = useState("674b0a687d4f4b21c6c980ba"); // Replace with dynamic value
+  const router = useRouter(); // Initialize router
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -240,15 +229,13 @@ export default function EditShipmentPage({ params }: Props) {
         bills: [],
       },
       shippingDetails: {
-        shippingLine: "",
-        numberOfShippingLineInvoices: 0,
-        shippingLineInvoices: [],
-        forwarderName: "",
-        numberOfForwarderInvoices: 0,
-        forwarderInvoices: [],
+        review: "",
         transporterName: "",
-        numberOfTransporterInvoices: 0,
+        noOftransportinvoices: 0,
         transporterInvoices: [],
+        forwarderName: "",
+        noOfForwarderinvoices: 0,
+        forwarderInvoices: [],
       },
       supplierDetails: {
         clearance: {
@@ -368,13 +355,13 @@ export default function EditShipmentPage({ params }: Props) {
   
       // Define API endpoints for each section
       const apiEndpoints: Record<keyof FormValues, string> = {
-        bookingDetails: "http://localhost:4080/shipment/booking-details",
-        shippingDetails: "http://localhost:4080/shipment/shipping-details",
-        shippingBillDetails: "http://localhost:4080/shipment/shipping-bill-details",
-        supplierDetails: "http://localhost:4080/shipment/supplier-details",
-        saleInvoiceDetails: "http://localhost:4080/shipment/sale-invoice-details",
-        blDetails: "http://localhost:4080/shipment/bl-details",
-        otherDetails: "http://localhost:4080/shipment/other-details",
+        bookingDetails: "https://incodocs-server.onrender.com/shipment/booking-details",
+        shippingDetails: "https://incodocs-server.onrender.com/shipment/shipping-details",
+        shippingBillDetails: "https://incodocs-server.onrender.com/shipment/shipping-bill-details",
+        supplierDetails: "https://incodocs-server.onrender.com/shipment/supplier-details",
+        saleInvoiceDetails: "https://incodocs-server.onrender.com/shipment/sale-invoice-details",
+        blDetails: "https://incodocs-server.onrender.com/shipment/bl-details",
+        otherDetails: "https://incodocs-server.onrender.com/shipment/other-details",
         shipmentId: "",
         organizationId: "",
       };
@@ -506,7 +493,8 @@ export default function EditShipmentPage({ params }: Props) {
         console.log("Navigating to step:", currentStep + 1);
         setCurrentStep(currentStep + 1);
       } else {
-        console.log("At last step, no navigation");
+        console.log("At last step, navigating to previous page");
+        router.push("../"); // Navigate to previous page
       }
     } catch (error) {
       console.error(`Error in ${steps[currentStep].field}:`, error);
@@ -533,10 +521,10 @@ export default function EditShipmentPage({ params }: Props) {
           `http://localhost:4080/shipment/getbyid/${params.id}`
         );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
-
+  
         const data = await response.json();
         console.log("Fetched shipment data:", data);
-
+  
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
           organizationId: organizationId || "",
@@ -591,54 +579,43 @@ export default function EditShipmentPage({ params }: Props) {
               })) || [],
           },
           shippingDetails: {
-            shippingLine:
-              typeof data.shippingDetails?.shippingLine === "object"
-                ? data.shippingDetails?.shippingLine?._id || data.shippingDetails?.shippingLine?.name || ""
-                : data.shippingDetails?.shippingLine || "",
-            numberOfShippingLineInvoices:
-              data.shippingDetails?.shippingLineInvoices?.length || 0,
-            shippingLineInvoices:
-              data.shippingDetails?.shippingLineInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadShippingLineInvoice:
-                    invoice.uploadShippingLineInvoice || "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGST: invoice.valueWithGST || "",
-                  valueWithoutGST: invoice.valueWithoutGST || "",
-                })
-              ) || [],
+            review: data.shippingDetails?.review || "",
+            transporterName:
+              typeof data.shippingDetails?.transporterName === "object"
+                ? data.shippingDetails?.transporterName?._id ||
+                  data.shippingDetails?.transporterName?.name ||
+                  ""
+                : data.shippingDetails?.transporterName || "",
+            noOftransportinvoices:
+              data.shippingDetails?.noOftransportinvoices ||
+              data.shippingDetails?.transporterInvoices?.length ||
+              0,
+            transporterInvoices:
+              data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
+                invoiceNumber: invoice.invoiceNumber || "",
+                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadTransporterInvoice || "",
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
+                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
+              })) || [],
             forwarderName:
               typeof data.shippingDetails?.forwarderName === "object"
-                ? data.shippingDetails?.forwarderName?._id || data.shippingDetails?.forwarderName?.name || ""
+                ? data.shippingDetails?.forwarderName?._id ||
+                  data.shippingDetails?.forwarderName?.name ||
+                  ""
                 : data.shippingDetails?.forwarderName || "",
-            numberOfForwarderInvoices:
-              data.shippingDetails?.forwarderInvoices?.length || 0,
+            noOfForwarderinvoices:
+              data.shippingDetails?.noOfForwarderinvoices ||
+              data.shippingDetails?.forwarderInvoices?.length ||
+              0,
             forwarderInvoices:
               data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
                 invoiceNumber: invoice.invoiceNumber || "",
-                uploadForwarderInvoice: invoice.uploadForwarderInvoice || "",
+                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadForwarderInvoice || "",
                 date: invoice.date ? parseISO(invoice.date) : undefined,
-                valueWithGST: invoice.valueWithGST || "",
-                valueWithoutGST: invoice.valueWithoutGST || "",
+                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
+                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
               })) || [],
-            transporterName:
-              typeof data.shippingDetails?.transporterName === "object"
-                ? data.shippingDetails?.transporterName?._id || data.shippingDetails?.transporterName?.name || ""
-                : data.shippingDetails?.transporterName || "",
-            numberOfTransporterInvoices:
-              data.shippingDetails?.transporterInvoices?.length || 0,
-            transporterInvoices:
-              data.shippingDetails?.transporterInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadTransporterInvoice:
-                    invoice.uploadTransporterInvoice || "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGST: invoice.valueWithGST || "",
-                  valueWithoutGST: invoice.valueWithoutGST || "",
-                })
-              ) || [],
           },
           supplierDetails: {
             clearance: {
@@ -733,7 +710,7 @@ export default function EditShipmentPage({ params }: Props) {
                   },
                 ],
         };
-
+  
         methods.reset(updatedValues);
       } catch (error) {
         console.error("Error fetching shipment data:", error);
@@ -742,7 +719,7 @@ export default function EditShipmentPage({ params }: Props) {
         setIsFetching(false);
       }
     }
-
+  
     fetchShipmentData();
   }, [params.id, methods, organizationId]);
 
