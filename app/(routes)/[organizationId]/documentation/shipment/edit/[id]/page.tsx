@@ -18,7 +18,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation"; // Import useRouter
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   shipmentId: z.string().optional(),
@@ -203,8 +203,9 @@ interface Props {
 export default function EditShipmentPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
+  const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
   const [organizationId] = useState("674b0a687d4f4b21c6c980ba"); // Replace with dynamic value
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -282,7 +283,12 @@ export default function EditShipmentPage({ params }: Props) {
       {
         id: 1,
         name: "Booking Details",
-        component: <BookingDetails shipmentId={params.id} />,
+        component: (
+          <BookingDetails
+            shipmentId={params.id}
+            onProductDetailsOpenChange={setIsProductDetailsOpen}
+          />
+        ),
         field: "bookingDetails" as keyof FormValues,
       },
       {
@@ -325,20 +331,23 @@ export default function EditShipmentPage({ params }: Props) {
     [params.id]
   );
 
-  const handleUpdateAndNext = async (data: FormValues) => {
+  const handleUpdateAndNext = async (data: FormValues, isIntentional: boolean) => {
+    if (isProductDetailsOpen || !isIntentional) {
+      console.log("handleUpdateAndNext blocked: isProductDetailsOpen =", isProductDetailsOpen, "isIntentional =", isIntentional);
+      return;
+    }
     console.log("handleUpdateAndNext called with data:", JSON.stringify(data, null, 2));
+    console.trace("handleUpdateAndNext call stack");
     const currentField = steps[currentStep].field;
     console.log("Current field:", currentField);
-  
+
     try {
       console.log("Starting validation for:", currentField);
-      // Validate only the current step's field
       const isValid = await methods.trigger(currentField, { shouldFocus: true });
       console.log("Validation result:", isValid);
       console.log("Form errors:", JSON.stringify(errors, null, 2));
-  
+
       if (!isValid) {
-        // Safely extract error message
         let errorMessage = "Please fix errors in the form";
         if (errors[currentField as keyof FormValues]) {
           const fieldErrors = errors[currentField as keyof FormValues] as any;
@@ -350,10 +359,9 @@ export default function EditShipmentPage({ params }: Props) {
         toast.error(`Validation failed for ${steps[currentStep].name}: ${errorMessage}`);
         return;
       }
-  
+
       console.log("Validation passed, proceeding to API call");
-  
-      // Define API endpoints for each section
+
       const apiEndpoints: Record<keyof FormValues, string> = {
         bookingDetails: "https://incodocs-server.onrender.com/shipment/booking-details",
         shippingDetails: "https://incodocs-server.onrender.com/shipment/shipping-details",
@@ -365,15 +373,13 @@ export default function EditShipmentPage({ params }: Props) {
         shipmentId: "",
         organizationId: "",
       };
-  
-      // Prepare payload for the current section
+
       let payload: any = {
         shipmentId: params.id,
         organizationId,
         [currentField]: data[currentField],
       };
-  
-      // Special handling for bookingDetails to transform container data
+
       if (currentField === "bookingDetails") {
         payload.bookingDetails = {
           ...data.bookingDetails,
@@ -384,39 +390,35 @@ export default function EditShipmentPage({ params }: Props) {
           })) || [],
         };
       }
-  
-      // Make API call to the specific endpoint
+
       const apiUrl = apiEndpoints[currentField as keyof FormValues];
       console.log(`Calling API: ${apiUrl} with payload:`, JSON.stringify(payload, null, 2));
-  
+
       const response = await fetch(apiUrl, {
-        method: "POST", // Adjust if other endpoints require PUT
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`API error: ${errorText || response.statusText}`);
       }
-  
+
       const updatedData = await response.json();
       console.log("API response:", updatedData);
-  
-      // Update form state with the response data for the current section
+
       if (updatedData[currentField]) {
         let updatedSectionData: any;
-  
-        // Handle object-based sections (bookingDetails, shippingDetails, etc.)
+
         if (currentField !== "otherDetails" && currentField !== "shipmentId" && currentField !== "organizationId") {
           updatedSectionData = {
             ...(data[currentField] as object),
             ...(updatedData[currentField] as object),
           };
-  
-          // Handle date parsing for specific fields
+
           if (currentField === "bookingDetails") {
             updatedSectionData.vesselSailingDate = updatedData.bookingDetails.vesselSailingDate
               ? parseISO(updatedData.bookingDetails.vesselSailingDate)
@@ -473,28 +475,25 @@ export default function EditShipmentPage({ params }: Props) {
               : undefined;
           }
         } else if (currentField === "otherDetails") {
-          // Handle array-based section (otherDetails)
           updatedSectionData = updatedData.otherDetails?.map((item: any) => ({
             ...item,
             date: item.date ? parseISO(item.date) : undefined,
           })) || [];
         } else {
-          // Handle string fields (shipmentId, organizationId)
           updatedSectionData = updatedData[currentField];
         }
-  
+
         methods.setValue(currentField as keyof FormValues, updatedSectionData);
       }
-  
+
       toast.success(`${steps[currentStep].name} updated successfully!`);
-  
-      // Navigate to next step
+
       if (currentStep < steps.length - 1) {
         console.log("Navigating to step:", currentStep + 1);
         setCurrentStep(currentStep + 1);
       } else {
         console.log("At last step, navigating to previous page");
-        router.push("../"); // Navigate to previous page
+        router.push("../");
       }
     } catch (error) {
       console.error(`Error in ${steps[currentStep].field}:`, error);
@@ -521,10 +520,10 @@ export default function EditShipmentPage({ params }: Props) {
           `http://localhost:4080/shipment/getbyid/${params.id}`
         );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
-  
+
         const data = await response.json();
         console.log("Fetched shipment data:", data);
-  
+
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
           organizationId: organizationId || "",
@@ -710,7 +709,7 @@ export default function EditShipmentPage({ params }: Props) {
                   },
                 ],
         };
-  
+
         methods.reset(updatedValues);
       } catch (error) {
         console.error("Error fetching shipment data:", error);
@@ -719,7 +718,7 @@ export default function EditShipmentPage({ params }: Props) {
         setIsFetching(false);
       }
     }
-  
+
     fetchShipmentData();
   }, [params.id, methods, organizationId]);
 
@@ -760,7 +759,7 @@ export default function EditShipmentPage({ params }: Props) {
           onClick={() => {
             console.log("Update & Next button clicked");
             methods.handleSubmit(
-              handleUpdateAndNext,
+              (data) => handleUpdateAndNext(data, true),
               (err) => {
                 console.log("Form submission errors:", JSON.stringify(err, null, 2));
                 toast.error(`Please fix errors in ${steps[currentStep].name}`);
@@ -778,8 +777,14 @@ export default function EditShipmentPage({ params }: Props) {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              console.log("Form submitted via Enter key");
-              methods.handleSubmit(handleUpdateAndNext)();
+              if (isProductDetailsOpen) {
+                console.log("Parent form submission blocked: isProductDetailsOpen =", isProductDetailsOpen);
+                return;
+              }
+              console.log("Parent form submitted via Enter key or intentional submission");
+              methods.handleSubmit(
+                (data) => handleUpdateAndNext(data, true)
+              )();
             }}
             className="flex flex-col gap-3 w-full p-3"
           >

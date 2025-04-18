@@ -27,13 +27,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
 }
 
 export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
@@ -370,6 +371,24 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
           </Table>
         </div>
       )}
+      {/* Review */}
+      <FormField
+        control={control}
+        name="shippingDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                onBlur={() => getValues()}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
     </div>
   );
 }
