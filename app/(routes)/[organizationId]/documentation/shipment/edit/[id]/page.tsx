@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingBillDetails } from "./components/ShippingBillDetails";
@@ -13,43 +13,57 @@ import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { OtherDetails } from "./components/OtherDetails";
+import ProgressBar from "./components/ProgressBar";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { parseISO } from "date-fns";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
-// Define the schema
 const formSchema = z.object({
   shipmentId: z.string().optional(),
+  organizationId: z.string().optional(),
   bookingDetails: z
     .object({
-      bookingNumber: z.string().min(3, { message: "Required name" }).optional(),
-      portOfLoading: z.string().min(3, { message: "Required name" }).optional(),
-      destinationPort: z
-        .string()
-        .min(3, { message: "Required name" })
-        .optional(),
-      vesselSailingDate: z.date().optional(),
-      vesselArrivingDate: z.date().optional(),
-      numberOfContainer: z.number().optional(),
+      invoiceNumber: z.string().min(1, "Invoice Number is required"),
+      bookingNumber: z.string().optional(),
+      portOfLoading: z.string().optional(),
+      destinationPort: z.string().optional(),
+      vesselSailingDate: z.any().optional(),
+      vesselArrivingDate: z.any().optional(),
+      numberOfContainer: z.number().min(0).optional(),
       containers: z
         .array(
           z.object({
-            containerNumber: z
-              .string()
-              .min(3, {
-                message: "Container Number must be at least 3 characters long",
-              })
-              .optional(),
-            truckNumber: z
-              .string()
-              .min(3, {
-                message: "Truck Number must be at least 3 characters long",
-              })
-              .optional(),
-            truckDriverContactNumber: z
-              .string()
-              .min(10, {
-                message: "Truck driver number should be 10 characters long",
+            containerNumber: z.string().optional(),
+            truckNumber: z.string().optional(),
+            truckDriverContactNumber: z.any().optional(),
+            addProductDetails: z
+              .object({
+                productCategory: z.string().optional(),
+                graniteAndMarble: z.string().optional(),
+                tiles: z
+                  .object({
+                    noOfBoxes: z.number().optional(),
+                    noOfPiecesPerBoxes: z.number().optional(),
+                    sizePerTile: z
+                      .object({
+                        length: z
+                          .object({
+                            value: z.number().optional(),
+                            units: z.string().optional(),
+                          })
+                          .optional(),
+                        breadth: z
+                          .object({
+                            value: z.number().optional(),
+                            units: z.string().optional(),
+                          })
+                          .optional(),
+                      })
+                      .optional(),
+                  })
+                  .optional(),
               })
               .optional(),
           })
@@ -68,7 +82,7 @@ const formSchema = z.object({
           z.object({
             uploadShippingBill: z.any().optional(),
             shippingBillNumber: z.string().optional(),
-            shippingBillDate: z.date().optional(),
+            shippingBillDate: z.any().optional(),
             drawbackValue: z.string().optional(),
             rodtepValue: z.string().optional(),
           })
@@ -78,42 +92,30 @@ const formSchema = z.object({
     .optional(),
   shippingDetails: z
     .object({
-      shippingLine: z.string().optional(),
-      numberOfShippingLineInvoices: z.number().optional(),
-      shippingLineInvoices: z
-        .array(
-          z.object({
-            invoiceNumber: z.string().optional(),
-            uploadShippingLineInvoice: z.any().optional(),
-            date: z.date().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
-          })
-        )
-        .optional(),
-      forwarderName: z.string().optional(),
-      numberOfForwarderInvoices: z.number().optional(),
-      forwarderInvoices: z
-        .array(
-          z.object({
-            invoiceNumber: z.string().optional(),
-            uploadForwarderInvoice: z.any().optional(),
-            date: z.date().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
-          })
-        )
-        .optional(),
-      transporterName: z.string().optional(),
-      numberOfTransporterInvoices: z.number().optional(),
+      review: z.string().optional(),
+      transporterName: z.any().optional(),
+      noOftransportinvoices: z.number().optional(),
       transporterInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
-            uploadTransporterInvoice: z.any().optional(),
-            date: z.date().optional(),
-            valueWithGST: z.string().optional(),
-            valueWithoutGST: z.string().optional(),
+            uploadInvoiceUr: z.any().optional(),
+            date: z.any().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+          })
+        )
+        .optional(),
+      forwarderName: z.any().optional(),
+      noOfForwarderinvoices: z.number().optional(),
+      forwarderInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUr: z.any().optional(),
+            date: z.any().optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
           })
         )
         .optional(),
@@ -130,7 +132,7 @@ const formSchema = z.object({
               z.object({
                 supplierGSTN: z.string().optional(),
                 supplierInvoiceNumber: z.string().optional(),
-                supplierInvoiceDate: z.date().optional(),
+                supplierInvoiceDate: z.any().optional(),
                 supplierInvoiceValueWithGST: z.string().optional(),
                 supplierInvoiceValueWithOutGST: z.string().optional(),
                 clearanceSupplierInvoiceUrl: z.any().optional(),
@@ -151,7 +153,7 @@ const formSchema = z.object({
     .optional(),
   saleInvoiceDetails: z
     .object({
-      consignee: z.string().optional(),
+      consignee: z.any().optional(),
       actualBuyer: z.string().optional(),
       numberOfSalesInvoices: z.number().optional(),
       invoice: z
@@ -170,8 +172,8 @@ const formSchema = z.object({
   blDetails: z
     .object({
       blNumber: z.string().optional(),
-      blDate: z.date().optional(),
-      telexDate: z.date().optional(),
+      blDate: z.any().optional(),
+      telexDate: z.any().optional(),
       uploadBL: z.any().optional(),
     })
     .optional(),
@@ -181,7 +183,7 @@ const formSchema = z.object({
         review: z.string().optional(),
         certificateName: z.string().optional(),
         certificateNumber: z.string().optional(),
-        date: z.date().optional(),
+        date: z.any().optional(),
         issuerOfCertificate: z.string().optional(),
         uploadCopyOfCertificate: z.any().optional(),
       })
@@ -198,15 +200,20 @@ interface Props {
   };
 }
 
-export default function CreateNewFormPage({ params }: Props) {
+export default function EditShipmentPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
   const [isFetching, setIsFetching] = useState(true);
+  const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
+  const [organizationId] = useState("674b0a687d4f4b21c6c980ba"); // Replace with dynamic value
+  const router = useRouter();
 
   const methods = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       shipmentId: "",
+      organizationId: "",
       bookingDetails: {
+        invoiceNumber: "",
         bookingNumber: "",
         portOfLoading: "",
         destinationPort: "",
@@ -223,15 +230,13 @@ export default function CreateNewFormPage({ params }: Props) {
         bills: [],
       },
       shippingDetails: {
-        shippingLine: "",
-        numberOfShippingLineInvoices: 0,
-        shippingLineInvoices: [],
-        forwarderName: "",
-        numberOfForwarderInvoices: 0,
-        forwarderInvoices: [],
+        review: "",
         transporterName: "",
-        numberOfTransporterInvoices: 0,
+        noOftransportinvoices: 0,
         transporterInvoices: [],
+        forwarderName: "",
+        noOfForwarderinvoices: 0,
+        forwarderInvoices: [],
       },
       supplierDetails: {
         clearance: {
@@ -270,52 +275,233 @@ export default function CreateNewFormPage({ params }: Props) {
       ],
     },
   });
-  const { watch } = methods;
-  const shipmentId = watch("shipmentId");
-  const steps = [
-    {
-      id: 1,
-      name: "Booking Details",
-      component: <BookingDetails shipmentId={params.id} />,
-    },
-    {
-      id: 2,
-      name: "Shipping Details",
-      component: <ShippingDetails shipmentId={params.id} />,
-    },
-    {
-      id: 3,
-      name: "Shipping Bill Details",
-      component: <ShippingBillDetails shipmentId={params.id} />,
-    },
+  const { watch, formState: { errors } } = methods;
+  const invoiceNumber = watch("bookingDetails.invoiceNumber");
 
-    {
-      id: 4,
-      name: "Supplier Details",
-      component: <SupplierDetails shipmentId={params.id} />,
-    },
-    {
-      id: 5,
-      name: "Sale Invoice Details",
-      component: <SaleInvoiceDetails shipmentId={params.id} />,
-    },
-    {
-      id: 6,
-      name: "Bill of Lading Details",
-      component: <BillOfLadingDetails shipmentId={params.id} />,
-    },
-    {
-      id: 7,
-      name: "Other Details",
-      component: <OtherDetails shipmentId={params.id} />,
-    },
-  ];
+  const steps = useMemo(
+    () => [
+      {
+        id: 1,
+        name: "Booking Details",
+        component: (
+          <BookingDetails
+            shipmentId={params.id}
+            onProductDetailsOpenChange={setIsProductDetailsOpen}
+          />
+        ),
+        field: "bookingDetails" as keyof FormValues,
+      },
+      {
+        id: 2,
+        name: "Shipping Details",
+        component: <ShippingDetails shipmentId={params.id} />,
+        field: "shippingDetails" as keyof FormValues,
+      },
+      {
+        id: 3,
+        name: "Shipping Bill Details",
+        component: <ShippingBillDetails shipmentId={params.id} />,
+        field: "shippingBillDetails" as keyof FormValues,
+      },
+      {
+        id: 4,
+        name: "Supplier Details",
+        component: <SupplierDetails shipmentId={params.id} />,
+        field: "supplierDetails" as keyof FormValues,
+      },
+      {
+        id: 5,
+        name: "Commercial Invoices",
+        component: <SaleInvoiceDetails shipmentId={params.id} />,
+        field: "saleInvoiceDetails" as keyof FormValues,
+      },
+      {
+        id: 6,
+        name: "Bill of Lading Details",
+        component: <BillOfLadingDetails shipmentId={params.id} />,
+        field: "blDetails" as keyof FormValues,
+      },
+      {
+        id: 7,
+        name: "Other Details",
+        component: <OtherDetails shipmentId={params.id} />,
+        field: "otherDetails" as keyof FormValues,
+      },
+    ],
+    [params.id]
+  );
 
-  const totalSteps = steps.length;
+  const handleUpdateAndNext = async (data: FormValues, isIntentional: boolean) => {
+    if (isProductDetailsOpen || !isIntentional) {
+      console.log("handleUpdateAndNext blocked: isProductDetailsOpen =", isProductDetailsOpen, "isIntentional =", isIntentional);
+      return;
+    }
+    console.log("handleUpdateAndNext called with data:", JSON.stringify(data, null, 2));
+    console.trace("handleUpdateAndNext call stack");
+    const currentField = steps[currentStep].field;
+    console.log("Current field:", currentField);
 
-  const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+    try {
+      console.log("Starting validation for:", currentField);
+      const isValid = await methods.trigger(currentField, { shouldFocus: true });
+      console.log("Validation result:", isValid);
+      console.log("Form errors:", JSON.stringify(errors, null, 2));
+
+      if (!isValid) {
+        let errorMessage = "Please fix errors in the form";
+        if (errors[currentField as keyof FormValues]) {
+          const fieldErrors = errors[currentField as keyof FormValues] as any;
+          errorMessage =
+            fieldErrors?.message ||
+            fieldErrors?.[Object.keys(fieldErrors)[0]]?.message ||
+            errorMessage;
+        }
+        toast.error(`Validation failed for ${steps[currentStep].name}: ${errorMessage}`);
+        return;
+      }
+
+      console.log("Validation passed, proceeding to API call");
+
+      const apiEndpoints: Record<keyof FormValues, string> = {
+        bookingDetails: "https://incodocs-server.onrender.com/shipment/booking-details",
+        shippingDetails: "https://incodocs-server.onrender.com/shipment/shipping-details",
+        shippingBillDetails: "https://incodocs-server.onrender.com/shipment/shipping-bill-details",
+        supplierDetails: "https://incodocs-server.onrender.com/shipment/supplier-details",
+        saleInvoiceDetails: "https://incodocs-server.onrender.com/shipment/sale-invoice-details",
+        blDetails: "https://incodocs-server.onrender.com/shipment/bl-details",
+        otherDetails: "https://incodocs-server.onrender.com/shipment/other-details",
+        shipmentId: "",
+        organizationId: "",
+      };
+
+      let payload: any = {
+        shipmentId: params.id,
+        organizationId,
+        [currentField]: data[currentField],
+      };
+
+      if (currentField === "bookingDetails") {
+        payload.bookingDetails = {
+          ...data.bookingDetails,
+          containers: data.bookingDetails?.containers?.map((container) => ({
+            ...container,
+            trukDriverContactNumber: container.truckDriverContactNumber || "",
+            truckDriverContactNumber: undefined,
+          })) || [],
+        };
+      }
+
+      const apiUrl = apiEndpoints[currentField as keyof FormValues];
+      console.log(`Calling API: ${apiUrl} with payload:`, JSON.stringify(payload, null, 2));
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error: ${errorText || response.statusText}`);
+      }
+
+      const updatedData = await response.json();
+      console.log("API response:", updatedData);
+
+      if (updatedData[currentField]) {
+        let updatedSectionData: any;
+
+        if (currentField !== "otherDetails" && currentField !== "shipmentId" && currentField !== "organizationId") {
+          updatedSectionData = {
+            ...(data[currentField] as object),
+            ...(updatedData[currentField] as object),
+          };
+
+          if (currentField === "bookingDetails") {
+            updatedSectionData.vesselSailingDate = updatedData.bookingDetails.vesselSailingDate
+              ? parseISO(updatedData.bookingDetails.vesselSailingDate)
+              : undefined;
+            updatedSectionData.vesselArrivingDate = updatedData.bookingDetails.vesselArrivingDate
+              ? parseISO(updatedData.bookingDetails.vesselArrivingDate)
+              : undefined;
+            updatedSectionData.containers = updatedData.bookingDetails.containers?.map(
+              (container: any) => ({
+                ...container,
+                truckDriverContactNumber: container.trukDriverContactNumber || "",
+                trukDriverContactNumber: undefined,
+              })
+            ) || [];
+          } else if (currentField === "shippingBillDetails") {
+            updatedSectionData.bills = updatedData.shippingBillDetails.bills?.map((bill: any) => ({
+              ...bill,
+              shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
+            })) || [];
+          } else if (currentField === "shippingDetails") {
+            updatedSectionData.shippingLineInvoices = updatedData.shippingDetails.shippingLineInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+            updatedSectionData.forwarderInvoices = updatedData.shippingDetails.forwarderInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+            updatedSectionData.transporterInvoices = updatedData.shippingDetails.transporterInvoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+              })
+            ) || [];
+          } else if (currentField === "supplierDetails") {
+            updatedSectionData.clearance.invoices = updatedData.supplierDetails.clearance.invoices?.map(
+              (invoice: any) => ({
+                ...invoice,
+                supplierInvoiceDate: invoice.supplierInvoiceDate
+                  ? parseISO(invoice.supplierInvoiceDate)
+                  : undefined,
+              })
+            ) || [];
+          } else if (currentField === "blDetails") {
+            updatedSectionData.blDate = updatedData.blDetails.blDate
+              ? parseISO(updatedData.blDetails.blDate)
+              : undefined;
+            updatedSectionData.telexDate = updatedData.blDetails.telexDate
+              ? parseISO(updatedData.blDetails.telexDate)
+              : undefined;
+          }
+        } else if (currentField === "otherDetails") {
+          updatedSectionData = updatedData.otherDetails?.map((item: any) => ({
+            ...item,
+            date: item.date ? parseISO(item.date) : undefined,
+          })) || [];
+        } else {
+          updatedSectionData = updatedData[currentField];
+        }
+
+        methods.setValue(currentField as keyof FormValues, updatedSectionData);
+      }
+
+      toast.success(`${steps[currentStep].name} updated successfully!`);
+
+      if (currentStep < steps.length - 1) {
+        console.log("Navigating to step:", currentStep + 1);
+        setCurrentStep(currentStep + 1);
+      } else {
+        console.log("At last step, navigating to previous page");
+        router.push("../");
+      }
+    } catch (error) {
+      console.error(`Error in ${steps[currentStep].field}:`, error);
+      toast.error(
+        `Failed to update ${steps[currentStep].name}: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`
+      );
     }
   };
 
@@ -329,17 +515,20 @@ export default function CreateNewFormPage({ params }: Props) {
     async function fetchShipmentData() {
       try {
         setIsFetching(true);
+        console.log("Fetching shipment data for ID:", params.id);
         const response = await fetch(
           `http://localhost:4080/shipment/getbyid/${params.id}`
         );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
 
         const data = await response.json();
-        // console.log("Fetched Data:", JSON.stringify(data, null, 2));
+        console.log("Fetched shipment data:", data);
 
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
+          organizationId: organizationId || "",
           bookingDetails: {
+            invoiceNumber: data.bookingDetails?.invoiceNumber || "",
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
             destinationPort: data.bookingDetails?.destinationPort || "",
@@ -355,9 +544,21 @@ export default function CreateNewFormPage({ params }: Props) {
                 containerNumber: container.containerNumber || "",
                 truckNumber: container.truckNumber || "",
                 truckDriverContactNumber:
-                  container.truckDriverContactNumber ||
                   container.trukDriverContactNumber ||
+                  container.truckDriverContactNumber ||
                   "",
+                addProductDetails: container.addProductDetails || {
+                  productCategory: "",
+                  graniteAndMarble: "",
+                  tiles: {
+                    noOfBoxes: 0,
+                    noOfPiecesPerBoxes: 0,
+                    sizePerTile: {
+                      length: { value: 0, units: "" },
+                      breadth: { value: 0, units: "" },
+                    },
+                  },
+                },
               })) || [],
           },
           shippingBillDetails: {
@@ -367,7 +568,7 @@ export default function CreateNewFormPage({ params }: Props) {
             numberOFShippingBill: data.shippingBillDetails?.bills?.length || 0,
             bills:
               data.shippingBillDetails?.bills?.map((bill: any) => ({
-                uploadShippingBill: bill.uploadShippingBill || "",
+                uploadShippingBill: bill.uploadShippingBill || bill.shippingBillUrl || "",
                 shippingBillNumber: bill.shippingBillNumber || "",
                 shippingBillDate: bill.shippingBillDate
                   ? parseISO(bill.shippingBillDate)
@@ -377,58 +578,52 @@ export default function CreateNewFormPage({ params }: Props) {
               })) || [],
           },
           shippingDetails: {
-            shippingLine:
-              typeof data.shippingDetails?.shippingLine === "object"
-                ? data.shippingDetails?.shippingLine?._id || ""
-                : data.shippingDetails?.shippingLine || "",
-            numberOfShippingLineInvoices:
-              data.shippingDetails?.shippingLineInvoices?.length || 0,
-            shippingLineInvoices:
-              data.shippingDetails?.shippingLineInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadShippingLineInvoice:
-                    invoice.uploadShippingLineInvoice || "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGST: invoice.valueWithGST || "",
-                  valueWithoutGST: invoice.valueWithoutGST || "",
-                })
-              ) || [],
+            review: data.shippingDetails?.review || "",
+            transporterName:
+              typeof data.shippingDetails?.transporterName === "object"
+                ? data.shippingDetails?.transporterName?._id ||
+                  data.shippingDetails?.transporterName?.name ||
+                  ""
+                : data.shippingDetails?.transporterName || "",
+            noOftransportinvoices:
+              data.shippingDetails?.noOftransportinvoices ||
+              data.shippingDetails?.transporterInvoices?.length ||
+              0,
+            transporterInvoices:
+              data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
+                invoiceNumber: invoice.invoiceNumber || "",
+                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadTransporterInvoice || "",
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
+                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
+              })) || [],
             forwarderName:
               typeof data.shippingDetails?.forwarderName === "object"
-                ? data.shippingDetails?.forwarderName?._id || ""
+                ? data.shippingDetails?.forwarderName?._id ||
+                  data.shippingDetails?.forwarderName?.name ||
+                  ""
                 : data.shippingDetails?.forwarderName || "",
-            numberOfForwarderInvoices:
-              data.shippingDetails?.forwarderInvoices?.length || 0,
+            noOfForwarderinvoices:
+              data.shippingDetails?.noOfForwarderinvoices ||
+              data.shippingDetails?.forwarderInvoices?.length ||
+              0,
             forwarderInvoices:
               data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
                 invoiceNumber: invoice.invoiceNumber || "",
-                uploadForwarderInvoice: invoice.uploadForwarderInvoice || "",
+                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadForwarderInvoice || "",
                 date: invoice.date ? parseISO(invoice.date) : undefined,
-                valueWithGST: invoice.valueWithGST || "",
-                valueWithoutGST: invoice.valueWithoutGST || "",
+                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
+                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
               })) || [],
-            transporterName:
-              typeof data.shippingDetails?.transporterName === "object"
-                ? data.shippingDetails?.transporterName?._id || ""
-                : data.shippingDetails?.transporterName || "",
-            numberOfTransporterInvoices:
-              data.shippingDetails?.transporterInvoices?.length || 0,
-            transporterInvoices:
-              data.shippingDetails?.transporterInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadTransporterInvoice:
-                    invoice.uploadTransporterInvoice || "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGST: invoice.valueWithGST || "",
-                  valueWithoutGST: invoice.valueWithoutGST || "",
-                })
-              ) || [],
           },
           supplierDetails: {
             clearance: {
-              supplierName: data.supplierDetails?.clearance?.supplierName ?? "",
+              supplierName:
+                typeof data.supplierDetails?.clearance?.supplierName === "object"
+                  ? data.supplierDetails?.clearance?.supplierName?._id ||
+                    data.supplierDetails?.clearance?.supplierName?.name ||
+                    ""
+                  : data.supplierDetails?.clearance?.supplierName || "",
               noOfInvoices:
                 data.supplierDetails?.clearance?.invoices?.length || 0,
               invoices:
@@ -450,7 +645,11 @@ export default function CreateNewFormPage({ params }: Props) {
             },
             actual: {
               actualSupplierName:
-                data.supplierDetails?.actual?.actualSupplierName || "",
+                typeof data.supplierDetails?.actual?.actualSupplierName === "object"
+                  ? data.supplierDetails?.actual?.actualSupplierName?._id ||
+                    data.supplierDetails?.actual?.actualSupplierName?.name ||
+                    ""
+                  : data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceValue:
                 data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
               actualSupplierInvoiceUrl:
@@ -462,7 +661,9 @@ export default function CreateNewFormPage({ params }: Props) {
           saleInvoiceDetails: {
             consignee:
               typeof data.saleInvoiceDetails?.consignee === "object"
-                ? data.saleInvoiceDetails?.consignee?._id || ""
+                ? data.saleInvoiceDetails?.consignee?._id ||
+                  data.saleInvoiceDetails?.consignee?.name ||
+                  ""
                 : data.saleInvoiceDetails?.consignee || "",
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
             numberOfSalesInvoices:
@@ -510,16 +711,16 @@ export default function CreateNewFormPage({ params }: Props) {
         };
 
         methods.reset(updatedValues);
-        console.log("Form Values After Reset:", methods.getValues());
       } catch (error) {
         console.error("Error fetching shipment data:", error);
+        toast.error("Failed to load shipment data");
       } finally {
         setIsFetching(false);
       }
     }
 
     fetchShipmentData();
-  }, [params.id, methods]);
+  }, [params.id, methods, organizationId]);
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -533,15 +734,18 @@ export default function CreateNewFormPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Edit Shipment: ${shipmentId || "N/A"}`}
+            title={`Edit Shipment: ${invoiceNumber || "N/A"}`}
           />
           <p className="text-muted-foreground text-sm">
-            Complete the form below to Edit shipment details.
+            Complete the form below to edit shipment details.
           </p>
         </div>
       </div>
       <Separator orientation="horizontal" />
-      <div className="flex justify-between mt-4">
+      <div className="w-full">
+        <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
+      </div>
+      <div className="flex justify-between mt-8">
         <Button
           type="button"
           onClick={prevStep}
@@ -550,20 +754,38 @@ export default function CreateNewFormPage({ params }: Props) {
         >
           Previous
         </Button>
-        {currentStep < steps.length - 1 && (
-          <Button type="button" onClick={nextStep}>
-            Next
-          </Button>
-        )}
+        <Button
+          type="button"
+          onClick={() => {
+            console.log("Update & Next button clicked");
+            methods.handleSubmit(
+              (data) => handleUpdateAndNext(data, true),
+              (err) => {
+                console.log("Form submission errors:", JSON.stringify(err, null, 2));
+                toast.error(`Please fix errors in ${steps[currentStep].name}`);
+              }
+            )();
+          }}
+        >
+          {currentStep < steps.length - 1 ? "Update & Next" : "Update & Finish"}
+        </Button>
       </div>
       {isFetching ? (
         <p>Loading...</p>
       ) : (
         <FormProvider {...methods}>
           <form
-            onSubmit={methods.handleSubmit((data) =>
-              console.log("Parent Form Submitted:", data)
-            )}
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isProductDetailsOpen) {
+                console.log("Parent form submission blocked: isProductDetailsOpen =", isProductDetailsOpen);
+                return;
+              }
+              console.log("Parent form submitted via Enter key or intentional submission");
+              methods.handleSubmit(
+                (data) => handleUpdateAndNext(data, true)
+              )();
+            }}
             className="flex flex-col gap-3 w-full p-3"
           >
             <div className="flex justify-between">
