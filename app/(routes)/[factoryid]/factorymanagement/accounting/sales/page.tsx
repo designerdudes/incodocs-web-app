@@ -29,49 +29,66 @@ interface Props {
   };
 }
 
-export default async function Purchases({ params }: Props) {
+export default async function Sales({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `http://localhost:4080/transaction/sale/getgstsale/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+  const factoryId = params?.factoryid;
+
+  let SalesData: any[] = [];
+  let GetSalesData: any[] = [];
+
+  if (!factoryId) {
+    console.error("Missing factory ID in params.");
+  } else {
+    // First API call (GST sales)
+    const gstRes = await fetch(
+      `https://incodocs-server.onrender.com/transaction/sale/getgstsale/${factoryId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    const gstJson = await gstRes.json();
+
+    if (Array.isArray(gstJson)) {
+      SalesData = gstJson;
+    } else {
+      console.error("Invalid GST sales response:", gstJson);
     }
-  ).then((response) => {
-    return response.json();
-  });
 
-  let SalesData;
-  SalesData = res;
+    // Second API call (Actual sales)
+    const actualRes = await fetch(
+      `https://incodocs-server.onrender.com/transaction/sale/getsale/${factoryId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    const actualJson = await actualRes.json();
 
-  const Actualres = await fetch(
-    `http://localhost:4080/transaction/sale/getsale/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
+    if (Array.isArray(actualJson)) {
+      GetSalesData = actualJson;
+    } else {
+      console.error("Invalid Actual sales response:", actualJson);
     }
-  ).then((response) => {
-    return response.json();
-  });
+  }
 
-  let GetSalesData;
-  GetSalesData = Actualres;
-
-  const InvoiceValue = SalesData.filter(
+  // Only try to filter if SalesData is a valid array
+  const InvoiceValue = SalesData?.filter(
     (data: any) => data.purchaseType === "Raw"
   );
-  const ActualInvoiceValue = SalesData.filter(
+  const ActualInvoiceValue = SalesData?.filter(
     (data: any) => data.purchaseType === "Finished"
   );
 
+  
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
