@@ -58,7 +58,8 @@ export function LoginForm() {
         console.log(res?.user?._id, "jksdfksdfkl");
         Cookies.set("AccessToken", res?.token, { expires: 7 }); // Set the expiration in days
         toast.success("Login successful");
-        router.push(`/organization/${res?.user?._id}`);
+        // router.push(`/organization/${res?.user?._id}`);
+        router.push(`/dashboard`);
         router.refresh();
       } catch (error: any) {
         setLoading(false);
