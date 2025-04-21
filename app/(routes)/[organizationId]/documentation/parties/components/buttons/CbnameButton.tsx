@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import CBNameForm from "../forms/CbnameForm"; // adjust the path if needed
+import CBNameForm from "../forms/CBNameForm"; 
 
 interface CBNameButtonProps {
   onSuccess?: () => void;

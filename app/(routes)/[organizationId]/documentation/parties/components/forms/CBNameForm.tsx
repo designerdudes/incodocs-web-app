@@ -148,6 +148,20 @@ export default function CBNameForm({ onSuccess }: CBNameFormProps) {
             </FormItem>
           )}
         />
+<FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>CB number</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 45 Shipping Lane" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
