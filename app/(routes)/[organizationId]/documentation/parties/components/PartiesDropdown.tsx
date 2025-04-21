@@ -10,6 +10,7 @@ import ForwarderButton from "./buttons/ForwarderButton";
 import TransporterButton from "./buttons/TransporterButton";
 import Supplierform from "./forms/SupplierForm";
 import ConsigneeButton from "./buttons/ConsigneeButton";
+import CbnameButton from "./buttons/CbnameButton";
 
 interface PartiesDropdownProps {
   organizationId: string;
@@ -34,6 +35,7 @@ export default function PartiesDropdown({ organizationId }: PartiesDropdownProps
       <DropdownMenuTrigger asChild>
         <Button variant="default" className="gap-2">
           Add Parties
+
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-2 flex flex-col gap-2">
@@ -48,6 +50,7 @@ export default function PartiesDropdown({ organizationId }: PartiesDropdownProps
           Supplier
         </Button>
         <ConsigneeButton onSuccess={handleSuccess} />
+        <CbnameButton  onSuccess={handleSuccess}/>
       </DropdownMenuContent>
     </DropdownMenu>
   );
