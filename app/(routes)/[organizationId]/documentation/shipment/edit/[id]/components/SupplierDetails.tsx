@@ -1,6 +1,6 @@
 "use client";
-import React from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormField,
@@ -13,7 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Trash } from "lucide-react";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   Table,
   TableHeader,
@@ -24,18 +28,28 @@ import {
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
+import SupplierForm from "@/components/forms/Addsupplierform";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import EntityCombobox from "@/components/ui/EntityCombobox";
 
 interface SupplierDetailsProps {
   shipmentId: string;
 }
 
 export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
-  const { control, setValue, handleSubmit, watch } = useFormContext();
+  const { control, setValue, handleSubmit, watch, getValues } =
+    useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "supplierDetails.clearance.invoices",
   });
+  const [supplierNames, setSupplierNames] = useState<
+    { _id: string; name: string }[]
+  >([]);
+  const [shippingBills, setShippingBills] = useState<{ _id: string; name: string }[]>([]);
+  const GlobalModal = useGlobalModal();
 
   // Watch form values for debugging
   const formValues = watch("supplierDetails");
@@ -44,17 +58,21 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
   // Handle Number of Invoices Change
   const handleInvoiceCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
-    setValue("supplierDetails.clearance.noOfInvoices", value, { shouldDirty: true });
+    setValue("supplierDetails.clearance.noOfInvoices", value, {
+      shouldDirty: true,
+    });
     const currentInvoices = formValues.clearance.invoices || [];
     if (value > currentInvoices.length) {
-      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
-        supplierGSTN: "",
-        supplierInvoiceNumber: "",
-        supplierInvoiceDate: undefined,
-        supplierInvoiceValueWithGST: "",
-        supplierInvoiceValueWithOutGST: "",
-        clearanceSupplierInvoiceUrl: "",
-      }));
+      const newInvoices = Array(value - currentInvoices.length)
+        .fill(null)
+        .map(() => ({
+          supplierGSTN: "",
+          supplierInvoiceNumber: "",
+          supplierInvoiceDate: undefined,
+          supplierInvoiceValueWithGST: "",
+          supplierInvoiceValueWithOutGST: "",
+          clearanceSupplierInvoiceUrl: "",
+        }));
       append(newInvoices);
     } else if (value < currentInvoices.length) {
       for (let i = currentInvoices.length - 1; i >= value; i--) {
@@ -62,18 +80,48 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
       }
     }
   };
+   // Fetch supplier names and shipping bills
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const supplierResponse = await fetch(
+            "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+          );
+          const supplierData = await supplierResponse.json();
+          const mappedSuppliers = supplierData.map((supplier: any) => ({
+            _id: supplier._id,
+            name: supplier.supplierName,
+          }));
+          setSupplierNames(mappedSuppliers);
+        } catch (error) {
+          console.error("Error fetching supplier data:", error);
+        }
+      };
+      fetchData();
+      // Placeholder for shipping bills until API is provided
+      setShippingBills([
+        { _id: "1", name: "Bill 1" },
+        { _id: "2", name: "Bill 2" },
+      ]);
+    }, []);
 
   // Update API Call
   const onSubmit = async (data: any) => {
     console.log("Submitting Supplier Details:", data.supplierDetails);
     try {
-      const response = await fetch("http://localhost:4080/shipment/supplier-details", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ shipmentId, supplierDetails: data.supplierDetails }),
-      });
+      const response = await fetch(
+        "http://localhost:4080/shipment/supplier-details",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            shipmentId,
+            supplierDetails: data.supplierDetails,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -89,6 +137,28 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
     }
   };
 
+  const openSupplierForm = () => {
+    GlobalModal.title = "Add New Supplier";
+    GlobalModal.children = (
+      <SupplierForm
+        onSuccess={() => {
+          fetch(
+            "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              const mappedSuppliers = data.map((supplier: any) => ({
+                _id: supplier._id,
+                name: supplier.supplierName,
+              }));
+              setSupplierNames(mappedSuppliers);
+            });
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="grid grid-cols-4 gap-3">
@@ -98,13 +168,19 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
           name="supplierDetails.clearance.supplierName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Clearance Supplier Name</FormLabel>
+              <FormLabel>Select Supplier Name</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="eg. Supplier Inc."
-                  {...field}
-                  value={field.value ?? ""}
-                  onChange={(e) => field.onChange(e.target.value)}
+                <EntityCombobox
+                  entities={supplierNames}
+                  value={field.value || ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    (getValues());
+                  }}
+                  displayProperty="name"
+                  placeholder="Select a Supplier Name"
+                  onAddNew={openSupplierForm}
+                  addNewLabel="Add New Supplier"
                 />
               </FormControl>
               <FormMessage />
@@ -118,7 +194,7 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
           name="supplierDetails.clearance.noOfInvoices"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Number of Invoices</FormLabel>
+              <FormLabel>Number of Supplier Invoices</FormLabel>
               <FormControl>
                 <Input
                   type="number"
@@ -198,7 +274,9 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button variant="outline">
-                                    {field.value ? format(field.value, "PPPP") : "Pick a date"}
+                                    {field.value
+                                      ? format(field.value, "PPPP")
+                                      : "Pick a date"}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
                                 </FormControl>
@@ -256,7 +334,9 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
                           <FormControl>
                             <Input
                               type="file"
-                              onChange={(e) => field.onChange(e.target.files?.[0])}
+                              onChange={(e) =>
+                                field.onChange(e.target.files?.[0])
+                              }
                             />
                           </FormControl>
                         )}
@@ -357,11 +437,25 @@ export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
             </FormItem>
           )}
         />
+        {/* Review */}
+        <FormField
+          control={control}
+          name="shippingDetails.review"
+          render={({ field }) => (
+            <FormItem className="col-span-4">
+              <FormLabel>Remarks</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="e.g., this is some random comment"
+                  {...field}
+                  onBlur={() => (getValues())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-
-      <Button type="submit" className="mt-4">
-        Update  
-      </Button>
     </form>
   );
 }

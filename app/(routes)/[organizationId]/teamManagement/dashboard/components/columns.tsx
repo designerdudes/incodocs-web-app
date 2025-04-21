@@ -110,7 +110,7 @@ export const columns: ColumnDef<Employee>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">
+      <div>
         {row.original?.contactInformation?.email}
       </div>
     ),

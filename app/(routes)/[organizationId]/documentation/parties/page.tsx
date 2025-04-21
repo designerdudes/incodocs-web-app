@@ -103,14 +103,15 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
         <div className="flex justify-end mb-4">
-        <PartiesDropdown organizationId={orgaanisationID} />
-      </div>
+          <PartiesDropdown organizationId={orgaanisationID} />
+        </div>
       </div>
       {/* Moved PartiesDropdown here */}
-      
+
       <Separator className="my-2" />
       <div>
         <Tabs defaultValue="shippingLine" className="w-full">
+          {" "}
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="shippingLine">
               Shipping Line
@@ -138,6 +139,12 @@ export default async function PartiesPage({ params }: Props) {
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="consignee">
               Consignee
+              <Badge className="text-bg-primary-foreground" variant="outline">
+                {consignee?.length ?? 0}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger className="gap-2" value="consignee">
+              Cb name
               <Badge className="text-bg-primary-foreground" variant="outline">
                 {consignee?.length ?? 0}
               </Badge>
@@ -207,4 +214,25 @@ export default async function PartiesPage({ params }: Props) {
       </div>
     </div>
   );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
 }

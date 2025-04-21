@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -29,6 +29,10 @@ import {
 } from "@/components/ui/select";
 import { Trash } from "lucide-react";
 import toast from "react-hot-toast";
+import { Textarea } from "@/components/ui/textarea";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
+import EntityCombobox from "@/components/ui/EntityCombobox";
 
 const consigneeOptions = [
   { id: "67acfa7f7dabb67dd56d34c5", name: "khan" }, // Match API _id
@@ -40,7 +44,8 @@ interface SaleInvoiceDetailsProps {
 }
 
 export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
-  const { control, setValue, handleSubmit, watch } = useFormContext();
+  const { control, setValue, handleSubmit, watch, getValues } =
+    useFormContext();
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -48,6 +53,10 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
   });
 
   const [showInvoiceForm, setShowInvoiceForm] = useState<boolean>(false);
+  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>(
+    []
+  );
+  const GlobalModal = useGlobalModal();
 
   // Watch form values for debugging
   const formValues = watch("saleInvoiceDetails");
@@ -56,16 +65,20 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
   // Handle Number of Invoices Change
   const handleInvoiceNumberCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
-    setValue("saleInvoiceDetails.numberOfSalesInvoices", value, { shouldDirty: true });
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", value, {
+      shouldDirty: true,
+    });
     const currentInvoices = formValues.invoice || [];
     if (value > currentInvoices.length) {
-      const newInvoices = Array(value - currentInvoices.length).fill(null).map(() => ({
-        commercialInvoiceNumber: "",
-        clearanceCommercialInvoice: "",
-        actualCommercialInvoice: "",
-        saberInvoice: "",
-        addProductDetails: "",
-      }));
+      const newInvoices = Array(value - currentInvoices.length)
+        .fill(null)
+        .map(() => ({
+          commercialInvoiceNumber: "",
+          clearanceCommercialInvoice: "",
+          actualCommercialInvoice: "",
+          saberInvoice: "",
+          addProductDetails: "",
+        }));
       append(newInvoices);
     } else if (value < currentInvoices.length) {
       for (let i = currentInvoices.length - 1; i >= value; i--) {
@@ -74,17 +87,45 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
     }
   };
 
+  const openConsigneeForm = () => {
+    GlobalModal.title = "Add New Consignee";
+    GlobalModal.children = (
+      <AddConsigneeForm
+        onSuccess={() => {
+          fetch(
+            "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+          )
+            .then((res) => res.json())
+            .then((data) => {
+              const mappedConsignees = data.map((consignee: any) => ({
+                _id: consignee._id,
+                name: consignee.name || consignee.consigneeName,
+              }));
+              setConsignees(mappedConsignees);
+            });
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
   // Update API Call
   const onSubmit = async (data: any) => {
     console.log("Submitting Sale Invoice Details:", data.saleInvoiceDetails);
     try {
-      const response = await fetch("http://localhost:4080/shipment/sale-invoice-details", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ shipmentId, saleInvoiceDetails: data.saleInvoiceDetails }),
-      });
+      const response = await fetch(
+        "http://localhost:4080/shipment/sale-invoice-details",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            shipmentId,
+            saleInvoiceDetails: data.saleInvoiceDetails,
+          }),
+        }
+      );
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -103,6 +144,29 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
       }
     }
   };
+  // Fetch consignees on mount
+  useEffect(() => {
+    const fetchConsignees = async () => {
+      try {
+        const response = await fetch(
+          "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+        );
+        const data = await response.json();
+        const mappedConsignees = data.map((consignee: any) => ({
+          _id: consignee._id,
+          name: consignee.name || consignee.consigneeName,
+        }));
+        setConsignees(mappedConsignees);
+      } catch (error) {
+        console.error("Error fetching consignees:", error);
+      }
+    };
+    fetchConsignees();
+  }, []);
+
+  function saveProgressSilently(arg0: FieldValues): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -115,18 +179,18 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
             <FormItem>
               <FormLabel>Select Consignee</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a Consignee" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {consigneeOptions.map((Details) => (
-                      <SelectItem key={Details.id} value={Details.id}>
-                        {Details.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <EntityCombobox
+                  entities={consignees}
+                  value={field.value || ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    saveProgressSilently(getValues());
+                  }}
+                  displayProperty="name"
+                  placeholder="Select a Consignee"
+                  onAddNew={openConsigneeForm}
+                  addNewLabel="Add New Consignee"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -304,11 +368,25 @@ export function SaleInvoiceDetails({ shipmentId }: SaleInvoiceDetailsProps) {
             </Table>
           </div>
         )}
+        {/* Review */}
+        <FormField
+          control={control}
+          name="shippingDetails.review"
+          render={({ field }) => (
+            <FormItem className="col-span-4">
+              <FormLabel>Remarks</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="e.g., this is some random comment"
+                  {...field}
+                  onBlur={() => saveProgressSilently(getValues())}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
-
-      <Button type="submit" className="mt-4">
-        Update  
-      </Button>
     </form>
   );
 }
