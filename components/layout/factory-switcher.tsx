@@ -20,14 +20,13 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "../forms/AddFactoryForm";
 import { usePathname, useRouter } from "next/navigation";
-import AddFactoryButton from "@/app/(routes)/[organizationId]/settings/factory/components/AddFactoryButton";
+import AddFactoryButton from "@/app/(routes)/settings/factory/components/AddFactoryButton";
 
 interface Factory {
     factoryName: string;
     logo: React.ElementType;
     plan: string;
     factoryId: string;
-    organizationId: string;
 }
 
 function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
@@ -35,37 +34,37 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
     const pathname = usePathname();
     const { isMobile } = useSidebar();
     const [activeFactory, setActiveFactory] = React.useState<Factory | null>(
-        FactoriesData?.length > 0 ? FactoriesData[0] : null // Default to the first factory
+        FactoriesData.length > 0 ? FactoriesData[0] : null // Default to the first factory
     );
 
     const handleFactorySelect = (factory: Factory) => {
         setActiveFactory(factory);
         localStorage.setItem("activeFactoryId", factory.factoryId); // Store the selected factory ID
-        router.push(`/${factory?.organizationId}/${factory.factoryId}/dashboard`);
+        router.push(`/${factory.factoryId}/dashboard`);
     };
     // Update activeFactory when FactoriesData changes
     React.useEffect(() => {
         const storedFactoryId = localStorage.getItem("activeFactoryId");
-        if (storedFactoryId && FactoriesData?.length > 0) {
+        if (storedFactoryId && FactoriesData.length > 0) {
             const foundFactory = FactoriesData.find((factory) => factory.factoryId === storedFactoryId);
             if (foundFactory) {
                 setActiveFactory(foundFactory); // Set the active factory from localStorage
             }
-        } else if (FactoriesData?.length > 0) {
+        } else if (FactoriesData.length > 0) {
             setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
         }
-    }, [FactoriesData, localStorage.getItem("activeFactoryId")]);
+    }, [FactoriesData]);
 
     React.useEffect(() => {
         const storedFactoryId = localStorage.getItem("activeFactoryId");
 
         // If navigating to a page without a factory ID, redirect to the last used one
         if (pathname.includes("undefined") || pathname.includes("null")) {
-            router.replace(`/${FactoriesData[0].organizationId}/${storedFactoryId}/dashboard`);
+            router.replace(`/${storedFactoryId}/dashboard`);
         }
-    }, [pathname, router, localStorage.getItem("activeFactoryId")]);
+    }, [pathname, router]);
 
-    const GlobalModal = useGlobalModal();
+    // const GlobalModal = useGlobalModal();
 
     return (
         <div>
@@ -85,7 +84,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                         <span className="truncate font-semibold">
                                             {activeFactory?.factoryName}
                                         </span>
-                                        <span className="truncate text-xs">{activeFactory?.organizationId}</span>
+                                        <span className="truncate text-xs">{activeFactory?.plan}</span>
                                     </div>
                                     <ChevronsUpDown className="ml-auto" />
                                 </SidebarMenuButton>
@@ -95,18 +94,15 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                 align="start"
                                 side={isMobile ? "bottom" : "right"}
                                 sideOffset={4}
-                                
                             >
                                 <DropdownMenuLabel className="text-xs text-muted-foreground">
                                     Factories
                                 </DropdownMenuLabel>
-                                {FactoriesData?.map((factory, index) => (
+                                {FactoriesData.map((factory, index) => (
                                     <DropdownMenuItem
                                         key={factory.factoryId}
                                         onClick={() => handleFactorySelect(factory)}
                                         className="gap-2 p-2"
-                                        
-                                        
                                     >
                                         <div className="flex size-6 items-center justify-center rounded-sm border">
                                             <factory.logo className="size-4 shrink-0" />
@@ -116,7 +112,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                                     </DropdownMenuItem>
                                 ))}
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem
+                                {/* <DropdownMenuItem
                             className="gap-2 p-2"
                             onSelect={() => {
                                 GlobalModal.title = `Enter Factory Details`;
@@ -129,9 +125,9 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[] }) {
                             </div>
                             <div className="font-medium text-muted-foreground">Add Factory</div>
                             
-                        </DropdownMenuItem>
-                                {/* <div>                                <AddFactoryButton />
-                                </div> */}
+                        </DropdownMenuItem> */}
+                                <div>                                <AddFactoryButton />
+                                </div>
                             </DropdownMenuContent>
                         </div>
                     </DropdownMenu>

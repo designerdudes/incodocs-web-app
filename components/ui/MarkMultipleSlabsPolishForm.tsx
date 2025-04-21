@@ -16,7 +16,7 @@ import {
 } from "./form";
 import { Button } from "./button";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Slab } from "@/app/(routes)/[organizationId]/[factoryid]/factorymanagement/inventory/raw/processing/components/inpolishingcolumns";
+import { Slab } from "@/app/(routes)/[factoryid]/factorymanagement/inventory/raw/processing/components/inpolishingcolumns";
 
 interface MarkMultipleSlabsPolishFormProps {
   table: any;

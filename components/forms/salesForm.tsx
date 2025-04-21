@@ -14,7 +14,7 @@ import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,9 @@ import {
   TableRow,
 } from "../ui/table";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import CustomerForm from "@/app/(routes)/[factoryid]/factorymanagement/accounting/Parties/components/forms/AddCustomerForm";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import { values } from "lodash";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -81,16 +84,23 @@ const formSchema = z.object({
 
 export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
+  const [slabsCount, setSlabsCount] = React.useState(0);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] =
+    React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =
+    React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [customerLoading, setCustomerLoading] = React.useState(false);
-  const [customers, setCustomers] = React.useState<{ _id: string; name: string }[]>([]);
-  
-  const router = useRouter();
+  const [customers, setCustomers] = React.useState<
+    { _id: string; name: string }[]
+  >([]);
 
+  const router = useRouter();
+  const { onOpen, setTitle, setChildren } = useGlobalModal();
+  const params = useParams();
+  const customerId = params?.id as string;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -117,7 +127,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
           throw new Error(`Error: ${response.status}`);
         }
         const customerData = await response.json();
-  
+
         // Validate response before mapping
         if (Array.isArray(customerData)) {
           const mappedCustomers = customerData.map((customer: any) => ({
@@ -125,8 +135,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
             name: customer.customerName, // Make sure this key exists in the response
           }));
           setCustomers(mappedCustomers);
-          console.log(customers); // ✅ Check if customer data is available here
-
         } else {
           console.error("Invalid response format:", customerData);
           toast.error("Unexpected response format");
@@ -140,48 +148,64 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
     };
     fetchCustomers();
   }, []);
-  
 
   const handleAddNewCustomer = () => {
-    toast("Add new customer functionality to be implemented");
-    // For full implementation, you could add a modal here similar to your supplier form
+    setTitle("Enter Customer Details");
+    setChildren(<CustomerForm />);
+    onOpen();
   };
 
-  function handleSlabsInputChange(value: string) {
+  function handleSlabsInputChange(value: any) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
-      const newSlabs = Array.from({ length: count }, (_, index) => ({
-        dimensions: {
-          slabNumber: index + 1,
-          length: { value: 0, units: "inch" as "inch" },
-          height: { value: 0, units: "inch" as "inch" },
-        },
-      }));
-      setSlabs(newSlabs);
-      form.setValue("slabs", newSlabs);
-      form.setValue("noOfSlabs", count);
+      setSlabsCount(count);
+      const defaultDimensions = {
+        length: { value: 0, units: "inch" as "inch" },
+        height: { value: 0, units: "inch" as "inch" },
+        status: "readyForPolish" as "readyForPolish",
+      };
+      form.setValue(
+        "slabs",
+        Array.from({ length: count }, () => ({ dimensions: defaultDimensions }))
+      );
     } else {
-      setSlabs([]);
+      setSlabsCount(0);
       form.setValue("slabs", []);
-      form.setValue("noOfSlabs", 0);
     }
   }
 
   React.useEffect(() => {
-    form.setValue("noOfSlabs", slabs.length);
-  }, [slabs, form]);
+    if (applyLengthToAll || applyHeightToAll) {
+      const updatedSlabs = form.getValues("slabs") || [];
+      const newSlabs = updatedSlabs.map((slab) => ({
+        dimensions: {
+          ...slab.dimensions,
+          length: applyLengthToAll
+            ? { value: Number(globalLength) || 0, units: "inch" as "inch" }
+            : slab.dimensions.length,
+          height: applyHeightToAll
+            ? { value: Number(globalHeight) || 0, units: "inch" as "inch" }
+            : slab.dimensions.height,
+        },
+      }));
+      form.setValue("slabs", newSlabs, { shouldValidate: true });
+    }
+  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("Submitting form for ID:", values);
     setIsLoading(true);
     try {
-      await postData("/factory-management/sales/addsale", {
+      await postData("/transaction/sale/add", {
         ...values,
+        factoryId: "67b59a9909b5da78090bfd40",
         status: "active",
       });
-      toast.success("Sales Record Added Successfully");
-      router.push("./factorymanagement/sales/records");
+      toast.success("Sales Record Updated Successfully");
+      router.push("./");
     } catch (error) {
-      toast.error("Error creating/updating Sale Record");
+      console.error(error);
+      toast.error("Error updating Sale Record");
     } finally {
       setIsLoading(false);
     }
@@ -201,7 +225,14 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
       const heightInFeet = (slab.dimensions.height.value || 0) / 12;
       return sum + lengthInFeet * heightInFeet;
     }, 0);
-    return totalSqft.toFixed(2);
+    return totalSqft.toFixed(2); // Round to 2 decimal places
+  }
+
+  function handleDeleteRow(index: number) {
+    const updatedSlabs = [...form.getValues("slabs")];
+    updatedSlabs.splice(index, 1);
+    setSlabsCount(updatedSlabs.length);
+    form.setValue("slabs", updatedSlabs);
   }
 
   return (
@@ -234,32 +265,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-
-           
-
-           
-          </div>
-
-          {/* Row 2: GST Number, No of Slabs */}
-          <div className={`grid grid-cols-3 gap-3`}>
-            <FormField
-              name="gstNumber"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>GST Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter GST Number"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               name="noOfSlabs"
               control={form.control}
@@ -296,7 +301,8 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                     <select
                       disabled={isLoading}
                       {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                      className=" block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500
+                       focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
                     >
                       <option value="0">0%</option>
                       <option value="1">1%</option>
@@ -322,7 +328,9 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       value={field.value === 0 ? "" : field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -343,7 +351,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                           <Button
                             variant="outline"
                             className={cn(
-                              "w-[40%] justify-start text-left font-normal",
+                              "w-[100%] justify-start text-left font-normal",
                               !field.value && "text-muted-foreground"
                             )}
                           >
@@ -373,180 +381,171 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               )}
             />
           </div>
+          <div>
+            <FormField
+              name="noOfSlabs"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Slabs</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter number of slabs"
+                      disabled={isLoading}
+                      value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10);
 
-          {/* Dimensions Inputs */}
-          <div className="grid grid-cols-4 gap-3 mt-3">
+                        if (isNaN(value) || value < 0) return; // Prevents negative values
+
+                        field.onChange(value);
+                        handleSlabsInputChange(value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
+                placeholder="Length(inches)"
+                type="number"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
-                type="number"
                 disabled={isLoading}
               />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label className="text-sm font-medium flex items-center mt-2">
                 <input
                   type="checkbox"
+                  className="mr-2"
                   checked={applyLengthToAll}
-                  onChange={(e) => {
-                    setApplyLengthToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedSlabs = slabs.map((slab) => ({
-                        ...slab,
-                        dimensions: {
-                          ...slab.dimensions,
-                          length: {
-                            ...slab.dimensions.length,
-                            value: parseFloat(globalLength) || 0,
-                          },
-                        },
-                      }));
-                      setSlabs(updatedSlabs);
-                      form.setValue("slabs", updatedSlabs);
-                    }
-                  }}
+                  onChange={(e) => setApplyLengthToAll(e.target.checked)}
                 />{" "}
-                Apply Length to all rows
+                Apply Length (inches) to all rows
               </label>
             </div>
-
             <div>
               <Input
+                placeholder="Height(inches)"
+                type="number"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
-                type="number"
                 disabled={isLoading}
               />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              <label className="text-sm font-medium flex items-center mt-2">
                 <input
                   type="checkbox"
+                  className="mr-2"
                   checked={applyHeightToAll}
-                  onChange={(e) => {
-                    setApplyHeightToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedSlabs = slabs.map((slab) => ({
-                        ...slab,
-                        dimensions: {
-                          ...slab.dimensions,
-                          height: {
-                            ...slab.dimensions.height,
-                            value: parseFloat(globalHeight) || 0,
-                          },
-                        },
-                      }));
-                      setSlabs(updatedSlabs);
-                      form.setValue("slabs", updatedSlabs);
-                    }
-                  }}
+                  onChange={(e) => setApplyHeightToAll(e.target.checked)}
                 />{" "}
-                Apply Height to all rows
+                Apply Height (inches) to all rows
               </label>
             </div>
           </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Length (inch)</TableHead>
-                <TableHead>Height (inch)</TableHead>
-                <TableHead>Area (sqft)</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {slabs.map((slab, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`slabs.${index}.dimensions.length.value`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={slab.dimensions.length.value}
-                              placeholder="Enter length"
-                              onChange={(e) => {
-                                const updatedBlocks = [...slabs];
-                                updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || 0;
-                                setSlabs(updatedBlocks);
-                                form.setValue("slabs", updatedBlocks);
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+          {slabsCount > 0 && (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Length(inches)</TableHead>
+                  <TableHead>Height(inches)</TableHead>
+                  <TableHead>Area (sqft)</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {form.getValues("slabs").map((slab, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`slabs.${index}.dimensions.length.value`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Length"
+                                type="number"
+                                value={slab.dimensions.length.value}
+                                onChange={(e) => {
+                                  const slabs = form.getValues("slabs");
+                                  slabs[index].dimensions.length.value =
+                                    parseFloat(e.target.value) || 0;
+                                  form.setValue("slabs", slabs, {
+                                    shouldValidate: true,
+                                  });
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`slabs.${index}.dimensions.height.value`}
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Height"
+                                type="number"
+                                value={slab.dimensions.height.value}
+                                onChange={(e) => {
+                                  const slabs = form.getValues("slabs");
+                                  slabs[index].dimensions.height.value =
+                                    parseFloat(e.target.value) || 0;
+                                  form.setValue("slabs", slabs, {
+                                    shouldValidate: true,
+                                  });
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {calculateSqft(
+                        slab.dimensions.length.value,
+                        slab.dimensions.height.value
                       )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`slabs.${index}.dimensions.height.value`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={slab.dimensions.height.value}
-                              placeholder="Enter height"
-                              onChange={(e) => {
-                                const updatedBlocks = [...slabs];
-                                updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0;
-                                setSlabs(updatedBlocks);
-                                form.setValue("slabs", updatedBlocks);
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {calculateSqft(
-                      slab?.dimensions?.length?.value,
-                      slab?.dimensions?.height?.value
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => {
-                        const updatedBlocks = slabs.filter(
-                          (_, i) => i !== index
-                        );
-                        setSlabs(updatedBlocks);
-                        form.setValue("slabs", updatedBlocks);
-                      }}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        type="button"
+                        onClick={() => handleDeleteRow(index)}
+                        disabled={isLoading}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={5} className="text-right font-bold">
+                    Total Area (sqft): {calculateTotalSqft()}
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={5} className="text-right font-bold">
-                  Total Area (sqft): {calculateTotalSqft()}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
-
+              </TableFooter>
+            </Table>
+          )}
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Submitting..." : "Submit"}
+            {isLoading ? "Submiting..." : "Submit"}
           </Button>
         </form>
       </Form>

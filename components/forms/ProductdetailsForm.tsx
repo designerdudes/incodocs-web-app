@@ -290,13 +290,13 @@ export default function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps
                           field.onChange(
                             !isNaN(l) && !isNaN(b)
                               ? {
-                                length: { value: l, units: "inch" },
-                                breadth: { value: b, units: "inch" },
-                              }
+                                  length: { value: l, units: "inch" },
+                                  breadth: { value: b, units: "inch" },
+                                }
                               : {
-                                length: { value: undefined, units: "inch" },
-                                breadth: { value: undefined, units: "inch" },
-                              }
+                                  length: { value: undefined, units: "inch" },
+                                  breadth: { value: undefined, units: "inch" },
+                                }
                           );
                         }}
                       />
@@ -309,126 +309,126 @@ export default function ProductDetailsForm({ onSubmit }: ProductDetailsFormProps
 
           {/* Slabs Fields */}
           {selectedSubcategory === "Slabs" && (
-            <>
-              <FormField
-                control={form.control}
-                name="slabType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slab Type</FormLabel>
-                    <FormControl>
-                      <Select value={field.value} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Slab Type" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Single">Single</SelectItem>
-                          <SelectItem value="Book Match">Book Match</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                  </FormItem>
-                )}
+  <>
+    <FormField
+      control={form.control}
+      name="slabType"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Slab Type</FormLabel>
+          <FormControl>
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select Slab Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Single">Single</SelectItem>
+                <SelectItem value="Book Match">Book Match</SelectItem>
+              </SelectContent>
+            </Select>
+          </FormControl>
+        </FormItem>
+      )}
+    />
+
+    <div className="grid grid-cols-2 gap-4">
+      <FormField
+        control={form.control}
+        name="slabLength"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Length</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={0}
+                placeholder="Length in inches"
+                value={field.value?.value ?? ""}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (val >= 0 || e.target.value === "") {
+                    field.onChange({
+                      value: val,
+                      units: "inch",
+                    });
+                  }
+                }}
               />
+            </FormControl>
+          </FormItem>
+        )}
+      />
 
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="slabLength"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Length</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="Length in inches"
-                          value={field.value?.value ?? ""}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (val >= 0 || e.target.value === "") {
-                              field.onChange({
-                                value: val,
-                                units: "inch",
-                              });
-                            }
-                          }}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="slabBreadth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Breadth</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="Breadth in inches"
-                          value={field.value?.value ?? ""}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (val >= 0 || e.target.value === "") {
-                              field.onChange({
-                                value: val,
-                                units: "inch",
-                              });
-                            }
-                          }}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="slabThickness"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Thickness (mm)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min={0}
-                        placeholder="e.g., 18"
-                        value={field.value ?? ""}
-                        onChange={(e) => {
-                          const val = parseFloat(e.target.value);
-                          if (val >= 0 || e.target.value === "") {
-                            field.onChange(val);
-                          }
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
+      <FormField
+        control={form.control}
+        name="slabBreadth"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Breadth</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                min={0}
+                placeholder="Breadth in inches"
+                value={field.value?.value ?? ""}
+                onChange={(e) => {
+                  const val = parseFloat(e.target.value);
+                  if (val >= 0 || e.target.value === "") {
+                    field.onChange({
+                      value: val,
+                      units: "inch",
+                    });
+                  }
+                }}
               />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+    </div>
 
-              <FormField
-                control={form.control}
-                name="slabDocument"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Upload Document (PDF, JPG, PNG)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="file"
-                        accept=".pdf,.jpg,.png"
-                        onChange={(e) => field.onChange(e.target.files?.[0])}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </>
-          )}
+    <FormField
+      control={form.control}
+      name="slabThickness"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Thickness (mm)</FormLabel>
+          <FormControl>
+            <Input
+              type="number"
+              min={0}
+              placeholder="e.g., 18"
+              value={field.value ?? ""}
+              onChange={(e) => {
+                const val = parseFloat(e.target.value);
+                if (val >= 0 || e.target.value === "") {
+                  field.onChange(val);
+                }
+              }}
+            />
+          </FormControl>
+        </FormItem>
+      )}
+    />
+
+    <FormField
+      control={form.control}
+      name="slabDocument"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Upload Document (PDF, JPG, PNG)</FormLabel>
+          <FormControl>
+            <Input
+              type="file"
+              accept=".pdf,.jpg,.png"
+              onChange={(e) => field.onChange(e.target.files?.[0])}
+            />
+          </FormControl>
+        </FormItem>
+      )}
+    />
+  </>
+)}
 
 
           <Button type="submit" disabled={isLoading}>

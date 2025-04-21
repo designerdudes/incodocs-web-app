@@ -71,7 +71,7 @@ export default function NavUser({
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
                                 <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback className="rounded-lg">{user.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-semibold">{user.name}</span>
@@ -98,8 +98,29 @@ export default function NavUser({
                                 </div>
                             </div>
                         </DropdownMenuLabel>
-                    
-                   
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem>
+                                <Sparkles />
+                                Upgrade to Pro
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuGroup>
+                            <DropdownMenuItem>
+                                <BadgeCheck />
+                                Account
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <CreditCard />
+                                Billing
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <Bell />
+                                Notifications
+                            </DropdownMenuItem>
+                        </DropdownMenuGroup>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
                             <LogOut />
                             Log out
