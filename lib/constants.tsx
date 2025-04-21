@@ -4,6 +4,7 @@ import {
   FactoryIcon,
   HelpCircle,
   HomeIcon,
+  LayoutDashboard,
   ScissorsLineDashed,
   Settings,
   Settings2,
@@ -20,6 +21,8 @@ import { MdOutlineAttachMoney } from "react-icons/md";
 import { GiExpense } from "react-icons/gi";
 import { MdManageAccounts } from "react-icons/md";
 import { FaBookReader } from "react-icons/fa";
+import { title } from "process";
+import { url } from "inspector";
 
 
 
@@ -282,9 +285,15 @@ const AccountingCard = [
  const sidebarTabs = {
   navMain: [
     {
-      title: "Dashboard",
+      title: "Home",
       url: "/dashboard",
       icon: HomeIcon, // Component function
+      isActive: true,
+    },
+    {
+      title: "Dashboard",
+      url: "/dashboard",
+      icon: LayoutDashboard , // Component function
       isActive: true,
     },
     {
@@ -299,6 +308,17 @@ const AccountingCard = [
             {
               title: "Raw Inventory",
               url: "/factorymanagement/inventory/raw",
+              isActive: true,
+              items:[
+                {
+                  title:"Lots",
+                  url:"/factorymanagement/inventory/raw/lots"
+                },
+                {
+                  title:"Processing",
+                  url:"/factorymanagement/inventory/raw/processing"
+                },
+              ]
             },
             {
               title: "Finished Goods",

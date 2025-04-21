@@ -1,11 +1,9 @@
 "use client";
-
-import { Icons } from "@/components/ui/icons";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -13,8 +11,6 @@ import {
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { ArrowRight } from "lucide-react";
-import axios from "axios";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { BrandName } from "@/lib/constants";
 import Link from "next/link";
@@ -25,58 +21,97 @@ import Cookies from "js-cookie";
 export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
 
   const router = useRouter();
 
-  const user = {
-    email: email,
-    password: password,
-  };
-  const onSubmit = async () => {
-    setLoading(true);
-    if (email === "") {
-      setError(true);
-      setMessage("Email is required");
-      setLoading(false);
-    }
-    if (password === "") {
-      setError(true);
-      setMessage("Password is required");
-      setLoading(false);
-    }
-    if (email === "" || password === "") {
-      setError(true);
-      setMessage("Email and Password is required");
-      setLoading(false);
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const emailValue = e.target.value;
+    setEmail(emailValue);
+
+    if (emailValue && !emailRegex.test(emailValue)) {
+      setEmailError("Invalid email format. Please enter a valid email.");
     } else {
-      try {
-        setLoading(true);
-        const res = await postData("/user/login", user);
-        console.log(res?.user?._id, "jksdfksdfkl");
-        Cookies.set("AccessToken", res?.token, { expires: 7 }); // Set the expiration in days
-        toast.success("Login successful");
-        // router.push(`/organization/${res?.user?._id}`);
-        router.push(`/dashboard`);
-        router.refresh();
-      } catch (error: any) {
-        setLoading(false);
-        setError(true);
-        setMessage(error?.response?.data?.error);
-        console.error(error?.response?.data?.error);
-      } finally {
-        setLoading(false);
-      }
+      setEmailError("");
     }
   };
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const passwordValue = e.target.value;
+    setPassword(passwordValue);
+
+    if (passwordValue.length < 6) {
+      setPasswordError("Password is too short. Minimum 6 characters required.");
+    } else {
+      setPasswordError("");
+    }
+  };
+
+  const onSubmit = async () => {
+    setLoading(true);
+    setEmailError("");
+    setPasswordError("");
+
+    // Email validation
+    if (!email) {
+      setEmailError("Email is required");
+      setLoading(false);
+      return;
+    }
+    if (!password) {
+      setPasswordError("Password is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!emailRegex.test(email)) {
+      setEmailError(
+        "Invalid email address. Please enter a valid email address."
+      );
+      setLoading(false);
+      return;
+    }
+
+    if (!password) {
+      setPasswordError("Password is required");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setPasswordError("Password is too short. Minimum 6 characters required.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await postData("/user/login", { email, password });
+      Cookies.set("AccessToken", res?.token, { expires: 7 });
+      toast.success("Login successful");
+      router.push(`/dashboard`);
+      router.refresh();
+    } catch (error) {
+      toast.error("Invalid email or password");
+    } finally {
+      setLoading(false);
+    }
+    // catch (error) {
+    //   setEmailError("Login failed. Please check your credentials.");
+    //   setPasswordError("Login failed. Please check your credentials.");
+    // } finally {
+    //   setLoading(false);
+    // }
+  };
+
   return (
-    <Card className=" shadow-sm shadow-[#00000042]  dark:shadow-[#ffffff42]">
+    <Card className="shadow-sm shadow-[#00000042] dark:shadow-[#ffffff42]">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl font-bold leading-tight tracking-tighter">
-          Log in to your <br />{" "}
+          Log in to your <br />
           <span className="text-primary">{BrandName}</span> Account
         </CardTitle>
       </CardHeader>
@@ -87,9 +122,12 @@ export function LoginForm() {
             id="email"
             disabled={loading}
             value={email}
-            onChange={(e: any) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             placeholder="mohammed@incodocs.in"
           />
+          {emailError && (
+            <p className="text-red-700 text-xs mt-1">{emailError}</p>
+          )}
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
@@ -98,11 +136,13 @@ export function LoginForm() {
               disabled={loading}
               id="password"
               value={password}
-              onChange={(e: any) => setPassword(e.target.value)}
+              onChange={handlePasswordChange}
               type="password"
               placeholder="******"
             />
-            {error && <p className="text-red-500 text-xs mt-1">{message}</p>}
+            {passwordError && (
+              <p className="text-red-700 text-xs mt-1">{passwordError}</p>
+            )}
             <Link href="/forgot-password">
               <Button
                 className="w-fit p-0 m-0 justify-start text-xs"
@@ -124,7 +164,7 @@ export function LoginForm() {
         >
           Continue via Email
           {loading ? (
-            <Icons.spinner className="ml-2 w-4 animate-spin" />
+            <ArrowRight className="ml-2 w-4 animate-spin" />
           ) : (
             <ArrowRight className="ml-2 w-4" />
           )}
