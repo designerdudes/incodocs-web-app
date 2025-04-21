@@ -12,10 +12,10 @@ import { ShippingBillDetails } from "./components/ShippingBillDetails";
 import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
+import { OtherDetails } from "./components/OtherDetails";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { OtherDetails } from "./components/OtherDetails";
 import toast from "react-hot-toast";
 import { postData } from "@/axiosUtility/api";
 import { useRouter } from "next/navigation";
@@ -24,20 +24,20 @@ import { debounce } from "lodash";
 
 // Save progress functions
 const saveProgressSilently = (data: any) => {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("shipmentDraft", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 };
 
 const saveProgressWithFeedback = (data: any) => {
   saveProgressSilently(data);
-  toast.success("Progress saved!");
+  toast.success("Progress saved as draft!");
 };
 
 // Updated Zod Schema with all fields optional
 const formSchema = z.object({
   bookingDetails: z
     .object({
-      review: z.string().optional(),
+      invoiceNumber: z.string().optional(),
       bookingNumber: z.string().optional(),
       portOfLoading: z.string().optional(),
       destinationPort: z.string().optional(),
@@ -88,37 +88,36 @@ const formSchema = z.object({
         .optional(),
     })
     .optional(),
-  transporterName: z.string().optional(),
-  noOftransportinvoices: z.number().optional(),
-  transporterInvoices: z
-    .array(
-      z.object({
-        invoiceNumber: z.string().optional(),
-        uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-        date: z
-          .string()
-          .datetime({ message: "Invalid date format" })
-          .optional(),
-        valueWithGst: z.number().optional(),
-        valueWithoutGst: z.number().optional(),
-      })
-    )
-    .optional(),
-  forwarderName: z.string().optional(),
-  noOfForwarderinvoices: z.number().optional(),
-  forwarderInvoices: z
-    .array(
-      z.object({
-        invoiceNumber: z.string().optional(),
-        uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-        date: z
-          .string()
-          .datetime({ message: "Invalid date format" })
-          .optional(),
-        valueWithGst: z.number().optional(),
-        valueWithoutGst: z.number().optional(),
-      })
-    )
+  shippingDetails: z
+    .object({
+      review: z.string().optional(),
+      forwarder: z.string().optional(),
+      noOfForwarderinvoices: z.number().optional(),
+      forwarderInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+          })
+        )
+        .optional(),
+      transporter: z.string().optional(),
+      noOftransportinvoices: z.number().optional(),
+      transporterInvoices: z
+        .array(
+          z.object({
+            invoiceNumber: z.string().optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+          })
+        )
+        .optional(),
+    })
     .optional(),
   shippingBillDetails: z
     .object({
@@ -127,16 +126,18 @@ const formSchema = z.object({
       cbName: z.string().optional(),
       cdCode: z.string().optional(),
       ShippingBills: z
-        .object({
-          shippingBillUrl: z.string().url("Invalid URL").optional(),
-          shippingBillNumber: z.string().optional(),
-          shippingBillDate: z
-            .string()
-            .datetime({ message: "Invalid date format" })
-            .optional(),
-          drawbackValue: z.string().optional(),
-          rodtepValue: z.string().optional(),
-        })
+        .array(
+          z.object({
+            shippingBillUrl: z.string().url("Invalid URL").optional(),
+            shippingBillNumber: z.string().optional(),
+            shippingBillDate: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
+            drawbackValue: z.string().optional(),
+            rodtepValue: z.string().optional(),
+          })
+        )
         .optional(),
     })
     .optional(),
@@ -170,8 +171,8 @@ const formSchema = z.object({
       actual: z
         .object({
           actualSupplierName: z.string().optional(),
-          actualSupplierInvoiceValue: z.string().optional(),
           actualSupplierInvoiceUrl: z.string().url("Invalid URL").optional(),
+          actualSupplierInvoiceValue: z.string().optional(),
           shippingBillUrl: z.string().optional(),
         })
         .optional(),
@@ -183,35 +184,15 @@ const formSchema = z.object({
       consignee: z.string().optional(),
       actualBuyer: z.string().optional(),
       commercialInvoices: z
-        .object({
-          commercialInvoiceNumber: z.string().optional(),
-          clearanceCommercialInvoiceUrl: z
-            .string()
-            .url("Invalid URL")
-            .optional(),
-          actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
-          saberInvoiceUrl: z.string().optional(),
-        })
+        .array(
+          z.object({
+            commercialInvoiceNumber: z.string().optional(),
+            clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            saberInvoiceUrl: z.string().url("Invalid URL").optional(),
+          })
+        )
         .optional(),
-    })
-    .optional(),
-  shippingDetails: z
-    .object({
-      review: z.string().optional(),
-      shippingLineName: z.string().optional(),
-      noOfShipmentinvoices: z.number().optional(),
-      shippingLineInvoices: z.array(
-        z.object({
-          invoiceNumber: z.string().optional(),
-          uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-          date: z
-            .string()
-            .datetime({ message: "Invalid date format" })
-            .optional(),
-          valueWithGst: z.number().optional(),
-          valueWithoutGst: z.number().optional(),
-        })
-      ),
     })
     .optional(),
   blDetails: z
@@ -227,6 +208,28 @@ const formSchema = z.object({
         .datetime({ message: "Invalid date format" })
         .optional(),
       uploadBL: z.string().url("Invalid URL").optional(),
+      shippingDetails: z
+        .object({
+          review: z.string().optional(),
+          shippingLineName: z.string().optional(),
+          noOfShipmentinvoices: z.number().optional(),
+          shippingLineInvoices: z
+            .array(
+              z.object({
+                invoiceNumber: z.string().optional(),
+                uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+                date: z
+                  .string()
+                  .datetime({ message: "Invalid date format" })
+                  .optional(),
+                valueWithGst: z.number().optional(),
+                valueWithoutGst: z.number().optional(),
+              })
+            )
+            .optional(),
+          // ... (other shippingDetails fields)
+        })
+        .optional(),
     })
     .optional(),
   otherDetails: z
@@ -245,87 +248,9 @@ const formSchema = z.object({
     )
     .optional(),
   organizationId: z.string().optional(),
+  shipmentId: z.string().optional(),
 });
 
-const steps = [
-  {
-    id: 1,
-    name: "Booking Details",
-    component: (
-      <BookingDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 2,
-    name: "Shipping Details",
-    component: (
-      <ShippingDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 3,
-    name: "Shipping Bill Details",
-    component: (
-      <ShippingBillDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 4,
-    name: "Supplier Details",
-    component: (
-      <SupplierDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 5,
-    name: "Commercial Invoice",
-    component: (
-      <SaleInvoiceDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 6,
-    name: "Bill of Lading Details",
-    component: (
-      <BillOfLadingDetails
-        saveProgress={saveProgressWithFeedback}
-        onSectionSubmit={function (): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    ),
-  },
-  {
-    id: 7,
-    name: "Other Details",
-    component: <OtherDetails saveProgress={saveProgressWithFeedback} />,
-  },
-];
 
 export default function CreateNewFormPage() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -333,66 +258,90 @@ export default function CreateNewFormPage() {
   const router = useRouter();
   const organizationId = "674b0a687d4f4b21c6c980ba";
 
+  const steps = [
+    {
+      id: 1,
+      name: "Booking Details",
+      component: (
+        <BookingDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 2,
+      name: "Shipping Details",
+      component: (
+        <ShippingDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 3,
+      name: "Shipping Bill Details",
+      component: (
+        <ShippingBillDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 4,
+      name: "Supplier Details",
+      component: (
+        <SupplierDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 5,
+      name: "Commercial Invoice",
+      component: (
+        <SaleInvoiceDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 6,
+      name: "Bill of Lading Details",
+      component: (
+        <BillOfLadingDetails
+          saveProgress={saveProgressWithFeedback}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 7,
+      name: "Other Details",
+      component: <OtherDetails saveProgress={saveProgressWithFeedback} />,
+    },
+  ];
+
+
+  const loadDraft = () => {
+    const draft = localStorage.getItem("shipmentDraft");
+    return draft ? JSON.parse(draft) : {};
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      bookingDetails: { containers: [] },
-      transporterInvoices: [],
-      forwarderInvoices: [],
-      shippingBillDetails: { ShippingBills: {} },
-      supplierDetails: { clearance: { invoices: [] }, actual: {} },
-      saleInvoiceDetails: { commercialInvoices: {} },
-      shippingDetails: {},
-      blDetails: {},
-      otherDetails: [],
-      organizationId,
-    },
+    defaultValues: loadDraft(),
   });
 
   const watchedValues = form.watch();
   const debouncedSave = debounce(saveProgressSilently, 1000);
   useEffect(() => {
     debouncedSave(watchedValues);
-    return () => debouncedSave.cancel();
   }, [watchedValues, debouncedSave]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      await postData("/shipment/add/", {
-        ...values,
-        organizationId,
-        status: "active",
-      });
-      toast.success("Shipment created successfully");
-      router.push("./");
-    } catch (error) {
-      console.error("Error creating shipment:", error);
-      toast.error("Error creating shipment");
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  // Handle section-specific submission
-  const handleSectionSubmit = async () => {
-    setIsLoading(true);
-    try {
-      const values = form.getValues();
-      await postData("/shipment/add/", {
-        ...values,
-        organizationId,
-        status: "active",
-      });
-      toast.success(`${steps[currentStep].name} submitted successfully`);
-      nextStep();
-    } catch (error) {
-      console.error(`Error submitting ${steps[currentStep].name}:`, error);
-      toast.error(`Error submitting ${steps[currentStep].name}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
@@ -400,9 +349,68 @@ export default function CreateNewFormPage() {
     }
   };
 
-  const prevStep = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
+  const submitDraft = async () => {
+    setIsLoading(true);
+    try {
+      const values = form.getValues();
+      const payload = {
+        shipmentId: values.shipmentId || undefined,
+        bookingDetails: values.bookingDetails || {},
+        shippingDetails: {
+          forwarder: values.shippingDetails?.forwarder ?? "",
+          forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
+          transporter: values.shippingDetails?.transporter ?? "",
+          transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
+        },
+        shippingBillDetails: values.shippingBillDetails || {},
+        supplierDetails: values.supplierDetails || {},
+        saleInvoiceDetails: {
+          review: values.saleInvoiceDetails?.review ?? "",
+          consignee: values.saleInvoiceDetails?.consignee ?? "",
+          actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
+          commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
+        },
+        blDetails: {
+          review: values.blDetails?.review ?? "",
+          blNumber: values.blDetails?.blNumber ?? "",
+          blDate: values.blDetails?.blDate ?? "",
+          telexDate: values.blDetails?.telexDate ?? "",
+          uploadBL: values.blDetails?.uploadBL ?? "",
+          shippingDetails: {
+            review: values.blDetails?.shippingDetails?.review ?? "",
+            shippingLineName: values.blDetails?.shippingDetails?.shippingLineName || undefined,
+            noOfShipmentinvoices: values.blDetails?.shippingDetails?.noOfShipmentinvoices ?? 0,
+            shippingLineInvoices: values.blDetails?.shippingDetails?.shippingLineInvoices ?? [],
+          },
+        },
+        otherDetails: values.otherDetails || [],
+        organizationId,
+      };
+      await postData("/shipment/add/", payload);
+      toast.success("Shipment created successfully!");
+      router.push("./");
+      setTimeout(() => localStorage.removeItem("shipmentDraft"), 2000);;
+      setTimeout(() => window.location.reload(), 5000);
+    } catch (error) {
+      console.error("Error submitting draft:", error);
+      toast.error("Error submitting shipment");
+    } finally {
+      setIsLoading(false);
+    }
   };
+  async function handleSectionSubmit() {
+    setIsLoading(true);
+    try {
+      const values = form.getValues();
+      saveProgressWithFeedback(values); // Save as draft
+      nextStep();
+    } catch (error) {
+      console.error(`Error saving ${steps[currentStep].name} as draft:`, error);
+      toast.error(`Error saving ${steps[currentStep].name} as draft`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -419,6 +427,15 @@ export default function CreateNewFormPage() {
             Complete the form below to add a new shipment.
           </p>
         </div>
+        <Button
+          className="h-8"
+          type="button"
+          onClick={handleSectionSubmit}
+          disabled={isLoading}
+        >
+          Save and Next
+          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
       </div>
       <Separator orientation="horizontal" />
       <div className="w-full">
@@ -426,29 +443,16 @@ export default function CreateNewFormPage() {
       </div>
 
       <FormProvider {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="flex flex-col gap-3 w-full p-3"
-        >
+        <form className="flex flex-col gap-3 w-full p-3">
           <div className="flex justify-between mt-4">
             <Button
               type="button"
-              onClick={prevStep}
+              onClick={() => setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)}
               disabled={currentStep === 0 || isLoading}
               className={`${currentStep === 0 ? "invisible" : ""} h-8`}
             >
               Previous
             </Button>
-            {currentStep < steps.length - 1 && (
-              <Button
-                className="h-8"
-                type="button"
-                onClick={nextStep}
-                disabled={isLoading}
-              >
-                Next
-              </Button>
-            )}
           </div>
 
           <div className="flex justify-between">
@@ -498,29 +502,23 @@ export default function CreateNewFormPage() {
           {steps[currentStep].id === 7 && (
             <OtherDetails saveProgress={saveProgressWithFeedback} />
           )}
-
-          <div className="flex justify-between mt-4">
-            <Button
-              type="button"
-              onClick={() => saveProgressWithFeedback(form.getValues())}
-              className="h-8"
-              disabled={isLoading}
-            >
-              Save Progress
-            </Button>
-          </div>
-          <div className="mt-4">
-            {currentStep === steps.length - 1 && (
-              <Button size="lg" disabled={isLoading} type="submit">
-                Submit
-                {isLoading && (
-                  <Icons.spinner className="ml-2 w-4 animate-spin" />
-                )}
-              </Button>
-            )}
-          </div>
         </form>
       </FormProvider>
+
+      {/* Final Submit Button on Last Step */}
+      {currentStep === steps.length - 1 && (
+        <div className="flex justify-end mt-4">
+          <Button
+            type="button"
+            onClick={submitDraft}
+            className="h-8"
+            disabled={isLoading}
+          >
+            Submit Shipment
+            {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -33,6 +33,7 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { toast } from "react-hot-toast";
 
+<<<<<<< HEAD
 // Form data types
 interface ShippingBillDetails {
   portCode: string;
@@ -57,6 +58,9 @@ interface FormData {
 }
 
 interface ShippingBillDetailsProps {
+=======
+interface ShippingBillDetailsProps extends SaveDetailsProps {
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   onSectionSubmit: () => void;
 }
 
@@ -98,12 +102,23 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
         },
         { shouldDirty: false }
       );
+<<<<<<< HEAD
     } else if (!formData.shippingBillDetails.numberOFShippingBill) {
       setValue("shippingBillDetails.numberOFShippingBill", initialCount, { shouldDirty: false });
       setValue("shippingBillDetails.ShippingBills", shippingBills, { shouldDirty: false });
+=======
+      setShippingBills(newShippingBills);
+      setValue("shippingBillDetails.ShippingBills", newShippingBills);
+      saveProgress(getValues()); // Use parent saveProgress
+    } else {
+      setShippingBills([]);
+      setValue("shippingBillDetails.ShippingBills", []);
+      saveProgress(getValues()); // Use parent saveProgress
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     }
   }, [setValue, getValues, watch, shippingBills]);
 
+<<<<<<< HEAD
   const handleShippingBillCountChange = useCallback(
     (value: string) => {
       const newCount = Number(value) || initialCount;
@@ -137,6 +152,14 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
     },
     [watch, setValue, getValues, shippingBills]
   );
+=======
+  const handleDeleteBill = (index: number) => {
+    const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
+    setShippingBills(updatedShippingBills);
+    setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
+    saveProgress(getValues()); // Use parent saveProgress
+  };
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
 
   const handleConfirmChange = useCallback(() => {
     if (shippingBillCountToBeDeleted !== null) {
@@ -174,6 +197,7 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
       if (!response.ok) throw new Error("Upload failed");
       const data = await response.json();
       const storageUrl = data.storageLink;
+<<<<<<< HEAD
       setValue(fieldName, storageUrl, { shouldDirty: false });
       setSelectedFiles((prev) => {
         const newFiles = [...prev];
@@ -181,6 +205,10 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
         return newFiles;
       });
       toast.success("File uploaded successfully");
+=======
+      setValue(fieldName, storageUrl);
+      saveProgress(getValues()); // Use parent saveProgress
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     } catch (error) {
       toast.error("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -198,7 +226,16 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>Port Code</FormLabel>
             <FormControl>
+<<<<<<< HEAD
               <Input placeholder="e.g., SB101" className="uppercase" {...field} />
+=======
+              <Input
+                placeholder="e.g., SB101"
+                className="uppercase"
+                {...field}
+                onBlur={() => saveProgress(getValues())}
+              />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -211,7 +248,16 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
+<<<<<<< HEAD
               <Input placeholder="e.g., xyz" className="uppercase" {...field} />
+=======
+              <Input
+                placeholder="e.g., xyz"
+                className="uppercase"
+                {...field}
+                onBlur={() => saveProgress(getValues())}
+              />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -224,7 +270,16 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>CB Code</FormLabel>
             <FormControl>
+<<<<<<< HEAD
               <Input placeholder="e.g., randomcode" className="uppercase" {...field} />
+=======
+              <Input
+                placeholder="e.g., randomcode"
+                className="uppercase"
+                {...field}
+                onBlur={() => saveProgress(getValues())}
+              />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -334,7 +389,17 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
+<<<<<<< HEAD
                             <Input placeholder="e.g., 34583" className="uppercase" {...field} />
+=======
+                            <Input
+                              placeholder="e.g., 34583"
+                              className="uppercase"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                              required // Enforce required field
+                            />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -362,6 +427,10 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
+<<<<<<< HEAD
+=======
+                                  saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                                 }}
                               />
                             </PopoverContent>
@@ -378,7 +447,15 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
+<<<<<<< HEAD
                             <Input placeholder="e.g., 2394" {...field} />
+=======
+                            <Input
+                              placeholder="e.g., 2394"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                            />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -392,7 +469,15 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
+<<<<<<< HEAD
                             <Input placeholder="e.g., 8934" {...field} />
+=======
+                            <Input
+                              placeholder="e.g., 8934"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                            />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -422,7 +507,15 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem className="col-span-4 mt-4">
             <FormLabel>Remarks</FormLabel>
             <FormControl>
+<<<<<<< HEAD
               <Textarea placeholder="e.g., this is some random comment" {...field} />
+=======
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                onBlur={() => saveProgress(getValues())}
+              />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>

@@ -37,6 +37,7 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { toast } from "react-hot-toast";
 
+<<<<<<< HEAD
 // Form data types
 interface SupplierInvoice {
   supplierGSTN: string;
@@ -89,6 +90,8 @@ function saveProgressSilently(data: FormData) {
   }
 }
 
+=======
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
 interface SupplierDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
 }
@@ -101,12 +104,15 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
   const [selectedActualFile, setSelectedActualFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [supplierNames, setSupplierNames] = useState<{ _id: string; name: string }[]>([]);
+<<<<<<< HEAD
   const [shippingBills, setShippingBills] = useState<{ _id: string; name: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [invoiceCountToBeDeleted, setInvoiceCountToBeDeleted] = useState<number | null>(null);
+=======
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const GlobalModal = useGlobalModal();
 
-  // Fetch supplier names and shipping bills
+  // Fetch supplier names
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -126,6 +132,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
       }
     };
     fetchData();
+<<<<<<< HEAD
     // Placeholder for shipping bills
     setShippingBills([
       { _id: "1", name: "Bill 1" },
@@ -210,6 +217,41 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
       }
       setInvoiceCountToBeDeleted(null);
       setShowConfirmation(false);
+=======
+  }, []);
+
+  const handleDelete = (index: number) => {
+    const updatedInvoices = invoices.filter((_, i) => i !== index);
+    setInvoices(updatedInvoices);
+    setValue("supplierDetails.clearance.invoices", updatedInvoices);
+    setValue("supplierDetails.clearance.noOfInvoices", updatedInvoices.length);
+    saveProgress(getValues());
+  };
+
+  const handleInvoiceNumberCountChange = (value: string) => {
+    const count = parseInt(value, 10);
+    if (!isNaN(count) && count > 0) {
+      const currentInvoices = watch("supplierDetails.clearance.invoices") || [];
+      const newInvoices = Array.from({ length: count }, (_, i) =>
+        currentInvoices[i] || {
+          supplierGSTN: "",
+          supplierInvoiceNumber: "",
+          supplierInvoiceDate: "",
+          supplierInvoiceValueWithGST: "",
+          supplierInvoiceValueWithOutGST: "",
+          clearanceSupplierInvoiceUrl: "",
+        }
+      );
+      setInvoices(newInvoices);
+      setValue("supplierDetails.clearance.invoices", newInvoices);
+      setValue("supplierDetails.clearance.noOfInvoices", newInvoices.length);
+      saveProgress(getValues());
+    } else {
+      setInvoices([]);
+      setValue("supplierDetails.clearance.invoices", []);
+      setValue("supplierDetails.clearance.noOfInvoices", 0);
+      saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     }
   }, [invoices, invoiceCountToBeDeleted, setValue, getValues]);
 
@@ -226,6 +268,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
       if (!response.ok) throw new Error("Upload failed");
       const data = await response.json();
       const storageUrl = data.storageLink;
+<<<<<<< HEAD
       setValue(fieldName, storageUrl, { shouldDirty: false });
       if (index !== undefined) {
         setSelectedInvoiceFiles((prev) => {
@@ -244,6 +287,10 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
         toast.error("Invalid form data");
       }
       toast.success("File uploaded successfully");
+=======
+      setValue(fieldName, storageUrl);
+      saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     } catch (error) {
       toast.error("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -265,10 +312,14 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 name: supplier.supplierName,
               }));
               setSupplierNames(mappedSuppliers);
+<<<<<<< HEAD
             })
             .catch((error) => {
               console.error("Error refreshing suppliers:", error);
               toast.error("Failed to refresh supplier list");
+=======
+              saveProgress(getValues()); // Save after updating suppliers
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             });
         }}
       />
@@ -292,6 +343,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
+<<<<<<< HEAD
                     const formData = getValues();
                     if (isFormData(formData)) {
                       saveProgressSilently(formData);
@@ -299,6 +351,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                       console.error("Invalid formData in supplierName onChange:", formData);
                       toast.error("Invalid form data");
                     }
+=======
+                    saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                   }}
                   displayProperty="name"
                   placeholder="Select a Supplier Name"
@@ -377,6 +432,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                         control={control}
                         name={`supplierDetails.clearance.invoices[${index}].supplierGSTN`}
                         render={({ field }) => (
+<<<<<<< HEAD
                           <FormItem>
                             <FormControl>
                               <Input
@@ -395,6 +451,15 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             </FormControl>
                             <FormMessage />
                           </FormItem>
+=======
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., hsdfjkghog89r"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                            />
+                          </FormControl>
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                         )}
                       />
                     </TableCell>
@@ -403,6 +468,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                         control={control}
                         name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceNumber`}
                         render={({ field }) => (
+<<<<<<< HEAD
                           <FormItem>
                             <FormControl>
                               <Input
@@ -421,6 +487,16 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             </FormControl>
                             <FormMessage />
                           </FormItem>
+=======
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., INV789"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                              required // Enforce required field
+                            />
+                          </FormControl>
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                         )}
                       />
                     </TableCell>
@@ -494,6 +570,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                                   selected={field.value ? new Date(field.value) : undefined}
                                   onSelect={(date) => {
                                     field.onChange(date?.toISOString());
+<<<<<<< HEAD
                                     const formData = getValues();
                                     if (isFormData(formData)) {
                                       saveProgressSilently(formData);
@@ -501,6 +578,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                                       console.error("Invalid formData in supplierInvoiceDate onSelect:", formData);
                                       toast.error("Invalid form data");
                                     }
+=======
+                                    saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                                   }}
                                 />
                               </PopoverContent>
@@ -515,6 +595,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                         control={control}
                         name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceValueWithGST`}
                         render={({ field }) => (
+<<<<<<< HEAD
                           <FormItem>
                             <FormControl>
                               <Input
@@ -533,6 +614,13 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             </FormControl>
                             <FormMessage />
                           </FormItem>
+=======
+                          <Input
+                            placeholder="e.g., 1000"
+                            {...field}
+                            onBlur={() => saveProgress(getValues())}
+                          />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                         )}
                       />
                     </TableCell>
@@ -541,6 +629,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                         control={control}
                         name={`supplierDetails.clearance.invoices[${index}].supplierInvoiceValueWithOutGST`}
                         render={({ field }) => (
+<<<<<<< HEAD
                           <FormItem>
                             <FormControl>
                               <Input
@@ -559,6 +648,13 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             </FormControl>
                             <FormMessage />
                           </FormItem>
+=======
+                          <Input
+                            placeholder="e.g., 900"
+                            {...field}
+                            onBlur={() => saveProgress(getValues())}
+                          />
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                         )}
                       />
                     </TableCell>
@@ -596,6 +692,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                   placeholder="e.g., ASI101"
                   className="uppercase"
                   {...field}
+<<<<<<< HEAD
                   onBlur={() => {
                     const formData = getValues();
                     if (isFormData(formData)) {
@@ -605,6 +702,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                       toast.error("Invalid form data");
                     }
                   }}
+=======
+                  onBlur={() => saveProgress(getValues())}
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                 />
               </FormControl>
               <FormMessage />
@@ -665,6 +765,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 <Input
                   placeholder="e.g., 1100"
                   {...field}
+<<<<<<< HEAD
                   onBlur={() => {
                     const formData = getValues();
                     if (isFormData(formData)) {
@@ -674,6 +775,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                       toast.error("Invalid form data");
                     }
                   }}
+=======
+                  onBlur={() => saveProgress(getValues())}
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                 />
               </FormControl>
               <FormMessage />
@@ -689,10 +793,11 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
               <FormLabel>Select Shipping Bill</FormLabel>
               <FormControl>
                 <EntityCombobox
-                  entities={shippingBills}
+                  entities={[]}
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
+<<<<<<< HEAD
                     const formData = getValues();
                     if (isFormData(formData)) {
                       saveProgressSilently(formData);
@@ -700,6 +805,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                       console.error("Invalid formData in shippingBillUrl onChange:", formData);
                       toast.error("Invalid form data");
                     }
+=======
+                    saveProgress(getValues());
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                   }}
                   displayProperty="name"
                   placeholder="Select a Shipping Bill"
@@ -722,6 +830,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 <Textarea
                   placeholder="e.g., this is some random comment"
                   {...field}
+<<<<<<< HEAD
                   onBlur={() => {
                     const formData = getValues();
                     if (isFormData(formData)) {
@@ -731,6 +840,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                       toast.error("Invalid form data");
                     }
                   }}
+=======
+                  onBlur={() => saveProgress(getValues())}
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                 />
               </FormControl>
               <FormMessage />

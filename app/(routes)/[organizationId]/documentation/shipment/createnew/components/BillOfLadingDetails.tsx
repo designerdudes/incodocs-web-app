@@ -34,11 +34,6 @@ import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Icons } from "@/components/ui/icons";
 
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
-
 interface BillOfLadingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
 }
@@ -47,14 +42,9 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
   const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
   const GlobalModal = useGlobalModal();
-  const shippingInvoicesFromForm = watch("shippingDetails.shippingLineInvoices") || [];
+  const shippingInvoicesFromForm = watch("blDetails.shippingDetails.shippingLineInvoices") || [];
   const [shippingInvoices, setShippingInvoices] = useState(shippingInvoicesFromForm);
   const [shippingLines, setShippingLines] = useState([]);
-  const [selectedShippingFiles, setSelectedShippingFiles] = useState<(File | null)[]>([]);
-
-  useEffect(() => {
-    setSelectedShippingFiles(Array(shippingInvoices.length).fill(null));
-  }, [shippingInvoices.length]);
 
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
@@ -72,7 +62,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
       const data = await response.json();
       const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
-      saveProgressSilently(getValues());
+      saveProgress(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -81,6 +71,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     }
   };
 
+<<<<<<< HEAD
   interface ShippingInvoice {
     invoiceNumber: string;
     date: string;
@@ -88,6 +79,36 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
   }
 
   
+=======
+  const handleShippingCountChange = (value: string) => {
+    const count = Number.parseInt(value, 10) || 0;
+    const currentInvoices = watch("blDetails.shippingDetails.shippingLineInvoices") || [];
+    const newInvoices = Array.from(
+      { length: count },
+      (_, i) =>
+        currentInvoices[i] || {
+          invoiceNumber: "",
+          uploadInvoiceUrl: "",
+          date: null,
+          valueWithGst: "",
+          valueWithoutGst: "",
+        },
+    );
+    setShippingInvoices(newInvoices);
+    setValue("blDetails.shippingDetails.shippingLineInvoices", newInvoices);
+    setValue("blDetails.shippingDetails.noOfShipmentinvoices", newInvoices.length);
+    saveProgress(getValues());
+  };
+
+  const handleShippingDelete = (index: number) => {
+    const updatedInvoices = shippingInvoices.filter((_: any, i: number) => i !== index);
+    setShippingInvoices(updatedInvoices);
+    setValue("blDetails.shippingDetails.shippingLineInvoices", updatedInvoices);
+    setValue("blDetails.shippingDetails.noOfShipmentinvoices", updatedInvoices.length);
+    saveProgress(getValues());
+  };
+
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const openShippingLineForm = () => {
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
@@ -95,7 +116,10 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
         onSuccess={() => {
           fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba")
             .then((res) => res.json())
-            .then((data) => setShippingLines(data));
+            .then((data) => {
+              setShippingLines(data);
+              saveProgress(getValues()); // Save after updating shipping lines
+            });
         }}
       />
     );
@@ -121,7 +145,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.shippingLineName"
+          name="blDetails.shippingDetails.shippingLineName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Shipping Line</FormLabel>
@@ -131,7 +155,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
-                    saveProgressSilently(getValues());
+                    saveProgress(getValues());
                   }}
                   displayProperty="shippingLineName"
                   placeholder="Select a Shipping Line"
@@ -143,7 +167,168 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
             </FormItem>
           )}
         />
+<<<<<<< HEAD
   
+=======
+        <FormField
+          control={control}
+          name="blDetails.shippingDetails.noOfShipmentinvoices"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Shipping Invoices</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of invoices"
+                  value={field.value || ""}
+                  onChange={(e) => {
+                    const value = Number.parseInt(e.target.value, 10);
+                    if (!isNaN(value) && value >= 0) {
+                      field.onChange(value);
+                      handleShippingCountChange(e.target.value);
+                    }
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        {shippingInvoices.length > 0 && (
+          <div className="col-span-4 overflow-x-auto mt-4">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>#</TableHead>
+                  <TableHead>Invoice Number</TableHead>
+                  <TableHead>Upload Invoice</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead>Value With GST</TableHead>
+                  <TableHead>Value Without GST</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {shippingInvoices.map((_: any, index: number) => (
+                  <TableRow key={index}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`blDetails.shippingDetails.shippingLineInvoices[${index}].invoiceNumber`}
+                        render={({ field }) => (
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 123456898"
+                              {...field}
+                              onBlur={() => saveProgress(getValues())}
+                              required // Enforce required field
+                            />
+                          </FormControl>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`blDetails.shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`}
+                        render={({ field }) => (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png,.jpeg"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload(file, `blDetails.shippingDetails.shippingLineInvoices[${index}].uploadInvoiceUrl`);
+                              }}
+                              disabled={uploading}
+                            />
+                            <Button
+                              variant="secondary"
+                              className="bg-blue-500 text-white"
+                              disabled={uploading}
+                              onClick={() => { /* Upload handled in onChange */ }}
+                            >
+                              <UploadCloud className="w-5 h-5 mr-2" />
+                              {uploading ? "Uploading..." : "Upload"}
+                            </Button>
+                          </div>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`blDetails.shippingDetails.shippingLineInvoices[${index}].date`}
+                        render={({ field }) => (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button variant="outline">
+                                  {field.value
+                                    ? format(new Date(field.value), "PPPP")
+                                    : "Pick a date"}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value ? new Date(field.value) : undefined}
+                                onSelect={(date) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgress(getValues());
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`blDetails.shippingDetails.shippingLineInvoices[${index}].valueWithGst`}
+                        render={({ field }) => (
+                          <Input
+                            placeholder="e.g., 11800"
+                            {...field}
+                            onBlur={() => saveProgress(getValues())}
+                          />
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`blDetails.shippingDetails.shippingLineInvoices[${index}].valueWithoutGst`}
+                        render={({ field }) => (
+                          <Input
+                            placeholder="e.g., 11800"
+                            {...field}
+                            onBlur={() => saveProgress(getValues())}
+                          />
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => handleShippingDelete(index)}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
       </div>
       <Separator className="my-4" />
       <div className="grid grid-cols-4 gap-3">
@@ -159,7 +344,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                   placeholder="e.g., BL456"
                   className="uppercase"
                   {...field}
-                  onBlur={() => saveProgressSilently(getValues())}
+                  onBlur={() => saveProgress(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -192,7 +377,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       field.onChange(date?.toISOString());
-                      saveProgressSilently(getValues());
+                      saveProgress(getValues());
                     }}
                   />
                 </PopoverContent>
@@ -227,7 +412,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       field.onChange(date?.toISOString());
-                      saveProgressSilently(getValues());
+                      saveProgress(getValues());
                     }}
                   />
                 </PopoverContent>
@@ -271,7 +456,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
         {/* Review Field */}
         <FormField
           control={control}
-          name="BillOfLandingDetails.review"
+          name="blDetails.review"
           render={({ field }) => (
             <FormItem className="col-span-4 mb-4">
               <FormLabel>Remarks</FormLabel>
@@ -279,7 +464,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                 <Textarea
                   placeholder="e.g., this is some random comment for sale invoice details"
                   {...field}
-                  onBlur={() => saveProgressSilently(getValues())}
+                  onBlur={() => saveProgress(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -295,7 +480,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
           className="h-8"
           disabled={uploading}
         >
-          Submit 
+          Submit
           {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>
