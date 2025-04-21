@@ -1,254 +1,152 @@
-"use client"
+"use server";
 
-import { useEffect, useState } from "react"
-import * as React from "react"
 import {
-    AudioWaveform,
-    BookIcon,
-    BookOpen,
-    BookUpIcon,
-    Bot,
-    Command,
-    FactoryIcon,
-    Frame,
-    GalleryVerticalEnd,
-    HomeIcon,
-    Map,
-    PieChart,
-    Settings2,
-    SquareTerminal,
-    User,
-} from "lucide-react"
+  AudioWaveform,
+  BookIcon,
+  BookOpen,
+  BookUpIcon,
+  Bot,
+  Command,
+  FactoryIcon,
+  Frame,
+  GalleryVerticalEnd,
+  HomeIcon,
+  Map,
+  PieChart,
+  Plus,
+  Settings2,
+  SquareTerminal,
+  User,
+} from "lucide-react";
 
-import NavMain from "@/components/layout/nav-main"
-import NavProjects from "@/components/nav-projects"
-import NavUser from "@/components/layout/nav-user"
+import NavMain from "@/components/layout/nav-main";
+import NavUser from "@/components/layout/nav-user";
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarRail,
-} from "@/components/ui/sidebar"
-import FactorySwitcher from "./factory-switcher"
-import { fetchData } from "@/axiosUtility/api"
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarRail,
+} from "@/components/ui/sidebar";
+import FactorySwitcher from "./factory-switcher";
+import { cookies } from "next/headers";
+import { Button } from "../ui/button";
+import { sidebarTabs } from "@/lib/constants";
 
-// Static navigation data (excluding user data)
-const data = {
-    Factories: [
-        {
-            factoryName: "JabalExim Pvt. Ltd.",
-            logo: GalleryVerticalEnd,
-            plan: "Enterprise",
-        },
-        {
-            factoryName: "Stoneer Pvt. Ltd.",
-            logo: Command,
-            plan: "Free",
-        },
-        {
-            factoryName: "Tilecia Pvt. Ltd.",
-            logo: Command,
-            plan: "Free",
-        },
-    ],
-    navMain: [
-        {
-            title: "Home",
-            url: "/dashboard",
-            icon: HomeIcon,
-            isActive: true,
-        },
-        {
-            title: "Factory Management",
-            url: "/factorymanagement",
-            icon: FactoryIcon,
-            isActive: true,
-            items: [
-                {
-                    title: "Inventory",
-                    items: [
-                        {
-                            title: "Raw Inventory",
-                            url: "/factorymanagement/inventory/raw",
-                        },
-                        {
-                            title: "Finished Goods",
-                            url: "/factorymanagement/inventory/finished",
-                        },
-                    ],
-                    url: "/factorymanagement/inventory",
-                },
-                {
-                    title: "Accounting",
-                    url: "/factorymanagement/accounting",
-                    items: [
-                        {
-                            title: "Purchases",
-                            url: "/factorymanagement/accounting/purchases",
-                        },
-                        {
-                            title: "Sales",
-                            url: "/factorymanagement/accounting/sales",
-                        },
-                        {
-                            title: "Expenses",
-                            url: "/factorymanagement/accounting/Expenses",
-                        },
-                        {
-                            title: "GST Ledger",
-                            url: "/factorymanagement/accounting/GSTLedger",
-                        },
-                        {
-                            title: "Ledger",
-                            url: "/factorymanagement/accounting/Parties",
-                        },
-                    ],
-                },
-            ],
-        },
-        {
-            title: "Documentation",
-            url: "/documentation/dashboard",
-            icon: BookOpen,
-            items: [
-                {
-                    title: "Export Docs",
-                    url: "/documentation/expodocs",
-                },
-                {
-                    title: "Shipments",
-                    url: "/documentation/shipment",
-                },
-                {
-                    title: "Invoices",
-                    url: "/documentation/invoices",
-                },
-                {
-                    title: "Purchase Orders",
-                    url: "/documentation/purchaseOrders",
-                },
-                {
-                    title: "Quotes",
-                    url: "/documentation/quotes",
-                },
-                {
-                    title:"Parties",
-                    url:"/documentation/parties"
-                }
-            ],
-        },
-        {
-            title: "Team Management",
-            url: "teamManagement/dashboard",
-            icon: User,
-            isActive: true,
-        },
-        {
-            title: "Integration",
-            url: "",
-            icon: SquareTerminal,
-        },
-        {
-            title: "Settings",
-            url: "/settings",
-            icon: Settings2,
-            items: [
-                {
-                    title: "General",
-                    url: "/settings/general",
-                },
-                {
-                    title: "Factory",
-                    url: "/settings/factory",
-                },
-                {
-                    title: "Organisation",
-                    url: "/settings/organisation",
-                }
-            ],
-        },
-    ],
-    projects: [
-        {
-            name: "Design Engineering",
-            url: "#",
-            icon: Frame,
-        },
-        {
-            name: "Sales & Marketing",
-            url: "#",
-            icon: PieChart,
-        },
-        {
-            name: "Travel",
-            url: "#",
-            icon: Map,
-        },
-    ],
+// Static navigation data (use strings for icons to avoid serialization issues)
+
+
+interface Params {
+    organizationId: string; // Match the [orgid] route
+    factoryid: string; // Match the [factoryid] route
 }
 
-function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const [factoryData, setFactoryData] = useState<any[]>([])
-    const [userData, setUserData] = useState<any>(null) // State for current user data
+export default async function AppSidebar({ params }: { params: Params }) {
+  const { organizationId } = params;
+  const { factoryid } = params; // Extract factoryId from params
 
-    // Fetch factory data
-    const getFactoryData = async () => {
-        try {
-            const res = await fetchData("/factory/getAll")
-            const transformedData = res.map((factory: any) => ({
-                factoryName: factory.factoryName,
-                factoryId: factory._id,
-                logo: FactoryIcon,
-                plan: "Standard Plan",
-            }))
-            setFactoryData(transformedData)
-        } catch (error) {
-            console.error("Error fetching Factory data", error)
-        }
-    }
+  console.log("Params:", params); // Debug params
+  console.log("orgid:", organizationId);
 
-    // Fetch current user data
-    const getCurrentUserData = async () => {
-        try {
-            const res = await fetchData("/user/currentUser")
-            // Assuming the API returns user data in the format { name, email, avatar }
-            setUserData({
-                name: res.fullName,
-                email: res.email,
-                avatar: res.avatar || "/avatars/default.jpg", // Fallback avatar
-            })
-        } catch (error) {
-            console.error("Error fetching current user data", error)
-            setUserData({
-                name: "Guest",
-                email: "guest@example.com",
-                avatar: "/avatars/default.jpg",
-            }) // Fallback user data in case of error
-        }
-    }
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value;
 
-    useEffect(() => {
-        getFactoryData()
-        getCurrentUserData()
-    }, [])
-
+  // Safeguard for missing orgid
+  if (!organizationId) {
     return (
-        <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader>
-                <FactorySwitcher FactoriesData={factoryData} />
-            </SidebarHeader>
-            <SidebarContent>
-                <NavMain items={data.navMain} />
-                {/* <NavProjects projects={data.projects} /> */}
-            </SidebarContent>
-            <SidebarFooter>
-                {/* Pass fetched user data to NavUser, fallback to loading state if null */}
-                <NavUser user={userData || { name: "Loading...", email: "", avatar: "" }} />
-            </SidebarFooter>
-            <SidebarRail />
-        </Sidebar>
-    )
-}
+      <Sidebar collapsible="icon">
+        <SidebarHeader>
+          <div>Error: Organization ID missing</div>
+        </SidebarHeader>
+      </Sidebar>
+    );
+  }
 
-export default AppSidebar
+  // Fetch factories
+  let factories = [];
+  try {
+    const factoriesRes = await fetch(
+      `https://incodocs-server.onrender.com/factory/getbyorg/${organizationId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!factoriesRes.ok) {
+      throw new Error("Failed to fetch factories");
+    }
+
+    factories = await factoriesRes.json();
+  } catch (error) {
+    console.error("Error fetching factories:", error);
+    factories = [];
+  }
+
+  // Fetch current user data
+  let userData = { name: "Guest", email: "guest@example.com", avatar: "" };
+  try {
+    const userRes = await fetch(
+      `https://incodocs-server.onrender.com/user/currentUser`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (userRes.ok) {
+      const user = await userRes.json();
+      userData = {
+        name: user.fullName || "Guest",
+        email: user.email || "guest@example.com",
+        avatar: user.avatar || "",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+  }
+
+  // Transform factories to ensure serializable data
+  const transformedFactories = factories.map((factory: any) => ({
+    factoryName: factory.name || factory.factoryName || "Unnamed Factory",
+    factoryId: factory._id,
+    logo: "FactoryIcon", // String identifier
+    plan: factory.plan || "Standard",
+    organizationId: factory.organization || organizationId,
+  }));
+
+
+  console.log("Transformed Factories:", organizationId, factoryid); // Debug transformed factories
+  return (
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+      {transformedFactories.length > 0 ? (
+        <FactorySwitcher FactoriesData={transformedFactories} />
+      ) : (
+        <div className="">
+          <Button variant="default"  className=" mr-4 flex items-center  gap-2 w-full">
+            <Plus className="h-4 w-4" />
+            <span >Add Factory</span>
+            </Button>
+        <div className="text-muted-foreground text-xs mt-2">
+            No factories found. Please add a factory to get started.
+            </div>
+        </div>
+      )}
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain orgId={organizationId} factoryId={factoryid} />
+      </SidebarContent>
+      <SidebarFooter>
+        <NavUser user={userData} />
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
+}
