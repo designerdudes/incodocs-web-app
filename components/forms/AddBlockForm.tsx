@@ -26,13 +26,11 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash, Volume } from "lucide-react";
 import { postData, putData } from "@/axiosUtility/api";
-import CostCalculationTable from "@/app/(routes)/[organizationId]/[factoryid]/factorymanagement/inventory/raw/lots/addblocks/[id]/components/CostCalculationTable";
-
 interface AddBlockFormProps {
-  params: {
-    LotData: string;
-  };
-  gap: number;
+  
+    LotData: any;
+  
+  gap?: string;
 }
 
 const formSchema = z.object({
@@ -85,11 +83,12 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
-export function AddBlockForm({ params }: AddBlockFormProps) {
-  console.log("params data", params);
+export function AddBlockForm({ LotData }: AddBlockFormProps) {
+  console.log("lot data", LotData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any[]>([]);
+  const [costs, setCosts] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
@@ -107,8 +106,11 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
-  let lotId = params.lotId;
-
+  let lotId = LotData?._id;
+let prevMarkerCost = LotData?.markerCost;
+let prevTransportCost = LotData?.transportCost;
+let prevMaterialCost = LotData?.materialCost;
+let prevNoOfBlocks = LotData?.noOfBlocks;
   
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
@@ -150,7 +152,7 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
 
     try {
       await putData(
-        `/factory-management/inventory/updatelotaddblocks/${params.lotId}`,
+        `/factory-management/inventory/updatelotaddblocks/${lotId}`,
         submissionData
       );
       setIsLoading(false);
@@ -176,16 +178,6 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
     };
   }
 
-  function calculateCosts() {
-        const totalCost = blocks.reduce((total, block) => {
-          const { markerCost, breadth, height } = block.dimensions;
-          const volume = (length.value * breadth.value * height.value) / 1000000;
-          return total + (volume || 0);
-        }, 0);
-        return {
-          inM: totalVolumeInM,
-        };
-      }
 
   return (
     <div className="space-y-6">
@@ -205,11 +197,18 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
+                        setCosts
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value}
                     />
-                  </FormControl>
+                  </FormControl>{
+                    field.value &&(
+                  <span className="text-gray-500 text-sm">
+                    Total Material cost: {prevMaterialCost} {"+"} {field.value} ={prevMaterialCost + field.value}
+                  </span>
+                    )
+              }
                   <FormMessage />
                 </FormItem>
               )}
@@ -232,6 +231,13 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       value={field.value}
                     />
                   </FormControl>
+                    {
+                      field.value && (
+                        <span className="text-gray-500 text-sm">
+                          Total Marker cost: {prevMarkerCost}{" + "}  {field.value} = {prevMarkerCost + field.value}
+                        </span>
+                      )
+                    }
                   <FormMessage />
                 </FormItem>
               )}
@@ -254,6 +260,13 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       value={field.value}
                     />
                   </FormControl>
+                  {
+                    field.value &&(
+                  <span className="text-gray-500 text-sm">
+                    Total Transport cost: {prevTransportCost} {"+"} {field.value} ={prevTransportCost + field.value}
+                  </span>
+                    )
+              }
                   <FormMessage />
                 </FormItem>
               )}

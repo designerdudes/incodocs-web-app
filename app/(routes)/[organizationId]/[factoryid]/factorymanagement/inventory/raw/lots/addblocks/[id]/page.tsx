@@ -28,8 +28,6 @@ interface Props {
     lotid: string;
   };
 }
-import CostCalculationTable from "./components/CostCalculationTable";
-
 
 
 export default async function AddBlockFormPage({ params }: Props) {
@@ -94,13 +92,13 @@ export default async function AddBlockFormPage({ params }: Props) {
 
       <Separator orientation="horizontal" />
 
-      <div className="flex flex-col lg:flex-row gap-2 w-full">
-        <div className="w-full lg:w-3/5">
-          <AddBlockForm gap={3} params={{ lotId }} />
+      <div className="flex flex-col lg:flex-row gap-6 w-full">  
+        <div className="w-full lg:w-2/3">
+          <AddBlockForm  LotData={ LotData as any } />
         </div>
 
         {/* Lot Details Card */}
-        <Card className="w-full lg:w-2/5">
+        <Card className="w- lg:w-1/3">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
             <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
@@ -173,8 +171,6 @@ export default async function AddBlockFormPage({ params }: Props) {
               </TableBody>
             </Table>
           </CardContent>
-          {/* Cost Calculation Table */}
-        <CostCalculationTable LotData={LotData} />
         </Card>
 
         
