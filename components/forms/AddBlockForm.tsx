@@ -26,10 +26,11 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash, Volume } from "lucide-react";
 import { postData, putData } from "@/axiosUtility/api";
+import CostCalculationTable from "@/app/(routes)/[organizationId]/[factoryid]/factorymanagement/inventory/raw/lots/addblocks/[id]/components/CostCalculationTable";
 
 interface AddBlockFormProps {
   params: {
-    lotId: string;
+    LotData: string;
   };
   gap: number;
 }
@@ -85,6 +86,7 @@ const formSchema = z.object({
 });
 
 export function AddBlockForm({ params }: AddBlockFormProps) {
+  console.log("params data", params);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any[]>([]);
@@ -107,6 +109,7 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   });
   let lotId = params.lotId;
 
+  
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
 
@@ -164,14 +167,25 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
 
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { length, breadth, height } = block.dimensions;
-      const volume = (length.value * breadth.value * height.value) / 1000000;
+      const { materialCost, breadth, height } = block.dimensions;
+      const totalcost = (length.value * breadth.value * height.value) / 1000000;
       return total + (volume || 0);
     }, 0);
     return {
       inM: totalVolumeInM,
     };
   }
+
+  function calculateCosts() {
+        const totalCost = blocks.reduce((total, block) => {
+          const { markerCost, breadth, height } = block.dimensions;
+          const volume = (length.value * breadth.value * height.value) / 1000000;
+          return total + (volume || 0);
+        }, 0);
+        return {
+          inM: totalVolumeInM,
+        };
+      }
 
   return (
     <div className="space-y-6">
@@ -576,6 +590,9 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
           </Button>
         </form>
       </Form>
+
     </div>
+    
   );
 }
+
