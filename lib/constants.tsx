@@ -298,7 +298,7 @@ const AccountingCard = [
     },
     {
       title: "Factory Management",
-      url: "/factorymanagement",
+      url: "/dashboard",
       icon: FactoryIcon,
       isActive: true,
       items: [
