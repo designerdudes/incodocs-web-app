@@ -317,6 +317,51 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 </FormItem>
               )}
             />
+<FormField
+              name="noOfBlocks"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quarry Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Quarry Cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="noOfBlocks"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Comission Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Comission Cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleBlocksInputChange(e.target.value);
+                      }}
+                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
           </div>
 
           <div className="grid grid-cols-4 gap-3">

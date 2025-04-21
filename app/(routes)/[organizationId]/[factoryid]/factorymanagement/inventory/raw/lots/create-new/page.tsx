@@ -23,7 +23,7 @@ export default function CreateNewFormPage() {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title="Create new Lot Inventory"
+                        title="Add New Lot"
                     />
                     <p className="text-muted-foreground text-sm">
                         Complete the form below to add a new lot to your inventory. Provide essential information like material type, dimensions, quantity, and any additional details.
