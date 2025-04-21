@@ -46,15 +46,6 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
   const GlobalModal = useGlobalModal();
 
   const {
-    fields: shippingLineFields,
-    append: appendShippingLine,
-    remove: removeShippingLine,
-  } = useFieldArray({
-    control,
-    name: "shippingDetails.shippingLineInvoices",
-  });
-
-  const {
     fields: forwarderFields,
     append: appendForwarder,
     remove: removeForwarder,
@@ -76,33 +67,9 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
   const formValues = watch("shippingDetails");
 
   // Handle Count Changes
-  const handleShippingCountChange = (value: number) => {
-    if (isNaN(value) || value < 0) return;
-    setValue("shippingDetails.numberOfShippingLineInvoices", value, {
-      shouldDirty: true,
-    });
-    const currentInvoices = formValues.shippingLineInvoices || [];
-    if (value > currentInvoices.length) {
-      const newInvoices = Array(value - currentInvoices.length)
-        .fill(null)
-        .map(() => ({
-          invoiceNumber: "",
-          uploadShippingLineInvoice: "",
-          date: undefined,
-          valueWithGST: "",
-          valueWithoutGST: "",
-        }));
-      appendShippingLine(newInvoices);
-    } else if (value < currentInvoices.length) {
-      for (let i = currentInvoices.length - 1; i >= value; i--) {
-        removeShippingLine(i);
-      }
-    }
-  };
-
   const handleForwarderCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
-    setValue("shippingDetails.numberOfForwarderInvoices", value, {
+    setValue("shippingDetails.noOfForwarderinvoices", value, {
       shouldDirty: true,
     });
     const currentInvoices = formValues.forwarderInvoices || [];
@@ -111,10 +78,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         .fill(null)
         .map(() => ({
           invoiceNumber: "",
-          uploadForwarderInvoice: "",
+          uploadInvoiceUr: "",
           date: undefined,
-          valueWithGST: "",
-          valueWithoutGST: "",
+          valueWithGst: "",
+          valueWithoutGst: "",
         }));
       appendForwarder(newInvoices);
     } else if (value < currentInvoices.length) {
@@ -126,7 +93,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
 
   const handleTransporterCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
-    setValue("shippingDetails.numberOfTransporterInvoices", value, {
+    setValue("shippingDetails.noOftransportinvoices", value, {
       shouldDirty: true,
     });
     const currentInvoices = formValues.transporterInvoices || [];
@@ -135,10 +102,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         .fill(null)
         .map(() => ({
           invoiceNumber: "",
-          uploadTransporterInvoice: "",
+          uploadInvoiceUr: "",
           date: undefined,
-          valueWithGST: "",
-          valueWithoutGST: "",
+          valueWithGst: "",
+          valueWithoutGst: "",
         }));
       appendTransporter(newInvoices);
     } else if (value < currentInvoices.length) {
@@ -261,7 +228,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         {/* Number of Forwarder Invoices */}
         <FormField
           control={control}
-          name="shippingDetails.numberOfForwarderInvoices"
+          name="shippingDetails.noOfForwarderinvoices"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Number of Forwarder Invoices</FormLabel>
@@ -319,7 +286,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadForwarderInvoice`}
+                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`}
                         render={({ field }) => (
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
@@ -337,7 +304,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                   size="sm"
                                   onClick={() =>
                                     setValue(
-                                      `shippingDetails.forwarderInvoices[${index}].uploadForwarderInvoice`,
+                                      `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`,
                                       "",
                                       { shouldDirty: true }
                                     )
@@ -356,7 +323,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     if (file) {
                                       handleFileUpload(
                                         file,
-                                        `shippingDetails.forwarderInvoices[${index}].uploadForwarderInvoice`
+                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`
                                       );
                                     }
                                   }}
@@ -412,26 +379,32 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithGST`}
+                        name={`shippingDetails.forwarderInvoices[${index}].valueWithGst`}
                         render={({ field }) => (
-                          <Input
-                            placeholder="eg. 11800"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
+                          <FormControl>
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
                         )}
                       />
                     </TableCell>
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGST`}
+                        name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGst`}
                         render={({ field }) => (
-                          <Input
-                            placeholder="eg. 11800"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
+                          <FormControl>
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
                         )}
                       />
                     </TableCell>
@@ -484,7 +457,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         {/* Number of Transporter Invoices */}
         <FormField
           control={control}
-          name="shippingDetails.numberOfTransporterInvoices"
+          name="shippingDetails.noOftransportinvoices"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Number of Transporter Invoices</FormLabel>
@@ -542,7 +515,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].uploadTransporterInvoice`}
+                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`}
                         render={({ field }) => (
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
@@ -560,7 +533,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                   size="sm"
                                   onClick={() =>
                                     setValue(
-                                      `shippingDetails.transporterInvoices[${index}].uploadTransporterInvoice`,
+                                      `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`,
                                       "",
                                       { shouldDirty: true }
                                     )
@@ -579,7 +552,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     if (file) {
                                       handleFileUpload(
                                         file,
-                                        `shippingDetails.transporterInvoices[${index}].uploadTransporterInvoice`
+                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`
                                       );
                                     }
                                   }}
@@ -635,26 +608,32 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithGST`}
+                        name={`shippingDetails.transporterInvoices[${index}].valueWithGst`}
                         render={({ field }) => (
-                          <Input
-                            placeholder="eg. 11800"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
+                          <FormControl>
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
                         )}
                       />
                     </TableCell>
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithoutGST`}
+                        name={`shippingDetails.transporterInvoices[${index}].valueWithoutGst`}
                         render={({ field }) => (
-                          <Input
-                            placeholder="eg. 11800"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
+                          <FormControl>
+                            <Input
+                              placeholder="eg. 11800"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value)}
+                            />
+                          </FormControl>
                         )}
                       />
                     </TableCell>
@@ -686,7 +665,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
               <Textarea
                 placeholder="e.g., this is some random comment"
                 {...field}
-                onBlur={() => (getValues())}
+                onBlur={() => getValues()}
               />
             </FormControl>
             <FormMessage />
