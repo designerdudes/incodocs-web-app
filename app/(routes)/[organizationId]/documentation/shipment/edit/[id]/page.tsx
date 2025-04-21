@@ -1,3 +1,4 @@
+
 "use client";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -20,12 +21,44 @@ import { parseISO } from "date-fns";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 
+// Type for backend ShippingBill data
+type BackendShippingBill = {
+  shippingBillUrl?: string;
+  uploadShippingBill?: string;
+  shippingBillNumber?: string;
+  shippingBillDate?: string;
+  drawbackValue?: string;
+  rodtepValue?: string;
+  _id?: string;
+};
+
+// Type for backend addProductDetails
+type BackendProductDetails = {
+  productCategory?: string;
+  graniteAndMarble?: string;
+  tiles?: {
+    noOfBoxes?: number;
+    noOfPiecesPerBoxes?: number;
+    sizePerTile?: {
+      length?: { value?: number; units?: "inch" | "cm" };
+      breadth?: { value?: number; units?: "inch" | "cm" };
+    };
+  };
+  slabs?: {
+    noOfBundles?: number;
+    noOfSlabsPerBundle?: number;
+    uploadMeasurementSheetUrl?: string;
+    totalSQMTRorSQFTwithAllowance?: string;
+    totalSQMTRorSMFTwithoutAllowance?: string;
+  };
+};
+
 const formSchema = z.object({
   shipmentId: z.string().optional(),
   organizationId: z.string().optional(),
   bookingDetails: z
     .object({
-      invoiceNumber: z.string().min(1, "Invoice Number is required"),
+      invoiceNumber: z.string().optional(),
       bookingNumber: z.string().optional(),
       portOfLoading: z.string().optional(),
       destinationPort: z.string().optional(),
@@ -35,9 +68,10 @@ const formSchema = z.object({
       containers: z
         .array(
           z.object({
+            type: z.string().optional(),
             containerNumber: z.string().optional(),
             truckNumber: z.string().optional(),
-            truckDriverContactNumber: z.any().optional(),
+            truckDriverContactNumber: z.number().optional(),
             addProductDetails: z
               .object({
                 productCategory: z.string().optional(),
@@ -51,17 +85,26 @@ const formSchema = z.object({
                         length: z
                           .object({
                             value: z.number().optional(),
-                            units: z.string().optional(),
+                            units: z.enum(["inch", "cm"]).optional(),
                           })
                           .optional(),
                         breadth: z
                           .object({
                             value: z.number().optional(),
-                            units: z.string().optional(),
+                            units: z.enum(["inch", "cm"]).optional(),
                           })
                           .optional(),
                       })
                       .optional(),
+                  })
+                  .optional(),
+                slabs: z
+                  .object({
+                    noOfBundles: z.number().optional(),
+                    noOfSlabsPerBundle: z.number().optional(),
+                    uploadMeasurementSheetUrl: z.string().optional(),
+                    totalSQMTRorSQFTwithAllowance: z.string().optional(),
+                    totalSQMTRorSMFTwithoutAllowance: z.string().optional(),
                   })
                   .optional(),
               })
@@ -93,7 +136,12 @@ const formSchema = z.object({
   shippingDetails: z
     .object({
       review: z.string().optional(),
-      transporterName: z.any().optional(),
+      transporterName: z
+        .any()
+        .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+          message: "transporterName must be a valid ObjectId or empty",
+        })
+        .optional(),
       noOftransportinvoices: z.number().optional(),
       transporterInvoices: z
         .array(
@@ -101,12 +149,27 @@ const formSchema = z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUr: z.any().optional(),
             date: z.any().optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional(),
+            valueWithGst: z
+              .union([
+                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z.number().transform((val) => (isNaN(val) ? undefined : val)),
+              ])
+              .optional(),
+            valueWithoutGst: z
+              .union([
+                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z.number().transform((val) => (isNaN(val) ? undefined : val)),
+              ])
+              .optional(),
           })
         )
         .optional(),
-      forwarderName: z.any().optional(),
+      forwarderName: z
+        .any()
+        .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+          message: "forwarderName must be a valid ObjectId or empty",
+        })
+        .optional(),
       noOfForwarderinvoices: z.number().optional(),
       forwarderInvoices: z
         .array(
@@ -114,8 +177,18 @@ const formSchema = z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUr: z.any().optional(),
             date: z.any().optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional(),
+            valueWithGst: z
+              .union([
+                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z.number().transform((val) => (isNaN(val) ? undefined : val)),
+              ])
+              .optional(),
+            valueWithoutGst: z
+              .union([
+                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z.number().transform((val) => (isNaN(val) ? undefined : val)),
+              ])
+              .optional(),
           })
         )
         .optional(),
@@ -125,7 +198,12 @@ const formSchema = z.object({
     .object({
       clearance: z
         .object({
-          supplierName: z.string().optional(),
+          supplierName: z
+            .any()
+            .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+              message: "supplierName must be a valid ObjectId or empty",
+            })
+            .optional(),
           noOfInvoices: z.number().optional(),
           invoices: z
             .array(
@@ -231,16 +309,16 @@ export default function EditShipmentPage({ params }: Props) {
       },
       shippingDetails: {
         review: "",
-        transporterName: "",
+        transporterName: null,
         noOftransportinvoices: 0,
         transporterInvoices: [],
-        forwarderName: "",
+        forwarderName: null,
         noOfForwarderinvoices: 0,
         forwarderInvoices: [],
       },
       supplierDetails: {
         clearance: {
-          supplierName: "",
+          supplierName: null,
           noOfInvoices: 0,
           invoices: [],
         },
@@ -275,7 +353,10 @@ export default function EditShipmentPage({ params }: Props) {
       ],
     },
   });
-  const { watch, formState: { errors } } = methods;
+  const {
+    watch,
+    formState: { errors },
+  } = methods;
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
 
   const steps = useMemo(
@@ -331,19 +412,32 @@ export default function EditShipmentPage({ params }: Props) {
     [params.id]
   );
 
-  const handleUpdateAndNext = async (data: FormValues, isIntentional: boolean) => {
+  const handleUpdateAndNext = async (
+    data: FormValues,
+    isIntentional: boolean
+  ) => {
     if (isProductDetailsOpen || !isIntentional) {
-      console.log("handleUpdateAndNext blocked: isProductDetailsOpen =", isProductDetailsOpen, "isIntentional =", isIntentional);
+      console.log(
+        "handleUpdateAndNext blocked: isProductDetailsOpen =",
+        isProductDetailsOpen,
+        "isIntentional =",
+        isIntentional
+      );
       return;
     }
-    console.log("handleUpdateAndNext called with data:", JSON.stringify(data, null, 2));
+    console.log(
+      "handleUpdateAndNext called with data:",
+      JSON.stringify(data, null, 2)
+    );
     console.trace("handleUpdateAndNext call stack");
     const currentField = steps[currentStep].field;
     console.log("Current field:", currentField);
 
     try {
       console.log("Starting validation for:", currentField);
-      const isValid = await methods.trigger(currentField, { shouldFocus: true });
+      const isValid = await methods.trigger(currentField, {
+        shouldFocus: true,
+      });
       console.log("Validation result:", isValid);
       console.log("Form errors:", JSON.stringify(errors, null, 2));
 
@@ -356,20 +450,28 @@ export default function EditShipmentPage({ params }: Props) {
             fieldErrors?.[Object.keys(fieldErrors)[0]]?.message ||
             errorMessage;
         }
-        toast.error(`Validation failed for ${steps[currentStep].name}: ${errorMessage}`);
+        toast.error(
+          `Validation failed for ${steps[currentStep].name}: ${errorMessage}`
+        );
         return;
       }
 
       console.log("Validation passed, proceeding to API call");
 
       const apiEndpoints: Record<keyof FormValues, string> = {
-        bookingDetails: "https://incodocs-server.onrender.com/shipment/booking-details",
-        shippingDetails: "https://incodocs-server.onrender.com/shipment/shipping-details",
-        shippingBillDetails: "https://incodocs-server.onrender.com/shipment/shipping-bill-details",
-        supplierDetails: "https://incodocs-server.onrender.com/shipment/supplier-details",
-        saleInvoiceDetails: "https://incodocs-server.onrender.com/shipment/sale-invoice-details",
+        bookingDetails:
+          "https://incodocs-server.onrender.com/shipment/booking-details",
+        shippingDetails:
+          "https://incodocs-server.onrender.com/shipment/shipping-details",
+        shippingBillDetails:
+          "https://incodocs-server.onrender.com/shipment/shipping-bill-details",
+        supplierDetails:
+          "https://incodocs-server.onrender.com/shipment/supplier-details",
+        saleInvoiceDetails:
+          "https://incodocs-server.onrender.com/shipment/sale-invoice-details",
         blDetails: "https://incodocs-server.onrender.com/shipment/bl-details",
-        otherDetails: "https://incodocs-server.onrender.com/shipment/other-details",
+        otherDetails:
+          "https://incodocs-server.onrender.com/shipment/other-details",
         shipmentId: "",
         organizationId: "",
       };
@@ -383,16 +485,77 @@ export default function EditShipmentPage({ params }: Props) {
       if (currentField === "bookingDetails") {
         payload.bookingDetails = {
           ...data.bookingDetails,
-          containers: data.bookingDetails?.containers?.map((container) => ({
-            ...container,
-            trukDriverContactNumber: container.truckDriverContactNumber || "",
-            truckDriverContactNumber: undefined,
-          })) || [],
+          containers:
+            data.bookingDetails?.containers?.map((container) => ({
+              ...container,
+              truckDriverContactNumber: container.truckDriverContactNumber || undefined,
+              trukDriverContactNumber: undefined,
+              addProductDetails: container.addProductDetails ? [container.addProductDetails] : [],
+            })) || [],
         };
+      } else if (currentField === "shippingDetails") {
+        payload.shippingDetails = {
+          ...data.shippingDetails,
+          transporterName:
+            data.shippingDetails?.transporterName &&
+            /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
+              ? data.shippingDetails.transporterName
+              : null,
+          forwarderName:
+            data.shippingDetails?.forwarderName &&
+            /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
+              ? data.shippingDetails.forwarderName
+              : null,
+          transporterInvoices:
+            data.shippingDetails?.transporterInvoices?.map((invoice) => ({
+              ...invoice,
+              valueWithGst: invoice.valueWithGst ? parseFloat(invoice.valueWithGst.toString()) : undefined,
+              valueWithoutGst: invoice.valueWithoutGst ? parseFloat(invoice.valueWithoutGst.toString()) : undefined,
+            })) || [],
+          forwarderInvoices:
+            data.shippingDetails?.forwarderInvoices?.map((invoice) => ({
+              ...invoice,
+              valueWithGst: invoice.valueWithGst ? parseFloat(invoice.valueWithGst.toString()) : undefined,
+              valueWithoutGst: invoice.valueWithoutGst ? parseFloat(invoice.valueWithoutGst.toString()) : undefined,
+            })) || [],
+        };
+      } else if (currentField === "shippingBillDetails") {
+        payload.shippingBillDetails = {
+          ...data.shippingBillDetails,
+          bills:
+            data.shippingBillDetails?.bills?.map((bill) => ({
+              ...bill,
+              uploadShippingBill: bill.uploadShippingBill || "",
+              shippingBillDate:
+                bill.shippingBillDate instanceof Date
+                  ? bill.shippingBillDate.toISOString()
+                  : bill.shippingBillDate,
+            })) || [],
+        };
+      } else if (currentField === "supplierDetails") {
+        payload.supplierDetails = {
+          ...data.supplierDetails,
+          clearance: {
+            ...data.supplierDetails?.clearance,
+            supplierName:
+              data.supplierDetails?.clearance?.supplierName &&
+              /^[0-9a-fA-F]{24}$/.test(data.supplierDetails.clearance.supplierName)
+                ? data.supplierDetails.clearance.supplierName
+                : null,
+          },
+          actual: {
+            ...data.supplierDetails?.actual,
+            actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
+          },
+        };
+        console.log("SupplierDetails payload:", JSON.stringify(payload.supplierDetails, null, 2));
       }
 
       const apiUrl = apiEndpoints[currentField as keyof FormValues];
-      console.log(`Calling API: ${apiUrl} with payload:`, JSON.stringify(payload, null, 2));
+      console.log(
+        `Calling API: ${apiUrl} with payload:`,
+        JSON.stringify(payload, null, 2)
+      );
 
       const response = await fetch(apiUrl, {
         method: "POST",
@@ -413,59 +576,115 @@ export default function EditShipmentPage({ params }: Props) {
       if (updatedData[currentField]) {
         let updatedSectionData: any;
 
-        if (currentField !== "otherDetails" && currentField !== "shipmentId" && currentField !== "organizationId") {
+        if (
+          currentField !== "otherDetails" &&
+          currentField !== "shipmentId" &&
+          currentField !== "organizationId"
+        ) {
           updatedSectionData = {
             ...(data[currentField] as object),
             ...(updatedData[currentField] as object),
           };
 
           if (currentField === "bookingDetails") {
-            updatedSectionData.vesselSailingDate = updatedData.bookingDetails.vesselSailingDate
+            updatedSectionData.vesselSailingDate = updatedData.bookingDetails
+              .vesselSailingDate
               ? parseISO(updatedData.bookingDetails.vesselSailingDate)
               : undefined;
-            updatedSectionData.vesselArrivingDate = updatedData.bookingDetails.vesselArrivingDate
+            updatedSectionData.vesselArrivingDate = updatedData.bookingDetails
+              .vesselArrivingDate
               ? parseISO(updatedData.bookingDetails.vesselArrivingDate)
               : undefined;
-            updatedSectionData.containers = updatedData.bookingDetails.containers?.map(
-              (container: any) => ({
+            updatedSectionData.containers =
+              updatedData.bookingDetails.containers?.map((container: any) => ({
                 ...container,
-                truckDriverContactNumber: container.trukDriverContactNumber || "",
+                truckDriverContactNumber:
+                  container.truckDriverContactNumber || container.trukDriverContactNumber || undefined,
                 trukDriverContactNumber: undefined,
-              })
-            ) || [];
+                addProductDetails: Array.isArray(container.addProductDetails)
+                  ? container.addProductDetails[0] || {
+                      productCategory: "",
+                      graniteAndMarble: "",
+                      tiles: {
+                        noOfBoxes: 0,
+                        noOfPiecesPerBoxes: 0,
+                        sizePerTile: {
+                          length: { value: 0, units: "" },
+                          breadth: { value: 0, units: "" },
+                        },
+                      },
+                      slabs: {
+                        noOfBundles: 0,
+                        noOfSlabsPerBundle: 0,
+                        uploadMeasurementSheetUrl: "",
+                        totalSQMTRorSQFTwithAllowance: "",
+                        totalSQMTRorSMFTwithoutAllowance: "",
+                      },
+                    }
+                  : container.addProductDetails || {
+                      productCategory: "",
+                      graniteAndMarble: "",
+                      tiles: {
+                        noOfBoxes: 0,
+                        noOfPiecesPerBoxes: 0,
+                        sizePerTile: {
+                          length: { value: 0, units: "" },
+                          breadth: { value: 0, units: "" },
+                        },
+                      },
+                      slabs: {
+                        noOfBundles: 0,
+                        noOfSlabsPerBundle: 0,
+                        uploadMeasurementSheetUrl: "",
+                        totalSQMTRorSQFTwithAllowance: "",
+                        totalSQMTRorSMFTwithoutAllowance: "",
+                      },
+                    },
+              })) || [];
           } else if (currentField === "shippingBillDetails") {
             updatedSectionData.bills = updatedData.shippingBillDetails.bills?.map((bill: any) => ({
               ...bill,
               shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
+              uploadShippingBill: bill.uploadShippingBill || bill.shippingBillUrl || "",
             })) || [];
           } else if (currentField === "shippingDetails") {
-            updatedSectionData.shippingLineInvoices = updatedData.shippingDetails.shippingLineInvoices?.map(
-              (invoice: any) => ({
-                ...invoice,
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-              })
-            ) || [];
-            updatedSectionData.forwarderInvoices = updatedData.shippingDetails.forwarderInvoices?.map(
-              (invoice: any) => ({
-                ...invoice,
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-              })
-            ) || [];
-            updatedSectionData.transporterInvoices = updatedData.shippingDetails.transporterInvoices?.map(
-              (invoice: any) => ({
-                ...invoice,
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-              })
-            ) || [];
+            updatedSectionData.transporterInvoices =
+              updatedData.shippingDetails.transporterInvoices?.map(
+                (invoice: any) => ({
+                  ...invoice,
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
+                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                })
+              ) || [];
+            updatedSectionData.forwarderInvoices =
+              updatedData.shippingDetails.forwarderInvoices?.map(
+                (invoice: any) => ({
+                  ...invoice,
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
+                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                })
+              ) || [];
           } else if (currentField === "supplierDetails") {
-            updatedSectionData.clearance.invoices = updatedData.supplierDetails.clearance.invoices?.map(
-              (invoice: any) => ({
-                ...invoice,
-                supplierInvoiceDate: invoice.supplierInvoiceDate
-                  ? parseISO(invoice.supplierInvoiceDate)
-                  : undefined,
-              })
-            ) || [];
+            updatedSectionData.clearance.invoices =
+              updatedData.supplierDetails.clearance.invoices?.map(
+                (invoice: any) => ({
+                  ...invoice,
+                  supplierInvoiceDate: invoice.supplierInvoiceDate
+                    ? parseISO(invoice.supplierInvoiceDate)
+                    : undefined,
+                })
+              ) || [];
+            updatedSectionData.clearance.supplierName =
+              typeof updatedData.supplierDetails?.clearance?.supplierName === "object"
+                ? updatedData.supplierDetails?.clearance?.supplierName?._id || null
+                : updatedData.supplierDetails?.clearance?.supplierName &&
+                  /^[0-9a-fA-F]{24}$/.test(updatedData.supplierDetails.clearance.supplierName)
+                ? updatedData.supplierDetails.clearance.supplierName
+                : null;
+            updatedSectionData.actual.actualSupplierName =
+              updatedData.supplierDetails?.actual?.actualSupplierName || "";
           } else if (currentField === "blDetails") {
             updatedSectionData.blDate = updatedData.blDetails.blDate
               ? parseISO(updatedData.blDetails.blDate)
@@ -475,10 +694,11 @@ export default function EditShipmentPage({ params }: Props) {
               : undefined;
           }
         } else if (currentField === "otherDetails") {
-          updatedSectionData = updatedData.otherDetails?.map((item: any) => ({
-            ...item,
-            date: item.date ? parseISO(item.date) : undefined,
-          })) || [];
+          updatedSectionData =
+            updatedData.otherDetails?.map((item: any) => ({
+              ...item,
+              date: item.date ? parseISO(item.date) : undefined,
+            })) || [];
         } else {
           updatedSectionData = updatedData[currentField];
         }
@@ -541,34 +761,68 @@ export default function EditShipmentPage({ params }: Props) {
             numberOfContainer: data.bookingDetails?.containers?.length || 0,
             containers:
               data.bookingDetails?.containers?.map((container: any) => ({
+                type: container.type || "",
                 containerNumber: container.containerNumber || "",
                 truckNumber: container.truckNumber || "",
                 truckDriverContactNumber:
-                  container.trukDriverContactNumber ||
-                  container.truckDriverContactNumber ||
-                  "",
-                addProductDetails: container.addProductDetails || {
-                  productCategory: "",
-                  graniteAndMarble: "",
-                  tiles: {
-                    noOfBoxes: 0,
-                    noOfPiecesPerBoxes: 0,
-                    sizePerTile: {
-                      length: { value: 0, units: "" },
-                      breadth: { value: 0, units: "" },
+                  container.truckDriverContactNumber || container.trukDriverContactNumber || undefined,
+                addProductDetails: Array.isArray(container.addProductDetails)
+                  ? container.addProductDetails[0] || {
+                      productCategory: "",
+                      graniteAndMarble: "",
+                      tiles: {
+                        noOfBoxes: 0,
+                        noOfPiecesPerBoxes: 0,
+                        sizePerTile: {
+                          length: { value: 0, units: "" },
+                          breadth: { value: 0, units: "" },
+                        },
+                      },
+                      slabs: {
+                        noOfBundles: 0,
+                        noOfSlabsPerBundle: 0,
+                        uploadMeasurementSheetUrl: "",
+                        totalSQMTRorSQFTwithAllowance: "",
+                        totalSQMTRorSMFTwithoutAllowance: "",
+                      },
+                    }
+                  : container.addProductDetails || {
+                      productCategory: "",
+                      graniteAndMarble: "",
+                      tiles: {
+                        noOfBoxes: 0,
+                        noOfPiecesPerBoxes: 0,
+                        sizePerTile: {
+                          length: { value: 0, units: "" },
+                          breadth: { value: 0, units: "" },
+                        },
+                      },
+                      slabs: {
+                        noOfBundles: 0,
+                        noOfSlabsPerBundle: 0,
+                        uploadMeasurementSheetUrl: "",
+                        totalSQMTRorSQFTwithAllowance: "",
+                        totalSQMTRorSMFTwithoutAllowance: "",
+                      },
                     },
-                  },
-                },
               })) || [],
           },
           shippingBillDetails: {
             portCode: data.shippingBillDetails?.portCode || "",
             cbName: data.shippingBillDetails?.cbName || "",
             cbCode: data.shippingBillDetails?.cbCode || "",
-            numberOFShippingBill: data.shippingBillDetails?.bills?.length || 0,
+            numberOFShippingBill:
+              data.shippingBillDetails?.ShippingBills?.length ||
+              data.shippingBillDetails?.bills?.length ||
+              0,
             bills:
-              data.shippingBillDetails?.bills?.map((bill: any) => ({
-                uploadShippingBill: bill.uploadShippingBill || bill.shippingBillUrl || "",
+              (
+                data.shippingBillDetails?.ShippingBills ||
+                data.shippingBillDetails?.bills ||
+                []
+              )?.map((bill: BackendShippingBill) => ({
+                uploadShippingBill:
+                  bill.uploadShippingBill || bill.shippingBillUrl || "",
                 shippingBillNumber: bill.shippingBillNumber || "",
                 shippingBillDate: bill.shippingBillDate
                   ? parseISO(bill.shippingBillDate)
@@ -581,49 +835,62 @@ export default function EditShipmentPage({ params }: Props) {
             review: data.shippingDetails?.review || "",
             transporterName:
               typeof data.shippingDetails?.transporterName === "object"
-                ? data.shippingDetails?.transporterName?._id ||
-                  data.shippingDetails?.transporterName?.name ||
-                  ""
-                : data.shippingDetails?.transporterName || "",
+                ? data.shippingDetails?.transporterName?._id || null
+                : data.shippingDetails?.transporterName &&
+                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
+                ? data.shippingDetails.transporterName
+                : null,
             noOftransportinvoices:
               data.shippingDetails?.noOftransportinvoices ||
               data.shippingDetails?.transporterInvoices?.length ||
               0,
             transporterInvoices:
-              data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
-                invoiceNumber: invoice.invoiceNumber || "",
-                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadTransporterInvoice || "",
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
-                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
-              })) || [],
+              data.shippingDetails?.transporterInvoices?.map(
+                (invoice: any) => ({
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  uploadInvoiceUr:
+                    invoice.uploadInvoiceUr ||
+                    invoice.uploadTransporterInvoice ||
+                    "",
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
+                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                })
+              ) || [],
             forwarderName:
               typeof data.shippingDetails?.forwarderName === "object"
-                ? data.shippingDetails?.forwarderName?._id ||
-                  data.shippingDetails?.forwarderName?.name ||
-                  ""
-                : data.shippingDetails?.forwarderName || "",
+                ? data.shippingDetails?.forwarderName?._id || null
+                : data.shippingDetails?.forwarderName &&
+                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
+                ? data.shippingDetails.forwarderName
+                : null,
             noOfForwarderinvoices:
               data.shippingDetails?.noOfForwarderinvoices ||
               data.shippingDetails?.forwarderInvoices?.length ||
               0,
             forwarderInvoices:
-              data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
-                invoiceNumber: invoice.invoiceNumber || "",
-                uploadInvoiceUr: invoice.uploadInvoiceUr || invoice.uploadForwarderInvoice || "",
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-                valueWithGst: invoice.valueWithGst || invoice.valueWithGST || 0,
-                valueWithoutGst: invoice.valueWithoutGst || invoice.valueWithoutGST || 0,
-              })) || [],
+              data.shippingDetails?.forwarderInvoices?.map(
+                (invoice: any) => ({
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  uploadInvoiceUr:
+                    invoice.uploadInvoiceUr ||
+                    invoice.uploadForwarderInvoice ||
+                    "",
+                  date: invoice.date ? parseISO(invoice.date) : undefined,
+                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
+                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                })
+              ) || [],
           },
           supplierDetails: {
             clearance: {
               supplierName:
                 typeof data.supplierDetails?.clearance?.supplierName === "object"
-                  ? data.supplierDetails?.clearance?.supplierName?._id ||
-                    data.supplierDetails?.clearance?.supplierName?.name ||
-                    ""
-                  : data.supplierDetails?.clearance?.supplierName || "",
+                  ? data.supplierDetails?.clearance?.supplierName?._id || null
+                  : data.supplierDetails?.clearance?.supplierName &&
+                    /^[0-9a-fA-F]{24}$/.test(data.supplierDetails.clearance.supplierName)
+                  ? data.supplierDetails.clearance.supplierName
+                  : null,
               noOfInvoices:
                 data.supplierDetails?.clearance?.invoices?.length || 0,
               invoices:
@@ -644,12 +911,7 @@ export default function EditShipmentPage({ params }: Props) {
                 ) || [],
             },
             actual: {
-              actualSupplierName:
-                typeof data.supplierDetails?.actual?.actualSupplierName === "object"
-                  ? data.supplierDetails?.actual?.actualSupplierName?._id ||
-                    data.supplierDetails?.actual?.actualSupplierName?.name ||
-                    ""
-                  : data.supplierDetails?.actual?.actualSupplierName || "",
+              actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceValue:
                 data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
               actualSupplierInvoiceUrl:
@@ -667,9 +929,15 @@ export default function EditShipmentPage({ params }: Props) {
                 : data.saleInvoiceDetails?.consignee || "",
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
             numberOfSalesInvoices:
-              data.saleInvoiceDetails?.invoice?.length || 0,
+              data.saleInvoiceDetails?.invoice?.length ||
+              data.saleInvoiceDetails?.commercialInvoices?.length ||
+              0,
             invoice:
-              data.saleInvoiceDetails?.invoice?.map((inv: any) => ({
+              (
+                data.saleInvoiceDetails?.invoice ||
+                data.saleInvoiceDetails?.commercialInvoices ||
+                []
+              )?.map((inv: any) => ({
                 commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
                 clearanceCommercialInvoice:
                   inv.clearanceCommercialInvoice || "",
@@ -710,6 +978,7 @@ export default function EditShipmentPage({ params }: Props) {
                 ],
         };
 
+        console.log("Mapped form values:", JSON.stringify(updatedValues, null, 2));
         methods.reset(updatedValues);
       } catch (error) {
         console.error("Error fetching shipment data:", error);
@@ -758,10 +1027,17 @@ export default function EditShipmentPage({ params }: Props) {
           type="button"
           onClick={() => {
             console.log("Update & Next button clicked");
+            const supplierName = methods.getValues("supplierDetails.clearance.supplierName");
+            const actualSupplierName = methods.getValues("supplierDetails.actual.actualSupplierName");
+            console.log("SupplierName before submit:", supplierName);
+            console.log("ActualSupplierName before submit:", actualSupplierName);
             methods.handleSubmit(
               (data) => handleUpdateAndNext(data, true),
               (err) => {
-                console.log("Form submission errors:", JSON.stringify(err, null, 2));
+                console.log(
+                  "Form submission errors:",
+                  JSON.stringify(err, null, 2)
+                );
                 toast.error(`Please fix errors in ${steps[currentStep].name}`);
               }
             )();
@@ -778,13 +1054,20 @@ export default function EditShipmentPage({ params }: Props) {
             onSubmit={(e) => {
               e.preventDefault();
               if (isProductDetailsOpen) {
-                console.log("Parent form submission blocked: isProductDetailsOpen =", isProductDetailsOpen);
+                console.log(
+                  "Parent form submission blocked: isProductDetailsOpen =",
+                  isProductDetailsOpen
+                );
                 return;
               }
-              console.log("Parent form submitted via Enter key or intentional submission");
-              methods.handleSubmit(
-                (data) => handleUpdateAndNext(data, true)
-              )();
+              console.log(
+                "Parent form submitted via Enter key or intentional submission"
+              );
+              const supplierName = methods.getValues("supplierDetails.clearance.supplierName");
+              const actualSupplierName = methods.getValues("supplierDetails.actual.actualSupplierName");
+              console.log("SupplierName on form submit:", supplierName);
+              console.log("ActualSupplierName on form submit:", actualSupplierName);
+              methods.handleSubmit((data) => handleUpdateAndNext(data, true))();
             }}
             className="flex flex-col gap-3 w-full p-3"
           >

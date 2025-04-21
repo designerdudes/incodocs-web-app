@@ -27,7 +27,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import toast from "react-hot-toast";
-import { Textarea } from "@/components/ui/textarea";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
@@ -42,8 +41,9 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
     name: "shippingBillDetails.bills",
   });
 
-  // Watch form values
+  // Watch form values for debugging
   const formValues = watch("shippingBillDetails");
+  console.log("ShippingBillDetails form values:", formValues);
 
   // Handle Number of Shipping Bills Change
   const handleShippingBillCountChange = (value: number) => {
@@ -99,6 +99,20 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
     }
   };
 
+  // Format cbName if it's a date
+  const formatCbName = (cbName: string | undefined) => {
+    if (!cbName) return "";
+    try {
+      const date = new Date(cbName);
+      if (!isNaN(date.getTime())) {
+        return format(date, "yyyy-MM-dd");
+      }
+      return cbName;
+    } catch {
+      return cbName;
+    }
+  };
+
   return (
     <div className="grid grid-cols-4 gap-3">
       {/* Port Code */}
@@ -110,7 +124,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
             <FormLabel>Port Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. 123456"
+                placeholder="e.g. SB101"
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
@@ -130,10 +144,11 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
             <FormLabel>CB Name</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. John Doe"
+                placeholder="e.g. John Doe"
                 className="uppercase"
                 {...field}
-                value={field.value ?? ""}
+                value={formatCbName(field.value)}
+                onChange={(e) => field.onChange(e.target.value)}
               />
             </FormControl>
             <FormMessage />
@@ -150,7 +165,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
             <FormLabel>CB Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="eg. CB123"
+                placeholder="e.g. CB123"
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
@@ -276,7 +291,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="Bill Number"
+                              placeholder="e.g. 34583"
                               className="uppercase"
                               {...field}
                               value={field.value ?? ""}
@@ -297,7 +312,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value
+                                  {field.value instanceof Date && !isNaN(field.value.getTime())
                                     ? format(field.value, "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -307,10 +322,9 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value}
-                                onSelect={(date) =>
-                                  field.onChange(date?.toISOString())
-                                }
+                                selected={field.value instanceof Date ? field.value : undefined}
+                                onSelect={(date) => field.onChange(date)}
+                                initialFocus
                               />
                             </PopoverContent>
                           </Popover>
@@ -327,7 +341,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="525121"
+                              placeholder="e.g. 2394"
                               {...field}
                               value={field.value ?? ""}
                             />
@@ -345,7 +359,7 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="446656"
+                              placeholder="e.g. 446656"
                               {...field}
                               value={field.value ?? ""}
                             />
@@ -371,24 +385,6 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
           </Table>
         </div>
       )}
-      {/* Review */}
-      <FormField
-        control={control}
-        name="shippingDetails.review"
-        render={({ field }) => (
-          <FormItem className="col-span-4">
-            <FormLabel>Remarks</FormLabel>
-            <FormControl>
-              <Textarea
-                placeholder="e.g., this is some random comment"
-                {...field}
-                onBlur={() => getValues()}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
     </div>
   );
 }
