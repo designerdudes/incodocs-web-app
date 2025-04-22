@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
@@ -37,7 +38,7 @@ const formSchema = z.object({
     location: z.string().min(1, { message: "Location is required" }),
     pincode: z
       .number()
-      .min(6, { message: "Pincode must be at least 6 characters" }),
+      .min(100000, { message: "Pincode must be at least 6 digits" }),
   }),
   workersCuttingPay: z.preprocess(
     (val) => (typeof val === "string" ? parseFloat(val) : val),
@@ -49,18 +50,29 @@ const formSchema = z.object({
   ),
 });
 
-const organizations = [
-  { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
-];
+interface FactoryFormProps {
+  organizationId: string;
+  token: string;
+  organizations?: { id: string; name: string }[]; // Optional prop for dynamic organizations
+}
 
-function FactoryForm() {
+export default function FactoryForm({
+  organizationId,
+  token,
+  organizations = [],
+}: FactoryFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Fallback to hardcoded organizations if none provided
+  const orgList = organizations.length > 0
+    ? organizations
+    : [{ id: organizationId, name: "Organization Jabal" }];
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       factoryName: "",
-      organizationId: "",
+      organizationId, // Preselect the organization
       gstNo: "",
       address: {
         location: "",
@@ -85,7 +97,7 @@ function FactoryForm() {
         </p>
         <p>
           <strong>Organization:</strong>{" "}
-          {organizations.find((org) => org.id === values.organizationId)?.name}
+          {orgList.find((org) => org.id === values.organizationId)?.name}
         </p>
         <p>
           <strong>GST Number:</strong> {values.gstNo}
@@ -97,12 +109,10 @@ function FactoryForm() {
           <strong>Pincode:</strong> {values.address.pincode}
         </p>
         <p>
-          <strong>Workers Cutting Pay:</strong>
-          {values.workersCuttingPay}
+          <strong>Workers Cutting Pay:</strong> {values.workersCuttingPay}
         </p>
         <p>
-          <strong>Workers Polishing Pay:</strong>
-          {values.workersPolishingPay}
+          <strong>Workers Polishing Pay:</strong> {values.workersPolishingPay}
         </p>
         <div className="flex justify-end space-x-2">
           <Button
@@ -117,19 +127,28 @@ function FactoryForm() {
           <Button
             onClick={async () => {
               try {
-                await postData("/factory/add", {
-                  ...values,
-                  status: "active",
-                });
+                await postData(
+                  "/factory/add",
+                  {
+                    ...values,
+                    status: "active",
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${token}`,
+                    },
+                  }
+                );
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("Factory created/updated successfully");
-                window.location.reload();
+                toast.success("Factory created successfully");
+                form.reset(); // Reset form after submission
+                router.refresh(); // Refresh to update FactorySwitcher
               } catch (error) {
-                console.error("Error creating/updating Factory:", error);
+                console.error("Error creating Factory:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error("Error creating/updating Factory");
+                toast.error("Error creating Factory");
               }
             }}
           >
@@ -151,7 +170,7 @@ function FactoryForm() {
             <FormItem>
               <FormLabel>Factory Name</FormLabel>
               <FormControl>
-                <Input placeholder="Eg: Factory A" {...field} />
+                <Input placeholder="Eg: Factory A" {...field} disabled={isLoading} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -164,12 +183,16 @@ function FactoryForm() {
             <FormItem>
               <FormLabel>Organization</FormLabel>
               <FormControl>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  disabled={isLoading}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select an organization" />
                   </SelectTrigger>
                   <SelectContent>
-                    {organizations.map((org) => (
+                    {orgList.map((org) => (
                       <SelectItem key={org.id} value={org.id}>
                         {org.name}
                       </SelectItem>
@@ -188,7 +211,11 @@ function FactoryForm() {
             <FormItem>
               <FormLabel>GST Number</FormLabel>
               <FormControl>
-                <Input placeholder="Eg: 361AAA90823RFS56" {...field} />
+                <Input
+                  placeholder="Eg: 361AAA90823RFS56"
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -201,7 +228,11 @@ function FactoryForm() {
             <FormItem>
               <FormLabel>Location</FormLabel>
               <FormControl>
-                <Input placeholder="Eg: 343 Main Street" {...field} />
+                <Input
+                  placeholder="Eg: 343 Main Street"
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -225,13 +256,13 @@ function FactoryForm() {
                     }
                   }}
                   min="0"
+                  disabled={isLoading}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {/* Workers Cutting Pay */}
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
@@ -243,7 +274,7 @@ function FactoryForm() {
                   <Input
                     type="number"
                     placeholder="Eg: 1500"
-                    step="any" // Allows decimal values
+                    step="any"
                     value={field.value === 0 ? "" : field.value}
                     onChange={(e) => {
                       const value = Number(e.target.value);
@@ -251,14 +282,14 @@ function FactoryForm() {
                         field.onChange(value);
                       }
                     }}
-                    min="0" // Prevents negative numbers from being input manually
+                    min="0"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          {/* Workers Polishing Pay */}
           <FormField
             control={form.control}
             name="workersPolishingPay"
@@ -269,7 +300,7 @@ function FactoryForm() {
                   <Input
                     type="number"
                     placeholder="Eg: 1200"
-                    step="any" // Allows decimal values
+                    step="any"
                     value={field.value === 0 ? "" : field.value}
                     onChange={(e) => {
                       const value = Number(e.target.value);
@@ -277,7 +308,8 @@ function FactoryForm() {
                         field.onChange(value);
                       }
                     }}
-                    min="0" // Prevents negative numbers from being input manually
+                    min="0"
+                    disabled={isLoading}
                   />
                 </FormControl>
                 <FormMessage />
@@ -293,5 +325,3 @@ function FactoryForm() {
     </Form>
   );
 }
-
-export default FactoryForm;
