@@ -26,7 +26,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
-import { preload } from "react-dom";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
 interface MarkCutAndCreateSlabsFormProps {
   gap: number;
@@ -37,7 +38,7 @@ const formSchema = z.object({
   _id: z.string().optional(),
   numberofSlabs: z
     .number()
-    .min(1, { message: "Number of blocks must be greater than zero" }),
+    .min(1, { message: "Number of slabs must be greater than zero" }),
   slabs: z
     .array(
       z.object({
@@ -67,58 +68,129 @@ export function MarkCutAndCreateSlabsForm({
 }: MarkCutAndCreateSlabsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
-  const [slabsCount, setSlabsCount] = React.useState(0);
+  const [slabs, setSlabs] = React.useState<any[]>([]);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
   const [applyLengthToAll, setApplyLengthToAll] = React.useState(false);
   const [applyHeightToAll, setApplyHeightToAll] = React.useState(false);
+  const [showConfirmation, setShowConfirmation] = React.useState(false);
+  const [slabCountToBeDeleted, setSlabCountToBeDeleted] = React.useState<
+    number | null
+  >(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       _id: BlockData?._id || "",
-      numberofSlabs: BlockData?.numberofSlabs || "",
-      slabs: BlockData?.slabs || [],
+      numberofSlabs: BlockData?.numberofSlabs || 1,
+      slabs: BlockData?.slabs || [
+        {
+          dimensions: {
+            length: { value: 0, units: "inch" },
+            height: { value: 0, units: "inch" },
+            status: "readyForPolish",
+          },
+        },
+      ],
     },
   });
 
-  function handleSlabsInputChange(value: any) {
-    const count = parseInt(value, 10);
-    if (!isNaN(count) && count > 0) {
-      setSlabsCount(count);
-      const defaultDimensions = {
-        length: { value: 0, units: "inch" as "inch" },
-        height: { value: 0, units: "inch" as "inch" },
-        status: "readyForPolish" as "readyForPolish",
-      };
-      form.setValue(
-        "slabs",
-        Array.from({ length: count }, () => ({ dimensions: defaultDimensions }))
-      );
-    } else {
-      setSlabsCount(0);
-      form.setValue("slabs", []);
-    }
-  }
+  const { control, setValue, watch, getValues } = form;
 
+  // Sync slabs state with form on mount
+  React.useEffect(() => {
+    const formSlabs = watch("slabs") || [];
+    if (formSlabs.length > 0) {
+      setSlabs(formSlabs);
+    }
+  }, [watch]);
+
+  // Save progress to localStorage
+  const saveProgressSilently = (data: any) => {
+    try {
+      localStorage.setItem("slabsFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+    } catch (error) {
+      console.error("Failed to save progress to localStorage:", error);
+    }
+  };
+
+  // Handle slab count changes
+  const handleSlabCountChange = (value: string) => {
+    const newCount = Number(value);
+
+    if (newCount < slabs.length) {
+      setShowConfirmation(true);
+      setSlabCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "slabs",
+        createNewItem: () => ({
+          dimensions: {
+            length: { value: 0, units: "inch" },
+            height: { value: 0, units: "inch" },
+            status: "readyForPolish",
+          },
+        }),
+        customFieldSetters: {
+          slabs: (items, setValue) => {
+            setValue("numberofSlabs", items.length);
+            setSlabs(items);
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  };
+
+  // Handle confirmation for reducing slab count
+  const handleConfirmChange = () => {
+    if (slabCountToBeDeleted !== null) {
+      const updatedSlabs = slabs.slice(0, slabCountToBeDeleted);
+      setSlabs(updatedSlabs);
+      setValue("slabs", updatedSlabs);
+      setValue("numberofSlabs", updatedSlabs.length);
+      saveProgressSilently(getValues());
+      setSlabCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
+  };
+
+  // Handle slab deletion
+  const handleDeleteRow = (index: number) => {
+    const updatedSlabs = slabs.filter((_, i) => i !== index);
+    setSlabs(updatedSlabs);
+    setValue("slabs", updatedSlabs);
+    setValue("numberofSlabs", updatedSlabs.length);
+    saveProgressSilently(getValues());
+  };
+
+  // Apply global dimensions
   React.useEffect(() => {
     if (applyLengthToAll || applyHeightToAll) {
-      const updatedSlabs = form.getValues("slabs") || [];
-      const newSlabs = updatedSlabs.map((slab) => ({
+      const updatedSlabs = slabs.map((slab) => ({
         dimensions: {
           ...slab.dimensions,
           length: applyLengthToAll
-            ? { value: Number(globalLength) || 0, units: "inch" as "inch" }
+            ? { value: parseFloat(globalLength) || 0.1, units: "inch" }
             : slab.dimensions.length,
           height: applyHeightToAll
-            ? { value: Number(globalHeight) || 0, units: "inch" as "inch" }
+            ? { value: parseFloat(globalHeight) || 0.1, units: "inch" }
             : slab.dimensions.height,
+          status: slab.dimensions.status,
         },
       }));
-      form.setValue("slabs", newSlabs, { shouldValidate: true });
+      setSlabs(updatedSlabs);
+      setValue("slabs", updatedSlabs, { shouldValidate: true });
+      saveProgressSilently(getValues());
     }
-  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, form]);
+  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, setValue]);
 
+  // Calculate square footage
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
@@ -126,13 +198,17 @@ export function MarkCutAndCreateSlabsForm({
     return area > 0 ? area.toFixed(2) : "0.00";
   }
 
-  function handleDeleteRow(index: number) {
-    const updatedSlabs = [...form.getValues("slabs")];
-    updatedSlabs.splice(index, 1);
-    setSlabsCount(updatedSlabs.length);
-    form.setValue("slabs", updatedSlabs);
+  // Calculate total square footage
+  function calculateTotalSqft(): string {
+    const totalSqft = slabs.reduce((sum, slab) => {
+      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
+      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
+      return sum + lengthInFeet * heightInFeet;
+    }, 0);
+    return totalSqft.toFixed(2);
   }
 
+  // Form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
@@ -143,13 +219,8 @@ export function MarkCutAndCreateSlabsForm({
           status: "cut",
         }
       );
-
       toast.success("Block data updated successfully");
-
-      // Navigate back to the Processing page
       router.back();
-
-      // Force reload after navigation
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -160,16 +231,6 @@ export function MarkCutAndCreateSlabsForm({
     }
   }
 
-  function calculateTotalSqft(): string {
-    const slabs = form.getValues("slabs") || [];
-    const totalSqft = slabs.reduce((sum, slab) => {
-      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
-      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
-      return sum + lengthInFeet * heightInFeet;
-    }, 0);
-    return totalSqft.toFixed(2); // Round to 2 decimal places
-  }
-
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -177,7 +238,7 @@ export function MarkCutAndCreateSlabsForm({
           <div className={`grid grid-cols-${gap} gap-3`}>
             <FormField
               name="numberofSlabs"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Number of Slabs</FormLabel>
@@ -185,16 +246,20 @@ export function MarkCutAndCreateSlabsForm({
                     <Input
                       type="number"
                       placeholder="Enter number of slabs"
+                      min="1"
                       disabled={isLoading}
-                      value={field.value === 0 ? "" : field.value} // Display empty string if value is 0
                       onChange={(e) => {
-                        const value = parseInt(e.target.value, 10);
-
-                        if (isNaN(value) || value < 0) return; // Prevents negative values
-
-                        field.onChange(value);
-                        handleSlabsInputChange(value);
+                        const value = e.target.value;
+                        if (value === "" || Number(value) < 1) {
+                          field.onChange(1);
+                          handleSlabCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleSlabCountChange(value);
                       }}
+                      value={field.value ?? 1}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -205,11 +270,12 @@ export function MarkCutAndCreateSlabsForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
-                placeholder="Length(inches)"
+                placeholder="Length (inches)"
                 type="number"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium flex items-center mt-2">
                 <input
@@ -223,11 +289,12 @@ export function MarkCutAndCreateSlabsForm({
             </div>
             <div>
               <Input
-                placeholder="Height(inches)"
+                placeholder="Height (inches)"
                 type="number"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium flex items-center mt-2">
                 <input
@@ -240,39 +307,43 @@ export function MarkCutAndCreateSlabsForm({
               </label>
             </div>
           </div>
-          {slabsCount > 0 && (
+          {slabs.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Length(inches)</TableHead>
-                  <TableHead>Height(inches)</TableHead>
+                  <TableHead>Length (inches)</TableHead>
+                  <TableHead>Height (inches)</TableHead>
                   <TableHead>Area (sqft)</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {form.getValues("slabs").map((slab, index) => (
+                {slabs.map((slab, index) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <FormField
                         name={`slabs.${index}.dimensions.length.value`}
-                        control={form.control}
+                        control={control}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
                               <Input
-                                placeholder="Length"
                                 type="number"
+                                min="0.1"
+                                step="0.1"
+                                placeholder="Enter length"
                                 value={slab.dimensions.length.value}
                                 onChange={(e) => {
-                                  const slabs = form.getValues("slabs");
-                                  slabs[index].dimensions.length.value =
-                                    parseFloat(e.target.value) || 0;
-                                  form.setValue("slabs", slabs, {
+                                  const updatedSlabs = [...slabs];
+                                  updatedSlabs[index].dimensions.length.value =
+                                    parseFloat(e.target.value) || 0.1;
+                                  setSlabs(updatedSlabs);
+                                  setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
                                   });
+                                  saveProgressSilently(getValues());
                                 }}
                                 disabled={isLoading}
                               />
@@ -285,21 +356,25 @@ export function MarkCutAndCreateSlabsForm({
                     <TableCell>
                       <FormField
                         name={`slabs.${index}.dimensions.height.value`}
-                        control={form.control}
+                        control={control}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
                               <Input
-                                placeholder="Height"
                                 type="number"
+                                min="0.1"
+                                step="0.1"
+                                placeholder="Enter height"
                                 value={slab.dimensions.height.value}
                                 onChange={(e) => {
-                                  const slabs = form.getValues("slabs");
-                                  slabs[index].dimensions.height.value =
-                                    parseFloat(e.target.value) || 0;
-                                  form.setValue("slabs", slabs, {
+                                  const updatedSlabs = [...slabs];
+                                  updatedSlabs[index].dimensions.height.value =
+                                    parseFloat(e.target.value) || 0.1;
+                                  setSlabs(updatedSlabs);
+                                  setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
                                   });
+                                  saveProgressSilently(getValues());
                                 }}
                                 disabled={isLoading}
                               />
@@ -338,8 +413,16 @@ export function MarkCutAndCreateSlabsForm({
             </Table>
           )}
           <Button type="submit" disabled={isLoading}>
-            Update Slabs
+            {isLoading ? "Submitting..." : "Update Slabs"}
           </Button>
+
+          <ConfirmationDialog
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmChange}
+            title="Are you sure?"
+            description="You are reducing the number of slabs. This action cannot be undone."
+          />
         </form>
       </Form>
     </div>

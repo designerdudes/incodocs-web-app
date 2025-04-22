@@ -1,6 +1,6 @@
 "use client";
-import { useFormContext } from "react-hook-form";
-import React, { useEffect, useState } from "react";
+import { useFormContext, Path } from "react-hook-form";
+import React, { useState, useCallback } from "react";
 import {
   FormControl,
   FormField,
@@ -34,10 +34,40 @@ import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
+// Form data types
+interface Invoice {
+  invoiceNumber: string;
+  uploadInvoiceUrl: string;
+  date: string | null;
+  valueWithGst: string;
+  valueWithoutGst: string;
+}
+
+interface ShippingDetails {
+  forwarderName?: string;
+  transporterName?: string;
+  noOfForwarderinvoices: number;
+  noOftransportinvoices: number;
+  forwarderInvoices: Invoice[];
+  transporterInvoices: Invoice[];
+  review?: string;
+}
+
+interface FormData {
+  shipmentId?: string;
+  shippingDetails: ShippingDetails;
+}
+
+function saveProgressSilently(data: FormData) {
+  try {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
 }
 
 interface ShippingDetailsProps extends SaveDetailsProps {
@@ -45,30 +75,57 @@ interface ShippingDetailsProps extends SaveDetailsProps {
 }
 
 export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
 
+<<<<<<< HEAD
+  const initialCount = 1;
+  const [forwarderInvoices, setForwarderInvoices] = useState<Invoice[]>(
+    Array.from({ length: initialCount }, () => ({
+      invoiceNumber: "",
+      uploadInvoiceUrl: "",
+      date: null,
+      valueWithGst: "",
+      valueWithoutGst: "",
+    }))
+  );
+  const [transporterInvoices, setTransporterInvoices] = useState<Invoice[]>(
+    Array.from({ length: initialCount }, () => ({
+      invoiceNumber: "",
+      uploadInvoiceUrl: "",
+      date: null,
+      valueWithGst: "",
+      valueWithoutGst: "",
+    }))
+  );
+=======
   const forwarderInvoicesFromForm = watch("shippingDetails.forwarderInvoices") || [];
   const transporterInvoicesFromForm = watch("shippingDetails.transporterInvoices") || [];
 
   const [forwarderInvoices, setForwarderInvoices] = useState(forwarderInvoicesFromForm);
   const [transporterInvoices, setTransporterInvoices] = useState(transporterInvoicesFromForm);
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const [uploading, setUploading] = useState(false);
+  const [forwarders, setForwarders] = useState<any[]>([]);
+  const [transporters, setTransporters] = useState<any[]>([]);
+  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>(Array(initialCount).fill(null));
+  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>(Array(initialCount).fill(null));
+  const [showForwarderConfirmation, setShowForwarderConfirmation] = useState(false);
+  const [showTransporterConfirmation, setShowTransporterConfirmation] = useState(false);
+  const [forwarderCountToBeDeleted, setForwarderCountToBeDeleted] = useState<number | null>(null);
+  const [transporterCountToBeDeleted, setTransporterCountToBeDeleted] = useState<number | null>(null);
 
+<<<<<<< HEAD
+=======
   const [forwarders, setForwarders] = useState([]);
   const [transporters, setTransporters] = useState([]);
 
   const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>([]);
   const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>([]);
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const GlobalModal = useGlobalModal();
 
-  // Sync selected files arrays with invoice arrays
-  useEffect(() => {
-    setSelectedForwarderFiles(Array(forwarderInvoices.length).fill(null));
-    setSelectedTransporterFiles(Array(transporterInvoices.length).fill(null));
-  }, [forwarderInvoices.length, transporterInvoices.length]);
-
   // Fetch data on component mount
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchData = async () => {
       try {
         const forwarderResponse = await fetch(
@@ -89,63 +146,125 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
     fetchData();
   }, []);
 
+<<<<<<< HEAD
+  const handleForwarderDelete = useCallback((index: number) => {
+    const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
+=======
   const handleForwarderDelete = (index: number) => {
     const updatedInvoices = forwarderInvoices.filter((_: any, i: number) => i !== index);
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     setForwarderInvoices(updatedInvoices);
-    setValue("shippingDetails.forwarderInvoices", updatedInvoices);
-    setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length);
+    setSelectedForwarderFiles(prev => prev.filter((_, i) => i !== index));
+    setValue("shippingDetails.forwarderInvoices", updatedInvoices, { shouldDirty: false });
+    setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length, { shouldDirty: false });
     saveProgressSilently(getValues());
-  };
+  }, [forwarderInvoices, setValue, getValues]);
 
-  const handleForwarderCountChange = (value: string) => {
-    const count = Number.parseInt(value, 10) || 0;
-    const currentInvoices = watch("shippingDetails.forwarderInvoices") || [];
-    const newInvoices = Array.from(
-      { length: count },
-      (_, i) =>
-        currentInvoices[i] || {
+  const handleForwarderCountChange = useCallback((value: string) => {
+    const newCount = Number(value) || 1;
+    if (newCount < forwarderInvoices.length) {
+      setShowForwarderConfirmation(true);
+      setForwarderCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange<FormData>({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "shippingDetails.forwarderInvoices",
+        countFieldName: "shippingDetails.noOfForwarderinvoices",
+        createNewItem: () => ({
           invoiceNumber: "",
           uploadInvoiceUrl: "",
           date: null,
           valueWithGst: "",
           valueWithoutGst: "",
-        }
-    );
-    setForwarderInvoices(newInvoices);
-    setValue("shippingDetails.forwarderInvoices", newInvoices);
-    setValue("shippingDetails.noOfForwarderinvoices", newInvoices.length);
-    saveProgressSilently(getValues());
-  };
+        }),
+        customFieldSetters: {
+          "shippingDetails.forwarderInvoices": (items: Invoice[], setValue) => {
+            setValue("shippingDetails.noOfForwarderinvoices", items.length, { shouldDirty: false });
+            setForwarderInvoices(items);
+            setSelectedForwarderFiles(Array(items.length).fill(null));
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  }, [watch, setValue, getValues, forwarderInvoices]);
 
+<<<<<<< HEAD
+  const handleForwarderConfirmChange = useCallback(() => {
+    if (forwarderCountToBeDeleted !== null) {
+      const updatedInvoices = forwarderInvoices.slice(0, forwarderCountToBeDeleted);
+      setForwarderInvoices(updatedInvoices);
+      setSelectedForwarderFiles(Array(updatedInvoices.length).fill(null));
+      setValue("shippingDetails.forwarderInvoices", updatedInvoices, { shouldDirty: false });
+      setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length, { shouldDirty: false });
+      saveProgressSilently(getValues());
+      setForwarderCountToBeDeleted(null);
+      setShowForwarderConfirmation(false);
+    }
+  }, [forwarderInvoices, forwarderCountToBeDeleted, setValue, getValues]);
+
+  const handleTransporterDelete = useCallback((index: number) => {
+    const updatedInvoices = transporterInvoices.filter((_, i) => i !== index);
+=======
   const handleTransporterDelete = (index: number) => {
     const updatedInvoices = transporterInvoices.filter((_: any, i: number) => i !== index);
+>>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     setTransporterInvoices(updatedInvoices);
-    setValue("shippingDetails.transporterInvoices", updatedInvoices);
-    setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length);
+    setSelectedTransporterFiles(prev => prev.filter((_, i) => i !== index));
+    setValue("shippingDetails.transporterInvoices", updatedInvoices, { shouldDirty: false });
+    setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length, { shouldDirty: false });
     saveProgressSilently(getValues());
-  };
+  }, [transporterInvoices, setValue, getValues]);
 
-  const handleTransporterCountChange = (value: string) => {
-    const count = Number.parseInt(value, 10) || 0;
-    const currentInvoices = watch("shippingDetails.transporterInvoices") || [];
-    const newInvoices = Array.from(
-      { length: count },
-      (_, i) =>
-        currentInvoices[i] || {
+  const handleTransporterCountChange = useCallback((value: string) => {
+    const newCount = Number(value) || 1;
+    if (newCount < transporterInvoices.length) {
+      setShowTransporterConfirmation(true);
+      setTransporterCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange<FormData>({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "shippingDetails.transporterInvoices",
+        countFieldName: "shippingDetails.noOftransportinvoices",
+        createNewItem: () => ({
           invoiceNumber: "",
           uploadInvoiceUrl: "",
           date: null,
           valueWithGst: "",
           valueWithoutGst: "",
-        }
-    );
-    setTransporterInvoices(newInvoices);
-    setValue("shippingDetails.transporterInvoices", newInvoices);
-    setValue("shippingDetails.noOftransportinvoices", newInvoices.length);
-    saveProgressSilently(getValues());
-  };
+        }),
+        customFieldSetters: {
+          "shippingDetails.transporterInvoices": (items: Invoice[], setValue) => {
+            setValue("shippingDetails.noOftransportinvoices", items.length, { shouldDirty: false });
+            setTransporterInvoices(items);
+            setSelectedTransporterFiles(Array(items.length).fill(null));
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  }, [watch, setValue, getValues, transporterInvoices]);
 
-  const handleFileUpload = async (file: File, fieldName: string) => {
+  const handleTransporterConfirmChange = useCallback(() => {
+    if (transporterCountToBeDeleted !== null) {
+      const updatedInvoices = transporterInvoices.slice(0, transporterCountToBeDeleted);
+      setTransporterInvoices(updatedInvoices);
+      setSelectedTransporterFiles(Array(updatedInvoices.length).fill(null));
+      setValue("shippingDetails.transporterInvoices", updatedInvoices, { shouldDirty: false });
+      setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length, { shouldDirty: false });
+      saveProgressSilently(getValues());
+      setTransporterCountToBeDeleted(null);
+      setShowTransporterConfirmation(false);
+    }
+  }, [transporterInvoices, transporterCountToBeDeleted, setValue, getValues]);
+
+  const handleFileUpload = async (file: File, fieldName: Path<FormData>) => {
     if (!file) return;
     setUploading(true);
     try {
@@ -160,7 +279,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       );
       const data = await response.json();
       const storageUrl = data.storageLink;
-      setValue(fieldName, storageUrl);
+      setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
@@ -240,14 +359,20 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                 <Input
                   type="number"
                   placeholder="Enter number of invoices"
-                  value={field.value || ""}
+                  value={field.value || 1}
                   onChange={(e) => {
-                    const value = Number.parseInt(e.target.value, 10);
-                    if (!isNaN(value) && value >= 0) {
-                      field.onChange(value);
-                      handleForwarderCountChange(e.target.value);
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(1);
+                      handleForwarderCountChange("1");
+                      return;
                     }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
+                    handleForwarderCountChange(numericValue.toString());
                   }}
+                  onBlur={() => saveProgressSilently(getValues())}
+                  min={1}
                 />
               </FormControl>
               <FormMessage />
@@ -269,7 +394,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {forwarderInvoices.map((_: any, index: number) => (
+                {forwarderInvoices.map((_: Invoice, index: number) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
@@ -444,14 +569,20 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                 <Input
                   type="number"
                   placeholder="Enter number of invoices"
-                  value={field.value || ""}
+                  value={field.value || 1}
                   onChange={(e) => {
-                    const value = Number.parseInt(e.target.value, 10);
-                    if (!isNaN(value) && value >= 0) {
-                      field.onChange(value);
-                      handleTransporterCountChange(e.target.value);
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(1);
+                      handleTransporterCountChange("1");
+                      return;
                     }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
+                    handleTransporterCountChange(numericValue.toString());
                   }}
+                  onBlur={() => saveProgressSilently(getValues())}
+                  min={1}
                 />
               </FormControl>
               <FormMessage />
@@ -473,7 +604,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transporterInvoices.map((_: any, index: number) => (
+                {transporterInvoices.map((_: Invoice, index: number) => (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
@@ -611,12 +742,11 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
           </div>
         )}
       </div>
-      {/* Review */}
       <FormField
         control={control}
         name="shippingDetails.review"
         render={({ field }) => (
-          <FormItem className="col-span-4">
+          <FormItem className="col-span-4 mt-4">
             <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
@@ -629,7 +759,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
           </FormItem>
         )}
       />
-      {/* Submit Button */}
       <div className="flex justify-end mt-4">
         <Button
           type="button"
@@ -641,6 +770,27 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
           {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>
+
+      <ConfirmationDialog
+        isOpen={showForwarderConfirmation}
+        onClose={() => {
+          setShowForwarderConfirmation(false);
+          setForwarderCountToBeDeleted(null);
+        }}
+        onConfirm={handleForwarderConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of forwarder invoices. This action cannot be undone."
+      />
+      <ConfirmationDialog
+        isOpen={showTransporterConfirmation}
+        onClose={() => {
+          setShowTransporterConfirmation(false);
+          setTransporterCountToBeDeleted(null);
+        }}
+        onConfirm={handleTransporterConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of transporter invoices. This action cannot be undone."
+      />
     </div>
   );
 }

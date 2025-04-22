@@ -29,131 +29,82 @@ export function RegisterForm() {
   const [longitude, setLongitude] = useState("");
   const [pincode, setPincode] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [errors, setErrors] = useState({
+    fullName: "",
+    email: "",
+    mobileNumber: "",
+    location: "",
+    pincode: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   const router = useRouter();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validateAll = () => {
+    const newErrors = {
+      fullName: fullName ? "" : "Full Name is required",
+      email: !email
+        ? "Email is required"
+        : !emailRegex.test(email)
+        ? "Invalid Email format"
+        : "",
+      mobileNumber: mobileNumber ? "" : "Mobile Number is required",
+      location: location ? "" : "Location is required",
+      pincode: pincode ? "" : "Pincode is required",
+      password: validatePassword(password),
+      confirmPassword:
+        confirmPassword === password ? "" : "Passwords do not match",
+    };
+    setErrors(newErrors);
 
-  // Construct the user object dynamically
-  const user = {
-    fullName,
-    email,
-    mobileNumber,
-    address: {
-      location,
-      //   coordinates: {
-      //     type: "Point",
-      // coordinates: [
-      //   parseFloat(latitude) || 0, // Default to 0 if invalid
-      //   parseFloat(longitude) || 0,
-      // ],
-      //   },
-      pincode,
-    },
-    password,
+    return Object.values(newErrors).every((err) => err === "");
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) return "Password is required";
+    if (value.length < 6) return "Minimum 6 characters required";
+    if (/\s/.test(value)) return "No spaces allowed";
+    if (!/[0-9]/.test(value)) return "Include at least one number";
+    if (!/[A-Z]/.test(value)) return "Include an uppercase letter";
+    if (!/[a-z]/.test(value)) return "Include a lowercase letter";
+    if (!/[!@#$%^&*()_+\-=\[\]{};:\\|,.<>?]/.test(value))
+      return "Add one special character";
+    return "";
   };
 
   const onSubmit = async () => {
-    setLoading(true);
-    setError(false);
-    setMessage("");
-
-    // Validation logic
-    if (!fullName) {
-      setError(true);
-      setMessage("Full Name is required");
-      setLoading(false);
-      return;
-    }
-    if (!email) {
-      setError(true);
-      setMessage("Email is required");
-      setLoading(false);
-      return;
-    }
-    if (!mobileNumber) {
-      setError(true);
-      setMessage("Mobile Number is required");
-      setLoading(false);
+    if (!validateAll()) {
+      toast.error("Please fix the errors in the form.");
       return;
     }
 
-    if (!location) {
-      setError(true);
-      setMessage("Location is required");
-      setLoading(false);
-      return;
-    }
-
-    if (!pincode) {
-      setError(true);
-      setMessage("Pincode is required");
-      setLoading(false);
-      return;
-    }
-    if (!password) {
-      setError(true);
-      setMessage("Password is required");
-      setLoading(false);
-      return;
-    }
-
-    if (password.length < 6) {
-      setError(true);
-      setMessage("Password must be at least 6 characters long");
-      setLoading(false);
-      return;
-    }
-    if (/\s/.test(password)) {
-      setError(true);
-      setMessage("Password cannot contain spaces");
-      setLoading(false);
-      return;
-    }
-    if (!/[0-9]/.test(password)) {
-      setError(true);
-      setMessage("Password must contain at least one number");
-      setLoading(false);
-      return;
-    }
-    if (!/[A-Z]/.test(password)) {
-      setError(true);
-      setMessage("Password must contain at least one uppercase letter");
-      setLoading(false);
-      return;
-    }
-    if (!/[a-z]/.test(password)) {
-      setError(true);
-      setMessage("Password must contain at least one lowercase letter");
-      setLoading(false);
-      return;
-    }
-    if (!/[!@#$%^&*()_+\-=\[\]{};:\\|,.<>?]/.test(password)) {
-      setError(true);
-      setMessage("Password must contain at least one special character");
-      setLoading(false);
-      return;
-    }
-    if (!/@/.test(email)) {
-      setError(true);
-      setMessage("Email must contain '@'");
-      setLoading(false);
-      return;
-    }
+    const user = {
+      fullName,
+      email,
+      mobileNumber,
+      address: {
+        location,
+        pincode,
+      },
+      password,
+    };
 
     try {
       setLoading(true);
       const res = await postData("/user/add", user);
-      console.log("Account Created Successfully");
-      console.log(res.token);
-      router.refresh();
-      toast.success("registration successful");
+      toast.success("Registration successful");
       router.push("/login");
     } catch (error: any) {
-      setError(true);
-      setMessage(error.response?.data?.error || "Something went wrong");
-      console.error(error.response?.data?.error || error);
+      console.log(error);
+      if (error.response?.status === 409) {
+        toast.error("Email or Mobile Number already exists");
+      } else {
+        toast.error(error.response?.data?.error || "Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -176,40 +127,67 @@ export function RegisterForm() {
             id="fullname"
             disabled={loading}
             value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
+            onChange={(e) => {
+              setFullName(e.target.value);
+              setErrors((prev) => ({
+                ...prev,
+                fullName: e.target.value ? "" : "Full Name is required",
+              }));
+            }}
             placeholder="Enter your full name"
           />
+          {errors.fullName && (
+            <p className="text-red-500 text-sm">{errors.fullName}</p>
+          )}
         </div>
+
         <div className="grid gap-2">
           <Label htmlFor="email">Email</Label>
           <Input
             id="email"
             disabled={loading}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+              setEmail(val);
+              setErrors((prev) => ({
+                ...prev,
+                email: !val
+                  ? "Email is required"
+                  : !emailRegex.test(val)
+                  ? "Invalid email format"
+                  : "",
+              }));
+            }}
             placeholder="Enter your email"
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
         </div>
+
         <div className="grid gap-2">
           <Label htmlFor="mobileNumber">Mobile Number</Label>
           <Input
             id="mobileNumber"
             disabled={loading}
             value={mobileNumber}
-            onChange={(e) => setMobileNumber(e.target.value)}
+            onChange={(e) => {
+              setMobileNumber(e.target.value);
+              setErrors((prev) => ({
+                ...prev,
+                mobileNumber: e.target.value ? "" : "Mobile Number is required",
+              }));
+            }}
             placeholder="Enter your mobile number"
           />
+          {errors.mobileNumber && (
+            <p className="text-red-500 text-sm">{errors.mobileNumber}</p>
+          )}
         </div>
-        {/* <div className="grid gap-2">
-          <Label htmlFor="role">Role</Label>
-          <Input
-            id="role"
-            disabled={loading}
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            placeholder="Enter your role (e.g., admin, user)"
-          />
-        </div> */}
+
         <div className="grid grid-cols-2 gap-4">
           <div className="grid gap-2">
             <Label htmlFor="location">Location</Label>
@@ -217,9 +195,18 @@ export function RegisterForm() {
               id="location"
               disabled={loading}
               value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setErrors((prev) => ({
+                  ...prev,
+                  location: e.target.value ? "" : "Location is required",
+                }));
+              }}
               placeholder="Enter your location"
             />
+            {errors.location && (
+              <p className="text-red-500 text-sm">{errors.location}</p>
+            )}
           </div>
           <div className="grid gap-2">
             <Label htmlFor="pincode">Pincode</Label>
@@ -227,50 +214,66 @@ export function RegisterForm() {
               id="pincode"
               disabled={loading}
               value={pincode}
-              onChange={(e) => setPincode(e.target.value)}
+              onChange={(e) => {
+                setPincode(e.target.value);
+                setErrors((prev) => ({
+                  ...prev,
+                  pincode: e.target.value ? "" : "Pincode is required",
+                }));
+              }}
               placeholder="Enter your pincode"
             />
+            {errors.pincode && (
+              <p className="text-red-500 text-sm">{errors.pincode}</p>
+            )}
           </div>
         </div>
-        {/* <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="latitude">Latitude</Label>
-            <Input
-              id="latitude"
-              disabled={loading}
-              value={latitude}
-              onChange={(e) => setLatitude(e.target.value)}
-              placeholder="Enter latitude (e.g., 40.7128)"
-              type="number"
-              step="any"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="longitude">Longitude</Label>
-            <Input
-              id="longitude"
-              disabled={loading}
-              value={longitude}
-              onChange={(e) => setLongitude(e.target.value)}
-              placeholder="Enter longitude (e.g., -74.0060)"
-              type="number"
-              step="any"
-            />
-          </div>
-        </div> */}
+
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             disabled={loading}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              const val = e.target.value;
+              setPassword(val);
+              setErrors((prev) => ({
+                ...prev,
+                password: validatePassword(val),
+              }));
+            }}
             type="password"
             placeholder="Enter your password"
           />
-          {error && <p className="text-red-500 text-sm">{message}</p>}
+          {errors.password && (
+            <p className="text-red-500 text-sm">{errors.password}</p>
+          )}
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            disabled={loading}
+            value={confirmPassword}
+            onChange={(e) => {
+              const val = e.target.value;
+              setConfirmPassword(val);
+              setErrors((prev) => ({
+                ...prev,
+                confirmPassword:
+                  val === password ? "" : "Passwords do not match",
+              }));
+            }}
+            type="password"
+            placeholder="Confirm your password"
+          />
+          {errors.confirmPassword && (
+            <p className="text-red-500 text-sm">{errors.confirmPassword}</p>
+          )}
         </div>
       </CardContent>
+
       <CardFooter className="flex flex-col gap-2">
         <Button
           size="lg"

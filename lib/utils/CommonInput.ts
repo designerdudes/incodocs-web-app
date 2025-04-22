@@ -1,8 +1,11 @@
-type CreateItemFunction<T> = () => T;
+type CreateItemFunction<ItemType> = () => ItemType;
 
-type CustomFieldSetter<T> = (items: T[], setValue: (field: string, value: any) => void) => void;
+type CustomFieldSetter<ItemType> = (
+  items: ItemType[],
+  setValue: (field: string, value: any) => void
+) => void;
 
-export function handleDynamicArrayCountChange<T>({
+export function handleDynamicArrayCountChange<T, ItemType>({
   value,
   watch,
   setValue,
@@ -11,43 +14,47 @@ export function handleDynamicArrayCountChange<T>({
   createNewItem,
   saveCallback,
   customFieldSetters = {},
-  confirmCallback = (message: string) => window.confirm(message), // default browser confirm
-  isDataFilled = (item: T) => !!item, // customize based on your item structure
+  isDataFilled = (item: ItemType) => !!item,
+  onRequireConfirmation,
 }: {
   value: string;
-  watch: (field: string) => T[];
+  watch: (field: string) => ItemType[];
   setValue: (field: string, value: any) => void;
-  getValues: () => any;
+  getValues: () => T;
   fieldName: string;
-  createNewItem: CreateItemFunction<T>;
-  saveCallback?: (data: any) => void;
-  customFieldSetters?: Record<string, CustomFieldSetter<T>>;
-  confirmCallback?: (message: string) => boolean;
-  isDataFilled?: (item: T) => boolean;
+  createNewItem: CreateItemFunction<ItemType>;
+  saveCallback?: (data: T) => void;
+  customFieldSetters?: Record<string, CustomFieldSetter<ItemType>>;
+  isDataFilled?: (item: ItemType) => boolean;
+  onRequireConfirmation?: (pendingItemsToRemove: ItemType[], confirmedCallback: () => void) => void;
 }) {
-  let count = Math.max(1, Math.min(parseInt(value, 10) || 1, 50)); // min 1, max 50
+  const count = Math.max(1, Math.min(parseInt(value, 10) || 1, 50));
   const currentItems = watch(fieldName) || [];
 
   if (count < currentItems.length) {
     const removedItems = currentItems.slice(count);
     const hasFilledData = removedItems.some(isDataFilled);
 
-    if (hasFilledData) {
-      const confirmed = confirmCallback(
-        `You are about to remove ${removedItems.length} item(s) with data. Are you sure?`
-      );
-      if (!confirmed) return;
+    if (hasFilledData && onRequireConfirmation) {
+      onRequireConfirmation(removedItems, () => {
+        applyNewItemList();
+      });
+      return;
     }
   }
 
-  const newItems = Array.from({ length: count }, (_, i) => currentItems[i] || createNewItem());
-  setValue(fieldName, newItems);
+  applyNewItemList();
 
-  if (customFieldSetters[fieldName]) {
-    customFieldSetters[fieldName](newItems, setValue);
-  }
+  function applyNewItemList() {
+    const newItems = Array.from({ length: count }, (_, i) => currentItems[i] || createNewItem());
+    setValue(fieldName, newItems);
 
-  if (saveCallback) {
-    saveCallback(getValues());
+    if (customFieldSetters[fieldName]) {
+      customFieldSetters[fieldName](newItems, setValue);
+    }
+
+    if (saveCallback) {
+      saveCallback(getValues());
+    }
   }
 }

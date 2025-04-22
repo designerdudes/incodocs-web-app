@@ -24,13 +24,12 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Trash, Volume } from "lucide-react";
+import { Trash } from "lucide-react";
 import { postData } from "@/axiosUtility/api";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
-interface RawMaterialCreateNewFormProps {
-  gap: number;
-}
-
+// Define the form schema
 const formSchema = z.object({
   lotName: z
     .string()
@@ -97,6 +96,10 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
+interface RawMaterialCreateNewFormProps {
+  gap: number;
+}
+
 export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
@@ -113,38 +116,107 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     React.useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] =
     React.useState<boolean>(false);
+  const [showConfirmation, setShowConfirmation] = React.useState(false);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = React.useState<
+    number | null
+  >(null);
+
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      noOfBlocks: 1,
+      blocks: [
+        {
+          dimensions: {
+            weight: { value: 0, units: "tons" },
+            length: { value: 0, units: "inch" },
+            breadth: { value: 0, units: "inch" },
+            height: { value: 0, units: "inch" },
+          },
+        },
+      ],
+    },
   });
 
-  function handleBlocksInputChange(value: string) {
-    const count = parseInt(value, 10);
+  const { control, setValue, watch, getValues } = form;
 
-    if (!isNaN(count) && count > 0) {
-      const newBlocks = Array.from({ length: count }, (_, index) => ({
-        dimensions: {
-          blockNumber: index + 1,
-          weight: { value: 0, units: "tons" as "tons" },
-          length: { value: 0, units: "inch" as "inch" },
-          breadth: { value: 0, units: "inch" as "inch" },
-          height: { value: 0, units: "inch" as "inch" },
-        },
-      }));
-
-      setBlocks(newBlocks);
-      form.setValue("blocks", newBlocks);
-    } else {
-      setBlocks([]);
-      form.setValue("blocks", []);
-    }
-  }
-
+  // Sync blocks state with form on mount
   React.useEffect(() => {
-    form.setValue("noOfBlocks", blocks.length);
-  }, [blocks, form]);
+    const formBlocks = watch("blocks") || [];
+    if (formBlocks.length > 0) {
+      setBlocks(formBlocks);
+    }
+  }, [watch]);
 
+  // Save progress to localStorage
+  const saveProgressSilently = (data: any) => {
+    try {
+      localStorage.setItem("rawMaterialFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+    } catch (error) {
+      console.error("Failed to save progress to localStorage:", error);
+    }
+  };
+
+  // Handle block count changes
+  const handleBlockCountChange = (value: string) => {
+    const newCount = Number(value);
+
+    if (newCount < blocks.length) {
+      setShowConfirmation(true);
+      setBlockCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "blocks",
+        createNewItem: () => ({
+          dimensions: {
+            weight: { value: 0, units: "tons" },
+            length: { value: 0, units: "inch" },
+            breadth: { value: 0, units: "inch" },
+            height: { value: 0, units: "inch" },
+          },
+        }),
+        customFieldSetters: {
+          blocks: (items, setValue) => {
+            setValue("noOfBlocks", items.length);
+            setBlocks(items);
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  };
+
+  // Handle confirmation for reducing block count
+  const handleConfirmChange = () => {
+    if (blockCountToBeDeleted !== null) {
+      const updatedBlocks = blocks.slice(0, blockCountToBeDeleted);
+      setBlocks(updatedBlocks);
+      setValue("blocks", updatedBlocks);
+      setValue("noOfBlocks", updatedBlocks.length);
+      saveProgressSilently(getValues());
+      setBlockCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
+  };
+
+  // Handle block deletion
+  const handleDeleteBlock = (index: number) => {
+    const updatedBlocks = blocks.filter((_, i) => i !== index);
+    setBlocks(updatedBlocks);
+    setValue("blocks", updatedBlocks);
+    setValue("noOfBlocks", updatedBlocks.length);
+    saveProgressSilently(getValues());
+  };
+
+  // Form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
@@ -154,17 +226,18 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         organizationId,
         status: "active",
       });
-      setIsLoading(false);
       toast.success("Lot created/updated successfully");
       router.push("./");
     } catch (error) {
       console.error("Error creating/updating Lot:", error);
-      setIsLoading(false);
       toast.error("Error creating/updating Lot");
+    } finally {
+      setIsLoading(false);
     }
     router.refresh();
   }
 
+  // Calculate total volume
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
@@ -180,15 +253,20 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className={`grid grid-cols-3 gap-3`}>
+          <div className="grid grid-cols-3 gap-3">
             <FormField
               name="lotName"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Lot Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Xyz" disabled={isLoading} {...field} />
+                    <Input
+                      placeholder="Xyz"
+                      disabled={isLoading}
+                      {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -196,7 +274,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="materialType"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Material Type</FormLabel>
@@ -205,6 +283,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       placeholder="Granite"
                       disabled={isLoading}
                       {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -213,7 +292,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="materialCost"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Material Cost</FormLabel>
@@ -226,7 +305,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -235,7 +315,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="markerCost"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Marker Cost</FormLabel>
@@ -248,7 +328,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -257,7 +338,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="transportCost"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Transport Cost</FormLabel>
@@ -270,7 +351,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -279,16 +361,16 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="markerOperatorName"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Marker Operator</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter Operator Name"
-                      type="string"
                       disabled={isLoading}
                       {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -297,7 +379,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             />
             <FormField
               name="noOfBlocks"
-              control={form.control}
+              control={control}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Number of Blocks</FormLabel>
@@ -305,12 +387,20 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                     <Input
                       placeholder="Enter number of blocks"
                       type="number"
+                      min="1"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        if (value === "" || Number(value) < 1) {
+                          field.onChange(1);
+                          handleBlockCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleBlockCountChange(value);
                       }}
-                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
+                      value={field.value ?? 1}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -372,6 +462,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 placeholder="Weight (tons)"
                 type="number"
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 <input
@@ -386,12 +477,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           weight: {
                             ...block.dimensions.weight,
-                            value: parseFloat(globalWeight) || 0,
+                            value: parseFloat(globalWeight) || 0.1,
                           },
                         },
                       }));
                       setBlocks(updatedBlocks);
-                      form.setValue("blocks", updatedBlocks);
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
                     }
                   }}
                 />{" "}
@@ -402,9 +494,10 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               <Input
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (cm)"
+                placeholder="Length (inch)"
                 type="number"
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 <input
@@ -419,12 +512,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           length: {
                             ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0,
+                            value: parseFloat(globalLength) || 0.1,
                           },
                         },
                       }));
                       setBlocks(updatedBlocks);
-                      form.setValue("blocks", updatedBlocks);
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
                     }
                   }}
                 />{" "}
@@ -435,9 +529,10 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               <Input
                 value={globalBreadth}
                 onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (cm)"
+                placeholder="Breadth (inch)"
                 type="number"
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 <input
@@ -452,12 +547,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           breadth: {
                             ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0,
+                            value: parseFloat(globalBreadth) || 0.1,
                           },
                         },
                       }));
                       setBlocks(updatedBlocks);
-                      form.setValue("blocks", updatedBlocks);
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
                     }
                   }}
                 />{" "}
@@ -468,9 +564,10 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               <Input
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (cm)"
+                placeholder="Height (inch)"
                 type="number"
                 disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
               />
               <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                 <input
@@ -485,12 +582,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           height: {
                             ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0,
+                            value: parseFloat(globalHeight) || 0.1,
                           },
                         },
                       }));
                       setBlocks(updatedBlocks);
-                      form.setValue("blocks", updatedBlocks);
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
                     }
                   }}
                 />{" "}
@@ -498,16 +596,17 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               </label>
             </div>
           </div>
+
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Weight (tons)</TableHead>
-                <TableHead>Length (cm)</TableHead>
-                <TableHead>Breadth (cm)</TableHead>
-                <TableHead>Height (cm)</TableHead>
-                <TableHead>Volume(m³)</TableHead>
-                <TableHead> Vehicle Number </TableHead>
+                <TableHead>Length (inch)</TableHead>
+                <TableHead>Breadth (inch)</TableHead>
+                <TableHead>Height (inch)</TableHead>
+                <TableHead>Volume (m³)</TableHead>
+                <TableHead>Vehicle Number</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -518,20 +617,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.weight.value`}
-                      control={form.control}
+                      control={control}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               type="number"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.weight.value}
                               placeholder="Enter weight"
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.weight.value =
-                                  parseFloat(e.target.value) || 0;
+                                  parseFloat(e.target.value) || 0.1;
                                 setBlocks(updatedBlocks);
-                                form.setValue("blocks", updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
                             />
@@ -544,20 +646,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.length.value`}
-                      control={form.control}
+                      control={control}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               type="number"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || 0;
+                                  parseFloat(e.target.value) || 0.1;
                                 setBlocks(updatedBlocks);
-                                form.setValue("blocks", updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
                             />
@@ -570,20 +675,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.breadth.value`}
-                      control={form.control}
+                      control={control}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               type="number"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.breadth.value}
                               placeholder="Enter breadth"
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.breadth.value =
-                                  parseFloat(e.target.value) || 0;
+                                  parseFloat(e.target.value) || 0.1;
                                 setBlocks(updatedBlocks);
-                                form.setValue("blocks", updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
                             />
@@ -596,20 +704,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.height.value`}
-                      control={form.control}
+                      control={control}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               type="number"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.height.value}
                               placeholder="Enter height"
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0;
+                                  parseFloat(e.target.value) || 0.1;
                                 setBlocks(updatedBlocks);
-                                form.setValue("blocks", updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
                             />
@@ -632,6 +743,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       type="string"
                       placeholder="BH 08 BH 0823"
                       disabled={isLoading}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </TableCell>
                   <TableCell>
@@ -639,14 +751,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       variant="destructive"
                       size="sm"
                       type="button"
-                      onClick={() => {
-                        const updatedBlocks = blocks.filter(
-                          (_, i) => i !== index
-                        );
-
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
+                      onClick={() => handleDeleteBlock(index)}
+                      disabled={isLoading}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -662,9 +768,18 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               </TableRow>
             </TableFooter>
           </Table>
+
           <Button type="submit" disabled={isLoading}>
-            Submit
+            {isLoading ? "Submitting..." : "Submit"}
           </Button>
+
+          <ConfirmationDialog
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmChange}
+            title="Are you sure?"
+            description="You are reducing the number of blocks. This action cannot be undone."
+          />
         </form>
       </Form>
     </div>
