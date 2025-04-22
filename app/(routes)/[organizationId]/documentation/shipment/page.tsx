@@ -63,7 +63,7 @@ export default async function Page() {
                 <ShipmentDataTable
                 columns={columns}
                 data={shipmentData}
-                searchKeys={["shipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
+                searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
                 bulkDeleteIdName="_id"
                 bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                 bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
