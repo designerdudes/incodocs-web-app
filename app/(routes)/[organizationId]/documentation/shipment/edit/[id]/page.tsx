@@ -1,4 +1,3 @@
-
 "use client";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -51,6 +50,11 @@ type BackendProductDetails = {
     totalSQMTRorSQFTwithAllowance?: string;
     totalSQMTRorSMFTwithoutAllowance?: string;
   };
+  slabType?: string;
+  slabLength?: { value?: number; units?: string };
+  slabBreadth?: { value?: number; units?: string };
+  slabThickness?: number;
+  slabDocument?: any;
 };
 
 const formSchema = z.object({
@@ -71,43 +75,70 @@ const formSchema = z.object({
             type: z.string().optional(),
             containerNumber: z.string().optional(),
             truckNumber: z.string().optional(),
-            truckDriverContactNumber: z.number().optional(),
+            truckDriverContactNumber: z
+              .union([
+                z.number(),
+                z
+                  .string()
+                  .transform((val) => (val ? parseFloat(val) : undefined)),
+              ])
+              .optional()
+              .refine((val) => val === undefined || !isNaN(val), {
+                message: "truckDriverContactNumber must be a valid number",
+              }),
             addProductDetails: z
-              .object({
-                productCategory: z.string().optional(),
-                graniteAndMarble: z.string().optional(),
-                tiles: z
-                  .object({
-                    noOfBoxes: z.number().optional(),
-                    noOfPiecesPerBoxes: z.number().optional(),
-                    sizePerTile: z
-                      .object({
-                        length: z
-                          .object({
-                            value: z.number().optional(),
-                            units: z.enum(["inch", "cm"]).optional(),
-                          })
-                          .optional(),
-                        breadth: z
-                          .object({
-                            value: z.number().optional(),
-                            units: z.enum(["inch", "cm"]).optional(),
-                          })
-                          .optional(),
-                      })
-                      .optional(),
-                  })
-                  .optional(),
-                slabs: z
-                  .object({
-                    noOfBundles: z.number().optional(),
-                    noOfSlabsPerBundle: z.number().optional(),
-                    uploadMeasurementSheetUrl: z.string().optional(),
-                    totalSQMTRorSQFTwithAllowance: z.string().optional(),
-                    totalSQMTRorSMFTwithoutAllowance: z.string().optional(),
-                  })
-                  .optional(),
-              })
+              .array(
+                z.object({
+                  productCategory: z.string().optional(),
+                  graniteAndMarble: z.string().optional(),
+                  tiles: z
+                    .object({
+                      noOfBoxes: z.number().nonnegative().optional(),
+                      noOfPiecesPerBoxes: z.number().nonnegative().optional(),
+                      sizePerTile: z
+                        .object({
+                          length: z
+                            .object({
+                              value: z.number().nonnegative().optional(),
+                              units: z.enum(["inch", "cm"]).optional(),
+                            })
+                            .optional(),
+                          breadth: z
+                            .object({
+                              value: z.number().nonnegative().optional(),
+                              units: z.enum(["inch", "cm"]).optional(),
+                            })
+                            .optional(),
+                        })
+                        .optional(),
+                    })
+                    .optional(),
+                  slabs: z
+                    .object({
+                      noOfBundles: z.number().nonnegative().optional(),
+                      noOfSlabsPerBundle: z.number().nonnegative().optional(),
+                      uploadMeasurementSheetUrl: z.string().optional(),
+                      totalSQMTRorSQFTwithAllowance: z.string().optional(),
+                      totalSQMTRorSMFTwithoutAllowance: z.string().optional(),
+                    })
+                    .optional(),
+                  slabType: z.string().optional(),
+                  slabLength: z
+                    .object({
+                      value: z.number().nonnegative().optional(),
+                      units: z.string().optional(),
+                    })
+                    .optional(),
+                  slabBreadth: z
+                    .object({
+                      value: z.number().nonnegative().optional(),
+                      units: z.string().optional(),
+                    })
+                    .optional(),
+                  slabThickness: z.number().nonnegative().optional(),
+                  slabDocument: z.any().optional(),
+                })
+              )
               .optional(),
           })
         )
@@ -151,13 +182,17 @@ const formSchema = z.object({
             date: z.any().optional(),
             valueWithGst: z
               .union([
-                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z
+                  .string()
+                  .transform((val) => (val ? parseFloat(val) : undefined)),
                 z.number().transform((val) => (isNaN(val) ? undefined : val)),
               ])
               .optional(),
             valueWithoutGst: z
               .union([
-                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z
+                  .string()
+                  .transform((val) => (val ? parseFloat(val) : undefined)),
                 z.number().transform((val) => (isNaN(val) ? undefined : val)),
               ])
               .optional(),
@@ -179,13 +214,17 @@ const formSchema = z.object({
             date: z.any().optional(),
             valueWithGst: z
               .union([
-                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z
+                  .string()
+                  .transform((val) => (val ? parseFloat(val) : undefined)),
                 z.number().transform((val) => (isNaN(val) ? undefined : val)),
               ])
               .optional(),
             valueWithoutGst: z
               .union([
-                z.string().transform((val) => (val ? parseFloat(val) : undefined)),
+                z
+                  .string()
+                  .transform((val) => (val ? parseFloat(val) : undefined)),
                 z.number().transform((val) => (isNaN(val) ? undefined : val)),
               ])
               .optional(),
@@ -223,7 +262,7 @@ const formSchema = z.object({
         .object({
           actualSupplierName: z.string().optional(),
           actualSupplierInvoiceValue: z.string().optional(),
-          actualSupplierInvoiceUrl: z.any().optional(),
+          actualSupplierInvoiceUrl: z.string().optional(),
           shippingBillUrl: z.string().optional(),
         })
         .optional(),
@@ -270,7 +309,7 @@ const formSchema = z.object({
 });
 
 // Infer the type from the schema
-type FormValues = z.infer<typeof formSchema>;
+export type FormValues = z.infer<typeof formSchema>; // Export the type
 
 interface Props {
   params: {
@@ -488,9 +527,11 @@ export default function EditShipmentPage({ params }: Props) {
           containers:
             data.bookingDetails?.containers?.map((container) => ({
               ...container,
-              truckDriverContactNumber: container.truckDriverContactNumber || undefined,
+              truckDriverContactNumber: container.truckDriverContactNumber
+                ? parseFloat(container.truckDriverContactNumber.toString())
+                : undefined,
               trukDriverContactNumber: undefined,
-              addProductDetails: container.addProductDetails ? [container.addProductDetails] : [],
+              addProductDetails: container.addProductDetails || [],
             })) || [],
         };
       } else if (currentField === "shippingDetails") {
@@ -509,14 +550,22 @@ export default function EditShipmentPage({ params }: Props) {
           transporterInvoices:
             data.shippingDetails?.transporterInvoices?.map((invoice) => ({
               ...invoice,
-              valueWithGst: invoice.valueWithGst ? parseFloat(invoice.valueWithGst.toString()) : undefined,
-              valueWithoutGst: invoice.valueWithoutGst ? parseFloat(invoice.valueWithoutGst.toString()) : undefined,
+              valueWithGst: invoice.valueWithGst
+                ? parseFloat(invoice.valueWithGst.toString())
+                : undefined,
+              valueWithoutGst: invoice.valueWithoutGst
+                ? parseFloat(invoice.valueWithoutGst.toString())
+                : undefined,
             })) || [],
           forwarderInvoices:
             data.shippingDetails?.forwarderInvoices?.map((invoice) => ({
               ...invoice,
-              valueWithGst: invoice.valueWithGst ? parseFloat(invoice.valueWithGst.toString()) : undefined,
-              valueWithoutGst: invoice.valueWithoutGst ? parseFloat(invoice.valueWithoutGst.toString()) : undefined,
+              valueWithGst: invoice.valueWithGst
+                ? parseFloat(invoice.valueWithGst.toString())
+                : undefined,
+              valueWithoutGst: invoice.valueWithoutGst
+                ? parseFloat(invoice.valueWithoutGst.toString())
+                : undefined,
             })) || [],
         };
       } else if (currentField === "shippingBillDetails") {
@@ -539,16 +588,41 @@ export default function EditShipmentPage({ params }: Props) {
             ...data.supplierDetails?.clearance,
             supplierName:
               data.supplierDetails?.clearance?.supplierName &&
-              /^[0-9a-fA-F]{24}$/.test(data.supplierDetails.clearance.supplierName)
+              /^[0-9a-fA-F]{24}$/.test(
+                data.supplierDetails.clearance.supplierName
+              )
                 ? data.supplierDetails.clearance.supplierName
                 : null,
+            invoices:
+              data.supplierDetails?.clearance?.invoices?.map((invoice) => ({
+                ...invoice,
+                clearanceSupplierInvoiceUrl:
+                  typeof invoice.clearanceSupplierInvoiceUrl === "string"
+                    ? invoice.clearanceSupplierInvoiceUrl
+                    : "",
+              })) || [],
           },
           actual: {
             ...data.supplierDetails?.actual,
-            actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
+            actualSupplierName:
+              data.supplierDetails?.actual?.actualSupplierName || "",
+            actualSupplierInvoiceUrl:
+              typeof data.supplierDetails?.actual?.actualSupplierInvoiceUrl ===
+              "string"
+                ? data.supplierDetails?.actual?.actualSupplierInvoiceUrl
+                : "",
+            actualSupplierInvoiceValue:
+              data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
+            shippingBillUrl:
+              typeof data.supplierDetails?.actual?.shippingBillUrl === "string"
+                ? data.supplierDetails?.actual?.shippingBillUrl
+                : "",
           },
         };
-        console.log("SupplierDetails payload:", JSON.stringify(payload.supplierDetails, null, 2));
+        console.log(
+          "SupplierDetails payload:",
+          JSON.stringify(payload.supplierDetails, null, 2)
+        );
       }
 
       const apiUrl = apiEndpoints[currentField as keyof FormValues];
@@ -599,62 +673,118 @@ export default function EditShipmentPage({ params }: Props) {
               updatedData.bookingDetails.containers?.map((container: any) => ({
                 ...container,
                 truckDriverContactNumber:
-                  container.truckDriverContactNumber || container.trukDriverContactNumber || undefined,
+                  container.truckDriverContactNumber ||
+                  container.trukDriverContactNumber ||
+                  undefined,
                 trukDriverContactNumber: undefined,
-                addProductDetails: Array.isArray(container.addProductDetails)
-                  ? container.addProductDetails[0] || {
-                      productCategory: "",
-                      graniteAndMarble: "",
-                      tiles: {
-                        noOfBoxes: 0,
-                        noOfPiecesPerBoxes: 0,
-                        sizePerTile: {
-                          length: { value: 0, units: "" },
-                          breadth: { value: 0, units: "" },
-                        },
-                      },
-                      slabs: {
-                        noOfBundles: 0,
-                        noOfSlabsPerBundle: 0,
-                        uploadMeasurementSheetUrl: "",
-                        totalSQMTRorSQFTwithAllowance: "",
-                        totalSQMTRorSMFTwithoutAllowance: "",
-                      },
-                    }
-                  : container.addProductDetails || {
-                      productCategory: "",
-                      graniteAndMarble: "",
-                      tiles: {
-                        noOfBoxes: 0,
-                        noOfPiecesPerBoxes: 0,
-                        sizePerTile: {
-                          length: { value: 0, units: "" },
-                          breadth: { value: 0, units: "" },
-                        },
-                      },
-                      slabs: {
-                        noOfBundles: 0,
-                        noOfSlabsPerBundle: 0,
-                        uploadMeasurementSheetUrl: "",
-                        totalSQMTRorSQFTwithAllowance: "",
-                        totalSQMTRorSMFTwithoutAllowance: "",
-                      },
-                    },
+                addProductDetails:
+                  container.addProductDetails?.map(
+                    (product: BackendProductDetails) => ({
+                      productCategory: product.productCategory || "",
+                      graniteAndMarble: product.graniteAndMarble || "",
+                      tiles: product.tiles
+                        ? {
+                            noOfBoxes: product.tiles.noOfBoxes || 0,
+                            noOfPiecesPerBoxes:
+                              product.tiles.noOfPiecesPerBoxes || 0,
+                            sizePerTile: product.tiles.sizePerTile
+                              ? {
+                                  length: product.tiles.sizePerTile.length
+                                    ? {
+                                        value:
+                                          product.tiles.sizePerTile.length
+                                            .value || 0,
+                                        units:
+                                          product.tiles.sizePerTile.length
+                                            .units || "inch",
+                                      }
+                                    : { value: 0, units: "inch" },
+                                  breadth: product.tiles.sizePerTile.breadth
+                                    ? {
+                                        value:
+                                          product.tiles.sizePerTile.breadth
+                                            .value || 0,
+                                        units:
+                                          product.tiles.sizePerTile.breadth
+                                            .units || "inch",
+                                      }
+                                    : { value: 0, units: "inch" },
+                                }
+                              : {
+                                  length: { value: 0, units: "inch" },
+                                  breadth: { value: 0, units: "inch" },
+                                },
+                          }
+                        : {
+                            noOfBoxes: 0,
+                            noOfPiecesPerBoxes: 0,
+                            sizePerTile: {
+                              length: { value: 0, units: "inch" },
+                              breadth: { value: 0, units: "inch" },
+                            },
+                          },
+                      slabs: product.slabs
+                        ? {
+                            noOfBundles: product.slabs.noOfBundles || 0,
+                            noOfSlabsPerBundle:
+                              product.slabs.noOfSlabsPerBundle || 0,
+                            uploadMeasurementSheetUrl:
+                              product.slabs.uploadMeasurementSheetUrl || "",
+                            totalSQMTRorSQFTwithAllowance:
+                              product.slabs.totalSQMTRorSQFTwithAllowance || "",
+                            totalSQMTRorSMFTwithoutAllowance:
+                              product.slabs.totalSQMTRorSMFTwithoutAllowance ||
+                              "",
+                          }
+                        : {
+                            noOfBundles: 0,
+                            noOfSlabsPerBundle: 0,
+                            uploadMeasurementSheetUrl: "",
+                            totalSQMTRorSQFTwithAllowance: "",
+                            totalSQMTRorSMFTwithoutAllowance: "",
+                          },
+                      slabType: product.slabType || "",
+                      slabLength: product.slabLength
+                        ? {
+                            value: product.slabLength.value || undefined,
+                            units: product.slabLength.units || "inch",
+                          }
+                        : { value: undefined, units: "inch" },
+                      slabBreadth: product.slabBreadth
+                        ? {
+                            value: product.slabBreadth.value || undefined,
+                            units: product.slabBreadth.units || "inch",
+                          }
+                        : { value: undefined, units: "inch" },
+                      slabThickness: product.slabThickness || undefined,
+                      slabDocument: product.slabDocument || undefined,
+                    })
+                  ) || [],
               })) || [];
           } else if (currentField === "shippingBillDetails") {
-            updatedSectionData.bills = updatedData.shippingBillDetails.bills?.map((bill: any) => ({
-              ...bill,
-              shippingBillDate: bill.shippingBillDate ? parseISO(bill.shippingBillDate) : undefined,
-              uploadShippingBill: bill.uploadShippingBill || bill.shippingBillUrl || "",
-            })) || [];
+            updatedSectionData.bills =
+              updatedData.shippingBillDetails.bills?.map((bill: any) => ({
+                ...bill,
+                shippingBillDate: bill.shippingBillDate
+                  ? parseISO(bill.shippingBillDate)
+                  : undefined,
+                uploadShippingBill:
+                  bill.uploadShippingBill || bill.shippingBillUrl || "",
+              })) || [];
           } else if (currentField === "shippingDetails") {
             updatedSectionData.transporterInvoices =
               updatedData.shippingDetails.transporterInvoices?.map(
                 (invoice: any) => ({
                   ...invoice,
                   date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
-                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                  valueWithGst:
+                    invoice.valueWithGst != null
+                      ? invoice.valueWithGst.toString()
+                      : "",
+                  valueWithoutGst:
+                    invoice.valueWithoutGst != null
+                      ? invoice.valueWithoutGst.toString()
+                      : "",
                 })
               ) || [];
             updatedSectionData.forwarderInvoices =
@@ -662,8 +792,14 @@ export default function EditShipmentPage({ params }: Props) {
                 (invoice: any) => ({
                   ...invoice,
                   date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
-                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                  valueWithGst:
+                    invoice.valueWithGst != null
+                      ? invoice.valueWithGst.toString()
+                      : "",
+                  valueWithoutGst:
+                    invoice.valueWithoutGst != null
+                      ? invoice.valueWithoutGst.toString()
+                      : "",
                 })
               ) || [];
           } else if (currentField === "supplierDetails") {
@@ -674,17 +810,38 @@ export default function EditShipmentPage({ params }: Props) {
                   supplierInvoiceDate: invoice.supplierInvoiceDate
                     ? parseISO(invoice.supplierInvoiceDate)
                     : undefined,
+                  clearanceSupplierInvoiceUrl:
+                    typeof invoice.clearanceSupplierInvoiceUrl === "string"
+                      ? invoice.clearanceSupplierInvoiceUrl
+                      : "",
                 })
               ) || [];
             updatedSectionData.clearance.supplierName =
-              typeof updatedData.supplierDetails?.clearance?.supplierName === "object"
-                ? updatedData.supplierDetails?.clearance?.supplierName?._id || null
+              typeof updatedData.supplierDetails?.clearance?.supplierName ===
+              "object"
+                ? updatedData.supplierDetails?.clearance?.supplierName?._id ||
+                  null
                 : updatedData.supplierDetails?.clearance?.supplierName &&
-                  /^[0-9a-fA-F]{24}$/.test(updatedData.supplierDetails.clearance.supplierName)
+                  /^[0-9a-fA-F]{24}$/.test(
+                    updatedData.supplierDetails.clearance.supplierName
+                  )
                 ? updatedData.supplierDetails.clearance.supplierName
                 : null;
             updatedSectionData.actual.actualSupplierName =
               updatedData.supplierDetails?.actual?.actualSupplierName || "";
+            updatedSectionData.actual.actualSupplierInvoiceUrl =
+              typeof updatedData.supplierDetails?.actual
+                ?.actualSupplierInvoiceUrl === "string"
+                ? updatedData.supplierDetails?.actual?.actualSupplierInvoiceUrl
+                : "";
+            updatedSectionData.actual.actualSupplierInvoiceValue =
+              updatedData.supplierDetails?.actual?.actualSupplierInvoiceValue ||
+              "";
+            updatedSectionData.actual.shippingBillUrl =
+              typeof updatedData.supplierDetails?.actual?.shippingBillUrl ===
+              "string"
+                ? updatedData.supplierDetails?.actual?.shippingBillUrl
+                : "";
           } else if (currentField === "blDetails") {
             updatedSectionData.blDate = updatedData.blDetails.blDate
               ? parseISO(updatedData.blDetails.blDate)
@@ -765,46 +922,125 @@ export default function EditShipmentPage({ params }: Props) {
                 containerNumber: container.containerNumber || "",
                 truckNumber: container.truckNumber || "",
                 truckDriverContactNumber:
-                  container.truckDriverContactNumber || container.trukDriverContactNumber || undefined,
-                addProductDetails: Array.isArray(container.addProductDetails)
-                  ? container.addProductDetails[0] || {
-                      productCategory: "",
-                      graniteAndMarble: "",
-                      tiles: {
-                        noOfBoxes: 0,
-                        noOfPiecesPerBoxes: 0,
-                        sizePerTile: {
-                          length: { value: 0, units: "" },
-                          breadth: { value: 0, units: "" },
+                  container.truckDriverContactNumber ||
+                  container.trukDriverContactNumber
+                    ? parseFloat(
+                        (
+                          container.truckDriverContactNumber ||
+                          container.trukDriverContactNumber
+                        ).toString()
+                      )
+                    : undefined,
+                addProductDetails: container.addProductDetails?.length
+                  ? container.addProductDetails.map(
+                      (product: BackendProductDetails) => ({
+                        productCategory: product.productCategory || "",
+                        graniteAndMarble: product.graniteAndMarble || "",
+                        tiles: product.tiles
+                          ? {
+                              noOfBoxes: product.tiles.noOfBoxes || 0,
+                              noOfPiecesPerBoxes:
+                                product.tiles.noOfPiecesPerBoxes || 0,
+                              sizePerTile: product.tiles.sizePerTile
+                                ? {
+                                    length: product.tiles.sizePerTile.length
+                                      ? {
+                                          value:
+                                            product.tiles.sizePerTile.length
+                                              .value || 0,
+                                          units:
+                                            product.tiles.sizePerTile.length
+                                              .units || "inch",
+                                        }
+                                      : { value: 0, units: "inch" },
+                                    breadth: product.tiles.sizePerTile.breadth
+                                      ? {
+                                          value:
+                                            product.tiles.sizePerTile.breadth
+                                              .value || 0,
+                                          units:
+                                            product.tiles.sizePerTile.breadth
+                                              .units || "inch",
+                                        }
+                                      : { value: 0, units: "inch" },
+                                  }
+                                : {
+                                    length: { value: 0, units: "inch" },
+                                    breadth: { value: 0, units: "inch" },
+                                  },
+                            }
+                          : {
+                              noOfBoxes: 0,
+                              noOfPiecesPerBoxes: 0,
+                              sizePerTile: {
+                                length: { value: 0, units: "inch" },
+                                breadth: { value: 0, units: "inch" },
+                              },
+                            },
+                        slabs: product.slabs
+                          ? {
+                              noOfBundles: product.slabs.noOfBundles || 0,
+                              noOfSlabsPerBundle:
+                                product.slabs.noOfSlabsPerBundle || 0,
+                              uploadMeasurementSheetUrl:
+                                product.slabs.uploadMeasurementSheetUrl || "",
+                              totalSQMTRorSQFTwithAllowance:
+                                product.slabs.totalSQMTRorSQFTwithAllowance ||
+                                "",
+                              totalSQMTRorSMFTwithoutAllowance:
+                                product.slabs
+                                  .totalSQMTRorSMFTwithoutAllowance || "",
+                            }
+                          : {
+                              noOfBundles: 0,
+                              noOfSlabsPerBundle: 0,
+                              uploadMeasurementSheetUrl: "",
+                              totalSQMTRorSQFTwithAllowance: "",
+                              totalSQMTRorSMFTwithoutAllowance: "",
+                            },
+                        slabType: product.slabType || "",
+                        slabLength: product.slabLength
+                          ? {
+                              value: product.slabLength.value || undefined,
+                              units: product.slabLength.units || "inch",
+                            }
+                          : { value: undefined, units: "inch" },
+                        slabBreadth: product.slabBreadth
+                          ? {
+                              value: product.slabBreadth.value || undefined,
+                              units: product.slabBreadth.units || "inch",
+                            }
+                          : { value: undefined, units: "inch" },
+                        slabThickness: product.slabThickness || undefined,
+                        slabDocument: product.slabDocument || undefined,
+                      })
+                    )
+                  : [
+                      {
+                        productCategory: "",
+                        graniteAndMarble: "",
+                        tiles: {
+                          noOfBoxes: 0,
+                          noOfPiecesPerBoxes: 0,
+                          sizePerTile: {
+                            length: { value: 0, units: "inch" },
+                            breadth: { value: 0, units: "inch" },
+                          },
                         },
-                      },
-                      slabs: {
-                        noOfBundles: 0,
-                        noOfSlabsPerBundle: 0,
-                        uploadMeasurementSheetUrl: "",
-                        totalSQMTRorSQFTwithAllowance: "",
-                        totalSQMTRorSMFTwithoutAllowance: "",
-                      },
-                    }
-                  : container.addProductDetails || {
-                      productCategory: "",
-                      graniteAndMarble: "",
-                      tiles: {
-                        noOfBoxes: 0,
-                        noOfPiecesPerBoxes: 0,
-                        sizePerTile: {
-                          length: { value: 0, units: "" },
-                          breadth: { value: 0, units: "" },
+                        slabs: {
+                          noOfBundles: 0,
+                          noOfSlabsPerBundle: 0,
+                          uploadMeasurementSheetUrl: "",
+                          totalSQMTRorSQFTwithAllowance: "",
+                          totalSQMTRorSMFTwithoutAllowance: "",
                         },
+                        slabType: "",
+                        slabLength: { value: undefined, units: "inch" },
+                        slabBreadth: { value: undefined, units: "inch" },
+                        slabThickness: undefined,
+                        slabDocument: undefined,
                       },
-                      slabs: {
-                        noOfBundles: 0,
-                        noOfSlabsPerBundle: 0,
-                        uploadMeasurementSheetUrl: "",
-                        totalSQMTRorSQFTwithAllowance: "",
-                        totalSQMTRorSMFTwithoutAllowance: "",
-                      },
-                    },
+                    ],
               })) || [],
           },
           shippingBillDetails: {
@@ -853,8 +1089,14 @@ export default function EditShipmentPage({ params }: Props) {
                     invoice.uploadTransporterInvoice ||
                     "",
                   date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
-                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
+                  valueWithGst:
+                    invoice.valueWithGst != null
+                      ? invoice.valueWithGst.toString()
+                      : "",
+                  valueWithoutGst:
+                    invoice.valueWithoutGst != null
+                      ? invoice.valueWithoutGst.toString()
+                      : "",
                 })
               ) || [],
             forwarderName:
@@ -869,26 +1111,33 @@ export default function EditShipmentPage({ params }: Props) {
               data.shippingDetails?.forwarderInvoices?.length ||
               0,
             forwarderInvoices:
-              data.shippingDetails?.forwarderInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadInvoiceUr:
-                    invoice.uploadInvoiceUr ||
-                    invoice.uploadForwarderInvoice ||
-                    "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst: invoice.valueWithGst != null ? invoice.valueWithGst.toString() : "",
-                  valueWithoutGst: invoice.valueWithoutGst != null ? invoice.valueWithoutGst.toString() : "",
-                })
-              ) || [],
+              data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
+                invoiceNumber: invoice.invoiceNumber || "",
+                uploadInvoiceUr:
+                  invoice.uploadInvoiceUr ||
+                  invoice.uploadForwarderInvoice ||
+                  "",
+                date: invoice.date ? parseISO(invoice.date) : undefined,
+                valueWithGst:
+                  invoice.valueWithGst != null
+                    ? invoice.valueWithGst.toString()
+                    : "",
+                valueWithoutGst:
+                  invoice.valueWithoutGst != null
+                    ? invoice.valueWithoutGst.toString()
+                    : "",
+              })) || [],
           },
           supplierDetails: {
             clearance: {
               supplierName:
-                typeof data.supplierDetails?.clearance?.supplierName === "object"
+                typeof data.supplierDetails?.clearance?.supplierName ===
+                "object"
                   ? data.supplierDetails?.clearance?.supplierName?._id || null
                   : data.supplierDetails?.clearance?.supplierName &&
-                    /^[0-9a-fA-F]{24}$/.test(data.supplierDetails.clearance.supplierName)
+                    /^[0-9a-fA-F]{24}$/.test(
+                      data.supplierDetails.clearance.supplierName
+                    )
                   ? data.supplierDetails.clearance.supplierName
                   : null,
               noOfInvoices:
@@ -911,7 +1160,8 @@ export default function EditShipmentPage({ params }: Props) {
                 ) || [],
             },
             actual: {
-              actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
+              actualSupplierName:
+                data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceValue:
                 data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
               actualSupplierInvoiceUrl:
@@ -978,7 +1228,10 @@ export default function EditShipmentPage({ params }: Props) {
                 ],
         };
 
-        console.log("Mapped form values:", JSON.stringify(updatedValues, null, 2));
+        console.log(
+          "Mapped form values:",
+          JSON.stringify(updatedValues, null, 2)
+        );
         methods.reset(updatedValues);
       } catch (error) {
         console.error("Error fetching shipment data:", error);
@@ -1027,10 +1280,17 @@ export default function EditShipmentPage({ params }: Props) {
           type="button"
           onClick={() => {
             console.log("Update & Next button clicked");
-            const supplierName = methods.getValues("supplierDetails.clearance.supplierName");
-            const actualSupplierName = methods.getValues("supplierDetails.actual.actualSupplierName");
+            const supplierName = methods.getValues(
+              "supplierDetails.clearance.supplierName"
+            );
+            const actualSupplierName = methods.getValues(
+              "supplierDetails.actual.actualSupplierName"
+            );
             console.log("SupplierName before submit:", supplierName);
-            console.log("ActualSupplierName before submit:", actualSupplierName);
+            console.log(
+              "ActualSupplierName before submit:",
+              actualSupplierName
+            );
             methods.handleSubmit(
               (data) => handleUpdateAndNext(data, true),
               (err) => {
@@ -1063,10 +1323,17 @@ export default function EditShipmentPage({ params }: Props) {
               console.log(
                 "Parent form submitted via Enter key or intentional submission"
               );
-              const supplierName = methods.getValues("supplierDetails.clearance.supplierName");
-              const actualSupplierName = methods.getValues("supplierDetails.actual.actualSupplierName");
+              const supplierName = methods.getValues(
+                "supplierDetails.clearance.supplierName"
+              );
+              const actualSupplierName = methods.getValues(
+                "supplierDetails.actual.actualSupplierName"
+              );
               console.log("SupplierName on form submit:", supplierName);
-              console.log("ActualSupplierName on form submit:", actualSupplierName);
+              console.log(
+                "ActualSupplierName on form submit:",
+                actualSupplierName
+              );
               methods.handleSubmit((data) => handleUpdateAndNext(data, true))();
             }}
             className="flex flex-col gap-3 w-full p-3"

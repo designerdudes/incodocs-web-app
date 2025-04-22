@@ -83,7 +83,7 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold">Other Certificates</h2>
+        <h2 className="text-xl font-bold">Documents</h2>
         <Button
           type="button"
           variant="outline"
