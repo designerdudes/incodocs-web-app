@@ -1,11 +1,42 @@
 "use client";
-import { ColumnDef } from "@tanstack/react-table";
+import { Column, ColumnDef, FilterFn } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnHeader } from "./column-header";
 import moment from "moment";
 import { DataTableCellActions } from "./cell-actions";
 import { Eye } from "lucide-react";
 import { Shipment } from "../data/schema";
+import { Button } from "@/components/ui/button";
+import ViewAllComponent from "./viewAllComponent";
+import { CSSProperties } from "react";
+
+const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
+  const searchableRowContent =
+    `${row.original.shipmentId}`.toLowerCase()
+  const searchTerm = (filterValue ?? "").toLowerCase()
+  return searchableRowContent.includes(searchTerm)
+}
+
+const statusFilterFn: FilterFn<Shipment> = (
+  row,
+  columnId,
+  filterValue: string[]
+) => {
+  if (!filterValue?.length) return true
+  const status = row.getValue(columnId) as string
+  return filterValue.includes(status)
+}
+
+const getPinningStyles = (column: Column<Shipment>): CSSProperties => {
+  const isPinned = column.getIsPinned()
+  return {
+    left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
+    right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
+    position: isPinned ? "sticky" : "relative",
+    width: column.getSize(),
+    zIndex: isPinned ? 1 : 0,
+  }
+}
 
 export const columns: ColumnDef<Shipment>[] = [
   {
@@ -16,21 +47,19 @@ export const columns: ColumnDef<Shipment>[] = [
           table.getIsAllPageRowsSelected() ||
           (table.getIsSomePageRowsSelected() && "indeterminate")
         }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
-        className="translate-y-[2px]"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
-        className="translate-y-[2px]"
       />
     ),
+    size: 50,
+    enablePinning: false,
     enableSorting: false,
     enableHiding: false,
   },
@@ -42,12 +71,14 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">{row.original.shipmentId}</span>
       </div>
     ),
+    filterFn: multiColumnFilterFn,
   },
   {
     accessorKey: "bookingDetails.invoiceNumber",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title=" Invoice Number" />
-    ),
+    // header: ({ column }) => (
+    //   <ColumnHeader column={column} title=" Invoice Number" />
+    // ),
+    header: "Invoice Number",
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -55,12 +86,15 @@ export const columns: ColumnDef<Shipment>[] = [
         </span>
       </div>
     ),
+    filterFn: multiColumnFilterFn,
   },
   {
     accessorKey: "saleInvoiceDetails.consignee",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Consignee Name" />
-    ),
+    // header: ({ column }) => (
+    //   <ColumnHeader column={column} title="Consignee Name" />
+    // ),
+    header: "Consignee Name",
+
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -71,9 +105,10 @@ export const columns: ColumnDef<Shipment>[] = [
   },
   {
     accessorKey: "saleInvoiceDetails.DescriptionofGoods",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Description of Goods" />
-    ),
+    // header: ({ column }) => (
+    //   <ColumnHeader column={column} title="Description of Goods" />
+    // ),
+    header: "Description of Goods",
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -81,6 +116,8 @@ export const columns: ColumnDef<Shipment>[] = [
         </span>
       </div>
     ),
+    size: 300,
+    
   },
   {
     accessorKey: "blDetails.blNumber",
@@ -101,14 +138,32 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.bookingDetails?.containers?.length > 0
+          {/* {row.original.bookingDetails?.containers?.length > 0
             ? row.original.bookingDetails.containers
               .map((container) => container.containerNumber)
               .join(", ")
+            : "N/A"} */}
+          {row.original.bookingDetails?.containers?.length > 0
+            ? <>
+         {   row.original.bookingDetails.containers[1]?.containerNumber}
+         {/* <Button variant="link" className="text-blue-500 pl-3 hover:text-blue-700">
+         View All
+          </Button> */}
+          <ViewAllComponent
+          params={{ organizationId: "your-organization-id" }}
+          data={ row.original.bookingDetails.containers
+            .map((container) => container.containerNumber)
+            .join(", ")}
+          setIsFetching={() => {}}
+          setIsLoading={() => {}}
+          />
+            </>
             : "N/A"}
         </span>
       </div>
     ),
+    filterFn: multiColumnFilterFn,
+    size: 200,
   },
   {
     accessorKey: "bookingDetails.portOfLoading",
@@ -179,40 +234,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
 
-  {
-    accessorKey: "bookingDetails.containers",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Truck Number" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.containers?.length > 0
-            ? row.original.bookingDetails.containers
-              .map((container) => container.truckNumber)
-              .join(", ")
-            : "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "bookingDetails.containers",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Truck Driver Number" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails?.containers?.length > 0
-            ? row.original.bookingDetails.containers
-              .map((container) => container.truckDriverContactNumber)
-              .join(", ")
-            : "N/A"}
-        </span>
-      </div>
-    ),
-  },
+ 
 
 
   {
@@ -333,23 +355,6 @@ export const columns: ColumnDef<Shipment>[] = [
           {row.original.shippingBillDetails?.ShippingBills?.length > 0
             ? row.original.shippingBillDetails.ShippingBills.map(
               (bill) => bill.shippingBillNumber
-            ).join(", ")
-            : "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "shippingBillDetails.ShippingBills",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Shipping Bill Date" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.shippingBillDetails?.ShippingBills?.length > 0
-            ? row.original.shippingBillDetails.ShippingBills.map((bill) =>
-              moment(bill.shippingBillDate).format("MMM Do YY")
             ).join(", ")
             : "N/A"}
         </span>

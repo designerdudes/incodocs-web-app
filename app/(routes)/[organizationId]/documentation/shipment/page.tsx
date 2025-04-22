@@ -6,6 +6,7 @@ import { columns } from "./components1/columns";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
+import ShipmentDataTable from "@/components/shipmentDataTable";
 
 export default async function Page() {
     const cookieStore = cookies();
@@ -48,7 +49,7 @@ export default async function Page() {
             </div>
             <Separator className="my-2" />
             <div >
-                <DataTable
+                {/* <DataTable
                     bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                     bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
@@ -58,6 +59,14 @@ export default async function Page() {
                     data={shipmentData}
                     columns={columns}
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
+                /> */}
+                <ShipmentDataTable
+                columns={columns}
+                data={shipmentData}
+                searchKeys={["shipmentId"]}
+                bulkDeleteIdName="_id"
+                bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
+                bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
                 />
             </div>
         </div>
