@@ -24,16 +24,13 @@ import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Trash } from "lucide-react";
-import { putData } from "@/axiosUtility/api";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
-
+import { Trash, Volume } from "lucide-react";
+import { postData, putData } from "@/axiosUtility/api";
 interface AddBlockFormProps {
-  params: {
-    lotId: string;
-  };
-  gap: number;
+  
+    LotData: any;
+  
+  gap?: string;
 }
 
 const formSchema = z.object({
@@ -86,10 +83,12 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
-export function AddBlockForm({ params }: AddBlockFormProps) {
+export function AddBlockForm({ LotData }: AddBlockFormProps) {
+  console.log("lot data", LotData);
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any[]>([]);
+  const [costs, setCosts] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
@@ -113,44 +112,15 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      noOfBlocks: 1,
-      blocks: [
-        {
-          dimensions: {
-            weight: { value: 0, units: "tons" },
-            length: { value: 0, units: "inch" },
-            breadth: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-          },
-        },
-      ],
-    },
   });
-
-  const { control, setValue, watch, getValues } = form;
-
-  // Sync blocks state with form on mount
-  React.useEffect(() => {
-    const formBlocks = watch("blocks") || [];
-    if (formBlocks.length > 0) {
-      setBlocks(formBlocks);
-    }
-  }, [watch]);
-
-  // Save progress to localStorage
-  const saveProgressSilently = (data: any) => {
-    try {
-      localStorage.setItem("addBlockFormData", JSON.stringify(data));
-      localStorage.setItem("lastSaved", new Date().toISOString());
-    } catch (error) {
-      console.error("Failed to save progress to localStorage:", error);
-    }
-  };
-
-  // Handle block count changes
-  const handleBlockCountChange = (value: string) => {
-    const newCount = Number(value);
+  let lotId = LotData?._id;
+let prevMarkerCost = LotData?.markerCost;
+let prevTransportCost = LotData?.transportCost;
+let prevMaterialCost = LotData?.materialCost;
+let prevNoOfBlocks = LotData?.noOfBlocks;
+  
+  function handleBlocksInputChange(value: string) {
+    const count = parseInt(value, 10);
 
     if (newCount < blocks.length) {
       setShowConfirmation(true);
@@ -234,14 +204,15 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
   // Calculate total volume
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { length, breadth, height } = block.dimensions;
-      const volume = (length.value * breadth.value * height.value) / 1000000;
+      const { materialCost, breadth, height } = block.dimensions;
+      const totalcost = (length.value * breadth.value * height.value) / 1000000;
       return total + (volume || 0);
     }, 0);
     return {
       inM: totalVolumeInM,
     };
   }
+
 
   return (
     <div className="space-y-6">
@@ -261,12 +232,19 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
+                        setCosts
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value ?? ""}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
-                  </FormControl>
+                  </FormControl>{
+                    field.value &&(
+                  <span className="text-gray-500 text-sm">
+                    Total Material cost: {prevMaterialCost} {"+"} {field.value} ={prevMaterialCost + field.value}
+                  </span>
+                    )
+              }
                   <FormMessage />
                 </FormItem>
               )}
@@ -290,6 +268,13 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
+                    {
+                      field.value && (
+                        <span className="text-gray-500 text-sm">
+                          Total Marker cost: {prevMarkerCost}{" + "}  {field.value} = {prevMarkerCost + field.value}
+                        </span>
+                      )
+                    }
                   <FormMessage />
                 </FormItem>
               )}
@@ -313,6 +298,13 @@ export function AddBlockForm({ params }: AddBlockFormProps) {
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
+                  {
+                    field.value &&(
+                  <span className="text-gray-500 text-sm">
+                    Total Transport cost: {prevTransportCost} {"+"} {field.value} ={prevTransportCost + field.value}
+                  </span>
+                    )
+              }
                   <FormMessage />
                 </FormItem>
               )}

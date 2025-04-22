@@ -30,6 +30,7 @@ import {
   CircleAlertIcon,
   CircleXIcon,
   Columns3Icon,
+  Download,
   EllipsisIcon,
   FilterIcon,
   ListFilterIcon,
@@ -168,6 +169,10 @@ function ShipmentDataTable<T>({
   });
 
   useEffect(() => {
+   table.setColumnPinning({
+      left: ["ShipmentId"],
+      right: ["actions"],
+    });
     const filterValue = dateFilter.from && dateFilter.to ? dateFilter : undefined;
     table.getColumn("booking_date")?.setFilterValue(filterValue);
     console.log("Applied Date Filter:", filterValue);
@@ -177,9 +182,11 @@ function ShipmentDataTable<T>({
 
   const getPinningStyles = (column: Column<Shipment>): CSSProperties => {
     const isPinned = column.getIsPinned()
+    const isAction = column.id === "actions"
     return {
       left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
-      right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
+      right: isPinned === "right" || isAction ? `${column.getAfter("right")}px` : undefined,
+      
       position: isPinned ? "sticky" : "relative",
       width: column.getSize(),
       zIndex: isPinned ? 1 : 0,
@@ -255,7 +262,8 @@ function ShipmentDataTable<T>({
               onChange={(e) =>
                 table.getColumn(searchKeys[0])?.setFilterValue(e.target.value)
               }
-              placeholder={`Filter by ${searchKeys?.join(", ").replace("_", " ")}`}
+              // placeholder={`Filter by ${searchKeys?.join(", ").replace("_", " ").replace(/_/g, " ")}`}
+              placeholder="Filter by ShipmentID, Consignee Name, Invoice Number, Booking Number"
               type="text"
               aria-label={`Filter by ${searchKeys?.join(", ").replace("_", " ")}`}
             />
@@ -531,6 +539,48 @@ function ShipmentDataTable<T>({
               Add
             </Button>
           )}
+          {
+           <Popover>
+           <PopoverTrigger asChild>
+             <Button variant="outline">
+               <Download className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+               Export
+               {selectedStatuses.length > 0 && (
+                 <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
+                   {selectedStatuses.length}
+                 </span>
+               )}
+             </Button>
+           </PopoverTrigger>
+           <PopoverContent className="w-auto min-w-36 p-3" align="start">
+             <div className="space-y-3">
+               <div className="text-muted-foreground text-xs font-medium">Export</div>
+               <div className="space-y-3">
+                <Button
+                onClick={() => {
+                  // Implement CSV export logic here
+                  console.log("Exporting data to CSV...");
+                  const csvContent = [
+                    columns.map((col) => col.header).join(","),
+                    ...data.map((row) => columns.map((col) => row[col.accessorKey]).join(",")),
+                  ].join("\n");
+                  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                  const link = document.createElement("a");
+                  link.href = URL.createObjectURL(blob);
+                  link.setAttribute("download", "shipment_data.csv");
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                }}
+                >
+                  Export in CSV
+                </Button>
+             
+               </div>
+             </div>
+           </PopoverContent>
+         </Popover>
+          }
         </div>
       </div>
 
@@ -732,7 +782,23 @@ function ShipmentDataTable<T>({
                     <TableCell
                       key={cell.id}
                       className="[&[data-pinned][data-last-col]]:border-border [&[data-pinned]]:bg-background/90 [&[data-pinned]]:backdrop-blur-sm  [&[data-pinned=left][data-last-col=left]]:border-r [&[data-pinned=right][data-last-col=right]]:border-l"
-                      style={{ ...getPinningStyles(column) }}
+                      style={
+                        column.id === "ShipmentId" ?
+                        //pin it to left 
+                        { 
+                          left: `${column.getStart("left")}px`
+
+                      } :
+                        //pin it to right
+                        column.id === "actions" ?
+                        { right: `${column.getAfter("right")}px` } :
+                        //default
+
+                        { 
+                      
+                        ...getPinningStyles(column)
+
+                       }}
                       data-pinned={isPinned || undefined}
                       data-last-col={
                         isLastLeftPinned

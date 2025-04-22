@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnHeader } from "./column-header";
 import moment from "moment";
 import { DataTableCellActions } from "./cell-actions";
-import { Eye } from "lucide-react";
+import { Copy, Eye } from "lucide-react";
 import { Shipment } from "../data/schema";
 import { Button } from "@/components/ui/button";
 import ViewAllComponent from "./viewAllComponent";
@@ -12,7 +12,12 @@ import { CSSProperties } from "react";
 
 const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
   const searchableRowContent =
-    `${row.original.shipmentId}`.toLowerCase()
+    `${row.original.shipmentId} ${row.original.bookingDetails?.invoiceNumber} ${row.original.saleInvoiceDetails?.consignee?.name} ${row.original.blDetails?.blNumber} ${row.original.bookingDetails?.containers.map(
+      (container) => container.containerNumber 
+    )}
+    ${row.original.bookingDetails?.portOfLoading} ${row.original.bookingDetails?.destinationPort} ${row.original.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.bookingDetails?.bookingNumber} ${row.original.shippingDetails?.transporterName?.transporterName} ${row.original.shippingDetails?.forwarderName?.forwarderName} ${row.original.shippingBillDetails?.portCode} ${row.original.shippingBillDetails?.cbName} ${row.original.shippingBillDetails?.ShippingBills.map(
+      (bill) => bill.shippingBillNumber
+    )} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.saleInvoiceDetails?.actualBuyer}`.toLowerCase()
   const searchTerm = (filterValue ?? "").toLowerCase()
   return searchableRowContent.includes(searchTerm)
 }
@@ -25,17 +30,6 @@ const statusFilterFn: FilterFn<Shipment> = (
   if (!filterValue?.length) return true
   const status = row.getValue(columnId) as string
   return filterValue.includes(status)
-}
-
-const getPinningStyles = (column: Column<Shipment>): CSSProperties => {
-  const isPinned = column.getIsPinned()
-  return {
-    left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
-    right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
-    position: isPinned ? "sticky" : "relative",
-    width: column.getSize(),
-    zIndex: isPinned ? 1 : 0,
-  }
 }
 
 export const columns: ColumnDef<Shipment>[] = [
@@ -64,17 +58,21 @@ export const columns: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "shipmentId",
+    accessorKey: "ShipmentId",
     header: ({ column }) => <ColumnHeader column={column} title="Shipment ID" />,
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">{row.original.shipmentId}</span>
+      <div className="flex items-center space-x-2">
+        <span className="truncate font-medium">{row.original.shipmentId || "N/A"}</span>
+    { row.original.shipmentId &&   <Copy
+          className="h-3 w-3 text-gray-500 cursor-pointer hover:text-blue-700"
+          onClick={() => navigator.clipboard.writeText(row.original.shipmentId)}
+        />}
       </div>
     ),
     filterFn: multiColumnFilterFn,
   },
   {
-    accessorKey: "bookingDetails.invoiceNumber",
+    accessorKey: "Invoice Number",
     // header: ({ column }) => (
     //   <ColumnHeader column={column} title=" Invoice Number" />
     // ),
@@ -89,7 +87,7 @@ export const columns: ColumnDef<Shipment>[] = [
     filterFn: multiColumnFilterFn,
   },
   {
-    accessorKey: "saleInvoiceDetails.consignee",
+    accessorKey: "Consignee",
     // header: ({ column }) => (
     //   <ColumnHeader column={column} title="Consignee Name" />
     // ),
@@ -102,9 +100,10 @@ export const columns: ColumnDef<Shipment>[] = [
         </span>
       </div>
     ),
+    size: 300,
   },
   {
-    accessorKey: "saleInvoiceDetails.DescriptionofGoods",
+    accessorKey: "Description of goods",
     // header: ({ column }) => (
     //   <ColumnHeader column={column} title="Description of Goods" />
     // ),
@@ -120,7 +119,7 @@ export const columns: ColumnDef<Shipment>[] = [
     
   },
   {
-    accessorKey: "blDetails.blNumber",
+    accessorKey: "BL Number",
     header: ({ column }) => <ColumnHeader column={column} title="BL Number" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -131,7 +130,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.containers",
+    accessorKey: "Container Numbers",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Container Number" />
     ),
@@ -145,7 +144,7 @@ export const columns: ColumnDef<Shipment>[] = [
             : "N/A"} */}
           {row.original.bookingDetails?.containers?.length > 0
             ? <>
-         {   row.original.bookingDetails.containers[1]?.containerNumber}
+         {   row.original.bookingDetails.containers[0]?.containerNumber}
          {/* <Button variant="link" className="text-blue-500 pl-3 hover:text-blue-700">
          View All
           </Button> */}
@@ -166,7 +165,42 @@ export const columns: ColumnDef<Shipment>[] = [
     size: 200,
   },
   {
-    accessorKey: "bookingDetails.portOfLoading",
+    accessorKey: "Truck Number",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Truck Number" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {/* {row.original.bookingDetails?.containers?.length > 0
+            ? row.original.bookingDetails.containers
+              .map((container) => container.containerNumber)
+              .join(", ")
+            : "N/A"} */}
+          {row.original.bookingDetails?.containers?.length > 0
+            ? <>
+         {   row.original.bookingDetails.containers[0]?.truckNumber}
+         {/* <Button variant="link" className="text-blue-500 pl-3 hover:text-blue-700">
+         View All
+          </Button> */}
+          <ViewAllComponent
+          params={{ organizationId: "your-organization-id" }}
+          data={ row.original.bookingDetails.containers
+            .map((container) => container.truckNumber)
+            .join(", ")}
+          setIsFetching={() => {}}
+          setIsLoading={() => {}}
+          />
+            </>
+            : "N/A"}
+        </span>
+      </div>
+    ),
+    filterFn: multiColumnFilterFn,
+    size: 200,
+  },
+  {
+    accessorKey: "Port Of Loading",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Port of Loading" />
     ),
@@ -179,7 +213,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.destinationPort",
+    accessorKey: "Destination Port",
     header: ({ column }) => (
       <ColumnHeader column={column} title=" Port Of Destination " />
     ),
@@ -192,7 +226,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "saleInvoiceDetails.commercialInvoicesValue",
+    accessorKey: "Commercial Invoices Value",
     header: ({ column }) => (
       <ColumnHeader column={column} title=" Invoice Value " />
     ),
@@ -206,7 +240,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "supplierDetails.Actualinvoicevalue",
+    accessorKey: "Actual Invoice Value",
     header: ({ column }) => (
       <ColumnHeader column={column} title=" Actual invoice value" />
     ),
@@ -221,7 +255,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.bookingNumber",
+    accessorKey: "Booking Number",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Booking Number" />
     ),
@@ -238,7 +272,7 @@ export const columns: ColumnDef<Shipment>[] = [
 
 
   {
-    accessorKey: "bookingDetails.vesselSailingDate",
+    accessorKey: "Vessel Sailing Date",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Sailing Date" />
     ),
@@ -255,7 +289,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "bookingDetails.vesselArrivingDate",
+    accessorKey: "Vessel Arriving Date",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Arriving Date" />
     ),
@@ -272,7 +306,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingDetails.transporterName",
+    accessorKey: "Transporter Name",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Transporter Name" />
     ),
@@ -286,7 +320,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingDetails.forwarderName",
+    accessorKey: "Forwarder Name",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Forwarder Name" />
     ),
@@ -299,7 +333,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingDetails.shippingLineInvoices",
+    accessorKey: "Shipping Line Invoices",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Line Invoice" />
     ),
@@ -323,7 +357,7 @@ export const columns: ColumnDef<Shipment>[] = [
     },
   },
   {
-    accessorKey: "shippingBillDetails.portCode",
+    accessorKey: "Port Code",
     header: ({ column }) => <ColumnHeader column={column} title="Port Code" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -334,7 +368,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingBillDetails.cbName",
+    accessorKey: "CB Name",
     header: ({ column }) => <ColumnHeader column={column} title="CB Name" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -345,7 +379,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingBillDetails.ShippingBills",
+    accessorKey: "Shipping Bills",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Bill Number" />
     ),
@@ -362,7 +396,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "supplierDetails.clearance",
+    accessorKey: "Supplier Name",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Supplier Name" />
     ),
@@ -377,7 +411,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "supplierDetails.clearance.invoices",
+    accessorKey: "Supplier Invoice Number",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Supplier Invoice Number" />
     ),
@@ -394,7 +428,7 @@ export const columns: ColumnDef<Shipment>[] = [
   },
 
   {
-    accessorKey: "saleInvoiceDetails.actualBuyer",
+    accessorKey: "Actual Buyer",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Actual Buyer" />
     ),
@@ -409,7 +443,7 @@ export const columns: ColumnDef<Shipment>[] = [
 
 
   {
-    accessorKey: "blDetails.blDate",
+    accessorKey: "BL Date",
     header: ({ column }) => <ColumnHeader column={column} title="BL Date" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -422,9 +456,9 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "otherDetails",
+    accessorKey: "Other Documents",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Certificate Number" />
+      <ColumnHeader column={column} title="Other Documents" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -437,8 +471,40 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
+    accessorKey: "createdBy",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Created By" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+        {row.original?.createdBy
+            ? row.original?.createdBy
+            : "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Created At" />
+    ),
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+        {row.original.createdAt
+            ? moment(row.original.createdAt).format("MMM Do YY")
+            : "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  {
     id: "actions",
     header: ({ column }) => <ColumnHeader column={column} title="Action" />,
     cell: ({ row }) => <DataTableCellActions row={row} />,
+    size: 70,
+    enablePinning: false,
   },
 ];
