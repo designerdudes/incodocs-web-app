@@ -213,6 +213,7 @@ export const shipmentSchema = z.object({
     employees: z.array(z.string()),
   }),
   createdAt: z.string().datetime(),
+  createdBy: z.string(),
   updatedAt: z.string().datetime(),
   __v: z.number(),
 });
