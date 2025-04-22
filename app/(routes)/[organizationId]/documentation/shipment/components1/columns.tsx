@@ -12,7 +12,12 @@ import { CSSProperties } from "react";
 
 const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
   const searchableRowContent =
-    `${row.original.shipmentId}`.toLowerCase()
+    `${row.original.shipmentId} ${row.original.bookingDetails?.invoiceNumber} ${row.original.saleInvoiceDetails?.consignee?.name} ${row.original.blDetails?.blNumber} ${row.original.bookingDetails?.containers.map(
+      (container) => container.containerNumber 
+    )}
+    ${row.original.bookingDetails?.portOfLoading} ${row.original.bookingDetails?.destinationPort} ${row.original.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.bookingDetails?.bookingNumber} ${row.original.shippingDetails?.transporterName?.transporterName} ${row.original.shippingDetails?.forwarderName?.forwarderName} ${row.original.shippingBillDetails?.portCode} ${row.original.shippingBillDetails?.cbName} ${row.original.shippingBillDetails?.ShippingBills.map(
+      (bill) => bill.shippingBillNumber
+    )} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.saleInvoiceDetails?.actualBuyer}`.toLowerCase()
   const searchTerm = (filterValue ?? "").toLowerCase()
   return searchableRowContent.includes(searchTerm)
 }

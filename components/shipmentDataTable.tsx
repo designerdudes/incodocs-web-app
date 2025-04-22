@@ -255,7 +255,8 @@ function ShipmentDataTable<T>({
               onChange={(e) =>
                 table.getColumn(searchKeys[0])?.setFilterValue(e.target.value)
               }
-              placeholder={`Filter by ${searchKeys?.join(", ").replace("_", " ")}`}
+              // placeholder={`Filter by ${searchKeys?.join(", ").replace("_", " ").replace(/_/g, " ")}`}
+              placeholder="Filter by ShipmentID, Consignee Name, Invoice Number, Booking Number"
               type="text"
               aria-label={`Filter by ${searchKeys?.join(", ").replace("_", " ")}`}
             />
