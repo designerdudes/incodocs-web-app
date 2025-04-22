@@ -76,3 +76,4 @@ const CostCalculationTable: React.FC<CostCalculationTableProps> = ({ LotData }) 
 };
 
 export default CostCalculationTable;
+
