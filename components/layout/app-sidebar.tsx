@@ -32,26 +32,24 @@ import FactorySwitcher from "./factory-switcher";
 import { cookies } from "next/headers";
 import { Button } from "../ui/button";
 import { sidebarTabs } from "@/lib/constants";
-
-// Static navigation data (use strings for icons to avoid serialization issues)
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import FactoryForm from "../forms/AddFactoryForm";
 
 
 interface Params {
-    organizationId: string; // Match the [orgid] route
-    factoryid: string; // Match the [factoryid] route
+  organizationId: string;
+  factoryid: string;
 }
 
 export default async function AppSidebar({ params }: { params: Params }) {
-  const { organizationId } = params;
-  const { factoryid } = params; // Extract factoryId from params
+  const { organizationId, factoryid } = params;
 
-  console.log("Params:", params); // Debug params
+  console.log("Params:", params);
   console.log("orgid:", organizationId);
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value;
 
-  // Safeguard for missing orgid
   if (!organizationId) {
     return (
       <Sidebar collapsible="icon">
@@ -116,29 +114,39 @@ export default async function AppSidebar({ params }: { params: Params }) {
   const transformedFactories = factories.map((factory: any) => ({
     factoryName: factory.name || factory.factoryName || "Unnamed Factory",
     factoryId: factory._id,
-    logo: "FactoryIcon", // String identifier
+    logo: "FactoryIcon",
     plan: factory.plan || "Standard",
     organizationId: factory.organization || organizationId,
   }));
 
+  console.log("Transformed Factories:", transformedFactories);
 
-  console.log("Transformed Factories:", organizationId, factoryid); // Debug transformed factories
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-      {transformedFactories.length > 0 ? (
-        <FactorySwitcher FactoriesData={transformedFactories} />
-      ) : (
-        <div className="">
-          <Button variant="default"  className=" mr-4 flex items-center  gap-2 w-full">
-            <Plus className="h-4 w-4" />
-            <span >Add Factory</span>
-            </Button>
-        <div className="text-muted-foreground text-xs mt-2">
-            No factories found. Please add a factory to get started.
+        {transformedFactories.length > 0 ? (
+          <FactorySwitcher FactoriesData={transformedFactories} />
+        ) : (
+          <div className="">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="default" className="mr-4 flex items-center gap-2 w-full">
+                  <Plus className="h-4 w-4" />
+                  <span>Add Factory</span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Factory</DialogTitle>
+                </DialogHeader>
+                <FactoryForm organizationId={organizationId} token={token || ""} />
+              </DialogContent>
+            </Dialog>
+            <div className="text-muted-foreground text-xs mt-2">
+              No factories found. Please add a factory to get started.
             </div>
-        </div>
-      )}
+          </div>
+        )}
       </SidebarHeader>
       <SidebarContent>
         <NavMain orgId={organizationId} factoryId={factoryid} />

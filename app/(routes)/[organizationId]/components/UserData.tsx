@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Heading from "@/components/ui/heading";
@@ -12,9 +13,10 @@ import {
 import { FiUser, FiPlus } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import FactoryForm from "@/components/forms/AddFactoryForm";
+
 
 interface Address {
   coordinates: {
@@ -59,7 +61,7 @@ interface UserDataProps {
   userData: User | null;
 }
 
-// Form component for the modal
+// Form component for creating an organization
 const CreateOrgForm: React.FC<{
   initialData: {
     name: string;
@@ -74,11 +76,51 @@ const CreateOrgForm: React.FC<{
     owner: string;
   }) => void;
   error: string | null;
-}> = ({ initialData, onSubmit, error }) => {
+  token: string;
+  organizations: Organization[];
+}> = ({ initialData, onSubmit, error, token, organizations }) => {
   const [formData, setFormData] = useState(initialData);
+  const modal = useGlobalModal();
 
   const handleSubmit = () => {
     onSubmit(formData);
+  };
+
+  const openAddFactoryModal = () => {
+    if (organizations.length === 0) {
+      modal.title = "No Organizations Available";
+      modal.description = "Please create an organization before adding a factory.";
+      modal.children = (
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            You need at least one organization to add a factory.
+          </p>
+          <Button
+            onClick={() => {
+              modal.onClose();
+            }}
+          >
+            Close
+          </Button>
+        </div>
+      );
+      modal.onOpen();
+      return;
+    }
+
+    modal.title = "Add New Factory";
+    modal.description = "Fill in the details to add a new factory.";
+    modal.children = (
+      <FactoryForm
+        organizationId={organizations[0]._id}
+        token={token}
+        organizations={organizations.map((org) => ({
+          id: org._id,
+          name: org.name,
+        }))}
+      />
+    );
+    modal.onOpen();
   };
 
   return (
@@ -93,18 +135,7 @@ const CreateOrgForm: React.FC<{
         />
       </div>
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          value={formData.description}
-          onChange={(e) =>
-            setFormData({ ...formData, description: e.target.value })
-          }
-          placeholder="e.g., This is a sample organization"
-        />
-      </div>
-      <div>
-        <Label htmlFor="location">Address Location</Label>
+        <Label htmlFor="location">Address </Label>
         <Input
           id="location"
           value={formData.address.location}
@@ -131,58 +162,13 @@ const CreateOrgForm: React.FC<{
           placeholder="e.g., 500008"
         />
       </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="latitude">Latitude</Label>
-          <Input
-            id="latitude"
-            type="number"
-            value={formData.address.coordinates.coordinates[0]}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                address: {
-                  ...formData.address,
-                  coordinates: {
-                    ...formData.address.coordinates,
-                    coordinates: [
-                      Number(e.target.value),
-                      formData.address.coordinates.coordinates[1],
-                    ],
-                  },
-                },
-              })
-            }
-            placeholder="e.g., 40.7128"
-          />
-        </div>
-        <div>
-          <Label htmlFor="longitude">Longitude</Label>
-          <Input
-            id="longitude"
-            type="number"
-            value={formData.address.coordinates.coordinates[1]}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                address: {
-                  ...formData.address,
-                  coordinates: {
-                    ...formData.address.coordinates,
-                    coordinates: [
-                      formData.address.coordinates.coordinates[0],
-                      Number(e.target.value),
-                    ],
-                  },
-                },
-              })
-            }
-            placeholder="e.g., -74.0060"
-          />
-        </div>
-      </div>
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <Button onClick={handleSubmit}>Create Organization</Button>
+      <div className="flex justify-center gap-4">
+        <Button onClick={handleSubmit}>Submit Organization</Button>
+        <Button onClick={openAddFactoryModal} >
+          <FiPlus className="mr-2 h-4 w-4" /> Add Factory
+        </Button>
+      </div>
     </div>
   );
 };
@@ -246,6 +232,39 @@ const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
         initialData={newOrg}
         onSubmit={handleCreateOrg}
         error={createOrgError}
+        token={token}
+        organizations={organizations}
+      />
+    );
+    modal.onOpen();
+  };
+
+  const openAddFactoryModal = () => {
+    if (organizations.length === 0) {
+      modal.title = "No Organizations Available";
+      modal.description = "Please create an organization before adding a factory.";
+      modal.children = (
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            You need at least one organization to add a factory.
+          </p>
+          <Button onClick={openCreateOrgModal}>Create Organization</Button>
+        </div>
+      );
+      modal.onOpen();
+      return;
+    }
+
+    modal.title = "Add New Factory";
+    modal.description = "Fill in the details to add a new factory.";
+    modal.children = (
+      <FactoryForm
+        organizationId={organizations[0]._id}
+        token={token}
+        organizations={organizations.map((org) => ({
+          id: org._id,
+          name: org.name,
+        }))}
       />
     );
     modal.onOpen();
@@ -271,12 +290,10 @@ const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
         console.log("No factories found for this organization.");
         router.push(`/${orgId}/dashboard`);
       }
-      const firstFactoryId = factories[0]._id
+      const firstFactoryId = factories[0]._id;
       router.push(`/${orgId}/${firstFactoryId}/dashboard`);
-
     } catch (err) {
       console.error("Error fetching factory data:", err);
-      // Fallback navigation if factory fetch fails
       router.push(`/${orgId}/dashboard`);
     }
   };
@@ -299,9 +316,12 @@ const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
         <p className="text-lg mt-4 text-gray-600">
           Choose the organization you want to continue with.
         </p>
-        <Button className="mt-4" onClick={openCreateOrgModal}>
-          <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-        </Button>
+        <div className="mt-4 flex justify-center gap-4">
+          <Button onClick={openCreateOrgModal}>
+            <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+          </Button>
+          
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
