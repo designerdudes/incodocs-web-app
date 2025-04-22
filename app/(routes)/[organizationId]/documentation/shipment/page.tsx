@@ -13,7 +13,7 @@ export default async function Page() {
     const token = cookieStore.get("AccessToken")?.value || "";
 
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/674b0a687d4f4b21c6c980ba`,
+        `https://incodocs-server.onrender.com/shipment/getbyorg/680769228f05500be0f8f89e`,
         {
             method: "GET",
             headers: {

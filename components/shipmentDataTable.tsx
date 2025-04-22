@@ -170,9 +170,9 @@ function ShipmentDataTable<T>({
 
   useEffect(() => {
    table.setColumnPinning({
-      left: ["ShipmentId"],
-      right: ["actions"],
+      left: ["select"],
     });
+    
     const filterValue = dateFilter.from && dateFilter.to ? dateFilter : undefined;
     table.getColumn("booking_date")?.setFilterValue(filterValue);
     console.log("Applied Date Filter:", filterValue);
@@ -182,10 +182,10 @@ function ShipmentDataTable<T>({
 
   const getPinningStyles = (column: Column<Shipment>): CSSProperties => {
     const isPinned = column.getIsPinned()
-    const isAction = column.id === "actions"
+
     return {
       left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
-      right: isPinned === "right" || isAction ? `${column.getAfter("right")}px` : undefined,
+      right: isPinned === "right" ? `${column.getAfter("right")}px` : undefined,
       
       position: isPinned ? "sticky" : "relative",
       width: column.getSize(),
@@ -473,7 +473,7 @@ function ShipmentDataTable<T>({
                 View
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="h-[500px] overflow-y-scroll">
               <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
               {table
                 .getAllColumns()
@@ -539,17 +539,17 @@ function ShipmentDataTable<T>({
               Add
             </Button>
           )}
-          {
+          {table.getSelectedRowModel().rows?.length > 0 && (
            <Popover>
            <PopoverTrigger asChild>
              <Button variant="outline">
                <Download className="-ms-1 opacity-60" size={16} aria-hidden="true" />
                Export
-               {selectedStatuses.length > 0 && (
+               {
                  <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
-                   {selectedStatuses.length}
+                   {table.getSelectedRowModel().rows?.length}
                  </span>
-               )}
+               }
              </Button>
            </PopoverTrigger>
            <PopoverContent className="w-auto min-w-36 p-3" align="start">
@@ -558,29 +558,31 @@ function ShipmentDataTable<T>({
                <div className="space-y-3">
                 <Button
                 onClick={() => {
-                  // Implement CSV export logic here
-                  console.log("Exporting data to CSV...");
-                  const csvContent = [
-                    columns.map((col) => col.header).join(","),
-                    ...data.map((row) => columns.map((col) => row[col.accessorKey]).join(",")),
-                  ].join("\n");
+                  // Implement CSV export logic here wuth selected values
+                  const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original);
+                  const csvContent = selectedRows.map((row) =>
+                    Object.values(row).map((value) => `"${value}"`)?.map((value) => value.replace(/,/g, ""))?.join(",")
+                  ).join("\n");
                   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
                   const link = document.createElement("a");
                   link.href = URL.createObjectURL(blob);
-                  link.setAttribute("download", "shipment_data.csv");
+                  link.setAttribute("download", "selected_rows.csv");
                   document.body.appendChild(link);
                   link.click();
                   document.body.removeChild(link);
+                  URL.revokeObjectURL(link.href);
+                  
+
                 }}
                 >
-                  Export in CSV
+                  Export Selected in CSV
                 </Button>
              
                </div>
              </div>
            </PopoverContent>
          </Popover>
-          }
+          )}
         </div>
       </div>
 
