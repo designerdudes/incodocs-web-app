@@ -112,33 +112,33 @@ export default function EditProductDetailsForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      productCategory: initialValues.productCategory || undefined,
+      productCategory: initialValues.productCategory || "",
       graniteAndMarble: initialValues.graniteAndMarble || "",
       tiles: {
-        noOfBoxes: initialValues.tiles?.noOfBoxes,
-        noOfPiecesPerBoxes: initialValues.tiles?.noOfPiecesPerBoxes,
+        noOfBoxes: initialValues.tiles?.noOfBoxes || 0,
+        noOfPiecesPerBoxes: initialValues.tiles?.noOfPiecesPerBoxes || 0,
         sizePerTile: {
           length: {
-            value: initialValues.tiles?.sizePerTile?.length?.value,
+            value: initialValues.tiles?.sizePerTile?.length?.value || 0,
             units: initialValues.tiles?.sizePerTile?.length?.units || "inch",
           },
           breadth: {
-            value: initialValues.tiles?.sizePerTile?.breadth?.value,
+            value: initialValues.tiles?.sizePerTile?.breadth?.value || 0,
             units: initialValues.tiles?.sizePerTile?.breadth?.units || "inch",
           },
         },
       },
       slabType: initialValues.slabType || "",
       slabLength: {
-        value: initialValues.slabLength?.value,
+        value: initialValues.slabLength?.value || undefined,
         units: initialValues.slabLength?.units || "inch",
       },
       slabBreadth: {
-        value: initialValues.slabBreadth?.value,
+        value: initialValues.slabBreadth?.value || undefined,
         units: initialValues.slabBreadth?.units || "inch",
       },
-      slabThickness: initialValues.slabThickness,
-      slabDocument: initialValues.slabDocument,
+      slabThickness: initialValues.slabThickness || undefined,
+      slabDocument: initialValues.slabDocument || undefined,
     },
   });
 
@@ -154,8 +154,8 @@ export default function EditProductDetailsForm({
   }, [initialValues]);
 
   const handleSubmit = async (event: React.FormEvent, values: z.infer<typeof formSchema>) => {
-    event.preventDefault(); // Prevent default form submission
-    event.stopPropagation(); // Prevent event propagation to parent form
+    event.preventDefault();
+    event.stopPropagation();
     setIsLoading(true);
     try {
       console.log("EditProductDetailsForm submitted with values:", values);
@@ -174,7 +174,6 @@ export default function EditProductDetailsForm({
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();
-      // Trigger form submission programmatically
       form.handleSubmit((values) => handleSubmit(event, values))();
     }
   };
@@ -202,7 +201,7 @@ export default function EditProductDetailsForm({
         <Form {...form}>
           <form
             onSubmit={(event) => form.handleSubmit((values) => handleSubmit(event, values))(event)}
-            onKeyDown={handleKeyDown} // Intercept Enter key
+            onKeyDown={handleKeyDown}
             className="grid gap-4"
           >
             {/* Category */}

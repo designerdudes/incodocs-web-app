@@ -33,10 +33,15 @@ interface BookingDetailsProps {
   onProductDetailsOpenChange?: (open: boolean) => void;
 }
 
-export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: BookingDetailsProps) {
+export function BookingDetails({
+  shipmentId,
+  onProductDetailsOpenChange,
+}: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const [editModalOpen, setEditModalOpen] = useState(false);
-  const [selectedContainerIndex, setSelectedContainerIndex] = useState<number | null>(null);
+  const [selectedContainerIndex, setSelectedContainerIndex] = useState<
+    number | null
+  >(null);
 
   const { fields, append, remove } = useFieldArray({
     control,
@@ -61,24 +66,26 @@ export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: Booki
         .map(() => ({
           containerNumber: "",
           truckNumber: "",
-          truckDriverContactNumber: "",
-          addProductDetails: {
-            productCategory: undefined,
-            graniteAndMarble: "",
-            tiles: {
-              noOfBoxes: 0,
-              noOfPiecesPerBoxes: 0,
-              sizePerTile: {
-                length: { value: 0, units: "" },
-                breadth: { value: 0, units: "" },
+          truckDriverContactNumber: undefined,
+          addProductDetails: [
+            {
+              productCategory: "",
+              graniteAndMarble: "",
+              tiles: {
+                noOfBoxes: 0,
+                noOfPiecesPerBoxes: 0,
+                sizePerTile: {
+                  length: { value: 0, units: "inch" },
+                  breadth: { value: 0, units: "inch" },
+                },
               },
+              slabType: "",
+              slabLength: { value: undefined, units: "inch" },
+              slabBreadth: { value: undefined, units: "inch" },
+              slabThickness: undefined,
+              slabDocument: undefined,
             },
-            slabType: "",
-            slabLength: { value: undefined, units: "inch" },
-            slabBreadth: { value: undefined, units: "inch" },
-            slabThickness: undefined,
-            slabDocument: undefined,
-          },
+          ],
         }));
       append(newContainers);
     } else if (value < currentContainers.length) {
@@ -107,19 +114,21 @@ export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: Booki
 
   // Handle product details submission
   const handleProductDetailsSubmit = (data: any, containerIndex: number) => {
-    console.log("handleProductDetailsSubmit called with data:", data, "for containerIndex:", containerIndex);
-    // Get current containers
+    console.log(
+      "handleProductDetailsSubmit called with data:",
+      data,
+      "for containerIndex:",
+      containerIndex
+    );
     const currentValues = getValues();
     const currentContainers = currentValues.bookingDetails?.containers || [];
 
-    // Update only the specific container's product details
     const updatedContainers = [...currentContainers];
     updatedContainers[containerIndex] = {
       ...updatedContainers[containerIndex],
-      addProductDetails: data,
+      addProductDetails: [data],
     };
 
-    // Update form state synchronously
     setValue("bookingDetails.containers", updatedContainers, {
       shouldDirty: false,
       shouldValidate: false,
@@ -129,9 +138,10 @@ export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: Booki
 
   // Prepare initial values for EditProductDetailsForm
   const getInitialValues = (index: number) => {
-    const container = formValues.containers?.[index]?.addProductDetails || {};
+    const container =
+      formValues.containers?.[index]?.addProductDetails?.[0] || {};
     return {
-      productCategory: container.productCategory || undefined,
+      productCategory: container.productCategory || "",
       graniteAndMarble: container.graniteAndMarble || "",
       tiles: {
         noOfBoxes: container.tiles?.noOfBoxes || 0,
@@ -390,6 +400,13 @@ export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: Booki
                               placeholder="e.g., 7702791728"
                               {...field}
                               value={field.value ?? ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
                             />
                           </FormControl>
                           <FormMessage />
@@ -398,10 +415,53 @@ export function BookingDetails({ shipmentId, onProductDetailsOpenChange }: Booki
                     />
                   </TableCell>
                   <TableCell>
+                    {formValues.containers?.[index]?.addProductDetails?.[0] ? (
+                      <div className="space-y-1">
+                        <p className="text-sm">
+                          <strong>Category:</strong>{" "}
+                          {formValues.containers[index].addProductDetails[0]
+                            .productCategory || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Type:</strong>{" "}
+                          {formValues.containers[index].addProductDetails[0]
+                            .graniteAndMarble || "N/A"}
+                        </p>
+                        {formValues.containers[index].addProductDetails[0]
+                          .tiles && (
+                          <>
+                            <p className="text-sm">
+                              <strong>Boxes:</strong>{" "}
+                              {formValues.containers[index].addProductDetails[0]
+                                .tiles.noOfBoxes || "N/A"}
+                            </p>
+                            <p className="text-sm">
+                              <strong>Pieces/Box:</strong>{" "}
+                              {formValues.containers[index].addProductDetails[0]
+                                .tiles.noOfPiecesPerBoxes || "N/A"}
+                            </p>
+                            <p className="text-sm">
+                              <strong>Size:</strong>{" "}
+                              {formValues.containers[index].addProductDetails[0]
+                                .tiles.sizePerTile?.length?.value &&
+                              formValues.containers[index].addProductDetails[0]
+                                .tiles.sizePerTile?.breadth?.value
+                                ? `${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.length.value} ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.length.units} x ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.breadth.value} ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.breadth.units}`
+                                : "N/A"}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground">
+                        No product details
+                      </p>
+                    )}
                     <Button
                       type="button"
                       variant="secondary"
                       onClick={() => handleEditProductDetails(index)}
+                      className="mt-2"
                     >
                       Edit Product Details
                     </Button>
