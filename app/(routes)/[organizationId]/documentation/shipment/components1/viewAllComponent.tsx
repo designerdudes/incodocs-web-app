@@ -5,6 +5,7 @@ import React from 'react'
 
 function ViewAllComponent({
     params,
+    title,  
     data,
     setIsFetching,
     setIsLoading,
@@ -19,7 +20,7 @@ function ViewAllComponent({
     const handleViewAll = () => {
         setIsLoading(true);
         setIsFetching(true);
-        GlobalModal.setTitle("All Data");
+        GlobalModal.setTitle(title);
         GlobalModal.setChildren(<div>{data}</div>); // Replace with actual component
         GlobalModal.onOpen();
     };

@@ -13,7 +13,7 @@ export default async function Page() {
     const token = cookieStore.get("AccessToken")?.value || "";
 
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/674b0a687d4f4b21c6c980ba`,
+        `https://incodocs-server.onrender.com/shipment/getbyorg/680769228f05500be0f8f89e`,
         {
             method: "GET",
             headers: {
@@ -61,9 +61,9 @@ export default async function Page() {
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 /> */}
                 <ShipmentDataTable
-                columns={columns}
+                columns={columns as any}
                 data={shipmentData}
-                searchKeys={["shipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
+                searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
                 bulkDeleteIdName="_id"
                 bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                 bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
