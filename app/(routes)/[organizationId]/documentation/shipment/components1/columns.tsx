@@ -161,6 +161,7 @@ export const columns: ColumnDef<Shipment>[] = [
          View All
           </Button> */}
           <ViewAllComponent
+          title="Container Numbers"
           params={{ organizationId: "your-organization-id" }}
           data={ row.original.bookingDetails.containers
             .map((container) => container.containerNumber)
@@ -196,6 +197,7 @@ export const columns: ColumnDef<Shipment>[] = [
          View All
           </Button> */}
           <ViewAllComponent
+          title="Truck Numbers"
           params={{ organizationId: "your-organization-id" }}
           data={ row.original.bookingDetails.containers
             .map((container) => container.truckNumber)

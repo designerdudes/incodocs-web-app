@@ -61,7 +61,7 @@ export default async function Page() {
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 /> */}
                 <ShipmentDataTable
-                columns={columns}
+                columns={columns as any}
                 data={shipmentData}
                 searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
                 bulkDeleteIdName="_id"
