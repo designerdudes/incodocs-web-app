@@ -44,22 +44,23 @@ export default async function page({ params }: Props) {
   const lotsData = Lotres;
   const slabData = Slabres;
 
-  // Update cards with specific values
+  // Update cards with specific values and dynamic factoryId URL
   const rawInventoryCards = BaseInventoryCards.map((card) => ({
     ...card,
     value:
       card.title === "Total Lots"
         ? lotsData.length || 0
         : card.title === "Slabs in Processing"
-          ? slabData.length || 0
-          : card.value,
-    // buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
+        ? slabData.length || 0
+        : card.value,
+    // Prepend factoryId to the buttonUrl to create the full route
+    buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
     desc:
       card.title === "Total Lots"
         ? "Number of lots currently available in inventory."
         : card.title === "Slabs in Processing"
-          ? "Slabs that are currently under processing."
-          : "", // Default to empty if not explicitly handled // Ensure correct factory ID in URL
+        ? "Slabs that are currently under processing."
+        : "",
   }));
 
   return (
@@ -87,8 +88,8 @@ export default async function page({ params }: Props) {
             stat={card.value}
             icon={card.icon}
             desc=""
-            href={card.buttonUrl} // Now correctly prefixed with factory ID
-            factoryId={params.factoryid} // Pass factory ID correctly
+            href={card.buttonUrl} // Pass the correct button URL with factoryId
+            factoryId={params.factoryid} // Correctly pass factoryId here
           />
         ))}
       </div>
