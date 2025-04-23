@@ -9,47 +9,48 @@ import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
 
 export default async function Page() {
-    const cookieStore = cookies();
-    const token = cookieStore.get("AccessToken")?.value || "";
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
 
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/680769228f05500be0f8f89e`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    ).then((response) => {
-        return response.json();
-    });
-    let shipmentData;
-    shipmentData = res;
-    console.log("shipmentData", shipmentData);
+  const res = await fetch(
+    `https://incodocs-server.onrender.com/shipment/getbyorg/6808eff236363ebda97e4cb0`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+  let shipmentData;
+  shipmentData = res;
+  console.log("shipmentData", shipmentData);
 
-    return (
-        <div className="flex flex-col p-6">
-            <div className="flex justify-between items-center gap-2">
-                <Link href="/documentation/dashboard">
-                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </Link>
-                <div className="flex-1">
-                    <Heading className="leading-tight" title="Shipments" />
-                    <p className="text-muted-foreground text-sm">
-                        Track and manage shipments with real-time visibility of container details, status, and progress through the logistics cycle.
-                    </p>
-                </div>
-                <Link href={`./shipment/createnew`}>
-                    <Button className="bg-primary text-white">Add New Shipment</Button>
-                </Link>
-            </div>
-            <Separator className="my-2" />
-            <div >
-                {/* <DataTable
+  return (
+    <div className="flex flex-col p-6">
+      <div className="flex justify-between items-center gap-2">
+        <Link href="/documentation/dashboard">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Shipments" />
+          <p className="text-muted-foreground text-sm">
+            Track and manage shipments with real-time visibility of container
+            details, status, and progress through the logistics cycle.
+          </p>
+        </div>
+        <Link href={`./shipment/createnew`}>
+          <Button className="bg-primary text-white">Add New Shipment</Button>
+        </Link>
+      </div>
+      <Separator className="my-2" />
+      <div>
+        {/* <DataTable
                     bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                     bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
@@ -60,17 +61,21 @@ export default async function Page() {
                     columns={columns}
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 /> */}
-                <ShipmentDataTable
-                columns={columns as any}
-                data={shipmentData}
-                searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
-                bulkDeleteIdName="_id"
-                bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
-                bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
-                />
-            </div>
-        </div>
-    );
+        <ShipmentDataTable
+          columns={columns as any}
+          data={shipmentData}
+          searchKeys={[
+            "ShipmentId",
+            "saleInvoiceDetails.consingeeName",
+            "bookingDetails.invoiceNumber",
+            "bookingDetails.bookingNumber",
+            "shippingDetails.shippingLineInvoices.invoiceNumber",
+          ]}
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
+          bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
+        />
+      </div>
+    </div>
+  );
 }
-
-

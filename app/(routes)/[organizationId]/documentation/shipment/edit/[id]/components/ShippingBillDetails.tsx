@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -229,14 +229,16 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                             <div className="flex items-center gap-2">
                               {field.value ? (
                                 <div className="flex flex-col gap-2">
-                                  <a
-                                    href={field.value}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 underline"
-                                  >
-                                    Uploaded File
-                                  </a>
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View
+                                    </a>
+                                  </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -312,7 +314,8 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value instanceof Date && !isNaN(field.value.getTime())
+                                  {field.value instanceof Date &&
+                                  !isNaN(field.value.getTime())
                                     ? format(field.value, "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -322,7 +325,11 @@ export function ShippingBillDetails({ shipmentId }: ShippingBillDetailsProps) {
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value instanceof Date ? field.value : undefined}
+                                selected={
+                                  field.value instanceof Date
+                                    ? field.value
+                                    : undefined
+                                }
                                 onSelect={(date) => field.onChange(date)}
                                 initialFocus
                               />
