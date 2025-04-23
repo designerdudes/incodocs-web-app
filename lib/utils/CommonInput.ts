@@ -21,7 +21,7 @@ export function handleDynamicArrayCountChange<T, ItemType>({
   value: string;
   watch: (field: string) => ItemType[];
   setValue: (field: any, value: any) => any
-  getValues: () => T;
+  getValues: () => any;
   fieldName: any;
   countFieldName?: string;
   createNewItem: CreateItemFunction<ItemType>;
