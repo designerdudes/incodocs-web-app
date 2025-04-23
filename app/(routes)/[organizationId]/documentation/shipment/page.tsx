@@ -13,7 +13,7 @@ export default async function Page() {
     const token = cookieStore.get("AccessToken")?.value || "";
 
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/680769228f05500be0f8f89e`,
+        `https://incodocs-server.onrender.com/shipment/getbyorg/6807774fa15655f599f89aa1`,
         {
             method: "GET",
             headers: {
@@ -65,8 +65,8 @@ export default async function Page() {
                 data={shipmentData}
                 searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
                 bulkDeleteIdName="_id"
-                bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
-                bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
+                 deleteRoute="shipment/deleteall"
+
                 />
             </div>
         </div>
