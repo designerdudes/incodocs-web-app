@@ -5,13 +5,14 @@ import React from 'react'
 
 function ViewAllComponent({
     params,
-    title,  
     data,
+    title,
     setIsFetching,
     setIsLoading,
     }: {
     params: { organizationId: string };
     data: any;
+    title:any;
     setIsFetching: React.Dispatch<React.SetStateAction<boolean>>;
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
