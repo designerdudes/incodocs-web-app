@@ -92,7 +92,7 @@ export function LoginForm() {
       const res = await postData("/user/login", { email, password });
       Cookies.set("AccessToken", res?.token, { expires: 7 });
       toast.success("Login successful");
-      router.push(`/dashboard`);
+      // router.push(`/dashboard`);
       router.refresh();
     } catch (error) {
       toast.error("Invalid email or password");

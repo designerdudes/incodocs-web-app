@@ -2,7 +2,9 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+// import MainDashboardComponent from '../(routes)/[organizationId]/components/MainDashboardComponent';
 import UserData from '../(routes)/[organizationId]/components/UserData';
+import MainDashboardComponent from '../(routes)/[organizationId]/components/MainDashboardComponent';
 
 export default async function Page() {
   // Get the access token from cookies
@@ -16,7 +18,7 @@ export default async function Page() {
 
   // Fetch user data
   try {
-    const res = await fetch('https://incodocs-server.onrender.com/user/currentUser', {
+    const res = await fetch('http://localhost:4080/user/currentUser', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -30,9 +32,16 @@ export default async function Page() {
 
     const userData = await res.json();
     console.log('User Data:', userData); // Logs to server console
+    // return (
+    //   <div className="flex flex-col gap-4">
+    //     <MainDashboardComponent token={token} userData={userData} />
+    //     {/* Heading */}
+    //   </div>
+    // );
+
 
    
-    return <UserData token={token} userData={userData} />;
+    return <MainDashboardComponent token={token} userData={userData} />;
   } catch (error) {
     console.error('Error fetching user data:', error);
     redirect('/login'); // Redirect on error
