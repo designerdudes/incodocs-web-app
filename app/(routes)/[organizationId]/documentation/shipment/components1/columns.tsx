@@ -161,13 +161,13 @@ export const columns: ColumnDef<Shipment>[] = [
          View All
           </Button> */}
           <ViewAllComponent
-          title="Container Numbers"
+          title={"Container Numbers"}
           params={{ organizationId: "your-organization-id" }}
           data={ row.original.bookingDetails.containers
             .map((container) => container.containerNumber)
             .join(", ")}
           setIsFetching={() => {}}
-          setIsLoading={() => {}}
+          setIsLoading={() => {}}       
           />
             </>
             : "N/A"}

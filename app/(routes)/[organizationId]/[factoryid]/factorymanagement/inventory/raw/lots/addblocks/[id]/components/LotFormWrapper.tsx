@@ -81,7 +81,7 @@ interface LotFormWrapperProps {
     };
 }
 
-export default function LotFormWrapper({ lotData }: LotFormWrapperProps) {
+export default function LotFormWrapper({ lotData }:LotFormWrapperProps ) {
     const methods = useForm<FormData>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -90,18 +90,37 @@ export default function LotFormWrapper({ lotData }: LotFormWrapperProps) {
             materialCost: lotData?.materialCost || undefined,
             noOfBlocks: lotData?.blocks?.length || 1,
             blocks:
-                lotData?.blocks?.length > 0
-                    ? lotData.blocks
-                    : [
-                        {
-                            dimensions: {
-                                weight: { value: 0.1, units: "tons" },
-                                length: { value: 0.1, units: "inch" },
-                                breadth: { value: 0.1, units: "inch" },
-                                height: { value: 0.1, units: "inch" },
-                            },
-                        },
-                    ],
+            lotData?.blocks?.length > 0
+              ? lotData.blocks.map((block) => ({
+                  dimensions: {
+                    weight: {
+                      value: block.dimensions.weight.value,
+                      units: "tons", // Explicitly set to match Zod schema
+                    },
+                    length: {
+                      value: block.dimensions.length.value,
+                      units: "inch", // Explicitly set to match Zod schema
+                    },
+                    breadth: {
+                      value: block.dimensions.breadth.value,
+                      units: "inch", // Explicitly set to match Zod schema
+                    },
+                    height: {
+                      value: block.dimensions.height.value,
+                      units: "inch", // Explicitly set to match Zod schema
+                    },
+                  },
+                }))
+              : [
+                  {
+                    dimensions: {
+                      weight: { value: 0.1, units: "tons" },
+                      length: { value: 0.1, units: "inch" },
+                      breadth: { value: 0.1, units: "inch" },
+                      height: { value: 0.1, units: "inch" },
+                    },
+                  },
+                ],
         },
     });
 

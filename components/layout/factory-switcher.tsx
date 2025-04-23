@@ -34,7 +34,13 @@ interface Factory {
     organizationId: string;
 }
 
-function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organizationId: any, token: any  }) {
+interface FactorySwitcherProps {
+    FactoriesData: Factory[];
+    organizationId: any;
+    token: any;
+}
+
+function FactorySwitcher({FactoriesData, organizationId, token}: FactorySwitcherProps) {
     const router = useRouter();
     const pathname = usePathname();
     const { isMobile } = useSidebar();
@@ -77,7 +83,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organiza
     ]
 
     // const blockedPatterns = ["[orgid]/dashboard"];
-  
+
 
     const isBlocked = blockedRegexes.some(regex => regex.test(pathname));
 
@@ -90,7 +96,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organiza
             </div>
         :
         FactoriesData.length > 0 ?
-            (<div>
+            <div>
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <DropdownMenu>
@@ -142,7 +148,9 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organiza
                                         className="gap-2 p-2"
                                         onSelect={() => {
                                             GlobalModal.title = `Enter Factory Details`;
-                                            GlobalModal.children = <FactoryForm />;
+                                            GlobalModal.children = <FactoryForm
+                                            organizationId={FactoriesData[0].organizationId}
+                                            />;
                                             GlobalModal.onOpen();
                                         }}
                                     >
@@ -159,8 +167,8 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organiza
                         </DropdownMenu>
                     </SidebarMenuItem>
                 </SidebarMenu>
-            </div>)
-            : (
+            </div>
+            : 
                 <div className="">
                     <Dialog>
                         <DialogTrigger asChild>
@@ -181,7 +189,7 @@ function FactorySwitcher({ FactoriesData }: { FactoriesData: Factory[], organiza
                     </div>
                 </div>
 
-            )
+            
     )
 }
     export default FactorySwitcher;

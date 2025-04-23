@@ -18,11 +18,8 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "@/components/forms/AddFactoryForm";
 import Topbar from "@/components/topbar";
 import { cn } from "@/lib/utils";
-import { Building, CircleXIcon } from "lucide-react";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Building, CircleXIcon, Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-import Container3D from "@/components/3DComponent";
-
 
 interface Address {
   coordinates: {
@@ -179,7 +176,7 @@ const CreateOrgForm: React.FC<{
   );
 };
 
-const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) => {
+const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any) => {
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
@@ -304,13 +301,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
     }
   };
 
-  if (!userData) {
-    return (
-      <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
-        <p className="text-lg text-gray-600">No user data available</p>
-      </div>
-    );
-  }
+
 
   const [orgSearch, setOrgSearch] = useState("");
 
@@ -362,7 +353,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
               type="text"
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-              <MagnifyingGlassIcon size={16} aria-hidden="true" />
+              <Search size={16} aria-hidden="true" />
             </div>
             {orgSearch && (
               <button
@@ -461,7 +452,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
           title="No Organizations Found"
         />
         <p className="text-lg text-gray-600">
-          You don't have any organizations yet. Create one to get started.
+          You don&apos;t have any organizations yet. Create one to get started.
             </p>
         
               <Button onClick={openCreateOrgModal}>

@@ -190,7 +190,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
           },
         },
         saveCallback: saveProgressSilently,
-      });
+      }) as any
     }
   };
 

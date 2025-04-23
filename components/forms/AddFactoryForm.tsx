@@ -51,8 +51,8 @@ const formSchema = z.object({
 });
 
 interface FactoryFormProps {
-  organizationId: string;
-  token: string;
+  organizationId?: string;
+  token?: string;
   organizations?: { id: string; name: string }[]; // Optional prop for dynamic organizations
 }
 
@@ -193,7 +193,7 @@ export default function FactoryForm({
                   </SelectTrigger>
                   <SelectContent>
                     {orgList.map((org) => (
-                      <SelectItem key={org.id} value={org.id}>
+                      <SelectItem key={org.id} value={org.id as any}>
                         {org.name}
                       </SelectItem>
                     ))}

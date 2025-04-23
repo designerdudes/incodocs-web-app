@@ -145,7 +145,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       setShowForwarderConfirmation(true);
       setForwarderCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange<FormData>({
+      handleDynamicArrayCountChange<FormData, Invoice>({
         value,
         watch,
         setValue,
@@ -161,7 +161,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
         }),
         customFieldSetters: {
           "shippingDetails.forwarderInvoices": (items: Invoice[], setValue) => {
-            setValue("shippingDetails.noOfForwarderinvoices", items.length, { shouldDirty: false });
+            setValue("shippingDetails.noOfForwarderinvoices", items.length);
             setForwarderInvoices(items);
             setSelectedForwarderFiles(Array(items.length).fill(null));
           },
@@ -199,7 +199,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       setShowTransporterConfirmation(true);
       setTransporterCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange<FormData>({
+      handleDynamicArrayCountChange<FormData, Invoice>({
         value,
         watch,
         setValue,
@@ -215,7 +215,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
         }),
         customFieldSetters: {
           "shippingDetails.transporterInvoices": (items: Invoice[], setValue) => {
-            setValue("shippingDetails.noOftransportinvoices", items.length, { shouldDirty: false });
+            setValue("shippingDetails.noOftransportinvoices", items.length);
             setTransporterInvoices(items);
             setSelectedTransporterFiles(Array(items.length).fill(null));
           },
@@ -301,7 +301,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.forwarder"
+          name="shippingDetails.forwarderName"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Forwarder Name</FormLabel>
@@ -374,7 +374,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].invoiceNumber`}
+                        name={`shippingDetails.forwarderInvoices[${index}].invoiceNumber` as any}
                         render={({ field }) => (
                           <FormControl>
                             <Input
@@ -389,7 +389,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
+                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
                         render={({ field }) => (
                           <div className="flex items-center gap-2">
                             <Input
@@ -415,7 +415,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                                 if (selectedForwarderFiles[index]) {
                                   handleFileUpload(
                                     selectedForwarderFiles[index]!,
-                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
+                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
                                   ).then(() => {
                                     setSelectedForwarderFiles((prev) => {
                                       const newFiles = [...prev];
@@ -436,14 +436,14 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].date`}
+                        name={`shippingDetails.forwarderInvoices[${index}].date` as any}
                         render={({ field }) => (
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -452,7 +452,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
+                                selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -466,7 +466,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithGst`}
+                        name={`shippingDetails.forwarderInvoices[${index}].valueWithGst` as any}
                         render={({ field }) => (
                           <Input
                             placeholder="e.g., 11800"
@@ -479,7 +479,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGst`}
+                        name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGst` as any}
                         render={({ field }) => (
                           <Input
                             placeholder="e.g., 11800"
@@ -511,7 +511,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.transporter"
+          name={"shippingDetails.transporter" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Transporter Name</FormLabel>
@@ -584,7 +584,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].invoiceNumber`}
+                        name={`shippingDetails.transporterInvoices[${index}].invoiceNumber` as any}
                         render={({ field }) => (
                           <FormControl>
                             <Input
@@ -599,7 +599,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
+                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
                         render={({ field }) => (
                           <div className="flex items-center gap-2">
                             <Input
@@ -625,7 +625,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                                 if (selectedTransporterFiles[index]) {
                                   handleFileUpload(
                                     selectedTransporterFiles[index]!,
-                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
+                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
                                   ).then(() => {
                                     setSelectedTransporterFiles((prev) => {
                                       const newFiles = [...prev];
@@ -646,8 +646,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].date`}
-                        render={({ field }) => (
+                        name={`shippingDetails.transporterInvoices[${index}].date` as any}
+                        render={({ field }:any) => (
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -676,7 +676,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithGst`}
+                        name={`shippingDetails.transporterInvoices[${index}].valueWithGst` as any}
                         render={({ field }) => (
                           <Input
                             placeholder="e.g., 11800"
@@ -689,7 +689,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithoutGst`}
+                        name={`shippingDetails.transporterInvoices[${index}].valueWithoutGst` as any}
                         render={({ field }) => (
                           <Input
                             placeholder="e.g., 11800"

@@ -49,7 +49,7 @@ export function BookingDetails({
   saveProgress,
   onSectionSubmit,
 }: BookingDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext() as any
   const containersFromForm = watch("bookingDetails.containers") || [];
   const GlobalModal = useGlobalModal();
   const [showConfirmation, setShowConfirmation] = useState(false);
