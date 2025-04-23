@@ -14,7 +14,7 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { CalendarIcon, UploadCloud, Trash } from "lucide-react";
+import { CalendarIcon, UploadCloud, Trash, Eye } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -123,7 +123,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "http://localhost:4080/shipmentdocsfile/upload",
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
@@ -131,8 +131,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      const storageUrl = data.storageLink;
-      setValue(fieldName, storageUrl, { shouldDirty: true });
+      console.log(data)
+      // const storageUrl = data.storageLink;
+      // console.log(storageUrl)
+      setValue(fieldName, data, { shouldDirty: true });
       toast.success("File uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
@@ -291,27 +293,35 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
                               <div className="flex flex-col gap-2">
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 underline"
-                                >
-                                  Uploaded File
-                                </a>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setValue(
-                                      `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`,
-                                      "",
-                                      { shouldDirty: true }
-                                    )
-                                  }
-                                >
-                                  Remove
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      setValue(
+                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`,
+                                        "",
+                                        { shouldDirty: true }
+                                      )
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild
+                                  >
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View
+                                    </a>
+                                  </Button>
+                                </div>
                               </div>
                             ) : (
                               <>
@@ -520,27 +530,35 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
                               <div className="flex flex-col gap-2">
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 underline"
-                                >
-                                  Uploaded File
-                                </a>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setValue(
-                                      `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`,
-                                      "",
-                                      { shouldDirty: true }
-                                    )
-                                  }
-                                >
-                                  Remove
-                                </Button>
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      setValue(
+                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`,
+                                        "",
+                                        { shouldDirty: true }
+                                      )
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    asChild
+                                  >
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View
+                                    </a>
+                                  </Button>
+                                </div>
                               </div>
                             ) : (
                               <>
