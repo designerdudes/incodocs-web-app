@@ -1,7 +1,6 @@
-
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
-import { useFormContext, Path } from "react-hook-form";
+import React, { useState } from "react";
+import { useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -28,85 +27,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SaveDetailsProps } from "./BookingDetails";
 import { Icons } from "@/components/ui/icons";
-import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { toast } from "react-hot-toast";
 
-<<<<<<< HEAD
-// Form data types
-interface ShippingBillDetails {
-  portCode: string;
-  cbName: string;
-  cdCode: string;
-  numberOFShippingBill: number;
-  ShippingBills: ShippingBill[];
-  review?: string;
-}
-
-interface ShippingBill {
-  shippingBillUrl: string;
-  shippingBillNumber: string;
-  shippingBillDate: string;
-  drawbackValue: string;
-  rodtepValue: string;
-}
-
-interface FormData {
-  shipmentId?: string;
-  shippingBillDetails: ShippingBillDetails;
-}
-
-interface ShippingBillDetailsProps {
-=======
 interface ShippingBillDetailsProps extends SaveDetailsProps {
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   onSectionSubmit: () => void;
 }
 
-export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext<FormData>();
+export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingBillDetailsProps) {
+  const { control, setValue, watch, getValues } = useFormContext();
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
-  const initialCount = 1;
-  const [shippingBills, setShippingBills] = useState<ShippingBill[]>(
-    shippingBillsFromForm.length > 0
-      ? shippingBillsFromForm
-      : Array.from({ length: initialCount }, () => ({
+  const [shippingBills, setShippingBills] = useState(shippingBillsFromForm);
+  const [uploading, setUploading] = useState(false);
+
+  const handleShippingBillCountChange = (value: string) => {
+    const count = parseInt(value, 10);
+    if (!isNaN(count) && count > 0) {
+      const currentBills = watch("shippingBillDetails.ShippingBills") || [];
+      const newShippingBills = Array.from({ length: count }, (_, i) =>
+        currentBills[i] || {
           shippingBillUrl: "",
           shippingBillNumber: "",
           shippingBillDate: "",
           drawbackValue: "",
           rodtepValue: "",
-        }))
-  );
-  const [selectedFiles, setSelectedFiles] = useState<(File | null)[]>(
-    Array(shippingBillsFromForm.length > 0 ? shippingBillsFromForm.length : initialCount).fill(null)
-  );
-  const [uploading, setUploading] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState(false);
-  const [shippingBillCountToBeDeleted, setShippingBillCountToBeDeleted] = useState<number | null>(null);
-
-  // Initialize form with default shippingBillDetails if missing
-  useEffect(() => {
-    const formData = getValues();
-    if (!formData.shippingBillDetails) {
-      setValue(
-        "shippingBillDetails",
-        {
-          portCode: "",
-          cbName: "",
-          cdCode: "",
-          numberOFShippingBill: initialCount,
-          ShippingBills: shippingBills,
-          review: "",
-        },
-        { shouldDirty: false }
+        }
       );
-<<<<<<< HEAD
-    } else if (!formData.shippingBillDetails.numberOFShippingBill) {
-      setValue("shippingBillDetails.numberOFShippingBill", initialCount, { shouldDirty: false });
-      setValue("shippingBillDetails.ShippingBills", shippingBills, { shouldDirty: false });
-=======
       setShippingBills(newShippingBills);
       setValue("shippingBillDetails.ShippingBills", newShippingBills);
       saveProgress(getValues()); // Use parent saveProgress
@@ -114,77 +60,17 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
       setShippingBills([]);
       setValue("shippingBillDetails.ShippingBills", []);
       saveProgress(getValues()); // Use parent saveProgress
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     }
-  }, [setValue, getValues, watch, shippingBills]);
+  };
 
-<<<<<<< HEAD
-  const handleShippingBillCountChange = useCallback(
-    (value: string) => {
-      const newCount = Number(value) || initialCount;
-      if (newCount < shippingBills.length) {
-        setShowConfirmation(true);
-        setShippingBillCountToBeDeleted(newCount);
-      } else {
-        handleDynamicArrayCountChange<FormData>({
-          value,
-          watch,
-          setValue,
-          getValues,
-          fieldName: "shippingBillDetails.ShippingBills",
-          countFieldName: "shippingBillDetails.numberOFShippingBill",
-          createNewItem: () => ({
-            shippingBillUrl: "",
-            shippingBillNumber: "",
-            shippingBillDate: "",
-            drawbackValue: "",
-            rodtepValue: "",
-          }),
-          customFieldSetters: {
-            "shippingBillDetails.ShippingBills": (items: ShippingBill[], setValue) => {
-              setValue("shippingBillDetails.numberOFShippingBill", items.length, { shouldDirty: false });
-              setShippingBills(items);
-              setSelectedFiles(Array(items.length).fill(null));
-            },
-          },
-        });
-      }
-    },
-    [watch, setValue, getValues, shippingBills]
-  );
-=======
   const handleDeleteBill = (index: number) => {
     const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
     setShippingBills(updatedShippingBills);
     setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
     saveProgress(getValues()); // Use parent saveProgress
   };
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
 
-  const handleConfirmChange = useCallback(() => {
-    if (shippingBillCountToBeDeleted !== null) {
-      const updatedShippingBills = shippingBills.slice(0, shippingBillCountToBeDeleted);
-      setShippingBills(updatedShippingBills);
-      setSelectedFiles(Array(updatedShippingBills.length).fill(null));
-      setValue("shippingBillDetails.ShippingBills", updatedShippingBills, { shouldDirty: false });
-      setValue("shippingBillDetails.numberOFShippingBill", updatedShippingBills.length, { shouldDirty: false });
-      setShippingBillCountToBeDeleted(null);
-      setShowConfirmation(false);
-    }
-  }, [shippingBills, shippingBillCountToBeDeleted, setValue]);
-
-  const handleDeleteBill = useCallback(
-    (index: number) => {
-      const updatedShippingBills = shippingBills.filter((_, i) => i !== index);
-      setShippingBills(updatedShippingBills);
-      setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
-      setValue("shippingBillDetails.ShippingBills", updatedShippingBills, { shouldDirty: false });
-      setValue("shippingBillDetails.numberOFShippingBill", updatedShippingBills.length, { shouldDirty: false });
-    },
-    [shippingBills, setValue]
-  );
-
-  const handleFileUpload = async (file: File, fieldName: Path<FormData>, index: number) => {
+  const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
     setUploading(true);
     try {
@@ -194,23 +80,12 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
         method: "POST",
         body: formData,
       });
-      if (!response.ok) throw new Error("Upload failed");
       const data = await response.json();
       const storageUrl = data.storageLink;
-<<<<<<< HEAD
-      setValue(fieldName, storageUrl, { shouldDirty: false });
-      setSelectedFiles((prev) => {
-        const newFiles = [...prev];
-        newFiles[index] = null;
-        return newFiles;
-      });
-      toast.success("File uploaded successfully");
-=======
       setValue(fieldName, storageUrl);
       saveProgress(getValues()); // Use parent saveProgress
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     } catch (error) {
-      toast.error("Failed to upload file. Please try again.");
+      alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
@@ -219,6 +94,7 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
 
   return (
     <div className="grid grid-cols-4 gap-3">
+      {/* Port Code */}
       <FormField
         control={control}
         name="shippingBillDetails.portCode"
@@ -226,21 +102,18 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>Port Code</FormLabel>
             <FormControl>
-<<<<<<< HEAD
-              <Input placeholder="e.g., SB101" className="uppercase" {...field} />
-=======
               <Input
                 placeholder="e.g., SB101"
                 className="uppercase"
                 {...field}
                 onBlur={() => saveProgress(getValues())}
               />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {/* CB Name */}
       <FormField
         control={control}
         name="shippingBillDetails.cbName"
@@ -248,21 +121,18 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
-<<<<<<< HEAD
-              <Input placeholder="e.g., xyz" className="uppercase" {...field} />
-=======
               <Input
                 placeholder="e.g., xyz"
                 className="uppercase"
                 {...field}
                 onBlur={() => saveProgress(getValues())}
               />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {/* CD Code */}
       <FormField
         control={control}
         name="shippingBillDetails.cdCode"
@@ -270,24 +140,21 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           <FormItem>
             <FormLabel>CB Code</FormLabel>
             <FormControl>
-<<<<<<< HEAD
-              <Input placeholder="e.g., randomcode" className="uppercase" {...field} />
-=======
               <Input
                 placeholder="e.g., randomcode"
                 className="uppercase"
                 {...field}
                 onBlur={() => saveProgress(getValues())}
               />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {/* Number of Shipping Bills */}
       <FormField
         control={control}
-        name="shippingBillDetails.numberOFShippingBill"
+        name="numberOFShippingBill"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Shipping Bills</FormLabel>
@@ -295,21 +162,13 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
               <Input
                 type="number"
                 placeholder="Enter number"
-                value={field.value || initialCount}
+                value={field.value === 0 ? "" : field.value}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    field.onChange(initialCount);
-                    handleShippingBillCountChange(initialCount.toString());
-                    return;
-                  }
-                  const numericValue = Number(value);
-                  if (!isNaN(numericValue) && numericValue >= 1) {
-                    field.onChange(numericValue);
-                    handleShippingBillCountChange(numericValue.toString());
-                  }
+                  const value = parseInt(e.target.value, 10);
+                  if (isNaN(value) || value < 0) return;
+                  field.onChange(value);
+                  handleShippingBillCountChange(e.target.value);
                 }}
-                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -332,7 +191,7 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shippingBills.map((_: ShippingBill, index: number) => (
+              {shippingBills.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
@@ -345,32 +204,20 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                             <div className="flex items-center gap-2">
                               <Input
                                 type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (file) {
-                                    setSelectedFiles((prev) => {
-                                      const newFiles = [...prev];
-                                      newFiles[index] = file;
-                                      return newFiles;
-                                    });
-                                  }
+                                  if (file)
+                                    handleFileUpload(
+                                      file,
+                                      `shippingBillDetails.ShippingBills[${index}].shippingBillUrl`
+                                    );
                                 }}
                                 disabled={uploading}
                               />
                               <Button
                                 variant="secondary"
                                 className="bg-blue-500 text-white"
-                                disabled={uploading || !selectedFiles[index]}
-                                onClick={() => {
-                                  if (selectedFiles[index]) {
-                                    handleFileUpload(
-                                      selectedFiles[index]!,
-                                      `shippingBillDetails.ShippingBills[${index}].shippingBillUrl`,
-                                      index
-                                    );
-                                  }
-                                }}
+                                disabled={uploading}
                               >
                                 <UploadCloud className="w-5 h-5 mr-2" />
                                 {uploading ? "Uploading..." : "Upload"}
@@ -389,9 +236,6 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-<<<<<<< HEAD
-                            <Input placeholder="e.g., 34583" className="uppercase" {...field} />
-=======
                             <Input
                               placeholder="e.g., 34583"
                               className="uppercase"
@@ -399,7 +243,6 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                               onBlur={() => saveProgress(getValues())}
                               required // Enforce required field
                             />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -416,7 +259,9 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value ? format(new Date(field.value), "PPPP") : "Pick a date"}
+                                  {field.value
+                                    ? format(new Date(field.value), "PPPP")
+                                    : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
@@ -427,10 +272,7 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
-<<<<<<< HEAD
-=======
                                   saveProgress(getValues());
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                                 }}
                               />
                             </PopoverContent>
@@ -447,15 +289,11 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-<<<<<<< HEAD
-                            <Input placeholder="e.g., 2394" {...field} />
-=======
                             <Input
                               placeholder="e.g., 2394"
                               {...field}
                               onBlur={() => saveProgress(getValues())}
                             />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -469,15 +307,11 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-<<<<<<< HEAD
-                            <Input placeholder="e.g., 8934" {...field} />
-=======
                             <Input
                               placeholder="e.g., 8934"
                               {...field}
                               onBlur={() => saveProgress(getValues())}
                             />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -500,27 +334,25 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           </Table>
         </div>
       )}
+      {/* Review */}
       <FormField
         control={control}
         name="shippingBillDetails.review"
         render={({ field }) => (
-          <FormItem className="col-span-4 mt-4">
+          <FormItem className="col-span-4">
             <FormLabel>Remarks</FormLabel>
             <FormControl>
-<<<<<<< HEAD
-              <Textarea placeholder="e.g., this is some random comment" {...field} />
-=======
               <Textarea
                 placeholder="e.g., this is some random comment"
                 {...field}
                 onBlur={() => saveProgress(getValues())}
               />
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+      {/* Submit Button */}
       <div className="flex justify-end mt-4 col-span-4">
         <Button
           type="button"
@@ -532,16 +364,6 @@ export function ShippingBillDetails({ onSectionSubmit }: ShippingBillDetailsProp
           {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>
-      <ConfirmationDialog
-        isOpen={showConfirmation}
-        onClose={() => {
-          setShowConfirmation(false);
-          setShippingBillCountToBeDeleted(null);
-        }}
-        onConfirm={handleConfirmChange}
-        title="Are you sure?"
-        description="You are reducing the number of shipping bills. This action cannot be undone."
-      />
     </div>
   );
 }

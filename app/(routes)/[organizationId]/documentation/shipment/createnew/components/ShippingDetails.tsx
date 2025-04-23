@@ -77,7 +77,6 @@ interface ShippingDetailsProps extends SaveDetailsProps {
 export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
 
-<<<<<<< HEAD
   const initialCount = 1;
   const [forwarderInvoices, setForwarderInvoices] = useState<Invoice[]>(
     Array.from({ length: initialCount }, () => ({
@@ -97,13 +96,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
       valueWithoutGst: "",
     }))
   );
-=======
-  const forwarderInvoicesFromForm = watch("shippingDetails.forwarderInvoices") || [];
-  const transporterInvoicesFromForm = watch("shippingDetails.transporterInvoices") || [];
-
-  const [forwarderInvoices, setForwarderInvoices] = useState(forwarderInvoicesFromForm);
-  const [transporterInvoices, setTransporterInvoices] = useState(transporterInvoicesFromForm);
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const [uploading, setUploading] = useState(false);
   const [forwarders, setForwarders] = useState<any[]>([]);
   const [transporters, setTransporters] = useState<any[]>([]);
@@ -114,14 +106,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
   const [forwarderCountToBeDeleted, setForwarderCountToBeDeleted] = useState<number | null>(null);
   const [transporterCountToBeDeleted, setTransporterCountToBeDeleted] = useState<number | null>(null);
 
-<<<<<<< HEAD
-=======
-  const [forwarders, setForwarders] = useState([]);
-  const [transporters, setTransporters] = useState([]);
-
-  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>([]);
-  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>([]);
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const GlobalModal = useGlobalModal();
 
   // Fetch data on component mount
@@ -146,13 +130,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
     fetchData();
   }, []);
 
-<<<<<<< HEAD
   const handleForwarderDelete = useCallback((index: number) => {
     const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
-=======
-  const handleForwarderDelete = (index: number) => {
-    const updatedInvoices = forwarderInvoices.filter((_: any, i: number) => i !== index);
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     setForwarderInvoices(updatedInvoices);
     setSelectedForwarderFiles(prev => prev.filter((_, i) => i !== index));
     setValue("shippingDetails.forwarderInvoices", updatedInvoices, { shouldDirty: false });
@@ -192,7 +171,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
     }
   }, [watch, setValue, getValues, forwarderInvoices]);
 
-<<<<<<< HEAD
   const handleForwarderConfirmChange = useCallback(() => {
     if (forwarderCountToBeDeleted !== null) {
       const updatedInvoices = forwarderInvoices.slice(0, forwarderCountToBeDeleted);
@@ -208,10 +186,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
 
   const handleTransporterDelete = useCallback((index: number) => {
     const updatedInvoices = transporterInvoices.filter((_, i) => i !== index);
-=======
-  const handleTransporterDelete = (index: number) => {
-    const updatedInvoices = transporterInvoices.filter((_: any, i: number) => i !== index);
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
     setTransporterInvoices(updatedInvoices);
     setSelectedTransporterFiles(prev => prev.filter((_, i) => i !== index));
     setValue("shippingDetails.transporterInvoices", updatedInvoices, { shouldDirty: false });
