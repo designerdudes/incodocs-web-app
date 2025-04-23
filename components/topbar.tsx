@@ -24,7 +24,17 @@ import axios from 'axios'
 import { BrandName } from '@/lib/constants'
 import LogoComponent from './logo'
 
-const Topbar = () => {
+interface TopbarProps {
+    userData: {
+        name: string;
+        email: string;
+    }
+
+
+
+}
+
+const Topbar = ({userData}: TopbarProps) => {
     const router = useRouter()
     const logout = async () => {
         try {
@@ -36,7 +46,7 @@ const Topbar = () => {
         }
     }
     return (
-        <div className="flex bg-secondary p-3 px-12 mb-2 justify-between items-center sticky top-0 z-50">
+        <div className="flex bg-muted rounded-md p-3 px-12 mb-2 justify-between items-center sticky top-0 z-50">
             <div className='flex items-center gap-2'>
                 <LogoComponent width={60} height={40} className='w-8 h-8 object-contain' />
                 <Heading title={BrandName} className='text-xl' />
@@ -44,25 +54,26 @@ const Topbar = () => {
             </div>
             <div className='flex items-center gap-2'>
 
-                <ModeToggle />
+              
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Avatar className='w-8 h-8'>
-                            <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                            <AvatarFallback>CN</AvatarFallback>
+                        <Avatar className='w-8 h-8 bg-secondary'>
+                            {/* <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" /> */}
+                            <AvatarFallback className='bg-secondary text-sm'>{userData.name.charAt(0).toUpperCase()}</AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56">
+                    <DropdownMenuContent className="w-full" side='bottom'>
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuGroup>
                             <DropdownMenuItem className='flex items-center gap-2'>
                                 <Avatar className='w-8 h-8'>
-                                    <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
-                                    <AvatarFallback>CN</AvatarFallback>
+                                    <AvatarImage src="" alt="@shadcn" />
+                                    <AvatarFallback className='bg-secondary text-sm'>{userData.name.charAt(0).toUpperCase()}</AvatarFallback>
+
                                 </Avatar>
                                 <div>
-                                    <p className='font-semibold'>Mohammed</p>
-                                    <p className='text-xs text-gray-500'>mohammed@incodocs.in</p>
+                                    <p className='font-semibold'>{userData.name}</p>
+                                    <p className='text-xs text-gray-500'>{userData.email}</p>
                                 </div>
 
                             </DropdownMenuItem>
@@ -81,8 +92,7 @@ const Topbar = () => {
 
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
+                        {/* <DropdownMenuGroup>
                             <DropdownMenuItem
 
                             >
@@ -94,7 +104,7 @@ const Topbar = () => {
                                 <Plus className="mr-2 h-4 w-4" />
                                 <span>New Team Member</span>
                             </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        </DropdownMenuGroup> */}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             onSelect={logout}
