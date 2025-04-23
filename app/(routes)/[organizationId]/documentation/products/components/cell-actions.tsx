@@ -14,6 +14,7 @@ import {
     Edit,
     EyeIcon,
     MoreHorizontal,
+    Scissors,
     ScissorsIcon,
     Trash,
 } from "lucide-react";
@@ -59,19 +60,14 @@ const CellActions: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
+                    
                     <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = `Edit Consignee - ${data.code}`;
-                            GlobalModal.description = "Update the details of the consignee below.";
-                            //   GlobalModal.children = (
-                            //     <EditConsigneeForm params={{ _id: data._id }} />
-                            //   );
-                            GlobalModal.onOpen();
-                        }}
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Consignee
-                    </DropdownMenuItem>
+                                onClick={() => router.push(`./products/Edit/${data._id}`)}
+                                className="focus:bg-green-500 focus:text-destructive-foreground"
+                              >
+                                <Scissors className="mr-2 h-4 w-4" />
+                                Edit Product
+                              </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = `Delete Consignee - ${data.code}`;
