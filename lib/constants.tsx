@@ -398,6 +398,12 @@ const AccountingCard = [
   ],
 };
 
+const blockedRegexes = [
+  /^\/[^\/]+\/dashboard$/,                            // e.g., /abc/dashboard
+  /^\/[^\/]+\/documentation\/shipment(\/.*)?$/,              // e.g., /abc/documentation/shipment
+  /^\/[^\/]+\/settings(\/.*)?$/,                      // e.g., /abc/settings and /abc/settings/*
+];
+
 export {
   sidebarTabs,
   accountingSidebarTabs,
@@ -407,5 +413,6 @@ export {
   InventoryCards,
   FinishedPageCards,
   FactoryCards,
+  blockedRegexes
 };
 export { BrandName, AccountingCard };

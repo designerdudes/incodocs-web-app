@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Building, CircleXIcon } from "lucide-react";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
+import Container3D from "@/components/3DComponent";
 
 
 interface Address {
@@ -329,7 +330,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
         }}
 
       />
-   { organizations.length > 0 && 
+   { 
      <div className="text-center my-10">
         <Heading
           className="text-4xl font-bold text-gray-800"
@@ -338,7 +339,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
         <p className="text-lg mt-4 text-gray-600">
           Choose the organization you want to continue with.
         </p>
-        <div className="mt-4 flex flex-col items-center justify-center gap-4">
+        <div className="mt-4 flex flex-row items-center justify-center gap-4">
 
           <div className="relative bg-white">
             <Input className={cn(
@@ -376,10 +377,10 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
               </button>
             )}
           </div>
-          {/* {organizations.length == 0 &&
+          <span className="text-sm text-gray-500">--or--</span>
             <Button onClick={openCreateOrgModal}>
               <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-            </Button>} */}
+            </Button>
 
         </div>
       </div>}

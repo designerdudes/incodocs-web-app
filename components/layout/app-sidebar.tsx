@@ -121,32 +121,17 @@ export default async function AppSidebar({ params }: { params: Params }) {
 
   console.log("Transformed Factories:", transformedFactories);
 
+  const blockedUrls = [
+    "/[organizationId]/dashboard",
+    "/[organizationId]/shipment/",
+  ]
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        {transformedFactories.length > 0 ? (
-          <FactorySwitcher FactoriesData={transformedFactories} />
-        ) : (
-          <div className="">
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="default" className="mr-4 flex items-center gap-2 w-full">
-                  <Plus className="h-4 w-4" />
-                  <span>Add Factory</span>
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Add New Factory</DialogTitle>
-                </DialogHeader>
-                <FactoryForm organizationId={organizationId} token={token || ""} />
-              </DialogContent>
-            </Dialog>
-            <div className="text-muted-foreground text-xs mt-2">
-              No factories found. Please add a factory to get started.
-            </div>
-          </div>
-        )}
+    
+          <FactorySwitcher FactoriesData={transformedFactories} organizationId={organizationId} token={token} />
+   
       </SidebarHeader>
       <SidebarContent>
         <NavMain orgId={organizationId} factoryId={factoryid} />
