@@ -453,7 +453,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
           title="No Organizations Found"
         />
         <p className="text-lg text-gray-600">
-          You don't have any organizations yet. Create one to get started.
+          You don&apos;t have any organizations yet. Create one to get started.
             </p>
         
               <Button onClick={openCreateOrgModal}>
