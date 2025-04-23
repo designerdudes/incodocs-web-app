@@ -18,6 +18,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { Trash } from "lucide-react";
 
 interface Props {
   id: string;
@@ -29,11 +30,11 @@ const formSchema = z.object({
       slabNumber: z.number(),
       dimensions: z.object({
         length: z.object({
-          value: z.number(),
+          value: z.number().min(0, "Value must be non-negative"),
           units: z.string(),
         }),
         height: z.object({
-          value: z.number(),
+          value: z.number().min(0, "Value must be non-negative"),
           units: z.string(),
         }),
       }),
@@ -100,59 +101,73 @@ export default function EditSlabForm({ id }: Props) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold mb-4">Edit Slabs</h2>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {slabs.map((slab, index) => (
-            <div key={slab._id} className="flex items-center gap-4 mb-2">
-              <span className="font-semibold">Slab {slab.slabNumber}</span>
-              <FormField
-                control={form.control}
-                name={`slabs.${index}.dimensions.height.value`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Height (inches)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(+e.target.value)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name={`slabs.${index}.dimensions.length.value`}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Length (inches)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(+e.target.value)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
+        {slabs.map((slab, index) => (
+  <div
+    key={slab._id}
+    className="flex flex-wrap md:flex-nowrap items-end gap-4 border p-4 rounded-md"
+  >
+    <div className="min-w-[100px] font-semibold text-sm">
+      Slab {slab.slabNumber}
+    </div>
+
+    <FormField
+      control={form.control}
+      name={`slabs.${index}.dimensions.length.value`}
+      render={({ field }) => (
+        <FormItem className="w-full md:w-40">
+          <FormLabel>Length (inches)</FormLabel>
+          <FormControl>
+            <Input
+              type="number"
+              min={0}
+              {...field}
+              value={field.value || ""}
+              onChange={(e) =>
+                field.onChange(Math.max(0, Number(e.target.value)))
+              }
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+
+    <FormField
+      control={form.control}
+      name={`slabs.${index}.dimensions.height.value`}
+      render={({ field }) => (
+        <FormItem className="w-full md:w-40">
+          <FormLabel>Height (inches)</FormLabel>
+          <FormControl>
+            <Input
+              type="number"
+              min={0}
+              {...field}
+              value={field.value || ""}
+              onChange={(e) =>
+                field.onChange(Math.max(0, Number(e.target.value)))
+              }
+            />
+          </FormControl>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+
+<Button
                 onClick={(e) => {
-                  e.preventDefault(); // Prevent form submission
+                  e.preventDefault();
                   handleDelete(slab._id);
                 }}
-                className="bg-red-500 text-white"
+                className="bg-red-500 text-white p-2"
               >
-                Delete
+                <Trash size={18} />
               </Button>
-            </div>
-          ))}
+  </div>
+))}
+
           <Button type="submit" disabled={isLoading}>
             Update Slabs
           </Button>
