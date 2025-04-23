@@ -18,7 +18,7 @@ export default async function Page() {
 
   // Fetch user data
   try {
-    const res = await fetch('http://localhost:4080/user/currentUser', {
+    const res = await fetch('https://incodocs-server.onrender.com/user/currentUser', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
