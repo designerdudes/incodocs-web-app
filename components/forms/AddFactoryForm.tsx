@@ -52,7 +52,7 @@ const formSchema = z.object({
 
 interface FactoryFormProps {
   organizationId: string;
-  token: string;
+  token?: string;
   organizations?: { id: string; name: string }[]; // Optional prop for dynamic organizations
 }
 
