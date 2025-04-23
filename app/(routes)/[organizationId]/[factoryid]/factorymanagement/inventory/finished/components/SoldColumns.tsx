@@ -152,6 +152,31 @@ export const SoldColumns: ColumnDef<Slab>[] = [
         ),
     },
     {
+        accessorKey: "length",
+        header: "Length (inch)",
+        cell: ({ row }) => <div>{row.original?.dimensions?.length?.value}</div>,
+    },
+    {
+        accessorKey: "height",
+        header: "Height (inch)",
+        cell: ({ row }) => <div>{row.original?.dimensions?.height?.value}</div>,
+    },
+{
+        accessorKey: "squareft",
+        header: "Total SQF",
+        cell: ({ row }) => {
+          const squareFt = ((row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144).toFixed(2);
+          return <div>{squareFt}</div>;
+        },
+        footer: ({ table }) => {
+          const totalSQF = table.getRowModel().rows.reduce((sum, row) => {
+            const sqf = (row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144;
+            return sum + sqf;
+          }, 0);
+          return <span className="font-medium text-gray-600">Total SQF: {totalSQF.toFixed(2)} </span>;
+        },
+      },
+    {
 
         header: ({ column }) => (
             <Button
