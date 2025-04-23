@@ -18,8 +18,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "@/components/forms/AddFactoryForm";
 import Topbar from "@/components/topbar";
 import { cn } from "@/lib/utils";
-import { Building, CircleXIcon } from "lucide-react";
-import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { Building, CircleXIcon, Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface Address {
@@ -354,7 +353,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
               type="text"
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-              <MagnifyingGlassIcon size={16} aria-hidden="true" />
+              <Search size={16} aria-hidden="true" />
             </div>
             {orgSearch && (
               <button
