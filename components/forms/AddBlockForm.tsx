@@ -9,30 +9,27 @@ import {
   TableHead,
   TableCell,
   TableFooter,
-} from "../ui/table";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
+  Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from "../ui/form";
+} from "@/components/ui/form";
+import { useFormContext } from "react-hook-form";
 import { useForm } from "react-hook-form";
-import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Trash, Volume } from "lucide-react";
-import { postData, putData } from "@/axiosUtility/api";
-interface AddBlockFormProps {
-  
-    LotData: any;
-  
-  gap?: string;
-}
+import { Trash } from "lucide-react";
+import { putData } from "@/axiosUtility/api";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
+// Define the Zod schema
 const formSchema = z.object({
   markerCost: z
     .number()
@@ -57,25 +54,25 @@ const formSchema = z.object({
             value: z
               .number({ required_error: "Weight is required" })
               .min(0.1, { message: "Weight must be greater than zero" }),
-            units: z.literal("tons").default("tons"),
+            units: z.string().default("tons"),
           }),
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
               .min(0.1, { message: "Length must be greater than zero" }),
-            units: z.literal("inch").default("inch"),
+            units: z.string().default("inch"),
           }),
           breadth: z.object({
             value: z
               .number({ required_error: "Breadth is required" })
               .min(0.1, { message: "Breadth must be greater than zero" }),
-            units: z.literal("inch").default("inch"),
+            units: z.string().default("inch"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
               .min(0.1, { message: "Height must be greater than zero" }),
-            units: z.literal("inch").default("inch"),
+            units: z.string().default("inch"),
           }),
         }),
       })
@@ -83,98 +80,160 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
+type FormData = z.infer<typeof formSchema>;
+
+interface AddBlockFormProps {
+  LotData: {
+    lotId: string;
+    lotName: string;
+    materialType: string;
+    blocksId: string[];
+    transportCost: number;
+    materialCost: number;
+    markerCost: number;
+    markerOperatorName: string;
+    createdAt: string;
+    updatedAt: string;
+    blocks: FormData["blocks"];
+  };
+}
+
+function saveProgressSilently(data: FormData) {
+  try {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
+}
+
+interface ConfirmationDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  title: string;
+  description: string;
+}
+
+const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  description,
+}) => (
+  <div className={isOpen ? "block" : "hidden"}>
+    <div className="fixed inset-0 bg-black bg-opacity-50" />
+    <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-lg">
+      <h2 className="text-lg font-bold">{title}</h2>
+      <p>{description}</p>
+      <div className="mt-4 flex justify-end space-x-2">
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
+        <Button variant="destructive" onClick={onConfirm}>
+          Confirm
+        </Button>
+      </div>
+    </div>
+  </div>
+);
+
 export function AddBlockForm({ LotData }: AddBlockFormProps) {
-  console.log("lot data", LotData);
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [blocks, setBlocks] = React.useState<any[]>([]);
-  const [costs, setCosts] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyWeightToAll, setApplyWeightToAll] =
-    React.useState<boolean>(false);
-  const [applyLengthToAll, setApplyLengthToAll] =
-    React.useState<boolean>(false);
-  const [applyBreadthToAll, setApplyBreadthToAll] =
-    React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] =
-    React.useState<boolean>(false);
+  const [applyWeightToAll, setApplyWeightToAll] = React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
+  const [applyBreadthToAll, setApplyBreadthToAll] = React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = React.useState(false);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = React.useState<
-    number | null
-  >(null);
+  const [pendingItemsToRemove, setPendingItemsToRemove] = React.useState<FormData["blocks"]>([]);
 
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
-  const lotId = params.lotId;
+  const lotId = LotData.lotId;
+
+  const blocks = watch("blocks") || [];
+  const prevMarkerCost = LotData?.markerCost || 0;
+  const prevTransportCost = LotData?.transportCost || 0;
+  const prevMaterialCost = LotData?.materialCost || 0;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-  });
-  let lotId = LotData?._id;
-let prevMarkerCost = LotData?.markerCost;
-let prevTransportCost = LotData?.transportCost;
-let prevMaterialCost = LotData?.materialCost;
-let prevNoOfBlocks = LotData?.noOfBlocks;
-  
-  function handleBlocksInputChange(value: string) {
-    const count = parseInt(value, 10);
-
-    if (newCount < blocks.length) {
-      setShowConfirmation(true);
-      setBlockCountToBeDeleted(newCount);
-    } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "blocks",
-        createNewItem: () => ({
+    defaultValues: {
+      noOfBlocks: 1,
+      blocks: [
+        {
           dimensions: {
             weight: { value: 0, units: "tons" },
             length: { value: 0, units: "inch" },
             breadth: { value: 0, units: "inch" },
             height: { value: 0, units: "inch" },
           },
-        }),
-        customFieldSetters: {
-          blocks: (items, setValue) => {
-            setValue("noOfBlocks", items.length);
-            setBlocks(items);
-          },
         },
-        saveCallback: saveProgressSilently,
-      });
-    }
-  };
+      ],
+    },
+  });
 
-  // Handle confirmation for reducing block count
+
+  function handleBlocksInputChange(value: string) {
+    handleDynamicArrayCountChange<FormData, FormData["blocks"][number]>({
+      value,
+      watch,
+      setValue,
+      getValues,
+      fieldName: "blocks",
+      createNewItem: () => ({
+        dimensions: {
+          weight: { value: 0.1, units: "tons" },
+          length: { value: 0.1, units: "inch" },
+          breadth: { value: 0.1, units: "inch" },
+          height: { value: 0.1, units: "inch" },
+        },
+      }),
+      customFieldSetters: {
+        blocks: (items, setValue) => {
+          setValue("noOfBlocks", items.length);
+        },
+      },
+      saveCallback: saveProgressSilently,
+      isDataFilled: (item) =>
+        item.dimensions.weight.value > 0.1 ||
+        item.dimensions.length.value > 0.1 ||
+        item.dimensions.breadth.value > 0.1 ||
+        item.dimensions.height.value > 0.1,
+      onRequireConfirmation: (items, confirmedCallback) => {
+        setPendingItemsToRemove(items);
+        setShowConfirmation(true);
+      },
+    });
+  }
+
   const handleConfirmChange = () => {
-    if (blockCountToBeDeleted !== null) {
-      const updatedBlocks = blocks.slice(0, blockCountToBeDeleted);
-      setBlocks(updatedBlocks);
+    if (pendingItemsToRemove.length > 0) {
+      const count = parseInt(watch("noOfBlocks")?.toString() || "1", 10);
+      const updatedBlocks = blocks.slice(0, count);
       setValue("blocks", updatedBlocks);
       setValue("noOfBlocks", updatedBlocks.length);
       saveProgressSilently(getValues());
-      setBlockCountToBeDeleted(null);
+      setPendingItemsToRemove([]);
     }
     setShowConfirmation(false);
   };
 
-  // Handle block deletion
   const handleDeleteBlock = (index: number) => {
     const updatedBlocks = blocks.filter((_, i) => i !== index);
-    setBlocks(updatedBlocks);
     setValue("blocks", updatedBlocks);
     setValue("noOfBlocks", updatedBlocks.length);
     saveProgressSilently(getValues());
   };
 
-  // Form submission
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormData) {
     setIsLoading(true);
     const submissionData = {
       ...values,
@@ -186,10 +245,7 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
     };
 
     try {
-      await putData(
-        `/factory-management/inventory/updatelotaddblocks/${lotId}`,
-        submissionData
-      );
+      await putData(`/factory-management/inventory/updatelotaddblocks/${lotId}`, submissionData);
       toast.success("Block created/updated successfully");
       router.push("../");
     } catch (error) {
@@ -201,11 +257,10 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
     router.refresh();
   }
 
-  // Calculate total volume
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { materialCost, breadth, height } = block.dimensions;
-      const totalcost = (length.value * breadth.value * height.value) / 1000000;
+      const { length, breadth, height } = block.dimensions;
+      const volume = (length.value * breadth.value * height.value) / 1_000_000;
       return total + (volume || 0);
     }, 0);
     return {
@@ -213,11 +268,10 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
     };
   }
 
-
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={control.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
               name="materialCost"
@@ -232,19 +286,18 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
-                        setCosts
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
                       value={field.value ?? ""}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
-                  </FormControl>{
-                    field.value &&(
-                  <span className="text-gray-500 text-sm">
-                    Total Material cost: {prevMaterialCost} {"+"} {field.value} ={prevMaterialCost + field.value}
-                  </span>
-                    )
-              }
+                  </FormControl>
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Material cost: {prevMaterialCost} + {field.value} ={" "}
+                      {prevMaterialCost + field.value}
+                    </span>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -268,13 +321,12 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
-                    {
-                      field.value && (
-                        <span className="text-gray-500 text-sm">
-                          Total Marker cost: {prevMarkerCost}{" + "}  {field.value} = {prevMarkerCost + field.value}
-                        </span>
-                      )
-                    }
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Marker cost: {prevMarkerCost} + {field.value} ={" "}
+                      {prevMarkerCost + field.value}
+                    </span>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -298,13 +350,12 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
-                  {
-                    field.value &&(
-                  <span className="text-gray-500 text-sm">
-                    Total Transport cost: {prevTransportCost} {"+"} {field.value} ={prevTransportCost + field.value}
-                  </span>
-                    )
-              }
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Transport cost: {prevTransportCost} + {field.value} ={" "}
+                      {prevTransportCost + field.value}
+                    </span>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -325,11 +376,11 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                         const value = e.target.value;
                         if (value === "" || Number(value) < 1) {
                           field.onChange(1);
-                          handleBlockCountChange("1");
+                          handleBlocksInputChange("1");
                           return;
                         }
                         field.onChange(Number(value));
-                        handleBlockCountChange(value);
+                        handleBlocksInputChange(value);
                       }}
                       value={field.value ?? 1}
                       onBlur={() => saveProgressSilently(getValues())}
@@ -357,7 +408,7 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                   checked={applyWeightToAll}
                   onChange={(e) => {
                     setApplyWeightToAll(e.target.checked);
-                    if (e.target.checked) {
+                    if (e.target.checked && globalWeight) {
                       const updatedBlocks = blocks.map((block) => ({
                         ...block,
                         dimensions: {
@@ -368,7 +419,6 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                           },
                         },
                       }));
-                      setBlocks(updatedBlocks);
                       setValue("blocks", updatedBlocks);
                       saveProgressSilently(getValues());
                     }
@@ -377,111 +427,7 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                 Apply Weight to all rows
               </label>
             </div>
-            <div>
-              <Input
-                value={globalLength}
-                onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
-                type="number"
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyLengthToAll}
-                  onChange={(e) => {
-                    setApplyLengthToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedBlocks = blocks.map((block) => ({
-                        ...block,
-                        dimensions: {
-                          ...block.dimensions,
-                          length: {
-                            ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0.1,
-                          },
-                        },
-                      }));
-                      setBlocks(updatedBlocks);
-                      setValue("blocks", updatedBlocks);
-                      saveProgressSilently(getValues());
-                    }
-                  }}
-                />{" "}
-                Apply Length to all rows
-              </label>
-            </div>
-            <div>
-              <Input
-                value={globalBreadth}
-                onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (inch)"
-                type="number"
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyBreadthToAll}
-                  onChange={(e) => {
-                    setApplyBreadthToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedBlocks = blocks.map((block) => ({
-                        ...block,
-                        dimensions: {
-                          ...block.dimensions,
-                          breadth: {
-                            ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0.1,
-                          },
-                        },
-                      }));
-                      setBlocks(updatedBlocks);
-                      setValue("blocks", updatedBlocks);
-                      saveProgressSilently(getValues());
-                    }
-                  }}
-                />{" "}
-                Apply Breadth to all rows
-              </label>
-            </div>
-            <div>
-              <Input
-                value={globalHeight}
-                onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
-                type="number"
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyHeightToAll}
-                  onChange={(e) => {
-                    setApplyHeightToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedBlocks = blocks.map((block) => ({
-                        ...block,
-                        dimensions: {
-                          ...block.dimensions,
-                          height: {
-                            ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0.1,
-                          },
-                        },
-                      }));
-                      setBlocks(updatedBlocks);
-                      setValue("blocks", updatedBlocks);
-                      saveProgressSilently(getValues());
-                    }
-                  }}
-                />{" "}
-                Apply Height to all rows
-              </label>
-            </div>
+
           </div>
 
           <Table>
@@ -513,13 +459,9 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                               min="0.1"
                               step="0.1"
                               placeholder="Enter weight"
-                              value={block.dimensions.weight.value}
+                              value={field.value}
                               onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.weight.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
+                                field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
@@ -542,13 +484,9 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                               min="0.1"
                               step="0.1"
                               placeholder="Enter length"
-                              value={block.dimensions.length.value}
+                              value={field.value}
                               onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
+                                field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
@@ -571,13 +509,9 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                               min="0.1"
                               step="0.1"
                               placeholder="Enter breadth"
-                              value={block.dimensions.breadth.value}
+                              value={field.value}
                               onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.breadth.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
+                                field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
@@ -600,13 +534,9 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                               min="0.1"
                               step="0.1"
                               placeholder="Enter height"
-                              value={block.dimensions.height.value}
+                              value={field.value}
                               onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
+                                field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
                               }}
                               disabled={isLoading}
@@ -622,12 +552,12 @@ let prevNoOfBlocks = LotData?.noOfBlocks;
                       (block.dimensions.length.value *
                         block.dimensions.breadth.value *
                         block.dimensions.height.value) /
-                      1000000
+                      1_000_000
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
                     <Input
-                      type="string"
+                      type="text"
                       placeholder="BH 08 BH 0823"
                       disabled={isLoading}
                       onBlur={() => saveProgressSilently(getValues())}
