@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { ProductsColumns } from "./components/columns";
 
 export interface Product {
+    _id: any;
     code: string;
     description: string;
     unit: string;
@@ -71,9 +72,11 @@ export default async function QuotesPage({ params }: Props) {
                     retail: true,
                     code: "WHL-001"
                 }
-            ]
+            ],
+            _id: 123456
         },
         {
+            _id: 1234567,
             code: "PRD-00124",
             description: "Polished marble tile",
             unit: "Square Meter (sqm)",
