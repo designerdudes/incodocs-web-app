@@ -21,8 +21,6 @@ import { cn } from "@/lib/utils";
 import { Building, CircleXIcon } from "lucide-react";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
-import Container3D from "@/components/3DComponent";
-
 
 interface Address {
   coordinates: {
@@ -179,7 +177,7 @@ const CreateOrgForm: React.FC<{
   );
 };
 
-const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) => {
+const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any) => {
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
@@ -304,13 +302,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
     }
   };
 
-  if (!userData) {
-    return (
-      <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
-        <p className="text-lg text-gray-600">No user data available</p>
-      </div>
-    );
-  }
+
 
   const [orgSearch, setOrgSearch] = useState("");
 
