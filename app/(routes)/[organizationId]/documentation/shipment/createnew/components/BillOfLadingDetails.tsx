@@ -71,15 +71,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     }
   };
 
-<<<<<<< HEAD
-  interface ShippingInvoice {
-    invoiceNumber: string;
-    date: string;
-    amount: number;
-  }
-
-  
-=======
   const handleShippingCountChange = (value: string) => {
     const count = Number.parseInt(value, 10) || 0;
     const currentInvoices = watch("blDetails.shippingDetails.shippingLineInvoices") || [];
@@ -108,7 +99,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     saveProgress(getValues());
   };
 
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
   const openShippingLineForm = () => {
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
@@ -167,9 +157,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
             </FormItem>
           )}
         />
-<<<<<<< HEAD
-  
-=======
         <FormField
           control={control}
           name="blDetails.shippingDetails.noOfShipmentinvoices"
@@ -328,7 +315,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
             </Table>
           </div>
         )}
->>>>>>> 12512eba0ec332ae6cbf6d3a3c7353961882f809
       </div>
       <Separator className="my-4" />
       <div className="grid grid-cols-4 gap-3">
