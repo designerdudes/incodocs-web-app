@@ -18,8 +18,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "@/components/forms/AddFactoryForm";
 import Topbar from "@/components/topbar";
 import { cn } from "@/lib/utils";
-import { CircleXIcon, ListFilterIcon } from "lucide-react";
-import { set } from "lodash";
+import { Building, CircleXIcon } from "lucide-react";
 import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
 import { Separator } from "@/components/ui/separator";
 
@@ -245,7 +244,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
     modal.onOpen();
   };
 
-  const openAddFactoryModal = () => {
+  const openAddFactoryModal = (orgID:any) => {
     if (organizations.length === 0) {
       modal.title = "No Organizations Available";
       modal.description = "Please create an organization before adding a factory.";
@@ -265,7 +264,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
     modal.description = "Fill in the details to add a new factory.";
     modal.children = (
       <FactoryForm
-        organizationId={organizations[0]._id}
+        organizationId={orgID}
         token={token}
         organizations={organizations.map((org: { _id: any; name: any; }) => ({
           id: org._id,
@@ -397,7 +396,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                 <CardTitle className="text-lg font-medium">
                   {org.name}
                 </CardTitle>
-                <FiUser className="h-6 w-6 text-muted-foreground" />
+                <Building className="h-6 w-6 text-muted-foreground" />
               </CardHeader>
               <CardContent className="space-y-3 flex-grow">
                 <CardDescription className="text-base text-gray-600">
@@ -419,7 +418,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                   className="h-8 w-8 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
-                    openAddFactoryModal();
+                    openAddFactoryModal(org._id);
                   }}
                 >
                   <FiPlus className="h-4 w-4" />
