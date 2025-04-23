@@ -13,21 +13,23 @@ export function handleDynamicArrayCountChange<T, ItemType>({
   fieldName,
   createNewItem,
   saveCallback,
+  countFieldName,
   customFieldSetters = {},
   isDataFilled = (item: ItemType) => !!item,
   onRequireConfirmation,
 }: {
   value: string;
   watch: (field: string) => ItemType[];
-  setValue: (field: string, value: any) => void;
+  setValue: (field: any, value: any) => any
   getValues: () => T;
-  fieldName: string;
+  fieldName: any;
+  countFieldName?: string;
   createNewItem: CreateItemFunction<ItemType>;
   saveCallback?: (data: T) => void;
   customFieldSetters?: Record<string, CustomFieldSetter<ItemType>>;
   isDataFilled?: (item: ItemType) => boolean;
   onRequireConfirmation?: (pendingItemsToRemove: ItemType[], confirmedCallback: () => void) => void;
-}) {
+}){
   const count = Math.max(1, Math.min(parseInt(value, 10) || 1, 50));
   const currentItems = watch(fieldName) || [];
 
