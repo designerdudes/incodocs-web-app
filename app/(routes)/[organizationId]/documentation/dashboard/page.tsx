@@ -82,6 +82,26 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
+        <Link href={`/documentation/products`} passHref>
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Products</CardTitle>
+              <LiaShippingFastSolid className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
+              <CardDescription className="text-base text-gray-600">
+                Effortlessly manage your business shipments, ensuring accuracy
+                and easy retrieval.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                Track and manage your shipments efficiently with real-time
+                updates on delivery status and progress. Ensure timely
+                deliveries by monitoring all stages of shipment from dispatch to
+                arrival.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
         <Link href={`/documentation/invoices`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

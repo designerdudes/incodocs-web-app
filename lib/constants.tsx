@@ -279,7 +279,7 @@ const AccountingCard = [
   }
 ];
 
- const sidebarTabs = {
+const sidebarTabs = {
   navMain: [
     {
       title: "Dashboard",
@@ -343,6 +343,10 @@ const AccountingCard = [
         {
           title: "Shipments",
           url: "/documentation/shipment",
+        },
+        {
+          title: "Products",
+          url: "/documentation/products",
         },
         {
           title: "Parties",
