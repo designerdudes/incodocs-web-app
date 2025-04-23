@@ -1,11 +1,8 @@
-// "use client";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { AddBlockForm } from "@/components/forms/AddBlockForm";
-import { cookies } from "next/headers";
 import {
   Card,
   CardHeader,
@@ -22,51 +19,67 @@ import {
   Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { cookies } from "next/headers";
+import LotFormWrapper from "./components/LotFormWrapper";
+
 interface Props {
   params: {
-    id: string;
-    lotid: string;
+    id: string; // Assuming 'id' is the lot ID, clarify if 'lotid' is needed
   };
 }
 
+// Define the expected shape of LotData
+interface LotData {
+  lotId: string;
+  lotName: string;
+  materialType: string;
+  blocksId: string[];
+  transportCost: number;
+  materialCost: number;
+  markerCost: number;
+  markerOperatorName: string;
+  createdAt: string;
+  updatedAt: string;
+  blocks: Array<{
+    dimensions: {
+      weight: { value: number; units: string };
+      length: { value: number; units: string };
+      breadth: { value: number; units: string };
+      height: { value: number; units: string };
+    };
+  }>;
+}
 
 export default async function AddBlockFormPage({ params }: Props) {
-  let lotId = null;
-  lotId = params.id;
-  console.log(params.id);
-  let BlockData = null;
+  const lotId = params.id; // Use params.id as lotId
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/blocksbylot/get/${params?.id}`,
+  // Fetch block data
+  // const blockResponse = await fetch(
+  //   `https://incodocs-server.onrender.com/factory-management/inventory/blocksbylot/get/${lotId}`,
+  //   {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${token}`,
+  //     },
+  //   }
+  // );
+  // const blockData = await blockResponse.json();
+
+  // Fetch lot data
+  const lotResponse = await fetch(
+    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
-  const res2 = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
-  BlockData = res;
-  let LotData = res2;
-  console.log("lotsdata", LotData);
-  // At the top of your component
-  
+  );
+  const lotData: LotData = await lotResponse.json();
 
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">
@@ -81,7 +94,7 @@ export default async function AddBlockFormPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Add New Block to ${LotData?.lotName}`}
+            title={`Add New Block to ${lotData?.lotName}`}
           />
           <p className="text-muted-foreground text-sm">
             Add a new block to a lot by entering its details, ensuring accurate
@@ -92,16 +105,18 @@ export default async function AddBlockFormPage({ params }: Props) {
 
       <Separator orientation="horizontal" />
 
-      <div className="flex flex-col lg:flex-row gap-6 w-full">  
+      <div className="flex flex-col lg:flex-row gap-6 w-full">
         <div className="w-full lg:w-2/3">
-          <AddBlockForm  LotData={ LotData as any } />
+          <LotFormWrapper
+            lotData={lotData}
+          />
         </div>
 
         {/* Lot Details Card */}
-        <Card className="w- lg:w-1/3">
+        <Card className="w-full lg:w-1/3">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
-            <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
+            <CardDescription>{`Details of ${lotData?.lotName}`}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -114,50 +129,50 @@ export default async function AddBlockFormPage({ params }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
+                  <TableCell>{lotData?.lotName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Type
                   </TableCell>
-                  <TableCell>{LotData?.materialType}</TableCell>
+                  <TableCell>{lotData?.materialType}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Total Blocks
                   </TableCell>
-                  <TableCell>{LotData?.blocksId?.length}</TableCell>
+                  <TableCell>{lotData?.blocksId?.length}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Transport Cost
                   </TableCell>
-                  <TableCell>{LotData?.transportCost}</TableCell>
+                  <TableCell>{lotData?.transportCost}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Cost
                   </TableCell>
-                  <TableCell>{LotData?.materialCost}</TableCell>
+                  <TableCell>{lotData?.materialCost}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Cost
                   </TableCell>
-                  <TableCell>{LotData?.markerCost}</TableCell>
+                  <TableCell>{lotData?.markerCost}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Operator
                   </TableCell>
-                  <TableCell>{LotData?.markerOperatorName}</TableCell>
+                  <TableCell>{lotData?.markerOperatorName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Block Created At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.createdAt).format("YYYY-MM-DD")}
+                    {moment(lotData.createdAt).format("YYYY-MM-DD")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -165,15 +180,13 @@ export default async function AddBlockFormPage({ params }: Props) {
                     Block Updated At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.updatedAt).format("YYYY-MM-DD")}
+                    {moment(lotData.updatedAt).format("YYYY-MM-DD")}
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
-
-        
       </div>
     </div>
   );

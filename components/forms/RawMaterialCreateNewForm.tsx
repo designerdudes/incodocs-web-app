@@ -100,7 +100,7 @@ interface RawMaterialCreateNewFormProps {
   gap: number;
 }
 
-export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [blocks, setBlocks] = React.useState<any[]>([]);
@@ -407,7 +407,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 </FormItem>
               )}
             />
-<FormField
+            <FormField
               name="noOfBlocks"
               control={form.control}
               render={({ field }) => (
@@ -417,12 +417,12 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                     <Input
                       placeholder="Enter Quarry Cost"
                       type="number"
-                      disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -441,10 +441,11 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(e);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value === 0 ? "" : field.value} // Check if field.value is 0 and render an empty string instead
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
