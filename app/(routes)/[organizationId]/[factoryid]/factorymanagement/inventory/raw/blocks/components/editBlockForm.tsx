@@ -189,6 +189,7 @@ export default function EditBlockForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 15"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     value={field.value || ""}
                     onChange={(e) =>
@@ -210,6 +211,7 @@ export default function EditBlockForm({ params }: Props) {
                   <Input
                     placeholder="Eg: 10"
                     type="number"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value))
@@ -226,12 +228,14 @@ export default function EditBlockForm({ params }: Props) {
           <FormField
             control={form.control}
             name="dimensions.breadth.value"
+            
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Length (inches)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
+              className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     value={field.value || ""}
                     onChange={(e) =>
@@ -253,6 +257,7 @@ export default function EditBlockForm({ params }: Props) {
                   <Input
                     placeholder="Eg: 10"
                     type="number"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     value={field.value || ""}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value))
