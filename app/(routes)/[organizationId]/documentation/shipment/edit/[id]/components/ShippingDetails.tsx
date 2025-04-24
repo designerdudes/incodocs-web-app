@@ -33,16 +33,24 @@ import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
 import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
+import { Icons } from "@/components/ui/icons";
 
 interface ShippingDetailsProps {
   shipmentId: string;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
 }
 
-export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
+export function ShippingDetails({
+  shipmentId,
+  saveProgress,
+  onSectionSubmit,
+}: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
-  const [forwarders, setForwarders] = useState([]);
-  const [transporters, setTransporters] = useState([]);
+  const [forwarders, setForwarders] = useState<any[]>([]);
+  const [transporters, setTransporters] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
 
   const {
@@ -66,6 +74,11 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
   // Watch form values
   const formValues = watch("shippingDetails");
 
+  // Autosave form data when shippingDetails changes
+  useEffect(() => {
+    saveProgress({ shippingDetails: formValues });
+  }, [formValues, saveProgress]);
+
   // Handle Count Changes
   const handleForwarderCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
@@ -78,10 +91,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         .fill(null)
         .map(() => ({
           invoiceNumber: "",
-          uploadInvoiceUr: "",
+          uploadInvoiceUrl: "",
           date: undefined,
-          valueWithGst: "",
-          valueWithoutGst: "",
+          valueWithGst: undefined,
+          valueWithoutGst: undefined,
         }));
       appendForwarder(newInvoices);
     } else if (value < currentInvoices.length) {
@@ -102,10 +115,10 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
         .fill(null)
         .map(() => ({
           invoiceNumber: "",
-          uploadInvoiceUr: "",
+          uploadInvoiceUrl: "",
           date: undefined,
-          valueWithGst: "",
-          valueWithoutGst: "",
+          valueWithGst: undefined,
+          valueWithoutGst: undefined,
         }));
       appendTransporter(newInvoices);
     } else if (value < currentInvoices.length) {
@@ -131,10 +144,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      console.log(data)
-      // const storageUrl = data.storageLink;
-      // console.log(storageUrl)
-      setValue(fieldName, data, { shouldDirty: true });
+      setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
@@ -152,15 +162,16 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
           "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const forwarderData = await forwarderResponse.json();
-        setForwarders(forwarderData);
+        setForwarders(Array.isArray(forwarderData) ? forwarderData : []);
 
         const transporterResponse = await fetch(
           "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const transporterData = await transporterResponse.json();
-        setTransporters(transporterData);
+        setTransporters(Array.isArray(transporterData) ? transporterData : []);
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.error("Failed to fetch forwarders or transporters");
       }
     };
     fetchData();
@@ -175,7 +186,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
             "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
           )
             .then((res) => res.json())
-            .then((data) => setForwarders(data));
+            .then((data) => setForwarders(Array.isArray(data) ? data : []));
         }}
       />
     );
@@ -191,11 +202,24 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
             "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
           )
             .then((res) => res.json())
-            .then((data) => setTransporters(data));
+            .then((data) => setTransporters(Array.isArray(data) ? data : []));
         }}
       />
     );
     GlobalModal.onOpen();
+  };
+
+  // Handle section submission
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await onSectionSubmit();
+    } catch (error) {
+      console.error("Error submitting Shipping Details:", error);
+      toast.error("Failed to submit Shipping Details");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -288,7 +312,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`}
+                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
                         render={({ field }) => (
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
@@ -299,7 +323,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     size="sm"
                                     onClick={() =>
                                       setValue(
-                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`,
+                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`,
                                         "",
                                         { shouldDirty: true }
                                       )
@@ -307,11 +331,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                   >
                                     Remove
                                   </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    asChild
-                                  >
+                                  <Button variant="outline" size="sm" asChild>
                                     <a
                                       href={field.value}
                                       target="_blank"
@@ -333,7 +353,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     if (file) {
                                       handleFileUpload(
                                         file,
-                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUr`
+                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
                                       );
                                     }
                                   }}
@@ -365,7 +385,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                 <FormControl>
                                   <Button variant="outline">
                                     {field.value
-                                      ? format(field.value, "PPPP")
+                                      ? format(new Date(field.value), "PPPP")
                                       : "Pick a date"}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
@@ -374,7 +394,11 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                               <PopoverContent align="start">
                                 <Calendar
                                   mode="single"
-                                  selected={field.value}
+                                  selected={
+                                    field.value
+                                      ? new Date(field.value)
+                                      : undefined
+                                  }
                                   onSelect={(date) =>
                                     field.onChange(date?.toISOString())
                                   }
@@ -393,10 +417,17 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                         render={({ field }) => (
                           <FormControl>
                             <Input
+                              type="number"
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
                             />
                           </FormControl>
                         )}
@@ -409,10 +440,17 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                         render={({ field }) => (
                           <FormControl>
                             <Input
+                              type="number"
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
                             />
                           </FormControl>
                         )}
@@ -525,7 +563,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`}
+                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
                         render={({ field }) => (
                           <div className="flex items-center justify-between gap-2">
                             {field.value ? (
@@ -536,7 +574,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     size="sm"
                                     onClick={() =>
                                       setValue(
-                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`,
+                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`,
                                         "",
                                         { shouldDirty: true }
                                       )
@@ -544,11 +582,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                   >
                                     Remove
                                   </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    asChild
-                                  >
+                                  <Button variant="outline" size="sm" asChild>
                                     <a
                                       href={field.value}
                                       target="_blank"
@@ -570,7 +604,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                     if (file) {
                                       handleFileUpload(
                                         file,
-                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUr`
+                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
                                       );
                                     }
                                   }}
@@ -602,7 +636,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                                 <FormControl>
                                   <Button variant="outline">
                                     {field.value
-                                      ? format(field.value, "PPPP")
+                                      ? format(new Date(field.value), "PPPP")
                                       : "Pick a date"}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                   </Button>
@@ -611,7 +645,11 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                               <PopoverContent align="start">
                                 <Calendar
                                   mode="single"
-                                  selected={field.value}
+                                  selected={
+                                    field.value
+                                      ? new Date(field.value)
+                                      : undefined
+                                  }
                                   onSelect={(date) =>
                                     field.onChange(date?.toISOString())
                                   }
@@ -630,10 +668,17 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                         render={({ field }) => (
                           <FormControl>
                             <Input
+                              type="number"
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
                             />
                           </FormControl>
                         )}
@@ -646,10 +691,17 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
                         render={({ field }) => (
                           <FormControl>
                             <Input
+                              type="number"
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
                             />
                           </FormControl>
                         )}
@@ -672,6 +724,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
           </div>
         )}
       </div>
+
       {/* Review */}
       <FormField
         control={control}
@@ -683,6 +736,7 @@ export function ShippingDetails({ shipmentId }: ShippingDetailsProps) {
               <Textarea
                 placeholder="e.g., this is some random comment"
                 {...field}
+                value={field.value ?? ""}
                 onBlur={() => getValues()}
               />
             </FormControl>
