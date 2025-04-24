@@ -31,13 +31,6 @@ export default async function Page() {
     }
 
     const userData = await res.json();
-    console.log('User Data:', userData); // Logs to server console
-    // return (
-    //   <div className="flex flex-col gap-4">
-    //     <MainDashboardComponent token={token} userData={userData} />
-    //     {/* Heading */}
-    //   </div>
-    // );
 
 
    
