@@ -113,7 +113,7 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
-                <TableRow>
+                  <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Type
                   </TableCell>
