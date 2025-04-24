@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -20,44 +20,47 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
+
 
 const productSchema = z.object({
     code: z.string().min(1, { message: "Code is required" }),
     description: z.string().min(1, { message: "Description is required" }),
-    unit: z.string().min(1, { message: "Unit of Measurement is required" }),
+    unitOfMeasurements: z.string().min(1, { message: "Unit of Measurement is required" }),
     countryOfOrigin: z.string().min(1, { message: "Select a country" }),
-    hsCode: z.string().min(1, { message: "HS Code is required" }),
+    HSCode: z.string().min(1, { message: "HS Code is required" }),
     prices: z.array(
         z.object({
             variantName: z.string().min(1, { message: "Variant name is required" }),
             variantType: z.string().min(1, { message: "Variant type is required" }),
-            sellPrice: z.number().min(0),
-            buyPrice: z.number().min(0),
+            sellPrice: z.number().min(0, { message: "Sell price must be positive" }),
+            buyPrice: z.number().min(0, { message: "Buy price must be positive" }),
         })
     ),
-    netWeight: z.number().min(0),
-    grossWeight: z.number().min(0),
-    cubicMeasurement: z.number().min(0),
+    netWeight: z.number().min(0, { message: "Net weight must be positive" }),
+    grossWeight: z.number().min(0, { message: "Gross weight must be positive" }),
+    cubicMeasurement: z.number().min(0, { message: "Cubic measurement must be positive" }),
+    organizationId: z.string().optional(),
+    createdBy: z.string().optional(),
 });
 
+interface ProductFormProps {
+    onSuccess?: () => void;
+}
 
-const organizations = [
-    { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
-];
-
-export default function ProductFormPage() {
+export default function ProductFormPage({ onSuccess }: ProductFormProps) {
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
     const form = useForm({
         resolver: zodResolver(productSchema),
         defaultValues: {
             code: "",
             description: "",
-            unit: "",
+            unitOfMeasurements: "",
             countryOfOrigin: "",
-            hsCode: "",
+            HSCode: "",
             prices: [
                 {
                     variantName: "",
@@ -72,35 +75,28 @@ export default function ProductFormPage() {
         },
     });
 
-
-    const router = useRouter();
-
     const handleSubmit = async (values: any) => {
         setIsLoading(true);
         try {
-            await postData("/employers/add/", values);
-            toast.success("Employee added successfully");
+            await postData("/shipment/productdetails/add", values); // Adjust endpoint as needed
+            toast.success("Product created successfully");
             router.push("./");
+            window.location.reload(); // Reload the page to see the new product
+            if (onSuccess) onSuccess();
         } catch (error: any) {
-            console.error("Error creating/updating employee:", error);
-
+            console.error("Error creating product:", error);
             if (error.response && error.response.status === 400) {
-                if (error.response.data.message === "Employee ID exists, please try a unique ID") {
-                    toast.error("Employee already exists, please use a unique ID.");
-                } else {
-                    toast.error(error.response.data.message || "Bad Request");
-                }
+                toast.error(error.response.data.message || "Bad Request");
             } else {
-                toast.error("Error creating/updating employee");
+                toast.error("Error creating product");
             }
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
-
 
     return (
         <div className="space-y-6">
-            {/* <h2 className="text-2xl font-bold mb-4">Add Team Member</h2> */}
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
                     <div className="grid grid-cols-3 gap-4">
@@ -110,7 +106,9 @@ export default function ProductFormPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Code</FormLabel>
-                                    <FormControl><Input placeholder="Eg: PROD-001" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input placeholder="Eg: PROD-001" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -121,18 +119,22 @@ export default function ProductFormPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
-                                    <FormControl><Input placeholder="Eg: Premium Marble Slab" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input placeholder="Eg: Premium Marble Slab" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <FormField
                             control={form.control}
-                            name="unit"
+                            name="unitOfMeasurements"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Unit of Measurement</FormLabel>
-                                    <FormControl><Input placeholder="Eg: Sq. Ft" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input placeholder="Eg: Sq. Ft" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -160,11 +162,13 @@ export default function ProductFormPage() {
                         />
                         <FormField
                             control={form.control}
-                            name="hsCode"
+                            name="HSCode"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>HS Code</FormLabel>
-                                    <FormControl><Input placeholder="Eg: 25151200" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input placeholder="Eg: 25151200" {...field} />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -181,7 +185,9 @@ export default function ProductFormPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Variant Name</FormLabel>
-                                            <FormControl><Input placeholder="Eg: Retail" {...field} /></FormControl>
+                                            <FormControl>
+                                                <Input placeholder="Eg: Retail" {...field} />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -192,7 +198,9 @@ export default function ProductFormPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Variant Type</FormLabel>
-                                            <FormControl><Input placeholder="Eg: Whole" {...field} /></FormControl>
+                                            <FormControl>
+                                                <Input placeholder="Eg: Whole" {...field} />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -203,7 +211,18 @@ export default function ProductFormPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Sell Price</FormLabel>
-                                            <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    {...field}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value ? Number(e.target.value) : 0
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -214,7 +233,18 @@ export default function ProductFormPage() {
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Buy Price</FormLabel>
-                                            <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    step="0.01"
+                                                    {...field}
+                                                    onChange={(e) =>
+                                                        field.onChange(
+                                                            e.target.value ? Number(e.target.value) : 0
+                                                        )
+                                                    }
+                                                />
+                                            </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -230,7 +260,18 @@ export default function ProductFormPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Net Weight (Kg)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            {...field}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value ? Number(e.target.value) : 0
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -241,7 +282,18 @@ export default function ProductFormPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Gross Weight (Kg)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            {...field}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value ? Number(e.target.value) : 0
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -252,7 +304,18 @@ export default function ProductFormPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Cubic Measurement (m³)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            step="0.01"
+                                            {...field}
+                                            onChange={(e) =>
+                                                field.onChange(
+                                                    e.target.value ? Number(e.target.value) : 0
+                                                )
+                                            }
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -264,7 +327,6 @@ export default function ProductFormPage() {
                     </Button>
                 </form>
             </Form>
-
         </div>
     );
 }

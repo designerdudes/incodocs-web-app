@@ -458,18 +458,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
           )}
         />
       </div>
-      {/* Submit Button */}
-      <div className="flex justify-end mt-4">
-        <Button
-          type="button"
-          onClick={onSectionSubmit}
-          className="h-8"
-          disabled={uploading}
-        >
-          Submit
-          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
-        </Button>
-      </div>
     </div>
   );
 }

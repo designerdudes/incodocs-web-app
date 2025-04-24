@@ -1,3 +1,4 @@
+
 "use client";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
   PopoverTrigger,
@@ -28,16 +28,38 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import ProductDetailsForm from "@/components/forms/ProductdetailsForm";
-import { Icons } from "@/components/ui/icons";
-import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import toast from "react-hot-toast";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { containerTypes } from "../data/formSchema";
+import { fetchData } from "@/axiosUtility/api";
+import ProductSelectionForm from "@/components/forms/ProductSelectionForm";
+import { AddContainerTypeModal } from "./AddContainerTypeModal";
+
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
 }
 
 interface BookingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+}
+
+interface Product {
+  _id: string;
+  code: string;
+  HScode: string;
+  dscription: string;
+  unitOfMeasurements: string;
+  countryOfOrigin: string;
+  variantName: string;
+  varianntType: string;
+  sellPrice: number;
+  buyPrice: number;
+  netWeight: number;
+  grossWeight: number;
+  cubicMeasurement: number;
 }
 
 function saveProgressSilently(data: any) {
@@ -49,29 +71,72 @@ export function BookingDetails({
   saveProgress,
   onSectionSubmit,
 }: BookingDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext() as any
+  const { control, setValue, watch, getValues } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
   const GlobalModal = useGlobalModal();
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [containerCountToBeDeleted, setContainerCountToBeDeleted] = useState<
     number | null
   >(null);
+  const [productsCache, setProductsCache] = useState<Product[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
 
-  const initialCount = 1;
-  const [containers, setContainers] = useState(
-    Array.from({ length: initialCount }, () => ({
-      containerNumber: "",
-      truckNumber: "",
-      truckDriverContactNumber: "",
-      addProductDetails: {},
-    }))
-  );
+  // Combine default and custom container types
+  const containerTypeEntities = customContainerTypes.map((type) => ({
+    _id: type.value,
+    label: type.label,
+    category: type.category,
+  }));
+
+  const handleAddContainerType = (data: {
+    value: string;
+    label: string;
+    category: string;
+  }) => {
+    if (customContainerTypes.some((type) => type.value === data.value)) {
+      toast.error("Container type value must be unique");
+      return;
+    }
+    const newContainerType = {
+      value: data.value,
+      label: data.label,
+      category: data.category,
+    };
+    setCustomContainerTypes([...customContainerTypes, newContainerType]);
+    setValue(`bookingDetails.containers[0].containerType`, data.value);
+    saveProgressSilently(getValues());
+  };
+
+  useEffect(() => {
+    setValue("bookingDetails.containers", containersFromForm);
+    setValue("NumberOfContainer", containersFromForm.length);
+  }, []);
+
+  const fetchProductDetails = async (productIds: string[]) => {
+    // Fetch only uncached products
+    const uncachedIds = productIds.filter(
+      (id) => !productsCache.some((p) => p._id === id)
+    );
+    if (uncachedIds.length === 0) return;
+
+    try {
+      const response = await fetchData(`/shipment/productdetails/get?ids=${uncachedIds.join(",")}`);
+      const newProducts: Product[] = response || [];
+      setProductsCache((prev) => [
+        ...prev.filter((p) => !uncachedIds.includes(p._id)),
+        ...newProducts,
+      ]);
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+      toast.error("Failed to load product details");
+    }
+  };
 
   const handleDelete = (index: number) => {
-    const updatedContainers = containers.filter(
+    const updatedContainers = containersFromForm.filter(
       (_: any, i: number) => i !== index
     );
-    setContainers(updatedContainers);
     setValue("bookingDetails.containers", updatedContainers);
     setValue("NumberOfContainer", updatedContainers.length);
     saveProgressSilently(getValues());
@@ -80,12 +145,10 @@ export function BookingDetails({
   const handleContainerCountChange = (value: string) => {
     const newCount = Number(value);
 
-    if (newCount < containers.length) {
-      // If the new count is less than the current containers, show confirmation dialog
+    if (newCount < containersFromForm.length) {
       setShowConfirmation(true);
-      setContainerCountToBeDeleted(newCount); // Store the count to be deleted
+      setContainerCountToBeDeleted(newCount);
     } else {
-      // Handling for adding new containers
       handleDynamicArrayCountChange({
         value,
         watch,
@@ -96,12 +159,12 @@ export function BookingDetails({
           containerNumber: "",
           truckNumber: "",
           truckDriverContactNumber: "",
-          addProductDetails: {},
+          addProductDetails: [],
+          containerType: "",
         }),
         customFieldSetters: {
           "bookingDetails.containers": (items, setValue) => {
             setValue("NumberOfContainer", items.length);
-            setContainers(items); // Sync the local state too!
           },
         },
         saveCallback: saveProgressSilently,
@@ -109,11 +172,9 @@ export function BookingDetails({
     }
   };
 
-  // Handle Confirm action after the dialog is triggered
   const handleConfirmChange = () => {
     if (containerCountToBeDeleted !== null) {
-      const updatedContainers = containers.slice(0, containerCountToBeDeleted);
-      setContainers(updatedContainers);
+      const updatedContainers = containersFromForm.slice(0, containerCountToBeDeleted);
       setValue("bookingDetails.containers", updatedContainers);
       setValue("NumberOfContainer", updatedContainers.length);
       saveProgressSilently(getValues());
@@ -123,22 +184,32 @@ export function BookingDetails({
   };
 
   const openProductForm = (index: number) => {
-    GlobalModal.title = "Add Product Details";
-    GlobalModal.description =
-      "Fill in the details to add product information for this container.";
+    GlobalModal.title = "Select Products for Container";
+    GlobalModal.description = "Search and select products to add to this container.";
     GlobalModal.children = (
-      <ProductDetailsForm
-        onSubmit={(productData: any) => {
-          const updatedContainers = [...containers];
-          updatedContainers[index].addProductDetails = productData;
-          setContainers(updatedContainers);
+      <ProductSelectionForm
+        onSubmit={(data: { productIds: string[] }) => {
+          const updatedContainers = [...containersFromForm];
+          updatedContainers[index].addProductDetails = data.productIds;
           setValue("bookingDetails.containers", updatedContainers);
+          fetchProductDetails(data.productIds);
           saveProgressSilently(getValues());
           GlobalModal.onClose();
         }}
+        initialProductIds={containersFromForm[index].addProductDetails || []}
       />
     );
     GlobalModal.onOpen();
+  };
+
+  const removeProduct = (containerIndex: number, productId: string) => {
+    const updatedContainers = [...containersFromForm];
+    updatedContainers[containerIndex].addProductDetails = updatedContainers[
+      containerIndex
+    ].addProductDetails.filter((id: string) => id !== productId);
+    setValue("bookingDetails.containers", updatedContainers);
+    saveProgressSilently(getValues());
+    toast.success("Product removed from container");
   };
 
   return (
@@ -312,12 +383,13 @@ export function BookingDetails({
         )}
       />
 
-      {containers.length > 0 && (
+      {containersFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
+                <TableHead>Container Type</TableHead>
                 <TableHead>Container Number</TableHead>
                 <TableHead>Truck Number</TableHead>
                 <TableHead>Truck Driver Contact</TableHead>
@@ -326,9 +398,36 @@ export function BookingDetails({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {containers.map((_: any, index: number) => (
+              {containersFromForm.map((container: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`bookingDetails.containers[${index}].containerType`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <EntityCombobox
+                              entities={containerTypeEntities}
+                              value={field.value || ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                saveProgressSilently(getValues());
+                              }}
+                              displayProperty="label"
+                              valueProperty="_id"
+                              placeholder="Select container type"
+                              onAddNew={() => setIsModalOpen(true)}
+                              addNewLabel="Add New Container Type"
+                              multiple={false}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
@@ -368,7 +467,7 @@ export function BookingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`bookingDetails.containers[${index}].trukDriverContactNumber`}
+                      name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -376,8 +475,12 @@ export function BookingDetails({
                               type="tel"
                               placeholder="e.g., 7702791728"
                               {...field}
-                              value={field.value}
-                              onChange={(e) => field.onChange(e.target.value)}
+                              value={field.value || ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value ? Number(e.target.value) : ""
+                                )
+                              }
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -391,9 +494,64 @@ export function BookingDetails({
                       type="button"
                       variant="secondary"
                       onClick={() => openProductForm(index)}
+                      className="mb-2"
                     >
-                      Add product
+                      Add Product
                     </Button>
+                    {container.addProductDetails?.length > 0 ? (
+                      <ScrollArea className="h-32">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Code</TableHead>
+                              <TableHead>Description</TableHead>
+                              <TableHead>HS Code</TableHead>
+                              <TableHead>Net Weight</TableHead>
+                              <TableHead>Gross Weight</TableHead>
+                              <TableHead>Action</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {container.addProductDetails.map((productId: string) => {
+                              const product = productsCache.find(
+                                (p) => p._id === productId
+                              );
+                              return (
+                                <TableRow key={productId}>
+                                  <TableCell>
+                                    {product ? product.code : "Loading..."}
+                                  </TableCell>
+                                  <TableCell>
+                                    {product ? product.dscription : "Loading..."}
+                                  </TableCell>
+                                  <TableCell>
+                                    {product ? product.HScode : "Loading..."}
+                                  </TableCell>
+                                  <TableCell>
+                                    {product ? `${product.netWeight} kg` : "Loading..."}
+                                  </TableCell>
+                                  <TableCell>
+                                    {product ? `${product.grossWeight} kg` : "Loading..."}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size="sm"
+                                      onClick={() => removeProduct(index, productId)}
+                                    >
+                                      <Trash size={16} />
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </ScrollArea>
+                    ) : (
+                      <p className="text-gray-500">No products added</p>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -410,18 +568,17 @@ export function BookingDetails({
           </Table>
         </div>
       )}
-      {/* Submit Button */}
-      <div className="flex justify-end mt-4 col-span-4">
-        <Button type="button" onClick={onSectionSubmit} className="h-8">
-          Submit
-        </Button>
-      </div>
       <ConfirmationDialog
         isOpen={showConfirmation}
         onClose={() => setShowConfirmation(false)}
         onConfirm={handleConfirmChange}
         title="Are you sure?"
         description="You are reducing the number of containers. This action cannot be undone."
+      />
+      <AddContainerTypeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddContainerType}
       />
     </div>
   );
