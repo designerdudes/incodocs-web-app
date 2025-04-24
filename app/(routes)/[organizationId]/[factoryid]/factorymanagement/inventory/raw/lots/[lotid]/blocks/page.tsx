@@ -151,6 +151,18 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
+                 Qarry cost
+                  </TableCell>
+                  <TableCell>{LotData?.markerOperatorName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                Comission cost
+                  </TableCell>
+                  <TableCell>{LotData?.markerOperatorName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
                     Block Created At
                   </TableCell>
                   <TableCell>
