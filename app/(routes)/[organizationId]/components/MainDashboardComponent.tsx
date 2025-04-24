@@ -273,34 +273,6 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     modal.onOpen();
   };
 
-  const handleCardClick = async (orgId: string) => {
-    try {
-      const factoryResponse = await fetch(
-        `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (!factoryResponse.ok) {
-        throw new Error("Failed to fetch factory data");
-      }
-      const factoryData = await factoryResponse.json();
-      const factories = factoryData;
-      console.log("factories", factories);
-      if (factories.length === 0) {
-        console.log("No factories found for this organization.");
-        router.push(`/${orgId}/dashboard`);
-      }
-      const firstFactoryId = factories[0]._id;
-      router.push(`/${orgId}/${firstFactoryId}/dashboard`);
-    } catch (err) {
-      console.error("Error fetching factory data:", err);
-      router.push(`/${orgId}/dashboard`);
-    }
-  };
-
 
 
   const [orgSearch, setOrgSearch] = useState("");
@@ -382,7 +354,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
             <Card
               key={org._id}
               className="bg-white dark:bg-card h-full flex flex-col cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              onClick={() => handleCardClick(org._id)}
+              onClick={() => router.push(`/${org._id}/dashboard`)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">

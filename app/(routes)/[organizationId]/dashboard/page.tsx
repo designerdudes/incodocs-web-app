@@ -9,7 +9,12 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import Heading from '@/components/ui/heading';
-import { Factory } from 'lucide-react';
+import { Factory, FactoryIcon, Ship } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import StatsCard from '@/components/statsCard';
+import StatsOverviewCard from '@/components/dashboard/statsOverviewCard';
+import { FinancialCard } from '@/components/dashboard/FinancialCard';
+import { FactoriesCard } from '@/components/dashboard/factoriesCards';
 
 
 interface Address {
@@ -24,9 +29,15 @@ interface Address {
 
 interface Factory {
   _id: string;
-  name: string;
+  factoryName: string;
   address: Address;
   organization: string;
+  gstNo: string;
+  BlocksId: string[];
+  SlabsId: string[];
+  lotId: string[];
+  workerCuttingPay: number;
+  workerPolishingPay: number;
   createdAt: string;
   updatedAt: string;
   __v?: number;
@@ -41,10 +52,10 @@ export default async function DashboardPage({ params }: { params: Params }) {
   const cookieStore = cookies();
   const token = cookieStore.get('AccessToken')?.value;
 
-console.log("orgId", organizationId);
+  console.log("orgId", organizationId);
 
   try {
-  
+
 
     // Fetch all factories for the organization
     const factoriesRes = await fetch(
@@ -58,55 +69,137 @@ console.log("orgId", organizationId);
       }
     );
 
-   
+
 
     const factories: Factory[] = await factoriesRes.json();
 
+    console.log('factories', factories);
+
     return (
-      <main className="flex h-full flex-col p-10 min-h-screen bg-gradient-to-r from-gray-100 to-white">
-        <div className="text-center mb-10">
+      <main className="flex  flex-col p-10 gap-4 bg-gradient-to-r from-gray-100 to-white">
+        <div className="gap-3">
           <Heading
-            className="text-4xl font-bold text-gray-800"
-            title="Organization Factories"
+            className="text-3xl"
+            title="Dashboard"
           />
-          <p className="text-lg mt-4 text-gray-600">
+          <p className="text-sm  text-gray-600">
             View all factories for your organization.
           </p>
         </div>
+        <Separator />
 
+        {/* stats cards  */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatsCard
+            title='Total Shipments'
+            stat={0}
+            statPrefix=''
+            href='/documentation/shipment'
+            factoryId={organizationId}
+            desc='Total shipments for your organization till date'
+            icon={<Ship className="h-6 w-6 text-muted-foreground" />}
+          />
+          <StatsCard
+            title='Total Factories'
+            stat={0}
+            statPrefix=''
+            href='/shipment'
+            factoryId={organizationId}
+            desc='Total factories for your organization till date'
+            icon={<FactoryIcon className="h-6 w-6 text-muted-foreground" />}
+          />
+          <StatsCard
+            title='Total Consignees'
+            stat={0}
+            statPrefix=''
+            href='/documentation/shipment'
+            factoryId={organizationId}
+            desc='Total consignees for your organization till date'
+            icon={<Ship className="h-6 w-6 text-muted-foreground" />}
+          />
+          <StatsCard
+            title='Total Supliers'
+            stat={0}
+            statPrefix=''
+            href='/documentation/shipment'
+            factoryId={organizationId}
+            desc='Total suppliers for your organization till date'
+            icon={<Ship className="h-6 w-6 text-muted-foreground" />}
+          />
+        </div>
+
+        <div className="gap-3">
+          <Heading
+            className="text-3xl"
+            title="Invoices, Quotations and Purchase Orders"
+          />
+          <p className="text-sm  text-gray-600">
+            Overview of all invoices, quotations and purchase orders for your organization.
+          </p>
+        </div>
+        <Separator />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <StatsOverviewCard
+            type='invoices'
+            totalCount={10}
+            totalValue={379404}
+            pendingCount={3}
+            pendingValue={10000}
+            paidCount={7}
+            paidValue={369404}
+            factoryId='1'
+          />
+          <StatsOverviewCard
+            type='quotes'
+            totalCount={10}
+            totalValue={379404}
+            pendingCount={3}
+            pendingValue={10000}
+            paidCount={7}
+            paidValue={369404}
+            factoryId='1'
+          />
+          <StatsOverviewCard
+            type='purchase-orders'
+            totalCount={10}
+
+            totalValue={379404}
+            pendingCount={3}
+            pendingValue={10000}
+            paidCount={7}
+            paidValue={369404}
+            factoryId='1'
+          />
+        </div>
+        <Separator />
+        <div className="gap-3">
+          <Heading
+            className="text-3xl"
+            title="Factories"
+          />
+          <p className="text-sm  text-gray-600">
+            Overview of your organization 
+          </p>
+        </div>
+        <Separator />
+
+        {/* Factories List */}
         {factories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {factories.map((factory) => (
-              <Card
+              <FactoriesCard
                 key={factory._id}
-                className="bg-white dark:bg-card h-full flex flex-col hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">
-                    {factory.name}
-                  </CardTitle>
-                  <Factory className="h-6 w-6 text-muted-foreground" />
-                </CardHeader>
-                <CardContent className="space-y-3 flex-grow">
-                  <CardDescription className="text-base text-gray-600">
-                    Factory ID: {factory._id}
-                  </CardDescription>
-                  <p className="text-sm text-gray-700">
-                    Address: {factory.address.location},{' '}
-                    {factory.address.pincode}
-                  </p>
-                  <p className="text-sm text-gray-700">
-                    Coordinates:{' '}
-                    {factory.address.coordinates.coordinates.join(', ')}
-                  </p>
-                  <Link
-                    href={`/factory/${factory._id}`}
-                    className="text-blue-600 hover:underline text-sm"
-                  >
-                    View Details
-                  </Link>
-                </CardContent>
-              </Card>
+                factoryId={factory._id}
+                factoryName={factory.factoryName}
+                factoryAddress={factory.address.location}
+                factoryGSTIN={factory.gstNo}
+                totalBlocks={factory.BlocksId?.length}
+                totalSlabs={factory.SlabsId?.length}
+                totalLots={factory.lotId?.length}
+                workerCuttingPay={factory.workerCuttingPay}
+                workerPolishingPay={factory.workerPolishingPay}
+              />
+
             ))}
           </div>
         ) : (
@@ -121,9 +214,9 @@ console.log("orgId", organizationId);
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     return (
-        <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
-            <p className="text-lg text-gray-600">Failed to fetch data</p>
-        </div>
-        );
+      <div className="flex h-full items-center justify-center p-10 bg-gradient-to-r from-gray-100 to-white">
+        <p className="text-lg text-gray-600">Failed to fetch data</p>
+      </div>
+    );
   }
 }
