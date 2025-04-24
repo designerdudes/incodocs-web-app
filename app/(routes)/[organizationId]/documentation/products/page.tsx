@@ -11,9 +11,9 @@ export interface Product {
     _id: any;
     code: string;
     description: string;
-    unit: string;
-    origin: string;
-    hsCode: string;
+    unitOfMeasurements: string;
+    countryOfOrigin: string;
+    HScode: string;
     sellPrice: number;
     buyPrice: number;
     netWeight: number;
@@ -35,71 +35,22 @@ interface Props {
     };
 }
 
-export default async function QuotesPage({ params }: Props) {
+export default async function ProductPage({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
 
     // Fetch data (unchanged)
-    //   const ExportDocsData = await fetch(
-    //     `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgaanisationID}`,
-    //     {
-    //       method: "GET",
-    //       headers: {
-    //         "Content-Type": "application/json",
-    //         Authorization: "Bearer " + token,
-    //       },
-    //     }
-    //   ).then((response) => response.json());
-    //     const shippingLine = ExportDocsData; 
-
-    const Products: Product[] = [
+    const res = await fetch(
+        `https://incodocs-server.onrender.com/shipment/productdetails/get`,
         {
-            code: "PRD-00123",
-            description: "High-quality granite slab",
-            unit: "Square Feet (sqft)",
-            origin: "India",
-            hsCode: "25161200",
-            sellPrice: 450.00,
-            buyPrice: 380.00,
-            netWeight: 120.00,
-            grossWeight: 130.00,
-            cubicMeasurement: 0.85,
-            priceVariants: [
-                {
-                    name: "Wholesale",
-                    type: "Regular",
-                    sellPrice: 450.00,
-                    retail: true,
-                    code: "WHL-001"
-                }
-            ],
-            _id: 123456
-        },
-        {
-            _id: 1234567,
-            code: "PRD-00124",
-            description: "Polished marble tile",
-            unit: "Square Meter (sqm)",
-            origin: "Turkey",
-            hsCode: "68029100",
-            sellPrice: 520.00,
-            buyPrice: 400.00,
-            netWeight: 140.00,
-            grossWeight: 150.00,
-            cubicMeasurement: 1.00,
-            priceVariants: [
-                {
-                    name: "Retail",
-                    type: "Discounted",
-                    sellPrice: 500.00,
-                    retail: true,
-                    code: "RTL-002"
-                }
-            ]
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + token,
+            },
         }
-    ];
-
-
+    ).then((response) => response.json());
+    const ProductsData = res;
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -133,7 +84,7 @@ export default async function QuotesPage({ params }: Props) {
                     deleteRoute="/shipment/shippingline/deletemany"
                     searchKey="name"
                     columns={ProductsColumns}
-                    data={Products as any}
+                    data={ProductsData as any}
                 />
             </div>
         </div>
