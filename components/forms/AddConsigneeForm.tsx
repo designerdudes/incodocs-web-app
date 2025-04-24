@@ -16,6 +16,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { useParams } from "next/navigation";
+
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -30,6 +32,8 @@ interface AddConsigneeFormProps {
 
 export default function AddConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const organizationId = useParams().organizationId as string;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -50,7 +54,7 @@ export default function AddConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
         email: values.email,
         telephoneNo: values.telephoneNo,
         address: values.address,
-        organizationId: "674b0a687d4f4b21c6c980ba",
+        organizationId,
       };
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipment/consignee/create",

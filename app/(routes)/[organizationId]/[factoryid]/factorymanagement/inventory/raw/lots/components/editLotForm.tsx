@@ -214,6 +214,7 @@ export default function EditLotForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 1000"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
@@ -234,6 +235,7 @@ export default function EditLotForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 1000"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
@@ -255,6 +257,7 @@ export default function EditLotForm({ params }: Props) {
                   <Input
                     placeholder="Eg: 1000"
                     type="number"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
                   />
@@ -270,12 +273,13 @@ export default function EditLotForm({ params }: Props) {
             name="markerOperatorName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Marker Operator</FormLabel>
+                <FormLabel>Marker Operator Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: Operator John"
                     type="text"
                     {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
                 <FormMessage />

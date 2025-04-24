@@ -1,5 +1,6 @@
+
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { format } from "date-fns";
 import {
@@ -27,14 +28,36 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import EditProductDetailsForm from "@/components/forms/EditProductDetails";
+import { Dispatch, SetStateAction } from "react";
+import { Icons } from "@/components/ui/icons";
+
+// Define AddProductDetails type inline
+interface AddProductDetails {
+  code: string;
+  HScode: string;
+  dscription: string;
+  unitOfMeasurements?: string;
+  countryOfOrigin?: string;
+  variantName?: string;
+  varianntType?: string;
+  sellPrice?: number;
+  buyPrice?: number;
+  netWeight?: number;
+  grossWeight?: number;
+  cubicMeasurement?: number;
+}
 
 interface BookingDetailsProps {
   shipmentId: string;
-  onProductDetailsOpenChange?: (open: boolean) => void;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
+  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
 export function BookingDetails({
   shipmentId,
+  saveProgress,
+  onSectionSubmit,
   onProductDetailsOpenChange,
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
@@ -42,14 +65,28 @@ export function BookingDetails({
   const [selectedContainerIndex, setSelectedContainerIndex] = useState<
     number | null
   >(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "bookingDetails.containers",
   });
 
-  // Watch form values
-  const formValues = watch("bookingDetails");
+  // Watch form values with fallback
+  const formValues = watch("bookingDetails") || {};
+  const containers = formValues.containers || [];
+
+  // Debug: Log containers state
+  useEffect(() => {
+    console.log("Current containers state:", containers);
+  }, [containers]);
+
+  // Autosave form data when bookingDetails changes
+  useEffect(() => {
+    if (formValues) {
+      saveProgress({ bookingDetails: formValues });
+    }
+  }, [formValues, saveProgress]);
 
   // Handle Container Count Change
   const handleContainerCountChange = (value: number) => {
@@ -59,7 +96,7 @@ export function BookingDetails({
       shouldValidate: true,
     });
 
-    const currentContainers = formValues.containers || [];
+    const currentContainers = containers || [];
     if (value > currentContainers.length) {
       const newContainers = Array(value - currentContainers.length)
         .fill(null)
@@ -67,25 +104,7 @@ export function BookingDetails({
           containerNumber: "",
           truckNumber: "",
           truckDriverContactNumber: undefined,
-          addProductDetails: [
-            {
-              productCategory: "",
-              graniteAndMarble: "",
-              tiles: {
-                noOfBoxes: 0,
-                noOfPiecesPerBoxes: 0,
-                sizePerTile: {
-                  length: { value: 0, units: "inch" },
-                  breadth: { value: 0, units: "inch" },
-                },
-              },
-              slabType: "",
-              slabLength: { value: undefined, units: "inch" },
-              slabBreadth: { value: undefined, units: "inch" },
-              slabThickness: undefined,
-              slabDocument: undefined,
-            },
-          ],
+          addProductDetails: [],
         }));
       append(newContainers);
     } else if (value < currentContainers.length) {
@@ -105,6 +124,20 @@ export function BookingDetails({
     });
   };
 
+  // Handle clear product details
+  const handleClearProductDetails = (index: number) => {
+    const currentValues = getValues();
+    const updatedContainers = [...(currentValues.bookingDetails?.containers || [])];
+    updatedContainers[index] = {
+      ...updatedContainers[index],
+      addProductDetails: [],
+    };
+    setValue("bookingDetails.containers", updatedContainers, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
+
   // Handle edit product details
   const handleEditProductDetails = (index: number) => {
     setSelectedContainerIndex(index);
@@ -113,7 +146,16 @@ export function BookingDetails({
   };
 
   // Handle product details submission
-  const handleProductDetailsSubmit = (data: any, containerIndex: number) => {
+  const handleProductDetailsSubmit = (
+    data: AddProductDetails,
+    containerIndex: number
+  ) => {
+    // Validate required fields before saving
+    if (!data.code.trim() || !data.HScode.trim() || !data.dscription.trim()) {
+      console.log("Invalid product details, skipping save:", data);
+      return;
+    }
+
     console.log(
       "handleProductDetailsSubmit called with data:",
       data,
@@ -126,49 +168,46 @@ export function BookingDetails({
     const updatedContainers = [...currentContainers];
     updatedContainers[containerIndex] = {
       ...updatedContainers[containerIndex],
-      addProductDetails: [data],
+      addProductDetails: [data], // Single product details per container
     };
 
     setValue("bookingDetails.containers", updatedContainers, {
-      shouldDirty: false,
-      shouldValidate: false,
-      shouldTouch: false,
+      shouldDirty: true,
+      shouldValidate: true,
     });
   };
 
+  // Handle section submission
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await onSectionSubmit();
+    } catch (error) {
+      console.error("Error submitting Booking Details:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Prepare initial values for EditProductDetailsForm
-  const getInitialValues = (index: number) => {
-    const container =
-      formValues.containers?.[index]?.addProductDetails?.[0] || {};
-    return {
-      productCategory: container.productCategory || "",
-      graniteAndMarble: container.graniteAndMarble || "",
-      tiles: {
-        noOfBoxes: container.tiles?.noOfBoxes || 0,
-        noOfPiecesPerBoxes: container.tiles?.noOfPiecesPerBoxes || 0,
-        sizePerTile: {
-          length: {
-            value: container.tiles?.sizePerTile?.length?.value || 0,
-            units: container.tiles?.sizePerTile?.length?.units || "inch",
-          },
-          breadth: {
-            value: container.tiles?.sizePerTile?.breadth?.value || 0,
-            units: container.tiles?.sizePerTile?.breadth?.units || "inch",
-          },
-        },
-      },
-      slabType: container.slabType || "",
-      slabLength: {
-        value: container.slabLength?.value || undefined,
-        units: container.slabLength?.units || "inch",
-      },
-      slabBreadth: {
-        value: container.slabBreadth?.value || undefined,
-        units: container.slabBreadth?.units || "inch",
-      },
-      slabThickness: container.slabThickness || undefined,
-      slabDocument: container.slabDocument || undefined,
+  const getInitialValues = (index: number): AddProductDetails => {
+    const container = containers?.[index]?.addProductDetails?.[0] || {};
+    const initial = {
+      code: container.code || "",
+      HScode: container.HScode || "",
+      dscription: container.dscription || "",
+      unitOfMeasurements: container.unitOfMeasurements || "",
+      countryOfOrigin: container.countryOfOrigin || "",
+      variantName: container.variantName || "",
+      varianntType: container.varianntType || "",
+      sellPrice: container.sellPrice ?? 0,
+      buyPrice: container.buyPrice ?? 0,
+      netWeight: container.netWeight ?? 0,
+      grossWeight: container.grossWeight ?? 0,
+      cubicMeasurement: container.cubicMeasurement ?? 0,
     };
+    console.log("getInitialValues for container", index, ":", initial);
+    return initial;
   };
 
   return (
@@ -415,56 +454,80 @@ export function BookingDetails({
                     />
                   </TableCell>
                   <TableCell>
-                    {formValues.containers?.[index]?.addProductDetails?.[0] ? (
+                    {containers?.[index]?.addProductDetails?.[0] ? (
                       <div className="space-y-1">
                         <p className="text-sm">
-                          <strong>Category:</strong>{" "}
-                          {formValues.containers[index].addProductDetails[0]
-                            .productCategory || "N/A"}
+                          <strong>Code:</strong>{" "}
+                          {containers[index].addProductDetails[0].code || "N/A"}
                         </p>
                         <p className="text-sm">
-                          <strong>Type:</strong>{" "}
-                          {formValues.containers[index].addProductDetails[0]
-                            .graniteAndMarble || "N/A"}
+                          <strong>HS Code:</strong>{" "}
+                          {containers[index].addProductDetails[0].HScode || "N/A"}
                         </p>
-                        {formValues.containers[index].addProductDetails[0]
-                          .tiles && (
-                          <>
-                            <p className="text-sm">
-                              <strong>Boxes:</strong>{" "}
-                              {formValues.containers[index].addProductDetails[0]
-                                .tiles.noOfBoxes || "N/A"}
-                            </p>
-                            <p className="text-sm">
-                              <strong>Pieces/Box:</strong>{" "}
-                              {formValues.containers[index].addProductDetails[0]
-                                .tiles.noOfPiecesPerBoxes || "N/A"}
-                            </p>
-                            <p className="text-sm">
-                              <strong>Size:</strong>{" "}
-                              {formValues.containers[index].addProductDetails[0]
-                                .tiles.sizePerTile?.length?.value &&
-                              formValues.containers[index].addProductDetails[0]
-                                .tiles.sizePerTile?.breadth?.value
-                                ? `${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.length.value} ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.length.units} x ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.breadth.value} ${formValues.containers[index].addProductDetails[0].tiles.sizePerTile.breadth.units}`
-                                : "N/A"}
-                            </p>
-                          </>
-                        )}
+                        <p className="text-sm">
+                          <strong>Description:</strong>{" "}
+                          {containers[index].addProductDetails[0].dscription || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Unit of Measurement:</strong>{" "}
+                          {containers[index].addProductDetails[0].unitOfMeasurements || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Country of Origin:</strong>{" "}
+                          {containers[index].addProductDetails[0].countryOfOrigin || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Variant Name:</strong>{" "}
+                          {containers[index].addProductDetails[0].variantName || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Variant Type:</strong>{" "}
+                          {containers[index].addProductDetails[0].varianntType || "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Sell Price:</strong>{" "}
+                          {containers[index].addProductDetails[0].sellPrice ?? "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Buy Price:</strong>{" "}
+                          {containers[index].addProductDetails[0].buyPrice ?? "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Net Weight:</strong>{" "}
+                          {containers[index].addProductDetails[0].netWeight ?? "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Gross Weight:</strong>{" "}
+                          {containers[index].addProductDetails[0].grossWeight ?? "N/A"}
+                        </p>
+                        <p className="text-sm">
+                          <strong>Cubic Measurement:</strong>{" "}
+                          {containers[index].addProductDetails[0].cubicMeasurement ?? "N/A"}
+                        </p>
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground">
                         No product details
                       </p>
                     )}
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      onClick={() => handleEditProductDetails(index)}
-                      className="mt-2"
-                    >
-                      Edit Product Details
-                    </Button>
+                    <div className="mt-2 space-x-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        onClick={() => handleEditProductDetails(index)}
+                      >
+                        Edit Product Details
+                      </Button>
+                      {containers?.[index]?.addProductDetails?.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => handleClearProductDetails(index)}
+                        >
+                          Clear Product Details
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Button

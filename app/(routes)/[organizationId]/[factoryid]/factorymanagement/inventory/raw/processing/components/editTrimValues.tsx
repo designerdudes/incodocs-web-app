@@ -153,6 +153,7 @@ function CardWithForm(params: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 15"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     step="any" // Allows decimal values
                     {...field}
@@ -180,6 +181,7 @@ function CardWithForm(params: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     step="any" // Allows decimal values
                     {...field}

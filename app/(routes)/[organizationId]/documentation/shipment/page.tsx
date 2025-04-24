@@ -9,11 +9,12 @@ import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
 
 export default async function Page() {
-    const cookieStore = cookies();
-    const token = cookieStore.get("AccessToken")?.value || "";
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+
 
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/6807774fa15655f599f89aa1`,
+        `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
         {
             method: "GET",
             headers: {
@@ -28,28 +29,30 @@ export default async function Page() {
     shipmentData = res;
     console.log("shipmentData", shipmentData);
 
-    return (
-        <div className="flex flex-col p-6">
-            <div className="flex justify-between items-center gap-2">
-                <Link href="/documentation/dashboard">
-                    <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
-                        <ChevronLeft className="h-4 w-4" />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </Link>
-                <div className="flex-1">
-                    <Heading className="leading-tight" title="Shipments" />
-                    <p className="text-muted-foreground text-sm">
-                        Track and manage shipments with real-time visibility of container details, status, and progress through the logistics cycle.
-                    </p>
-                </div>
-                <Link href={`./shipment/createnew`}>
-                    <Button className="bg-primary text-white">Add New Shipment</Button>
-                </Link>
-            </div>
-            <Separator className="my-2" />
-            <div >
-                {/* <DataTable
+
+  return (
+    <div className="flex flex-col p-6">
+      <div className="flex justify-between items-center gap-2">
+        <Link href="/documentation/dashboard">
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link>
+        <div className="flex-1">
+          <Heading className="leading-tight" title="Shipments" />
+          <p className="text-muted-foreground text-sm">
+            Track and manage shipments with real-time visibility of container
+            details, status, and progress through the logistics cycle.
+          </p>
+        </div>
+        <Link href={`./shipment/createnew`}>
+          <Button className="bg-primary text-white">Add New Shipment</Button>
+        </Link>
+      </div>
+      <Separator className="my-2" />
+      <div>
+        {/* <DataTable
                     bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
                     bulkDeleteDescription="This will delete all the selected Shipment, and they will not be recoverable."
@@ -71,6 +74,5 @@ export default async function Page() {
             </div>
         </div>
     );
+
 }
-
-

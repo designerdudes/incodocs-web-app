@@ -4,26 +4,27 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect, useMemo } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useState, useEffect, useRef } from "react";
+import ProgressBar from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
-import { ShippingBillDetails } from "./components/ShippingBillDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
+import { ShippingBillDetails } from "./components/ShippingBillDetails";
 import { SupplierDetails } from "./components/SupplierDetails";
 import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { OtherDetails } from "./components/OtherDetails";
-import ProgressBar from "./components/ProgressBar";
-import { z } from "zod";
+import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { parseISO } from "date-fns";
+import { z } from "zod";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { postData, putData } from "@/axiosUtility/api";
+import { useRouter, useParams } from "next/navigation";
+import { Icons } from "@/components/ui/icons";
+import { debounce } from "lodash";
 
 // Type for backend ShippingBill data
 type BackendShippingBill = {
   shippingBillUrl?: string;
-  uploadShippingBill?: string;
   shippingBillNumber?: string;
   shippingBillDate?: string;
   drawbackValue?: string;
@@ -31,144 +32,75 @@ type BackendShippingBill = {
   _id?: string;
 };
 
-// Type for backend addProductDetails
-type BackendProductDetails = {
-  productCategory?: string;
-  graniteAndMarble?: string;
-  tiles?: {
-    noOfBoxes?: number;
-    noOfPiecesPerBoxes?: number;
-    sizePerTile?: {
-      length?: { value?: number; units?: "inch" | "cm" };
-      breadth?: { value?: number; units?: "inch" | "cm" };
-    };
-  };
-  slabs?: {
-    noOfBundles?: number;
-    noOfSlabsPerBundle?: number;
-    uploadMeasurementSheetUrl?: string;
-    totalSQMTRorSQFTwithAllowance?: string;
-    totalSQMTRorSMFTwithoutAllowance?: string;
-  };
-  slabType?: string;
-  slabLength?: { value?: number; units?: string };
-  slabBreadth?: { value?: number; units?: string };
-  slabThickness?: number;
-  slabDocument?: any;
+// Type for backend Bl data
+type BackendBl = {
+  blNumber?: string;
+  blDate?: string;
+  telexDate?: string;
+  uploadBLUrl?: string;
+  _id?: string;
 };
 
+// Zod Schema aligned with the provided payload
 const formSchema = z.object({
   shipmentId: z.string().optional(),
   organizationId: z.string().optional(),
+  createdAt: z.string().datetime({ message: "Invalid date format" }).optional(),
+  updatedAt: z.string().datetime({ message: "Invalid date format" }).optional(),
+  createdBy: z.string().optional(),
   bookingDetails: z
     .object({
+      review: z.string().optional(),
       invoiceNumber: z.string().optional(),
       bookingNumber: z.string().optional(),
       portOfLoading: z.string().optional(),
       destinationPort: z.string().optional(),
-      vesselSailingDate: z.any().optional(),
-      vesselArrivingDate: z.any().optional(),
-      numberOfContainer: z.number().min(0).optional(),
+      vesselSailingDate: z
+        .string()
+        .datetime({ message: "Invalid date format" })
+        .optional(),
+      vesselArrivingDate: z
+        .string()
+        .datetime({ message: "Invalid date format" })
+        .optional(),
+      numberOfContainer: z.number().optional(),
       containers: z
         .array(
           z.object({
-            type: z.string().optional(),
+            containerType: z.string().optional(),
             containerNumber: z.string().optional(),
             truckNumber: z.string().optional(),
-            truckDriverContactNumber: z
-              .union([
-                z.number(),
-                z
-                  .string()
-                  .transform((val) => (val ? parseFloat(val) : undefined)),
-              ])
-              .optional()
-              .refine((val) => val === undefined || !isNaN(val), {
-                message: "truckDriverContactNumber must be a valid number",
-              }),
+            truckDriverContactNumber: z.number().optional(),
             addProductDetails: z
               .array(
                 z.object({
-                  productCategory: z.string().optional(),
-                  graniteAndMarble: z.string().optional(),
-                  tiles: z
-                    .object({
-                      noOfBoxes: z.number().nonnegative().optional(),
-                      noOfPiecesPerBoxes: z.number().nonnegative().optional(),
-                      sizePerTile: z
-                        .object({
-                          length: z
-                            .object({
-                              value: z.number().nonnegative().optional(),
-                              units: z.enum(["inch", "cm"]).optional(),
-                            })
-                            .optional(),
-                          breadth: z
-                            .object({
-                              value: z.number().nonnegative().optional(),
-                              units: z.enum(["inch", "cm"]).optional(),
-                            })
-                            .optional(),
-                        })
-                        .optional(),
-                    })
-                    .optional(),
-                  slabs: z
-                    .object({
-                      noOfBundles: z.number().nonnegative().optional(),
-                      noOfSlabsPerBundle: z.number().nonnegative().optional(),
-                      uploadMeasurementSheetUrl: z.string().optional(),
-                      totalSQMTRorSQFTwithAllowance: z.string().optional(),
-                      totalSQMTRorSMFTwithoutAllowance: z.string().optional(),
-                    })
-                    .optional(),
-                  slabType: z.string().optional(),
-                  slabLength: z
-                    .object({
-                      value: z.number().nonnegative().optional(),
-                      units: z.string().optional(),
-                    })
-                    .optional(),
-                  slabBreadth: z
-                    .object({
-                      value: z.number().nonnegative().optional(),
-                      units: z.string().optional(),
-                    })
-                    .optional(),
-                  slabThickness: z.number().nonnegative().optional(),
-                  slabDocument: z.any().optional(),
+                  code: z.string().optional(),
+                  HScode: z.string().optional(),
+                  dscription: z.string().optional(),
+                  unitOfMeasurements: z.string().optional(),
+                  countryOfOrigin: z.string().optional(),
+                  variantName: z.string().optional(),
+                  varianntType: z.string().optional(),
+                  sellPrice: z.number().optional(),
+                  buyPrice: z.number().optional(),
+                  netWeight: z.number().optional(),
+                  grossWeight: z.number().optional(),
+                  cubicMeasurement: z.number().optional(),
                 })
               )
-              .optional(),
+              .default([]),
+            _id: z.string().optional(),
           })
         )
-        .optional(),
-    })
-    .optional(),
-  shippingBillDetails: z
-    .object({
-      portCode: z.string().optional(),
-      cbName: z.string().optional(),
-      cbCode: z.string().optional(),
-      numberOFShippingBill: z.number().optional(),
-      bills: z
-        .array(
-          z.object({
-            uploadShippingBill: z.any().optional(),
-            shippingBillNumber: z.string().optional(),
-            shippingBillDate: z.any().optional(),
-            drawbackValue: z.string().optional(),
-            rodtepValue: z.string().optional(),
-          })
-        )
-        .optional(),
+        .default([]),
+      _id: z.string().optional(),
     })
     .optional(),
   shippingDetails: z
     .object({
       review: z.string().optional(),
       transporterName: z
-        .any()
+        .string()
         .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
           message: "transporterName must be a valid ObjectId or empty",
         })
@@ -178,29 +110,16 @@ const formSchema = z.object({
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
-            uploadInvoiceUr: z.any().optional(),
-            date: z.any().optional(),
-            valueWithGst: z
-              .union([
-                z
-                  .string()
-                  .transform((val) => (val ? parseFloat(val) : undefined)),
-                z.number().transform((val) => (isNaN(val) ? undefined : val)),
-              ])
-              .optional(),
-            valueWithoutGst: z
-              .union([
-                z
-                  .string()
-                  .transform((val) => (val ? parseFloat(val) : undefined)),
-                z.number().transform((val) => (isNaN(val) ? undefined : val)),
-              ])
-              .optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+            _id: z.string().optional(),
           })
         )
         .optional(),
       forwarderName: z
-        .any()
+        .string()
         .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
           message: "forwarderName must be a valid ObjectId or empty",
         })
@@ -210,88 +129,140 @@ const formSchema = z.object({
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
-            uploadInvoiceUr: z.any().optional(),
-            date: z.any().optional(),
-            valueWithGst: z
-              .union([
-                z
-                  .string()
-                  .transform((val) => (val ? parseFloat(val) : undefined)),
-                z.number().transform((val) => (isNaN(val) ? undefined : val)),
-              ])
-              .optional(),
-            valueWithoutGst: z
-              .union([
-                z
-                  .string()
-                  .transform((val) => (val ? parseFloat(val) : undefined)),
-                z.number().transform((val) => (isNaN(val) ? undefined : val)),
-              ])
-              .optional(),
+            uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
+            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            valueWithGst: z.number().optional(),
+            valueWithoutGst: z.number().optional(),
+            _id: z.string().optional(),
           })
         )
         .optional(),
+      _id: z.string().optional(),
+    })
+    .optional(),
+  shippingBillDetails: z
+    .object({
+      review: z.string().optional(),
+      portCode: z.string().optional(),
+      cbName: z.string().optional(),
+      cbCode: z.string().optional(),
+      numberOFShippingBill: z.number().optional(),
+      ShippingBills: z
+        .array(
+          z.object({
+            shippingBillUrl: z.string().url("Invalid URL").optional(),
+            shippingBillNumber: z.string().optional(),
+            shippingBillDate: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
+            drawbackValue: z.string().optional(),
+            rodtepValue: z.string().optional(),
+            _id: z.string().optional(),
+          })
+        )
+        .optional(),
+      _id: z.string().optional(),
     })
     .optional(),
   supplierDetails: z
     .object({
+      review: z.string().optional(),
       clearance: z
         .object({
-          supplierName: z
-            .any()
-            .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
-              message: "supplierName must be a valid ObjectId or empty",
-            })
-            .optional(),
-          noOfInvoices: z.number().optional(),
-          invoices: z
+          numberOfSuppliers: z.number().optional(),
+          suppliers: z
             .array(
               z.object({
-                supplierGSTN: z.string().optional(),
-                supplierInvoiceNumber: z.string().optional(),
-                supplierInvoiceDate: z.any().optional(),
-                supplierInvoiceValueWithGST: z.string().optional(),
-                supplierInvoiceValueWithOutGST: z.string().optional(),
-                clearanceSupplierInvoiceUrl: z.any().optional(),
+                supplierName: z
+                  .string()
+                  .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+                    message: "supplierName must be a valid ObjectId or empty",
+                  })
+                  .optional(),
+                noOfInvoices: z.number().optional(),
+                invoices: z
+                  .array(
+                    z.object({
+                      supplierGSTN: z.string().optional(),
+                      supplierInvoiceNumber: z.string().optional(),
+                      supplierInvoiceDate: z
+                        .string()
+                        .datetime({ message: "Invalid date format" })
+                        .optional(),
+                      supplierInvoiceValueWithGST: z.number().optional(),
+                      supplierInvoiceValueWithOutGST: z.number().optional(),
+                      clearanceSupplierInvoiceUrl: z
+                        .string()
+                        .url("Invalid URL")
+                        .optional(),
+                      _id: z.string().optional(),
+                    })
+                  )
+                  .optional(),
               })
             )
             .optional(),
+          _id: z.string().optional(),
         })
         .optional(),
       actual: z
         .object({
           actualSupplierName: z.string().optional(),
-          actualSupplierInvoiceValue: z.string().optional(),
-          actualSupplierInvoiceUrl: z.string().optional(),
-          shippingBillUrl: z.string().optional(),
+          actualSupplierInvoiceUrl: z.string().url("Invalid URL").optional(),
+          actualSupplierInvoiceValue: z.number().optional(),
+          shippingBillUrl: z.string().url("Invalid URL").optional(),
+          _id: z.string().optional(),
         })
         .optional(),
+      _id: z.string().optional(),
     })
     .optional(),
   saleInvoiceDetails: z
     .object({
-      consignee: z.any().optional(),
+      review: z.string().optional(),
+      consignee: z
+        .string()
+        .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+          message: "consignee must be a valid ObjectId or empty",
+        })
+        .optional(),
       actualBuyer: z.string().optional(),
       numberOfSalesInvoices: z.number().optional(),
-      invoice: z
+      commercialInvoices: z
         .array(
           z.object({
             commercialInvoiceNumber: z.string().optional(),
-            clearanceCommercialInvoice: z.string().optional(),
-            actualCommercialInvoice: z.string().optional(),
-            saberInvoice: z.string().optional(),
-            addProductDetails: z.string().optional(),
+            clearanceCommercialInvoiceUrl: z
+              .string()
+              .url("Invalid URL")
+              .optional(),
+            actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            saberInvoiceUrl: z.string().url("Invalid URL").optional(),
+            _id: z.string().optional(),
           })
         )
         .optional(),
+      _id: z.string().optional(),
     })
     .optional(),
   blDetails: z
     .object({
+      review: z.string().optional(),
+      shippingLine: z
+        .string()
+        .refine((val) => !val || /^[0-9a-fA-F]{24}$/.test(val), {
+          message: "shippingLine must be a valid ObjectId or empty",
+        })
+        .optional(),
       blNumber: z.string().optional(),
-      blDate: z.any().optional(),
-      telexDate: z.any().optional(),
-      uploadBL: z.any().optional(),
+      blDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+      telexDate: z
+        .string()
+        .datetime({ message: "Invalid date format" })
+        .optional(),
+      uploadBL: z.string().url("Invalid URL").optional(),
+      _id: z.string().optional(),
     })
     .optional(),
   otherDetails: z
@@ -300,16 +271,105 @@ const formSchema = z.object({
         review: z.string().optional(),
         certificateName: z.string().optional(),
         certificateNumber: z.string().optional(),
-        date: z.any().optional(),
+        date: z
+          .string()
+          .datetime({ message: "Invalid date format" })
+          .optional(),
         issuerOfCertificate: z.string().optional(),
-        uploadCopyOfCertificate: z.any().optional(),
+        uploadCopyOfCertificate: z.string().url("Invalid URL").optional(),
+        _id: z.string().optional(),
       })
     )
     .optional(),
 });
 
 // Infer the type from the schema
-export type FormValues = z.infer<typeof formSchema>; // Export the type
+export type FormValues = z.infer<typeof formSchema>;
+
+// Default form values
+const defaultFormValues: FormValues = {
+  shipmentId: "",
+  organizationId: "",
+  createdAt: undefined,
+  updatedAt: undefined,
+  createdBy: "",
+  bookingDetails: {
+    review: "",
+    invoiceNumber: "",
+    bookingNumber: "",
+    portOfLoading: "",
+    destinationPort: "",
+    vesselSailingDate: undefined,
+    vesselArrivingDate: undefined,
+    numberOfContainer: 0,
+    containers: [],
+    _id: "",
+  },
+  shippingDetails: {
+    review: "",
+    transporterName: "",
+    noOftransportinvoices: 0,
+    transporterInvoices: [],
+    forwarderName: "",
+    noOfForwarderinvoices: 0,
+    forwarderInvoices: [],
+    _id: "",
+  },
+  shippingBillDetails: {
+    review: "",
+    portCode: "",
+    cbName: "",
+    cbCode: "",
+    numberOFShippingBill: 0,
+    ShippingBills: [],
+    _id: "",
+  },
+  supplierDetails: {
+    review: "",
+    clearance: {
+      numberOfSuppliers: 0,
+      suppliers: [],
+      _id: "",
+    },
+    actual: {
+      actualSupplierName: "",
+      actualSupplierInvoiceUrl: "",
+      actualSupplierInvoiceValue: undefined,
+      shippingBillUrl: "",
+      _id: "",
+    },
+    _id: "",
+  },
+  saleInvoiceDetails: {
+    review: "",
+    consignee: "",
+    actualBuyer: "",
+    numberOfSalesInvoices: 0,
+    commercialInvoices: [],
+    _id: "",
+  },
+  blDetails: {
+    review: "",
+    shippingLine: "",
+    blNumber: "",
+    blDate: undefined,
+    telexDate: undefined,
+    uploadBL: "",
+    _id: "",
+  },
+  otherDetails: [],
+};
+
+// Save progress functions
+const saveProgressSilently = (data: any, shipmentId: string) => {
+  localStorage.setItem(`shipmentDraft_${shipmentId}`, JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+};
+
+const saveProgressWithFeedback = (data: any, shipmentId: string) => {
+  saveProgressSilently(data, shipmentId);
+  toast.success("Progress saved as draft!");
+};
 
 interface Props {
   params: {
@@ -319,572 +379,332 @@ interface Props {
 
 export default function EditShipmentPage({ params }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
-  const [organizationId] = useState("674b0a687d4f4b21c6c980ba"); // Replace with dynamic value
   const router = useRouter();
+  const orgId = useParams().organizationId;
+  const organizationId = "680a22e241b238b4f6c1713f";
+  const isInitialLoad = useRef(true); // Track initial load
 
-  const methods = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      shipmentId: "",
-      organizationId: "",
-      bookingDetails: {
-        invoiceNumber: "",
-        bookingNumber: "",
-        portOfLoading: "",
-        destinationPort: "",
-        vesselSailingDate: undefined,
-        vesselArrivingDate: undefined,
-        numberOfContainer: 0,
-        containers: [],
-      },
-      shippingBillDetails: {
-        portCode: "",
-        cbName: "",
-        cbCode: "",
-        numberOFShippingBill: 0,
-        bills: [],
-      },
-      shippingDetails: {
-        review: "",
-        transporterName: null,
-        noOftransportinvoices: 0,
-        transporterInvoices: [],
-        forwarderName: null,
-        noOfForwarderinvoices: 0,
-        forwarderInvoices: [],
-      },
-      supplierDetails: {
-        clearance: {
-          supplierName: null,
-          noOfInvoices: 0,
-          invoices: [],
-        },
-        actual: {
-          actualSupplierName: "",
-          actualSupplierInvoiceValue: "",
-          actualSupplierInvoiceUrl: "",
-          shippingBillUrl: "",
-        },
-      },
-      saleInvoiceDetails: {
-        consignee: "",
-        actualBuyer: "",
-        numberOfSalesInvoices: 0,
-        invoice: [],
-      },
-      blDetails: {
-        blNumber: "",
-        blDate: undefined,
-        telexDate: undefined,
-        uploadBL: "",
-      },
-      otherDetails: [
-        {
-          review: "",
-          certificateName: "",
-          certificateNumber: "",
-          date: undefined,
-          issuerOfCertificate: "",
-          uploadCopyOfCertificate: "",
-        },
-      ],
-    },
-  });
-  const {
-    watch,
-    formState: { errors },
-  } = methods;
-  const invoiceNumber = watch("bookingDetails.invoiceNumber");
-
-  const steps = useMemo(
-    () => [
-      {
-        id: 1,
-        name: "Booking Details",
-        component: (
-          <BookingDetails
-            shipmentId={params.id}
-            onProductDetailsOpenChange={setIsProductDetailsOpen}
-          />
-        ),
-        field: "bookingDetails" as keyof FormValues,
-      },
-      {
-        id: 2,
-        name: "Shipping Details",
-        component: <ShippingDetails shipmentId={params.id} />,
-        field: "shippingDetails" as keyof FormValues,
-      },
-      {
-        id: 3,
-        name: "Shipping Bill Details",
-        component: <ShippingBillDetails shipmentId={params.id} />,
-        field: "shippingBillDetails" as keyof FormValues,
-      },
-      {
-        id: 4,
-        name: "Supplier Details",
-        component: <SupplierDetails shipmentId={params.id} />,
-        field: "supplierDetails" as keyof FormValues,
-      },
-      {
-        id: 5,
-        name: "Commercial Invoices",
-        component: <SaleInvoiceDetails shipmentId={params.id} />,
-        field: "saleInvoiceDetails" as keyof FormValues,
-      },
-      {
-        id: 6,
-        name: "Bill of Lading Details",
-        component: <BillOfLadingDetails shipmentId={params.id} />,
-        field: "blDetails" as keyof FormValues,
-      },
-      {
-        id: 7,
-        name: "Other Details",
-        component: <OtherDetails shipmentId={params.id} />,
-        field: "otherDetails" as keyof FormValues,
-      },
-    ],
-    [params.id]
-  );
-
-  const handleUpdateAndNext = async (
-    data: FormValues,
-    isIntentional: boolean
-  ) => {
-    if (isProductDetailsOpen || !isIntentional) {
-      console.log(
-        "handleUpdateAndNext blocked: isProductDetailsOpen =",
-        isProductDetailsOpen,
-        "isIntentional =",
-        isIntentional
-      );
-      return;
-    }
-    console.log(
-      "handleUpdateAndNext called with data:",
-      JSON.stringify(data, null, 2)
-    );
-    console.trace("handleUpdateAndNext call stack");
-    const currentField = steps[currentStep].field;
-    console.log("Current field:", currentField);
-
-    try {
-      console.log("Starting validation for:", currentField);
-      const isValid = await methods.trigger(currentField, {
-        shouldFocus: true,
-      });
-      console.log("Validation result:", isValid);
-      console.log("Form errors:", JSON.stringify(errors, null, 2));
-
-      if (!isValid) {
-        let errorMessage = "Please fix errors in the form";
-        if (errors[currentField as keyof FormValues]) {
-          const fieldErrors = errors[currentField as keyof FormValues] as any;
-          errorMessage =
-            fieldErrors?.message ||
-            fieldErrors?.[Object.keys(fieldErrors)[0]]?.message ||
-            errorMessage;
-        }
-        toast.error(
-          `Validation failed for ${steps[currentStep].name}: ${errorMessage}`
-        );
-        return;
-      }
-
-      console.log("Validation passed, proceeding to API call");
-
-      const apiEndpoints: Record<keyof FormValues, string> = {
-        bookingDetails:
-          "https://incodocs-server.onrender.com/shipment/booking-details",
-        shippingDetails:
-          "https://incodocs-server.onrender.com/shipment/shipping-details",
-        shippingBillDetails:
-          "https://incodocs-server.onrender.com/shipment/shipping-bill-details",
-        supplierDetails:
-          "https://incodocs-server.onrender.com/shipment/supplier-details",
-        saleInvoiceDetails:
-          "https://incodocs-server.onrender.com/shipment/sale-invoice-details",
-        blDetails: "https://incodocs-server.onrender.com/shipment/bl-details",
-        otherDetails:
-          "https://incodocs-server.onrender.com/shipment/other-details",
-        shipmentId: "",
-        organizationId: "",
-      };
-
-      let payload: any = {
-        shipmentId: params.id,
-        organizationId,
-        [currentField]: data[currentField],
-      };
-
-      if (currentField === "bookingDetails") {
-        payload.bookingDetails = {
-          ...data.bookingDetails,
-          containers:
-            data.bookingDetails?.containers?.map((container) => ({
-              ...container,
-              truckDriverContactNumber: container.truckDriverContactNumber
-                ? parseFloat(container.truckDriverContactNumber.toString())
-                : undefined,
-              trukDriverContactNumber: undefined,
-              addProductDetails: container.addProductDetails || [],
-            })) || [],
-        };
-      } else if (currentField === "shippingDetails") {
-        payload.shippingDetails = {
-          ...data.shippingDetails,
-          transporterName:
-            data.shippingDetails?.transporterName &&
-            /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
-              ? data.shippingDetails.transporterName
-              : null,
-          forwarderName:
-            data.shippingDetails?.forwarderName &&
-            /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
-              ? data.shippingDetails.forwarderName
-              : null,
-          transporterInvoices:
-            data.shippingDetails?.transporterInvoices?.map((invoice) => ({
-              ...invoice,
-              valueWithGst: invoice.valueWithGst
-                ? parseFloat(invoice.valueWithGst.toString())
-                : undefined,
-              valueWithoutGst: invoice.valueWithoutGst
-                ? parseFloat(invoice.valueWithoutGst.toString())
-                : undefined,
-            })) || [],
-          forwarderInvoices:
-            data.shippingDetails?.forwarderInvoices?.map((invoice) => ({
-              ...invoice,
-              valueWithGst: invoice.valueWithGst
-                ? parseFloat(invoice.valueWithGst.toString())
-                : undefined,
-              valueWithoutGst: invoice.valueWithoutGst
-                ? parseFloat(invoice.valueWithoutGst.toString())
-                : undefined,
-            })) || [],
-        };
-      } else if (currentField === "shippingBillDetails") {
-        payload.shippingBillDetails = {
-          ...data.shippingBillDetails,
-          bills:
-            data.shippingBillDetails?.bills?.map((bill) => ({
-              ...bill,
-              uploadShippingBill: bill.uploadShippingBill || "",
-              shippingBillDate:
-                bill.shippingBillDate instanceof Date
-                  ? bill.shippingBillDate.toISOString()
-                  : bill.shippingBillDate,
-            })) || [],
-        };
-      } else if (currentField === "supplierDetails") {
-        payload.supplierDetails = {
-          ...data.supplierDetails,
-          clearance: {
-            ...data.supplierDetails?.clearance,
-            supplierName:
-              data.supplierDetails?.clearance?.supplierName &&
-              /^[0-9a-fA-F]{24}$/.test(
-                data.supplierDetails.clearance.supplierName
-              )
-                ? data.supplierDetails.clearance.supplierName
-                : null,
-            invoices:
-              data.supplierDetails?.clearance?.invoices?.map((invoice) => ({
-                ...invoice,
-                clearanceSupplierInvoiceUrl:
-                  typeof invoice.clearanceSupplierInvoiceUrl === "string"
-                    ? invoice.clearanceSupplierInvoiceUrl
-                    : "",
-              })) || [],
-          },
-          actual: {
-            ...data.supplierDetails?.actual,
-            actualSupplierName:
-              data.supplierDetails?.actual?.actualSupplierName || "",
-            actualSupplierInvoiceUrl:
-              typeof data.supplierDetails?.actual?.actualSupplierInvoiceUrl ===
-              "string"
-                ? data.supplierDetails?.actual?.actualSupplierInvoiceUrl
-                : "",
-            actualSupplierInvoiceValue:
-              data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
-            shippingBillUrl:
-              typeof data.supplierDetails?.actual?.shippingBillUrl === "string"
-                ? data.supplierDetails?.actual?.shippingBillUrl
-                : "",
-          },
-        };
-        console.log(
-          "SupplierDetails payload:",
-          JSON.stringify(payload.supplierDetails, null, 2)
-        );
-      }
-
-      const apiUrl = apiEndpoints[currentField as keyof FormValues];
-      console.log(
-        `Calling API: ${apiUrl} with payload:`,
-        JSON.stringify(payload, null, 2)
-      );
-
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API error: ${errorText || response.statusText}`);
-      }
-
-      const updatedData = await response.json();
-      console.log("API response:", updatedData);
-
-      if (updatedData[currentField]) {
-        let updatedSectionData: any;
-
-        if (
-          currentField !== "otherDetails" &&
-          currentField !== "shipmentId" &&
-          currentField !== "organizationId"
-        ) {
-          updatedSectionData = {
-            ...(data[currentField] as object),
-            ...(updatedData[currentField] as object),
-          };
-
-          if (currentField === "bookingDetails") {
-            updatedSectionData.vesselSailingDate = updatedData.bookingDetails
-              .vesselSailingDate
-              ? parseISO(updatedData.bookingDetails.vesselSailingDate)
-              : undefined;
-            updatedSectionData.vesselArrivingDate = updatedData.bookingDetails
-              .vesselArrivingDate
-              ? parseISO(updatedData.bookingDetails.vesselArrivingDate)
-              : undefined;
-            updatedSectionData.containers =
-              updatedData.bookingDetails.containers?.map((container: any) => ({
-                ...container,
-                truckDriverContactNumber:
-                  container.truckDriverContactNumber ||
-                  container.trukDriverContactNumber ||
-                  undefined,
-                trukDriverContactNumber: undefined,
-                addProductDetails:
-                  container.addProductDetails?.map(
-                    (product: BackendProductDetails) => ({
-                      productCategory: product.productCategory || "",
-                      graniteAndMarble: product.graniteAndMarble || "",
-                      tiles: product.tiles
-                        ? {
-                            noOfBoxes: product.tiles.noOfBoxes || 0,
-                            noOfPiecesPerBoxes:
-                              product.tiles.noOfPiecesPerBoxes || 0,
-                            sizePerTile: product.tiles.sizePerTile
-                              ? {
-                                  length: product.tiles.sizePerTile.length
-                                    ? {
-                                        value:
-                                          product.tiles.sizePerTile.length
-                                            .value || 0,
-                                        units:
-                                          product.tiles.sizePerTile.length
-                                            .units || "inch",
-                                      }
-                                    : { value: 0, units: "inch" },
-                                  breadth: product.tiles.sizePerTile.breadth
-                                    ? {
-                                        value:
-                                          product.tiles.sizePerTile.breadth
-                                            .value || 0,
-                                        units:
-                                          product.tiles.sizePerTile.breadth
-                                            .units || "inch",
-                                      }
-                                    : { value: 0, units: "inch" },
-                                }
-                              : {
-                                  length: { value: 0, units: "inch" },
-                                  breadth: { value: 0, units: "inch" },
-                                },
-                          }
-                        : {
-                            noOfBoxes: 0,
-                            noOfPiecesPerBoxes: 0,
-                            sizePerTile: {
-                              length: { value: 0, units: "inch" },
-                              breadth: { value: 0, units: "inch" },
-                            },
-                          },
-                      slabs: product.slabs
-                        ? {
-                            noOfBundles: product.slabs.noOfBundles || 0,
-                            noOfSlabsPerBundle:
-                              product.slabs.noOfSlabsPerBundle || 0,
-                            uploadMeasurementSheetUrl:
-                              product.slabs.uploadMeasurementSheetUrl || "",
-                            totalSQMTRorSQFTwithAllowance:
-                              product.slabs.totalSQMTRorSQFTwithAllowance || "",
-                            totalSQMTRorSMFTwithoutAllowance:
-                              product.slabs.totalSQMTRorSMFTwithoutAllowance ||
-                              "",
-                          }
-                        : {
-                            noOfBundles: 0,
-                            noOfSlabsPerBundle: 0,
-                            uploadMeasurementSheetUrl: "",
-                            totalSQMTRorSQFTwithAllowance: "",
-                            totalSQMTRorSMFTwithoutAllowance: "",
-                          },
-                      slabType: product.slabType || "",
-                      slabLength: product.slabLength
-                        ? {
-                            value: product.slabLength.value || undefined,
-                            units: product.slabLength.units || "inch",
-                          }
-                        : { value: undefined, units: "inch" },
-                      slabBreadth: product.slabBreadth
-                        ? {
-                            value: product.slabBreadth.value || undefined,
-                            units: product.slabBreadth.units || "inch",
-                          }
-                        : { value: undefined, units: "inch" },
-                      slabThickness: product.slabThickness || undefined,
-                      slabDocument: product.slabDocument || undefined,
-                    })
-                  ) || [],
-              })) || [];
-          } else if (currentField === "shippingBillDetails") {
-            updatedSectionData.bills =
-              updatedData.shippingBillDetails.bills?.map((bill: any) => ({
-                ...bill,
-                shippingBillDate: bill.shippingBillDate
-                  ? parseISO(bill.shippingBillDate)
-                  : undefined,
-                uploadShippingBill:
-                  bill.uploadShippingBill || bill.shippingBillUrl || "",
-              })) || [];
-          } else if (currentField === "shippingDetails") {
-            updatedSectionData.transporterInvoices =
-              updatedData.shippingDetails.transporterInvoices?.map(
-                (invoice: any) => ({
-                  ...invoice,
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst:
-                    invoice.valueWithGst != null
-                      ? invoice.valueWithGst.toString()
-                      : "",
-                  valueWithoutGst:
-                    invoice.valueWithoutGst != null
-                      ? invoice.valueWithoutGst.toString()
-                      : "",
-                })
-              ) || [];
-            updatedSectionData.forwarderInvoices =
-              updatedData.shippingDetails.forwarderInvoices?.map(
-                (invoice: any) => ({
-                  ...invoice,
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst:
-                    invoice.valueWithGst != null
-                      ? invoice.valueWithGst.toString()
-                      : "",
-                  valueWithoutGst:
-                    invoice.valueWithoutGst != null
-                      ? invoice.valueWithoutGst.toString()
-                      : "",
-                })
-              ) || [];
-          } else if (currentField === "supplierDetails") {
-            updatedSectionData.clearance.invoices =
-              updatedData.supplierDetails.clearance.invoices?.map(
-                (invoice: any) => ({
-                  ...invoice,
-                  supplierInvoiceDate: invoice.supplierInvoiceDate
-                    ? parseISO(invoice.supplierInvoiceDate)
-                    : undefined,
-                  clearanceSupplierInvoiceUrl:
-                    typeof invoice.clearanceSupplierInvoiceUrl === "string"
-                      ? invoice.clearanceSupplierInvoiceUrl
-                      : "",
-                })
-              ) || [];
-            updatedSectionData.clearance.supplierName =
-              typeof updatedData.supplierDetails?.clearance?.supplierName ===
-              "object"
-                ? updatedData.supplierDetails?.clearance?.supplierName?._id ||
-                  null
-                : updatedData.supplierDetails?.clearance?.supplierName &&
-                  /^[0-9a-fA-F]{24}$/.test(
-                    updatedData.supplierDetails.clearance.supplierName
-                  )
-                ? updatedData.supplierDetails.clearance.supplierName
-                : null;
-            updatedSectionData.actual.actualSupplierName =
-              updatedData.supplierDetails?.actual?.actualSupplierName || "";
-            updatedSectionData.actual.actualSupplierInvoiceUrl =
-              typeof updatedData.supplierDetails?.actual
-                ?.actualSupplierInvoiceUrl === "string"
-                ? updatedData.supplierDetails?.actual?.actualSupplierInvoiceUrl
-                : "";
-            updatedSectionData.actual.actualSupplierInvoiceValue =
-              updatedData.supplierDetails?.actual?.actualSupplierInvoiceValue ||
-              "";
-            updatedSectionData.actual.shippingBillUrl =
-              typeof updatedData.supplierDetails?.actual?.shippingBillUrl ===
-              "string"
-                ? updatedData.supplierDetails?.actual?.shippingBillUrl
-                : "";
-          } else if (currentField === "blDetails") {
-            updatedSectionData.blDate = updatedData.blDetails.blDate
-              ? parseISO(updatedData.blDetails.blDate)
-              : undefined;
-            updatedSectionData.telexDate = updatedData.blDetails.telexDate
-              ? parseISO(updatedData.blDetails.telexDate)
-              : undefined;
-          }
-        } else if (currentField === "otherDetails") {
-          updatedSectionData =
-            updatedData.otherDetails?.map((item: any) => ({
-              ...item,
-              date: item.date ? parseISO(item.date) : undefined,
-            })) || [];
-        } else {
-          updatedSectionData = updatedData[currentField];
-        }
-
-        methods.setValue(currentField as keyof FormValues, updatedSectionData);
-      }
-
-      toast.success(`${steps[currentStep].name} updated successfully!`);
-
-      if (currentStep < steps.length - 1) {
-        console.log("Navigating to step:", currentStep + 1);
-        setCurrentStep(currentStep + 1);
-      } else {
-        console.log("At last step, navigating to previous page");
-        router.push("../");
-      }
-    } catch (error) {
-      console.error(`Error in ${steps[currentStep].field}:`, error);
-      toast.error(
-        `Failed to update ${steps[currentStep].name}: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
+  const loadDraft = (shipmentId: string): FormValues => {
+    const draft = localStorage.getItem(`shipmentDraft_${shipmentId}`);
+    return draft ? { ...defaultFormValues, ...JSON.parse(draft) } : defaultFormValues;
   };
 
-  const prevStep = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: loadDraft(params.id),
+  });
+
+  const watchedValues = form.watch();
+  const debouncedSave = debounce((data: any) => {
+    if (!isInitialLoad.current) {
+      saveProgressSilently(data, params.id);
+    }
+  }, 1000);
+
+  useEffect(() => {
+    debouncedSave(watchedValues);
+    return () => debouncedSave.cancel(); // Cleanup debounce on unmount
+  }, [watchedValues, debouncedSave]);
+
+  const steps = [
+    {
+      id: 1,
+      name: "Booking Details",
+      component: (
+        <BookingDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+          onProductDetailsOpenChange={setIsProductDetailsOpen}
+        />
+      ),
+    },
+    {
+      id: 2,
+      name: "Shipping Details",
+      component: (
+        <ShippingDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 3,
+      name: "Shipping Bill Details",
+      component: (
+        <ShippingBillDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 4,
+      name: "Supplier Details",
+      component: (
+        <SupplierDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 5,
+      name: "Commercial Invoice",
+      component: (
+        <SaleInvoiceDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 6,
+      name: "Bill of Lading Details",
+      component: (
+        <BillOfLadingDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+          onSectionSubmit={handleSectionSubmit}
+        />
+      ),
+    },
+    {
+      id: 7,
+      name: "Other Details",
+      component: (
+        <OtherDetails
+          shipmentId={params.id}
+          saveProgress={(data) => saveProgressSilently(data, params.id)}
+        />
+      ),
+    },
+  ];
+
+  async function handleSectionSubmit() {
+    if (isProductDetailsOpen) {
+      console.log("handleSectionSubmit blocked: isProductDetailsOpen =", isProductDetailsOpen);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const values = form.getValues();
+      console.log(`Saving draft for ${steps[currentStep].name}:`, values);
+      saveProgressWithFeedback(values, params.id); // Show toast
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+      }
+    } catch (error) {
+      console.error(`Error saving ${steps[currentStep].name} as draft:`, error);
+      toast.error(`Error saving ${steps[currentStep].name} as draft`);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  const submitDraft = async () => {
+    setIsLoading(true);
+    try {
+      const values = form.getValues();
+      console.log("Submitting shipment update for ID:", params.id, "Values:", values);
+      const payload = {
+        shipmentId: params.id,
+        organizationId,
+        createdAt: values.createdAt || undefined,
+        updatedAt: values.updatedAt || undefined,
+        createdBy: values.createdBy || undefined,
+        bookingDetails: {
+          review: values.bookingDetails?.review || "",
+          invoiceNumber: values.bookingDetails?.invoiceNumber || "",
+          bookingNumber: values.bookingDetails?.bookingNumber || "",
+          portOfLoading: values.bookingDetails?.portOfLoading || "",
+          destinationPort: values.bookingDetails?.destinationPort || "",
+          vesselSailingDate: values.bookingDetails?.vesselSailingDate || undefined,
+          vesselArrivingDate: values.bookingDetails?.vesselArrivingDate || undefined,
+          numberOfContainer: values.bookingDetails?.numberOfContainer || 0,
+          containers: values.bookingDetails?.containers?.map((container) => ({
+            containerType: container.containerType || "",
+            containerNumber: container.containerNumber || "",
+            truckNumber: container.truckNumber || "",
+            truckDriverContactNumber: container.truckDriverContactNumber || undefined,
+            addProductDetails: container.addProductDetails || [],
+            _id: container._id || undefined,
+          })) || [],
+          _id: values.bookingDetails?._id || undefined,
+        },
+        shippingDetails: {
+          review: values.shippingDetails?.review || "",
+          transporterName:
+            values.shippingDetails?.transporterName &&
+            /^[0-9a-fA-F]{24}$/.test(values.shippingDetails.transporterName)
+              ? values.shippingDetails.transporterName
+              : undefined,
+          noOftransportinvoices:
+            values.shippingDetails?.noOftransportinvoices ||
+            values.shippingDetails?.transporterInvoices?.length ||
+            0,
+          transporterInvoices:
+            values.shippingDetails?.transporterInvoices?.map((invoice) => ({
+              invoiceNumber: invoice.invoiceNumber || "",
+              uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
+              date: invoice.date || undefined,
+              valueWithGst: invoice.valueWithGst || undefined,
+              valueWithoutGst: invoice.valueWithoutGst || undefined,
+              _id: invoice._id || undefined,
+            })) || [],
+          forwarderName:
+            values.shippingDetails?.forwarderName &&
+            /^[0-9a-fA-F]{24}$/.test(values.shippingDetails.forwarderName)
+              ? values.shippingDetails.forwarderName
+              : undefined,
+          noOfForwarderinvoices:
+            values.shippingDetails?.noOfForwarderinvoices ||
+            values.shippingDetails?.forwarderInvoices?.length ||
+            0,
+          forwarderInvoices:
+            values.shippingDetails?.forwarderInvoices?.map((invoice) => ({
+              invoiceNumber: invoice.invoiceNumber || "",
+              uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
+              date: invoice.date || undefined,
+              valueWithGst: invoice.valueWithGst || undefined,
+              valueWithoutGst: invoice.valueWithoutGst || undefined,
+              _id: invoice._id || undefined,
+            })) || [],
+          _id: values.shippingDetails?._id || undefined,
+        },
+        shippingBillDetails: {
+          review: values.shippingBillDetails?.review || "",
+          portCode: values.shippingBillDetails?.portCode || "",
+          cbName: values.shippingBillDetails?.cbName || "",
+          cbCode: values.shippingBillDetails?.cbCode || "",
+          numberOFShippingBill:
+            values.shippingBillDetails?.numberOFShippingBill ||
+            values.shippingBillDetails?.ShippingBills?.length ||
+            0,
+          ShippingBills:
+            values.shippingBillDetails?.ShippingBills?.map((bill) => ({
+              shippingBillUrl: bill.shippingBillUrl || "",
+              shippingBillNumber: bill.shippingBillNumber || "",
+              shippingBillDate: bill.shippingBillDate || undefined,
+              drawbackValue: bill.drawbackValue || "",
+              rodtepValue: bill.rodtepValue || "",
+              _id: bill._id || undefined,
+            })) || [],
+          _id: values.shippingBillDetails?._id || undefined,
+        },
+        supplierDetails: {
+          review: values.supplierDetails?.review || "",
+          clearance: {
+            numberOfSuppliers:
+              values.supplierDetails?.clearance?.numberOfSuppliers ||
+              values.supplierDetails?.clearance?.suppliers?.length ||
+              0,
+            suppliers:
+              values.supplierDetails?.clearance?.suppliers?.map((supplier) => ({
+                supplierName:
+                  supplier.supplierName &&
+                  /^[0-9a-fA-F]{24}$/.test(supplier.supplierName)
+                    ? supplier.supplierName
+                    : undefined,
+                noOfInvoices: supplier.noOfInvoices || 0,
+                invoices:
+                  supplier.invoices?.map((invoice) => ({
+                    supplierGSTN: invoice.supplierGSTN || "",
+                    supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
+                    supplierInvoiceDate: invoice.supplierInvoiceDate || undefined,
+                    supplierInvoiceValueWithGST:
+                      invoice.supplierInvoiceValueWithGST || undefined,
+                    supplierInvoiceValueWithOutGST:
+                      invoice.supplierInvoiceValueWithOutGST || undefined,
+                    clearanceSupplierInvoiceUrl:
+                      invoice.clearanceSupplierInvoiceUrl || "",
+                    _id: invoice._id || undefined,
+                  })) || [],
+              })) || [],
+            _id: values.supplierDetails?.clearance?._id || undefined,
+          },
+          actual: {
+            actualSupplierName: values.supplierDetails?.actual?.actualSupplierName || "",
+            actualSupplierInvoiceUrl:
+              values.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
+            actualSupplierInvoiceValue:
+              values.supplierDetails?.actual?.actualSupplierInvoiceValue || undefined,
+            shippingBillUrl: values.supplierDetails?.actual?.shippingBillUrl || "",
+            _id: values.supplierDetails?.actual?._id || undefined,
+          },
+          _id: values.supplierDetails?._id || undefined,
+        },
+        saleInvoiceDetails: {
+          review: values.saleInvoiceDetails?.review || "",
+          consignee:
+            values.saleInvoiceDetails?.consignee &&
+            /^[0-9a-fA-F]{24}$/.test(values.saleInvoiceDetails.consignee)
+              ? values.saleInvoiceDetails.consignee
+              : undefined,
+          actualBuyer: values.saleInvoiceDetails?.actualBuyer || "",
+          numberOfSalesInvoices:
+            values.saleInvoiceDetails?.numberOfSalesInvoices ||
+            values.saleInvoiceDetails?.commercialInvoices?.length ||
+            0,
+          commercialInvoices:
+            values.saleInvoiceDetails?.commercialInvoices?.map((inv) => ({
+              commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
+              clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || "",
+              actualCommercialInvoiceUrl: inv.actualCommercialInvoiceUrl || "",
+              saberInvoiceUrl: inv.saberInvoiceUrl || "",
+              _id: inv._id || undefined,
+            })) || [],
+          _id: values.saleInvoiceDetails?._id || undefined,
+        },
+        blDetails: {
+          review: values.blDetails?.review || "",
+          shippingLine:
+            values.blDetails?.shippingLine &&
+            /^[0-9a-fA-F]{24}$/.test(values.blDetails.shippingLine)
+              ? values.blDetails.shippingLine
+              : undefined,
+          blNumber: values.blDetails?.blNumber || "",
+          blDate: values.blDetails?.blDate || undefined,
+          telexDate: values.blDetails?.telexDate || undefined,
+          uploadBL: values.blDetails?.uploadBL || "",
+          _id: values.blDetails?._id || undefined,
+        },
+        otherDetails:
+          values.otherDetails?.map((item) => ({
+            review: item.review || "",
+            certificateName: item.certificateName || "",
+            certificateNumber: item.certificateNumber || "",
+            date: item.date || undefined,
+            issuerOfCertificate: item.issuerOfCertificate || "",
+            uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
+            _id: item._id || undefined,
+          })) || [],
+      };
+
+      await putData(`/shipment/update/${params.id}`, payload);
+      toast.success("Shipment updated successfully!");
+      router.push("../");
+      setTimeout(() => localStorage.removeItem(`shipmentDraft_${params.id}`), 2000);
+      setTimeout(() => window.location.reload(), 5000);
+    } catch (error: any) {
+      console.error("Error submitting shipment update:", error);
+      if (error.response) {
+        console.error("Response status:", error.response.status);
+        console.error("Response data:", error.response.data);
+        toast.error(`Error updating shipment: ${error.response.data.message || "Server error"}`);
+      } else {
+        toast.error("Error updating shipment: Network error or server unreachable");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -894,218 +714,80 @@ export default function EditShipmentPage({ params }: Props) {
         setIsFetching(true);
         console.log("Fetching shipment data for ID:", params.id);
         const response = await fetch(
-          `http://localhost:4080/shipment/getbyid/${params.id}`
+          `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`
         );
         if (!response.ok) throw new Error("Failed to fetch shipment data");
 
         const data = await response.json();
-        console.log("Fetched shipment data:", data);
+        console.log("Raw API response:", data);
 
         const updatedValues: FormValues = {
           shipmentId: data.shipmentId || "",
-          organizationId: organizationId || "",
+          organizationId: data.organizationId || "",
+          createdAt: data.createdAt || undefined,
+          updatedAt: data.updatedAt || undefined,
+          createdBy: data.createdBy || "",
           bookingDetails: {
+            review: data.bookingDetails?.review || "",
             invoiceNumber: data.bookingDetails?.invoiceNumber || "",
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
             destinationPort: data.bookingDetails?.destinationPort || "",
-            vesselSailingDate: data.bookingDetails?.vesselSailingDate
-              ? parseISO(data.bookingDetails.vesselSailingDate)
-              : undefined,
-            vesselArrivingDate: data.bookingDetails?.vesselArrivingDate
-              ? parseISO(data.bookingDetails.vesselArrivingDate)
-              : undefined,
-            numberOfContainer: data.bookingDetails?.containers?.length || 0,
-            containers:
-              data.bookingDetails?.containers?.map((container: any) => ({
-                type: container.type || "",
-                containerNumber: container.containerNumber || "",
-                truckNumber: container.truckNumber || "",
-                truckDriverContactNumber:
-                  container.truckDriverContactNumber ||
-                  container.trukDriverContactNumber
-                    ? parseFloat(
-                        (
-                          container.truckDriverContactNumber ||
-                          container.trukDriverContactNumber
-                        ).toString()
-                      )
-                    : undefined,
-                addProductDetails: container.addProductDetails?.length
-                  ? container.addProductDetails.map(
-                      (product: BackendProductDetails) => ({
-                        productCategory: product.productCategory || "",
-                        graniteAndMarble: product.graniteAndMarble || "",
-                        tiles: product.tiles
-                          ? {
-                              noOfBoxes: product.tiles.noOfBoxes || 0,
-                              noOfPiecesPerBoxes:
-                                product.tiles.noOfPiecesPerBoxes || 0,
-                              sizePerTile: product.tiles.sizePerTile
-                                ? {
-                                    length: product.tiles.sizePerTile.length
-                                      ? {
-                                          value:
-                                            product.tiles.sizePerTile.length
-                                              .value || 0,
-                                          units:
-                                            product.tiles.sizePerTile.length
-                                              .units || "inch",
-                                        }
-                                      : { value: 0, units: "inch" },
-                                    breadth: product.tiles.sizePerTile.breadth
-                                      ? {
-                                          value:
-                                            product.tiles.sizePerTile.breadth
-                                              .value || 0,
-                                          units:
-                                            product.tiles.sizePerTile.breadth
-                                              .units || "inch",
-                                        }
-                                      : { value: 0, units: "inch" },
-                                  }
-                                : {
-                                    length: { value: 0, units: "inch" },
-                                    breadth: { value: 0, units: "inch" },
-                                  },
-                            }
-                          : {
-                              noOfBoxes: 0,
-                              noOfPiecesPerBoxes: 0,
-                              sizePerTile: {
-                                length: { value: 0, units: "inch" },
-                                breadth: { value: 0, units: "inch" },
-                              },
-                            },
-                        slabs: product.slabs
-                          ? {
-                              noOfBundles: product.slabs.noOfBundles || 0,
-                              noOfSlabsPerBundle:
-                                product.slabs.noOfSlabsPerBundle || 0,
-                              uploadMeasurementSheetUrl:
-                                product.slabs.uploadMeasurementSheetUrl || "",
-                              totalSQMTRorSQFTwithAllowance:
-                                product.slabs.totalSQMTRorSQFTwithAllowance ||
-                                "",
-                              totalSQMTRorSMFTwithoutAllowance:
-                                product.slabs
-                                  .totalSQMTRorSMFTwithoutAllowance || "",
-                            }
-                          : {
-                              noOfBundles: 0,
-                              noOfSlabsPerBundle: 0,
-                              uploadMeasurementSheetUrl: "",
-                              totalSQMTRorSQFTwithAllowance: "",
-                              totalSQMTRorSMFTwithoutAllowance: "",
-                            },
-                        slabType: product.slabType || "",
-                        slabLength: product.slabLength
-                          ? {
-                              value: product.slabLength.value || undefined,
-                              units: product.slabLength.units || "inch",
-                            }
-                          : { value: undefined, units: "inch" },
-                        slabBreadth: product.slabBreadth
-                          ? {
-                              value: product.slabBreadth.value || undefined,
-                              units: product.slabBreadth.units || "inch",
-                            }
-                          : { value: undefined, units: "inch" },
-                        slabThickness: product.slabThickness || undefined,
-                        slabDocument: product.slabDocument || undefined,
-                      })
-                    )
-                  : [
-                      {
-                        productCategory: "",
-                        graniteAndMarble: "",
-                        tiles: {
-                          noOfBoxes: 0,
-                          noOfPiecesPerBoxes: 0,
-                          sizePerTile: {
-                            length: { value: 0, units: "inch" },
-                            breadth: { value: 0, units: "inch" },
-                          },
-                        },
-                        slabs: {
-                          noOfBundles: 0,
-                          noOfSlabsPerBundle: 0,
-                          uploadMeasurementSheetUrl: "",
-                          totalSQMTRorSQFTwithAllowance: "",
-                          totalSQMTRorSMFTwithoutAllowance: "",
-                        },
-                        slabType: "",
-                        slabLength: { value: undefined, units: "inch" },
-                        slabBreadth: { value: undefined, units: "inch" },
-                        slabThickness: undefined,
-                        slabDocument: undefined,
-                      },
-                    ],
-              })) || [],
-          },
-          shippingBillDetails: {
-            portCode: data.shippingBillDetails?.portCode || "",
-            cbName: data.shippingBillDetails?.cbName || "",
-            cbCode: data.shippingBillDetails?.cbCode || "",
-            numberOFShippingBill:
-              data.shippingBillDetails?.ShippingBills?.length ||
-              data.shippingBillDetails?.bills?.length ||
-              0,
-            bills:
-              (
-                data.shippingBillDetails?.ShippingBills ||
-                data.shippingBillDetails?.bills ||
-                []
-              )?.map((bill: BackendShippingBill) => ({
-                uploadShippingBill:
-                  bill.uploadShippingBill || bill.shippingBillUrl || "",
-                shippingBillNumber: bill.shippingBillNumber || "",
-                shippingBillDate: bill.shippingBillDate
-                  ? parseISO(bill.shippingBillDate)
-                  : undefined,
-                drawbackValue: bill.drawbackValue || "",
-                rodtepValue: bill.rodtepValue || "",
-              })) || [],
+            vesselSailingDate: data.bookingDetails?.vesselSailingDate || undefined,
+            vesselArrivingDate: data.bookingDetails?.vesselArrivingDate || undefined,
+            numberOfContainer: data.bookingDetails?.numberOfContainer || 0,
+            containers: Array.isArray(data.bookingDetails?.containers)
+              ? data.bookingDetails.containers.map((container: any) => ({
+                  containerType: container.containerType || "",
+                  containerNumber: container.containerNumber || "",
+                  truckNumber: container.truckNumber || "",
+                  truckDriverContactNumber: container.truckDriverContactNumber || undefined,
+                  addProductDetails: Array.isArray(container.addProductDetails)
+                    ? container.addProductDetails.map((product: any) => ({
+                        code: product.code || "",
+                        HScode: product.HScode || "",
+                        dscription: product.dscription || "",
+                        unitOfMeasurements: product.unitOfMeasurements || "",
+                        countryOfOrigin: product.countryOfOrigin || "",
+                        variantName: product.variantName || "",
+                        varianntType: product.varianntType || "",
+                        sellPrice: product.sellPrice ?? undefined,
+                        buyPrice: product.buyPrice ?? undefined,
+                        netWeight: product.netWeight ?? undefined,
+                        grossWeight: product.grossWeight ?? undefined,
+                        cubicMeasurement: product.cubicMeasurement ?? undefined,
+                      }))
+                    : [],
+                  _id: container._id || "",
+                }))
+              : [],
+            _id: data.bookingDetails?._id || "",
           },
           shippingDetails: {
             review: data.shippingDetails?.review || "",
             transporterName:
-              typeof data.shippingDetails?.transporterName === "object"
-                ? data.shippingDetails?.transporterName?._id || null
-                : data.shippingDetails?.transporterName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
+              data.shippingDetails?.transporterName &&
+              /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
                 ? data.shippingDetails.transporterName
-                : null,
+                : undefined,
             noOftransportinvoices:
               data.shippingDetails?.noOftransportinvoices ||
               data.shippingDetails?.transporterInvoices?.length ||
               0,
             transporterInvoices:
-              data.shippingDetails?.transporterInvoices?.map(
-                (invoice: any) => ({
-                  invoiceNumber: invoice.invoiceNumber || "",
-                  uploadInvoiceUr:
-                    invoice.uploadInvoiceUr ||
-                    invoice.uploadTransporterInvoice ||
-                    "",
-                  date: invoice.date ? parseISO(invoice.date) : undefined,
-                  valueWithGst:
-                    invoice.valueWithGst != null
-                      ? invoice.valueWithGst.toString()
-                      : "",
-                  valueWithoutGst:
-                    invoice.valueWithoutGst != null
-                      ? invoice.valueWithoutGst.toString()
-                      : "",
-                })
-              ) || [],
+              data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
+                invoiceNumber: invoice.invoiceNumber || "",
+                uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
+                date: invoice.date || undefined,
+                valueWithGst: invoice.valueWithGst || undefined,
+                valueWithoutGst: invoice.valueWithoutGst || undefined,
+                _id: invoice._id || "",
+              })) || [],
             forwarderName:
-              typeof data.shippingDetails?.forwarderName === "object"
-                ? data.shippingDetails?.forwarderName?._id || null
-                : data.shippingDetails?.forwarderName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
+              data.shippingDetails?.forwarderName &&
+              /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
                 ? data.shippingDetails.forwarderName
-                : null,
+                : undefined,
             noOfForwarderinvoices:
               data.shippingDetails?.noOfForwarderinvoices ||
               data.shippingDetails?.forwarderInvoices?.length ||
@@ -1113,98 +795,119 @@ export default function EditShipmentPage({ params }: Props) {
             forwarderInvoices:
               data.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
                 invoiceNumber: invoice.invoiceNumber || "",
-                uploadInvoiceUr:
-                  invoice.uploadInvoiceUr ||
-                  invoice.uploadForwarderInvoice ||
-                  "",
-                date: invoice.date ? parseISO(invoice.date) : undefined,
-                valueWithGst:
-                  invoice.valueWithGst != null
-                    ? invoice.valueWithGst.toString()
-                    : "",
-                valueWithoutGst:
-                  invoice.valueWithoutGst != null
-                    ? invoice.valueWithoutGst.toString()
-                    : "",
+                uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
+                date: invoice.date || undefined,
+                valueWithGst: invoice.valueWithGst || undefined,
+                valueWithoutGst: invoice.valueWithoutGst || undefined,
+                _id: invoice._id || "",
               })) || [],
+            _id: data.shippingDetails?._id || "",
+          },
+          shippingBillDetails: {
+            review: data.shippingBillDetails?.review || "",
+            portCode: data.shippingBillDetails?.portCode || "",
+            cbName: data.shippingBillDetails?.cbName || "",
+            cbCode: data.shippingBillDetails?.cbCode || "",
+            numberOFShippingBill:
+              data.shippingBillDetails?.numberOFShippingBill ||
+              data.shippingBillDetails?.ShippingBills?.length ||
+              0,
+            ShippingBills:
+              (
+                data.shippingBillDetails?.ShippingBills ||
+                data.shippingBillDetails?.bills ||
+                []
+              )?.map((bill: BackendShippingBill) => ({
+                shippingBillUrl: bill.shippingBillUrl || "",
+                shippingBillNumber: bill.shippingBillNumber || "",
+                shippingBillDate: bill.shippingBillDate || undefined,
+                drawbackValue: bill.drawbackValue || "",
+                rodtepValue: bill.rodtepValue || "",
+                _id: bill._id || "",
+              })) || [],
+            _id: data.shippingBillDetails?._id || "",
           },
           supplierDetails: {
+            review: data.supplierDetails?.review || "",
             clearance: {
-              supplierName:
-                typeof data.supplierDetails?.clearance?.supplierName ===
-                "object"
-                  ? data.supplierDetails?.clearance?.supplierName?._id || null
-                  : data.supplierDetails?.clearance?.supplierName &&
-                    /^[0-9a-fA-F]{24}$/.test(
-                      data.supplierDetails.clearance.supplierName
-                    )
-                  ? data.supplierDetails.clearance.supplierName
-                  : null,
-              noOfInvoices:
-                data.supplierDetails?.clearance?.invoices?.length || 0,
-              invoices:
-                data.supplierDetails?.clearance?.invoices?.map(
-                  (invoice: any) => ({
-                    supplierGSTN: invoice.supplierGSTN || "",
-                    supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
-                    supplierInvoiceDate: invoice.supplierInvoiceDate
-                      ? parseISO(invoice.supplierInvoiceDate)
+              numberOfSuppliers:
+                data.supplierDetails?.clearance?.numberOfSuppliers ||
+                data.supplierDetails?.clearance?.suppliers?.length ||
+                0,
+              suppliers:
+                data.supplierDetails?.clearance?.suppliers?.map((supplier: any) => ({
+                  supplierName:
+                    supplier.supplierName &&
+                    /^[0-9a-fA-F]{24}$/.test(supplier.supplierName)
+                      ? supplier.supplierName
                       : undefined,
-                    supplierInvoiceValueWithGST:
-                      invoice.supplierInvoiceValueWithGST || "",
-                    supplierInvoiceValueWithOutGST:
-                      invoice.supplierInvoiceValueWithOutGST || "",
-                    clearanceSupplierInvoiceUrl:
-                      invoice.clearanceSupplierInvoiceUrl || "",
-                  })
-                ) || [],
+                  noOfInvoices: supplier.noOfInvoices || 0,
+                  invoices:
+                    supplier.invoices?.map((invoice: any) => ({
+                      supplierGSTN: invoice.supplierGSTN || "",
+                      supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
+                      supplierInvoiceDate: invoice.supplierInvoiceDate || undefined,
+                      supplierInvoiceValueWithGST:
+                        invoice.supplierInvoiceValueWithGST || undefined,
+                      supplierInvoiceValueWithOutGST:
+                        invoice.supplierInvoiceValueWithOutGST || undefined,
+                      clearanceSupplierInvoiceUrl:
+                        invoice.clearanceSupplierInvoiceUrl || "",
+                      _id: invoice._id || "",
+                    })) || [],
+                })) || [],
+              _id: data.supplierDetails?.clearance?._id || "",
             },
             actual: {
-              actualSupplierName:
-                data.supplierDetails?.actual?.actualSupplierName || "",
-              actualSupplierInvoiceValue:
-                data.supplierDetails?.actual?.actualSupplierInvoiceValue || "",
+              actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceUrl:
                 data.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
-              shippingBillUrl:
-                data.supplierDetails?.actual?.shippingBillUrl || "",
+              actualSupplierInvoiceValue:
+                data.supplierDetails?.actual?.actualSupplierInvoiceValue || undefined,
+              shippingBillUrl: data.supplierDetails?.actual?.shippingBillUrl || "",
+              _id: data.supplierDetails?.actual?._id || "",
             },
+            _id: data.supplierDetails?._id || "",
           },
           saleInvoiceDetails: {
+            review: data.saleInvoiceDetails?.review || "",
             consignee:
-              typeof data.saleInvoiceDetails?.consignee === "object"
-                ? data.saleInvoiceDetails?.consignee?._id ||
-                  data.saleInvoiceDetails?.consignee?.name ||
-                  ""
-                : data.saleInvoiceDetails?.consignee || "",
+              data.saleInvoiceDetails?.consignee &&
+              /^[0-9a-fA-F]{24}$/.test(data.saleInvoiceDetails.consignee)
+                ? data.saleInvoiceDetails.consignee
+                : undefined,
             actualBuyer: data.saleInvoiceDetails?.actualBuyer || "",
             numberOfSalesInvoices:
-              data.saleInvoiceDetails?.invoice?.length ||
+              data.saleInvoiceDetails?.numberOfSalesInvoices ||
               data.saleInvoiceDetails?.commercialInvoices?.length ||
               0,
-            invoice:
+            commercialInvoices:
               (
-                data.saleInvoiceDetails?.invoice ||
                 data.saleInvoiceDetails?.commercialInvoices ||
+                data.saleInvoiceDetails?.invoice ||
                 []
               )?.map((inv: any) => ({
                 commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
-                clearanceCommercialInvoice:
-                  inv.clearanceCommercialInvoice || "",
-                actualCommercialInvoice: inv.actualCommercialInvoice || "",
-                saberInvoice: inv.saberInvoice || "",
-                addProductDetails: inv.addProductDetails || "",
+                clearanceCommercialInvoiceUrl:
+                  inv.clearanceCommercialInvoiceUrl || "",
+                actualCommercialInvoiceUrl: inv.actualCommercialInvoiceUrl || "",
+                saberInvoiceUrl: inv.saberInvoiceUrl || "",
+                _id: inv._id || "",
               })) || [],
+            _id: data.saleInvoiceDetails?._id || "",
           },
           blDetails: {
+            review: data.blDetails?.review || "",
+            shippingLine:
+              data.blDetails?.shippingLine &&
+              /^[0-9a-fA-F]{24}$/.test(data.blDetails.shippingLine)
+                ? data.blDetails.shippingLine
+                : undefined,
             blNumber: data.blDetails?.blNumber || "",
-            blDate: data.blDetails?.blDate
-              ? parseISO(data.blDetails.blDate)
-              : undefined,
-            telexDate: data.blDetails?.telexDate
-              ? parseISO(data.blDetails.telexDate)
-              : undefined,
+            blDate: data.blDetails?.blDate || undefined,
+            telexDate: data.blDetails?.telexDate || undefined,
             uploadBL: data.blDetails?.uploadBL || "",
+            _id: data.blDetails?._id || "",
           },
           otherDetails:
             data.otherDetails?.length > 0
@@ -1212,37 +915,36 @@ export default function EditShipmentPage({ params }: Props) {
                   review: item.review || "",
                   certificateName: item.certificateName || "",
                   certificateNumber: item.certificateNumber || "",
-                  date: item.date ? parseISO(item.date) : undefined,
+                  date: item.date || undefined,
                   issuerOfCertificate: item.issuerOfCertificate || "",
                   uploadCopyOfCertificate: item.uploadCopyOfCertificate || "",
+                  _id: item._id || "",
                 }))
-              : [
-                  {
-                    review: "",
-                    certificateName: "",
-                    certificateNumber: "",
-                    date: undefined,
-                    issuerOfCertificate: "",
-                    uploadCopyOfCertificate: "",
-                  },
-                ],
+              : [],
         };
 
-        console.log(
-          "Mapped form values:",
-          JSON.stringify(updatedValues, null, 2)
-        );
-        methods.reset(updatedValues);
+        console.log("Mapped form values:", JSON.stringify(updatedValues, null, 2));
+        form.reset(updatedValues);
+        isInitialLoad.current = false; // Allow autosave after initial load
       } catch (error) {
         console.error("Error fetching shipment data:", error);
         toast.error("Failed to load shipment data");
+        isInitialLoad.current = false; // Allow autosave even if fetch fails
       } finally {
         setIsFetching(false);
       }
     }
 
     fetchShipmentData();
-  }, [params.id, methods, organizationId]);
+  }, [params.id, form, organizationId]);
+
+  if (isFetching) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p>Loading shipment data...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -1256,7 +958,7 @@ export default function EditShipmentPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Edit Shipment: ${invoiceNumber || "N/A"}`}
+            title={`Edit Shipment: ${form.watch("bookingDetails.invoiceNumber") || "N/A"}`}
           />
           <p className="text-muted-foreground text-sm">
             Complete the form below to edit shipment details.
@@ -1267,90 +969,40 @@ export default function EditShipmentPage({ params }: Props) {
       <div className="w-full">
         <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
       </div>
-      <div className="flex justify-between mt-8">
+
+      {/* New container for Previous and Save and Next buttons */}
+      <div className="flex justify-between items-center mb-4">
         <Button
           type="button"
-          onClick={prevStep}
-          disabled={currentStep === 0}
-          className={currentStep === 0 ? "invisible" : ""}
+          onClick={() => setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)}
+          disabled={currentStep === 0 || isLoading}
+          className={`${currentStep === 0 ? "invisible" : ""} h-8`}
         >
           Previous
         </Button>
         <Button
+          className="h-8"
           type="button"
-          onClick={() => {
-            console.log("Update & Next button clicked");
-            const supplierName = methods.getValues(
-              "supplierDetails.clearance.supplierName"
-            );
-            const actualSupplierName = methods.getValues(
-              "supplierDetails.actual.actualSupplierName"
-            );
-            console.log("SupplierName before submit:", supplierName);
-            console.log(
-              "ActualSupplierName before submit:",
-              actualSupplierName
-            );
-            methods.handleSubmit(
-              (data) => handleUpdateAndNext(data, true),
-              (err) => {
-                console.log(
-                  "Form submission errors:",
-                  JSON.stringify(err, null, 2)
-                );
-                toast.error(`Please fix errors in ${steps[currentStep].name}`);
-              }
-            )();
-          }}
+          onClick={currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft}
+          disabled={isLoading || isProductDetailsOpen}
         >
-          {currentStep < steps.length - 1 ? "Update & Next" : "Update & Finish"}
+          {currentStep < steps.length - 1 ? "Update and Next" : "Update Shipment"}
+          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>
-      {isFetching ? (
-        <p>Loading...</p>
-      ) : (
-        <FormProvider {...methods}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (isProductDetailsOpen) {
-                console.log(
-                  "Parent form submission blocked: isProductDetailsOpen =",
-                  isProductDetailsOpen
-                );
-                return;
-              }
-              console.log(
-                "Parent form submitted via Enter key or intentional submission"
-              );
-              const supplierName = methods.getValues(
-                "supplierDetails.clearance.supplierName"
-              );
-              const actualSupplierName = methods.getValues(
-                "supplierDetails.actual.actualSupplierName"
-              );
-              console.log("SupplierName on form submit:", supplierName);
-              console.log(
-                "ActualSupplierName on form submit:",
-                actualSupplierName
-              );
-              methods.handleSubmit((data) => handleUpdateAndNext(data, true))();
-            }}
-            className="flex flex-col gap-3 w-full p-3"
-          >
-            <div className="flex justify-between">
-              <Heading
-                className="text-xl"
-                title={steps[currentStep]?.name || "Step"}
-              />
-              <p className="text-sm text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
-              </p>
-            </div>
-            {steps[currentStep].component}
-          </form>
-        </FormProvider>
-      )}
+
+      <FormProvider {...form}>
+        <form className="flex flex-col gap-3 w-full p-3">
+          <div className="flex justify-between">
+            <Heading className="text-xl" title={steps[currentStep].name} />
+            <p className="text-sm text-muted-foreground">
+              Step {currentStep + 1} of {steps.length}
+            </p>
+          </div>
+
+          {steps[currentStep].component}
+        </form>
+      </FormProvider>
     </div>
   );
 }
