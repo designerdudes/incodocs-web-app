@@ -59,8 +59,9 @@ export const ProductsColumns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "unit",
-        header: () => <div>Unit</div>,
-        cell: ({ row }) => <div>{row.original.unit}</div>,
+        header: () => <div>Unit of Measurements</div>,
+        cell: ({ row }) => <div>{row.original.unitOfMeasurements}</div>,
+
     },
     {
         accessorKey: "origin",
