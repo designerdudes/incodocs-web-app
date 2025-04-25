@@ -84,7 +84,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface AddBlockFormProps {
   LotData: {
-    lotId: string;
+    _id: string;
     lotName: string;
     materialType: string;
     blocksId: string[];
@@ -156,7 +156,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
-  const lotId = LotData.lotId;
+  const lotId = LotData._id;
+  console.log("LotData", LotData);
+  console.log("LotData", LotData);
 
   const blocks = watch("blocks") || [];
   const prevMarkerCost = LotData?.markerCost || 0;
@@ -246,11 +248,11 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
     try {
       await putData(`/factory-management/inventory/updatelotaddblocks/${lotId}`, submissionData);
-      toast.success("Block created/updated successfully");
+      toast.success("Block updated successfully");
       router.push("../");
     } catch (error) {
-      console.error("Error creating/updating Block:", error);
-      toast.error("Error creating/updating Block");
+      console.error("Error updating Block:", error);
+      toast.error("Error updating Block");
     } finally {
       setIsLoading(false);
     }
