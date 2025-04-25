@@ -31,13 +31,13 @@ interface Factory {
   _id: string;
   factoryName: string;
   address: Address;
-  organization: string;
+  organizationId: string;
   gstNo: string;
   BlocksId: string[];
   SlabsId: string[];
   lotId: string[];
-  workerCuttingPay: number;
-  workerPolishingPay: number;
+  workersCuttingPay: number;
+  workersPolishingPay: number;
   createdAt: string;
   updatedAt: string;
   __v?: number;
@@ -190,14 +190,15 @@ export default async function DashboardPage({ params }: { params: Params }) {
               <FactoriesCard
                 key={factory._id}
                 factoryId={factory._id}
+                organizationId={factory.organizationId}
                 factoryName={factory.factoryName}
                 factoryAddress={factory.address.location}
                 factoryGSTIN={factory.gstNo}
                 totalBlocks={factory.BlocksId?.length}
                 totalSlabs={factory.SlabsId?.length}
                 totalLots={factory.lotId?.length}
-                workerCuttingPay={factory.workerCuttingPay}
-                workerPolishingPay={factory.workerPolishingPay}
+                workerCuttingPay={factory.workersCuttingPay}
+                workerPolishingPay={factory.workersPolishingPay}
               />
 
             ))}
