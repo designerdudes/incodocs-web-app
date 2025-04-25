@@ -32,6 +32,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import SupplierForm from "@/components/forms/Addsupplierform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Icons } from "@/components/ui/icons";
 
 interface SupplierDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;

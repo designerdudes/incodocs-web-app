@@ -24,6 +24,7 @@ import {
 import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
+import { Icons } from "@/components/ui/icons";
 
 interface SaleInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;

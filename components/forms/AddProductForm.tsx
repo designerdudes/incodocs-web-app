@@ -22,7 +22,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 
 const productSchema = z.object({
@@ -51,6 +51,8 @@ interface ProductFormProps {
 }
 
 export default function ProductFormPage({ onSuccess }: ProductFormProps) {
+    const orgid = useParams().organizationId;
+
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const form = useForm({
@@ -72,6 +74,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
             netWeight: 0,
             grossWeight: 0,
             cubicMeasurement: 0,
+            OrganizationId: orgid
         },
     });
 
