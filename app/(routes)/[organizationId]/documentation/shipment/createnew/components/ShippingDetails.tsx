@@ -252,7 +252,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetai
         }
       );
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
+
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
