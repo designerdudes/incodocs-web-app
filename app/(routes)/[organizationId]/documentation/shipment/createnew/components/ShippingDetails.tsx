@@ -255,7 +255,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       );
       const data = await response.json();
       const storageUrl = data.url;
-      console.log("File uploaded successfully:", storageUrl);
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
