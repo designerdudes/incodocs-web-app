@@ -53,6 +53,8 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Marker name is required" })
     .optional(),
+  quarryCost: z.string().optional(),
+  commissionCost: z.string().optional(),
   noOfBlocks: z
     .number()
     .min(1, { message: "Number of blocks must be greater than zero" }),
@@ -253,212 +255,212 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-3 gap-3">
-  <FormField
-    name="lotName"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Lot Name</FormLabel>
-        <FormControl>
-          <Input
-            placeholder="Xyz"
-            disabled={isLoading}
-            {...field}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="materialType"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Material Type</FormLabel>
-        <FormControl>
-          <Input
-            placeholder="Granite"
-            disabled={isLoading}
-            {...field}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="materialCost"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Material Cost</FormLabel>
-        <FormControl>
-          <Input
-            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter Material cost"
-            type="number"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              field.onChange(value ? parseFloat(value) : undefined);
-            }}
-            value={field.value ?? ""}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="markerCost"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Marker Cost</FormLabel>
-        <FormControl>
-          <Input
-            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter Marker cost"
-            type="number"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              field.onChange(value ? parseFloat(value) : undefined);
-            }}
-            value={field.value ?? ""}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="transportCost"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Transport Cost</FormLabel>
-        <FormControl>
-          <Input
-            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter Transport cost"
-            type="number"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              field.onChange(value ? parseFloat(value) : undefined);
-            }}
-            value={field.value ?? ""}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="markerOperatorName"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Marker Operator</FormLabel>
-        <FormControl>
-          <Input
-            placeholder="Enter Operator Name"
-            disabled={isLoading}
-            {...field}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="noOfBlocks"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Number of Blocks</FormLabel>
-        <FormControl>
-          <Input
-            placeholder="Enter Number of Blocks"
-            type="number"
-            min="1"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === "" || Number(value) < 1) {
-                field.onChange(1);
-                handleBlockCountChange("1");
-                return;
-              }
-              field.onChange(Number(value));
-              handleBlockCountChange(value);
-            }}
-            value={field.value ?? 1}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="quarryCost"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Quarry Cost</FormLabel>
-        <FormControl>
-          <Input
-            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter Quarry Cost"
-            type="number"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              field.onChange(value ? parseFloat(value) : undefined);
-            }}
-            value={field.value ?? ""}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-  <FormField
-    name="commissionCost"
-    control={control}
-    render={({ field }) => (
-      <FormItem>
-        <FormLabel>Commission Cost</FormLabel>
-        <FormControl>
-          <Input
-            className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter Commission Cost"
-            type="number"
-            disabled={isLoading}
-            onChange={(e) => {
-              const value = e.target.value;
-              field.onChange(value ? parseFloat(value) : undefined);
-            }}
-            value={field.value ?? ""}
-            onBlur={() => saveProgressSilently(getValues())}
-          />
-        </FormControl>
-        <FormMessage />
-      </FormItem>
-    )}
-  />
-</div>           </div>
+          <div className="grid grid-cols-3 gap-3">
+            <FormField
+              name="lotName"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lot Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Xyz"
+                      disabled={isLoading}
+                      {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="materialType"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Material Type</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Granite"
+                      disabled={isLoading}
+                      {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="materialCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Material Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="Enter Material cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="markerCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marker Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="Enter Marker cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="transportCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transport Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="Enter Transport cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="markerOperatorName"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Marker Operator</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Operator Name"
+                      disabled={isLoading}
+                      {...field}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="noOfBlocks"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Blocks</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Number of Blocks"
+                      type="number"
+                      min="1"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || Number(value) < 1) {
+                          field.onChange(1);
+                          handleBlockCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleBlockCountChange(value);
+                      }}
+                      value={field.value ?? 1}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="quarryCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quarry Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="Enter Quarry Cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="commissionCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Commission Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      placeholder="Enter Commission Cost"
+                      type="number"
+                      disabled={isLoading}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <div className="grid grid-cols-4 gap-3">
             <div>
@@ -788,6 +790,6 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
           />
         </form>
       </Form>
-    </div>
+    </div >
   );
 }
