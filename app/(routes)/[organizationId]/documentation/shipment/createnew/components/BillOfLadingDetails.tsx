@@ -36,15 +36,41 @@ import { Icons } from "@/components/ui/icons";
 
 interface BillOfLadingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+  params: string | string[];
 }
 
-export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLadingDetailsProps) {
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
+export function BillOfLadingDetails({ saveProgress, onSectionSubmit, params }: BillOfLadingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
+  const organizationId = Array.isArray(params) ? params[0] : params;
   const [uploading, setUploading] = useState(false);
   const GlobalModal = useGlobalModal();
   const shippingInvoicesFromForm = watch("blDetails.shippingDetails.shippingLineInvoices") || [];
   const [shippingInvoices, setShippingInvoices] = useState(shippingInvoicesFromForm);
-  const [shippingLines, setShippingLines] = useState([]);
+  const [shippingLines, setShippingLines] = useState<{ _id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchShippingLines = async () => {
+      try {
+        const response = await fetch(
+          `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organizationId}`
+        );
+        const data = await response.json();
+        const mappedConsignees = data.map((consignee: any) => ({
+          _id: consignee._id,
+          name: consignee.name || consignee.consigneeName,
+        }));
+        setShippingLines(mappedConsignees);
+      } catch (error) {
+        console.error("Error fetching consignees:", error);
+      }
+    };
+    fetchShippingLines();
+  }, []);
 
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
@@ -53,16 +79,16 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "http://localhost:4080/shipmentdocsfile/upload",
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
         }
       );
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
       setValue(fieldName, storageUrl);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -88,7 +114,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     setShippingInvoices(newInvoices);
     setValue("blDetails.shippingDetails.shippingLineInvoices", newInvoices);
     setValue("blDetails.shippingDetails.noOfShipmentinvoices", newInvoices.length);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const handleShippingDelete = (index: number) => {
@@ -96,7 +122,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     setShippingInvoices(updatedInvoices);
     setValue("blDetails.shippingDetails.shippingLineInvoices", updatedInvoices);
     setValue("blDetails.shippingDetails.noOfShipmentinvoices", updatedInvoices.length);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const openShippingLineForm = () => {
@@ -104,11 +130,11 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     GlobalModal.children = (
       <ShippinglineForm
         onSuccess={() => {
-          fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba")
+          fetch(`https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organizationId}`)
             .then((res) => res.json())
             .then((data) => {
               setShippingLines(data);
-              saveProgress(getValues()); // Save after updating shipping lines
+              saveProgressSilently(getValues()); // Save after updating shipping lines
             });
         }}
       />
@@ -116,19 +142,6 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
     GlobalModal.onOpen();
   };
 
-  // Fetch data on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const shippingResponse = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba");
-        const shippingData = await shippingResponse.json();
-        setShippingLines(shippingData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
 
   return (
     <div>
@@ -145,7 +158,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
-                    saveProgress(getValues());
+                    saveProgressSilently(getValues());
                   }}
                   displayProperty="shippingLineName"
                   placeholder="Select a Shipping Line"
@@ -208,7 +221,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                             <Input
                               placeholder="e.g., 123456898"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                               required // Enforce required field
                             />
                           </FormControl>
@@ -265,7 +278,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
-                                  saveProgress(getValues());
+                                  saveProgressSilently(getValues());
                                 }}
                               />
                             </PopoverContent>
@@ -281,7 +294,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                           <Input
                             placeholder="e.g., 11800"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         )}
                       />
@@ -294,7 +307,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                           <Input
                             placeholder="e.g., 11800"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         )}
                       />
@@ -330,7 +343,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                   placeholder="e.g., BL456"
                   className="uppercase"
                   {...field}
-                  onBlur={() => saveProgress(getValues())}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -363,7 +376,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       field.onChange(date?.toISOString());
-                      saveProgress(getValues());
+                      saveProgressSilently(getValues());
                     }}
                   />
                 </PopoverContent>
@@ -398,7 +411,7 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                     selected={field.value ? new Date(field.value) : undefined}
                     onSelect={(date) => {
                       field.onChange(date?.toISOString());
-                      saveProgress(getValues());
+                      saveProgressSilently(getValues());
                     }}
                   />
                 </PopoverContent>
@@ -450,13 +463,25 @@ export function BillOfLadingDetails({ saveProgress, onSectionSubmit }: BillOfLad
                 <Textarea
                   placeholder="e.g., this is some random comment for sale invoice details"
                   {...field}
-                  onBlur={() => saveProgress(getValues())}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+      </div>
+      {/* Submit Button */}
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
       </div>
     </div>
   );

@@ -111,7 +111,10 @@ const formSchema = z.object({
           z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            date: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
             valueWithGst: z.number().optional(),
             valueWithoutGst: z.number().optional(),
             _id: z.string().optional(),
@@ -130,7 +133,10 @@ const formSchema = z.object({
           z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            date: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
             valueWithGst: z.number().optional(),
             valueWithoutGst: z.number().optional(),
             _id: z.string().optional(),
@@ -237,7 +243,10 @@ const formSchema = z.object({
               .string()
               .url("Invalid URL")
               .optional(),
-            actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            actualCommercialInvoiceUrl: z
+              .string()
+              .url("Invalid URL")
+              .optional(),
             saberInvoiceUrl: z.string().url("Invalid URL").optional(),
             _id: z.string().optional(),
           })
@@ -256,7 +265,10 @@ const formSchema = z.object({
         })
         .optional(),
       blNumber: z.string().optional(),
-      blDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+      blDate: z
+        .string()
+        .datetime({ message: "Invalid date format" })
+        .optional(),
       telexDate: z
         .string()
         .datetime({ message: "Invalid date format" })
@@ -389,7 +401,9 @@ export default function EditShipmentPage({ params }: Props) {
 
   const loadDraft = (shipmentId: string): FormValues => {
     const draft = localStorage.getItem(`shipmentDraft_${shipmentId}`);
-    return draft ? { ...defaultFormValues, ...JSON.parse(draft) } : defaultFormValues;
+    return draft
+      ? { ...defaultFormValues, ...JSON.parse(draft) }
+      : defaultFormValues;
   };
 
   const form = useForm<FormValues>({
@@ -491,7 +505,10 @@ export default function EditShipmentPage({ params }: Props) {
 
   async function handleSectionSubmit() {
     if (isProductDetailsOpen) {
-      console.log("handleSectionSubmit blocked: isProductDetailsOpen =", isProductDetailsOpen);
+      console.log(
+        "handleSectionSubmit blocked: isProductDetailsOpen =",
+        isProductDetailsOpen
+      );
       return;
     }
     setIsLoading(true);
@@ -514,7 +531,12 @@ export default function EditShipmentPage({ params }: Props) {
     setIsLoading(true);
     try {
       const values = form.getValues();
-      console.log("Submitting shipment update for ID:", params.id, "Values:", values);
+      console.log(
+        "Submitting shipment update for ID:",
+        params.id,
+        "Values:",
+        values
+      );
       const payload = {
         shipmentId: params.id,
         organizationId,
@@ -527,17 +549,21 @@ export default function EditShipmentPage({ params }: Props) {
           bookingNumber: values.bookingDetails?.bookingNumber || "",
           portOfLoading: values.bookingDetails?.portOfLoading || "",
           destinationPort: values.bookingDetails?.destinationPort || "",
-          vesselSailingDate: values.bookingDetails?.vesselSailingDate || undefined,
-          vesselArrivingDate: values.bookingDetails?.vesselArrivingDate || undefined,
+          vesselSailingDate:
+            values.bookingDetails?.vesselSailingDate || undefined,
+          vesselArrivingDate:
+            values.bookingDetails?.vesselArrivingDate || undefined,
           numberOfContainer: values.bookingDetails?.numberOfContainer || 0,
-          containers: values.bookingDetails?.containers?.map((container) => ({
-            containerType: container.containerType || "",
-            containerNumber: container.containerNumber || "",
-            truckNumber: container.truckNumber || "",
-            truckDriverContactNumber: container.truckDriverContactNumber || undefined,
-            addProductDetails: container.addProductDetails || [],
-            _id: container._id || undefined,
-          })) || [],
+          containers:
+            values.bookingDetails?.containers?.map((container) => ({
+              containerType: container.containerType || "",
+              containerNumber: container.containerNumber || "",
+              truckNumber: container.truckNumber || "",
+              truckDriverContactNumber:
+                container.truckDriverContactNumber || undefined,
+              addProductDetails: container.addProductDetails || [],
+              _id: container._id || undefined,
+            })) || [],
           _id: values.bookingDetails?._id || undefined,
         },
         shippingDetails: {
@@ -619,7 +645,8 @@ export default function EditShipmentPage({ params }: Props) {
                   supplier.invoices?.map((invoice) => ({
                     supplierGSTN: invoice.supplierGSTN || "",
                     supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
-                    supplierInvoiceDate: invoice.supplierInvoiceDate || undefined,
+                    supplierInvoiceDate:
+                      invoice.supplierInvoiceDate || undefined,
                     supplierInvoiceValueWithGST:
                       invoice.supplierInvoiceValueWithGST || undefined,
                     supplierInvoiceValueWithOutGST:
@@ -632,12 +659,15 @@ export default function EditShipmentPage({ params }: Props) {
             _id: values.supplierDetails?.clearance?._id || undefined,
           },
           actual: {
-            actualSupplierName: values.supplierDetails?.actual?.actualSupplierName || "",
+            actualSupplierName:
+              values.supplierDetails?.actual?.actualSupplierName || "",
             actualSupplierInvoiceUrl:
               values.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
             actualSupplierInvoiceValue:
-              values.supplierDetails?.actual?.actualSupplierInvoiceValue || undefined,
-            shippingBillUrl: values.supplierDetails?.actual?.shippingBillUrl || "",
+              values.supplierDetails?.actual?.actualSupplierInvoiceValue ||
+              undefined,
+            shippingBillUrl:
+              values.supplierDetails?.actual?.shippingBillUrl || "",
             _id: values.supplierDetails?.actual?._id || undefined,
           },
           _id: values.supplierDetails?._id || undefined,
@@ -657,7 +687,8 @@ export default function EditShipmentPage({ params }: Props) {
           commercialInvoices:
             values.saleInvoiceDetails?.commercialInvoices?.map((inv) => ({
               commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
-              clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || "",
+              clearanceCommercialInvoiceUrl:
+                inv.clearanceCommercialInvoiceUrl || "",
               actualCommercialInvoiceUrl: inv.actualCommercialInvoiceUrl || "",
               saberInvoiceUrl: inv.saberInvoiceUrl || "",
               _id: inv._id || undefined,
@@ -692,16 +723,25 @@ export default function EditShipmentPage({ params }: Props) {
       await putData(`/shipment/update/${params.id}`, payload);
       toast.success("Shipment updated successfully!");
       router.push("../");
-      setTimeout(() => localStorage.removeItem(`shipmentDraft_${params.id}`), 2000);
+      setTimeout(
+        () => localStorage.removeItem(`shipmentDraft_${params.id}`),
+        2000
+      );
       setTimeout(() => window.location.reload(), 5000);
     } catch (error: any) {
       console.error("Error submitting shipment update:", error);
       if (error.response) {
         console.error("Response status:", error.response.status);
         console.error("Response data:", error.response.data);
-        toast.error(`Error updating shipment: ${error.response.data.message || "Server error"}`);
+        toast.error(
+          `Error updating shipment: ${
+            error.response.data.message || "Server error"
+          }`
+        );
       } else {
-        toast.error("Error updating shipment: Network error or server unreachable");
+        toast.error(
+          "Error updating shipment: Network error or server unreachable"
+        );
       }
     } finally {
       setIsLoading(false);
@@ -733,15 +773,18 @@ export default function EditShipmentPage({ params }: Props) {
             bookingNumber: data.bookingDetails?.bookingNumber || "",
             portOfLoading: data.bookingDetails?.portOfLoading || "",
             destinationPort: data.bookingDetails?.destinationPort || "",
-            vesselSailingDate: data.bookingDetails?.vesselSailingDate || undefined,
-            vesselArrivingDate: data.bookingDetails?.vesselArrivingDate || undefined,
+            vesselSailingDate:
+              data.bookingDetails?.vesselSailingDate || undefined,
+            vesselArrivingDate:
+              data.bookingDetails?.vesselArrivingDate || undefined,
             numberOfContainer: data.bookingDetails?.numberOfContainer || 0,
             containers: Array.isArray(data.bookingDetails?.containers)
               ? data.bookingDetails.containers.map((container: any) => ({
                   containerType: container.containerType || "",
                   containerNumber: container.containerNumber || "",
                   truckNumber: container.truckNumber || "",
-                  truckDriverContactNumber: container.truckDriverContactNumber || undefined,
+                  truckDriverContactNumber:
+                    container.truckDriverContactNumber || undefined,
                   addProductDetails: Array.isArray(container.addProductDetails)
                     ? container.addProductDetails.map((product: any) => ({
                         code: product.code || "",
@@ -775,14 +818,16 @@ export default function EditShipmentPage({ params }: Props) {
               data.shippingDetails?.transporterInvoices?.length ||
               0,
             transporterInvoices:
-              data.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
-                invoiceNumber: invoice.invoiceNumber || "",
-                uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
-                date: invoice.date || undefined,
-                valueWithGst: invoice.valueWithGst || undefined,
-                valueWithoutGst: invoice.valueWithoutGst || undefined,
-                _id: invoice._id || "",
-              })) || [],
+              data.shippingDetails?.transporterInvoices?.map(
+                (invoice: any) => ({
+                  invoiceNumber: invoice.invoiceNumber || "",
+                  uploadInvoiceUrl: invoice.uploadInvoiceUrl || "",
+                  date: invoice.date || undefined,
+                  valueWithGst: invoice.valueWithGst || undefined,
+                  valueWithoutGst: invoice.valueWithoutGst || undefined,
+                  _id: invoice._id || "",
+                })
+              ) || [],
             forwarderName:
               data.shippingDetails?.forwarderName &&
               /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
@@ -835,36 +880,43 @@ export default function EditShipmentPage({ params }: Props) {
                 data.supplierDetails?.clearance?.suppliers?.length ||
                 0,
               suppliers:
-                data.supplierDetails?.clearance?.suppliers?.map((supplier: any) => ({
-                  supplierName:
-                    supplier.supplierName &&
-                    /^[0-9a-fA-F]{24}$/.test(supplier.supplierName)
-                      ? supplier.supplierName
-                      : undefined,
-                  noOfInvoices: supplier.noOfInvoices || 0,
-                  invoices:
-                    supplier.invoices?.map((invoice: any) => ({
-                      supplierGSTN: invoice.supplierGSTN || "",
-                      supplierInvoiceNumber: invoice.supplierInvoiceNumber || "",
-                      supplierInvoiceDate: invoice.supplierInvoiceDate || undefined,
-                      supplierInvoiceValueWithGST:
-                        invoice.supplierInvoiceValueWithGST || undefined,
-                      supplierInvoiceValueWithOutGST:
-                        invoice.supplierInvoiceValueWithOutGST || undefined,
-                      clearanceSupplierInvoiceUrl:
-                        invoice.clearanceSupplierInvoiceUrl || "",
-                      _id: invoice._id || "",
-                    })) || [],
-                })) || [],
+                data.supplierDetails?.clearance?.suppliers?.map(
+                  (supplier: any) => ({
+                    supplierName:
+                      supplier.supplierName &&
+                      /^[0-9a-fA-F]{24}$/.test(supplier.supplierName)
+                        ? supplier.supplierName
+                        : undefined,
+                    noOfInvoices: supplier.noOfInvoices || 0,
+                    invoices:
+                      supplier.invoices?.map((invoice: any) => ({
+                        supplierGSTN: invoice.supplierGSTN || "",
+                        supplierInvoiceNumber:
+                          invoice.supplierInvoiceNumber || "",
+                        supplierInvoiceDate:
+                          invoice.supplierInvoiceDate || undefined,
+                        supplierInvoiceValueWithGST:
+                          invoice.supplierInvoiceValueWithGST || undefined,
+                        supplierInvoiceValueWithOutGST:
+                          invoice.supplierInvoiceValueWithOutGST || undefined,
+                        clearanceSupplierInvoiceUrl:
+                          invoice.clearanceSupplierInvoiceUrl || "",
+                        _id: invoice._id || "",
+                      })) || [],
+                  })
+                ) || [],
               _id: data.supplierDetails?.clearance?._id || "",
             },
             actual: {
-              actualSupplierName: data.supplierDetails?.actual?.actualSupplierName || "",
+              actualSupplierName:
+                data.supplierDetails?.actual?.actualSupplierName || "",
               actualSupplierInvoiceUrl:
                 data.supplierDetails?.actual?.actualSupplierInvoiceUrl || "",
               actualSupplierInvoiceValue:
-                data.supplierDetails?.actual?.actualSupplierInvoiceValue || undefined,
-              shippingBillUrl: data.supplierDetails?.actual?.shippingBillUrl || "",
+                data.supplierDetails?.actual?.actualSupplierInvoiceValue ||
+                undefined,
+              shippingBillUrl:
+                data.supplierDetails?.actual?.shippingBillUrl || "",
               _id: data.supplierDetails?.actual?._id || "",
             },
             _id: data.supplierDetails?._id || "",
@@ -890,7 +942,8 @@ export default function EditShipmentPage({ params }: Props) {
                 commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
                 clearanceCommercialInvoiceUrl:
                   inv.clearanceCommercialInvoiceUrl || "",
-                actualCommercialInvoiceUrl: inv.actualCommercialInvoiceUrl || "",
+                actualCommercialInvoiceUrl:
+                  inv.actualCommercialInvoiceUrl || "",
                 saberInvoiceUrl: inv.saberInvoiceUrl || "",
                 _id: inv._id || "",
               })) || [],
@@ -923,7 +976,10 @@ export default function EditShipmentPage({ params }: Props) {
               : [],
         };
 
-        console.log("Mapped form values:", JSON.stringify(updatedValues, null, 2));
+        console.log(
+          "Mapped form values:",
+          JSON.stringify(updatedValues, null, 2)
+        );
         form.reset(updatedValues);
         isInitialLoad.current = false; // Allow autosave after initial load
       } catch (error) {
@@ -958,41 +1014,46 @@ export default function EditShipmentPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Edit Shipment: ${form.watch("bookingDetails.invoiceNumber") || "N/A"}`}
+            title={`Edit Shipment: ${
+              form.watch("bookingDetails.invoiceNumber") || "N/A"
+            }`}
           />
           <p className="text-muted-foreground text-sm">
             Complete the form below to edit shipment details.
           </p>
         </div>
+        <Button
+          className="h-8"
+          type="button"
+          onClick={
+            currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft
+          }
+          disabled={isLoading || isProductDetailsOpen}
+        >
+          {currentStep < steps.length - 1 ? "Save and Next" : "Save and Update"}
+          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
       </div>
       <Separator orientation="horizontal" />
       <div className="w-full">
         <ProgressBar currentStep={currentStep} totalSteps={steps.length} />
       </div>
 
-      {/* New container for Previous and Save and Next buttons */}
-      <div className="flex justify-between items-center mb-4">
-        <Button
-          type="button"
-          onClick={() => setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)}
-          disabled={currentStep === 0 || isLoading}
-          className={`${currentStep === 0 ? "invisible" : ""} h-8`}
-        >
-          Previous
-        </Button>
-        <Button
-          className="h-8"
-          type="button"
-          onClick={currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft}
-          disabled={isLoading || isProductDetailsOpen}
-        >
-          {currentStep < steps.length - 1 ? "Update and Next" : "Update Shipment"}
-          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
-        </Button>
-      </div>
-
       <FormProvider {...form}>
         <form className="flex flex-col gap-3 w-full p-3">
+          <div className="flex justify-between mt-4">
+            <Button
+              type="button"
+              onClick={() =>
+                setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
+              }
+              disabled={currentStep === 0 || isLoading}
+              className={`${currentStep === 0 ? "invisible" : ""} h-8`}
+            >
+              Previous
+            </Button>
+          </div>
+
           <div className="flex justify-between">
             <Heading className="text-xl" title={steps[currentStep].name} />
             <p className="text-sm text-muted-foreground">

@@ -339,7 +339,8 @@ export function ShippingBillDetails({
                               <PopoverTrigger asChild>
                                 <FormControl>
                                   <Button variant="outline">
-                                    {field.value && !isNaN(new Date(field.value).getTime())
+                                    {field.value &&
+                                    !isNaN(new Date(field.value).getTime())
                                       ? format(new Date(field.value), "PPPP")
                                       : "Pick a date"}
                                     <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -350,7 +351,8 @@ export function ShippingBillDetails({
                                 <Calendar
                                   mode="single"
                                   selected={
-                                    field.value && !isNaN(new Date(field.value).getTime())
+                                    field.value &&
+                                    !isNaN(new Date(field.value).getTime())
                                       ? new Date(field.value)
                                       : undefined
                                   }
@@ -432,6 +434,19 @@ export function ShippingBillDetails({
                 ))}
               </TableBody>
             </Table>
+          </div>
+
+          {/* Save and Next Button */}
+          <div className="col-span-4 flex justify-end mt-4">
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isLoading}
+              className="h-8"
+            >
+              Save and Next
+              {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+            </Button>
           </div>
         </>
       )}

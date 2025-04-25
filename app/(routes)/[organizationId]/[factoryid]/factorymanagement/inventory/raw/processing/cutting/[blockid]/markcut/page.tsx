@@ -54,12 +54,12 @@ export default async function MarkCutPage(params: Props) {
                 {/* <CreateNewLotButton /> */}
             </div>
             <Separator orientation="horizontal" />
-            <div className="container mx-auto  py-1">
+            <div className="container mx-auto  py-10">
 
                 {BlockData ?
                     <MarkCutAndCreateSlabsForm gap={3} BlockData={BlockData} />
                     :
-                    <div className="flex flex-col gap-1 items-center justify-center h-full">
+                    <div className="flex flex-col gap-2 items-center justify-center h-full">
 
                         <p className="text-muted-foreground text-lg">No Category Found</p>
                         {/* <Button onClick={() => router.back()} variant='default'>Go Back</Button> */}

@@ -113,7 +113,7 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
-                  <TableRow>
+                <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Type
                   </TableCell>
@@ -146,18 +146,6 @@ export default async function BlocksPage({ params }: Props) {
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Operator:
-                  </TableCell>
-                  <TableCell>{LotData?.markerOperatorName}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                 Qarry cost
-                  </TableCell>
-                  <TableCell>{LotData?.markerOperatorName}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                Comission cost
                   </TableCell>
                   <TableCell>{LotData?.markerOperatorName}</TableCell>
                 </TableRow>

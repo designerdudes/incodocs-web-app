@@ -29,6 +29,11 @@ import {
   Table,
 } from "@/components/ui/table";
 
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
 export function OtherDetails({ saveProgress }: SaveDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
@@ -52,14 +57,14 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
     );
     setOtherDetails(newDetails);
     setValue("otherDetails", newDetails);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const handleDeleteDetail = (index: number) => {
     const updatedDetails = otherDetails.filter((_: any, i: number) => i !== index);
     setOtherDetails(updatedDetails);
     setValue("otherDetails", updatedDetails);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -75,7 +80,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
       const data = await response.json();
       const storageUrl = data.storageLink;
       setValue(fieldName, storageUrl);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -140,7 +145,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <Input
                             placeholder="e.g., coo"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         </FormControl>
                       )}
@@ -156,7 +161,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                             placeholder="e.g., hfsd89"
                             className="uppercase"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                             required // Enforce required field
                           />
                         </FormControl>
@@ -186,7 +191,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
-                                  saveProgress(getValues());
+                                  saveProgressSilently(getValues());
                                 }}
                               />
                             </PopoverContent>
@@ -205,7 +210,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <Input
                             placeholder="e.g., don't know"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         </FormControl>
                       )}
@@ -253,7 +258,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <Textarea
                             placeholder="e.g., this is some random comment"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         </FormControl>
                       )}
