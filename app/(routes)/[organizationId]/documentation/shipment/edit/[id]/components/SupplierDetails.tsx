@@ -1,6 +1,6 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormField,
@@ -32,7 +32,6 @@ import { Textarea } from "@/components/ui/textarea";
 import SupplierForm from "@/components/forms/Addsupplierform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import EntityCombobox from "@/components/ui/EntityCombobox";
-import { Icons } from "@/components/ui/icons";
 
 interface SupplierDetailsProps {
   shipmentId: string;
@@ -50,21 +49,23 @@ interface Invoice {
   id?: string;
 }
 
-export function SupplierDetails({
-  shipmentId,
-  saveProgress,
-  onSectionSubmit,
-}: SupplierDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+export function SupplierDetails({ shipmentId }: SupplierDetailsProps) {
+  const { control, setValue, handleSubmit, watch, getValues } =
+    useFormContext();
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "supplierDetails.clearance.invoices",
+  });
   const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
   >([]);
-  const [uploading, setUploading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [shippingBills, setShippingBills] = useState<{ _id: string; name: string }[]>([]);
   const GlobalModal = useGlobalModal();
 
-  // Watch form values
-  const formValues = watch("supplierDetails") || {};
+  // Watch form values for debugging
+  const formValues = watch("supplierDetails");
+  console.log("Current Supplier Details Values:", formValues);
 
   // Manage suppliers with useFieldArray
   const {
@@ -100,36 +101,35 @@ export function SupplierDetails({
     fetchData();
   }, []);
 
-  // Autosave form data when supplierDetails changes
-  useEffect(() => {
-    if (formValues) {
-      saveProgress({ supplierDetails: formValues });
-    }
-  }, [formValues, saveProgress]);
-
-  // Handle File Upload
-  const handleFileUpload = async (file: File, fieldName: string) => {
-    if (!file) return;
-    setUploading(true);
+  // Update API Call
+  const onSubmit = async (data: any) => {
+    console.log("Submitting Supplier Details:", data.supplierDetails);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
       const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+        "http://localhost:4080/shipment/supplier-details",
         {
-          method: "POST",
-          body: formData,
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            shipmentId,
+            supplierDetails: data.supplierDetails,
+          }),
         }
       );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
-      setValue(fieldName, data.storageLink, { shouldDirty: true });
-      toast.success("File uploaded successfully!");
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to update supplier details: ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log("API Response:", responseData);
+      toast.success("Supplier details updated successfully!");
     } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload file");
-    } finally {
-      setUploading(false);
+      console.error("Error updating supplier details:", error);
+      toast.error(`Failed to update supplier details`);
     }
   };
 
@@ -143,32 +143,16 @@ export function SupplierDetails({
           )
             .then((res) => res.json())
             .then((data) => {
-              setSupplierNames(
-                Array.isArray(data)
-                  ? data.map((supplier: any) => ({
-                      _id: supplier._id,
-                      name: supplier.supplierName,
-                    }))
-                  : []
-              );
+              const mappedSuppliers = data.map((supplier: any) => ({
+                _id: supplier._id,
+                name: supplier.supplierName,
+              }));
+              setSupplierNames(mappedSuppliers);
             });
         }}
       />
     );
     GlobalModal.onOpen();
-  };
-
-  // Handle section submission
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSectionSubmit();
-    } catch (error) {
-      console.error("Error submitting Supplier Details:", error);
-      toast.error("Failed to submit Supplier Details");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -527,113 +511,62 @@ export function SupplierDetails({
         </React.Fragment>
       ))}
 
-      {/* Actual Supplier Details */}
-      <FormField
-        control={control}
-        name="supplierDetails.actual.actualSupplierName"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Actual Supplier Name</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. Actual Supplier Inc."
-                {...field}
-                value={field.value ?? ""}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid grid-cols-4 gap-3">
+        {/* Actual Supplier Details */}
+        <FormField
+          control={control}
+          name="supplierDetails.actual.actualSupplierName"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual Supplier Name</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="eg. Actual Supplier Inc."
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={control}
-        name="supplierDetails.actual.actualSupplierInvoiceValue"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Actual Supplier Invoice Value</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="eg. 6000"
-                {...field}
-                value={field.value ?? ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value ? parseFloat(e.target.value) : undefined
-                  )
-                }
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={control}
+          name="supplierDetails.actual.actualSupplierInvoiceValue"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Actual Supplier Invoice Value</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="eg. 6000"
+                  {...field}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-      <FormField
-        control={control}
-        name="supplierDetails.actual.actualSupplierInvoiceUrl"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Upload Actual Supplier Invoice</FormLabel>
-            <FormControl>
-              <div className="flex items-center gap-2">
-                {field.value ? (
-                  <div className="flex flex-col gap-2">
-                    <a
-                      href={field.value}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Uploaded File
-                    </a>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setValue(
-                          "supplierDetails.actual.actualSupplierInvoiceUrl",
-                          "",
-                          { shouldDirty: true }
-                        )
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleFileUpload(
-                            file,
-                            "supplierDetails.actual.actualSupplierInvoiceUrl"
-                          );
-                        }
-                      }}
-                      disabled={uploading}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-white bg-blue-500 hover:bg-blue-600"
-                      disabled={uploading}
-                    >
-                      <UploadCloud className="w-5 h-5 mr-2" />
-                      {uploading ? "Uploading..." : "Upload"}
-                    </Button>
-                  </>
-                )}
-              </div>
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+        <FormField
+          control={control}
+          name="supplierDetails.actual.actualSupplierInvoiceUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload Actual Supplier Invoice</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
       <FormField
         control={control}
@@ -684,6 +617,6 @@ export function SupplierDetails({
           {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }

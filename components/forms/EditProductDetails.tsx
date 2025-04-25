@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import * as z from "zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -12,7 +12,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Icons } from "@/components/ui/icons";
+import toast from "react-hot-toast";
 import {
   Dialog,
   DialogContent,
@@ -58,6 +67,8 @@ const formSchema = z.object({
     .number()
     .min(0, "Cubic Measurement must be non-negative")
     .optional(),
+  slabThickness: z.number().nonnegative().optional(),
+  slabDocument: z.any().optional(),
 });
 
 type FormValues = AddProductDetails;
@@ -66,8 +77,8 @@ interface EditProductDetailsFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   containerIndex: number;
-  initialValues: FormValues;
-  onSubmit: (data: FormValues, containerIndex: number) => void;
+  initialValues: z.infer<typeof formSchema>;
+  onSubmit: (data: z.infer<typeof formSchema>, containerIndex: number) => void;
 }
 
 export default function EditProductDetailsForm({
@@ -129,12 +140,23 @@ export default function EditProductDetailsForm({
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();
-      form.handleSubmit(handleSubmit)();
+      form.handleSubmit((values) => handleSubmit(event, values))();
     }
   };
 
-  // Disable submit button until form is valid
-  const isFormValid = form.formState.isValid;
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (trimmed && !productCategories.includes(trimmed)) {
+      setProductCategories([...productCategories, trimmed]);
+      setSelectedCategory(trimmed);
+      form.setValue("productCategory", trimmed);
+      toast.success("Category added!");
+      setNewCategory("");
+      setOpenAddCategory(false);
+    } else {
+      toast.error("Invalid or duplicate category.");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -144,18 +166,45 @@ export default function EditProductDetailsForm({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleSubmit)}
+            onSubmit={(event) => form.handleSubmit((values) => handleSubmit(event, values))(event)}
             onKeyDown={handleKeyDown}
             className="grid gap-4"
           >
+            {/* Category */}
             <FormField
               control={form.control}
-              name="code"
+              name="productCategory"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Code</FormLabel>
+                  <FormLabel>Product Category</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., PROD001" {...field} />
+                    <Select
+                      value={field.value || undefined}
+                      onValueChange={(value) => {
+                        if (value === "__add_new__") {
+                          setOpenAddCategory(true);
+                        } else {
+                          field.onChange(value);
+                          setSelectedCategory(value);
+                          setSelectedSubcategory(value === "Ceramic" ? "Tiles" : "");
+                          form.setValue("graniteAndMarble", "");
+                        }
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {productCategories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                        <SelectItem value="__add_new__" className="text-blue-600">
+                          + Add Another Category
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -350,22 +399,33 @@ export default function EditProductDetailsForm({
               )}
             />
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || !isFormValid}>
-                {isLoading && (
-                  <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
-                )}
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Icons.spinner className="h-4 w-4 animate-spin mr-2" />}
                 Save Changes
               </Button>
             </DialogFooter>
           </form>
         </Form>
+
+        {/* Add Category Modal */}
+        <Dialog open={openAddCategory} onOpenChange={setOpenAddCategory}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+            </DialogHeader>
+            <Input
+              placeholder="Enter new category"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+            />
+            <DialogFooter>
+              <Button onClick={handleAddCategory}>Add</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </DialogContent>
     </Dialog>
   );

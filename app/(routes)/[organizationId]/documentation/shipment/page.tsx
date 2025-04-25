@@ -14,7 +14,7 @@ export default async function Page() {
 
 
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
+        `https://incodocs-server.onrender.com/shipment/getbyorg/6807774fa15655f599f89aa1`,
         {
             method: "GET",
             headers: {

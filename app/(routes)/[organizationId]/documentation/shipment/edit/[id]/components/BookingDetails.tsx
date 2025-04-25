@@ -66,15 +66,11 @@ interface ProductDetails {
 
 interface BookingDetailsProps {
   shipmentId: string;
-  saveProgress: (data: any) => void;
-  onSectionSubmit: () => Promise<void>;
-  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
+  onProductDetailsOpenChange?: (open: boolean) => void;
 }
 
 export function BookingDetails({
   shipmentId,
-  saveProgress,
-  onSectionSubmit,
   onProductDetailsOpenChange,
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
@@ -132,7 +128,7 @@ export function BookingDetails({
       shouldValidate: true,
     });
 
-    const currentContainers = containers || [];
+    const currentContainers = formValues.containers || [];
     if (value > currentContainers.length) {
       const newContainers = Array(value - currentContainers.length)
         .fill(null)
@@ -140,7 +136,25 @@ export function BookingDetails({
           containerNumber: "",
           truckNumber: "",
           truckDriverContactNumber: undefined,
-          addProductDetails: [],
+          addProductDetails: [
+            {
+              productCategory: "",
+              graniteAndMarble: "",
+              tiles: {
+                noOfBoxes: 0,
+                noOfPiecesPerBoxes: 0,
+                sizePerTile: {
+                  length: { value: 0, units: "inch" },
+                  breadth: { value: 0, units: "inch" },
+                },
+              },
+              slabType: "",
+              slabLength: { value: undefined, units: "inch" },
+              slabBreadth: { value: undefined, units: "inch" },
+              slabThickness: undefined,
+              slabDocument: undefined,
+            },
+          ],
         }));
       append(newContainers);
     } else if (value < currentContainers.length) {
@@ -192,8 +206,9 @@ export function BookingDetails({
     };
 
     setValue("bookingDetails.containers", updatedContainers, {
-      shouldDirty: true,
-      shouldValidate: true,
+      shouldDirty: false,
+      shouldValidate: false,
+      shouldTouch: false,
     });
 
     // Map AddProductDetails to ProductDetails for caching
