@@ -39,7 +39,7 @@ export default function CreateNewShipmentFormPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const orgid = useParams().organizationId;
-  console.log("orgid", orgid);
+  const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
 
   const steps = [
     {
@@ -49,6 +49,7 @@ export default function CreateNewShipmentFormPage() {
         <BookingDetails
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
+          setInvoiceNumber={setInvoiceNumber}
         />
       ),
     },
@@ -212,7 +213,9 @@ export default function CreateNewShipmentFormPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Create New Shipment" />
+          <Heading className="leading-tight"
+            title={`Create New Shipment${invoiceNumber ? ` — ${invoiceNumber}` : ""}`}
+          />
           <p className="text-muted-foreground text-sm">
             Complete the form below to add a new shipment.
           </p>
@@ -258,6 +261,8 @@ export default function CreateNewShipmentFormPage() {
             <BookingDetails
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
+              setInvoiceNumber={setInvoiceNumber}
+
             />
           )}
           {steps[currentStep].id === 2 && (

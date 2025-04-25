@@ -7,28 +7,32 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
+import { useParams } from "next/navigation";
 
-export default async function Page() {
+interface params {
+  params: {
+    organizationId: string
+  }
+}
+
+export default async function Page(params: params) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    ).then((response) => {
-        return response.json();
-    });
-    let shipmentData;
-    shipmentData = res;
-    console.log("shipmentData", shipmentData);
-
+  const res = await fetch(
+    `https://incodocs-server.onrender.com/shipment/getbyorg/${params.params.organizationId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+  console.log(res)
+  let shipmentData;
+  shipmentData = res;
 
   return (
     <div className="flex flex-col p-6">
@@ -63,16 +67,16 @@ export default async function Page() {
                     columns={columns}
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 /> */}
-                <ShipmentDataTable
-                columns={columns as any}
-                data={shipmentData}
-                searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
-                bulkDeleteIdName="_id"
-                 deleteRoute="shipment/deleteall"
+        <ShipmentDataTable
+          columns={columns as any}
+          data={shipmentData}
+          searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
+          bulkDeleteIdName="_id"
+          deleteRoute="shipment/deleteall"
 
-                />
-            </div>
-        </div>
-    );
+        />
+      </div>
+    </div>
+  );
 
 }
