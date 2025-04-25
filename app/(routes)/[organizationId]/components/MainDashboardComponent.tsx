@@ -34,9 +34,9 @@ interface Address {
 interface Organization {
   _id: string;
   name: string;
+  prefix: string;
   owner: string;
   address: Address;
-  description?: string;
   members: any[];
   shipments: any[];
   factory: any[];
@@ -64,19 +64,20 @@ interface UserDataProps {
   userData: User | null;
 }
 
+
 // Form component for creating an organization
 const CreateOrgForm: React.FC<{
   initialData: {
     name: string;
-    description: string;
+    prefix: string;
     address: Address;
-    owner: string;
+    owner: any;
   };
   onSubmit: (data: {
     name: string;
-    description: string;
+    prefix: string;
     address: Address;
-    owner: string;
+    owner: any;
   }) => void;
   error: string | null;
   token: string;
@@ -92,7 +93,8 @@ const CreateOrgForm: React.FC<{
   const openAddFactoryModal = () => {
     if (organizations.length === 0) {
       modal.title = "No Organizations Available";
-      modal.description = "Please create an organization before adding a factory.";
+      modal.description =
+        "Please create an organization before adding a factory.";
       modal.children = (
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -138,6 +140,15 @@ const CreateOrgForm: React.FC<{
         />
       </div>
       <div>
+        <Label htmlFor="prefix">Prefix</Label>
+        <Input
+          id="prefix"
+          value={formData.prefix}
+          onChange={(e) => setFormData({ ...formData, prefix: e.target.value })}
+          placeholder="e.g., NJO"
+        />
+      </div>
+      <div>
         <Label htmlFor="location">Address </Label>
         <Input
           id="location"
@@ -168,25 +179,25 @@ const CreateOrgForm: React.FC<{
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-center gap-4">
         <Button onClick={handleSubmit}>Submit Organization</Button>
-        <Button onClick={openAddFactoryModal} >
-          <FiPlus className="mr-2 h-4 w-4" /> Add Factory
-        </Button>
       </div>
     </div>
   );
 };
 
-const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any) => {
+const MainDashboardComponent: React.FC<UserDataProps> = ({
+  token,
+  userData,
+}: any) => {
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState(
     userData?.ownedOrganizations || []
-  ) as any
+  ) as any;
 
   const [newOrg, setNewOrg] = useState({
     name: "",
-    description: "",
+    prefix: "",
     owner: userData?._id || "",
     address: {
       location: "",
@@ -197,7 +208,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
 
   const handleCreateOrg = async (formData: {
     name: string;
-    description: string;
+    prefix: string,
     address: Address;
     owner: string;
   }) => {
@@ -242,10 +253,11 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     modal.onOpen();
   };
 
-  const openAddFactoryModal = (orgID:any) => {
+  const openAddFactoryModal = (orgID: any) => {
     if (organizations.length === 0) {
       modal.title = "No Organizations Available";
-      modal.description = "Please create an organization before adding a factory.";
+      modal.description =
+        "Please create an organization before adding a factory.";
       modal.children = (
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -264,7 +276,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
       <FactoryForm
         organizationId={orgID}
         token={token}
-        organizations={organizations.map((org: { _id: any; name: any; }) => ({
+        organizations={organizations.map((org: { _id: any; name: any }) => ({
           id: org._id,
           name: org.name,
         }))}
@@ -273,7 +285,33 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     modal.onOpen();
   };
 
-
+  const handleCardClick = async (orgId: string) => {
+    try {
+      const factoryResponse = await fetch(
+        `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!factoryResponse.ok) {
+        throw new Error("Failed to fetch factory data");
+      }
+      const factoryData = await factoryResponse.json();
+      const factories = factoryData;
+      console.log("factories", factories);
+      if (factories.length === 0) {
+        console.log("No factories found for this organization.");
+        router.push(`/${orgId}/dashboard`);
+      }
+      const firstFactoryId = factories[0]._id;
+      router.push(`/${orgId}/${firstFactoryId}/dashboard`);
+    } catch (err) {
+      console.error("Error fetching factory data:", err);
+      router.push(`/${orgId}/dashboard`);
+    }
+  };
 
   const [orgSearch, setOrgSearch] = useState("");
 
@@ -281,8 +319,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     if (orgSearch === "") {
       setOrganizations(userData.ownedOrganizations);
     }
-  }
-    , [userData, orgSearch]);
+  }, [userData, orgSearch]);
 
   return (
     <main className="flex h-full flex-col  p-10">
@@ -291,62 +328,57 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
           name: userData.fullName || "",
           email: userData.email || "",
         }}
-
       />
-   { 
-     <div className="text-center my-10">
-        <Heading
-          className="text-4xl font-bold text-gray-800"
-          title="Your Organizations"
-        />
-        <p className="text-lg mt-4 text-gray-600">
-          Choose the organization you want to continue with.
-        </p>
-        <div className="mt-4 flex flex-row items-center justify-center gap-4">
-
-          <div className="relative bg-white">
-            <Input className={cn(
-              "peer w-[550px] ps-9",
-              orgSearch && "pe-9"
-            )}
-              value={orgSearch}
-              onChange={(e) => {
-                setOrgSearch(e.target.value);
-                setOrganizations(
-                  organizations.filter((org: { name: string; }) =>
-                    org.name
-                      .toLowerCase()
-                      .includes(e.target.value.toLowerCase())
-                  )
-                )
-              }
-              }
-              placeholder="Search for an organization"
-              type="text"
-            />
-            <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
-              <Search size={16} aria-hidden="true" />
-            </div>
-            {orgSearch && (
-              <button
-                className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
-                aria-label="Clear filter"
-                onClick={() => {
-                  setOrgSearch("");
-                  setOrganizations(userData.ownedOrganizations);
+      {
+        <div className="text-center my-10">
+          <Heading
+            className="text-4xl font-bold text-gray-800"
+            title="Your Organizations"
+          />
+          <p className="text-lg mt-4 text-gray-600">
+            Choose the organization you want to continue with.
+          </p>
+          <div className="mt-4 flex flex-row items-center justify-center gap-4">
+            <div className="relative bg-white">
+              <Input
+                className={cn("peer w-[550px] ps-9", orgSearch && "pe-9")}
+                value={orgSearch}
+                onChange={(e) => {
+                  setOrgSearch(e.target.value);
+                  setOrganizations(
+                    organizations.filter((org: { name: string }) =>
+                      org.name
+                        .toLowerCase()
+                        .includes(e.target.value.toLowerCase())
+                    )
+                  );
                 }}
-              >
-                <CircleXIcon size={16} aria-hidden="true" />
-              </button>
-            )}
-          </div>
-          <span className="text-sm text-gray-500">--or--</span>
+                placeholder="Search for an organization"
+                type="text"
+              />
+              <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
+                <Search size={16} aria-hidden="true" />
+              </div>
+              {orgSearch && (
+                <button
+                  className="text-muted-foreground/80 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 absolute inset-y-0 end-0 flex h-full w-9 items-center justify-center rounded-e-md transition-[color,box-shadow] outline-none focus:z-10 focus-visible:ring-[3px] disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Clear filter"
+                  onClick={() => {
+                    setOrgSearch("");
+                    setOrganizations(userData.ownedOrganizations);
+                  }}
+                >
+                  <CircleXIcon size={16} aria-hidden="true" />
+                </button>
+              )}
+            </div>
+            <span className="text-sm text-gray-500">--or--</span>
             <Button onClick={openCreateOrgModal}>
               <FiPlus className="mr-2 h-4 w-4" /> Create Organization
             </Button>
-
+          </div>
         </div>
-      </div>}
+      }
 
       <div className="grid h-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {organizations && organizations.length > 0 ? (
@@ -354,7 +386,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
             <Card
               key={org._id}
               className="bg-white dark:bg-card h-full flex flex-col cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              onClick={() => router.push(`/${org._id}/dashboard`)}
+              onClick={() => handleCardClick(org._id)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">
@@ -372,22 +404,22 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                 <p className="text-sm text-gray-500">
                   {org.members.length} Members
                 </p>
-               <Separator className="my-4" />
-               <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-500">
-                  Quick Links to Factories
-                </p>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAddFactoryModal(org._id);
-                  }}
-                >
-                  <FiPlus className="h-4 w-4" />
-                </Button>
-              </div>
+                <Separator className="my-4" />
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-500">
+                    Quick Links to Factories
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="h-8 w-8 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAddFactoryModal(org._id);
+                    }}
+                  >
+                    <FiPlus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="flex flex-row gap-2">
                   {org.factory && org.factory.length > 0 ? (
                     org.factory.map((factory: any) => (
@@ -397,9 +429,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                         className="text-left text-sm text-gray-500 hover:text-gray-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(
-                            `/${org._id}/${factory._id}/dashboard`
-                          );
+                          router.push(`/${org._id}/${factory._id}/dashboard`);
                         }}
                       >
                         {factory.factoryName}
@@ -410,8 +440,6 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                       No factories available.
                     </p>
                   )}
-                  
-                 
                 </div>
               </CardContent>
             </Card>
@@ -420,16 +448,17 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
           <div className="col-span-full flex flex-col my-8 h-full justify-center items-center gap-4 text-center">
             {/* Add Svg */}
             <Heading
-          className="text-3xl font-bold text-gray-800"
-          title="No Organizations Found"
-        />
-        <p className="text-lg text-gray-600">
-          You don&apos;t have any organizations yet. Create one to get started.
+              className="text-3xl font-bold text-gray-800"
+              title="No Organizations Found"
+            />
+            <p className="text-lg text-gray-600">
+              You don&apos;t have any organizations yet. Create one to get
+              started.
             </p>
-        
-              <Button onClick={openCreateOrgModal}>
-                <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-              </Button>
+
+            <Button onClick={openCreateOrgModal}>
+              <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+            </Button>
             {createOrgError && (
               <p className="text-sm text-red-600 mt-2">{createOrgError}</p>
             )}

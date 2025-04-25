@@ -169,7 +169,8 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value && !isNaN(new Date(field.value).getTime()) ? (
+                                  {field.value &&
+                                  !isNaN(new Date(field.value).getTime()) ? (
                                     format(new Date(field.value), "PPPP")
                                   ) : (
                                     <span>Pick a date</span>
@@ -178,15 +179,21 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={
-                                  field.value && !isNaN(new Date(field.value).getTime())
+                                  field.value &&
+                                  !isNaN(new Date(field.value).getTime())
                                     ? new Date(field.value)
                                     : undefined
                                 }
-                                onSelect={(date) => field.onChange(date?.toISOString())}
+                                onSelect={(date) =>
+                                  field.onChange(date?.toISOString())
+                                }
                               />
                             </PopoverContent>
                           </Popover>

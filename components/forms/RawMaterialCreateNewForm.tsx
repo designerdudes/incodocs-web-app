@@ -49,14 +49,6 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
-  quarryCost: z
-    .number()
-    .min(1, { message: "Quarry cost must be greater than or equal to zero" })
-    .optional(),
-  commissionCost: z
-    .number()
-    .min(1, { message: "Commission cost must be greater than or equal to zero" })
-    .optional(),
   markerOperatorName: z
     .string()
     .min(1, { message: "Marker name is required" })
@@ -466,9 +458,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
       </FormItem>
     )}
   />
-</div> 
-
-
+</div>           </div>
 
           <div className="grid grid-cols-4 gap-3">
             <div>

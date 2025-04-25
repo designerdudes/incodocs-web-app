@@ -46,13 +46,13 @@ const formSchema = z.object({
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
-              .min(0, { message: "Length must be greater than zero" }),
+              .min(0.1, { message: "Length must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
-              .min(0, { message: "Height must be greater than zero" }),
+              .min(0.1, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           status: z.literal("readyForPolish").default("readyForPolish"),
@@ -83,8 +83,8 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
       slabs: BlockData?.slabs || [
         {
           dimensions: {
-            length: { value: "", units: "inch" },
-            height: { value: "", units: "inch" },
+            length: { value: 0.1, units: "inch" },
+            height: { value: 0.1, units: "inch" },
             status: "readyForPolish",
           },
         },
@@ -128,8 +128,8 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
         fieldName: "slabs",
         createNewItem: () => ({
           dimensions: {
-            length: { value: "", units: "inch" },
-            height: { value: "", units: "inch" },
+            length: { value: 0.1, units: "inch" },
+            height: { value: 0.1, units: "inch" },
             status: "readyForPolish",
           },
         }),
@@ -173,10 +173,10 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
         dimensions: {
           ...slab.dimensions,
           length: applyLengthToAll
-            ? { value: parseFloat(globalLength) || 0, units: "inch" }
+            ? { value: parseFloat(globalLength) || 0.1, units: "inch" }
             : slab.dimensions.length,
           height: applyHeightToAll
-            ? { value: parseFloat(globalHeight) || 0, units: "inch" }
+            ? { value: parseFloat(globalHeight) || 0.1, units: "inch" }
             : slab.dimensions.height,
           status: slab.dimensions.status,
         },
@@ -269,7 +269,6 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
               <Input
                 placeholder="Length (inches)"
                 type="number"
-                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
                 disabled={isLoading}
@@ -289,7 +288,6 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
               <Input
                 placeholder="Height (inches)"
                 type="number"
-                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 disabled={isLoading}
@@ -330,15 +328,14 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                             <FormControl>
                               <Input
                                 type="number"
-                                // min="0.1"
-                                // step="0.1"
+                                min="0.1"
+                                step="0.1"
                                 placeholder="Enter length"
-                                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.length.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.length.value =
-                                    parseFloat(e.target.value) ;
+                                    parseFloat(e.target.value) || 0.1;
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
@@ -362,15 +359,14 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                             <FormControl>
                               <Input
                                 type="number"
-                                // min="0.1"
-                                // step="0.1"
+                                min="0.1"
+                                step="0.1"
                                 placeholder="Enter height"
-                                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.height.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.height.value =
-                                    parseFloat(e.target.value) ;
+                                    parseFloat(e.target.value) || 0.1;
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,

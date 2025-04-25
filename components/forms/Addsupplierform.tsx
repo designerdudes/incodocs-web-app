@@ -16,7 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { useParams } from "next/navigation";
 
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
@@ -42,7 +41,7 @@ interface SupplierFormProps {
 
 export default function SupplierForm({ onSuccess }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const organizationId = useParams().organizationId as string;
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,7 +73,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             mobileNumber: values.mobileNumber,
             state: values.state,
             factoryAddress: values.factoryAddress,
-            organizationId,
+            organizationId: "674b0a687d4f4b21c6c980ba",
           }),
         }
       );

@@ -272,7 +272,6 @@ export function MarkCutAndCreateSlabsForm({
               <Input
                 placeholder="Length (inches)"
                 type="number"
-                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
                 disabled={isLoading}
@@ -292,7 +291,6 @@ export function MarkCutAndCreateSlabsForm({
               <Input
                 placeholder="Height (inches)"
                 type="number"
-                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 disabled={isLoading}
@@ -335,7 +333,6 @@ export function MarkCutAndCreateSlabsForm({
                                 type="number"
                                 min="0.1"
                                 step="0.1"
-                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 placeholder="Enter length"
                                 value={slab.dimensions.length.value}
                                 onChange={(e) => {
@@ -367,7 +364,6 @@ export function MarkCutAndCreateSlabsForm({
                                 type="number"
                                 min="0.1"
                                 step="0.1"
-                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 placeholder="Enter height"
                                 value={slab.dimensions.height.value}
                                 onChange={(e) => {
