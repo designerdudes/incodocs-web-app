@@ -28,6 +28,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
+import { Icons } from "@/components/ui/icons";
+
 
 interface ShippingBillDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;

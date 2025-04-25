@@ -18,7 +18,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
 import { postData } from "@/axiosUtility/api";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
 
@@ -389,7 +389,7 @@ export default function CreateNewFormPage() {
           },
         },
         otherDetails: values.otherDetails || [],
-        organizationId,
+        organizationId: values,
       };
       await postData("/shipment/add/", payload);
       toast.success("Shipment created successfully!");
