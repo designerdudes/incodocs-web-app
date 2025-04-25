@@ -32,8 +32,6 @@ export default async function Page() {
 
     const userData = await res.json();
 
-
-   
     return <MainDashboardComponent token={token} userData={userData} />;
   } catch (error) {
     console.error('Error fetching user data:', error);
