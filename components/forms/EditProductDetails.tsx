@@ -23,11 +23,12 @@ import {
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
-// Define AddProductDetails type inline (same as BookingDetails.tsx)
+// Define AddProductDetails type inline
 interface AddProductDetails {
+  productId?: string; // Optional, to align with BookingDetails.tsx
   code: string;
   HScode: string;
-  dscription: string;
+  description: string; // Changed from dscription
   unitOfMeasurements?: string;
   countryOfOrigin?: string;
   variantName?: string;
@@ -41,9 +42,10 @@ interface AddProductDetails {
 
 // Define the form schema based on AddProductDetails
 const formSchema = z.object({
+  productId: z.string().optional(),
   code: z.string().min(1, "Product Code is required"),
   HScode: z.string().min(1, "HS Code is required"),
-  dscription: z.string().min(1, "Description is required"),
+  description: z.string().min(1, "Description is required"), // Changed from dscription
   unitOfMeasurements: z.string().optional(),
   countryOfOrigin: z.string().optional(),
   variantName: z.string().optional(),
@@ -58,7 +60,7 @@ const formSchema = z.object({
     .optional(),
 });
 
-type FormValues = AddProductDetails; // Use AddProductDetails directly
+type FormValues = AddProductDetails;
 
 interface EditProductDetailsFormProps {
   open: boolean;
@@ -81,9 +83,10 @@ export default function EditProductDetailsForm({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      productId: initialValues.productId || "",
       code: initialValues.code || "",
       HScode: initialValues.HScode || "",
-      dscription: initialValues.dscription || "",
+      description: initialValues.description || "", // Changed from dscription
       unitOfMeasurements: initialValues.unitOfMeasurements || "",
       countryOfOrigin: initialValues.countryOfOrigin || "",
       variantName: initialValues.variantName || "",
@@ -103,7 +106,7 @@ export default function EditProductDetailsForm({
 
   const handleSubmit = async (values: FormValues) => {
     // Double-check required fields (redundant due to Zod, but for safety)
-    if (!values.code.trim() || !values.HScode.trim() || !values.dscription.trim()) {
+    if (!values.code.trim() || !values.HScode.trim() || !values.description.trim()) {
       toast.error("Please fill in all required fields (Code, HS Code, Description).");
       return;
     }
@@ -173,7 +176,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="dscription"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
