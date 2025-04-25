@@ -1,55 +1,53 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
-
 
 @layer base {
   :root {
     --background: 240.00 71.43% 98.63%;
     --foreground: 240.00 37.50% 6.27%;
-    
+
     --primary: 240.50 62.30% 62.55%;
     --primary-foreground: 0.00 0.00% 100.00%;
-    
+
     --card: 240.00 71.43% 98.63%;
     --card-foreground: 240.00 37.50% 6.27%;
-    
+
     --popover: 0.00 0.00% 100.00%;
     --popover-foreground: 240.00 37.50% 6.27%;
-    
+
     --secondary: 240.00 64.29% 94.51%;
     --secondary-foreground: 226.15 37.14% 13.73%;
-    
+
     --muted: 240.00 57.89% 96.27%;
     --muted-foreground: 0.00 0.00% 40.00%;
-     
+
     --accent: 240.00 57.89% 96.27%;
     --accent-foreground: 240.50 62.30% 62.55%;
-    
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    
+
     --border: 0.00 0.00% 90.20%;
     --input: 0.00 0.00% 90.20%;
     --ring: 240.50 62.30% 62.55%;
-    
+
     --radius: 0.5rem;
-    
+
     --sidebar-background: 0 0% 98%;
-    
+
     --sidebar-foreground: 240 5.3% 26.1%;
-    
+
     --sidebar-primary: 240 5.9% 10%;
-    
+
     --sidebar-primary-foreground: 0 0% 98%;
-    
+
     --sidebar-accent: 240 4.8% 95.9%;
-    
+
     --sidebar-accent-foreground: 240 5.9% 10%;
-    
+
     --sidebar-border: 220 13% 91%;
-    
+
     --sidebar-ring: 217.2 91.2% 59.8%;
 
     --chart-1: 12 76% 61%;
@@ -77,7 +75,7 @@
 
 --muted: 225.00 21.05% 22.35%;
 --muted-foreground: 226.15 5.94% 57.06%;
- 
+
 --accent: 240.00 37.50% 21.96%;
 --accent-foreground: 240.00 64.29% 94.51%;
 
@@ -106,10 +104,11 @@
 
 --sidebar-ring: 217.2 91.2% 59.8%;
   }
+  .theme {
+    --animate-grid: grid 15s linear infinite;
+  }
 }
 
-
- 
 @layer base {
   * {
     @apply border-border;
@@ -117,19 +116,28 @@
   body {
     @apply bg-background text-foreground;
   }
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
 }
 
 
- 
 
-
-
- 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+@layer utilities {
+  @keyframes grid {
+    0% {
+      transform: translateY(-50%);
+    }
+    100% {
+      transform: translateY(0);
+    }
   }
-  body {
-    @apply bg-background text-foreground;
+  .animate-grid {
+    animation: grid 35s linear infinite;
   }
 }
