@@ -20,6 +20,7 @@ import { Icons } from "@/components/ui/icons";
 // Define schema for form validation
 const organizationFormSchema = z.object({
   name: z.string().min(1, { message: "Organization name is required" }),
+  prefix: z.string().min(3, { message: "ABC" }),
   description: z.string().optional(),
   address: z.object({
     location: z.string().min(1, { message: "Address is required" }),
@@ -36,6 +37,7 @@ type OrganizationFormValues = z.infer<typeof organizationFormSchema>;
 interface Organization {
   _id: string;
   name: string;
+  prefix: string;
   description: string;
   address: {
     location: string;
@@ -62,6 +64,7 @@ export default function OrganizationSettingPage() {
     resolver: zodResolver(organizationFormSchema),
     defaultValues: {
       name: "",
+      prefix: "",
       description: "",
       address: {
         location: "",
@@ -84,6 +87,7 @@ export default function OrganizationSettingPage() {
         // Set form values
         form.reset({
           name: data.name,
+          prefix: data.prefix,
           description: data.description,
           address: {
             location: data.address.location,
@@ -132,6 +136,7 @@ export default function OrganizationSettingPage() {
       // Reset form to current organization values when entering edit mode
       form.reset({
         name: organization.name,
+        prefix: organization.prefix,
         description: organization.description,
         address: {
           location: organization.address.location,
@@ -219,6 +224,22 @@ export default function OrganizationSettingPage() {
                   />
                   <FormField
                     control={form.control}
+                    name="prefix"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Prefix</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="e.g., ABC"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="address.location"
                     render={({ field }) => (
                       <FormItem>
@@ -275,6 +296,10 @@ export default function OrganizationSettingPage() {
                   <TableRow>
                     <TableCell>Description</TableCell>
                     <TableCell>{organization?.description || "N/A"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Prefix</TableCell>
+                    <TableCell>{organization?.prefix || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Address</TableCell>

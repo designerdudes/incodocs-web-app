@@ -59,28 +59,28 @@ export const ProductsColumns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "unit",
-        header: () => <div>Unit Of Measurements</div>,
-        cell: ({ row }) => <div>{row.original.unitOfMeasurements}</div>,
+        header: () => <div>Unit</div>,
+        cell: ({ row }) => <div>{row.original.unit}</div>,
     },
     {
         accessorKey: "origin",
         header: () => <div>Country of Origin</div>,
-        cell: ({ row }) => <div>{row.original.countryOfOrigin}</div>,
+        cell: ({ row }) => <div>{row.original.origin}</div>,
     },
     {
         accessorKey: "hsCode",
         header: () => <div>HS Code</div>,
-        cell: ({ row }) => <div>{row.original.HScode}</div>,
+        cell: ({ row }) => <div>{row.original.hsCode}</div>,
     },
     {
         accessorKey: "sellPrice",
         header: () => <div>Sell Price</div>,
-        cell: ({ row }) => <div>${row.original?.sellPrice}</div>,
+        cell: ({ row }) => <div>${row.original.sellPrice.toFixed(2)}</div>,
     },
     {
         accessorKey: "buyPrice",
         header: () => <div>Buy Price</div>,
-        cell: ({ row }) => <div>${row.original.buyPrice}</div>,
+        cell: ({ row }) => <div>${row.original.buyPrice.toFixed(2)}</div>,
     },
     {
         accessorKey: "netWeight",

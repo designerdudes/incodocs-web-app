@@ -282,7 +282,6 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter material cost"
-                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
@@ -313,7 +312,6 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                     <Input
                       placeholder="Enter marker cost"
                       type="number"
-                        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -342,7 +340,6 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter transport cost"
-                        className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                       type="number"
                       disabled={isLoading}
                       onChange={(e) => {
