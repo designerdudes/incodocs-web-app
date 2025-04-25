@@ -71,6 +71,7 @@ export default function CreateNewShipmentFormPage() {
         <ShippingBillDetails
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
+          params={orgid}
         />
       ),
     },
@@ -276,6 +277,7 @@ export default function CreateNewShipmentFormPage() {
             <ShippingBillDetails
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
+              params={orgid}
             />
           )}
           {steps[currentStep].id === 4 && (

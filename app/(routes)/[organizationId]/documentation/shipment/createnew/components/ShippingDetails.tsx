@@ -33,7 +33,6 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import ForwarderForm from "@/components/forms/Forwarderdetailsform";
 import TransporterForm from "@/components/forms/Addtransporterform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
-import { Icons } from "@/components/ui/icons";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
@@ -109,26 +108,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
   const GlobalModal = useGlobalModal();
 
   // Fetch data on component mount
-  React.useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const forwarderResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
-        );
-        const forwarderData = await forwarderResponse.json();
-        setForwarders(forwarderData);
 
-        const transporterResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
-        );
-        const transporterData = await transporterResponse.json();
-        setTransporters(transporterData);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
 
   const handleForwarderDelete = useCallback((index: number) => {
     const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
@@ -263,6 +243,28 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       setUploading(false);
     }
   };
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const forwarderResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
+        );
+        const forwarderData = await forwarderResponse.json();
+        console.log("forwarderData", forwarderData)
+        setForwarders(forwarderData);
+
+        const transporterResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
+        );
+        const transporterData = await transporterResponse.json();
+        setTransporters(transporterData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const openForwarderForm = () => {
     GlobalModal.title = "Add New Forwarder";

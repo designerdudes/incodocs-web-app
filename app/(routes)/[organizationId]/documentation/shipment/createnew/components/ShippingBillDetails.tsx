@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -28,9 +28,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import CBNameForm from "../../../parties/components/forms/CBNameForm";
+
 
 interface ShippingBillDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+  params: string | string[];
 }
 
 function saveProgressSilently(data: any) {
@@ -38,11 +43,16 @@ function saveProgressSilently(data: any) {
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
-export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingBillDetailsProps) {
+export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: ShippingBillDetailsProps) {
+  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues } = useFormContext();
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
   const [shippingBills, setShippingBills] = useState(shippingBillsFromForm);
   const [uploading, setUploading] = useState(false);
+  const GlobalModal = useGlobalModal();
+  const [CBNames, setCBNames] = useState<any[]>([]);
+
+
 
   const handleShippingBillCountChange = (value: string) => {
     const count = parseInt(value, 10);
@@ -66,6 +76,9 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
       saveProgressSilently(getValues()); // Use parent saveProgress
     }
   };
+
+
+
 
   const handleDeleteBill = (index: number) => {
     const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
@@ -97,27 +110,40 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
     }
   };
 
+  useEffect(() => {
+    const fetchCBNames = async () => {
+      try {
+        const CBNameResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+        );
+        const CBNameData = await CBNameResponse.json();
+        setCBNames(CBNameData);
+        console.log(CBNameData)
+      } catch (error) {
+        console.error("Error fetching CB Names:", error);
+      }
+    };
+    fetchCBNames();
+  }, []);
+
+  const openCBNameForm = () => {
+    GlobalModal.title = "Add New CB Name";
+    GlobalModal.children = (
+      <CBNameForm
+        onSuccess={() => {
+          fetch(
+            `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+          )
+            .then((res) => res.json())
+            .then((data) => setCBNames(data));
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
+
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Port Code */}
-      <FormField
-        control={control}
-        name="shippingBillDetails.portCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Port Code</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., SB101"
-                className="uppercase"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
       {/* CB Name */}
       <FormField
         control={control}
@@ -126,11 +152,23 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
-              <Input
+              {/* <Input
                 placeholder="e.g., xyz"
                 className="uppercase"
                 {...field}
                 onBlur={() => saveProgressSilently(getValues())}
+              /> */}
+              <EntityCombobox
+                entities={CBNames}
+                value={field.value || ""}
+                onChange={(value) => {
+                  field.onChange(value);
+                  saveProgressSilently(getValues());
+                }}
+                displayProperty="cb name"
+                placeholder="Select a CB Name"
+                onAddNew={openCBNameForm}
+                addNewLabel="Add New CB Name"
               />
             </FormControl>
             <FormMessage />
@@ -147,6 +185,25 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
             <FormControl>
               <Input
                 placeholder="e.g., randomcode"
+                className="uppercase"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      {/* Port Code */}
+      <FormField
+        control={control}
+        name="shippingBillDetails.portCode"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Port Code</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="e.g., SB101"
                 className="uppercase"
                 {...field}
                 onBlur={() => saveProgressSilently(getValues())}
