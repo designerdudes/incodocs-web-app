@@ -126,7 +126,7 @@ export default function LotFormWrapper({ lotData }:LotFormWrapperProps ) {
 
     return (
         <FormProvider {...methods}>
-            <AddBlockForm LotData={lotData} />
+            <AddBlockForm LotData={lotData as any} />
         </FormProvider>
     );
 }
