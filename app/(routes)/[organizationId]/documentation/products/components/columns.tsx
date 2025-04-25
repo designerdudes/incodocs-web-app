@@ -59,7 +59,7 @@ export const ProductsColumns: ColumnDef<Product>[] = [
     },
     {
         accessorKey: "unit",
-        header: () => <div>Unit Of Measurements</div>,
+        header: () => <div>Unit of Measurements</div>,
         cell: ({ row }) => <div>{row.original.unitOfMeasurements}</div>,
     },
     {

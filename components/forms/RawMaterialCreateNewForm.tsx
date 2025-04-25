@@ -234,11 +234,11 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
         organizationId,
         status: "active",
       });
-      toast.success("Lot created/updated successfully");
+      toast.success("Lot updated successfully");
       router.push("./");
     } catch (error) {
-      console.error("Error creating/updating Lot:", error);
-      toast.error("Error creating/updating Lot");
+      console.error("Error updating Lot:", error);
+      toast.error("Error updating Lot");
     } finally {
       setIsLoading(false);
     }
@@ -307,7 +307,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
         <FormControl>
           <Input
             className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter material cost"
+            placeholder="Enter Material cost"
             type="number"
             disabled={isLoading}
             onChange={(e) => {
@@ -331,7 +331,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
         <FormControl>
           <Input
             className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter marker cost"
+            placeholder="Enter Marker cost"
             type="number"
             disabled={isLoading}
             onChange={(e) => {
@@ -355,7 +355,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
         <FormControl>
           <Input
             className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-            placeholder="Enter transport cost"
+            placeholder="Enter Transport cost"
             type="number"
             disabled={isLoading}
             onChange={(e) => {
@@ -396,7 +396,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
         <FormLabel>Number of Blocks</FormLabel>
         <FormControl>
           <Input
-            placeholder="Enter number of blocks"
+            placeholder="Enter Number of Blocks"
             type="number"
             min="1"
             disabled={isLoading}

@@ -592,7 +592,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
           </Table>
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Submitting..." : "Submit"}
+            {isLoading ? "Submitting..." : "Update Blocks"}
           </Button>
 
           <ConfirmationDialog
