@@ -22,16 +22,34 @@ import toast from "react-hot-toast";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { Icons } from "@/components/ui/icons";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
 }
 
-export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
-  const { control, setValue } = useFormContext();
-  const [shippingLines, setShippingLines] = useState([]);
+export function BillOfLadingDetails({
+  shipmentId,
+  saveProgress,
+  onSectionSubmit,
+}: BillOfLadingDetailsProps) {
+  const { control, setValue, watch } = useFormContext();
+  const [shippingLines, setShippingLines] = useState<
+    { _id: string; shippingLineName: string }[]
+  >([]);
   const [uploading, setUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
+
+  // Watch form values
+  const formValues = watch("blDetails");
+
+  // Autosave form data when blDetails changes
+  useEffect(() => {
+    saveProgress({ blDetails: formValues });
+  }, [formValues, saveProgress]);
 
   // Handle File Upload
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -41,7 +59,7 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "http://localhost:4080/shipmentdocsfile/upload",
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
@@ -49,8 +67,7 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      const storageUrl = data.storageLink;
-      setValue(fieldName, storageUrl, { shouldDirty: true });
+      setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
@@ -68,7 +85,14 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
           "https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const shippingData = await shippingResponse.json();
-        setShippingLines(shippingData);
+        setShippingLines(
+          Array.isArray(shippingData)
+            ? shippingData.map((line: any) => ({
+                _id: line._id,
+                shippingLineName: line.shippingLineName,
+              }))
+            : []
+        );
       } catch (error) {
         console.error("Error fetching shipping lines:", error);
         toast.error("Failed to load shipping lines");
@@ -86,11 +110,33 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
             "https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba"
           )
             .then((res) => res.json())
-            .then((data) => setShippingLines(data));
+            .then((data) => {
+              setShippingLines(
+                Array.isArray(data)
+                  ? data.map((line: any) => ({
+                      _id: line._id,
+                      shippingLineName: line.shippingLineName,
+                    }))
+                  : []
+              );
+            });
         }}
       />
     );
     GlobalModal.onOpen();
+  };
+
+  // Handle section submission
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await onSectionSubmit();
+    } catch (error) {
+      console.error("Error submitting Bill of Lading Details:", error);
+      toast.error("Failed to submit Bill of Lading Details");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -98,7 +144,7 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
       {/* Shipping Line */}
       <FormField
         control={control}
-        name="shippingDetails.shippingLine"
+        name="blDetails.shippingLine"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Select Shipping Line</FormLabel>
@@ -149,8 +195,8 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
+                    {field.value && !isNaN(new Date(field.value).getTime()) ? (
+                      format(new Date(field.value), "PPPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -161,7 +207,11 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
+                  selected={
+                    field.value && !isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
+                  }
                   onSelect={(date) => field.onChange(date?.toISOString())}
                 />
               </PopoverContent>
@@ -182,8 +232,8 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button variant="outline" className="w-full">
-                    {field.value ? (
-                      format(field.value, "PPPP")
+                    {field.value && !isNaN(new Date(field.value).getTime()) ? (
+                      format(new Date(field.value), "PPPP")
                     ) : (
                       <span>Pick a date</span>
                     )}
@@ -194,7 +244,11 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={field.value}
+                  selected={
+                    field.value && !isNaN(new Date(field.value).getTime())
+                      ? new Date(field.value)
+                      : undefined
+                  }
                   onSelect={(date) => field.onChange(date?.toISOString())}
                 />
               </PopoverContent>
@@ -264,6 +318,19 @@ export function BillOfLadingDetails({ shipmentId }: BillOfLadingDetailsProps) {
           </FormItem>
         )}
       />
+
+      {/* Save and Next Button */}
+      <div className="col-span-4 flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="h-8"
+        >
+          Save and Next
+          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }

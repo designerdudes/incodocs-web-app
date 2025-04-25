@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import * as z from "zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -12,16 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Icons } from "@/components/ui/icons";
-import toast from "react-hot-toast";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -62,13 +53,14 @@ const formSchema = z.object({
   sellPrice: z.number().min(0, "Sell Price must be non-negative").optional(),
   buyPrice: z.number().min(0, "Buy Price must be non-negative").optional(),
   netWeight: z.number().min(0, "Net Weight must be non-negative").optional(),
-  grossWeight: z.number().min(0, "Gross Weight must be non-negative").optional(),
+  grossWeight: z
+    .number()
+    .min(0, "Gross Weight must be non-negative")
+    .optional(),
   cubicMeasurement: z
     .number()
     .min(0, "Cubic Measurement must be non-negative")
     .optional(),
-  slabThickness: z.number().nonnegative().optional(),
-  slabDocument: z.any().optional(),
 });
 
 type FormValues = AddProductDetails;
@@ -77,8 +69,8 @@ interface EditProductDetailsFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   containerIndex: number;
-  initialValues: z.infer<typeof formSchema>;
-  onSubmit: (data: z.infer<typeof formSchema>, containerIndex: number) => void;
+  initialValues: FormValues;
+  onSubmit: (data: FormValues, containerIndex: number) => void;
 }
 
 export default function EditProductDetailsForm({
@@ -117,8 +109,14 @@ export default function EditProductDetailsForm({
 
   const handleSubmit = async (values: FormValues) => {
     // Double-check required fields (redundant due to Zod, but for safety)
-    if (!values.code.trim() || !values.HScode.trim() || !values.description.trim()) {
-      toast.error("Please fill in all required fields (Code, HS Code, Description).");
+    if (
+      !values.code.trim() ||
+      !values.HScode.trim() ||
+      !values.description.trim()
+    ) {
+      toast.error(
+        "Please fill in all required fields (Code, HS Code, Description)."
+      );
       return;
     }
 
@@ -140,23 +138,12 @@ export default function EditProductDetailsForm({
     if (event.key === "Enter") {
       event.preventDefault();
       event.stopPropagation();
-      form.handleSubmit((values) => handleSubmit(event, values))();
+      form.handleSubmit(handleSubmit)();
     }
   };
 
-  const handleAddCategory = () => {
-    const trimmed = newCategory.trim();
-    if (trimmed && !productCategories.includes(trimmed)) {
-      setProductCategories([...productCategories, trimmed]);
-      setSelectedCategory(trimmed);
-      form.setValue("productCategory", trimmed);
-      toast.success("Category added!");
-      setNewCategory("");
-      setOpenAddCategory(false);
-    } else {
-      toast.error("Invalid or duplicate category.");
-    }
-  };
+  // Disable submit button until form is valid
+  const isFormValid = form.formState.isValid;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -166,45 +153,18 @@ export default function EditProductDetailsForm({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={(event) => form.handleSubmit((values) => handleSubmit(event, values))(event)}
+            onSubmit={form.handleSubmit(handleSubmit)}
             onKeyDown={handleKeyDown}
             className="grid gap-4"
           >
-            {/* Category */}
             <FormField
               control={form.control}
-              name="productCategory"
+              name="code"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Product Category</FormLabel>
+                  <FormLabel>Product Code</FormLabel>
                   <FormControl>
-                    <Select
-                      value={field.value || undefined}
-                      onValueChange={(value) => {
-                        if (value === "__add_new__") {
-                          setOpenAddCategory(true);
-                        } else {
-                          field.onChange(value);
-                          setSelectedCategory(value);
-                          setSelectedSubcategory(value === "Ceramic" ? "Tiles" : "");
-                          form.setValue("graniteAndMarble", "");
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {productCategories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
-                            {cat}
-                          </SelectItem>
-                        ))}
-                        <SelectItem value="__add_new__" className="text-blue-600">
-                          + Add Another Category
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Input placeholder="e.g., PROD001" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -301,7 +261,9 @@ export default function EditProductDetailsForm({
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -323,7 +285,9 @@ export default function EditProductDetailsForm({
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -345,7 +309,9 @@ export default function EditProductDetailsForm({
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -367,7 +333,9 @@ export default function EditProductDetailsForm({
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -389,7 +357,9 @@ export default function EditProductDetailsForm({
                       value={field.value ?? ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -399,33 +369,22 @@ export default function EditProductDetailsForm({
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Icons.spinner className="h-4 w-4 animate-spin mr-2" />}
+              <Button type="submit" disabled={isLoading || !isFormValid}>
+                {isLoading && (
+                  <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
+                )}
                 Save Changes
               </Button>
             </DialogFooter>
           </form>
         </Form>
-
-        {/* Add Category Modal */}
-        <Dialog open={openAddCategory} onOpenChange={setOpenAddCategory}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Category</DialogTitle>
-            </DialogHeader>
-            <Input
-              placeholder="Enter new category"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-            />
-            <DialogFooter>
-              <Button onClick={handleAddCategory}>Add</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </DialogContent>
     </Dialog>
   );
