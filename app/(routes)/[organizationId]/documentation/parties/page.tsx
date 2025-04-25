@@ -22,12 +22,12 @@ interface Props {
 
 export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
-  const orgaanisationID = "674b0a687d4f4b21c6c980ba"; // Could use params.organizationId
+  const organisationID = params.organizationId // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch data (unchanged)
   const shippingLineRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organisationID}`,
     {
       method: "GET",
       headers: {
@@ -39,7 +39,7 @@ export default async function PartiesPage({ params }: Props) {
   const shippingLine = shippingLineRes;
 
   const ForwarderRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
     {
       method: "GET",
       headers: {
@@ -51,7 +51,7 @@ export default async function PartiesPage({ params }: Props) {
   const forwarder = ForwarderRes;
 
   const transporterRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organisationID}`,
     {
       method: "GET",
       headers: {
@@ -63,7 +63,7 @@ export default async function PartiesPage({ params }: Props) {
   const transporter = transporterRes;
 
   const supplierRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organisationID}`,
     {
       method: "GET",
       headers: {
@@ -75,7 +75,7 @@ export default async function PartiesPage({ params }: Props) {
   const supplier = supplierRes;
 
   const consigneeRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgaanisationID}`,
+    `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organisationID}`,
     {
       method: "GET",
       headers: {
@@ -103,7 +103,7 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
         <div className="flex justify-end mb-4">
-          <PartiesDropdown organizationId={orgaanisationID} />
+          <PartiesDropdown organizationId={organisationID} />
         </div>
       </div>
       {/* Moved PartiesDropdown here */}
@@ -234,5 +234,5 @@ export default async function PartiesPage({ params }: Props) {
 
 
 
-  
+
 }

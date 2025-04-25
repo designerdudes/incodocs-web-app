@@ -61,13 +61,11 @@ interface FormData {
   shippingDetails: ShippingDetails;
 }
 
-function saveProgressSilently(data: FormData) {
-  try {
-    localStorage.setItem("shipmentFormData", JSON.stringify(data));
-    localStorage.setItem("lastSaved", new Date().toISOString());
-  } catch (error) {
-    console.error("Failed to save progress to localStorage:", error);
-  }
+
+
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
 interface ShippingDetailsProps extends SaveDetailsProps {

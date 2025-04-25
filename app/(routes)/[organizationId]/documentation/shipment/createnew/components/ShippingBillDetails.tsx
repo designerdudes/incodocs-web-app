@@ -28,10 +28,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SaveDetailsProps } from "./BookingDetails";
-import { Icons } from "@/components/ui/icons";
 
 interface ShippingBillDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+}
+
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
 export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingBillDetailsProps) {
@@ -55,11 +59,11 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
       );
       setShippingBills(newShippingBills);
       setValue("shippingBillDetails.ShippingBills", newShippingBills);
-      saveProgress(getValues()); // Use parent saveProgress
+      saveProgressSilently(getValues()); // Use parent saveProgress
     } else {
       setShippingBills([]);
       setValue("shippingBillDetails.ShippingBills", []);
-      saveProgress(getValues()); // Use parent saveProgress
+      saveProgressSilently(getValues()); // Use parent saveProgress
     }
   };
 
@@ -76,12 +80,13 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("http://localhost:4080/shipmentdocsfile/upload", {
+      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
+      console.log("File uploaded successfully:", storageUrl);
       setValue(fieldName, storageUrl);
       saveProgress(getValues()); // Use parent saveProgress
     } catch (error) {
@@ -106,7 +111,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., SB101"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -125,7 +130,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., xyz"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -144,7 +149,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                 placeholder="e.g., randomcode"
                 className="uppercase"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -240,7 +245,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                               placeholder="e.g., 34583"
                               className="uppercase"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                               required // Enforce required field
                             />
                           </FormControl>
@@ -272,7 +277,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
-                                  saveProgress(getValues());
+                                  saveProgressSilently(getValues());
                                 }}
                               />
                             </PopoverContent>
@@ -292,7 +297,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                             <Input
                               placeholder="e.g., 2394"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -310,7 +315,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
                             <Input
                               placeholder="e.g., 8934"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
                           <FormMessage />
@@ -345,7 +350,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit }: ShippingB
               <Textarea
                 placeholder="e.g., this is some random comment"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />

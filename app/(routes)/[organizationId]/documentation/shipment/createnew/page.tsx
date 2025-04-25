@@ -10,7 +10,6 @@ import { BookingDetails } from "./components/BookingDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
 import { ShippingBillDetails } from "./components/ShippingBillDetails";
 import { SupplierDetails } from "./components/SupplierDetails";
-import { SaleInvoiceDetails } from "./components/SaleInvoiceDetails";
 import { BillOfLadingDetails } from "./components/BillOfLadingDetails";
 import { OtherDetails } from "./components/OtherDetails";
 import { FormProvider, useForm } from "react-hook-form";
@@ -22,6 +21,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
 import { formSchema } from "./data/formSchema";
+import { CommercialInvoiceDetails } from "./components/SaleInvoiceDetails";
 
 // Save progress functions
 const saveProgressSilently = (data: any) => {
@@ -80,6 +80,7 @@ export default function CreateNewShipmentFormPage() {
         <SupplierDetails
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
+          params={orgid}
         />
       ),
     },
@@ -87,9 +88,10 @@ export default function CreateNewShipmentFormPage() {
       id: 5,
       name: "Commercial Invoice",
       component: (
-        <SaleInvoiceDetails
+        <CommercialInvoiceDetails
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
+          params={orgid}
         />
       ),
     },
@@ -100,6 +102,7 @@ export default function CreateNewShipmentFormPage() {
         <BillOfLadingDetails
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
+          params={orgid}
         />
       ),
     },
@@ -234,10 +237,9 @@ export default function CreateNewShipmentFormPage() {
             </Button>
 
             <Button
-              className="h-8"
               type="button"
               onClick={handleSectionSubmit}
-              disabled={isLoading}
+              disabled={currentStep === 6 || isLoading}
             >
               Save and Next
               {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
@@ -275,18 +277,21 @@ export default function CreateNewShipmentFormPage() {
             <SupplierDetails
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
+              params={orgid}
             />
           )}
           {steps[currentStep].id === 5 && (
-            <SaleInvoiceDetails
+            <CommercialInvoiceDetails
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
+              params={orgid}
             />
           )}
           {steps[currentStep].id === 6 && (
             <BillOfLadingDetails
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
+              params={orgid}
             />
           )}
           {steps[currentStep].id === 7 && (

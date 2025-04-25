@@ -32,14 +32,22 @@ import {
 import { Separator } from "@/components/ui/separator";
 import SupplierForm from "@/components/forms/Addsupplierform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
-import { Icons } from "@/components/ui/icons";
 
 interface SupplierDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+  params: string | string[];
+
 }
 
-export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetailsProps) {
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
+export function SupplierDetails({ saveProgress, onSectionSubmit, params }: SupplierDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
+  const organizationId = Array.isArray(params) ? params[0] : params;
+
   const invoicesFromForm = watch("supplierDetails.clearance.invoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
@@ -51,7 +59,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
     const fetchData = async () => {
       try {
         const supplierResponse = await fetch(
-          "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
         );
         const supplierData = await supplierResponse.json();
         const mappedSuppliers = supplierData.map((supplier: any) => ({
@@ -71,7 +79,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
     setInvoices(updatedInvoices);
     setValue("supplierDetails.clearance.invoices", updatedInvoices);
     setValue("supplierDetails.clearance.noOfInvoices", updatedInvoices.length);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const handleInvoiceNumberCountChange = (value: string) => {
@@ -91,12 +99,12 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
       setInvoices(newInvoices);
       setValue("supplierDetails.clearance.invoices", newInvoices);
       setValue("supplierDetails.clearance.noOfInvoices", newInvoices.length);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } else {
       setInvoices([]);
       setValue("supplierDetails.clearance.invoices", []);
       setValue("supplierDetails.clearance.noOfInvoices", 0);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     }
   };
 
@@ -111,9 +119,9 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
       setValue(fieldName, storageUrl);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -127,7 +135,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
     GlobalModal.children = (
       <SupplierForm
         onSuccess={() => {
-          fetch("https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba")
+          fetch(`https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`)
             .then((res) => res.json())
             .then((data) => {
               const mappedSuppliers = data.map((supplier: any) => ({
@@ -135,7 +143,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 name: supplier.supplierName,
               }));
               setSupplierNames(mappedSuppliers);
-              saveProgress(getValues()); // Save after updating suppliers
+              saveProgressSilently(getValues()); // Save after updating suppliers
             });
         }}
       />
@@ -159,7 +167,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
-                    saveProgress(getValues());
+                    saveProgressSilently(getValues());
                   }}
                   displayProperty="name"
                   placeholder="Select a Supplier Name"
@@ -225,7 +233,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             <Input
                               placeholder="e.g., hsdfjkghog89r"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
                         )}
@@ -240,7 +248,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                             <Input
                               placeholder="e.g., INV789"
                               {...field}
-                              onBlur={() => saveProgress(getValues())}
+                              onBlur={() => saveProgressSilently(getValues())}
                               required // Enforce required field
                             />
                           </FormControl>
@@ -305,7 +313,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                                   selected={field.value ? new Date(field.value) : undefined}
                                   onSelect={(date) => {
                                     field.onChange(date?.toISOString());
-                                    saveProgress(getValues());
+                                    saveProgressSilently(getValues());
                                   }}
                                 />
                               </PopoverContent>
@@ -323,7 +331,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                           <Input
                             placeholder="e.g., 1000"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         )}
                       />
@@ -336,7 +344,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                           <Input
                             placeholder="e.g., 900"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         )}
                       />
@@ -375,7 +383,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                   placeholder="e.g., ASI101"
                   className="uppercase"
                   {...field}
-                  onBlur={() => saveProgress(getValues())}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -426,7 +434,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 <Input
                   placeholder="e.g., 1100"
                   {...field}
-                  onBlur={() => saveProgress(getValues())}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
@@ -446,7 +454,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                   value={field.value || ""}
                   onChange={(value) => {
                     field.onChange(value);
-                    saveProgress(getValues());
+                    saveProgressSilently(getValues());
                   }}
                   displayProperty="name"
                   placeholder="Select a Shipping Bill"
@@ -469,7 +477,7 @@ export function SupplierDetails({ saveProgress, onSectionSubmit }: SupplierDetai
                 <Textarea
                   placeholder="e.g., this is some random comment"
                   {...field}
-                  onBlur={() => saveProgress(getValues())}
+                  onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
               <FormMessage />
