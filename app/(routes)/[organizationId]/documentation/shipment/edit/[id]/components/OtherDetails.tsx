@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import {
   FormField,
@@ -30,16 +30,25 @@ import {
 
 interface OtherDetailsProps {
   shipmentId: string;
+  saveProgress: (data: any) => void;
 }
 
-export function OtherDetails({ shipmentId }: OtherDetailsProps) {
-  const { control, setValue } = useFormContext();
+export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
+  const { control, setValue, watch } = useFormContext();
   const [uploading, setUploading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     control,
     name: "otherDetails",
   });
+
+  // Watch form values
+  const formValues = watch("otherDetails");
+
+  // Autosave form data when otherDetails changes
+  useEffect(() => {
+    saveProgress({ otherDetails: formValues });
+  }, [formValues, saveProgress]);
 
   // Handle File Upload
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -49,7 +58,7 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "http://localhost:4080/shipmentdocsfile/upload",
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
@@ -57,8 +66,7 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      const storageUrl = data.storageLink;
-      setValue(fieldName, storageUrl, { shouldDirty: true });
+      setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
     } catch (error) {
       console.error("Upload error:", error);
@@ -161,17 +169,28 @@ export function OtherDetails({ shipmentId }: OtherDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value
-                                    ? format(field.value, "PPPP")
-                                    : "Pick a date"}
+                                  {field.value &&
+                                  !isNaN(new Date(field.value).getTime()) ? (
+                                    format(new Date(field.value), "PPPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
-                                selected={field.value}
+                                selected={
+                                  field.value &&
+                                  !isNaN(new Date(field.value).getTime())
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
                                 onSelect={(date) =>
                                   field.onChange(date?.toISOString())
                                 }

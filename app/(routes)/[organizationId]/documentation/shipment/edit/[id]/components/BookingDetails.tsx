@@ -66,11 +66,15 @@ interface ProductDetails {
 
 interface BookingDetailsProps {
   shipmentId: string;
-  onProductDetailsOpenChange?: (open: boolean) => void;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
+  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
 export function BookingDetails({
   shipmentId,
+  saveProgress,
+  onSectionSubmit,
   onProductDetailsOpenChange,
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
@@ -101,24 +105,27 @@ export function BookingDetails({
   }, [formValues, saveProgress]);
 
   // Fetch product details dynamically
-  const fetchProductDetails = useCallback(async (productId: string) => {
-    if (productDetailsCache[productId]) {
-      return productDetailsCache[productId];
-    }
-    try {
-      const response = await fetch(
-        `http://localhost:4080/shipment/productdetails/get/${productId}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch product details");
-      const data: ProductDetails = await response.json();
-      setProductDetailsCache((prev) => ({ ...prev, [productId]: data }));
-      return data;
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-      toast.error("Failed to load product details");
-      return null;
-    }
-  }, [productDetailsCache]);
+  const fetchProductDetails = useCallback(
+    async (productId: string) => {
+      if (productDetailsCache[productId]) {
+        return productDetailsCache[productId];
+      }
+      try {
+        const response = await fetch(
+          `http://localhost:4080/shipment/productdetails/get/${productId}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch product details");
+        const data: ProductDetails = await response.json();
+        setProductDetailsCache((prev) => ({ ...prev, [productId]: data }));
+        return data;
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+        toast.error("Failed to load product details");
+        return null;
+      }
+    },
+    [productDetailsCache]
+  );
 
   // Handle Container Count Change
   const handleContainerCountChange = (value: number) => {
@@ -128,7 +135,7 @@ export function BookingDetails({
       shouldValidate: true,
     });
 
-    const currentContainers = formValues.containers || [];
+    const currentContainers = containers || [];
     if (value > currentContainers.length) {
       const newContainers = Array(value - currentContainers.length)
         .fill(null)
@@ -136,25 +143,7 @@ export function BookingDetails({
           containerNumber: "",
           truckNumber: "",
           truckDriverContactNumber: undefined,
-          addProductDetails: [
-            {
-              productCategory: "",
-              graniteAndMarble: "",
-              tiles: {
-                noOfBoxes: 0,
-                noOfPiecesPerBoxes: 0,
-                sizePerTile: {
-                  length: { value: 0, units: "inch" },
-                  breadth: { value: 0, units: "inch" },
-                },
-              },
-              slabType: "",
-              slabLength: { value: undefined, units: "inch" },
-              slabBreadth: { value: undefined, units: "inch" },
-              slabThickness: undefined,
-              slabDocument: undefined,
-            },
-          ],
+          addProductDetails: [],
         }));
       append(newContainers);
     } else if (value < currentContainers.length) {
@@ -206,9 +195,8 @@ export function BookingDetails({
     };
 
     setValue("bookingDetails.containers", updatedContainers, {
-      shouldDirty: false,
-      shouldValidate: false,
-      shouldTouch: false,
+      shouldDirty: true,
+      shouldValidate: true,
     });
 
     // Map AddProductDetails to ProductDetails for caching
@@ -242,38 +230,36 @@ export function BookingDetails({
   const getInitialValues = (index: number): AddProductDetails => {
     const productId = containers?.[index]?.addProductDetails?.[0]?.productId;
     const product = productId ? productDetailsCache[productId] : null;
-    return (
-      product
-        ? {
-            productId,
-            code: product.code,
-            description: product.description,
-            unitOfMeasurements: product.unitOfMeasurements,
-            countryOfOrigin: product.countryOfOrigin,
-            HScode: product.HScode,
-            variantName: product.prices[0]?.variantName,
-            varianntType: product.prices[0]?.varianntType,
-            sellPrice: product.prices[0]?.sellPrice,
-            buyPrice: product.prices[0]?.buyPrice,
-            netWeight: product.netWeight,
-            grossWeight: product.grossWeight,
-            cubicMeasurement: product.cubicMeasurement,
-          }
-        : {
-            code: "",
-            description: "",
-            unitOfMeasurements: "",
-            countryOfOrigin: "",
-            HScode: "",
-            variantName: "",
-            varianntType: "",
-            sellPrice: 0,
-            buyPrice: 0,
-            netWeight: 0,
-            grossWeight: 0,
-            cubicMeasurement: 0,
-          }
-    );
+    return product
+      ? {
+          productId,
+          code: product.code,
+          description: product.description,
+          unitOfMeasurements: product.unitOfMeasurements,
+          countryOfOrigin: product.countryOfOrigin,
+          HScode: product.HScode,
+          variantName: product.prices[0]?.variantName,
+          varianntType: product.prices[0]?.varianntType,
+          sellPrice: product.prices[0]?.sellPrice,
+          buyPrice: product.prices[0]?.buyPrice,
+          netWeight: product.netWeight,
+          grossWeight: product.grossWeight,
+          cubicMeasurement: product.cubicMeasurement,
+        }
+      : {
+          code: "",
+          description: "",
+          unitOfMeasurements: "",
+          countryOfOrigin: "",
+          HScode: "",
+          variantName: "",
+          varianntType: "",
+          sellPrice: 0,
+          buyPrice: 0,
+          netWeight: 0,
+          grossWeight: 0,
+          cubicMeasurement: 0,
+        };
   };
 
   return (
@@ -525,7 +511,10 @@ export function BookingDetails({
                         type="button"
                         variant="secondary"
                         onClick={() => handleToggleProductDetails(index)}
-                        disabled={!containers?.[index]?.addProductDetails?.[0]?.productId}
+                        disabled={
+                          !containers?.[index]?.addProductDetails?.[0]
+                            ?.productId
+                        }
                       >
                         {expandedRow === index ? (
                           <>
