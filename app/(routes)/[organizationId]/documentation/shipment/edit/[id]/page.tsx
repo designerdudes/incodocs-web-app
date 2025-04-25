@@ -78,7 +78,7 @@ const formSchema = z.object({
             addProductDetails: z
               .array(
                 z.object({
-                  _id: z.string().optional(),
+                  _id:z.string().optional(),
                   code: z.string().optional(),
                   HScode: z.string().optional(),
                   dscription: z.string().optional(),

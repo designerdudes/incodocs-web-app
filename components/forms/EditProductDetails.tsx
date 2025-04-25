@@ -29,49 +29,49 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Icons } from "@/components/ui/icons";
+import toast from "react-hot-toast";
 
-// Schema with required slab fields
+// Define AddProductDetails type inline
+interface AddProductDetails {
+  productId?: string; // Optional, to align with BookingDetails.tsx
+  code: string;
+  HScode: string;
+  description: string; // Changed from dscription
+  unitOfMeasurements?: string;
+  countryOfOrigin?: string;
+  variantName?: string;
+  varianntType?: string;
+  sellPrice?: number;
+  buyPrice?: number;
+  netWeight?: number;
+  grossWeight?: number;
+  cubicMeasurement?: number;
+}
+
+// Define the form schema based on AddProductDetails
 const formSchema = z.object({
-  productCategory: z.string().min(1, "Category is required"),
-  graniteAndMarble: z.string().optional(),
-  tiles: z
-    .object({
-      noOfBoxes: z.number().nonnegative().optional(),
-      noOfPiecesPerBoxes: z.number().nonnegative().optional(),
-      sizePerTile: z
-        .object({
-          length: z
-            .object({
-              value: z.number().nonnegative().optional(),
-              units: z.string().optional(),
-            })
-            .optional(),
-          breadth: z
-            .object({
-              value: z.number().nonnegative().optional(),
-              units: z.string().optional(),
-            })
-            .optional(),
-        })
-        .optional(),
-    })
-    .optional(),
-  slabType: z.string().optional(),
-  slabLength: z
-    .object({
-      value: z.number({ required_error: "Length is required" }).optional(),
-      units: z.string().optional(),
-    })
-    .optional(),
-  slabBreadth: z
-    .object({
-      value: z.number({ required_error: "Breadth is required" }).optional(),
-      units: z.string().optional(),
-    })
+  productId: z.string().optional(),
+  code: z.string().min(1, "Product Code is required"),
+  HScode: z.string().min(1, "HS Code is required"),
+  description: z.string().min(1, "Description is required"), // Changed from dscription
+  unitOfMeasurements: z.string().optional(),
+  countryOfOrigin: z.string().optional(),
+  variantName: z.string().optional(),
+  varianntType: z.string().optional(),
+  sellPrice: z.number().min(0, "Sell Price must be non-negative").optional(),
+  buyPrice: z.number().min(0, "Buy Price must be non-negative").optional(),
+  netWeight: z.number().min(0, "Net Weight must be non-negative").optional(),
+  grossWeight: z.number().min(0, "Gross Weight must be non-negative").optional(),
+  cubicMeasurement: z
+    .number()
+    .min(0, "Cubic Measurement must be non-negative")
     .optional(),
   slabThickness: z.number().nonnegative().optional(),
   slabDocument: z.any().optional(),
 });
+
+type FormValues = AddProductDetails;
 
 interface EditProductDetailsFormProps {
   open: boolean;
@@ -89,73 +89,39 @@ export default function EditProductDetailsForm({
   onSubmit,
 }: EditProductDetailsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(
-    initialValues.productCategory || ""
-  );
-  const [selectedSubcategory, setSelectedSubcategory] = useState(
-    initialValues.graniteAndMarble || ""
-  );
-  const [tileSizeInput, setTileSizeInput] = useState("");
-  const [openAddCategory, setOpenAddCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
-  const [productCategories, setProductCategories] = useState([
-    "Granite & Marble",
-    "Ceramic",
-  ]);
-  const graniteSubcategories = ["Tiles", "Slabs"];
+
+  // Initialize form with initialValues
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      productId: initialValues.productId || "",
+      code: initialValues.code || "",
+      HScode: initialValues.HScode || "",
+      description: initialValues.description || "", // Changed from dscription
+      unitOfMeasurements: initialValues.unitOfMeasurements || "",
+      countryOfOrigin: initialValues.countryOfOrigin || "",
+      variantName: initialValues.variantName || "",
+      varianntType: initialValues.varianntType || "",
+      sellPrice: initialValues.sellPrice ?? 0,
+      buyPrice: initialValues.buyPrice ?? 0,
+      netWeight: initialValues.netWeight ?? 0,
+      grossWeight: initialValues.grossWeight ?? 0,
+      cubicMeasurement: initialValues.cubicMeasurement ?? 0,
+    },
+  });
 
   // Debug initialValues
   useEffect(() => {
     console.log("EditProductDetailsForm initialValues:", initialValues);
   }, [initialValues]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      productCategory: initialValues.productCategory || "",
-      graniteAndMarble: initialValues.graniteAndMarble || "",
-      tiles: {
-        noOfBoxes: initialValues.tiles?.noOfBoxes || 0,
-        noOfPiecesPerBoxes: initialValues.tiles?.noOfPiecesPerBoxes || 0,
-        sizePerTile: {
-          length: {
-            value: initialValues.tiles?.sizePerTile?.length?.value || 0,
-            units: initialValues.tiles?.sizePerTile?.length?.units || "inch",
-          },
-          breadth: {
-            value: initialValues.tiles?.sizePerTile?.breadth?.value || 0,
-            units: initialValues.tiles?.sizePerTile?.breadth?.units || "inch",
-          },
-        },
-      },
-      slabType: initialValues.slabType || "",
-      slabLength: {
-        value: initialValues.slabLength?.value || undefined,
-        units: initialValues.slabLength?.units || "inch",
-      },
-      slabBreadth: {
-        value: initialValues.slabBreadth?.value || undefined,
-        units: initialValues.slabBreadth?.units || "inch",
-      },
-      slabThickness: initialValues.slabThickness || undefined,
-      slabDocument: initialValues.slabDocument || undefined,
-    },
-  });
-
-  // Update tileSizeInput based on initial values
-  useEffect(() => {
-    const length = initialValues.tiles?.sizePerTile?.length?.value;
-    const breadth = initialValues.tiles?.sizePerTile?.breadth?.value;
-    if (length && breadth) {
-      setTileSizeInput(`${length}x${breadth}`);
-    } else {
-      setTileSizeInput("");
+  const handleSubmit = async (values: FormValues) => {
+    // Double-check required fields (redundant due to Zod, but for safety)
+    if (!values.code.trim() || !values.HScode.trim() || !values.description.trim()) {
+      toast.error("Please fill in all required fields (Code, HS Code, Description).");
+      return;
     }
-  }, [initialValues]);
 
-  const handleSubmit = async (event: React.FormEvent, values: z.infer<typeof formSchema>) => {
-    event.preventDefault();
-    event.stopPropagation();
     setIsLoading(true);
     try {
       console.log("EditProductDetailsForm submitted with values:", values);
@@ -244,260 +210,194 @@ export default function EditProductDetailsForm({
                 </FormItem>
               )}
             />
-
-            {/* Subcategory */}
-            {selectedCategory === "Granite & Marble" && (
-              <FormField
-                control={form.control}
-                name="graniteAndMarble"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Subcategory</FormLabel>
-                    <FormControl>
-                      <Select
-                        value={field.value}
-                        onValueChange={(value) => {
-                          field.onChange(value);
-                          setSelectedSubcategory(value);
-                        }}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Subcategory" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {graniteSubcategories.map((sub) => (
-                            <SelectItem key={sub} value={sub}>
-                              {sub}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
-            {/* Tiles Fields */}
-            {(selectedSubcategory === "Tiles" || selectedCategory === "Ceramic") && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="tiles.noOfBoxes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Boxes</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="e.g., 10"
-                          min="0"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : Math.max(0, parseInt(e.target.value))
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tiles.noOfPiecesPerBoxes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Pieces per Box</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          placeholder="e.g., 4"
-                          min="0"
-                          value={field.value ?? ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : Math.max(0, parseInt(e.target.value))
-                            )
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="tiles.sizePerTile"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Size per Tile (e.g., 120x60)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="text"
-                          placeholder="e.g., 120x60"
-                          value={tileSizeInput}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setTileSizeInput(value);
-                            const [l, b] = value.split("x").map(Number);
-                            field.onChange(
-                              !isNaN(l) && !isNaN(b)
-                                ? {
-                                    length: { value: l, units: "inch" },
-                                    breadth: { value: b, units: "inch" },
-                                  }
-                                : {
-                                    length: { value: undefined, units: "inch" },
-                                    breadth: { value: undefined, units: "inch" },
-                                  }
-                            );
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
-
-            {/* Slabs Fields */}
-            {selectedSubcategory === "Slabs" && (
-              <>
-                <FormField
-                  control={form.control}
-                  name="slabType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Slab Type</FormLabel>
-                      <FormControl>
-                        <Select value={field.value} onValueChange={field.onChange}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Slab Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="Single">Single</SelectItem>
-                            <SelectItem value="Book Match">Book Match</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="slabLength"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Length</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder="Length in inches"
-                            value={field.value?.value ?? ""}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value);
-                              if (val >= 0 || e.target.value === "") {
-                                field.onChange({
-                                  value: val,
-                                  units: "inch",
-                                });
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slabBreadth"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Breadth</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={0}
-                            placeholder="Breadth in inches"
-                            value={field.value?.value ?? ""}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value);
-                              if (val >= 0 || e.target.value === "") {
-                                field.onChange({
-                                  value: val,
-                                  units: "inch",
-                                });
-                              }
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name="slabThickness"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Thickness (mm)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          placeholder="e.g., 18"
-                          value={field.value ?? ""}
-                          onChange={(e) => {
-                            const val = parseFloat(e.target.value);
-                            if (val >= 0 || e.target.value === "") {
-                              field.onChange(val);
-                            }
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="slabDocument"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Upload Document (PDF, JPG, PNG)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="file"
-                          accept=".pdf,.jpg,.png"
-                          onChange={(e) => field.onChange(e.target.files?.[0])}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </>
-            )}
-
+            <FormField
+              control={form.control}
+              name="HScode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>HS Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., 123456" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Sample Product" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="unitOfMeasurements"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Unit of Measurement</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., kg" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="countryOfOrigin"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country of Origin</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., USA" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="variantName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Variant Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Variant1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="varianntType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Variant Type</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., Type1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sellPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sell Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 100"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="buyPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Buy Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 80"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="netWeight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Net Weight</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 50"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="grossWeight"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gross Weight</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 60"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cubicMeasurement"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cubic Measurement</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="e.g., 1.5"
+                      value={field.value ?? ""}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? parseFloat(e.target.value) : undefined
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
