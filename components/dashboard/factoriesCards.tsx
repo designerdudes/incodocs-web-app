@@ -1,12 +1,15 @@
+"use client"
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card"
 import { formatCurrency } from "@/lib/utils"
 import Heading from "../ui/heading"
 import { Button } from "../ui/button"
 import { ArrowRight } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface FactoriesCardProps {
     factoryId: string
     factoryName: string
+    organizationId: string
     factoryGSTIN: string
     factoryAddress: string
     totalLots: number
@@ -17,7 +20,9 @@ interface FactoriesCardProps {
 
 }
 
-export function FactoriesCard({ factoryName, factoryGSTIN, factoryAddress, totalLots, totalBlocks, totalSlabs, workerCuttingPay, workerPolishingPay }: FactoriesCardProps) {
+export function FactoriesCard({factoryId, factoryName, factoryGSTIN, factoryAddress,organizationId, totalLots, totalBlocks, totalSlabs, workerCuttingPay, workerPolishingPay }: FactoriesCardProps) {
+    const router = useRouter()
+
     return (
         <Card className="bg-white">
             <CardHeader className="flex flex-col">
@@ -41,8 +46,25 @@ export function FactoriesCard({ factoryName, factoryGSTIN, factoryAddress, total
                         <p className="opacity-80 text-sm">Total Slabs</p>
                     </Card>
                 </div>
+                <div className="grid grid-cols-2 gap-2">
+                    <Card className={`p-3 bg-white w-full `}>
+                        <Heading title={new Intl.NumberFormat('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                        }).format(workerCuttingPay) + "/sqft"} className="text-2xl font-extrabold text-gray-900" />
+
+                        <p className="opacity-80 text-sm">Workers Cutting Pay</p>
+                    </Card>
+                    <Card className={`p-3 bg-white w-full `}>
+                        <Heading title={new Intl.NumberFormat('en-IN', {
+                            style: 'currency',
+                            currency: 'INR',
+                        }).format(workerPolishingPay) + "/sqft"} className="text-2xl font-extrabold text-gray-900" />
+                        <p className="opacity-80 text-sm">Workers Polishing Pay</p>
+                    </Card>
+                </div>
                 <Button
-                    // onClick={() => router.push(`/${factoryId}${href}`)}
+                    onClick={() => router.push(`/${organizationId}/${factoryId}/dashboard`)}
                     variant="default"
                     className={`w-full flex justify-center items-center space-x-2 text-white`}
                 >
