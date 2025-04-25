@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { postData, putData } from "@/axiosUtility/api";
+import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const productSchema = z.object({
@@ -52,7 +52,6 @@ const organizations = [
 
 export default function ProductFormPage() {
     const [isLoading, setIsLoading] = useState(false);
-    const [isConfirming, setIsConfirming] = useState(false);
     const form = useForm({
         resolver: zodResolver(productSchema),
         defaultValues: {
@@ -81,8 +80,8 @@ export default function ProductFormPage() {
     const handleSubmit = async (values: any) => {
         setIsLoading(true);
         try {
-            await putData("/shipment/productdetails/put", values);
-            toast.success(" products Details updated successfully");
+            await postData("/employers/add/", values);
+            toast.success("Employee added successfully");
             router.push("./");
         } catch (error: any) {
             console.error("Error creating/updating employee:", error);
@@ -98,7 +97,6 @@ export default function ProductFormPage() {
             }
         }
         setIsLoading(false);
-        setIsConfirming(false);
     };
 
 
@@ -272,5 +270,3 @@ export default function ProductFormPage() {
         </div>
     );
 }
-
-

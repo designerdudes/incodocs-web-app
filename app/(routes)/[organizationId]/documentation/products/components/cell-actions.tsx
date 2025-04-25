@@ -33,18 +33,18 @@ interface Props {
 const CellActions: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
+    console.log("data", data);
 
-    const deleteConsignee = async () => {
+    const deleteProduct = async () => {
         try {
             const result = await deleteData(
-                `https://incodocs-server.onrender.com/shipment/consignee/delete/${data.code}` // Placeholder endpoint
+                `https://incodocs-server.onrender.com/shipment/productdetails/delete/${data._id}` // Placeholder endpoint
             );
-            toast.success("Consignee Deleted Successfully");
+            toast.success("Product Deleted Successfully");
             GlobalModal.onClose();
-            window.location.reload();
         } catch (error) {
-            console.error("Error deleting consignee:", error);
-            toast.error("Error deleting consignee");
+            console.error("Error deleting Product:", error);
+            toast.error("Error deleting Product");
         }
     };
 
@@ -60,21 +60,21 @@ const CellActions: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    
+
                     <DropdownMenuItem
-                                onClick={() => router.push(`./products/Edit/${data._id}`)}
-                                className="focus:bg-green-500 focus:text-destructive-foreground"
-                              >
-                                <Scissors className="mr-2 h-4 w-4" />
-                                Edit Product
-                              </DropdownMenuItem>
+                        onClick={() => router.push(`./products/Edit/${data._id}`)}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
+                    >
+                        <Scissors className="mr-2 h-4 w-4" />
+                        Edit Product
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Consignee - ${data.code}`;
+                            GlobalModal.title = `Delete Product - ${data.code}`;
                             GlobalModal.description =
-                                "Are you sure you want to delete this consignee?";
+                                "Are you sure you want to delete this Product?";
                             GlobalModal.children = (
-                                <Alert onConfirm={deleteConsignee} actionType={"delete"} />
+                                <Alert onConfirm={deleteProduct} actionType={"delete"} />
                             );
                             GlobalModal.onOpen();
                         }}
