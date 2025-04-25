@@ -16,7 +16,6 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
 
 const formSchema = z.object({
   transporterName: z
@@ -40,8 +39,6 @@ interface TransporterFormProps {
 
 function TransporterForm({ onSuccess }: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const organizationId = useParams().organizationId as string; // Get organizationId from URL params
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -70,7 +67,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
             responsiblePerson: values.responsiblePerson,
             mobileNo: values.mobileNo,
             email: values.email,
-            organizationId,
+            organizationId: "674b0a687d4f4b21c6c980ba",
           }),
         }
       );

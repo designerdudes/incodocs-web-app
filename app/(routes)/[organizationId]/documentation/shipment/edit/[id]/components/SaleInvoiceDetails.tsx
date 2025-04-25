@@ -323,6 +323,19 @@ export function SaleInvoiceDetails({
           </FormItem>
         )}
       />
+
+      {/* Save and Next Button */}
+      <div className="col-span-4 flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="h-8"
+        >
+          Save and Next
+          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
     </div>
   );
 }

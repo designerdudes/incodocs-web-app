@@ -19,8 +19,6 @@ export default async function Page(params: params) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
   console.log("paraaaaaams", params.params.organizationId)
-
-
   const res = await fetch(
     `https://incodocs-server.onrender.com/shipment/getbyorg/${params.params.organizationId}`,
     {
@@ -37,6 +35,7 @@ export default async function Page(params: params) {
   let shipmentData;
   shipmentData = res;
   console.log("shipmentData", shipmentData);
+
 
 
   return (

@@ -72,12 +72,10 @@ function saveProgressSilently(data: FormData) {
 
 interface ShippingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
-  params: string | string[];
 }
 
-export function ShippingDetails({ saveProgress, onSectionSubmit, params }: ShippingDetailsProps) {
+export function ShippingDetails({ saveProgress, onSectionSubmit }: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
-  const organizationId = Array.isArray(params) ? params[0] : params;
 
   const initialCount = 1;
   const [forwarderInvoices, setForwarderInvoices] = useState<Invoice[]>(
@@ -115,13 +113,13 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     const fetchData = async () => {
       try {
         const forwarderResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
+          "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const forwarderData = await forwarderResponse.json();
         setForwarders(forwarderData);
 
         const transporterResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
+          "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
         );
         const transporterData = await transporterResponse.json();
         setTransporters(transporterData);
@@ -255,6 +253,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       );
       const data = await response.json();
       const storageUrl = data.url;
+
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
@@ -271,7 +270,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       <ForwarderForm
         onSuccess={() => {
           fetch(
-            `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
+            "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
           )
             .then((res) => res.json())
             .then((data) => setForwarders(data));
@@ -287,7 +286,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       <TransporterForm
         onSuccess={() => {
           fetch(
-            `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
+            "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
           )
             .then((res) => res.json())
             .then((data) => setTransporters(data));
@@ -513,7 +512,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       <div className="grid grid-cols-4 gap-3">
         <FormField
           control={control}
-          name="shippingDetails.transporterName"
+          name={"shippingDetails.transporter" as any}
           render={({ field }) => (
             <FormItem>
               <FormLabel>Select Transporter Name</FormLabel>
@@ -649,7 +648,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                       <FormField
                         control={control}
                         name={`shippingDetails.transporterInvoices[${index}].date` as any}
-                        render={({ field }: any) => (
+                        render={({ field }:any) => (
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
@@ -735,6 +734,18 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
           </FormItem>
         )}
       />
+      <div className="flex justify-end mt-4">
+        <Button
+          type="button"
+          onClick={onSectionSubmit}
+          className="h-8"
+          disabled={uploading}
+        >
+          Submit
+          {uploading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+        </Button>
+      </div>
+
       <ConfirmationDialog
         isOpen={showForwarderConfirmation}
         onClose={() => {
