@@ -1,32 +1,35 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { columns } from "./components1/columns";
+
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
+import { columns } from "../components1/columns";
 
-export default async function Page() {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+export default function Page() {
 
 
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    ).then((response) => {
-        return response.json();
-    });
+    // const res = await fetch(
+    //     `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
+    //     {
+    //         method: "GET",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             Authorization: "Bearer " + token,
+    //         },
+    //     }
+    // ).then((response) => {
+    //     return response.json();
+    // });
+    const res = localStorage.getItem("shipmentDraft") as any
+    console.log("res", res)
+
     let shipmentData;
-    shipmentData = res;
+    shipmentData = [JSON.parse(res)];
     console.log("shipmentData", shipmentData);
 
 
@@ -40,14 +43,11 @@ export default async function Page() {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Shipments" />
+          <Heading className="leading-tight" title="Draft Shipments" />
           <p className="text-muted-foreground text-sm">
-            Effectively oversee your Shipment records.
+            View and manage your draft shipments
           </p>
         </div>
-        <Link href={`./shipment/drafts`}>
-          <Button variant="outline" >View Drafts</Button>
-        </Link>
         <Link href={`./shipment/createnew`}>
           <Button className="bg-primary text-white">Add New Shipment</Button>
         </Link>
