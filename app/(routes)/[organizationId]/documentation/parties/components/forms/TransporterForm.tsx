@@ -16,6 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
 
 const formSchema = z.object({
   transporterName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -32,6 +33,8 @@ const formSchema = z.object({
     (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
     { message: "Enter a valid email address" }
   ),
+  organizationId: z.string().optional()
+
 });
 
 interface TransporterFormProps {
@@ -40,6 +43,8 @@ interface TransporterFormProps {
 
 function Transporterform({ onSuccess }: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const orgid = useParams().organizationId;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,6 +54,8 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
+      organizationId: ""
+
     },
   });
 
@@ -62,7 +69,7 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...values,
-          organizationId: "674b0a687d4f4b21c6c980ba",
+          organizationId: orgid
         }),
       });
 

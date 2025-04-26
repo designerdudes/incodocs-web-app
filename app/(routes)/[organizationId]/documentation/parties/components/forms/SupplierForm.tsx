@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { useParams } from "next/navigation";
 
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
@@ -30,6 +31,8 @@ const formSchema = z.object({
     }),
   state: z.string().optional(),
   factoryAddress: z.string().optional(),
+  organizationId: z.string().optional()
+
 });
 
 interface SupplierFormProps {
@@ -38,6 +41,8 @@ interface SupplierFormProps {
 
 export default function Supplierform({ onSuccess }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const orgid = useParams().organizationId;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -49,6 +54,8 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
       mobileNumber: "",
       state: "",
       factoryAddress: "",
+      organizationId: ""
+
     },
   });
 
@@ -63,7 +70,7 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
         body: JSON.stringify({
           ...values,
           mobileNumber: values.mobileNumber ? parseInt(values.mobileNumber, 10) : undefined,
-          organizationId: "674b0a687d4f4b21c6c980ba",
+          organizationId: orgid
         }),
       });
       if (!response.ok) throw new Error("Failed to create supplier");

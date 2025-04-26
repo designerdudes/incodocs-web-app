@@ -44,6 +44,7 @@ export interface SaveDetailsProps {
 
 interface BookingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+  setInvoiceNumber: (val: string) => void;
 }
 
 interface Product {
@@ -70,8 +71,9 @@ function saveProgressSilently(data: any) {
 export function BookingDetails({
   saveProgress,
   onSectionSubmit,
+  setInvoiceNumber,
 }: BookingDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues, register } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
   const GlobalModal = useGlobalModal();
   const [showConfirmation, setShowConfirmation] = useState(false);
@@ -81,6 +83,13 @@ export function BookingDetails({
   const [productsCache, setProductsCache] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
+  const invoiceNumber = watch("bookingDetails.invoiceNumber");
+
+  useEffect(() => {
+    if (invoiceNumber) {
+      setInvoiceNumber(invoiceNumber);
+    }
+  }, [invoiceNumber, setInvoiceNumber]);
 
   // Combine default and custom container types
   const containerTypeEntities = customContainerTypes.map((type) => ({
@@ -222,6 +231,7 @@ export function BookingDetails({
             <FormLabel>Invoice Number</FormLabel>
             <FormControl>
               <Input
+                {...register("bookingDetails.invoiceNumber")}
                 placeholder="e.g., 99808541234"
                 className="uppercase"
                 {...field}
@@ -568,17 +578,17 @@ export function BookingDetails({
           </Table>
         </div>
       )}
+      <AddContainerTypeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddContainerType}
+      />
       <ConfirmationDialog
         isOpen={showConfirmation}
         onClose={() => setShowConfirmation(false)}
         onConfirm={handleConfirmChange}
         title="Are you sure?"
         description="You are reducing the number of containers. This action cannot be undone."
-      />
-      <AddContainerTypeModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddContainerType}
       />
     </div>
   );

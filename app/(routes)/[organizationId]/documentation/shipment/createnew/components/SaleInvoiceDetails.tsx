@@ -11,15 +11,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
-import { format } from "date-fns";
+import { Trash, UploadCloud } from "lucide-react";
 import {
   TableHeader,
   TableRow,
@@ -31,33 +24,38 @@ import {
 import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
-import { Icons } from "@/components/ui/icons";
 
 interface SaleInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
+  params: string | string[];
 }
 
-export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoiceDetailsProps) {
+
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
+
+export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params }: SaleInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
+  const organizationId = Array.isArray(params) ? params[0] : params;
+  console.log(organizationId)
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
   const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
-  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
+  const [consignees, setConsignees] = useState<any[]>([]);
   const GlobalModal = useGlobalModal();
 
   // Fetch consignees on mount
   useEffect(() => {
     const fetchConsignees = async () => {
       try {
-        const response = await fetch(
-          "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+        const consigneeResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`
         );
-        const data = await response.json();
-        const mappedConsignees = data.map((consignee: any) => ({
-          _id: consignee._id,
-          name: consignee.name || consignee.consigneeName,
-        }));
-        setConsignees(mappedConsignees);
+        const consigneeData = await consigneeResponse.json();
+        console.log("This is consignee data ", consigneeData)
+        setConsignees(consigneeData);
       } catch (error) {
         console.error("Error fetching consignees:", error);
       }
@@ -69,7 +67,7 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
     const updatedInvoices = invoices.filter((_, i) => i !== index);
     setInvoices(updatedInvoices);
     setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
-    saveProgress(getValues());
+    saveProgressSilently(getValues());
   };
 
   const handleInvoiceNumberCountChange = (value: string) => {
@@ -86,11 +84,11 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
       );
       setInvoices(newInvoices);
       setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } else {
       setInvoices([]);
       setValue("saleInvoiceDetails.commercialInvoices", []);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     }
   };
 
@@ -105,9 +103,9 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
       setValue(fieldName, storageUrl);
-      saveProgress(getValues());
+      saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -121,16 +119,9 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
     GlobalModal.children = (
       <AddConsigneeForm
         onSuccess={() => {
-          fetch("https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba")
+          fetch(`https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())
-            .then((data) => {
-              const mappedConsignees = data.map((consignee: any) => ({
-                _id: consignee._id,
-                name: consignee.name || consignee.consigneeName,
-              }));
-              setConsignees(mappedConsignees);
-              saveProgress(getValues()); // Save after updating consignees
-            });
+            .then((data) => setConsignees(data));
         }}
       />
     );
@@ -152,7 +143,7 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
                 value={field.value || ""}
                 onChange={(value) => {
                   field.onChange(value);
-                  saveProgress(getValues());
+                  saveProgressSilently(getValues());
                 }}
                 displayProperty="name"
                 placeholder="Select a Consignee"
@@ -175,7 +166,7 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
               <Input
                 placeholder="e.g., Khan"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
@@ -238,7 +229,7 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
                           <Input
                             placeholder="e.g., 3458H4"
                             {...field}
-                            onBlur={() => saveProgress(getValues())}
+                            onBlur={() => saveProgressSilently(getValues())}
                             required // Enforce required field
                           />
                         </FormControl>
@@ -380,13 +371,14 @@ export function SaleInvoiceDetails({ saveProgress, onSectionSubmit }: SaleInvoic
               <Textarea
                 placeholder="e.g., this is some random comment for sale invoice details"
                 {...field}
-                onBlur={() => saveProgress(getValues())}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
+
     </div>
   );
 }

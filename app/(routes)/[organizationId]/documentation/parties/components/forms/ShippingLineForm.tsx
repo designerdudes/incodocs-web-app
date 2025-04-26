@@ -16,6 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { useParams } from "next/navigation";
 
 const formSchema = z.object({
   shippingLineName: z.string().min(1, { message: "Shipping Line Name is required" }),
@@ -35,6 +36,8 @@ const formSchema = z.object({
       (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
       { message: "Enter a valid Email" }
     ),
+  organizationId: z.string().optional()
+
 });
 
 interface ShippinglineFormProps {
@@ -43,6 +46,8 @@ interface ShippinglineFormProps {
 
 function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const orgid = useParams().organizationId;
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -52,6 +57,8 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
+      organizationId: ""
+
     },
   });
 
@@ -70,7 +77,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
           responsiblePerson: values.responsiblePerson,
           mobileNo: values.mobileNo ? parseInt(values.mobileNo) : undefined,
           email: values.email,
-          organizationId: "674b0a687d4f4b21c6c980ba",
+          organizationId: orgid
         }),
       });
       if (!response.ok) throw new Error("Failed to create shipping line");
