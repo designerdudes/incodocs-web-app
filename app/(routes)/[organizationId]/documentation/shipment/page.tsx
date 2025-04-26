@@ -72,6 +72,7 @@ export default async function Page(params: params) {
         <ShipmentDataTable
           columns={columns as any}
           data={shipmentData}
+          statusColumnName={"status"}
           searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
           bulkDeleteIdName="_id"
           deleteRoute="shipment/deleteall"
