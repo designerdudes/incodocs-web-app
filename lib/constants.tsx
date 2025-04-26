@@ -9,7 +9,6 @@ import {
   Settings,
   Settings2,
   Sheet,
-  SparkleIcon,
   User,
 } from "lucide-react";
 import { FiDollarSign, FiGrid } from "react-icons/fi";
