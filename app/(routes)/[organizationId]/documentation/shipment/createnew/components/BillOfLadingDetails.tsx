@@ -58,17 +58,11 @@ export function BillOfLadingDetails({
   const { control, setValue, watch, getValues } = useFormContext();
   const organizationId = Array.isArray(params) ? params[0] : params;
   const blFromForm = watch("blDetails.Bl") || [];
-  const [blEntries, setBlEntries] = useState<any[]>(blFromForm);
   const [uploading, setUploading] = useState(false);
   const [shippingLines, setShippingLines] = useState<{ _id: string; name: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingBlCount, setPendingBlCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
-
-  // Sync local BL entries state with form state
-  useEffect(() => {
-    setBlEntries(blFromForm);
-  }, [blFromForm]);
 
   // Fetch shipping lines
   useEffect(() => {
@@ -92,14 +86,6 @@ export function BillOfLadingDetails({
   }, [organizationId]);
 
   const handleBlCountChange = (value: string) => {
-    const newCount = Math.max(0, parseInt(value, 10) || 0);
-
-    if (newCount < blEntries.length) {
-      setShowConfirmation(true);
-      setPendingBlCount(newCount);
-      return;
-    }
-
     handleDynamicArrayCountChange({
       value,
       watch,
@@ -115,7 +101,6 @@ export function BillOfLadingDetails({
       customFieldSetters: {
         "blDetails.Bl": (items, setValue) => {
           setValue("blDetails.noOfBl", items.length);
-          setBlEntries(items);
         },
       },
       saveCallback: saveProgressSilently,
@@ -124,12 +109,15 @@ export function BillOfLadingDetails({
         !!item.blDate ||
         !!item.telexDate ||
         !!item.uploadBLUrl,
+      onRequireConfirmation: (pendingItems, confirmedCallback) => {
+        setShowConfirmation(true);
+        setPendingBlCount(pendingItems.length);
+      },
     });
   };
 
   const handleBlDelete = (index: number) => {
-    const updatedBlEntries = blEntries.filter((_, i) => i !== index);
-    setBlEntries(updatedBlEntries);
+    const updatedBlEntries = blFromForm.filter((_: any, i: number) => i !== index);
     setValue("blDetails.Bl", updatedBlEntries);
     setValue("blDetails.noOfBl", updatedBlEntries.length);
     saveProgressSilently(getValues());
@@ -137,8 +125,7 @@ export function BillOfLadingDetails({
 
   const handleConfirmChange = () => {
     if (pendingBlCount !== null) {
-      const updatedBlEntries = blEntries.slice(0, pendingBlCount);
-      setBlEntries(updatedBlEntries);
+      const updatedBlEntries = blFromForm.slice(0, pendingBlCount);
       setValue("blDetails.Bl", updatedBlEntries);
       setValue("blDetails.noOfBl", updatedBlEntries.length);
       saveProgressSilently(getValues());
@@ -251,7 +238,7 @@ export function BillOfLadingDetails({
         />
       </div>
 
-      {blEntries.length > 0 && (
+      {blFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
@@ -265,7 +252,7 @@ export function BillOfLadingDetails({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {blEntries.map((_: any, index: number) => (
+              {blFromForm.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>

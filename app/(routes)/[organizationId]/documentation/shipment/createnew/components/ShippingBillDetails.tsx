@@ -101,7 +101,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
       const storageUrl = data.url;
       console.log("File uploaded successfully:", storageUrl);
       setValue(fieldName, storageUrl);
-      saveProgress(getValues()); // Use parent saveProgress
+      saveProgressSilently(getValues()); // Use parent saveProgress
     } catch (error) {
       alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
@@ -118,7 +118,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
         );
         const CBNameData = await CBNameResponse.json();
         setCBNames(CBNameData);
-        console.log(CBNameData)
+        console.log("This is Cb names", CBNameData)
       } catch (error) {
         console.error("Error fetching CB Names:", error);
       }

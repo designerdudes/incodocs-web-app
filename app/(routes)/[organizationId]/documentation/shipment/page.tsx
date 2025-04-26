@@ -30,7 +30,6 @@ export default async function Page(params: params) {
   ).then((response) => {
     return response.json();
   });
-  console.log(res)
   let shipmentData;
   shipmentData = res;
 
