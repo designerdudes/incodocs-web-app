@@ -16,6 +16,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import toast from "react-hot-toast";
 import { Icons } from "@/components/ui/icons";
+import { useParams } from "next/navigation";
+
+
 
 // Define schema for form validation
 const organizationFormSchema = z.object({
@@ -56,6 +59,8 @@ export default function OrganizationSettingPage() {
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { organizationId } = useParams();
+  
 
   // Initialize form
   const form = useForm<OrganizationFormValues>({
@@ -76,7 +81,7 @@ export default function OrganizationSettingPage() {
       setIsLoading(true);
       try {
         const response = await fetch(
-          "https://incodocs-server.onrender.com/organizations/get/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/organizations/get/${organizationId}`
         );
         if (!response.ok) throw new Error("Failed to fetch organization");
         const data = await response.json();
@@ -105,7 +110,7 @@ export default function OrganizationSettingPage() {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://incodocs-server.onrender.com/organizations/update/674b0a687d4f4b21c6c980ba",
+        `https://incodocs-server.onrender.com/organizations/${organizationId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -298,7 +303,7 @@ export default function OrganizationSettingPage() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Teams</TableCell>
-                    <TableCell>{organization?.teams.length || 0} team(s)</TableCell>
+                    <TableCell>{organization?.teams?.length || 0} team(s)</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Employees</TableCell>
