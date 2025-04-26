@@ -81,7 +81,7 @@ export default async function ProductPage({ params }: Props) {
                     bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
                     bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-                    deleteRoute="/shipment/shippingline/deletemany"
+                    deleteRoute="/shipment/productdetails/deletemany"
                     searchKey="name"
                     columns={ProductsColumns}
                     data={ProductsData as any}

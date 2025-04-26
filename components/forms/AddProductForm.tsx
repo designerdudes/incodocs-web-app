@@ -22,7 +22,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 
 const productSchema = z.object({
@@ -35,8 +35,8 @@ const productSchema = z.object({
         z.object({
             variantName: z.string().min(1, { message: "Variant name is required" }),
             variantType: z.string().min(1, { message: "Variant type is required" }),
-            sellPrice: z.number().min(0, { message: "Sell price must be positive" }),
-            buyPrice: z.number().min(0, { message: "Buy price must be positive" }),
+            sellPrice: z.number().min(1, { message: "Sell price must be positive" }),
+            buyPrice: z.number().min(1, { message: "Buy price must be positive" }),
         })
     ),
     netWeight: z.number().min(0, { message: "Net weight must be positive" }),
@@ -51,6 +51,7 @@ interface ProductFormProps {
 }
 
 export default function ProductFormPage({ onSuccess }: ProductFormProps) {
+    const orgId = useParams().organizationId
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const form = useForm({
@@ -72,6 +73,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
             netWeight: 0,
             grossWeight: 0,
             cubicMeasurement: 0,
+            organizationId: orgId
         },
     });
 
@@ -81,7 +83,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
             await postData("/shipment/productdetails/add", values); // Adjust endpoint as needed
             toast.success("Product created successfully");
             router.push("./");
-            window.location.reload(); // Reload the page to see the new product
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error("Error creating product:", error);
@@ -98,7 +99,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
     return (
         <div className="space-y-6">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 w-full">
                     <div className="grid grid-cols-3 gap-4">
                         <FormField
                             control={form.control}
@@ -214,7 +215,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                             <FormControl>
                                                 <Input
                                                     type="number"
-                                                    step="0.01"
                                                     {...field}
                                                     onChange={(e) =>
                                                         field.onChange(
@@ -236,7 +236,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                             <FormControl>
                                                 <Input
                                                     type="number"
-                                                    step="0.01"
                                                     {...field}
                                                     onChange={(e) =>
                                                         field.onChange(
@@ -263,7 +262,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                     <FormControl>
                                         <Input
                                             type="number"
-                                            step="0.01"
                                             {...field}
                                             onChange={(e) =>
                                                 field.onChange(
@@ -285,7 +283,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                     <FormControl>
                                         <Input
                                             type="number"
-                                            step="0.01"
                                             {...field}
                                             onChange={(e) =>
                                                 field.onChange(
@@ -307,7 +304,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                     <FormControl>
                                         <Input
                                             type="number"
-                                            step="0.01"
                                             {...field}
                                             onChange={(e) =>
                                                 field.onChange(

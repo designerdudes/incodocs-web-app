@@ -39,6 +39,11 @@ import ProductSelectionForm from "@/components/forms/ProductSelectionForm";
 import { AddContainerTypeModal } from "./AddContainerTypeModal";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import ProductFormPage from "@/components/forms/AddProductForm";
+
+interface ProductFormProps {
+  onSuccess?: () => void;
+}
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
@@ -161,7 +166,7 @@ export function BookingDetails({
           _id: product._id,
           code: product.code,
           description: product.description,
-          name: product.code + product.description
+          name: product.code + ": " + product.description
         }));
         setProducts(mappedProduct);
 
@@ -223,20 +228,22 @@ export function BookingDetails({
     setShowConfirmation(false);
   };
 
-  const openProductForm = (index: number) => {
-    GlobalModal.title = "Select Products for Container";
-    GlobalModal.description = "Search and select products to add to this container.";
+  const openProductForm = () => {
+    GlobalModal.title = "Add New Product";
+    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
-      <ProductSelectionForm
-        onSubmit={(data: { productIds: string[] }) => {
-          const updatedContainers = [...containersFromForm];
-          updatedContainers[index].addProductDetails = data.productIds;
-          setValue("bookingDetails.containers", updatedContainers);
-          fetchProductDetails(data.productIds);
-          saveProgressSilently(getValues());
+      <ProductFormPage
+        onSuccess={async () => {
+          try {
+            const response = await fetchData("/shipment/productdetails/get");
+            setProducts(response || []);
+            toast.success("Product created successfully");
+          } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Failed to refresh product list");
+          }
           GlobalModal.onClose();
         }}
-        initialProductIds={containersFromForm[index].addProductDetails || []}
       />
     );
     GlobalModal.onOpen();
@@ -547,7 +554,7 @@ export function BookingDetails({
                               displayProperty="name"
                               valueProperty="_id"
                               placeholder="Select Product"
-                              onAddNew={() => setIsModalOpen(true)}
+                              onAddNew={openProductForm}
                               addNewLabel="Add New Product"
                               multiple={false}
                             />
