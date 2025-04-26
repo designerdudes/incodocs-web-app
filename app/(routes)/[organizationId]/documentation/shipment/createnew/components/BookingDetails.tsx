@@ -45,6 +45,7 @@ export interface SaveDetailsProps {
 interface BookingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   setInvoiceNumber: (val: string) => void;
+  params: string | string[];
 }
 
 interface Product {
@@ -72,6 +73,7 @@ export function BookingDetails({
   saveProgress,
   onSectionSubmit,
   setInvoiceNumber,
+  params
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues, register } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
@@ -84,6 +86,9 @@ export function BookingDetails({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
+  const organizationId = Array.isArray(params) ? params[0] : params;
+  const [products, setProducts] = useState<any[]>([]);
+
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -141,6 +146,24 @@ export function BookingDetails({
       toast.error("Failed to load product details");
     }
   };
+
+  useEffect(() => {
+    const fetchConsignees = async () => {
+      try {
+        const ProductsResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
+        );
+        const ProductsData = await ProductsResponse.json();
+        console.log("This is Product data ", ProductsData)
+        setProducts(ProductsData);
+
+      } catch (error) {
+        console.error("Error fetching Product Data:", error);
+      }
+    };
+    fetchConsignees();
+  }, []);
+
 
   const handleDelete = (index: number) => {
     const updatedContainers = containersFromForm.filter(

@@ -78,7 +78,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
         body: formData,
       });
       const data = await response.json();
-      const storageUrl = data.storageLink;
+      const storageUrl = data.url;
       setValue(fieldName, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
