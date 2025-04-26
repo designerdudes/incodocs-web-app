@@ -95,6 +95,8 @@ export function MarkCutAndCreateSlabsForm({
     },
   });
 
+  
+
   const { control, setValue, watch, getValues } = form;
 
   // Sync slabs state with form on mount
