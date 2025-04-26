@@ -85,7 +85,7 @@ export default async function BlocksPage({ params }: Props) {
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for
             cutting. Select the block and initiate the cutting process as the
-            next step in its preparation.
+            next step in its  preparation.
           </p>
         </div>
       </div>
@@ -95,7 +95,7 @@ export default async function BlocksPage({ params }: Props) {
       {/* Content Area */}
       <div className="flex flex-1 gap-6">
         {/* Lot Details Card */}
-        <Card className="w-2/5">
+        <Card className="w-1.5/5">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
             <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
@@ -166,7 +166,9 @@ export default async function BlocksPage({ params }: Props) {
                     Block Created At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.createdAt).format("YYYY-MM-DD")}
+                    {moment(LotData.createdAt).format("DD MMM YYYY")}
+
+
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -174,16 +176,20 @@ export default async function BlocksPage({ params }: Props) {
                     Block Updated At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.updatedAt).format("YYYY-MM-DD")}
+                 {moment(LotData.updatedAt).format("DD MMM YYYY")}
+                    
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+        
 
         {/* Block's DataTable */}
-        <div className="w-3/5">
+
+
+        <div className="w-3.5/5">
           <DataTable
             bulkDeleteIdName="_id"
             bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
