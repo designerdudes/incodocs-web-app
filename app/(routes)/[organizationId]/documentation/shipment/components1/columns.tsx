@@ -9,6 +9,9 @@ import { Shipment } from "../data/schema";
 import { Button } from "@/components/ui/button";
 import ViewAllComponent from "./viewAllComponent";
 import { CSSProperties } from "react";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
   const searchableRowContent =
@@ -485,19 +488,60 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
+    accessorKey: "status",
+    header: ({ column }) => <ColumnHeader column={column} title="Status" />,
+    cell: ({ row }) => (
+      <Badge
+      className={cn(
+        row.getValue("status") === "Trucks Dispatched" && "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+        row.getValue("status") === "Trucks Arrived" && "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+        row.getValue("status") === "Trucks Halted" && "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+        row.getValue("status") === "Stuffing" && "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+        row.getValue("status") === "In Clearance" && "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+        row.getValue("status") === "Loaded On Vessel" && "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+        row.getValue("status") === "In Transit" && "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+        row.getValue("status") === "Arrived At POD" && "bg-green-200 text-green-800 hover:bg-green-300/80",
+        row.getValue("status") === "Delivery Completed" && "bg-green-200 text-green-800 hover:bg-green-500/80",
+        ![
+          "Trucks Dispatched",
+          "Trucks Arrived",
+          "Trucks Halted",
+          "Stuffing",
+          "In Clearance",
+          "Loaded On Vessel",
+          "In Transit",
+          "Arrived At POD",
+          "Delivery Completed",
+        ].includes(row.original.status) && "bg-muted-foreground/60 text-primary-foreground"
+      )}
+    >
+      {row.original.status}
+    </Badge>
+    ),
+    filterFn: statusFilterFn,
+    size: 200,
+  },
+  
+  {
     accessorKey: "createdBy",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Created By" />
     ),
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-        {row.original?.createdBy
-            ? row.original?.createdBy
-            : "N/A"}
-        </span>
+          <div className="flex items-center space-x-2 truncate">
+          <Avatar className="h-6 w-6">
+              <AvatarImage src={row.original.createdBy.profileImg} alt={row.original.createdBy.fullName} />
+              <AvatarFallback>{row.original.createdBy.fullName.charAt(0)}</AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col space-y-1 leading-none">
+          <span className="capitalize">{row.original.createdBy.fullName}</span>
+          <span className="text-xs truncate text-muted-foreground">
+              {row.original.createdBy.email}
+          </span>
+          </div>
       </div>
     ),
+    size: 280,
   },
   {
     accessorKey: "createdAt",

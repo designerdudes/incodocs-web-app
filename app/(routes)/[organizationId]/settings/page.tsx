@@ -3,11 +3,21 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function SettingsPage() {
+
+interface SettingsPageProps {
+    params: {
+        organizationId: string;
+    }; 
+  }
+
+
+export default function SettingsPage({ params }: SettingsPageProps) {
+    const { organizationId } = params;
+
     const settingsOptions = [
-        { name: "Factory Settings", path: "/settings/factory" },
-        { name: "General Settings", path: "/settings/general" },
-        { name: "Organisation", path: "/settings/organisation" }
+        { name: "Factory Settings", path: `${organizationId}/settings/factory` },
+        { name: "General Settings", path: `${organizationId}/settings/general` },
+        { name: "Organization", path: `${organizationId}/settings/organization` }
     ];
 
     return (

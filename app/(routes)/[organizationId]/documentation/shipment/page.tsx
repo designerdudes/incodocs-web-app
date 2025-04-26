@@ -79,6 +79,7 @@ export default async function Page(params: params) {
             "bookingDetails.bookingNumber",
             "shippingDetails.shippingLineInvoices.invoiceNumber",
           ]}
+          statusColumnName={"status"}  
           bulkDeleteIdName="_id"
           deleteRoute="shipment/deleteall"
         />

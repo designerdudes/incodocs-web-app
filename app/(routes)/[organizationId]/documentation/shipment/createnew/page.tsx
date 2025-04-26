@@ -50,6 +50,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           setInvoiceNumber={setInvoiceNumber}
+          params={orgid}
         />
       ),
     },
@@ -116,7 +117,7 @@ export default function CreateNewShipmentFormPage() {
   ];
 
 
-  const loadDraft = () => {
+  const loadDraft = (): Record<string, any> => {
     const draft = localStorage.getItem("shipmentDraft");
     return draft ? JSON.parse(draft) : {};
   };
@@ -263,6 +264,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               setInvoiceNumber={setInvoiceNumber}
+              params={orgid}
 
             />
           )}

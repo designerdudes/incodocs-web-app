@@ -251,7 +251,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
           `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
         );
         const forwarderData = await forwarderResponse.json();
-        console.log("forwarderData", forwarderData)
         setForwarders(forwarderData);
 
         const transporterResponse = await fetch(
