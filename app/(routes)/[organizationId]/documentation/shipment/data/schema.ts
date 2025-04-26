@@ -16,22 +16,30 @@ export const shipmentSchema = z.object({
         containerNumber: z.string().optional(),
         truckNumber: z.string().optional(),
         truckDriverContactNumber: z.number().optional(), // Optional since not always present
-        addProductDetails: z
+        addProductDetails: z.array(z
           .object({
-            tiles: z.object({
-              sizePerTile: z.object({
-                length: z.object({ value: z.number(), units: z.string() }),
-                breadth: z.object({ value: z.number(), units: z.string() }),
-              }),
-              noOfBoxes: z.number(),
-              noOfPiecesPerBoxes: z.number(),
-            }),
-            productCategory: z.string(),
-            graniteAndMarble: z.string(),
             _id: z.string(),
+            code: z.string(),
+            description: z.string(),
+            unitOfMeasurements: z.string(),
+            countryOfOrigin: z.string(),
+            netWeight: z.number(),
+            grossWeight: z.number(),
+            cubicMeasurement: z.number(),
+            __v: z.number(),
+            prices: z.array(
+              z.object({
+                _id: z.string(),
+                sellPrice: z.number(),
+                buyPrice: z.number(),
+                createdAt: z.string().datetime(),
+                updatedAt: z.string().datetime(),
+                __v: z.number(),
+              })
+            ),
           })
           .optional(), // Optional since not always present
-        _id: z.string(),
+        ),
       })
     ),
     _id: z.string(),
@@ -165,20 +173,31 @@ export const shipmentSchema = z.object({
       __v: z.number(),
     }),
     actualBuyer: z.string(),
-    commercialInvoices: z.object({
+    commercialInvoices: z.array(
+      z.object({
       commercialInvoiceNumber: z.string(),
       clearanceCommercialInvoiceUrl: z.string(),
       actualCommercialInvoiceUrl: z.string(),
       saberInvoiceUrl: z.string(),
       _id: z.string(),
-    }),
+    })),
     _id: z.string(),
-  }),
+  })
+  ,
   blDetails: z.object({
-    blNumber: z.string(),
-    blDate: z.string().datetime(),
-    telexDate: z.string().datetime(),
+    shippingLineName: z.string(),
+    noOfBl: z.number(),
+    Bl: z.array(
+      z.object({
+        blNumber: z.string(),
+        blDate: z.string().datetime(),
+        telexDate: z.string().datetime(),
+        uploadBLUrl: z.string(),
+        _id: z.string(),
+      })
+    ),
     _id: z.string(),
+
   }),
   otherDetails: z.array( // Changed to array to match data
     z.object({
