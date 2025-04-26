@@ -17,6 +17,7 @@ import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOu
 import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
 import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
 import { Block } from "./components/incuttingcolumns";
+import TabsDataTable from "./components/tabsDataTable";
 
 export type FinishedMaterial = {
   _id: string; // Unique identifier
@@ -155,7 +156,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
       </div>
       <Separator className="my-2" />
       <div>
-        <Tabs defaultValue="inCutting" className="w-full">
+        {/* <Tabs defaultValue="inCutting" className="w-full">
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="inCutting">
               In Cutting
@@ -348,7 +349,22 @@ export default async function SlabsProcessingPage({ params }: Props) {
               </TabsContent>
             </Tabs>
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
+        <TabsDataTable
+          inCutting={inCutting}
+          readyForPolish={readyForPolish}
+          inPolishing={inPolishing}
+          Polished={Polished}
+          slabsData={slabsData}
+          incuttingcolumns={incuttingcolumns}
+          Readyforpolishcolumns={Readyforpolishcolumns}
+          inPolishingolumns={inPolishingolumns}
+          Polishedcolumns={Polishedcolumns}
+          CuttingInchesWithAllowanceColumns={CuttingInchesWithAllowanceColumns}
+          CuttingInchesWithOutAllowanceColumns={CuttingInchesWithOutAllowanceColumns}
+          polishingInchesWithOutAllowanceColumns={polishingInchesWithOutAllowanceColumns}
+          polishingInchesWithAllowanceColumns={polishingInchesWithAllowanceColumns}
+        />
       </div>
     </div>
   );

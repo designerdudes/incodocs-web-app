@@ -1,37 +1,37 @@
+"use client"
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { columns } from "./components1/columns";
+
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
-import { useParams } from "next/navigation";
+import { columns } from "../components1/columns";
 
-interface params {
-  params: {
-    organizationId: string;
-  };
-}
+export default function Page() {
 
-export default async function Page(params: params) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/shipment/getbyorg/${params.params.organizationId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
-  let shipmentData;
-  shipmentData = res;
+
+    // const res = await fetch(
+    //     `https://incodocs-server.onrender.com/shipment/getbyorg/680a22e241b238b4f6c1713f`,
+    //     {
+    //         method: "GET",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             Authorization: "Bearer " + token,
+    //         },
+    //     }
+    // ).then((response) => {
+    //     return response.json();
+    // });
+    const res = localStorage.getItem("shipmentDraft") as any
+    console.log("res", res)
+
+    let shipmentData;
+    shipmentData = [JSON.parse(res)];
+    console.log("shipmentData", shipmentData);
+
 
   return (
     <div className="flex flex-col p-6">
@@ -43,14 +43,11 @@ export default async function Page(params: params) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Shipments" />
+          <Heading className="leading-tight" title="Draft Shipments" />
           <p className="text-muted-foreground text-sm">
-            Effectively oversee your Shipment records.
+            View and manage your draft shipments
           </p>
         </div>
-        <Link href={`./shipment/drafts`}>
-          <Button variant="outline">View Drafts</Button>
-        </Link>
         <Link href={`./shipment/createnew`}>
           <Button className="bg-primary text-white">Add New Shipment</Button>
         </Link>
@@ -68,21 +65,16 @@ export default async function Page(params: params) {
                     columns={columns}
                     showDropdown={true} // ✅ Enable dropdown for Shipment Page
                 /> */}
-        <ShipmentDataTable
-          columns={columns as any}
-          data={shipmentData}
-          searchKeys={[
-            "ShipmentId",
-            "saleInvoiceDetails.consingeeName",
-            "bookingDetails.invoiceNumber",
-            "bookingDetails.bookingNumber",
-            "shippingDetails.shippingLineInvoices.invoiceNumber",
-          ]}
-          statusColumnName={"status"}
-          bulkDeleteIdName="_id"
-          deleteRoute="shipment/deleteall"
-        />
-      </div>
-    </div>
-  );
+                <ShipmentDataTable
+                columns={columns as any}
+                data={shipmentData}
+                searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
+                bulkDeleteIdName="_id"
+                 deleteRoute="shipment/deleteall"
+
+                />
+            </div>
+        </div>
+    );
+
 }

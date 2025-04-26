@@ -340,7 +340,7 @@ function ShipmentDataTable<T>({
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto min-w-36 p-3" align="start">
+            <PopoverContent className="w-auto min-w-40 p-3" align="start">
               <div className="space-y-3">
                 <div className="text-muted-foreground text-xs font-medium">Filters</div>
                 <div className="space-y-3">
@@ -355,10 +355,23 @@ function ShipmentDataTable<T>({
                         htmlFor={`${id}-${i}`}
                         className="flex grow justify-between gap-2 font-normal"
                       >
-                        {value}{" "}
-                        <span className="text-muted-foreground ms-2 text-xs">
+                        {value}{" "} 
+                        <div className={`h-4 w-4 items-center justify-center rounded-md  text-center text-xs ${
+                         value === "Trucks Dispatched" ? "bg-gray-200 text-gray-800": 
+                         value === "Trucks Arrived" ? "bg-blue-200 text-blue-800":
+                         value === "Trucks Halted" ? "bg-yellow-200 text-yellow-800":
+                         value === "Stuffing" ? "bg-orange-200 text-orange-800":
+                         value === "In Clearance" ? "bg-purple-200 text-purple-800":
+                         value === "Loaded On Vessel" ? "bg-teal-200 text-teal-800":
+                         value === "In Transit" ? "bg-cyan-200 text-grcyanay-800":
+                         value === "Arrived At POD" ? "bg-green-200 text-green-800":
+                         value === "Delivery Completed" && "bg-green-200 text-green-800"
+
+                        }`} >
+                     
                           {statusCounts.get(value)}
-                        </span>
+              
+                        </div>
                       </Label>
                     </div>
                   ))}

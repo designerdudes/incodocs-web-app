@@ -174,3 +174,4 @@ export default function CBNameForm({ onSuccess }: CBNameFormProps) {
     </Form>
   );
 }
+

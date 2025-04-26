@@ -9,7 +9,6 @@ import {
   Settings,
   Settings2,
   Sheet,
-  SparkleIcon,
   User,
 } from "lucide-react";
 import { FiDollarSign, FiGrid } from "react-icons/fi";
@@ -376,7 +375,7 @@ const sidebarTabs = {
     },
     {
       title: "Team Management",
-      url: "/teamManagement/dashboard",
+      url: "/teamManagement",
       icon: User,
       isActive: true,
     },
