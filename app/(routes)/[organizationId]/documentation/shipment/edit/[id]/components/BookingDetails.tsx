@@ -1,6 +1,5 @@
-
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
 import { format } from "date-fns";
 import {
@@ -13,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -30,18 +29,42 @@ import {
 import EditProductDetailsForm from "@/components/forms/EditProductDetails";
 import { Dispatch, SetStateAction } from "react";
 import { Icons } from "@/components/ui/icons";
+import toast from "react-hot-toast";
 
-// Define AddProductDetails type inline
 interface AddProductDetails {
+  productId?: string;
   code: string;
-  HScode: string;
-  dscription: string;
+  description: string;
   unitOfMeasurements?: string;
   countryOfOrigin?: string;
-  variantName?: string;
-  varianntType?: string;
-  sellPrice?: number;
-  buyPrice?: number;
+  HScode: string;
+  prices?: {
+    variantName?: string;
+    variantType?: string;
+    sellPrice?: number;
+    buyPrice?: number;
+    _id?: string;
+  }[];
+  netWeight?: number;
+  grossWeight?: number;
+  cubicMeasurement?: number;
+}
+
+interface ProductDetails {
+  _id?: string;
+  productId?: string;
+  code: string;
+  description: string;
+  unitOfMeasurements: string;
+  countryOfOrigin: string;
+  HScode?: string;
+  prices?: {
+    variantName?: string;
+    variantType?: string;
+    sellPrice?: number;
+    buyPrice?: number;
+    _id?: string;
+  }[];
   netWeight?: number;
   grossWeight?: number;
   cubicMeasurement?: number;
@@ -49,13 +72,21 @@ interface AddProductDetails {
 
 interface BookingDetailsProps {
   shipmentId: string;
+  orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
   onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
+interface ProductDetailsSubTableProps {
+  productId: string;
+  fetchProductDetails: (productId: string) => Promise<ProductDetails | null>;
+  onEdit: () => void;
+}
+
 export function BookingDetails({
   shipmentId,
+  orgId,
   saveProgress,
   onSectionSubmit,
   onProductDetailsOpenChange,
@@ -66,8 +97,12 @@ export function BookingDetails({
     number | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [productDetailsCache, setProductDetailsCache] = useState<
+    Record<string, ProductDetails>
+  >({});
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "bookingDetails.containers",
   });
@@ -76,21 +111,131 @@ export function BookingDetails({
   const formValues = watch("bookingDetails") || {};
   const containers = formValues.containers || [];
 
-  // Debug: Log containers state
+  // Fetch booking details on mount
   useEffect(() => {
-    console.log("Current containers state:", containers);
-  }, [containers]);
+    const fetchBookingDetails = async () => {
+      if (!orgId || !shipmentId) return;
+      setIsLoading(true);
+      try {
+        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
+        const response = await fetch(
+          `https://incodocs-server.onrender.com/shipment/bookingdetails/get/${orgIdToUse}/${shipmentId}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch booking details");
+        const data = await response.json();
+        if (data && Object.keys(data).length > 0) {
+          setValue(
+            "bookingDetails",
+            {
+              invoiceNumber: data.invoiceNumber || "",
+              bookingNumber: data.bookingNumber || "",
+              portOfLoading: data.portOfLoading || "",
+              destinationPort: data.destinationPort || "",
+              vesselSailingDate: data.vesselSailingDate || undefined,
+              vesselArrivingDate: data.vesselArrivingDate || undefined,
+              numberOfContainer: data.containers?.length || 0,
+              containers:
+                data.containers?.map((container: any) => ({
+                  containerNumber: container.containerNumber || "",
+                  truckNumber: container.truckNumber || "",
+                  truckDriverContactNumber:
+                    container.truckDriverContactNumber || undefined,
+                  addProductDetails: container.addProductDetails || [],
+                })) || [],
+            },
+            { shouldDirty: false }
+          );
+        }
+      } catch (error) {
+        console.error("Error fetching booking details:", error);
+        toast.error("Failed to load booking details");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchBookingDetails();
+  }, [orgId, shipmentId, setValue]);
 
   // Autosave form data when bookingDetails changes
   useEffect(() => {
-    if (formValues) {
+    if (formValues && !isLoading) {
       saveProgress({ bookingDetails: formValues });
     }
-  }, [formValues, saveProgress]);
+  }, [formValues, saveProgress, isLoading]);
+
+  // Initialize numberOfContainer based on containers length
+  useEffect(() => {
+    if (containers.length > 0 && !formValues.numberOfContainer) {
+      setValue("bookingDetails.numberOfContainer", containers.length, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+  }, [containers, formValues.numberOfContainer, setValue]);
+
+  // Fetch product details using API
+  const fetchProductDetails = useCallback(
+    async (productId: string): Promise<ProductDetails | null> => {
+      if (productDetailsCache[productId]) {
+        return productDetailsCache[productId];
+      }
+      try {
+        console.log("Fetching product details for:", productId);
+        const response = await fetch(
+          `http://localhost:4080/shipment/productdetails/get/${productId}`
+        );
+        if (!response.ok) throw new Error("Failed to fetch product details");
+        const data = await response.json();
+        console.log("Product details API response:", data);
+        const productDetails: ProductDetails = {
+          _id: data._id,
+          productId: data._id,
+          code: data.code || "",
+          description: data.description || "",
+          unitOfMeasurements: data.unitOfMeasurements || "",
+          countryOfOrigin: data.countryOfOrigin || "",
+          HScode: data.HScode || "",
+          prices:
+            data.prices?.map((price: any) => ({
+              variantName: price.variantName || "",
+              variantType: price.variantType || price.varianntType || "",
+              sellPrice: price.sellPrice || undefined,
+              buyPrice: price.buyPrice || undefined,
+              _id: price._id || undefined,
+            })) || [],
+          netWeight: data.netWeight || undefined,
+          grossWeight: data.grossWeight || undefined,
+          cubicMeasurement: data.cubicMeasurement || undefined,
+        };
+        console.log("Mapped productDetails:", productDetails);
+        setProductDetailsCache((prev) => ({
+          ...prev,
+          [productId]: productDetails,
+        }));
+        return productDetails;
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+        toast.error("Failed to load product details");
+        return null;
+      }
+    },
+    [productDetailsCache]
+  );
 
   // Handle Container Count Change
-  const handleContainerCountChange = (value: number) => {
-    if (isNaN(value) || value < 0) return;
+  const handleContainerCountChange = (value: number | undefined) => {
+    if (value === undefined || isNaN(value) || value < 0) {
+      setValue("bookingDetails.numberOfContainer", undefined, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      setValue("bookingDetails.containers", [], {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      replace([]);
+      return;
+    }
     setValue("bookingDetails.numberOfContainer", value, {
       shouldDirty: true,
       shouldValidate: true,
@@ -108,34 +253,29 @@ export function BookingDetails({
         }));
       append(newContainers);
     } else if (value < currentContainers.length) {
-      setValue("bookingDetails.containers", currentContainers.slice(0, value), {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
+      for (let i = currentContainers.length - 1; i >= value; i--) {
+        remove(i);
+      }
     }
   };
 
   // Handle delete container
   const handleDelete = (index: number) => {
     remove(index);
-    setValue("bookingDetails.numberOfContainer", fields.length - 1, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+    setValue(
+      "bookingDetails.numberOfContainer",
+      fields.length - 1 || undefined,
+      {
+        shouldDirty: true,
+        shouldValidate: true,
+      }
+    );
+    if (expandedRow === index) setExpandedRow(null);
   };
 
-  // Handle clear product details
-  const handleClearProductDetails = (index: number) => {
-    const currentValues = getValues();
-    const updatedContainers = [...(currentValues.bookingDetails?.containers || [])];
-    updatedContainers[index] = {
-      ...updatedContainers[index],
-      addProductDetails: [],
-    };
-    setValue("bookingDetails.containers", updatedContainers, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+  // Handle toggle product details
+  const handleToggleProductDetails = (index: number) => {
+    setExpandedRow(expandedRow === index ? null : index);
   };
 
   // Handle edit product details
@@ -150,64 +290,128 @@ export function BookingDetails({
     data: AddProductDetails,
     containerIndex: number
   ) => {
-    // Validate required fields before saving
-    if (!data.code.trim() || !data.HScode.trim() || !data.dscription.trim()) {
-      console.log("Invalid product details, skipping save:", data);
-      return;
-    }
-
-    console.log(
-      "handleProductDetailsSubmit called with data:",
-      data,
-      "for containerIndex:",
-      containerIndex
-    );
     const currentValues = getValues();
     const currentContainers = currentValues.bookingDetails?.containers || [];
+    const productId = data.productId || crypto.randomUUID();
 
     const updatedContainers = [...currentContainers];
     updatedContainers[containerIndex] = {
       ...updatedContainers[containerIndex],
-      addProductDetails: [data], // Single product details per container
+      addProductDetails: [
+        {
+          productId,
+          code: data.code,
+          description: data.description,
+          unitOfMeasurements: data.unitOfMeasurements || "",
+          countryOfOrigin: data.countryOfOrigin || "",
+          HScode: data.HScode,
+          prices: data.prices || [],
+          netWeight: data.netWeight,
+          grossWeight: data.grossWeight,
+          cubicMeasurement: data.cubicMeasurement,
+        },
+      ],
     };
 
     setValue("bookingDetails.containers", updatedContainers, {
       shouldDirty: true,
       shouldValidate: true,
     });
-  };
 
-  // Handle section submission
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSectionSubmit();
-    } catch (error) {
-      console.error("Error submitting Booking Details:", error);
-    } finally {
-      setIsLoading(false);
-    }
+    const productDetails: ProductDetails = {
+      productId,
+      code: data.code,
+      description: data.description,
+      unitOfMeasurements: data.unitOfMeasurements || "",
+      countryOfOrigin: data.countryOfOrigin || "",
+      HScode: data.HScode,
+      prices: data.prices || [],
+      netWeight: data.netWeight,
+      grossWeight: data.grossWeight,
+      cubicMeasurement: data.cubicMeasurement,
+    };
+
+    // Update cache with new product details
+    setProductDetailsCache((prev) => ({
+      ...prev,
+      [productId]: productDetails,
+    }));
+
+    // Trigger autosave
+    saveProgress({ bookingDetails: getValues().bookingDetails });
   };
 
   // Prepare initial values for EditProductDetailsForm
   const getInitialValues = (index: number): AddProductDetails => {
-    const container = containers?.[index]?.addProductDetails?.[0] || {};
-    const initial = {
-      code: container.code || "",
-      HScode: container.HScode || "",
-      dscription: container.dscription || "",
-      unitOfMeasurements: container.unitOfMeasurements || "",
-      countryOfOrigin: container.countryOfOrigin || "",
-      variantName: container.variantName || "",
-      varianntType: container.varianntType || "",
-      sellPrice: container.sellPrice ?? 0,
-      buyPrice: container.buyPrice ?? 0,
-      netWeight: container.netWeight ?? 0,
-      grossWeight: container.grossWeight ?? 0,
-      cubicMeasurement: container.cubicMeasurement ?? 0,
-    };
-    console.log("getInitialValues for container", index, ":", initial);
-    return initial;
+    const product = containers?.[index]?.addProductDetails?.[0];
+    const cachedProduct = product?.productId
+      ? productDetailsCache[product.productId]
+      : null;
+
+    // Prefer cached API data if available, fallback to container data
+    if (cachedProduct) {
+      console.log("Using cached product for initialValues:", cachedProduct);
+      return {
+        productId: cachedProduct.productId || "",
+        code: cachedProduct.code || "",
+        description: cachedProduct.description || "",
+        unitOfMeasurements: cachedProduct.unitOfMeasurements || "",
+        countryOfOrigin: cachedProduct.countryOfOrigin || "",
+        HScode: cachedProduct.HScode || "",
+        prices: cachedProduct.prices || [
+          {
+            variantName: "",
+            variantType: "",
+            sellPrice: undefined,
+            buyPrice: undefined,
+          },
+        ],
+        netWeight: cachedProduct.netWeight,
+        grossWeight: cachedProduct.grossWeight,
+        cubicMeasurement: cachedProduct.cubicMeasurement,
+      };
+    }
+
+    // Fallback to container data
+    console.log("Using container product for initialValues:", product);
+    return product
+      ? {
+          productId: product.productId || "",
+          code: product.code || "",
+          description: product.description || "",
+          unitOfMeasurements: product.unitOfMeasurements || "",
+          countryOfOrigin: product.countryOfOrigin || "",
+          HScode: product.HScode || "",
+          prices: product.prices || [
+            {
+              variantName: "",
+              variantType: "",
+              sellPrice: undefined,
+              buyPrice: undefined,
+            },
+          ],
+          netWeight: product.netWeight,
+          grossWeight: product.grossWeight,
+          cubicMeasurement: product.cubicMeasurement,
+        }
+      : {
+          code: "",
+          description: "",
+          unitOfMeasurements: "",
+          countryOfOrigin: "",
+          HScode: "",
+          prices: [
+            {
+              variantName: "",
+              variantType: "",
+              sellPrice: undefined,
+              buyPrice: undefined,
+            },
+          ],
+          netWeight: undefined,
+          grossWeight: undefined,
+          cubicMeasurement: undefined,
+        };
   };
 
   return (
@@ -224,6 +428,7 @@ export function BookingDetails({
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -242,6 +447,7 @@ export function BookingDetails({
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -260,6 +466,7 @@ export function BookingDetails({
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -278,6 +485,7 @@ export function BookingDetails({
                 className="uppercase"
                 {...field}
                 value={field.value ?? ""}
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -293,7 +501,11 @@ export function BookingDetails({
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
                     {field.value ? (
                       format(new Date(field.value), "PPPP")
                     ) : (
@@ -324,7 +536,11 @@ export function BookingDetails({
             <Popover>
               <PopoverTrigger asChild>
                 <FormControl>
-                  <Button variant="outline" className="w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={isLoading}
+                  >
                     {field.value ? (
                       format(new Date(field.value), "PPPP")
                     ) : (
@@ -361,13 +577,14 @@ export function BookingDetails({
                   const value = e.target.value;
                   if (value === "") {
                     field.onChange(undefined);
-                    handleContainerCountChange(0);
+                    handleContainerCountChange(undefined);
                     return;
                   }
                   const numericValue = Math.max(0, Number(value));
                   field.onChange(numericValue);
                   handleContainerCountChange(numericValue);
                 }}
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -389,156 +606,126 @@ export function BookingDetails({
             </TableHeader>
             <TableBody>
               {fields.map((field, index) => (
-                <TableRow key={field.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].containerNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., 7858784698986"
-                              {...field}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].truckNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., BH 08 5280"
-                              {...field}
-                              value={field.value ?? ""}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="tel"
-                              placeholder="e.g., 7702791728"
-                              {...field}
-                              value={field.value ?? ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value
-                                    ? parseFloat(e.target.value)
-                                    : undefined
-                                )
-                              }
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {containers?.[index]?.addProductDetails?.[0] ? (
-                      <div className="space-y-1">
-                        <p className="text-sm">
-                          <strong>Code:</strong>{" "}
-                          {containers[index].addProductDetails[0].code || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>HS Code:</strong>{" "}
-                          {containers[index].addProductDetails[0].HScode || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Description:</strong>{" "}
-                          {containers[index].addProductDetails[0].dscription || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Unit of Measurement:</strong>{" "}
-                          {containers[index].addProductDetails[0].unitOfMeasurements || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Country of Origin:</strong>{" "}
-                          {containers[index].addProductDetails[0].countryOfOrigin || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Variant Name:</strong>{" "}
-                          {containers[index].addProductDetails[0].variantName || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Variant Type:</strong>{" "}
-                          {containers[index].addProductDetails[0].varianntType || "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Sell Price:</strong>{" "}
-                          {containers[index].addProductDetails[0].sellPrice ?? "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Buy Price:</strong>{" "}
-                          {containers[index].addProductDetails[0].buyPrice ?? "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Net Weight:</strong>{" "}
-                          {containers[index].addProductDetails[0].netWeight ?? "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Gross Weight:</strong>{" "}
-                          {containers[index].addProductDetails[0].grossWeight ?? "N/A"}
-                        </p>
-                        <p className="text-sm">
-                          <strong>Cubic Measurement:</strong>{" "}
-                          {containers[index].addProductDetails[0].cubicMeasurement ?? "N/A"}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
-                        No product details
-                      </p>
-                    )}
-                    <div className="mt-2 space-x-2">
+                <React.Fragment key={field.id}>
+                  <TableRow>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers[${index}].containerNumber`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., 7858784698986"
+                                {...field}
+                                value={field.value ?? ""}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers[${index}].truckNumber`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="e.g., BH 08 5280"
+                                {...field}
+                                value={field.value ?? ""}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers[${index}].truckDriverContactNumber`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="tel"
+                                placeholder="e.g., 7702791728"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value
+                                      ? parseFloat(e.target.value)
+                                      : undefined
+                                  )
+                                }
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
                       <Button
                         type="button"
                         variant="secondary"
-                        onClick={() => handleEditProductDetails(index)}
+                        onClick={() => handleToggleProductDetails(index)}
+                        disabled={
+                          !containers?.[index]?.addProductDetails?.length ||
+                          isLoading
+                        }
                       >
-                        Edit Product Details
+                        {expandedRow === index ? (
+                          <>
+                            Hide Product Details
+                            <ChevronUp className="ml-2 h-4 w-4" />
+                          </>
+                        ) : (
+                          <>
+                            Show Product Details
+                            <ChevronDown className="ml-2 h-4 w-4" />
+                          </>
+                        )}
                       </Button>
-                      {containers?.[index]?.addProductDetails?.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => handleClearProductDetails(index)}
-                        >
-                          Clear Product Details
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={() => handleDelete(index)}
-                    >
-                      <Trash size={16} />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={() => handleDelete(index)}
+                        disabled={isLoading}
+                      >
+                        <Trash size={16} />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  {expandedRow === index &&
+                    containers?.[index]?.addProductDetails?.length > 0 && (
+                      <TableRow>
+                        <TableCell colSpan={6}>
+                          <ProductDetailsSubTable
+                            productId={
+                              containers[index].addProductDetails[0]
+                                .productId ||
+                              containers[index].addProductDetails[0]._id ||
+                              ""
+                            }
+                            fetchProductDetails={fetchProductDetails}
+                            onEdit={() => handleEditProductDetails(index)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    )}
+                </React.Fragment>
               ))}
             </TableBody>
           </Table>
@@ -558,5 +745,82 @@ export function BookingDetails({
         />
       )}
     </div>
+  );
+}
+
+function ProductDetailsSubTable({
+  productId,
+  fetchProductDetails,
+  onEdit,
+}: ProductDetailsSubTableProps) {
+  const [product, setProduct] = useState<ProductDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProductDetails = async () => {
+      if (!productId) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      const data = await fetchProductDetails(productId);
+      console.log("Product in sub-table:", data);
+      setProduct(data);
+      setLoading(false);
+    };
+    loadProductDetails();
+  }, [productId, fetchProductDetails]);
+
+  if (loading) {
+    return <div>Loading product details...</div>;
+  }
+
+  if (!product) {
+    return <div>Failed to load product details.</div>;
+  }
+
+  const price = product.prices?.[0] || {};
+
+  return (
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>Code</TableHead>
+          <TableHead>Description</TableHead>
+          <TableHead>Unit of Measurement</TableHead>
+          <TableHead>Country of Origin</TableHead>
+          <TableHead>HS Code</TableHead>
+          <TableHead>Variant Name</TableHead>
+          <TableHead>Variant Type</TableHead>
+          <TableHead>Sell Price</TableHead>
+          <TableHead>Buy Price</TableHead>
+          <TableHead>Net Weight</TableHead>
+          <TableHead>Gross Weight</TableHead>
+          <TableHead>Cubic Measurement</TableHead>
+          <TableHead>Action</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        <TableRow>
+          <TableCell>{product.code || "N/A"}</TableCell>
+          <TableCell>{product.description || "N/A"}</TableCell>
+          <TableCell>{product.unitOfMeasurements || "N/A"}</TableCell>
+          <TableCell>{product.countryOfOrigin || "N/A"}</TableCell>
+          <TableCell>{product.HScode || "N/A"}</TableCell>
+          <TableCell>{price.variantName || "N/A"}</TableCell>
+          <TableCell>{price.variantType || "N/A"}</TableCell>
+          <TableCell>{price.sellPrice ?? "N/A"}</TableCell>
+          <TableCell>{price.buyPrice ?? "N/A"}</TableCell>
+          <TableCell>{product.netWeight ?? "N/A"}</TableCell>
+          <TableCell>{product.grossWeight ?? "N/A"}</TableCell>
+          <TableCell>{product.cubicMeasurement ?? "N/A"}</TableCell>
+          <TableCell>
+            <Button type="button" variant="secondary" onClick={onEdit}>
+              Edit Product
+            </Button>
+          </TableCell>
+        </TableRow>
+      </TableBody>
+    </Table>
   );
 }
