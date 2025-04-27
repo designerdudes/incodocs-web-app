@@ -27,6 +27,9 @@ import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn"
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
 import ExportCsvButton from "./Components/ExportCsvButton"
 import moment from "moment";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { DocColumns } from "./Components/DocumentColumns";
 
 
 interface Props {
@@ -55,7 +58,154 @@ export default async function Page({ params }: Props) {
     return <div>Error loading shipment data</div>;
   }
   const shipmentData = await res.json();
-  console.log("this is shipment", shipmentData)
+
+ //extract documents from shipmentData in this format where i want it want document name and url
+ // Transporter Invoices
+ const transporterInvoices = shipmentData?.shippingDetails?.transporterInvoices?.map(
+  (invoice: { invoiceNumber: any; uploadInvoiceUrl: any; }) => ({
+    documentName: 'Transporter Invoice',
+    documentNumber: invoice.invoiceNumber,
+    documentUrl: invoice.uploadInvoiceUrl,
+  })
+) || [];
+
+// Forwarder Invoices
+const forwarderInvoices = shipmentData?.shippingDetails?.forwarderInvoices?.map(
+  (invoice: { invoiceNumber: any; uploadInvoiceUrl: any; }) => ({
+    documentName: 'Forwarder Invoice',
+    documentNumber: invoice.invoiceNumber,
+    documentUrl: invoice.uploadInvoiceUrl,
+  })
+) || [];
+
+// Shipping Bills
+const shippingBills = shipmentData?.shippingBillDetails?.ShippingBills?.map(
+  (invoice: { shippingBillNumber: any; shippingBillUrl: any; }) => ({
+    documentName: 'Shipping Bill',
+    documentNumber: invoice.shippingBillNumber,
+    documentUrl: invoice.shippingBillUrl,
+  })
+) || [];
+
+// Supplier Invoice
+const supplierInvoice = shipmentData?.supplierDetails?.actual
+  ? [{
+      documentName: 'Supplier Invoice',
+      documentNumber: shipmentData.supplierDetails.actual.actualSupplierName,
+      documentUrl: shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl,
+    }]
+  : [];
+
+// Commercial Invoices
+const commercialInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+  (invoice: { commercialInvoiceNumber: any; clearanceCommercialInvoiceUrl: any; }) => ({
+    documentName: 'Commercial Invoice',
+    documentNumber: invoice.commercialInvoiceNumber,
+    documentUrl: invoice.clearanceCommercialInvoiceUrl,
+  })
+) || [];
+
+// Actual Invoices
+const actualInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+  (invoice: { saleInvoiceNumber: any; actualCommercialInvoiceUrl: any; }) => ({
+    documentName: 'Actual Invoice',
+    documentNumber: invoice.saleInvoiceNumber,
+    documentUrl: invoice.actualCommercialInvoiceUrl,
+  })
+) || [];
+
+// SABER Invoices
+const saberInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+  (invoice: { saleInvoiceNumber: any; saberInvoiceUrl: any; }) => ({
+    documentName: 'SABER Invoice',
+    documentNumber: invoice.saleInvoiceNumber,
+    documentUrl: invoice.saberInvoiceUrl,
+  })
+) || [];
+
+// Bill of Lading
+const billsOfLading = shipmentData?.blDetails?.Bl?.map(
+  (invoice: { blNumber: any; uploadBLUrl: any; }) => ({
+    documentName: 'Bill of Lading',
+    documentNumber: invoice.blNumber,
+    documentUrl: invoice.uploadBLUrl,
+  })
+) || [];
+
+// Certificates
+const certificates = shipmentData?.blDetails?.Bl?.map(
+  (invoice: { certificateName: any; certificateNumber: any; uploadCopyOfCertificate: any; }) => ({
+    documentName: invoice.certificateName || 'Certificate',
+    documentNumber: invoice.certificateNumber,
+    documentUrl: invoice.uploadCopyOfCertificate,
+  })
+).filter((doc: { documentName: any; documentNumber: any; documentUrl: any; }) => doc.documentName && (doc.documentNumber || doc.documentUrl)) || [];
+
+//  const documents = [
+//   shipmentData?.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
+//     documentName: "Transporter Invoice",
+//     documentNumber: invoice.invoiceNumber,
+//     documentUrl: invoice.uploadInvoiceUrl,
+//   })),
+//   shipmentData?.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
+//     documentName: "Forwarder Invoice",
+//     documentNumber: invoice.invoiceNumber,
+//     documentUrl: invoice.uploadInvoiceUrl,
+//   })),
+//   shipmentData?.shippingBillDetails?.ShippingBills?.map((invoice: any) => ({
+//     documentName: "Shipping Bill",
+//     documentNumber: invoice.shippingBillNumber,
+//     documentUrl: invoice.shippingBillUrl,
+//   })),
+//  {
+//       documentName: "Supplier Invoice",
+//       documentNumber: shipmentData?.supplierDetails?.actual?.actualSupplierName,
+//       documentUrl: shipmentData?.supplierDetails?.actual?.actualSupplierInvoiceUrl}
+//     ,
+
+//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
+//     documentName: "Commercial Invoice",
+//     documentNumber: invoice.commercialInvoiceNumber,
+//     documentUrl: invoice.clearanceCommercialInvoiceUrl,
+//   })),
+//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
+//     documentName: "Actual Invoice",
+//     documentNumber: invoice.saleInvoiceNumber,
+//     documentUrl: invoice.actualCommercialInvoiceUrl,
+//   })),
+//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
+//     documentName: "SABER Invoice",
+//     documentNumber: invoice.saleInvoiceNumber,
+//     documentUrl: invoice.saberInvoiceUrl,
+//   })),
+//   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
+//     documentName: "Bill of Lading",
+//     documentNumber: invoice.blNumber,
+//     documentUrl: invoice.uploadBLUrl,
+//   })),
+//   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
+//     documentName: invoice.certificateName,
+//     documentNumber: invoice.certificateNumber,
+//     documentUrl: invoice.uploadCopyOfCertificate,
+//   })),
+//  ]
+
+const documents = [
+  ...transporterInvoices,
+  ...forwarderInvoices,
+  ...shippingBills,
+  ...supplierInvoice,
+  ...commercialInvoices,
+  ...actualInvoices,
+  ...saberInvoices,
+  ...billsOfLading,
+  ...certificates
+  
+]
+
+ console.log("this is documents", documents)
+
+  // console.log("this is shipment", shipmentData)
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -89,7 +239,7 @@ export default async function Page({ params }: Props) {
       </div>
       <Separator />
       <div className="flex flex-col gap-10 w-full mt-4">
-        <Card className="w-full items-center justify-center p-6">
+        <Card className="w-full flex flex-row items-center space-between p-6">
           <div className="flex w-1/2 items-center justify-between gap-4">
             <div className="flex flex-col">
               <Heading title={shipmentData?.bookingDetails?.portOfLoading}
@@ -104,6 +254,38 @@ export default async function Page({ params }: Props) {
                 className="text-2xl font-semibold " />
               <p className="text-muted-foreground text-xs">Vessel Arriving Date: <span className="font-semibold text-black">{moment(shipmentData?.bookingDetails?.vesselArrivingDate).format("MMM Do YY")}</span></p>
             </div>
+          </div>
+          <div className="flex w-1/2 items-center justify-end gap-4">
+          <div className="flex flex-col gap-2">
+<p className="text-muted-foreground text-xs">Shipment Status:</p>   
+          <Badge
+      className={cn(
+         shipmentData?.status === "Trucks Dispatched" && "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+         shipmentData?.status === "Trucks Arrived" && "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+         shipmentData?.status === "Trucks Halted" && "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+         shipmentData?.status === "Stuffing" && "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+         shipmentData?.status === "In Clearance" && "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+         shipmentData?.status === "Loaded On Vessel" && "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+         shipmentData?.status === "In Transit" && "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+         shipmentData?.status === "Arrived At POD" && "bg-green-200 text-green-800 hover:bg-green-300/80",
+         shipmentData?.status === "Delivery Completed" && "bg-green-200 text-green-800 hover:bg-green-500/80",
+        ![
+          "Trucks Dispatched",
+          "Trucks Arrived",
+          "Trucks Halted",
+          "Stuffing",
+          "In Clearance",
+          "Loaded On Vessel",
+          "In Transit",
+          "Arrived At POD",
+          "Delivery Completed",
+        ].includes(shipmentData?.status) && "bg-muted-foreground/60 text-primary-foreground"
+      )}
+    >
+       {shipmentData?.status}
+    </Badge>
+          </div>
+           
           </div>
         </Card>
         <Tabs defaultValue="Booking details" className="w-full">
@@ -123,6 +305,8 @@ export default async function Page({ params }: Props) {
             <TabsTrigger value="Certificate Of Origin">
               Other details
             </TabsTrigger>
+            <TabsTrigger value="Documents">Documents</TabsTrigger>
+
           </TabsList>
 
           {/* Booking Details */}
@@ -581,12 +765,6 @@ export default async function Page({ params }: Props) {
           </TabsContent>
 
           {/* Bill Of Lading Details */}
-
-
-
-
-
-
           <TabsContent value="Bill Of Lading Details">
 
             <div className="flex flex-col md:flex-row gap-4 mt-4">
@@ -717,6 +895,7 @@ export default async function Page({ params }: Props) {
               </Card>
             </div>
           </TabsContent>
+
           {/* Certificate Of Origin (Other Details) */}
           <TabsContent value="Certificate Of Origin">
             <div className="flex flex-col md:flex-row gap-4">
@@ -731,6 +910,20 @@ export default async function Page({ params }: Props) {
                   data={shipmentData?.otherDetails || []}
                   columns={OtherDetailsColumn}
                 // showDropdown={true}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Documents  */}
+          <TabsContent value="Documents">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="w-full">
+                <DataTable
+                  searchKey="documentName"
+                  data={documents || []}
+                  columns={DocColumns}
+                showDropdown={true}
                 />
               </div>
             </div>
