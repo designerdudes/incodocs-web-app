@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -26,6 +26,7 @@ import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
 import ExportCsvButton from "./Components/ExportCsvButton"
+import moment from "moment";
 
 
 interface Props {
@@ -54,7 +55,7 @@ export default async function Page({ params }: Props) {
     return <div>Error loading shipment data</div>;
   }
   const shipmentData = await res.json();
-  console.log("this is shipment",shipmentData)
+  console.log("this is shipment", shipmentData)
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -69,9 +70,8 @@ export default async function Page({ params }: Props) {
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`Shipment: ${
-                shipmentData?.bookingDetails.invoiceNumber || "N/A"
-              }`}
+              title={`Shipment: ${shipmentData?.bookingDetails.invoiceNumber || "N/A"
+                }`}
 
             />
             <p className="text-muted-foreground text-sm mt-2">
@@ -89,6 +89,23 @@ export default async function Page({ params }: Props) {
       </div>
       <Separator />
       <div className="flex flex-col gap-10 w-full mt-4">
+        <Card className="w-full items-center justify-center p-6">
+          <div className="flex w-1/2 items-center justify-between gap-4">
+            <div className="flex flex-col">
+              <Heading title={shipmentData?.bookingDetails?.portOfLoading}
+                className="text-2xl font-semibold " />
+              <p className="text-muted-foreground text-xs">Vessel Sailing Date: <span className="font-semibold text-black">{moment(shipmentData?.bookingDetails?.vesselSailingDate).format("MMM Do YY")}</span></p>
+            </div>
+            <div className="h-0.5 flex justify-center items-center w-full bg-gray-300">
+              <ChevronRight className="h-6 w-6 text-gray-300" />
+            </div>
+            <div className="flex flex-col">
+              <Heading title={shipmentData?.bookingDetails?.destinationPort}
+                className="text-2xl font-semibold " />
+              <p className="text-muted-foreground text-xs">Vessel Arriving Date: <span className="font-semibold text-black">{moment(shipmentData?.bookingDetails?.vesselArrivingDate).format("MMM Do YY")}</span></p>
+            </div>
+          </div>
+        </Card>
         <Tabs defaultValue="Booking details" className="w-full">
           <TabsList className="gap-3 flex-wrap">
             <TabsTrigger value="Booking details">Booking Details</TabsTrigger>
@@ -125,13 +142,13 @@ export default async function Page({ params }: Props) {
                     </TableHeader>
                     <TableBody>
 
-                    <TableRow>
+                      <TableRow>
                         <TableCell>Invoice Number</TableCell>
                         <TableCell>
                           {shipmentData?.bookingDetails.invoiceNumber}
                         </TableCell>
                       </TableRow>
-                    
+
 
                       <TableRow>
                         <TableCell>Booking Number</TableCell>
@@ -205,7 +222,7 @@ export default async function Page({ params }: Props) {
           {/* Shipping Details */}
           <TabsContent value="Shipping Details">
             <div className="space-y-6">
-             
+
               {/* Forwarder Details */}
               <div className="flex flex-col md:flex-row gap-4">
                 <Card className="mt-4 w-full md:w-1/3">
@@ -565,71 +582,71 @@ export default async function Page({ params }: Props) {
 
           {/* Bill Of Lading Details */}
 
-          
+
 
 
 
 
           <TabsContent value="Bill Of Lading Details">
 
-          <div className="flex flex-col md:flex-row gap-4 mt-4">
-          <Card className="mt-4 w-full md:w-1/3">
-                  <CardHeader>
-                    <CardTitle>Shipping Line Details</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Field</TableHead>
-                          <TableHead>Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Shipping Line Name</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.shippingLineName
-                              ?.shippingLineName || "N/A"}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.shippingLineInvoices
-                              ?.length || 0}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Review</TableCell>
-                          <TableCell>
-                            {shipmentData?.shippingDetails?.review || "N/A"}
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-                <div className="w-full md:w-2/3">
-                  <DataTable
-                    bulkDeleteIdName="_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
-                    bulkDeleteDescription="This will delete the selected shipping line invoices."
-                    bulkDeleteToastMessage="Selected invoices deleted successfully"
-                    deleteRoute="shipment/deleteall"
-                    searchKey="invoiceNumber"
-                    data={
-                      shipmentData?.shippingDetails?.shippingLineInvoices || []
-                    }
-                    columns={ShippingDetailsColumn}
-                  // showDropdown={true}
-                  />
-                </div>
-                    </div>
+            <div className="flex flex-col md:flex-row gap-4 mt-4">
+              <Card className="mt-4 w-full md:w-1/3">
+                <CardHeader>
+                  <CardTitle>Shipping Line Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell>Shipping Line Name</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingDetails?.shippingLineName
+                            ?.shippingLineName || "N/A"}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Number Of Invoices</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingDetails?.shippingLineInvoices
+                            ?.length || 0}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Review</TableCell>
+                        <TableCell>
+                          {shipmentData?.shippingDetails?.review || "N/A"}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <div className="w-full md:w-2/3">
+                <DataTable
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
+                  bulkDeleteDescription="This will delete the selected shipping line invoices."
+                  bulkDeleteToastMessage="Selected invoices deleted successfully"
+                  deleteRoute="shipment/deleteall"
+                  searchKey="invoiceNumber"
+                  data={
+                    shipmentData?.shippingDetails?.shippingLineInvoices || []
+                  }
+                  columns={ShippingDetailsColumn}
+                // showDropdown={true}
+                />
+              </div>
+            </div>
 
 
             <div className="flex flex-col md:flex-row gap-4">
-              
+
               <Card className="mt-4 w-full md:w-1/2">
                 <CardHeader>
                   <CardTitle>Bill Of Lading Details</CardTitle>

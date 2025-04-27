@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
   const searchableRowContent =
-    `${row.original.shipmentId} ${row.original.bookingDetails?.invoiceNumber} ${row.original.saleInvoiceDetails?.consignee?.name} ${row.original.blDetails?.blNumber} ${row.original.bookingDetails?.containers.map(
+    `${row.original.shipmentId} ${row.original.bookingDetails?.invoiceNumber} ${row.original.saleInvoiceDetails?.consignee?.name} ${row.original.blDetails?.Bl?.map((bl) => bl.blNumber)} ${row.original.bookingDetails?.containers.map(
       (container) => container.containerNumber 
     )} ${row.original.bookingDetails?.containers.map(
       (container) => container.truckNumber
@@ -30,7 +30,7 @@ const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => 
     )} ${row.original.bookingDetails?.containers.map(
       (container) => container.truckNumber
     )}
-    ${row.original.bookingDetails?.portOfLoading} ${row.original.bookingDetails?.destinationPort} ${row.original.saleInvoiceDetails?.commercialInvoices?.commercialInvoiceNumber} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.bookingDetails?.bookingNumber} ${row.original.shippingDetails?.transporterName?.transporterName} ${row.original.shippingDetails?.forwarderName?.forwarderName} ${row.original.shippingBillDetails?.portCode} ${row.original.shippingBillDetails?.cbName} ${row.original.shippingBillDetails?.ShippingBills.map(
+    ${row.original.bookingDetails?.portOfLoading} ${row.original.bookingDetails?.destinationPort} ${row.original.saleInvoiceDetails?.commercialInvoices?.map((invoice) => invoice.commercialInvoiceNumber)} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.bookingDetails?.bookingNumber} ${row.original.shippingDetails?.transporterName?.transporterName} ${row.original.shippingDetails?.forwarderName?.forwarderName} ${row.original.shippingBillDetails?.portCode} ${row.original.shippingBillDetails?.cbName} ${row.original.shippingBillDetails?.ShippingBills.map(
       (bill) => bill.shippingBillNumber
     )} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.saleInvoiceDetails?.actualBuyer}`.toLowerCase()
   const searchTerm = (filterValue ?? "").toLowerCase()
@@ -126,7 +126,7 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+          {row.original.bookingDetails.containers[0]?.addProductDetails[0]?.description || "N/A"}
         </span>
       </div>
     ),
@@ -139,7 +139,7 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.blDetails?.blNumber || "N/A"}
+          {row.original.blDetails?.Bl[0]?.blNumber || "N/A"}
         </span>
       </div>
     ),
@@ -243,15 +243,14 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "Commercial Invoices Value",
+    accessorKey: "Commercial Invoices Number",
     header: ({ column }) => (
-      <ColumnHeader column={column} title=" Invoice Value " />
+      <ColumnHeader column={column} title="Commercial Invoice Number" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.commercialInvoices
-            ?.commercialInvoiceNumber || "N/A"}
+          {row.original.saleInvoiceDetails?.commercialInvoices[0]?.commercialInvoiceNumber || "N/A"}
         </span>
       </div>
     ),
@@ -264,9 +263,20 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.supplierDetails?.clearance?.supplierName?.supplierName ||
-            row.original.supplierDetails?.actual?.actualSupplierName ||
-            "N/A"}
+          {
+          row.original.supplierDetails?.actual?.actualSupplierInvoiceValue ?
+          new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+            notation: "compact",
+            compactDisplay: "short",
+          }).format(
+            parseFloat(row.original.supplierDetails?.actual?.actualSupplierInvoiceValue)
+          )
+          : "N/A"
+        }   
         </span>
       </div>
     ),
@@ -465,8 +475,8 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.blDetails?.blDate
-            ? moment(row.original.blDetails.blDate).format("MMM Do YY")
+          {row.original.blDetails?.Bl[0]?.blDate
+            ? moment(row.original.blDetails?.Bl[0]?.blDate).format("MMM Do YY")
             : "N/A"}
         </span>
       </div>
