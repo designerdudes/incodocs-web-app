@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { useFormContext, useFieldArray } from "react-hook-form";
@@ -13,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import {
   Popover,
   PopoverTrigger,
@@ -37,19 +36,32 @@ import { Icons } from "@/components/ui/icons";
 
 interface SupplierDetailsProps {
   shipmentId: string;
+  orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
+interface Invoice {
+  supplierInvoiceNumber: string;
+  supplierInvoiceDate?: string;
+  supplierInvoiceValueWithGST?: number;
+  supplierInvoiceValueWithOutGST?: number;
+  clearanceSupplierInvoiceUrl: string;
+  _id?: string;
+}
+
 export function SupplierDetails({
   shipmentId,
+  orgId,
   saveProgress,
   onSectionSubmit,
 }: SupplierDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue, watch, trigger } = useFormContext();
   const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
   >([]);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
@@ -57,46 +69,120 @@ export function SupplierDetails({
   // Watch form values
   const formValues = watch("supplierDetails") || {};
 
-  // Manage invoices with useFieldArray
+  // Manage suppliers with useFieldArray
   const {
-    fields: invoiceFields,
-    append: appendInvoice,
-    remove: removeInvoice,
+    fields: supplierFields,
+    append: appendSupplier,
+    remove: removeSupplier,
   } = useFieldArray({
     control,
-    name: "supplierDetails.clearance.invoices",
+    name: "supplierDetails.clearance.suppliers",
   });
 
   // Fetch supplier names
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoadingSuppliers(true);
+        setFetchError(null);
+        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
         const supplierResponse = await fetch(
-          "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${orgIdToUse}`
         );
+        if (!supplierResponse.ok) {
+          throw new Error(`HTTP error! Status: ${supplierResponse.status}`);
+        }
         const supplierData = await supplierResponse.json();
-        setSupplierNames(
-          Array.isArray(supplierData)
-            ? supplierData.map((supplier: any) => ({
-                _id: supplier._id,
-                name: supplier.supplierName,
-              }))
-            : []
+        console.log("Raw API response:", JSON.stringify(supplierData, null, 2));
+        const suppliers = Array.isArray(supplierData)
+          ? supplierData.map((supplier: any) => ({
+              _id: supplier._id,
+              name: supplier.supplierName,
+            }))
+          : [];
+        if (suppliers.length === 0) {
+          console.warn(
+            "No suppliers found for organization 674b0a687d4f4b21c6c980ba"
+          );
+        }
+        setSupplierNames(suppliers);
+        console.log(
+          "Fetched supplier names:",
+          JSON.stringify(suppliers, null, 2)
         );
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching supplier data:", error);
+        setFetchError(error.message || "Failed to load suppliers");
         toast.error("Failed to load suppliers");
+        setSupplierNames([]);
+      } finally {
+        setIsLoadingSuppliers(false);
       }
     };
     fetchData();
-  }, []);
+  }, [orgId]);
+
+  // Fetch individual supplier if not in supplierNames
+  useEffect(() => {
+    if (!isLoadingSuppliers && supplierFields.length > 0) {
+      supplierFields.forEach(async (supplier, index) => {
+        const supplierNameObj = watch(
+          `supplierDetails.clearance.suppliers.${index}.supplierName`
+        );
+        const supplierId = supplierNameObj?._id;
+        if (supplierId && !supplierNames.find((s) => s._id === supplierId)) {
+          console.warn(
+            `Supplier ID ${supplierId} not found in supplierNames for Supplier ${
+              index + 1
+            }`
+          );
+          try {
+            const response = await fetch(
+              `https://incodocs-server.onrender.com/shipment/supplier/${supplierId}`
+            );
+            if (!response.ok) throw new Error("Failed to fetch supplier");
+            const data = await response.json();
+            console.log(
+              "Individual supplier response:",
+              JSON.stringify(data, null, 2)
+            );
+            if (data?._id && data?.supplierName) {
+              setSupplierNames((prev) => [
+                ...prev,
+                { _id: data._id, name: data.supplierName },
+              ]);
+              console.log(
+                `Added supplier ${data._id}: ${data.supplierName} to supplierNames`
+              );
+            }
+          } catch (error) {
+            console.error(`Error fetching supplier ${supplierId}:`, error);
+            toast.error(`Failed to load supplier ${supplierId}`);
+          }
+        }
+      });
+    }
+  }, [supplierNames, supplierFields, watch, isLoadingSuppliers]);
 
   // Autosave form data when supplierDetails changes
   useEffect(() => {
     if (formValues) {
       saveProgress({ supplierDetails: formValues });
+      console.log("Form values saved:", JSON.stringify(formValues, null, 2));
     }
   }, [formValues, saveProgress]);
+
+  // Log form state for debugging
+  useEffect(() => {
+    console.log(
+      "Current supplier fields:",
+      JSON.stringify(supplierFields, null, 2)
+    );
+    console.log(
+      "Current form values:",
+      JSON.stringify(watch("supplierDetails"), null, 2)
+    );
+  }, [supplierFields, watch]);
 
   // Handle File Upload
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -130,18 +216,27 @@ export function SupplierDetails({
       <SupplierForm
         onSuccess={() => {
           fetch(
-            "https://incodocs-server.onrender.com/shipment/supplier/getbyorg/674b0a687d4f4b21c6c980ba"
+            `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${
+              orgId || "674b0a687d4f4b21c6c980ba"
+            }`
           )
             .then((res) => res.json())
             .then((data) => {
-              setSupplierNames(
-                Array.isArray(data)
-                  ? data.map((supplier: any) => ({
-                      _id: supplier._id,
-                      name: supplier.supplierName,
-                    }))
-                  : []
+              const suppliers = Array.isArray(data)
+                ? data.map((supplier: any) => ({
+                    _id: supplier._id,
+                    name: supplier.supplierName,
+                  }))
+                : [];
+              setSupplierNames(suppliers);
+              console.log(
+                "Updated supplier names after adding new:",
+                JSON.stringify(suppliers, null, 2)
               );
+            })
+            .catch((error) => {
+              console.error("Error refreshing suppliers:", error);
+              toast.error("Failed to refresh suppliers");
             });
         }}
       />
@@ -164,59 +259,34 @@ export function SupplierDetails({
 
   return (
     <div className="grid grid-cols-4 gap-3">
-      {/* Clearance Supplier Name */}
+      {/* Number of Suppliers */}
       <FormField
         control={control}
-        name="supplierDetails.clearance.supplierName"
+        name="supplierDetails.clearance.noOfSuppliers"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Select Supplier Name</FormLabel>
-            <FormControl>
-              <EntityCombobox
-                entities={supplierNames}
-                value={field.value || ""}
-                onChange={(value) => field.onChange(value)}
-                displayProperty="name"
-                placeholder="Select a Supplier Name"
-                onAddNew={openSupplierForm}
-                addNewLabel="Add New Supplier"
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      {/* Number of Invoices */}
-      <FormField
-        control={control}
-        name="supplierDetails.clearance.noOfInvoices"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Supplier Invoices</FormLabel>
+          <FormItem className="col-span-1">
+            <FormLabel>Number of Suppliers</FormLabel>
             <FormControl>
               <Input
                 type="number"
-                placeholder="Enter number of invoices"
+                placeholder="Enter number of suppliers"
                 value={field.value ?? ""}
                 onChange={(e) => {
                   const value = parseInt(e.target.value, 10);
                   if (isNaN(value) || value < 0) return;
                   field.onChange(value);
-                  if (value > invoiceFields.length) {
-                    appendInvoice(
-                      Array(value - invoiceFields.length).fill({
-                        supplierGSTN: "",
-                        supplierInvoiceNumber: "",
-                        supplierInvoiceDate: undefined,
-                        supplierInvoiceValueWithGST: undefined,
-                        supplierInvoiceValueWithOutGST: undefined,
-                        clearanceSupplierInvoiceUrl: "",
+                  if (value > supplierFields.length) {
+                    appendSupplier(
+                      Array(value - supplierFields.length).fill({
+                        supplierName: { _id: "", supplierName: "" },
+                        noOfInvoices: 0,
+                        invoices: [],
+                        _id: "",
                       })
                     );
-                  } else if (value < invoiceFields.length) {
-                    for (let i = invoiceFields.length - 1; i >= value; i--) {
-                      removeInvoice(i);
+                  } else if (value < supplierFields.length) {
+                    for (let i = supplierFields.length - 1; i >= value; i--) {
+                      removeSupplier(i);
                     }
                   }
                 }}
@@ -227,216 +297,409 @@ export function SupplierDetails({
         )}
       />
 
-      {/* Invoices Table */}
-      {invoiceFields.length > 0 && (
-        <div className="col-span-4 overflow-x-auto mt-4">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Supplier GSTN</TableHead>
-                <TableHead>Invoice Number</TableHead>
-                <TableHead>Invoice Date</TableHead>
-                <TableHead>Value With GST</TableHead>
-                <TableHead>Value Without GST</TableHead>
-                <TableHead>Upload Invoice</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoiceFields.map((invoice, index) => (
-                <TableRow key={invoice.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.supplierGSTN`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="eg. 27AABCU9603R1ZM"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.supplierInvoiceNumber`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="eg. INV123"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.supplierInvoiceDate`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button variant="outline">
-                                  {field.value &&
-                                  !isNaN(new Date(field.value).getTime())
-                                    ? format(new Date(field.value), "PPPP")
-                                    : "Pick a date"}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  field.value &&
-                                  !isNaN(new Date(field.value).getTime())
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
-                                onSelect={(date) =>
-                                  field.onChange(date?.toISOString())
-                                }
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.supplierInvoiceValueWithGST`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="eg. 5000"
-                            {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) =>
+      {/* Render fields for each supplier */}
+      {supplierFields.map((supplier, supplierIndex) => (
+        <React.Fragment key={supplier.id}>
+          <div className="col-span-4">
+            <h3 className="text-lg font-semibold mb-2">
+              Supplier {supplierIndex + 1}
+            </h3>
+            <div className="grid grid-cols-4 gap-3">
+              {/* Supplier Name */}
+              <FormField
+                control={control}
+                name={`supplierDetails.clearance.suppliers.${supplierIndex}.supplierName`}
+                render={({ field }) => {
+                  const selectedSupplier = supplierNames.find(
+                    (s) => s._id === field.value?._id
+                  );
+                  console.log(
+                    `Supplier ${supplierIndex + 1} - Field value:`,
+                    JSON.stringify(field.value, null, 2),
+                    "Selected supplier name:",
+                    selectedSupplier?.name,
+                    "Available suppliers:",
+                    JSON.stringify(supplierNames, null, 2)
+                  );
+                  console.log(
+                    "Passing entities to EntityCombobox:",
+                    JSON.stringify(supplierNames, null, 2)
+                  );
+                  return (
+                    <FormItem>
+                      <FormLabel>Select Supplier Name</FormLabel>
+                      <FormControl>
+                        {fetchError ? (
+                          <p className="text-sm text-red-500">
+                            Error loading suppliers: {fetchError}
+                          </p>
+                        ) : (
+                          <EntityCombobox
+                            entities={supplierNames}
+                            value={field.value?._id || ""}
+                            onChange={(value) => {
+                              const selected = supplierNames.find(
+                                (s) => s._id === value
+                              );
+                              console.log(
+                                `Supplier ${supplierIndex + 1} selected:`,
+                                value,
+                                "Selected supplier object:",
+                                JSON.stringify(selected, null, 2)
+                              );
                               field.onChange(
-                                e.target.value ? parseFloat(e.target.value) : undefined
-                              )
-                            }
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.supplierInvoiceValueWithOutGST`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="eg. 4500"
-                            {...field}
-                            value={field.value ?? ""}
-                            onChange={(e) =>
-                              field.onChange(
-                                e.target.value ? parseFloat(e.target.value) : undefined
-                              )
-                            }
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`supplierDetails.clearance.invoices.${index}.clearanceSupplierInvoiceUrl`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <div className="flex items-center gap-2">
-                            {field.value ? (
-                              <div className="flex flex-col gap-2">
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 underline"
-                                >
-                                  Uploaded File
-                                </a>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() =>
-                                    setValue(
-                                      `supplierDetails.clearance.invoices.${index}.clearanceSupplierInvoiceUrl`,
-                                      "",
-                                      { shouldDirty: true }
-                                    )
-                                  }
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            ) : (
-                              <>
-                                <Input
-                                  type="file"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleFileUpload(
-                                        file,
-                                        `supplierDetails.clearance.invoices.${index}.clearanceSupplierInvoiceUrl`
-                                      );
+                                selected
+                                  ? {
+                                      _id: selected._id,
+                                      supplierName: selected.name,
                                     }
-                                  }}
-                                  disabled={uploading}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  className="text-white bg-blue-500 hover:bg-blue-600"
-                                  disabled={uploading}
-                                >
-                                  <UploadCloud className="w-5 h-5 mr-2" />
-                                  {uploading ? "Uploading..." : "Upload"}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => removeInvoice(index)}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                                  : { _id: "", supplierName: "" }
+                              );
+                              trigger(
+                                `supplierDetails.clearance.suppliers.${supplierIndex}.supplierName`
+                              );
+                              console.log(
+                                "Form state after selection:",
+                                JSON.stringify(
+                                  watch(
+                                    `supplierDetails.clearance.suppliers.${supplierIndex}`
+                                  ),
+                                  null,
+                                  2
+                                )
+                              );
+                            }}
+                            displayProperty="name"
+                            placeholder="Select a Supplier Name"
+                            onAddNew={openSupplierForm}
+                            addNewLabel="Add New Supplier"
+                            disabled={isLoadingSuppliers || !!fetchError}
+                          />
+                        )}
+                      </FormControl>
+                      {field.value?._id &&
+                        !selectedSupplier &&
+                        !isLoadingSuppliers &&
+                        !fetchError && (
+                          <p className="text-sm text-red-500 mt-1">
+                            Supplier ID {field.value._id} not found. Fetching...
+                          </p>
+                        )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
+              />
 
-      <Separator className="my-4 col-span-4" />
+              {/* Number of Invoices */}
+              <FormField
+                control={control}
+                name={`supplierDetails.clearance.suppliers.${supplierIndex}.noOfInvoices`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number of Supplier Invoices</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Enter number of invoices"
+                        value={field.value ?? ""}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          if (isNaN(value) || value < 0) return;
+                          field.onChange(value);
+                          const invoices =
+                            watch(
+                              `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`
+                            ) || [];
+                          if (value > invoices.length) {
+                            setValue(
+                              `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`,
+                              [
+                                ...invoices,
+                                ...Array(value - invoices.length).fill({
+                                  supplierInvoiceNumber: "",
+                                  supplierInvoiceDate: undefined,
+                                  supplierInvoiceValueWithGST: undefined,
+                                  supplierInvoiceValueWithOutGST: undefined,
+                                  clearanceSupplierInvoiceUrl: "",
+                                  _id: "",
+                                }),
+                              ],
+                              { shouldDirty: true }
+                            );
+                          } else if (value < invoices.length) {
+                            setValue(
+                              `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`,
+                              invoices.slice(0, value),
+                              { shouldDirty: true }
+                            );
+                          }
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Invoices Table */}
+              {watch(
+                `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`
+              )?.length > 0 && (
+                <div className="col-span-4 overflow-x-auto mt-4">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>#</TableHead>
+                        <TableHead>Invoice Number</TableHead>
+                        <TableHead>Invoice Date</TableHead>
+                        <TableHead>Value With GST</TableHead>
+                        <TableHead>Value Without GST</TableHead>
+                        <TableHead>Upload Invoice</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {watch(
+                        `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`
+                      )?.map((invoice: Invoice, invoiceIndex: number) => (
+                        <TableRow key={invoice._id || invoiceIndex}>
+                          <TableCell>{invoiceIndex + 1}</TableCell>
+                          <TableCell>
+                            <FormField
+                              control={control}
+                              name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.supplierInvoiceNumber`}
+                              render={({ field }) => (
+                                <FormControl>
+                                  <Input
+                                    placeholder="eg. INV123"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={control}
+                              name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.supplierInvoiceDate`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <Popover>
+                                    <PopoverTrigger asChild>
+                                      <FormControl>
+                                        <Button variant="outline">
+                                          {field.value &&
+                                          !isNaN(
+                                            new Date(field.value).getTime()
+                                          )
+                                            ? format(
+                                                new Date(field.value),
+                                                "PPPP"
+                                              )
+                                            : "Pick a date"}
+                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                        </Button>
+                                      </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent align="start">
+                                      <Calendar
+                                        mode="single"
+                                        selected={
+                                          field.value &&
+                                          !isNaN(
+                                            new Date(field.value).getTime()
+                                          )
+                                            ? new Date(field.value)
+                                            : undefined
+                                        }
+                                        onSelect={(date) =>
+                                          field.onChange(date?.toISOString())
+                                        }
+                                      />
+                                    </PopoverContent>
+                                  </Popover>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={control}
+                              name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.supplierInvoiceValueWithGST`}
+                              render={({ field }) => (
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="eg. 5000"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        e.target.value
+                                          ? parseFloat(e.target.value)
+                                          : undefined
+                                      )
+                                    }
+                                  />
+                                </FormControl>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={control}
+                              name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.supplierInvoiceValueWithOutGST`}
+                              render={({ field }) => (
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    placeholder="eg. 4500"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        e.target.value
+                                          ? parseFloat(e.target.value)
+                                          : undefined
+                                      )
+                                    }
+                                  />
+                                </FormControl>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <FormField
+                              control={control}
+                              name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`}
+                              render={({ field }) => (
+                                <FormControl>
+                                  <div className="flex items-center gap-2">
+                                    {field.value ? (
+                                      <div className="flex gap-2 mt-2">
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          asChild
+                                        >
+                                          <a
+                                            href={field.value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                          >
+                                            <Eye className="w-4 h-4 mr-2" />
+                                            View
+                                          </a>
+                                        </Button>
+                                        <Button
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() =>
+                                            setValue(
+                                              "supplierDetails.actual.actualSupplierInvoiceUrl",
+                                              "",
+                                              { shouldDirty: true }
+                                            )
+                                          }
+                                        >
+                                          Remove
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <>
+                                        <Input
+                                          type="file"
+                                          onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                              handleFileUpload(
+                                                file,
+                                                `supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`
+                                              );
+                                            }
+                                          }}
+                                          disabled={uploading}
+                                        />
+                                        <Button
+                                          type="button"
+                                          variant="secondary"
+                                          className="text-white bg-blue-500 hover:bg-blue-600"
+                                          disabled={uploading}
+                                        >
+                                          <UploadCloud className="w-5 h-5 mr-2" />
+                                          {uploading
+                                            ? "Uploading..."
+                                            : "Upload"}
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </FormControl>
+                              )}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              type="button"
+                              onClick={() => {
+                                const invoices = watch(
+                                  `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`
+                                );
+                                setValue(
+                                  `supplierDetails.clearance.suppliers.${supplierIndex}.invoices`,
+                                  invoices.filter(
+                                    (_: Invoice, i: number) =>
+                                      i !== invoiceIndex
+                                  ),
+                                  { shouldDirty: true }
+                                );
+                                const noOfInvoices = invoices.length - 1;
+                                setValue(
+                                  `supplierDetails.clearance.suppliers.${supplierIndex}.noOfInvoices`,
+                                  noOfInvoices >= 0 ? noOfInvoices : 0,
+                                  { shouldDirty: true }
+                                );
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+
+              {/* Remove Supplier Button */}
+              <div className="col-span-4 flex justify-end mt-2">
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    removeSupplier(supplierIndex);
+                    const noOfSuppliers = supplierFields.length - 1;
+                    setValue(
+                      "supplierDetails.clearance.noOfSuppliers",
+                      noOfSuppliers >= 0 ? noOfSuppliers : 0,
+                      { shouldDirty: true }
+                    );
+                  }}
+                >
+                  Remove Supplier
+                </Button>
+              </div>
+            </div>
+          </div>
+          <Separator className="my-4 col-span-4" />
+        </React.Fragment>
+      ))}
 
       {/* Actual Supplier Details */}
       <FormField
@@ -490,15 +753,17 @@ export function SupplierDetails({
             <FormControl>
               <div className="flex items-center gap-2">
                 {field.value ? (
-                  <div className="flex flex-col gap-2">
-                    <a
-                      href={field.value}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Uploaded File
-                    </a>
+                  <div className="flex gap-2 mt-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={field.value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </a>
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -564,7 +829,7 @@ export function SupplierDetails({
         )}
       />
 
-      {/* Review */}
+      {/* Remarks */}
       <FormField
         control={control}
         name="supplierDetails.review"
@@ -588,11 +853,16 @@ export function SupplierDetails({
         <Button
           type="button"
           onClick={handleSubmit}
-          disabled={isLoading}
-          className="h-8"
+          disabled={isLoading || uploading}
         >
-          Save and Next
-          {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
+          {isLoading ? (
+            <>
+              Saving...
+              <Icons.spinner className="ml-2 w-4 animate-spin" />
+            </>
+          ) : (
+            "Save Supplier Details"
+          )}
         </Button>
       </div>
     </div>

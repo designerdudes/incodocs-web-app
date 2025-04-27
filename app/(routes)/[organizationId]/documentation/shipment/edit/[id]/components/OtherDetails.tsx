@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, UploadCloud, Trash, Plus } from "lucide-react";
+import { CalendarIcon, UploadCloud, Trash, Plus, Eye } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import {
@@ -169,7 +169,8 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
-                                  {field.value && !isNaN(new Date(field.value).getTime()) ? (
+                                  {field.value &&
+                                  !isNaN(new Date(field.value).getTime()) ? (
                                     format(new Date(field.value), "PPPP")
                                   ) : (
                                     <span>Pick a date</span>
@@ -178,15 +179,21 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <Calendar
                                 mode="single"
                                 selected={
-                                  field.value && !isNaN(new Date(field.value).getTime())
+                                  field.value &&
+                                  !isNaN(new Date(field.value).getTime())
                                     ? new Date(field.value)
                                     : undefined
                                 }
-                                onSelect={(date) => field.onChange(date?.toISOString())}
+                                onSelect={(date) =>
+                                  field.onChange(date?.toISOString())
+                                }
                               />
                             </PopoverContent>
                           </Popover>
@@ -222,23 +229,27 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                           <FormControl>
                             <div className="flex items-center gap-2">
                               {field.value ? (
-                                <div className="flex flex-col gap-2">
-                                  <a
-                                    href={field.value}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 underline"
-                                  >
-                                    Uploaded File
-                                  </a>
+                                <div className="flex gap-2 mt-2">
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View
+                                    </a>
+                                  </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"
                                     onClick={() =>
                                       setValue(
-                                        `otherDetails[${index}].uploadCopyOfCertificate`,
+                                        "blDetails.Bl[0].uploadBLUrl",
                                         "",
-                                        { shouldDirty: true }
+                                        {
+                                          shouldDirty: true,
+                                        }
                                       )
                                     }
                                   >
