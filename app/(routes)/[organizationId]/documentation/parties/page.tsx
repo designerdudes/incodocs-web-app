@@ -37,7 +37,7 @@ export default async function PartiesPage({ params }: Props) {
     }
   ).then((response) => response.json());
   const shippingLine = shippingLineRes;
-
+console.log("shipping line",shippingLine)
   const ForwarderRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
     {

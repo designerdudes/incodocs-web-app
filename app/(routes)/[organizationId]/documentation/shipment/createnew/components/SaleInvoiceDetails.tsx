@@ -54,7 +54,6 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
           `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`
         );
         const consigneeData = await consigneeResponse.json();
-        console.log("This is consignee data ", consigneeData)
         setConsignees(consigneeData);
       } catch (error) {
         console.error("Error fetching consignees:", error);

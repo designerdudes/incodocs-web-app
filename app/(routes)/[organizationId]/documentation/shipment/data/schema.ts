@@ -1,3 +1,4 @@
+import { profile } from "console";
 import { z } from "zod";
 
 export const shipmentSchema = z.object({
@@ -212,8 +213,14 @@ export const shipmentSchema = z.object({
     teams: z.array(z.string()),
     employees: z.array(z.string()),
   }),
+  status: z.enum(["Trucks Dispatched, Trucks Arrived, Trucks Halted, Stuffing, In Clearance, Loaded On Vessel, In Transit, Arrived At POD, Delivery Completed"]),
   createdAt: z.string().datetime(),
-  createdBy: z.string(),
+  createdBy: z.object({
+    _id: z.string(),
+    fullName: z.string(),
+    email: z.string(),
+    profileImg: z.string(),
+  }),
   updatedAt: z.string().datetime(),
   __v: z.number(),
 });

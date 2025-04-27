@@ -118,26 +118,31 @@ export const formSchema = z.object({
       review: z.string().optional(),
       clearance: z
         .object({
-          supplierName: z.string().optional(),
-          noOfInvoices: z.number().optional(),
-          invoices: z
-            .array(
-              z.object({
-                supplierGSTN: z.string().optional(),
-                supplierInvoiceNumber: z.string().optional(),
-                supplierInvoiceDate: z
-                  .string()
-                  .datetime({ message: "Invalid date format" })
-                  .optional(),
-                supplierInvoiceValueWithGST: z.string().optional(),
-                supplierInvoiceValueWithOutGST: z.string().optional(),
-                clearanceSupplierInvoiceUrl: z
-                  .string()
-                  .url("Invalid URL")
-                  .optional(),
-              })
-            )
-            .optional(),
+          noOfSuppliers:z.number().optional(),
+          suppliers: z
+          .array(
+            z.object({
+            supplierName: z.string().optional(),
+            noOfInvoices: z.number().optional(),
+            invoices: z
+              .array(
+                z.object({
+                  supplierInvoiceNumber: z.string().optional(),
+                  supplierInvoiceDate: z
+                    .string()
+                    .datetime({ message: "Invalid date format" })
+                    .optional(),
+                  supplierInvoiceValueWithGST: z.string().optional(),
+                  supplierInvoiceValueWithOutGST: z.string().optional(),
+                  clearanceSupplierInvoiceUrl: z
+                    .string()
+                    .url("Invalid URL")
+                    .optional(),
+                })
+              )
+              .optional(),
+          }))
+          
         })
         .optional(),
       actual: z
