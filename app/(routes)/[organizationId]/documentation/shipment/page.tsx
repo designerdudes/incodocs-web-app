@@ -30,7 +30,6 @@ export default async function Page(params: params) {
   ).then((response) => {
     return response.json();
   });
-  console.log(res);
   let shipmentData;
   shipmentData = res;
 
@@ -79,7 +78,7 @@ export default async function Page(params: params) {
             "bookingDetails.bookingNumber",
             "shippingDetails.shippingLineInvoices.invoiceNumber",
           ]}
-          statusColumnName={"status"}  
+          statusColumnName={"status"}
           bulkDeleteIdName="_id"
           deleteRoute="shipment/deleteall"
         />

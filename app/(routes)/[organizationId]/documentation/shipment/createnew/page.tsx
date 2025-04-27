@@ -182,7 +182,6 @@ export default function CreateNewShipmentFormPage() {
       toast.success("Shipment created successfully!");
       router.push("./");
       setTimeout(() => localStorage.removeItem("shipmentDraft"), 2000);;
-      setTimeout(() => window.location.reload(), 5000);
     } catch (error) {
       console.error("Error submitting draft:", error);
       toast.error("Error submitting shipment");

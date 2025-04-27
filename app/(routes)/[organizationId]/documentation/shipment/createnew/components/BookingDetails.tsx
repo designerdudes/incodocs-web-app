@@ -37,6 +37,13 @@ import { containerTypes } from "../data/formSchema";
 import { fetchData } from "@/axiosUtility/api";
 import ProductSelectionForm from "@/components/forms/ProductSelectionForm";
 import { AddContainerTypeModal } from "./AddContainerTypeModal";
+import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
+import ProductFormPage from "@/components/forms/AddProductForm";
+
+interface ProductFormProps {
+  onSuccess?: () => void;
+}
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
@@ -137,6 +144,7 @@ export function BookingDetails({
     try {
       const response = await fetchData(`/shipment/productdetails/get?ids=${uncachedIds.join(",")}`);
       const newProducts: Product[] = response || [];
+      console.log("This is PRoducts reponse", response)
       setProductsCache((prev) => [
         ...prev.filter((p) => !uncachedIds.includes(p._id)),
         ...newProducts,
@@ -154,8 +162,13 @@ export function BookingDetails({
           `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
         );
         const ProductsData = await ProductsResponse.json();
-        console.log("This is Product data ", ProductsData)
-        setProducts(ProductsData);
+        const mappedProduct = ProductsData.map((product: any) => ({
+          _id: product._id,
+          code: product.code,
+          description: product.description,
+          name: product.code + ": " + product.description
+        }));
+        setProducts(mappedProduct);
 
       } catch (error) {
         console.error("Error fetching Product Data:", error);
@@ -215,20 +228,22 @@ export function BookingDetails({
     setShowConfirmation(false);
   };
 
-  const openProductForm = (index: number) => {
-    GlobalModal.title = "Select Products for Container";
-    GlobalModal.description = "Search and select products to add to this container.";
+  const openProductForm = () => {
+    GlobalModal.title = "Add New Product";
+    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
-      <ProductSelectionForm
-        onSubmit={(data: { productIds: string[] }) => {
-          const updatedContainers = [...containersFromForm];
-          updatedContainers[index].addProductDetails = data.productIds;
-          setValue("bookingDetails.containers", updatedContainers);
-          fetchProductDetails(data.productIds);
-          saveProgressSilently(getValues());
+      <ProductFormPage
+        onSuccess={async () => {
+          try {
+            const response = await fetchData("/shipment/productdetails/get");
+            setProducts(response || []);
+            toast.success("Product created successfully");
+          } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Failed to refresh product list");
+          }
           GlobalModal.onClose();
         }}
-        initialProductIds={containersFromForm[index].addProductDetails || []}
       />
     );
     GlobalModal.onOpen();
@@ -506,14 +521,14 @@ export function BookingDetails({
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="e.g., 7702791728"
+                              placeholder="e.g.,+91 1234567891"
                               {...field}
-                              value={field.value || ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
-                                )
-                              }
+                              // value={field.value || ""}
+                              // onChange={(e) =>
+                              //   field.onChange(
+                              //     e.target.value ? Number(e.target.value) : ""
+                              //   )
+                              // }
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -523,7 +538,32 @@ export function BookingDetails({
                     />
                   </TableCell>
                   <TableCell>
-                    <Button
+                    <FormField
+                      control={control}
+                      name={`bookingDetails.containers[${index}].containerType`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <EntityCombobox
+                              entities={products}
+                              value={field.value || ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                saveProgressSilently(getValues());
+                              }}
+                              displayProperty="name"
+                              valueProperty="_id"
+                              placeholder="Select Product"
+                              onAddNew={openProductForm}
+                              addNewLabel="Add New Product"
+                              multiple={false}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* <Button
                       type="button"
                       variant="secondary"
                       onClick={() => openProductForm(index)}
@@ -584,7 +624,7 @@ export function BookingDetails({
                       </ScrollArea>
                     ) : (
                       <p className="text-gray-500">No products added</p>
-                    )}
+                    )} */}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -601,6 +641,25 @@ export function BookingDetails({
           </Table>
         </div>
       )}
+
+      <FormField
+        control={control}
+        name="bookingDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mt-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for booking details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <AddContainerTypeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

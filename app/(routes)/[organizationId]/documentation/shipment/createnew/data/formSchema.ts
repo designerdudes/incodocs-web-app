@@ -52,7 +52,7 @@ export const formSchema = z.object({
           z.object({
             containerNumber: z.string().optional(),
             truckNumber: z.string().optional(),
-            truckDriverContactNumber: z.number().optional(), // Note: Typo "truk" retained from payload
+            truckDriverContactNumber: z.string().optional(), // Note: Typo "truk" retained from payload
             addProductDetails: z.array(z.string()).optional(),
             containerType: z.enum(containerTypeValues).optional(), // Fixed to use containerTypeValues
           })

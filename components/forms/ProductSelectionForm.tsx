@@ -43,6 +43,7 @@ interface Product {
 interface ProductSelectionFormProps {
     onSubmit: (data: { productIds: string[] }) => void;
     initialProductIds?: string[];
+    onSuccess?: () => void;
 }
 
 function saveProgressSilently(data: any) {
@@ -55,6 +56,7 @@ function saveProgressSilently(data: any) {
 }
 
 export default function ProductSelectionForm({
+    onSuccess,
     onSubmit,
     initialProductIds = [],
 }: ProductSelectionFormProps) {
@@ -101,6 +103,7 @@ export default function ProductSelectionForm({
                         const response = await fetchData("/shipment/productdetails/get");
                         setProducts(response || []);
                         toast.success("Product created successfully");
+                        if (onSuccess) onSuccess();
                     } catch (error) {
                         console.error("Error refreshing products:", error);
                         toast.error("Failed to refresh product list");
