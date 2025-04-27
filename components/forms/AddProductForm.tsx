@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
+import { Textarea } from "../ui/textarea";
 
 
 const productSchema = z.object({
@@ -30,7 +31,7 @@ const productSchema = z.object({
     description: z.string().min(1, { message: "Description is required" }),
     unitOfMeasurements: z.string().min(1, { message: "Unit of Measurement is required" }),
     countryOfOrigin: z.string().min(1, { message: "Select a country" }),
-    HSCode: z.string().min(1, { message: "HS Code is required" }),
+    HScode: z.string().min(1, { message: "HS Code is required" }),
     prices: z.array(
         z.object({
             variantName: z.string().min(1, { message: "Variant name is required" }),
@@ -61,7 +62,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
             description: "",
             unitOfMeasurements: "",
             countryOfOrigin: "",
-            HSCode: "",
+            HScode: "",
             prices: [
                 {
                     variantName: "",
@@ -121,7 +122,10 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                                 <FormItem>
                                     <FormLabel>Description</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Eg: Premium Marble Slab" {...field} />
+                                        <Textarea
+                                            placeholder="e.g., this is some random comment for booking details"
+                                            {...field}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -163,7 +167,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         />
                         <FormField
                             control={form.control}
-                            name="HSCode"
+                            name="HScode"
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>HS Code</FormLabel>

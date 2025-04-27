@@ -27,64 +27,132 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import CBNameForm from "../../../parties/components/forms/CBNameForm";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import toast from "react-hot-toast";
 
-
-interface ShippingBillDetailsProps extends SaveDetailsProps {
+interface ShippingBillDetailsProps {
+  saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
   params: string | string[];
 }
 
 function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
+  try {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
 }
 
-export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: ShippingBillDetailsProps) {
-  const organizationId = Array.isArray(params) ? params[0] : params;
+export function ShippingBillDetails({
+  saveProgress,
+  onSectionSubmit,
+  params,
+}: ShippingBillDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
+  const organizationId = Array.isArray(params) ? params[0] : params;
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
-  const [shippingBills, setShippingBills] = useState(shippingBillsFromForm);
+  const selectedCbName = watch("shippingBillDetails.cbName");
   const [uploading, setUploading] = useState(false);
+  const [CBNames, setCBNames] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
-  const [CBNames, setCBNames] = useState<any[]>([]);
 
+  // Fetch CB Names
+  useEffect(() => {
+    const fetchCBNames = async () => {
+      try {
+        const CBNameResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+        );
+        const CBNameData = await CBNameResponse.json();
+        const mappedCBNames = CBNameData.map((cbData: any) => ({
+          _id: cbData._id,
+          name: cbData.cbName,
+          cbCode: cbData.cbCode,
+        }));
+        setCBNames(mappedCBNames);
+        console.log("THis is cb names", mappedCBNames)
+      } catch (error) {
+        console.error("Error fetching CB Names:", error);
+        toast.error("Failed to load CB names");
+      }
+    };
+    fetchCBNames();
+  }, [organizationId]);
 
+  // Update cbCode when cbName changes
+  useEffect(() => {
+    if (selectedCbName) {
+      const selectedCB = CBNames.find((cb) => cb.name === selectedCbName);
+      if (selectedCB) {
+        setValue("shippingBillDetails.cbCode", selectedCB.cbCode);
+        saveProgressSilently(getValues());
+      } else {
+        setValue("shippingBillDetails.cbCode", "");
+      }
+    } else {
+      setValue("shippingBillDetails.cbCode", "");
+    }
+  }, [selectedCbName, CBNames, setValue, getValues]);
 
   const handleShippingBillCountChange = (value: string) => {
-    const count = parseInt(value, 10);
-    if (!isNaN(count) && count > 0) {
-      const currentBills = watch("shippingBillDetails.ShippingBills") || [];
-      const newShippingBills = Array.from({ length: count }, (_, i) =>
-        currentBills[i] || {
-          shippingBillUrl: "",
-          shippingBillNumber: "",
-          shippingBillDate: "",
-          drawbackValue: "",
-          rodtepValue: "",
-        }
-      );
-      setShippingBills(newShippingBills);
-      setValue("shippingBillDetails.ShippingBills", newShippingBills);
-      saveProgressSilently(getValues()); // Use parent saveProgress
-    } else {
-      setShippingBills([]);
-      setValue("shippingBillDetails.ShippingBills", []);
-      saveProgressSilently(getValues()); // Use parent saveProgress
-    }
+    handleDynamicArrayCountChange({
+      value,
+      watch,
+      setValue,
+      getValues,
+      fieldName: "shippingBillDetails.ShippingBills",
+      createNewItem: () => ({
+        shippingBillUrl: "",
+        shippingBillNumber: "",
+        shippingBillDate: "",
+        drawbackValue: "",
+        rodtepValue: "",
+      }),
+      customFieldSetters: {
+        "shippingBillDetails.ShippingBills": (items, setValue) => {
+          setValue("shippingBillDetails.noOfShippingBills", items.length);
+        },
+      },
+      saveCallback: saveProgressSilently,
+      isDataFilled: (item) =>
+        !!item.shippingBillUrl ||
+        !!item.shippingBillNumber ||
+        !!item.shippingBillDate ||
+        !!item.drawbackValue ||
+        !!item.rodtepValue,
+      onRequireConfirmation: (pendingItems) => {
+        setShowConfirmation(true);
+        setPendingBillCount(pendingItems.length);
+      },
+    });
   };
 
-
-
-
   const handleDeleteBill = (index: number) => {
-    const updatedShippingBills = shippingBills.filter((_: any, i: number) => i !== index);
-    setShippingBills(updatedShippingBills);
+    const updatedShippingBills = shippingBillsFromForm.filter(
+      (_: any, i: number) => i !== index
+    );
     setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
-    saveProgress(getValues()); // Use parent saveProgress
+    setValue("shippingBillDetails.noOfShippingBills", updatedShippingBills.length);
+    saveProgressSilently(getValues());
+  };
+
+  const handleConfirmChange = () => {
+    if (pendingBillCount !== null) {
+      const updatedShippingBills = shippingBillsFromForm.slice(0, pendingBillCount);
+      setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
+      setValue("shippingBillDetails.noOfShippingBills", updatedShippingBills.length);
+      saveProgressSilently(getValues());
+      setPendingBillCount(null);
+    }
+    setShowConfirmation(false);
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -93,49 +161,47 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const data = await response.json();
       const storageUrl = data.url;
-      console.log("File uploaded successfully:", storageUrl);
       setValue(fieldName, storageUrl);
-      saveProgressSilently(getValues()); // Use parent saveProgress
+      saveProgressSilently(getValues());
     } catch (error) {
-      alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
+      toast.error("Failed to upload file. Please try again.");
     } finally {
       setUploading(false);
     }
   };
 
-  useEffect(() => {
-    const fetchCBNames = async () => {
-      try {
-        const CBNameResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
-        );
-        const CBNameData = await CBNameResponse.json();
-        setCBNames(CBNameData);
-        console.log("This is Cb names", CBNameData)
-      } catch (error) {
-        console.error("Error fetching CB Names:", error);
-      }
-    };
-    fetchCBNames();
-  }, []);
-
   const openCBNameForm = () => {
     GlobalModal.title = "Add New CB Name";
     GlobalModal.children = (
       <CBNameForm
-        onSuccess={() => {
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
-          )
-            .then((res) => res.json())
-            .then((data) => setCBNames(data));
+        onSuccess={async () => {
+          try {
+            const res = await fetch(
+              `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+            );
+            const data = await res.json();
+            const mappedCBNames = data.map((cbData: any) => ({
+              _id: cbData._id,
+              name: cbData.cbName,
+              cbCode: cbData.cbCode,
+            }));
+            setCBNames(mappedCBNames);
+            saveProgressSilently(getValues());
+          } catch (error) {
+            console.error("Error refreshing CB names:", error);
+            toast.error("Failed to refresh CB names");
+          }
+          GlobalModal.onClose();
         }}
       />
     );
@@ -152,12 +218,6 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
-              {/* <Input
-                placeholder="e.g., xyz"
-                className="uppercase"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              /> */}
               <EntityCombobox
                 entities={CBNames}
                 value={field.value || ""}
@@ -165,7 +225,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
                   field.onChange(value);
                   saveProgressSilently(getValues());
                 }}
-                displayProperty="cb name"
+                displayProperty="name"
                 placeholder="Select a CB Name"
                 onAddNew={openCBNameForm}
                 addNewLabel="Add New CB Name"
@@ -175,19 +235,19 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
           </FormItem>
         )}
       />
-      {/* CD Code */}
+      {/* CB Code */}
       <FormField
         control={control}
-        name="shippingBillDetails.cdCode"
+        name="shippingBillDetails.cbCode"
         render={({ field }) => (
           <FormItem>
             <FormLabel>CB Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="e.g., randomcode"
-                className="uppercase"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
+                value={field.value || ""}
+                readOnly
+                placeholder="Select a CB Name to auto-fill"
+                className="uppercase bg-gray-100 cursor-not-allowed"
               />
             </FormControl>
             <FormMessage />
@@ -216,7 +276,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
       {/* Number of Shipping Bills */}
       <FormField
         control={control}
-        name="numberOFShippingBill"
+        name="shippingBillDetails.noOfShippingBills"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Shipping Bills</FormLabel>
@@ -224,12 +284,12 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
               <Input
                 type="number"
                 placeholder="Enter number"
-                value={field.value === 0 ? "" : field.value}
+                value={field.value || ""}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (isNaN(value) || value < 0) return;
-                  field.onChange(value);
-                  handleShippingBillCountChange(e.target.value);
+                  const value = e.target.value;
+                  if (value === "" || parseInt(value, 10) < 0) return;
+                  field.onChange(parseInt(value, 10));
+                  handleShippingBillCountChange(value);
                 }}
               />
             </FormControl>
@@ -238,7 +298,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
         )}
       />
 
-      {shippingBills.length > 0 && (
+      {shippingBillsFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
@@ -253,7 +313,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
               </TableRow>
             </TableHeader>
             <TableBody>
-              {shippingBills.map((_: any, index: number) => (
+              {shippingBillsFromForm.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
@@ -266,6 +326,7 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
                             <div className="flex items-center gap-2">
                               <Input
                                 type="file"
+                                accept=".pdf,.jpg,.png,.jpeg"
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
                                   if (file)
@@ -303,7 +364,6 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
                               className="uppercase"
                               {...field}
                               onBlur={() => saveProgressSilently(getValues())}
-                              required // Enforce required field
                             />
                           </FormControl>
                           <FormMessage />
@@ -331,7 +391,9 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
                             <PopoverContent align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
+                                selected={
+                                  field.value ? new Date(field.value) : undefined
+                                }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -413,6 +475,17 @@ export function ShippingBillDetails({ saveProgress, onSectionSubmit, params }: S
             <FormMessage />
           </FormItem>
         )}
+      />
+
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setPendingBillCount(null);
+        }}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of shipping bills. This action cannot be undone."
       />
     </div>
   );

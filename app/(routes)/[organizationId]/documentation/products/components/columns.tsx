@@ -73,16 +73,6 @@ export const ProductsColumns: ColumnDef<Product>[] = [
         cell: ({ row }) => <div>{row.original.HScode}</div>,
     },
     {
-        accessorKey: "sellPrice",
-        header: () => <div>Sell Price</div>,
-        cell: ({ row }) => <div>${row.original?.sellPrice}</div>,
-    },
-    {
-        accessorKey: "buyPrice",
-        header: () => <div>Buy Price</div>,
-        cell: ({ row }) => <div>${row.original.buyPrice}</div>,
-    },
-    {
         accessorKey: "netWeight",
         header: () => <div>Net Weight (Kg)</div>,
         cell: ({ row }) => <div>{row.original.netWeight} Kg</div>,
