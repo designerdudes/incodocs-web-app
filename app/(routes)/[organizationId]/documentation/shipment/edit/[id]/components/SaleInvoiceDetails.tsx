@@ -28,12 +28,14 @@ import { Icons } from "@/components/ui/icons";
 
 interface SaleInvoiceDetailsProps {
   shipmentId: string;
+  orgId: string | undefined;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
 export function SaleInvoiceDetails({
   shipmentId,
+  orgId,
   saveProgress,
   onSectionSubmit,
 }: SaleInvoiceDetailsProps) {
@@ -44,7 +46,7 @@ export function SaleInvoiceDetails({
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
 
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "saleInvoiceDetails.invoice",
   });
@@ -60,33 +62,101 @@ export function SaleInvoiceDetails({
   // Fetch consignees on mount
   useEffect(() => {
     const fetchConsignees = async () => {
+      if (!orgId) {
+        setConsignees([]);
+        return;
+      }
+      setIsLoading(true);
       try {
         const response = await fetch(
-          "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}`
         );
         const data = await response.json();
+        console.log("API Response (Consignees):", data);
         const mappedConsignees = Array.isArray(data)
           ? data.map((consignee: any) => ({
               _id: consignee._id,
-              name: consignee.name || consignee.consigneeName,
+              name:
+                consignee.name ||
+                consignee.consigneeName ||
+                "Unknown Consignee",
             }))
           : [];
+        console.log("Mapped Consignees:", mappedConsignees);
         setConsignees(mappedConsignees);
       } catch (error) {
         console.error("Error fetching consignees:", error);
         toast.error("Failed to fetch consignees");
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchConsignees();
-  }, []);
+  }, [orgId]);
+
+  // Reset consignee field if selected ID is invalid
+  useEffect(() => {
+    const currentConsigneeId = watch("saleInvoiceDetails.consignee");
+    if (
+      currentConsigneeId &&
+      !consignees.find((c) => c._id === currentConsigneeId)
+    ) {
+      setValue("saleInvoiceDetails.consignee", "", { shouldDirty: true });
+    }
+  }, [consignees, watch, setValue]);
+
+  // Sync invoice fields with numberOfSalesInvoices and API data
+  useEffect(() => {
+    if (!formValues) {
+      console.warn("SaleInvoiceDetails: formValues is undefined");
+      return;
+    }
+    console.log("SaleInvoiceDetails formValues:", formValues);
+    console.log("SaleInvoiceDetails fields:", fields);
+
+    const numberOfInvoices = formValues.numberOfSalesInvoices ?? 0;
+    const currentInvoices = formValues.invoice ?? [];
+
+    // Replace fields with API data if available and not yet synced
+    if (
+      currentInvoices.length > 0 &&
+      fields.length !== currentInvoices.length
+    ) {
+      console.log("Replacing fields with API invoices:", currentInvoices);
+      replace(currentInvoices);
+    } else if (numberOfInvoices !== fields.length) {
+      // Sync fields with numberOfSalesInvoices
+      console.log(
+        "Syncing fields with numberOfSalesInvoices:",
+        numberOfInvoices
+      );
+      if (numberOfInvoices > fields.length) {
+        const newInvoices = Array(numberOfInvoices - fields.length)
+          .fill(null)
+          .map(() => ({
+            commercialInvoiceNumber: "",
+            clearanceCommercialInvoice: "",
+            actualCommercialInvoice: "",
+            saberInvoice: "",
+            addProductDetails: [],
+          }));
+        append(newInvoices, { shouldFocus: false });
+      } else if (numberOfInvoices < fields.length) {
+        for (let i = fields.length - 1; i >= numberOfInvoices; i--) {
+          remove(i);
+        }
+      }
+    }
+  }, [formValues, fields.length, append, remove, replace]);
 
   // Handle Number of Invoices Change
   const handleInvoiceNumberCountChange = (value: number) => {
     if (isNaN(value) || value < 0) return;
+    console.log("handleInvoiceNumberCountChange:", value);
     setValue("saleInvoiceDetails.numberOfSalesInvoices", value, {
       shouldDirty: true,
     });
-    const currentInvoices = formValues.invoice || [];
+    const currentInvoices = formValues?.invoice ?? [];
     if (value > currentInvoices.length) {
       const newInvoices = Array(value - currentInvoices.length)
         .fill(null)
@@ -95,9 +165,9 @@ export function SaleInvoiceDetails({
           clearanceCommercialInvoice: "",
           actualCommercialInvoice: "",
           saberInvoice: "",
-          addProductDetails: [], // Initialize as empty array
+          addProductDetails: [],
         }));
-      append(newInvoices);
+      append(newInvoices, { shouldFocus: false });
     } else if (value < currentInvoices.length) {
       for (let i = currentInvoices.length - 1; i >= value; i--) {
         remove(i);
@@ -106,22 +176,41 @@ export function SaleInvoiceDetails({
   };
 
   const openConsigneeForm = () => {
+    if (!orgId) {
+      toast.error("Cannot add consignee: Organization ID is missing");
+      return;
+    }
+    console.log("Opening AddConsigneeForm with orgId:", orgId);
     GlobalModal.title = "Add New Consignee";
     GlobalModal.children = (
       <AddConsigneeForm
+        orgId={orgId}
         onSuccess={() => {
+          setIsLoading(true);
           fetch(
-            "https://incodocs-server.onrender.com/shipment/consignee/getbyorg/674b0a687d4f4b21c6c980ba"
+            `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`
           )
             .then((res) => res.json())
             .then((data) => {
+              console.log("Refetched Consignees:", data);
               const mappedConsignees = Array.isArray(data)
                 ? data.map((consignee: any) => ({
                     _id: consignee._id,
-                    name: consignee.name || consignee.consigneeName,
+                    name:
+                      consignee.name ||
+                      consignee.consigneeName ||
+                      "Unknown Consignee",
                   }))
                 : [];
               setConsignees(mappedConsignees);
+              console.log("Updated Consignees State:", mappedConsignees);
+            })
+            .catch((error) => {
+              console.error("Error refetching consignees:", error);
+              toast.error("Failed to refetch consignees. Please try again.");
+            })
+            .finally(() => {
+              setIsLoading(false);
             });
         }}
       />
@@ -160,6 +249,7 @@ export function SaleInvoiceDetails({
                 placeholder="Select a Consignee"
                 onAddNew={openConsigneeForm}
                 addNewLabel="Add New Consignee"
+                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
@@ -211,7 +301,7 @@ export function SaleInvoiceDetails({
       />
 
       {/* Invoices Table */}
-      {fields.length > 0 && (
+      {fields.length > 0 ? (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
@@ -302,6 +392,10 @@ export function SaleInvoiceDetails({
               ))}
             </TableBody>
           </Table>
+        </div>
+      ) : (
+        <div className="col-span-4 mt-4 text-muted-foreground">
+          No invoices added. Set the number of commercial invoices to add one.
         </div>
       )}
 

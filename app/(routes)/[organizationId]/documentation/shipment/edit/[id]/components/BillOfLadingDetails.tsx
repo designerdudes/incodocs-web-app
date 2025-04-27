@@ -16,22 +16,25 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, UploadCloud } from "lucide-react";
+import { CalendarIcon, Eye, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Icons } from "@/components/ui/icons";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
+  orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
 export function BillOfLadingDetails({
   shipmentId,
+  orgId,
   saveProgress,
   onSectionSubmit,
 }: BillOfLadingDetailsProps) {
@@ -46,10 +49,36 @@ export function BillOfLadingDetails({
   // Watch form values
   const formValues = watch("blDetails");
 
+  // Log form values for debugging
+  useEffect(() => {
+    console.log("BillOfLadingDetails formValues:", formValues);
+    console.log("BillOfLadingDetails shippingLines:", shippingLines);
+  }, [formValues, shippingLines]);
+
   // Autosave form data when blDetails changes
   useEffect(() => {
-    saveProgress({ blDetails: formValues });
+    if (formValues) {
+      saveProgress({ blDetails: formValues });
+    }
   }, [formValues, saveProgress]);
+
+  // Ensure Bl array has at least one entry
+  useEffect(() => {
+    if (!formValues?.Bl || formValues.Bl.length === 0) {
+      setValue(
+        "blDetails.Bl",
+        [
+          {
+            blNumber: "",
+            blDate: undefined,
+            telexDate: undefined,
+            uploadBLUrl: undefined,
+          },
+        ],
+        { shouldDirty: false }
+      );
+    }
+  }, [formValues, setValue]);
 
   // Handle File Upload
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -81,9 +110,12 @@ export function BillOfLadingDetails({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
         const shippingResponse = await fetch(
-          "https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgIdToUse}`
         );
+        if (!shippingResponse.ok)
+          throw new Error("Failed to fetch shipping lines");
         const shippingData = await shippingResponse.json();
         setShippingLines(
           Array.isArray(shippingData)
@@ -99,15 +131,16 @@ export function BillOfLadingDetails({
       }
     };
     fetchData();
-  }, []);
+  }, [orgId]);
 
   const openShippingLineForm = () => {
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
       <ShippinglineForm
         onSuccess={() => {
+          const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
           fetch(
-            "https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/674b0a687d4f4b21c6c980ba"
+            `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgIdToUse}`
           )
             .then((res) => res.json())
             .then((data) => {
@@ -144,7 +177,7 @@ export function BillOfLadingDetails({
       {/* Shipping Line */}
       <FormField
         control={control}
-        name="blDetails.shippingLine"
+        name="blDetails.shippingLineName"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Select Shipping Line</FormLabel>
@@ -167,7 +200,7 @@ export function BillOfLadingDetails({
       {/* BL Number */}
       <FormField
         control={control}
-        name="blDetails.blNumber"
+        name="blDetails.Bl[0].blNumber"
         render={({ field }) => (
           <FormItem>
             <FormLabel>BL Number</FormLabel>
@@ -187,7 +220,7 @@ export function BillOfLadingDetails({
       {/* BL Date */}
       <FormField
         control={control}
-        name="blDetails.blDate"
+        name="blDetails.Bl[0].blDate"
         render={({ field }) => (
           <FormItem className="flex flex-col gap-2">
             <FormLabel>BL Date</FormLabel>
@@ -224,7 +257,7 @@ export function BillOfLadingDetails({
       {/* Telex Date */}
       <FormField
         control={control}
-        name="blDetails.telexDate"
+        name="blDetails.Bl[0].telexDate"
         render={({ field }) => (
           <FormItem className="flex flex-col gap-2">
             <FormLabel>Telex Date</FormLabel>
@@ -261,27 +294,29 @@ export function BillOfLadingDetails({
       {/* Upload BL */}
       <FormField
         control={control}
-        name="blDetails.uploadBL"
+        name="blDetails.Bl[0].uploadBLUrl"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Upload BL</FormLabel>
             <FormControl>
               <div className="flex items-center gap-2">
                 {field.value ? (
-                  <div className="flex flex-col gap-2">
-                    <a
-                      href={field.value}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-500 underline"
-                    >
-                      Uploaded File
-                    </a>
+                  <div className="flex gap-2 mt-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <a
+                        href={field.value}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </a>
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        setValue("blDetails.uploadBL", "", {
+                        setValue("blDetails.Bl[0].uploadBLUrl", "", {
                           shouldDirty: true,
                         })
                       }
@@ -296,7 +331,7 @@ export function BillOfLadingDetails({
                       onChange={(e) => {
                         const file = e.target.files?.[0];
                         if (file) {
-                          handleFileUpload(file, "blDetails.uploadBL");
+                          handleFileUpload(file, "blDetails.Bl[0].uploadBLUrl");
                         }
                       }}
                       disabled={uploading}
@@ -313,6 +348,25 @@ export function BillOfLadingDetails({
                   </>
                 )}
               </div>
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      {/* Review */}
+      <FormField
+        control={control}
+        name="blDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment"
+                {...field}
+                value={field.value ?? ""}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

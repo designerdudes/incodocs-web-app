@@ -16,8 +16,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { useParams } from "next/navigation";
-
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -27,26 +25,34 @@ const formSchema = z.object({
 });
 
 interface AddConsigneeFormProps {
+  orgId: string;
   onSuccess?: () => void;
 }
 
-export default function AddConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
+export default function AddConsigneeForm({
+  orgId,
+  onSuccess,
+}: AddConsigneeFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const organizationId = useParams().organizationId as string;
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       email: "",
-      telephoneNo: undefined,
+      telephoneNo: "",
       address: "",
     },
   });
   const GlobalModal = useGlobalModal();
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!orgId) {
+      toast.error("Organization ID is missing");
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const payload = {
@@ -54,7 +60,7 @@ export default function AddConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
         email: values.email,
         telephoneNo: values.telephoneNo,
         address: values.address,
-        organizationId,
+        organizationId: orgId, // Use dynamic orgId prop
       };
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipment/consignee/create",
