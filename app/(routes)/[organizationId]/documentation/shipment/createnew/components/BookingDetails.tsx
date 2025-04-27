@@ -30,20 +30,13 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { containerTypes } from "../data/formSchema";
 import { fetchData } from "@/axiosUtility/api";
-import ProductSelectionForm from "@/components/forms/ProductSelectionForm";
 import { AddContainerTypeModal } from "./AddContainerTypeModal";
 import { Textarea } from "@/components/ui/textarea";
-import { Separator } from "@/components/ui/separator";
 import ProductFormPage from "@/components/forms/AddProductForm";
-
-interface ProductFormProps {
-  onSuccess?: () => void;
-}
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;

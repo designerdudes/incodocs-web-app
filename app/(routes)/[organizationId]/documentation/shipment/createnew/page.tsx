@@ -153,12 +153,14 @@ export default function CreateNewShipmentFormPage() {
           vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
           vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
           containers: values?.bookingDetails?.containers || [], // Includes containerType
+          review: values.bookingDetails?.review || ""
         },
         shippingDetails: {
           forwarderName: values.shippingDetails?.forwarderName ?? "",
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
           transporterName: values.shippingDetails?.transporterName ?? "",
           transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
+          review: values.shippingDetails?.review || ""
         },
         shippingBillDetails: values.shippingBillDetails || {},
         supplierDetails: values.supplierDetails || {},
@@ -181,7 +183,7 @@ export default function CreateNewShipmentFormPage() {
       await postData("/shipment/add/", payload);
       toast.success("Shipment created successfully!");
       router.push("./");
-      setTimeout(() => localStorage.removeItem("shipmentDraft"), 2000);;
+      setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
     } catch (error) {
       console.error("Error submitting draft:", error);
       toast.error("Error submitting shipment");
@@ -235,7 +237,7 @@ export default function CreateNewShipmentFormPage() {
               type="button"
               onClick={() => setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)}
               disabled={currentStep === 0 || isLoading}
-              className={`${currentStep === 0 ? "invisible" : ""} h-8`}
+              className={`${currentStep === 0 ? "invisible" : ""}`}
             >
               Previous
             </Button>
@@ -314,7 +316,6 @@ export default function CreateNewShipmentFormPage() {
           <Button
             type="button"
             onClick={submitDraft}
-            className="h-8"
             disabled={isLoading}
           >
             Submit Shipment

@@ -90,7 +90,7 @@ export function ShippingBillDetails({
   // Update cbCode when cbName changes
   useEffect(() => {
     if (selectedCbName) {
-      const selectedCB = CBNames.find((cb) => cb.name === selectedCbName);
+      const selectedCB = CBNames.find((cb) => cb._id === selectedCbName);
       if (selectedCB) {
         setValue("shippingBillDetails.cbCode", selectedCB.cbCode);
         saveProgressSilently(getValues());
