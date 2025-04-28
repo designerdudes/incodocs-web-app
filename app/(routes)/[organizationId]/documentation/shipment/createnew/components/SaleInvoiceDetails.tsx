@@ -117,6 +117,7 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
     GlobalModal.title = "Add New Consignee";
     GlobalModal.children = (
       <AddConsigneeForm
+        orgId={organizationId}
         onSuccess={() => {
           fetch(`https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())

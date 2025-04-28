@@ -127,48 +127,7 @@ export function BookingDetails({
     setValue("NumberOfContainer", containersFromForm.length);
   }, []);
 
-  const fetchProductDetails = async (productIds: string[]) => {
-    // Fetch only uncached products
-    const uncachedIds = productIds.filter(
-      (id) => !productsCache.some((p) => p._id === id)
-    );
-    if (uncachedIds.length === 0) return;
 
-    try {
-      const response = await fetchData(`/shipment/productdetails/get?ids=${uncachedIds.join(",")}`);
-      const newProducts: Product[] = response || [];
-      console.log("This is PRoducts reponse", response)
-      setProductsCache((prev) => [
-        ...prev.filter((p) => !uncachedIds.includes(p._id)),
-        ...newProducts,
-      ]);
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-      toast.error("Failed to load product details");
-    }
-  };
-
-  useEffect(() => {
-    const fetchConsignees = async () => {
-      try {
-        const ProductsResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
-        );
-        const ProductsData = await ProductsResponse.json();
-        const mappedProduct = ProductsData.map((product: any) => ({
-          _id: product._id,
-          code: product.code,
-          description: product.description,
-          name: product.code + ": " + product.description
-        }));
-        setProducts(mappedProduct);
-
-      } catch (error) {
-        console.error("Error fetching Product Data:", error);
-      }
-    };
-    fetchConsignees();
-  }, []);
 
 
   const handleDelete = (index: number) => {
@@ -221,6 +180,29 @@ export function BookingDetails({
     setShowConfirmation(false);
   };
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const ProductsResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
+        );
+        const ProductsData = await ProductsResponse.json();
+        const mappedProduct = ProductsData.map((product: any) => ({
+          _id: product._id,
+          code: product.code,
+          description: product.description,
+          name: product.code + ": " + product.description
+        }));
+        setProducts(mappedProduct);
+
+      } catch (error) {
+        console.error("Error fetching Product Data:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+
   const openProductForm = () => {
     GlobalModal.title = "Add New Product";
     GlobalModal.description = "Fill in the details to create a new product.";
@@ -228,8 +210,16 @@ export function BookingDetails({
       <ProductFormPage
         onSuccess={async () => {
           try {
-            const response = await fetchData("/shipment/productdetails/get");
-            setProducts(response || []);
+            const ProductsResponse = await fetchData("/shipment/productdetails/get");
+            const ProductsData = await ProductsResponse.json();
+            const mappedProduct = ProductsData.map((product: any) => ({
+              _id: product._id,
+              code: product.code,
+              description: product.description,
+              name: product.code + ": " + product.description
+            }));
+            setProducts(mappedProduct || []);
+            saveProgressSilently(getValues());
             toast.success("Product created successfully");
           } catch (error) {
             console.error("Error refreshing products:", error);
@@ -242,15 +232,15 @@ export function BookingDetails({
     GlobalModal.onOpen();
   };
 
-  const removeProduct = (containerIndex: number, productId: string) => {
-    const updatedContainers = [...containersFromForm];
-    updatedContainers[containerIndex].addProductDetails = updatedContainers[
-      containerIndex
-    ].addProductDetails.filter((id: string) => id !== productId);
-    setValue("bookingDetails.containers", updatedContainers);
-    saveProgressSilently(getValues());
-    toast.success("Product removed from container");
-  };
+  // const removeProduct = (containerIndex: number, productId: string) => {
+  //   const updatedContainers = [...containersFromForm];
+  //   updatedContainers[containerIndex].addProductDetails = updatedContainers[
+  //     containerIndex
+  //   ].addProductDetails.filter((id: string) => id !== productId);
+  //   setValue("bookingDetails.containers", updatedContainers);
+  //   saveProgressSilently(getValues());
+  //   toast.success("Product removed from container");
+  // };
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -533,7 +523,7 @@ export function BookingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`bookingDetails.containers[${index}].containerType`}
+                      name={`bookingDetails.containers[${index}].addProductDetails[${index}]`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>

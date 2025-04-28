@@ -75,25 +75,6 @@ export function SupplierDetails({
     setSuppliers(suppliersFromForm);
   }, [suppliersFromForm]);
 
-  // Fetch supplier names
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const supplierResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
-        );
-        const supplierData = await supplierResponse.json();
-        const mappedSuppliers = supplierData.map((supplier: any) => ({
-          _id: supplier._id,
-          name: supplier.supplierName,
-        }));
-        setSupplierNames(mappedSuppliers);
-      } catch (error) {
-        console.error("Error fetching supplier data:", error);
-      }
-    };
-    fetchData();
-  }, [organizationId]);
 
   const handleSupplierCountChange = (value: string) => {
     handleDynamicArrayCountChange({
@@ -224,6 +205,27 @@ export function SupplierDetails({
       setUploading(false);
     }
   };
+
+  // Fetch supplier names
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const supplierResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
+        );
+        const supplierData = await supplierResponse.json();
+        const mappedSuppliers = supplierData.map((supplier: any) => ({
+          _id: supplier._id,
+          name: supplier.supplierName,
+        }));
+        setSupplierNames(mappedSuppliers);
+      } catch (error) {
+        console.error("Error fetching supplier data:", error);
+      }
+    };
+    fetchData();
+  }, [organizationId]);
+
 
   const openSupplierForm = () => {
     GlobalModal.title = "Add New Supplier";

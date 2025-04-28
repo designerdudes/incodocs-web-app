@@ -64,7 +64,7 @@ export function ShippingBillDetails({
   const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
 
-  // Fetch CB Names
+  // Fetch CB Names 
   useEffect(() => {
     const fetchCBNames = async () => {
       try {
@@ -72,6 +72,7 @@ export function ShippingBillDetails({
           `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
         );
         const CBNameData = await CBNameResponse.json();
+        console.log("this is CBNameData", CBNameData)
         const mappedCBNames = CBNameData.map((cbData: any) => ({
           _id: cbData._id,
           name: cbData.cbName,
@@ -81,7 +82,7 @@ export function ShippingBillDetails({
         console.log("THis is cb names", mappedCBNames)
       } catch (error) {
         console.error("Error fetching CB Names:", error);
-        toast.error("Failed to load CB names");
+        // toast.error("Failed to load CB names");
       }
     };
     fetchCBNames();
@@ -184,6 +185,7 @@ export function ShippingBillDetails({
     GlobalModal.title = "Add New CB Name";
     GlobalModal.children = (
       <CBNameForm
+        orgId={organizationId}
         onSuccess={async () => {
           try {
             const res = await fetch(
