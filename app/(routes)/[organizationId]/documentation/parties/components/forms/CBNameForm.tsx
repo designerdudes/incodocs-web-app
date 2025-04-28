@@ -44,7 +44,7 @@ const formSchema = z.object({
 });
 
 interface CBNameFormProps {
-  orgId: string;
+  orgId?: string;
   onSuccess: (newBrokerId: string) => void;
 }
 
