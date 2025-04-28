@@ -72,7 +72,7 @@ export default function EditShippingLineForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/shippingline/getone/${shippingLineId}`
+          `https://incodocs-server.onrender.com/shipment/shippingline/getone/${shippingLineId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch shipping line data");

@@ -75,7 +75,7 @@ export default function EditSupplierForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/supplier/getbyid/${supplierId}`
+          `https://incodocs-server.onrender.com/shipment/supplier/getbyid/${supplierId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch supplier data");
