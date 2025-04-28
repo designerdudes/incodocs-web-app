@@ -25,7 +25,7 @@ const formSchema = z.object({
 });
 
 interface AddConsigneeFormProps {
-  orgId: string;
+  orgId?: string;
   onSuccess?: () => void;
 }
 

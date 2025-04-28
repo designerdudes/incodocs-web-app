@@ -67,7 +67,7 @@ export default function EditConsigneeForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/consignee/getone/${consigneeId}`
+          `https://incodocs-server.onrender.com/shipment/consignee/getone/${consigneeId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch consignee data");

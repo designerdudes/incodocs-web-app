@@ -75,7 +75,7 @@ export default function EditExpenseForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/expense/getbyid/${id}`
+          `https://incodocs-server.onrender.com/expense/getbyid/${id}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch slab data");

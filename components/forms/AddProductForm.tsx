@@ -83,7 +83,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
         try {
             await postData("/shipment/productdetails/add", values); // Adjust endpoint as needed
             toast.success("Product created successfully");
-            router.push("./");
+            // router.push("./");
             if (onSuccess) onSuccess();
         } catch (error: any) {
             console.error("Error creating product:", error);
