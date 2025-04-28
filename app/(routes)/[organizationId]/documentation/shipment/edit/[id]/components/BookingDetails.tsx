@@ -182,7 +182,7 @@ export function BookingDetails({
       try {
         console.log("Fetching product details for:", productId);
         const response = await fetch(
-          `http://localhost:4080/shipment/productdetails/get/${productId}`
+          `https://incodocs-server.onrender.com/shipment/productdetails/get/${productId}`
         );
         if (!response.ok) throw new Error("Failed to fetch product details");
         const data = await response.json();
