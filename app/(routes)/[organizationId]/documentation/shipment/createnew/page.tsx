@@ -184,9 +184,15 @@ export default function CreateNewShipmentFormPage() {
       toast.success("Shipment created successfully!");
       router.push("./");
       setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting draft:", error);
-      toast.error("Error submitting shipment");
+      const serverMessage = error?.response?.data?.message;
+
+      if (serverMessage === "Booking detail invoice number already exist") {
+        toast.error("Invoice number already exists. Please use a unique one.");
+      } else {
+        toast.error("Error submitting shipment: " + (serverMessage || error.message));
+      }
     } finally {
       setIsLoading(false);
     }
