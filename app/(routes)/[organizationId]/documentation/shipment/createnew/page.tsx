@@ -156,9 +156,9 @@ export default function CreateNewShipmentFormPage() {
           review: values.bookingDetails?.review || ""
         },
         shippingDetails: {
-          forwarderName: values.shippingDetails?.forwarderName ?? "",
+          forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
-          transporterName: values.shippingDetails?.transporterName ?? "",
+          transporterName: values.shippingDetails?.transporterName || undefined,
           transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
           review: values.shippingDetails?.review || ""
         },
@@ -166,7 +166,7 @@ export default function CreateNewShipmentFormPage() {
         supplierDetails: values.supplierDetails || {},
         saleInvoiceDetails: {
           review: values.saleInvoiceDetails?.review ?? "",
-          consignee: values.saleInvoiceDetails?.consignee ?? "",
+          consignee: values.saleInvoiceDetails?.consignee || undefined,
           actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
           commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
         },
