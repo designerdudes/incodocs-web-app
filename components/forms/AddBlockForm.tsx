@@ -430,6 +430,111 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                 Apply Weight to all rows
               </label>
             </div>
+            <div>
+              <Input
+                value={globalLength}
+                onChange={(e) => setGlobalLength(e.target.value)}
+                placeholder="Length (inches)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyLengthToAll}
+                  onChange={(e) => {
+                    setApplyLengthToAll(e.target.checked);
+                    if (e.target.checked && globalLength) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          length: {
+                            ...block.dimensions.length,
+                            value: parseFloat(globalLength) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply Length to all rows
+              </label>
+            </div>
+            
+           
+            <div>
+              <Input
+                value={globalBreadth}
+                onChange={(e) => setGlobalBreadth(e.target.value)}
+                placeholder="Breadth (inches)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyBreadthToAll}
+                  onChange={(e) => {
+                    setApplyBreadthToAll(e.target.checked);
+                    if (e.target.checked && globalBreadth) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          breadth: {
+                            ...block.dimensions.breadth,
+                            value: parseFloat(globalBreadth) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply Breadth to all rows
+              </label>
+            </div>
+            <div>
+              <Input
+                value={globalHeight}
+                onChange={(e) => setGlobalHeight(e.target.value)}
+                placeholder="Height (inch)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyHeightToAll}
+                  onChange={(e) => {
+                    setApplyHeightToAll(e.target.checked);
+                    if (e.target.checked && globalHeight) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          height: {
+                            ...block.dimensions.height,
+                            value: parseFloat(globalHeight) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply height to all rows
+              </label>
+            </div>
+            
 
           </div>
 
