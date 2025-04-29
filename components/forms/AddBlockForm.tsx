@@ -53,25 +53,25 @@ const formSchema = z.object({
           weight: z.object({
             value: z
               .number({ required_error: "Weight is required" })
-              .min(0.1, { message: "Weight must be greater than zero" }),
+              .min(0, { message: "Weight must be greater than zero" }),
             units: z.string().default("tons"),
           }),
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
-              .min(0.1, { message: "Length must be greater than zero" }),
+              .min(0, { message: "Length must be greater than zero" }),
             units: z.string().default("inch"),
           }),
           breadth: z.object({
             value: z
               .number({ required_error: "Breadth is required" })
-              .min(0.1, { message: "Breadth must be greater than zero" }),
+              .min(0, { message: "Breadth must be greater than zero" }),
             units: z.string().default("inch"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
-              .min(0.1, { message: "Height must be greater than zero" }),
+              .min(0, { message: "Height must be greater than zero" }),
             units: z.string().default("inch"),
           }),
         }),
@@ -190,10 +190,10 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       fieldName: "blocks",
       createNewItem: () => ({
         dimensions: {
-          weight: { value: 0.1, units: "tons" },
-          length: { value: 0.1, units: "inch" },
-          breadth: { value: 0.1, units: "inch" },
-          height: { value: 0.1, units: "inch" },
+          weight: { value: 0, units: "tons" },
+          length: { value: 0, units: "inch" },
+          breadth: { value: 0, units: "inch" },
+          height: { value: 0, units: "inch" },
         },
       }),
       customFieldSetters: {
@@ -203,10 +203,10 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       },
       saveCallback: saveProgressSilently,
       isDataFilled: (item) =>
-        item.dimensions.weight.value > 0.1 ||
-        item.dimensions.length.value > 0.1 ||
-        item.dimensions.breadth.value > 0.1 ||
-        item.dimensions.height.value > 0.1,
+        item.dimensions.weight.value > 0 ||
+        item.dimensions.length.value > 0||
+        item.dimensions.breadth.value > 0 ||
+        item.dimensions.height.value > 0,
       onRequireConfirmation: (items, confirmedCallback) => {
         setPendingItemsToRemove(items);
         setShowConfirmation(true);
@@ -459,10 +459,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0.1"
-                              step="0.1"
+                              min="0"
+                              step="1"
                               placeholder="Enter weight"
-                              value={field.value}
                               onChange={(e) => {
                                 field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
@@ -484,10 +483,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0.1"
-                              step="0.1"
+                              min="0"
+                              step="1"
                               placeholder="Enter length"
-                              value={field.value}
                               onChange={(e) => {
                                 field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
@@ -509,10 +507,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0.1"
-                              step="0.1"
+                              min="0"
+                              step="1"
                               placeholder="Enter breadth"
-                              value={field.value}
                               onChange={(e) => {
                                 field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
@@ -534,10 +531,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0.1"
-                              step="0.1"
+                              min="0"
+                              step="1"
                               placeholder="Enter height"
-                              value={field.value}
                               onChange={(e) => {
                                 field.onChange(parseFloat(e.target.value) || 0.1);
                                 saveProgressSilently(getValues());
