@@ -79,7 +79,7 @@ export function BillOfLadingDetails({
         setShippingLines(mappedShippingLines);
       } catch (error) {
         console.error("Error fetching shipping lines:", error);
-        toast.error("Failed to load shipping lines");
+        // toast.error("Failed to load shipping lines");
       }
     };
     fetchShippingLines();
