@@ -22,6 +22,7 @@ const formSchema = z.object({
   email: z.string().optional(),
   telephoneNo: z.string().optional(),
   address: z.string().optional(),
+  organizationId: z.string().optional()
 });
 
 interface AddConsigneeFormProps {
@@ -42,6 +43,7 @@ export default function AddConsigneeForm({
       email: "",
       telephoneNo: "",
       address: "",
+      organizationId: orgId
     },
   });
   const GlobalModal = useGlobalModal();

@@ -41,6 +41,8 @@ const formSchema = z.object({
       }
     ),
   address: z.string().optional(),
+  organizationId: z.string().optional()
+
 });
 
 interface CBNameFormProps {
@@ -60,14 +62,15 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
       email: "",
       mobileNo: "",
       address: "",
-    },
+      organizationId: orgId
+    }
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
       const payload = {
-        name: values.cbName, // API expects 'name' based on original CBNameForm
+        cbName: values.cbName, // API expects 'name' based on original CBNameForm
         cbCode: values.cbCode,
         email: values.email,
         mobileNo: values.mobileNo,
@@ -75,7 +78,7 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
         organizationId: orgId,
       };
       const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/cbname/create",
+        "https://incodocs-server.onrender.com/shipment/cbname/add",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
