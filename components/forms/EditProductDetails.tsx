@@ -23,42 +23,61 @@ import {
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
-// Define AddProductDetails type inline (same as BookingDetails.tsx)
 interface AddProductDetails {
+  productId?: string;
   code: string;
   HScode: string;
-  dscription: string;
+  description: string;
   unitOfMeasurements?: string;
   countryOfOrigin?: string;
-  variantName?: string;
-  varianntType?: string;
-  sellPrice?: number;
-  buyPrice?: number;
+  prices?: {
+    variantName?: string;
+    variantType?: string;
+    sellPrice?: number;
+    buyPrice?: number;
+    _id?: string;
+  }[];
   netWeight?: number;
   grossWeight?: number;
   cubicMeasurement?: number;
 }
 
-// Define the form schema based on AddProductDetails
 const formSchema = z.object({
+  productId: z.string().optional(),
   code: z.string().min(1, "Product Code is required"),
   HScode: z.string().min(1, "HS Code is required"),
-  dscription: z.string().min(1, "Description is required"),
+  description: z.string().min(1, "Description is required"),
   unitOfMeasurements: z.string().optional(),
   countryOfOrigin: z.string().optional(),
-  variantName: z.string().optional(),
-  varianntType: z.string().optional(),
-  sellPrice: z.number().min(0, "Sell Price must be non-negative").optional(),
-  buyPrice: z.number().min(0, "Buy Price must be non-negative").optional(),
+  prices: z
+    .array(
+      z.object({
+        variantName: z.string().optional(),
+        variantType: z.string().optional(),
+        sellPrice: z
+          .number()
+          .min(0, "Sell Price must be non-negative")
+          .optional(),
+        buyPrice: z
+          .number()
+          .min(0, "Buy Price must be non-negative")
+          .optional(),
+        _id: z.string().optional(),
+      })
+    )
+    .optional(),
   netWeight: z.number().min(0, "Net Weight must be non-negative").optional(),
-  grossWeight: z.number().min(0, "Gross Weight must be non-negative").optional(),
+  grossWeight: z
+    .number()
+    .min(0, "Gross Weight must be non-negative")
+    .optional(),
   cubicMeasurement: z
     .number()
     .min(0, "Cubic Measurement must be non-negative")
     .optional(),
 });
 
-type FormValues = AddProductDetails; // Use AddProductDetails directly
+type FormValues = AddProductDetails;
 
 interface EditProductDetailsFormProps {
   open: boolean;
@@ -77,37 +96,62 @@ export default function EditProductDetailsForm({
 }: EditProductDetailsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  // Initialize form with initialValues
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      productId: initialValues.productId || "",
       code: initialValues.code || "",
       HScode: initialValues.HScode || "",
-      dscription: initialValues.dscription || "",
+      description: initialValues.description || "",
       unitOfMeasurements: initialValues.unitOfMeasurements || "",
       countryOfOrigin: initialValues.countryOfOrigin || "",
-      variantName: initialValues.variantName || "",
-      varianntType: initialValues.varianntType || "",
-      sellPrice: initialValues.sellPrice ?? 0,
-      buyPrice: initialValues.buyPrice ?? 0,
-      netWeight: initialValues.netWeight ?? 0,
-      grossWeight: initialValues.grossWeight ?? 0,
-      cubicMeasurement: initialValues.cubicMeasurement ?? 0,
+      prices: initialValues.prices?.length
+        ? initialValues.prices
+        : [
+            {
+              variantName: "",
+              variantType: "",
+              sellPrice: undefined,
+              buyPrice: undefined,
+            },
+          ],
+      netWeight: initialValues.netWeight,
+      grossWeight: initialValues.grossWeight,
+      cubicMeasurement: initialValues.cubicMeasurement,
     },
   });
 
-  // Debug initialValues
   useEffect(() => {
-    console.log("EditProductDetailsForm initialValues:", initialValues);
-  }, [initialValues]);
+    if (open) {
+      console.log(
+        "EditProductDetailsForm resetting with initialValues:",
+        initialValues
+      );
+      form.reset({
+        productId: initialValues.productId || "",
+        code: initialValues.code || "",
+        HScode: initialValues.HScode || "",
+        description: initialValues.description || "",
+        unitOfMeasurements: initialValues.unitOfMeasurements || "",
+        countryOfOrigin: initialValues.countryOfOrigin || "",
+        prices: initialValues.prices?.length
+          ? initialValues.prices
+          : [
+              {
+                variantName: "",
+                variantType: "",
+                sellPrice: undefined,
+                buyPrice: undefined,
+              },
+            ],
+        netWeight: initialValues.netWeight,
+        grossWeight: initialValues.grossWeight,
+        cubicMeasurement: initialValues.cubicMeasurement,
+      });
+    }
+  }, [open, initialValues, form]);
 
   const handleSubmit = async (values: FormValues) => {
-    // Double-check required fields (redundant due to Zod, but for safety)
-    if (!values.code.trim() || !values.HScode.trim() || !values.dscription.trim()) {
-      toast.error("Please fill in all required fields (Code, HS Code, Description).");
-      return;
-    }
-
     setIsLoading(true);
     try {
       console.log("EditProductDetailsForm submitted with values:", values);
@@ -121,7 +165,6 @@ export default function EditProductDetailsForm({
     }
   };
 
-  // Prevent Enter key from submitting parent form
   const handleKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
@@ -130,12 +173,11 @@ export default function EditProductDetailsForm({
     }
   };
 
-  // Disable submit button until form is valid
   const isFormValid = form.formState.isValid;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>Edit Product Details</DialogTitle>
         </DialogHeader>
@@ -143,7 +185,7 @@ export default function EditProductDetailsForm({
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
             onKeyDown={handleKeyDown}
-            className="grid gap-4"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             <FormField
               control={form.control}
@@ -173,7 +215,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="dscription"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -212,7 +254,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="variantName"
+              name="prices.0.variantName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Variant Name</FormLabel>
@@ -225,7 +267,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="varianntType"
+              name="prices.0.variantType"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Variant Type</FormLabel>
@@ -238,7 +280,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="sellPrice"
+              name="prices.0.sellPrice"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sell Price</FormLabel>
@@ -246,10 +288,12 @@ export default function EditProductDetailsForm({
                     <Input
                       type="number"
                       placeholder="e.g., 100"
-                      value={field.value ?? ""}
+                      value={field.value != null ? field.value : ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -260,7 +304,7 @@ export default function EditProductDetailsForm({
             />
             <FormField
               control={form.control}
-              name="buyPrice"
+              name="prices.0.buyPrice"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Buy Price</FormLabel>
@@ -268,10 +312,12 @@ export default function EditProductDetailsForm({
                     <Input
                       type="number"
                       placeholder="e.g., 80"
-                      value={field.value ?? ""}
+                      value={field.value != null ? field.value : ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -290,10 +336,12 @@ export default function EditProductDetailsForm({
                     <Input
                       type="number"
                       placeholder="e.g., 50"
-                      value={field.value ?? ""}
+                      value={field.value != null ? field.value : ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -312,10 +360,12 @@ export default function EditProductDetailsForm({
                     <Input
                       type="number"
                       placeholder="e.g., 60"
-                      value={field.value ?? ""}
+                      value={field.value != null ? field.value : ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -334,10 +384,12 @@ export default function EditProductDetailsForm({
                     <Input
                       type="number"
                       placeholder="e.g., 1.5"
-                      value={field.value ?? ""}
+                      value={field.value != null ? field.value : ""}
                       onChange={(e) =>
                         field.onChange(
-                          e.target.value ? parseFloat(e.target.value) : undefined
+                          e.target.value
+                            ? parseFloat(e.target.value)
+                            : undefined
                         )
                       }
                     />
@@ -346,21 +398,23 @@ export default function EditProductDetailsForm({
                 </FormItem>
               )}
             />
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isLoading || !isFormValid}>
-                {isLoading && (
-                  <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
-                )}
-                Save Changes
-              </Button>
-            </DialogFooter>
+            <div className="col-span-1 md:col-span-2">
+              <DialogFooter>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isLoading || !isFormValid}>
+                  {isLoading && (
+                    <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
+                  )}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </div>
           </form>
         </Form>
       </DialogContent>

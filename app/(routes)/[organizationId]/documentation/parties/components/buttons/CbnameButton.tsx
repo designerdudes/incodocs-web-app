@@ -5,7 +5,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import CBNameForm from "../forms/CBNameForm"; 
 
 interface CBNameButtonProps {
-  onSuccess?: () => void;
+  onSuccess?: () => any;
 }
 
 export default function CBNameButton({ onSuccess }: CBNameButtonProps) {
@@ -13,7 +13,7 @@ export default function CBNameButton({ onSuccess }: CBNameButtonProps) {
 
   const openCBNameForm = () => {
     setTitle("Enter CB Name Details");
-    setChildren(<CBNameForm onSuccess={onSuccess} />);
+    setChildren(<CBNameForm onSuccess={onSuccess as any} />);
     onOpen();
   };
 

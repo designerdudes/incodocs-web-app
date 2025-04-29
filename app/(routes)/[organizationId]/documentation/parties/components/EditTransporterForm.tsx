@@ -71,7 +71,7 @@ export default function EditTransporterForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/transporter/getone/${transporterId}`
+          `https://incodocs-server.onrender.com/shipment/transporter/getone/${transporterId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch transporter data");

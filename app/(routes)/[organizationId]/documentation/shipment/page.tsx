@@ -11,8 +11,8 @@ import { useParams } from "next/navigation";
 
 interface params {
   params: {
-    organizationId: string
-  }
+    organizationId: string;
+  };
 }
 
 export default async function Page(params: params) {
@@ -30,7 +30,6 @@ export default async function Page(params: params) {
   ).then((response) => {
     return response.json();
   });
-  console.log(res)
   let shipmentData;
   shipmentData = res;
 
@@ -50,7 +49,7 @@ export default async function Page(params: params) {
           </p>
         </div>
         <Link href={`./shipment/drafts`}>
-          <Button variant="outline" >View Drafts</Button>
+          <Button variant="outline">View Drafts</Button>
         </Link>
         <Link href={`./shipment/createnew`}>
           <Button className="bg-primary text-white">Add New Shipment</Button>
@@ -72,13 +71,18 @@ export default async function Page(params: params) {
         <ShipmentDataTable
           columns={columns as any}
           data={shipmentData}
-          searchKeys={["ShipmentId", "saleInvoiceDetails.consingeeName", "bookingDetails.invoiceNumber", "bookingDetails.bookingNumber", "shippingDetails.shippingLineInvoices.invoiceNumber"]}
+          searchKeys={[
+            "ShipmentId",
+            "saleInvoiceDetails.consingeeName",
+            "bookingDetails.invoiceNumber",
+            "bookingDetails.bookingNumber",
+            "shippingDetails.shippingLineInvoices.invoiceNumber",
+          ]}
+          statusColumnName={"status"}
           bulkDeleteIdName="_id"
           deleteRoute="shipment/deleteall"
-
         />
       </div>
     </div>
   );
-
 }

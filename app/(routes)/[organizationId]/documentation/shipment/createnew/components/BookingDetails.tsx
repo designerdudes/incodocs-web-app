@@ -30,13 +30,13 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import toast from "react-hot-toast";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { containerTypes } from "../data/formSchema";
 import { fetchData } from "@/axiosUtility/api";
-import ProductSelectionForm from "@/components/forms/ProductSelectionForm";
 import { AddContainerTypeModal } from "./AddContainerTypeModal";
+import { Textarea } from "@/components/ui/textarea";
+import ProductFormPage from "@/components/forms/AddProductForm";
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
@@ -45,6 +45,7 @@ export interface SaveDetailsProps {
 interface BookingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   setInvoiceNumber: (val: string) => void;
+  params: string | string[];
 }
 
 interface Product {
@@ -72,6 +73,7 @@ export function BookingDetails({
   saveProgress,
   onSectionSubmit,
   setInvoiceNumber,
+  params
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues, register } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
@@ -84,6 +86,9 @@ export function BookingDetails({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
+  const organizationId = Array.isArray(params) ? params[0] : params;
+  const [products, setProducts] = useState<any[]>([]);
+
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -122,25 +127,8 @@ export function BookingDetails({
     setValue("NumberOfContainer", containersFromForm.length);
   }, []);
 
-  const fetchProductDetails = async (productIds: string[]) => {
-    // Fetch only uncached products
-    const uncachedIds = productIds.filter(
-      (id) => !productsCache.some((p) => p._id === id)
-    );
-    if (uncachedIds.length === 0) return;
 
-    try {
-      const response = await fetchData(`/shipment/productdetails/get?ids=${uncachedIds.join(",")}`);
-      const newProducts: Product[] = response || [];
-      setProductsCache((prev) => [
-        ...prev.filter((p) => !uncachedIds.includes(p._id)),
-        ...newProducts,
-      ]);
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-      toast.error("Failed to load product details");
-    }
-  };
+
 
   const handleDelete = (index: number) => {
     const updatedContainers = containersFromForm.filter(
@@ -192,34 +180,67 @@ export function BookingDetails({
     setShowConfirmation(false);
   };
 
-  const openProductForm = (index: number) => {
-    GlobalModal.title = "Select Products for Container";
-    GlobalModal.description = "Search and select products to add to this container.";
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const ProductsResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
+        );
+        const ProductsData = await ProductsResponse.json();
+        const mappedProduct = ProductsData.map((product: any) => ({
+          _id: product._id,
+          code: product.code,
+          description: product.description,
+          name: product.code + ": " + product.description
+        }));
+        setProducts(mappedProduct);
+
+      } catch (error) {
+        console.error("Error fetching Product Data:", error);
+      }
+    };
+    fetchProducts();
+  }, []);
+
+
+  const openProductForm = () => {
+    GlobalModal.title = "Add New Product";
+    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
-      <ProductSelectionForm
-        onSubmit={(data: { productIds: string[] }) => {
-          const updatedContainers = [...containersFromForm];
-          updatedContainers[index].addProductDetails = data.productIds;
-          setValue("bookingDetails.containers", updatedContainers);
-          fetchProductDetails(data.productIds);
-          saveProgressSilently(getValues());
+      <ProductFormPage
+        onSuccess={async () => {
+          try {
+            const ProductsResponse = await fetchData("/shipment/productdetails/get");
+            const ProductsData = await ProductsResponse.json();
+            const mappedProduct = ProductsData.map((product: any) => ({
+              _id: product._id,
+              code: product.code,
+              description: product.description,
+              name: product.code + ": " + product.description
+            }));
+            setProducts(mappedProduct || []);
+            saveProgressSilently(getValues());
+            toast.success("Product created successfully");
+          } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Failed to refresh product list");
+          }
           GlobalModal.onClose();
         }}
-        initialProductIds={containersFromForm[index].addProductDetails || []}
       />
     );
     GlobalModal.onOpen();
   };
 
-  const removeProduct = (containerIndex: number, productId: string) => {
-    const updatedContainers = [...containersFromForm];
-    updatedContainers[containerIndex].addProductDetails = updatedContainers[
-      containerIndex
-    ].addProductDetails.filter((id: string) => id !== productId);
-    setValue("bookingDetails.containers", updatedContainers);
-    saveProgressSilently(getValues());
-    toast.success("Product removed from container");
-  };
+  // const removeProduct = (containerIndex: number, productId: string) => {
+  //   const updatedContainers = [...containersFromForm];
+  //   updatedContainers[containerIndex].addProductDetails = updatedContainers[
+  //     containerIndex
+  //   ].addProductDetails.filter((id: string) => id !== productId);
+  //   setValue("bookingDetails.containers", updatedContainers);
+  //   saveProgressSilently(getValues());
+  //   toast.success("Product removed from container");
+  // };
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -483,14 +504,14 @@ export function BookingDetails({
                           <FormControl>
                             <Input
                               type="tel"
-                              placeholder="e.g., 7702791728"
+                              placeholder="e.g.,+91 1234567891"
                               {...field}
-                              value={field.value || ""}
-                              onChange={(e) =>
-                                field.onChange(
-                                  e.target.value ? Number(e.target.value) : ""
-                                )
-                              }
+                              // value={field.value || ""}
+                              // onChange={(e) =>
+                              //   field.onChange(
+                              //     e.target.value ? Number(e.target.value) : ""
+                              //   )
+                              // }
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -500,7 +521,32 @@ export function BookingDetails({
                     />
                   </TableCell>
                   <TableCell>
-                    <Button
+                    <FormField
+                      control={control}
+                      name={`bookingDetails.containers[${index}].addProductDetails[${index}]`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <EntityCombobox
+                              entities={products}
+                              value={field.value || ""}
+                              onChange={(value) => {
+                                field.onChange(value);
+                                saveProgressSilently(getValues());
+                              }}
+                              displayProperty="name"
+                              valueProperty="_id"
+                              placeholder="Select Product"
+                              onAddNew={openProductForm}
+                              addNewLabel="Add New Product"
+                              multiple={false}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {/* <Button
                       type="button"
                       variant="secondary"
                       onClick={() => openProductForm(index)}
@@ -561,7 +607,7 @@ export function BookingDetails({
                       </ScrollArea>
                     ) : (
                       <p className="text-gray-500">No products added</p>
-                    )}
+                    )} */}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -578,6 +624,25 @@ export function BookingDetails({
           </Table>
         </div>
       )}
+
+      <FormField
+        control={control}
+        name="bookingDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mt-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for booking details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
       <AddContainerTypeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

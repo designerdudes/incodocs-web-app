@@ -14,20 +14,16 @@ export interface Product {
     unitOfMeasurements: string;
     countryOfOrigin: string;
     HScode: string;
-    sellPrice: number;
-    buyPrice: number;
     netWeight: number;
     grossWeight: number;
     cubicMeasurement: number;
-    priceVariants: {
-        name: string;
-        type: string;
+    prices: {
+        variantName: string;
+        varianntType: string;
         sellPrice: number;
-        retail: boolean;
-        code: string;
+        buyPrice: number;
     }[];
 }
-
 
 interface Props {
     params: {
@@ -38,10 +34,11 @@ interface Props {
 export default async function ProductPage({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
+    const orgId = params.organizationId
 
     // Fetch data (unchanged)
     const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/productdetails/get`,
+        `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${orgId}`,
         {
             method: "GET",
             headers: {
@@ -81,7 +78,7 @@ export default async function ProductPage({ params }: Props) {
                     bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
                     bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-                    deleteRoute="/shipment/shippingline/deletemany"
+                    deleteRoute="/shipment/productdetails/deletemany"
                     searchKey="name"
                     columns={ProductsColumns}
                     data={ProductsData as any}

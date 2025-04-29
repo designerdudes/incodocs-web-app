@@ -71,7 +71,7 @@ export default function EditForwarderForm({ params }: Props) {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `http://localhost:4080/shipment/forwarder/getone/${forwarderId}`
+          `https://incodocs-server.onrender.com/shipment/forwarder/getone/${forwarderId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch forwarder data");

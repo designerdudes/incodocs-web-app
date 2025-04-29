@@ -28,7 +28,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
     const deleteLot = async () => {
         try {
-            const result = await deleteData(`http://localhost:4080/expense/delete/${data._id}`);
+            const result = await deleteData(`https://incodocs-server.onrender.com/expense/delete/${data._id}`);
             toast.success('Lot Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();

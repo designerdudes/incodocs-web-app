@@ -54,7 +54,6 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
           `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`
         );
         const consigneeData = await consigneeResponse.json();
-        console.log("This is consignee data ", consigneeData)
         setConsignees(consigneeData);
       } catch (error) {
         console.error("Error fetching consignees:", error);
@@ -118,6 +117,7 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
     GlobalModal.title = "Add New Consignee";
     GlobalModal.children = (
       <AddConsigneeForm
+        orgId={organizationId}
         onSuccess={() => {
           fetch(`https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())

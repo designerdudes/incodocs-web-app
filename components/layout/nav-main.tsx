@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
 import { sidebarTabs } from "@/lib/constants";
+import { ItemIndicator } from "@radix-ui/react-select";
 
 type NavItem = {
     title: string;
@@ -37,47 +38,47 @@ interface NavMainProps {
 export default function NavMain({  orgId, factoryId }: NavMainProps) {
     
     const RenderNavTabs = (navItems: NavItem[], orgId: string) => {
+        
         const factoryId = useParams().factoryid;
         const organisationId = useParams().organizationId;
 
-        console.log(organisationId, orgId, factoryId)
+        
 
 
-        console.log("Factory ID:", factoryId); // Debug factoryId
-
+        
         return navItems.map((item) => {
-            // Apply factoryId conditionally only for 'factorymanagement' and its children
-            // const shouldPrependFactoryId = item.url.includes('factorymanagement') || item.url === '/dashboard';
-            const shouldPrependIds =
-            item.url.includes("factorymanagement") ||
-            item.url.includes("dashboard") ||
-            item.url.includes("inventory") ||
-            item.url.includes("accounting") || item.url === "/dashboard" 
-            // const itemUrl = shouldPrependFactoryId
-            //     ? `/${factoryId}${item.url}`
-            //     : item.url.startsWith('/')
-            //         ? item.url
-            //         : `/${item.url}`;
-
             let itemUrl = item.url;
-      if (shouldPrependIds ) {
-        // Prepend /organizationId/factoryId
-        itemUrl = `/${organisationId}/${factoryId}${item.url.startsWith("/") ? item.url : "/" + item.url}`;
-      } else if (item.url.includes("documentation")) {
-        // Prepend /documentation
-        itemUrl = `/${organisationId}/${item.url.startsWith("/") ? item.url : "/" + item.url}`;
-      } else if (item.url.startsWith("/")) {
-        // Keep absolute URLs as-is
-        itemUrl = item.url;
-      } else if (item.url.includes("dashboard")) {
-        // Prepend /dashboard
-        itemUrl = `/${item.url.startsWith("/") ? item.url : "/" + item.url}`;
-      }
-      else {
-        // Relative URLs
-        itemUrl = `/${item.url}`;
-      }
-
+          
+            const needsFactoryAndOrg =
+              item.url.includes("factorymanagement") ||
+              item.url.includes("inventory") ||
+              item.url.includes("accounting") ||
+              (item.url.includes("dashboard") && factoryId); // dashboard with factory context
+          
+            const needsOnlyOrg =
+              item.url.toLowerCase().includes("documentation") ||
+              item.url.toLowerCase().includes("teammanagement") ||
+              item.url.toLowerCase().includes("settings");
+          
+            //  Prepend /orgId/factoryId for specific modules
+            if (needsFactoryAndOrg && organisationId && factoryId) {
+              itemUrl = `/${organisationId}/${factoryId}${item.url.startsWith("/") ? item.url : "/" + item.url}`;
+            }
+          
+            //  Prepend /orgId for others like documentation/settings/teammanagement
+            else if (needsOnlyOrg && organisationId) {
+              itemUrl = `/${organisationId}${item.url.startsWith("/") ? item.url : "/" + item.url}`;
+            }
+          
+            //  Use as-is if already starts with /
+            else if (item.url.startsWith("/")) {
+              itemUrl = item.url;
+            }
+          
+            //  Otherwise treat as relative URL
+            else {
+              itemUrl = `/${item.url}`;
+            }
             return (
                 <Collapsible
                     key={item.title}
