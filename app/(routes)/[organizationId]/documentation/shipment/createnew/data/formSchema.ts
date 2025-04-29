@@ -71,8 +71,8 @@ export const formSchema = z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
             date: z.string().datetime({ message: "Invalid date format" }).optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional(),
+            valueWithGst: z.string().optional(),
+            valueWithoutGst: z.string().optional(),
           })
         )
         .optional(),
@@ -84,8 +84,8 @@ export const formSchema = z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
             date: z.string().datetime({ message: "Invalid date format" }).optional(),
-            valueWithGst: z.number().optional(),
-            valueWithoutGst: z.number().optional(),
+            valueWithGst: z.string().optional(),
+            valueWithoutGst: z.string().optional(),
           })
         )
         .optional(),
