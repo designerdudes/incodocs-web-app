@@ -155,7 +155,8 @@ export default function CreateNewShipmentFormPage() {
           containers: values?.bookingDetails?.containers || [], // Includes containerType
           review: values.bookingDetails?.review || ""
         },
-        shippingDetails: {
+        shippingDetails:
+        {
           forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
           transporterName: values.shippingDetails?.transporterName || undefined,
