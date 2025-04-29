@@ -255,24 +255,6 @@ export function ShippingBillDetails({
     <div className="grid grid-cols-4 gap-3">
       <FormField
         control={control}
-        name="shippingBillDetails.portCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Port Code</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g. SB101"
-                className="uppercase"
-                {...field}
-                value={field.value ?? ""}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
         name="shippingBillDetails.cbName"
         render={({ field }) => (
           <FormItem>
@@ -305,6 +287,24 @@ export function ShippingBillDetails({
                 {...field}
                 value={field.value ?? ""}
                 readOnly
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name="shippingBillDetails.portCode"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Port Code</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="e.g. SB101"
+                className="uppercase"
+                {...field}
+                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />
