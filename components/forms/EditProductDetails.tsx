@@ -20,6 +20,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 
@@ -28,11 +36,11 @@ interface AddProductDetails {
   code: string;
   HScode: string;
   description: string;
-  unitOfMeasurements?: string;
-  countryOfOrigin?: string;
-  prices?: {
-    variantName?: string;
-    variantType?: string;
+  unitOfMeasurements: string;
+  countryOfOrigin: string;
+  prices: {
+    variantName: string;
+    variantType: string;
     sellPrice?: number;
     buyPrice?: number;
     _id?: string;
@@ -44,37 +52,25 @@ interface AddProductDetails {
 
 const formSchema = z.object({
   productId: z.string().optional(),
-  code: z.string().min(1, "Product Code is required"),
-  HScode: z.string().min(1, "HS Code is required"),
-  description: z.string().min(1, "Description is required"),
-  unitOfMeasurements: z.string().optional(),
-  countryOfOrigin: z.string().optional(),
-  prices: z
-    .array(
-      z.object({
-        variantName: z.string().optional(),
-        variantType: z.string().optional(),
-        sellPrice: z
-          .number()
-          .min(0, "Sell Price must be non-negative")
-          .optional(),
-        buyPrice: z
-          .number()
-          .min(0, "Buy Price must be non-negative")
-          .optional(),
-        _id: z.string().optional(),
-      })
-    )
-    .optional(),
-  netWeight: z.number().min(0, "Net Weight must be non-negative").optional(),
-  grossWeight: z
-    .number()
-    .min(0, "Gross Weight must be non-negative")
-    .optional(),
-  cubicMeasurement: z
-    .number()
-    .min(0, "Cubic Measurement must be non-negative")
-    .optional(),
+  code: z.string().min(1, { message: "Code is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  unitOfMeasurements: z
+    .string()
+    .min(1, { message: "Unit of Measurement is required" }),
+  countryOfOrigin: z.string().min(1, { message: "Select a country" }),
+  HScode: z.string().min(1, { message: "HS Code is required" }),
+  prices: z.array(
+    z.object({
+      variantName: z.string().min(1, { message: "Variant name is required" }),
+      variantType: z.string().min(1, { message: "Variant type is required" }),
+      sellPrice: z.number().min(0).optional(),
+      buyPrice: z.number().min(0).optional(),
+      _id: z.string().optional(),
+    })
+  ),
+  netWeight: z.number().min(0).optional(),
+  grossWeight: z.number().min(0).optional(),
+  cubicMeasurement: z.number().min(0).optional(),
 });
 
 type FormValues = AddProductDetails;
@@ -85,14 +81,16 @@ interface EditProductDetailsFormProps {
   containerIndex: number;
   initialValues: FormValues;
   onSubmit: (data: FormValues, containerIndex: number) => void;
+  onSuccess?: () => void;
 }
 
-export default function EditProductDetailsForm({
+export default function EditProductDetails({
   open,
   onOpenChange,
   containerIndex,
   initialValues,
   onSubmit,
+  onSuccess,
 }: EditProductDetailsFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -115,18 +113,14 @@ export default function EditProductDetailsForm({
               buyPrice: undefined,
             },
           ],
-      netWeight: initialValues.netWeight,
-      grossWeight: initialValues.grossWeight,
-      cubicMeasurement: initialValues.cubicMeasurement,
+      netWeight: initialValues.netWeight || undefined,
+      grossWeight: initialValues.grossWeight || undefined,
+      cubicMeasurement: initialValues.cubicMeasurement || undefined,
     },
   });
 
   useEffect(() => {
     if (open) {
-      console.log(
-        "EditProductDetailsForm resetting with initialValues:",
-        initialValues
-      );
       form.reset({
         productId: initialValues.productId || "",
         code: initialValues.code || "",
@@ -144,9 +138,9 @@ export default function EditProductDetailsForm({
                 buyPrice: undefined,
               },
             ],
-        netWeight: initialValues.netWeight,
-        grossWeight: initialValues.grossWeight,
-        cubicMeasurement: initialValues.cubicMeasurement,
+        netWeight: initialValues.netWeight || undefined,
+        grossWeight: initialValues.grossWeight || undefined,
+        cubicMeasurement: initialValues.cubicMeasurement || undefined,
       });
     }
   }, [open, initialValues, form]);
@@ -154,22 +148,14 @@ export default function EditProductDetailsForm({
   const handleSubmit = async (values: FormValues) => {
     setIsLoading(true);
     try {
-      console.log("EditProductDetailsForm submitted with values:", values);
       onSubmit(values, containerIndex);
       toast.success("Product details updated successfully!");
+      onSuccess?.();
       onOpenChange(false);
     } catch (error) {
       toast.error("Something went wrong!");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      event.stopPropagation();
-      form.handleSubmit(handleSubmit)();
     }
   };
 
@@ -184,237 +170,254 @@ export default function EditProductDetailsForm({
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            onKeyDown={handleKeyDown}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+            className="space-y-6 w-full"
           >
-            <FormField
-              control={form.control}
-              name="code"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Product Code</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., PROD001" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="HScode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>HS Code</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 123456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Sample Product" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="unitOfMeasurements"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Unit of Measurement</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., kg" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="countryOfOrigin"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country of Origin</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., USA" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="prices.0.variantName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Variant Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Variant1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="prices.0.variantType"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Variant Type</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Type1" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="prices.0.sellPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sell Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 100"
-                      value={field.value != null ? field.value : ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="prices.0.buyPrice"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Buy Price</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 80"
-                      value={field.value != null ? field.value : ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="netWeight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Net Weight</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 50"
-                      value={field.value != null ? field.value : ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="grossWeight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gross Weight</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 60"
-                      value={field.value != null ? field.value : ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cubicMeasurement"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Cubic Measurement</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="e.g., 1.5"
-                      value={field.value != null ? field.value : ""}
-                      onChange={(e) =>
-                        field.onChange(
-                          e.target.value
-                            ? parseFloat(e.target.value)
-                            : undefined
-                        )
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="col-span-1 md:col-span-2">
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => onOpenChange(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading || !isFormValid}>
-                  {isLoading && (
-                    <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
-                  )}
-                  Save Changes
-                </Button>
-              </DialogFooter>
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Eg: PROD-001" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="e.g., this is some random comment for booking details"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="unitOfMeasurements"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Unit of Measurement</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Eg: Sq. Ft" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="countryOfOrigin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Country of Origin</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="India">India</SelectItem>
+                        <SelectItem value="China">China</SelectItem>
+                        <SelectItem value="Turkey">Turkey</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="HScode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>HS Code</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Eg: 25151200" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
+
+            <div className="grid grid-cols-3 gap-4 border p-4 rounded-md">
+              <h3 className="text-lg font-semibold col-span-3">
+                Price Variant
+              </h3>
+              {form.watch("prices").map((_, index) => (
+                <React.Fragment key={index}>
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.variantName`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Variant Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Eg: Retail" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.variantType`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Variant Type</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Eg: Whole" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.sellPrice`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sell Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`prices.${index}.buyPrice`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Buy Price</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={(e) =>
+                              field.onChange(
+                                e.target.value
+                                  ? Number(e.target.value)
+                                  : undefined
+                              )
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </React.Fragment>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name="netWeight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Net Weight (Kg)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="grossWeight"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Gross Weight (Kg)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="cubicMeasurement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cubic Measurement (m³)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value ? Number(e.target.value) : undefined
+                          )
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading || !isFormValid}>
+                {isLoading && (
+                  <Icons.spinner className="h-4 w-4 animate-spin mr-2" />
+                )}
+                Save Changes
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
