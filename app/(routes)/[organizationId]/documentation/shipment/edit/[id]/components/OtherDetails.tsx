@@ -68,6 +68,7 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
       const data = await response.json();
       setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
+      console.log("Updated otherDetails:", watch("otherDetails"));
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload file");
@@ -228,7 +229,7 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                         <FormItem>
                           <FormControl>
                             <div className="flex items-center gap-2">
-                              {field.value ? (
+                              {field.value && field.value.startsWith("http") ? (
                                 <div className="flex gap-2 mt-2">
                                   <Button variant="outline" size="sm" asChild>
                                     <a
@@ -245,11 +246,9 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                                     size="sm"
                                     onClick={() =>
                                       setValue(
-                                        "blDetails.Bl[0].uploadBLUrl",
+                                        `otherDetails[${index}].uploadCopyOfCertificate`,
                                         "",
-                                        {
-                                          shouldDirty: true,
-                                        }
+                                        { shouldDirty: true }
                                       )
                                     }
                                   >

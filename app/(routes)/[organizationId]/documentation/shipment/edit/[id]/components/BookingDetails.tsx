@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormField,
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
+import { fetchData } from "@/axiosUtility/api";
 import {
   Popover,
   PopoverTrigger,
@@ -26,21 +27,27 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
-import EditProductDetailsForm from "@/components/forms/EditProductDetails";
+import EditProductDetails from "@/components/forms/EditProductDetails";
 import { Dispatch, SetStateAction } from "react";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { EditContainerTypeModal } from "./EditContainerTypeModal";
+import { containerTypes } from "../data/schema";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Textarea } from "@/components/ui/textarea";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 
 interface AddProductDetails {
   productId?: string;
   code: string;
-  description: string;
-  unitOfMeasurements?: string;
-  countryOfOrigin?: string;
   HScode: string;
-  prices?: {
-    variantName?: string;
-    variantType?: string;
+  description: string;
+  unitOfMeasurements: string;
+  countryOfOrigin: string;
+  prices: {
+    variantName: string;
+    variantType: string;
     sellPrice?: number;
     buyPrice?: number;
     _id?: string;
@@ -55,8 +62,8 @@ interface ProductDetails {
   productId?: string;
   code: string;
   description: string;
-  unitOfMeasurements: string;
-  countryOfOrigin: string;
+  unitOfMeasurements?: string;
+  countryOfOrigin?: string;
   HScode?: string;
   prices?: {
     variantName?: string;
@@ -68,6 +75,14 @@ interface ProductDetails {
   netWeight?: number;
   grossWeight?: number;
   cubicMeasurement?: number;
+}
+
+interface BookingDetailsProps {
+  shipmentId: string;
+  orgId?: string;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
+  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
 interface BookingDetailsProps {
@@ -92,15 +107,25 @@ export function BookingDetails({
   onProductDetailsOpenChange,
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
+  const containersFromForm = watch("bookingDetails.containers") || [];
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const GlobalModal = useGlobalModal();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedContainerIndex, setSelectedContainerIndex] = useState<
+    number | null
+  >(null);
+  const [containerCountToBeDeleted, setContainerCountToBeDeleted] = useState<
     number | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
+  const [customContainerTypes, setCustomContainerTypes] =
+    useState(containerTypes);
   const [productDetailsCache, setProductDetailsCache] = useState<
     Record<string, ProductDetails>
   >({});
+  const [products, setProducts] = useState<any[]>([]);
 
   const { fields, append, remove, replace } = useFieldArray({
     control,
@@ -110,6 +135,46 @@ export function BookingDetails({
   // Watch form values with fallback
   const formValues = watch("bookingDetails") || {};
   const containers = formValues.containers || [];
+
+  // Combine default and custom container types
+  const containerTypeEntities = customContainerTypes.map((type: any) => ({
+    _id: type.value,
+    label: type.label,
+    category: type.category,
+  }));
+
+  const handleAddContainerType = (data: {
+    value: string;
+    label: string;
+    category: string;
+  }) => {
+    if (customContainerTypes.some((type) => type.value === data.value)) {
+      toast.error("Container type value must be unique");
+      return;
+    }
+    const newContainerType = {
+      value: data.value,
+      label: data.label,
+      category: data.category,
+    };
+    setCustomContainerTypes([...customContainerTypes, newContainerType]);
+    setValue(`bookingDetails.containers[0].containerType`, data.value);
+    saveProgressSilently(getValues());
+  };
+
+  const handleConfirmChange = () => {
+    if (containerCountToBeDeleted !== null) {
+      const updatedContainers = containersFromForm.slice(
+        0,
+        containerCountToBeDeleted
+      );
+      setValue("bookingDetails.containers", updatedContainers);
+      setValue("bookingDetails.numberOfContainer", updatedContainers.length);
+      saveProgressSilently(getValues());
+      setContainerCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
+  };
 
   // Fetch booking details on mount
   useEffect(() => {
@@ -192,13 +257,13 @@ export function BookingDetails({
           productId: data._id,
           code: data.code || "",
           description: data.description || "",
-          unitOfMeasurements: data.unitOfMeasurements || "",
-          countryOfOrigin: data.countryOfOrigin || "",
+          unitOfMeasurements: data.unitOfMeasurements || undefined,
+          countryOfOrigin: data.countryOfOrigin || undefined,
           HScode: data.HScode || "",
           prices:
             data.prices?.map((price: any) => ({
-              variantName: price.variantName || "",
-              variantType: price.variantType || price.varianntType || "",
+              variantName: price.variantName || undefined,
+              variantType: price.variantType || price.varianntType || undefined,
               sellPrice: price.sellPrice || undefined,
               buyPrice: price.buyPrice || undefined,
               _id: price._id || undefined,
@@ -221,6 +286,61 @@ export function BookingDetails({
     },
     [productDetailsCache]
   );
+
+  const openProductForm = (index: number, isEditing: boolean = false) => {
+    const initialValues = getInitialValues(index);
+    const hasExistingProduct = !!initialValues.productId;
+
+    GlobalModal.title =
+      isEditing || hasExistingProduct ? "Edit Product" : "Add New Product";
+    GlobalModal.description =
+      isEditing || hasExistingProduct
+        ? "Update the details of the existing product."
+        : "Fill in the details to create a new product.";
+    GlobalModal.children = (
+      <EditProductDetails
+        open={true} // Set open to true to ensure the modal is visible
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            GlobalModal.onClose();
+            setSelectedContainerIndex(null);
+          }
+        }}
+        containerIndex={index}
+        initialValues={initialValues}
+        onSubmit={(data, containerIndex) => {
+          handleProductDetailsSubmit(data, containerIndex);
+        }}
+        onSuccess={async () => {
+          try {
+            const ProductsResponse = await fetchData(
+              "/shipment/productdetails/get"
+            );
+            const ProductsData = await ProductsResponse.json();
+            const mappedProduct = ProductsData.map((product: any) => ({
+              _id: product._id,
+              code: product.code,
+              description: product.description,
+              name: product.code + ": " + product.description,
+            }));
+            setProducts(mappedProduct || []);
+            saveProgressSilently(getValues());
+            toast.success(
+              isEditing || hasExistingProduct
+                ? "Product updated successfully"
+                : "Product created successfully"
+            );
+          } catch (error) {
+            console.error("Error refreshing products:", error);
+            toast.error("Failed to refresh product list");
+          }
+          GlobalModal.onClose();
+          setSelectedContainerIndex(null);
+        }}
+      />
+    );
+    GlobalModal.onOpen();
+  };
 
   // Handle Container Count Change
   const handleContainerCountChange = (value: number | undefined) => {
@@ -281,8 +401,7 @@ export function BookingDetails({
   // Handle edit product details
   const handleEditProductDetails = (index: number) => {
     setSelectedContainerIndex(index);
-    setEditModalOpen(true);
-    onProductDetailsOpenChange?.(true);
+    openProductForm(index, true);
   };
 
   // Handle product details submission
@@ -337,6 +456,26 @@ export function BookingDetails({
       [productId]: productDetails,
     }));
 
+    // Update the product in the backend if it exists
+    if (data.productId) {
+      try {
+        fetch(
+          `https://incodocs-server.onrender.com/shipment/productdetails/update/${data.productId}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(productDetails),
+          }
+        ).then((response) => {
+          if (!response.ok) throw new Error("Failed to update product");
+          console.log("Product updated in backend");
+        });
+      } catch (error) {
+        console.error("Error updating product:", error);
+        toast.error("Failed to update product in backend");
+      }
+    }
+
     // Trigger autosave
     saveProgress({ bookingDetails: getValues().bookingDetails });
   };
@@ -358,7 +497,7 @@ export function BookingDetails({
         unitOfMeasurements: cachedProduct.unitOfMeasurements || "",
         countryOfOrigin: cachedProduct.countryOfOrigin || "",
         HScode: cachedProduct.HScode || "",
-        prices: cachedProduct.prices || [
+        prices: [
           {
             variantName: "",
             variantType: "",
@@ -382,19 +521,22 @@ export function BookingDetails({
           unitOfMeasurements: product.unitOfMeasurements || "",
           countryOfOrigin: product.countryOfOrigin || "",
           HScode: product.HScode || "",
-          prices: product.prices || [
-            {
-              variantName: "",
-              variantType: "",
-              sellPrice: undefined,
-              buyPrice: undefined,
-            },
-          ],
+          prices: product.prices?.length
+            ? product.prices
+            : [
+                {
+                  variantName: "",
+                  variantType: "",
+                  sellPrice: undefined,
+                  buyPrice: undefined,
+                },
+              ],
           netWeight: product.netWeight,
           grossWeight: product.grossWeight,
           cubicMeasurement: product.cubicMeasurement,
         }
       : {
+          productId: "",
           code: "",
           description: "",
           unitOfMeasurements: "",
@@ -413,6 +555,10 @@ export function BookingDetails({
           cubicMeasurement: undefined,
         };
   };
+
+  function saveProgressSilently(arg0: FieldValues): void {
+    saveProgress({ bookingDetails: getValues().bookingDetails });
+  }
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -591,12 +737,13 @@ export function BookingDetails({
           </FormItem>
         )}
       />
-      {fields.length > 0 && (
+      {containersFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
+                <TableHead>Container Type</TableHead>
                 <TableHead>Container Number</TableHead>
                 <TableHead>Truck Number</TableHead>
                 <TableHead>Truck Driver Contact</TableHead>
@@ -605,10 +752,37 @@ export function BookingDetails({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fields.map((field, index) => (
-                <React.Fragment key={field.id}>
+              {containersFromForm.map((container: any, index: number) => (
+                <React.Fragment key={index}>
                   <TableRow>
                     <TableCell>{index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers[${index}].containerType`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <EntityCombobox
+                                entities={containerTypeEntities}
+                                value={field.value || ""}
+                                onChange={(value) => {
+                                  field.onChange(value);
+                                  saveProgressSilently(getValues());
+                                }}
+                                displayProperty="label"
+                                valueProperty="_id"
+                                placeholder="Select container type"
+                                onAddNew={() => setIsModalOpen(true)}
+                                addNewLabel="Add New Container Type"
+                                multiple={false}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
                     <TableCell>
                       <FormField
                         control={control}
@@ -619,8 +793,7 @@ export function BookingDetails({
                               <Input
                                 placeholder="e.g., 7858784698986"
                                 {...field}
-                                value={field.value ?? ""}
-                                disabled={isLoading}
+                                onBlur={() => saveProgressSilently(getValues())}
                               />
                             </FormControl>
                             <FormMessage />
@@ -638,8 +811,7 @@ export function BookingDetails({
                               <Input
                                 placeholder="e.g., BH 08 5280"
                                 {...field}
-                                value={field.value ?? ""}
-                                disabled={isLoading}
+                                onBlur={() => saveProgressSilently(getValues())}
                               />
                             </FormControl>
                             <FormMessage />
@@ -656,17 +828,103 @@ export function BookingDetails({
                             <FormControl>
                               <Input
                                 type="tel"
-                                placeholder="e.g., 7702791728"
+                                placeholder="e.g., +91 1234567891"
                                 {...field}
-                                value={field.value ?? ""}
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value
-                                      ? parseFloat(e.target.value)
-                                      : undefined
-                                  )
-                                }
-                                disabled={isLoading}
+                                onBlur={() => saveProgressSilently(getValues())}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        control={control}
+                        name={`bookingDetails.containers[${index}].addProductDetails[0].productId`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <EntityCombobox
+                                entities={products}
+                                value={field.value || ""}
+                                onChange={(value) => {
+                                  // Ensure value is a single string or undefined
+                                  const singleValue = Array.isArray(value)
+                                    ? value[0]
+                                    : value;
+                                  field.onChange(singleValue || undefined);
+                                  if (singleValue) {
+                                    fetchProductDetails(singleValue).then(
+                                      (productDetails) => {
+                                        if (productDetails) {
+                                          // Transform ProductDetails to AddProductDetails
+                                          const addProductDetails: AddProductDetails =
+                                            {
+                                              productId: singleValue,
+                                              code: productDetails.code || "",
+                                              HScode:
+                                                productDetails.HScode || "", // Provide default for HScode
+                                              description:
+                                                productDetails.description ||
+                                                "",
+                                              unitOfMeasurements:
+                                                productDetails.unitOfMeasurements ||
+                                                "",
+                                              countryOfOrigin:
+                                                productDetails.countryOfOrigin ||
+                                                "",
+                                              prices: productDetails.prices
+                                                ?.length
+                                                ? productDetails.prices.map(
+                                                    (price) => ({
+                                                      variantName:
+                                                        price.variantName || "",
+                                                      variantType:
+                                                        price.variantType || "",
+                                                      sellPrice:
+                                                        price.sellPrice,
+                                                      buyPrice: price.buyPrice,
+                                                      _id: price._id,
+                                                    })
+                                                  )
+                                                : [
+                                                    {
+                                                      variantName: "",
+                                                      variantType: "",
+                                                      sellPrice: undefined,
+                                                      buyPrice: undefined,
+                                                    },
+                                                  ],
+                                              netWeight:
+                                                productDetails.netWeight,
+                                              grossWeight:
+                                                productDetails.grossWeight,
+                                              cubicMeasurement:
+                                                productDetails.cubicMeasurement,
+                                            };
+                                          handleProductDetailsSubmit(
+                                            addProductDetails,
+                                            index
+                                          );
+                                        }
+                                      }
+                                    );
+                                  } else {
+                                    setValue(
+                                      `bookingDetails.containers[${index}].addProductDetails`,
+                                      [],
+                                      { shouldDirty: true }
+                                    );
+                                  }
+                                  saveProgressSilently(getValues());
+                                }}
+                                displayProperty="name"
+                                valueProperty="_id"
+                                placeholder="Select Product"
+                                onAddNew={() => openProductForm(index)}
+                                addNewLabel="Add New Product"
+                                multiple={false}
                               />
                             </FormControl>
                             <FormMessage />
@@ -677,150 +935,49 @@ export function BookingDetails({
                     <TableCell>
                       <Button
                         type="button"
-                        variant="secondary"
-                        onClick={() => handleToggleProductDetails(index)}
-                        disabled={
-                          !containers?.[index]?.addProductDetails?.length ||
-                          isLoading
-                        }
-                      >
-                        {expandedRow === index ? (
-                          <>
-                            Hide Product Details
-                            <ChevronUp className="ml-2 h-4 w-4" />
-                          </>
-                        ) : (
-                          <>
-                            Show Product Details
-                            <ChevronDown className="ml-2 h-4 w-4" />
-                          </>
-                        )}
-                      </Button>
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        type="button"
                         variant="destructive"
                         onClick={() => handleDelete(index)}
-                        disabled={isLoading}
                       >
                         <Trash size={16} />
                       </Button>
                     </TableCell>
                   </TableRow>
-                  {expandedRow === index &&
-                    containers?.[index]?.addProductDetails?.length > 0 && (
-                      <TableRow>
-                        <TableCell colSpan={6}>
-                          <ProductDetailsSubTable
-                            productId={
-                              containers[index].addProductDetails[0]
-                                .productId ||
-                              containers[index].addProductDetails[0]._id ||
-                              ""
-                            }
-                            fetchProductDetails={fetchProductDetails}
-                            onEdit={() => handleEditProductDetails(index)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    )}
                 </React.Fragment>
               ))}
             </TableBody>
           </Table>
         </div>
       )}
-      {selectedContainerIndex !== null && (
-        <EditProductDetailsForm
-          open={editModalOpen}
-          onOpenChange={(open) => {
-            setEditModalOpen(open);
-            onProductDetailsOpenChange?.(open);
-            if (!open) setSelectedContainerIndex(null);
-          }}
-          containerIndex={selectedContainerIndex}
-          initialValues={getInitialValues(selectedContainerIndex)}
-          onSubmit={handleProductDetailsSubmit}
-        />
-      )}
+      <FormField
+        control={control}
+        name="bookingDetails.review"
+        render={({ field }) => (
+          <FormItem className="col-span-4 mt-4">
+            <FormLabel>Remarks</FormLabel>
+            <FormControl>
+              <Textarea
+                placeholder="e.g., this is some random comment for booking details"
+                {...field}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <EditContainerTypeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleAddContainerType}
+      />
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of containers. This action cannot be undone."
+      />
     </div>
-  );
-}
-
-function ProductDetailsSubTable({
-  productId,
-  fetchProductDetails,
-  onEdit,
-}: ProductDetailsSubTableProps) {
-  const [product, setProduct] = useState<ProductDetails | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const loadProductDetails = async () => {
-      if (!productId) {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      const data = await fetchProductDetails(productId);
-      console.log("Product in sub-table:", data);
-      setProduct(data);
-      setLoading(false);
-    };
-    loadProductDetails();
-  }, [productId, fetchProductDetails]);
-
-  if (loading) {
-    return <div>Loading product details...</div>;
-  }
-
-  if (!product) {
-    return <div>Failed to load product details.</div>;
-  }
-
-  const price = product.prices?.[0] || {};
-
-  return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Code</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead>Unit of Measurement</TableHead>
-          <TableHead>Country of Origin</TableHead>
-          <TableHead>HS Code</TableHead>
-          <TableHead>Variant Name</TableHead>
-          <TableHead>Variant Type</TableHead>
-          <TableHead>Sell Price</TableHead>
-          <TableHead>Buy Price</TableHead>
-          <TableHead>Net Weight</TableHead>
-          <TableHead>Gross Weight</TableHead>
-          <TableHead>Cubic Measurement</TableHead>
-          <TableHead>Action</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow>
-          <TableCell>{product.code || "N/A"}</TableCell>
-          <TableCell>{product.description || "N/A"}</TableCell>
-          <TableCell>{product.unitOfMeasurements || "N/A"}</TableCell>
-          <TableCell>{product.countryOfOrigin || "N/A"}</TableCell>
-          <TableCell>{product.HScode || "N/A"}</TableCell>
-          <TableCell>{price.variantName || "N/A"}</TableCell>
-          <TableCell>{price.variantType || "N/A"}</TableCell>
-          <TableCell>{price.sellPrice ?? "N/A"}</TableCell>
-          <TableCell>{price.buyPrice ?? "N/A"}</TableCell>
-          <TableCell>{product.netWeight ?? "N/A"}</TableCell>
-          <TableCell>{product.grossWeight ?? "N/A"}</TableCell>
-          <TableCell>{product.cubicMeasurement ?? "N/A"}</TableCell>
-          <TableCell>
-            <Button type="button" variant="secondary" onClick={onEdit}>
-              Edit Product
-            </Button>
-          </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table>
   );
 }

@@ -155,10 +155,11 @@ export default function CreateNewShipmentFormPage() {
           containers: values?.bookingDetails?.containers || [], // Includes containerType
           review: values.bookingDetails?.review || ""
         },
-        shippingDetails: {
-          forwarderName: values.shippingDetails?.forwarderName ?? "",
+        shippingDetails:
+        {
+          forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
-          transporterName: values.shippingDetails?.transporterName ?? "",
+          transporterName: values.shippingDetails?.transporterName || undefined,
           transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
           review: values.shippingDetails?.review || ""
         },
@@ -166,7 +167,7 @@ export default function CreateNewShipmentFormPage() {
         supplierDetails: values.supplierDetails || {},
         saleInvoiceDetails: {
           review: values.saleInvoiceDetails?.review ?? "",
-          consignee: values.saleInvoiceDetails?.consignee ?? "",
+          consignee: values.saleInvoiceDetails?.consignee || undefined,
           actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
           commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
         },
@@ -184,9 +185,15 @@ export default function CreateNewShipmentFormPage() {
       toast.success("Shipment created successfully!");
       router.push("./");
       setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error submitting draft:", error);
-      toast.error("Error submitting shipment");
+      const serverMessage = error?.response?.data?.message;
+
+      if (serverMessage === "Booking detail invoice number already exist") {
+        toast.error("Invoice number already exists. Please use a unique one.");
+      } else {
+        toast.error("Error submitting shipment: " + (serverMessage || error.message));
+      }
     } finally {
       setIsLoading(false);
     }
