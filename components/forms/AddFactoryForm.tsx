@@ -30,6 +30,7 @@ import toast from "react-hot-toast";
 // Factory Form Schema
 const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
+  prefix: z.string().min(3,{message: "enter prefix"}) ,
   organizationId: z
     .string()
     .min(1, { message: "Organization must be selected" }),
@@ -72,6 +73,7 @@ export default function FactoryForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       factoryName: "",
+      prefix: "",
       organizationId, // Preselect the organization
       gstNo: "",
       address: {
@@ -94,6 +96,9 @@ export default function FactoryForm({
       <div className="space-y-4">
         <p>
           <strong>Factory Name:</strong> {values.factoryName}
+        </p>
+        <p>
+          <strong>Prefix:</strong> {values.prefix}
         </p>
         <p>
           <strong>Organization:</strong>{" "}
@@ -178,6 +183,19 @@ export default function FactoryForm({
         />
         <FormField
           control={form.control}
+          name="prefix"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prefix</FormLabel>
+              <FormControl>
+                <Input placeholder="Eg: SAA " {...field} disabled={isLoading} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="organizationId"
           render={({ field }) => (
             <FormItem>
@@ -238,6 +256,7 @@ export default function FactoryForm({
             </FormItem>
           )}
         />
+        
         <FormField
           control={form.control}
           name="address.pincode"
