@@ -543,6 +543,7 @@ export default function EditShipmentPage({ params }: Props) {
       component: (
         <ShippingDetails
           shipmentId={params.id}
+          orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
         />
