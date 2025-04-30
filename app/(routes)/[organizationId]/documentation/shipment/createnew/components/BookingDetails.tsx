@@ -538,8 +538,8 @@ export function BookingDetails({
                               valueProperty="_id"
                               placeholder="Select Product"
                               onAddNew={openProductForm}
+                              multiple={true}
                               addNewLabel="Add New Product"
-                              multiple={false}
                             />
                           </FormControl>
                           <FormMessage />

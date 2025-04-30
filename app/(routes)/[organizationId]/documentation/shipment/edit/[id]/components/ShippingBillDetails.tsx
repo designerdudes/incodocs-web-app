@@ -47,7 +47,7 @@ export function ShippingBillDetails({
   const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
   const [customsBrokers, setCustomsBrokers] = useState<
-    { _id: string; name: string; cbCode: string }[] // Adjusted to 'name'
+    { _id: string; name: string; cbCode: string }[]
   >([]);
   const GlobalModal = useGlobalModal();
 
@@ -56,7 +56,6 @@ export function ShippingBillDetails({
     name: "shippingBillDetails.bills",
   });
 
-  // Watch form values with fallback
   const formValues = watch("shippingBillDetails") || {};
   const numberOfShippingBills = formValues.numberOFShippingBill || 0;
 
@@ -78,35 +77,48 @@ export function ShippingBillDetails({
     }
   }, [formValues, saveProgress]);
 
-  // Fetch customs brokers on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${orgIdToUse}`
+  // Fetch customs brokers
+  const fetchCustomsBrokers = async (orgIdToUse: string) => {
+    try {
+      const response = await fetch(
+        `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${orgIdToUse}`
+      );
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch customs brokers: ${response.statusText}`
         );
-        if (!response.ok) throw new Error("Failed to fetch customs brokers");
-        const data = await response.json();
-        setCustomsBrokers(
-          Array.isArray(data)
-            ? data.map((broker: any) => ({
-                _id: broker._id,
-                name: broker.name, // API returns 'name'
-                cbCode: broker.cbCode,
-              }))
-            : []
-        );
-      } catch (error) {
-        console.error("Error fetching customs brokers:", error);
-        toast.error("Failed to load customs brokers");
       }
-    };
-    fetchData();
+      const data = await response.json();
+      const brokers = Array.isArray(data)
+        ? data.map((broker: any) => ({
+            _id: broker._id,
+            name: broker.cbName,
+            cbCode: broker.cbCode || "",
+          }))
+        : [];
+      setCustomsBrokers(brokers);
+      console.log("API response data:", data);
+      console.log("Mapped customs brokers:", brokers);
+      return brokers;
+    } catch (error) {
+      console.error("Error fetching customs brokers:", error);
+      toast.error("Failed to load customs brokers");
+      return [];
+    }
+  };
+
+  // Fetch customs brokers on mount
+  useEffect(() => {
+    const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
+    fetchCustomsBrokers(orgIdToUse);
   }, [orgId]);
 
   // Auto-set cbCode when cbName changes
   useEffect(() => {
+    if (!customsBrokers.length) {
+      console.log("No customs brokers loaded yet");
+      return;
+    }
     const cbId = formValues.cbName;
     if (cbId) {
       const selectedBroker = customsBrokers.find(
@@ -116,13 +128,20 @@ export function ShippingBillDetails({
         setValue("shippingBillDetails.cbCode", selectedBroker.cbCode, {
           shouldDirty: true,
         });
+        console.log("Updated cbCode:", selectedBroker.cbCode);
       } else {
         setValue("shippingBillDetails.cbCode", "", { shouldDirty: true });
+        console.log("Cleared cbCode: No matching broker found for ID", cbId);
       }
     }
   }, [formValues.cbName, customsBrokers, setValue]);
 
-  // Sync fields with numberOFShippingBill, respecting existing bills
+  // Log cbName changes for debugging
+  useEffect(() => {
+    console.log("cbName changed to:", formValues.cbName);
+  }, [formValues.cbName]);
+
+  // Sync fields with numberOFShippingBill
   useEffect(() => {
     const currentBills = getValues("shippingBillDetails.bills") || [];
     if (numberOfShippingBills === 0 && fields.length > 0) {
@@ -222,29 +241,13 @@ export function ShippingBillDetails({
     GlobalModal.children = (
       <CBNameForm
         orgId={orgId || "674b0a687d4f4b21c6c980ba"}
-        onSuccess={(newBrokerId: string) => {
+        onSuccess={async (newBrokerId: string) => {
           const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${orgIdToUse}`
-          )
-            .then((res) => res.json())
-            .then((data) => {
-              const updatedBrokers = Array.isArray(data)
-                ? data.map((broker: any) => ({
-                    _id: broker._id,
-                    name: broker.name,
-                    cbCode: broker.cbCode,
-                  }))
-                : [];
-              setCustomsBrokers(updatedBrokers);
-              setValue("shippingBillDetails.cbName", newBrokerId, {
-                shouldDirty: true,
-              });
-            })
-            .catch((error) => {
-              console.error("Error refetching customs brokers:", error);
-              toast.error("Failed to refresh customs brokers");
-            });
+          await fetchCustomsBrokers(orgIdToUse);
+          setValue("shippingBillDetails.cbName", newBrokerId, {
+            shouldDirty: true,
+          });
+          GlobalModal.onClose();
         }}
       />
     );
@@ -255,37 +258,20 @@ export function ShippingBillDetails({
     <div className="grid grid-cols-4 gap-3">
       <FormField
         control={control}
-        name="shippingBillDetails.portCode"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Port Code</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g. SB101"
-                className="uppercase"
-                {...field}
-                value={field.value ?? ""}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={control}
         name="shippingBillDetails.cbName"
         render={({ field }) => (
           <FormItem>
             <FormLabel>CB Name</FormLabel>
             <FormControl>
               <EntityCombobox
+                key={customsBrokers.length}
                 entities={customsBrokers}
                 value={field.value || ""}
                 onChange={(value) => field.onChange(value)}
-                displayProperty="name" // Adjusted to 'name'
+                displayProperty="name"
                 placeholder="Select a Customs Broker"
                 onAddNew={openCustomsBrokerForm}
-                addNewLabel="Add New Customs Broker"
+                addNewLabel="Add New cavCustoms Broker"
               />
             </FormControl>
             <FormMessage />
@@ -305,6 +291,24 @@ export function ShippingBillDetails({
                 {...field}
                 value={field.value ?? ""}
                 readOnly
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={control}
+        name="shippingBillDetails.portCode"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Port Code</FormLabel>
+            <FormControl>
+              <Input
+                placeholder="e.g. SB101"
+                className="uppercase"
+                {...field}
+                value={field.value ?? ""}
               />
             </FormControl>
             <FormMessage />

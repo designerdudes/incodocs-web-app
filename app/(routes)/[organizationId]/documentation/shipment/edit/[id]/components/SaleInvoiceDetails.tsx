@@ -30,7 +30,7 @@ interface SaleInvoiceDetailsProps {
   shipmentId: string;
   orgId: string | undefined;
   saveProgress: (data: any) => void;
-  onSectionSubmit: () => Promise<void>;
+  onSectionSubmit: () => Promise<any>; // Adjust return type if onSectionSubmit returns data
 }
 
 export function SaleInvoiceDetails({
@@ -59,48 +59,52 @@ export function SaleInvoiceDetails({
     saveProgress({ saleInvoiceDetails: formValues });
   }, [formValues, saveProgress]);
 
-  // Fetch consignees on mount
+  // Fetch consignees
+  const fetchConsignees = async () => {
+    if (!orgId) {
+      setConsignees([]);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`
+      );
+      const data = await response.json();
+      console.log("API Response (Consignees):", data);
+      const mappedConsignees = Array.isArray(data)
+        ? data.map((consignee: any) => ({
+            _id: consignee._id,
+            name:
+              consignee.name || consignee.consigneeName || "Unknown Consignee",
+          }))
+        : [];
+      console.log("Mapped Consignees:", mappedConsignees);
+      setConsignees(mappedConsignees);
+    } catch (error) {
+      console.error("Error fetching consignees:", error);
+      toast.error("Failed to fetch consignees");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch consignees on mount or orgId change
   useEffect(() => {
-    const fetchConsignees = async () => {
-      if (!orgId) {
-        setConsignees([]);
-        return;
-      }
-      setIsLoading(true);
-      try {
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}`
-        );
-        const data = await response.json();
-        console.log("API Response (Consignees):", data);
-        const mappedConsignees = Array.isArray(data)
-          ? data.map((consignee: any) => ({
-              _id: consignee._id,
-              name:
-                consignee.name ||
-                consignee.consigneeName ||
-                "Unknown Consignee",
-            }))
-          : [];
-        console.log("Mapped Consignees:", mappedConsignees);
-        setConsignees(mappedConsignees);
-      } catch (error) {
-        console.error("Error fetching consignees:", error);
-        toast.error("Failed to fetch consignees");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchConsignees();
   }, [orgId]);
 
   // Reset consignee field if selected ID is invalid
   useEffect(() => {
     const currentConsigneeId = watch("saleInvoiceDetails.consignee");
+    console.log("Current Consignee ID:", currentConsigneeId);
+    console.log("Available Consignees:", consignees);
     if (
       currentConsigneeId &&
+      consignees.length > 0 &&
       !consignees.find((c) => c._id === currentConsigneeId)
     ) {
+      console.warn("Consignee ID not found, resetting field");
       setValue("saleInvoiceDetails.consignee", "", { shouldDirty: true });
     }
   }, [consignees, watch, setValue]);
@@ -117,7 +121,6 @@ export function SaleInvoiceDetails({
     const numberOfInvoices = formValues.numberOfSalesInvoices ?? 0;
     const currentInvoices = formValues.invoice ?? [];
 
-    // Replace fields with API data if available and not yet synced
     if (
       currentInvoices.length > 0 &&
       fields.length !== currentInvoices.length
@@ -125,7 +128,6 @@ export function SaleInvoiceDetails({
       console.log("Replacing fields with API invoices:", currentInvoices);
       replace(currentInvoices);
     } else if (numberOfInvoices !== fields.length) {
-      // Sync fields with numberOfSalesInvoices
       console.log(
         "Syncing fields with numberOfSalesInvoices:",
         numberOfInvoices
@@ -186,49 +188,11 @@ export function SaleInvoiceDetails({
       <AddConsigneeForm
         orgId={orgId}
         onSuccess={() => {
-          setIsLoading(true);
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`
-          )
-            .then((res) => res.json())
-            .then((data) => {
-              console.log("Refetched Consignees:", data);
-              const mappedConsignees = Array.isArray(data)
-                ? data.map((consignee: any) => ({
-                    _id: consignee._id,
-                    name:
-                      consignee.name ||
-                      consignee.consigneeName ||
-                      "Unknown Consignee",
-                  }))
-                : [];
-              setConsignees(mappedConsignees);
-              console.log("Updated Consignees State:", mappedConsignees);
-            })
-            .catch((error) => {
-              console.error("Error refetching consignees:", error);
-              toast.error("Failed to refetch consignees. Please try again.");
-            })
-            .finally(() => {
-              setIsLoading(false);
-            });
+          fetchConsignees(); // Reuse fetchConsignees function
         }}
       />
     );
     GlobalModal.onOpen();
-  };
-
-  // Handle section submission
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSectionSubmit();
-    } catch (error) {
-      console.error("Error submitting Sale Invoice Details:", error);
-      toast.error("Failed to submit Sale Invoice Details");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (

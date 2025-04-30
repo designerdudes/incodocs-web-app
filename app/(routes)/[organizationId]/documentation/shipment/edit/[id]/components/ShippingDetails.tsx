@@ -37,12 +37,14 @@ import { Icons } from "@/components/ui/icons";
 
 interface ShippingDetailsProps {
   shipmentId: string;
+  orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
 export function ShippingDetails({
   shipmentId,
+  orgId,
   saveProgress,
   onSectionSubmit,
 }: ShippingDetailsProps) {
@@ -131,10 +133,23 @@ export function ShippingDetails({
   // Handle File Upload
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
+    if (!["application/pdf", "image/jpeg", "image/png"].includes(file.type)) {
+      toast.error("Only PDF, JPEG, or PNG files are allowed");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size must be less than 5MB");
+      return;
+    }
     setUploading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
+      console.log("Uploading file:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+      });
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
@@ -142,10 +157,56 @@ export function ShippingDetails({
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
-      setValue(fieldName, data.storageLink, { shouldDirty: true });
-      toast.success("File uploaded successfully!");
+      const responseText = await response.text();
+      console.log("Raw API response text:", responseText);
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch {
+          errorData = { message: responseText || "Unknown error" };
+        }
+        throw new Error(
+          `File upload failed: ${
+            errorData.message || response.statusText
+          } (Status: ${response.status})`
+        );
+      }
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error("Invalid JSON response from server: " + responseText);
+      }
+      console.log("Parsed API response:", data);
+      // Try multiple possible field names for the URL
+      const fileUrl =
+        data.storageLink ||
+        data.url ||
+        data.fileUrl ||
+        data.link ||
+        data.file ||
+        (data.file && data.file.url) ||
+        null;
+      console.log("Extracted file URL:", fileUrl);
+      if (
+        !fileUrl ||
+        typeof fileUrl !== "string" ||
+        !fileUrl.startsWith("http")
+      ) {
+        console.warn(
+          "Possible URL fields in response:",
+          Object.keys(data).join(", ")
+        );
+        throw new Error(
+          `No valid file URL found in API response. Available fields: ${Object.keys(
+            data
+          ).join(", ")}`
+        );
+      }
+      setValue(fieldName, fileUrl, { shouldDirty: true });
+      console.log("Form state after upload:", watch(fieldName));
+      toast.success(`File uploaded successfully: ${file.name}`);
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload file");
@@ -158,14 +219,15 @@ export function ShippingDetails({
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const orgIdToUse = orgId;
         const forwarderResponse = await fetch(
-          "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgIdToUse}`
         );
         const forwarderData = await forwarderResponse.json();
         setForwarders(Array.isArray(forwarderData) ? forwarderData : []);
 
         const transporterResponse = await fetch(
-          "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
+          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgIdToUse}`
         );
         const transporterData = await transporterResponse.json();
         setTransporters(Array.isArray(transporterData) ? transporterData : []);
@@ -313,65 +375,67 @@ export function ShippingDetails({
                       <FormField
                         control={control}
                         name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
-                        render={({ field }) => (
-                          <div className="flex items-center justify-between gap-2">
-                            {field.value ? (
-                              <div className="flex flex-col gap-2">
-                                <div className="flex gap-2">
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      setValue(
-                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`,
-                                        "",
-                                        { shouldDirty: true }
-                                      )
-                                    }
-                                  >
-                                    Remove
-                                  </Button>
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a
-                                      href={field.value}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
+                        render={({ field }) => {
+                          return (
+                            <div className="flex items-center justify-between gap-2">
+                              {field.value ? (
+                                <div className="flex flex-col gap-2">
+                                  <div className="flex gap-2">
+                                    <Button variant="outline" size="sm" asChild>
+                                      <a
+                                        href={field.value}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <Eye className="w-4 h-4 mr-2" />
+                                        View
+                                      </a>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() =>
+                                        setValue(
+                                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`,
+                                          "",
+                                          { shouldDirty: true }
+                                        )
+                                      }
                                     >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View
-                                    </a>
-                                  </Button>
+                                      Remove
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                            ) : (
-                              <>
-                                <Input
-                                  type="file"
-                                  className="flex-1"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleFileUpload(
-                                        file,
-                                        `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
-                                      );
-                                    }
-                                  }}
-                                  disabled={uploading}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                                  disabled={uploading}
-                                >
-                                  <UploadCloud className="w-5 h-5 mr-2" />
-                                  {uploading ? "Uploading..." : "Upload"}
-                                </Button>
-                              </>
-                            )}
-                          </div>
-                        )}
+                              ) : (
+                                <>
+                                  <Input
+                                    type="file"
+                                    className="flex-1"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        handleFileUpload(
+                                          file,
+                                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
+                                        );
+                                      }
+                                    }}
+                                    disabled={uploading}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="secondary"
+                                    className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
+                                    disabled={uploading}
+                                  >
+                                    <UploadCloud className="w-5 h-5 mr-2" />
+                                    {uploading ? "Uploading..." : "Upload"}
+                                  </Button>
+                                </>
+                              )}
+                            </div>
+                          );
+                        }}
                       />
                     </TableCell>
                     <TableCell>
@@ -569,6 +633,16 @@ export function ShippingDetails({
                             {field.value ? (
                               <div className="flex flex-col gap-2">
                                 <div className="flex gap-2">
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a
+                                      href={field.value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Eye className="w-4 h-4 mr-2" />
+                                      View
+                                    </a>
+                                  </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"
@@ -581,16 +655,6 @@ export function ShippingDetails({
                                     }
                                   >
                                     Remove
-                                  </Button>
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a
-                                      href={field.value}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View
-                                    </a>
                                   </Button>
                                 </div>
                               </div>

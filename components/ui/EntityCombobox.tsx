@@ -1,7 +1,10 @@
-
 "use client";
 import React from "react";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -118,13 +121,13 @@ export function EntityCombobox({
                       className={cn(
                         "ml-auto h-4 w-4",
                         multiple
-                          ? (Array.isArray(value) &&
-                            value.includes(entity[valueProperty]))
+                          ? Array.isArray(value) &&
+                            value.includes(entity[valueProperty])
                             ? "opacity-100"
                             : "opacity-0"
                           : value === entity[valueProperty]
-                            ? "opacity-100"
-                            : "opacity-0"
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
                     />
                   </CommandItem>
