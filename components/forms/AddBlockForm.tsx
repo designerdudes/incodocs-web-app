@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import { putData } from "@/axiosUtility/api";
+import { postData, putData } from "@/axiosUtility/api";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
 // Define the Zod schema
@@ -84,7 +84,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface AddBlockFormProps {
   LotData: {
-    lotId: string;
+    _id: string;
     lotName: string;
     materialType: string;
     blocksId: string[];
@@ -156,7 +156,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
-  const lotId = LotData.lotId;
+  const lotId = LotData?._id;
+
 
   const blocks = watch("blocks") || [];
   const prevMarkerCost = LotData?.markerCost || 0;
@@ -259,7 +260,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { length, breadth, height } = block.dimensions;
+      const { length, breadth, height    } = block.dimensions;
       const volume = (length.value * breadth.value * height.value) / 1_000_000;
       return total + (volume || 0);
     }, 0);
