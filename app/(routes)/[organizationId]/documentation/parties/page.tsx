@@ -13,6 +13,7 @@ import { transportercolumns } from "./components/transporterColumn";
 import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
 import PartiesDropdown from "./components/PartiesDropdown";
+import { cbNamecolumns } from "./components/CbNameColumn";
 
 interface Props {
   params: {
@@ -22,7 +23,7 @@ interface Props {
 
 export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
-  const organisationID = params.organizationId // Could use params.organizationId
+  const organisationID = params.organizationId; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch data (unchanged)
@@ -37,7 +38,7 @@ export default async function PartiesPage({ params }: Props) {
     }
   ).then((response) => response.json());
   const shippingLine = shippingLineRes;
-console.log("shipping line",shippingLine)
+  console.log("shipping line", shippingLine);
   const ForwarderRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
     {
@@ -85,6 +86,18 @@ console.log("shipping line",shippingLine)
     }
   ).then((response) => response.json());
   const consignee = consigneeRes;
+
+  const cbNameRes = await fetch(
+    `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organisationID}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => response.json());
+  const cbName = cbNameRes;
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -143,10 +156,10 @@ console.log("shipping line",shippingLine)
                 {consignee?.length ?? 0}
               </Badge>
             </TabsTrigger>
-            <TabsTrigger className="gap-2" value="consignee">
+            <TabsTrigger className="gap-2" value="cbName">
               Cb name
               <Badge className="text-bg-primary-foreground" variant="outline">
-                {consignee?.length ?? 0}
+                {cbName?.length ?? 0}
               </Badge>
             </TabsTrigger>
           </TabsList>
@@ -157,9 +170,11 @@ console.log("shipping line",shippingLine)
               bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
               bulkDeleteToastMessage="Selected shipping lines deleted successfully"
               deleteRoute="/shipment/shippingline/deletemany"
-              searchKey="name"
+              searchKey="shippingLineName"
               columns={shippingLinecolumns}
-              data={shippingLine as any}
+              data={shippingLine}
+              organizationId={organisationID}
+              token={token}
             />
           </TabsContent>
           <TabsContent value="forwarder">
@@ -169,9 +184,11 @@ console.log("shipping line",shippingLine)
               bulkDeleteDescription="This will delete the selected forwarders, and they will not be recoverable."
               bulkDeleteToastMessage="Selected forwarders deleted successfully"
               deleteRoute="/shipment/forwarder/deletemany"
-              searchKey="name"
+              searchKey="forwarderName"
               columns={forwardercolumns}
-              data={forwarder as any}
+              data={forwarder}
+              organizationId={organisationID}
+              token={token}
             />
           </TabsContent>
           <TabsContent value="transporter">
@@ -181,9 +198,11 @@ console.log("shipping line",shippingLine)
               bulkDeleteDescription="This will delete the selected transporters, and they will not be recoverable."
               bulkDeleteToastMessage="Selected transporters deleted successfully"
               deleteRoute="/shipment/transporter/deletemany"
-              searchKey="name"
+              searchKey="transporterName"
               columns={transportercolumns}
-              data={transporter as any}
+              data={transporter}
+              organizationId={organisationID}
+              token={token}
             />
           </TabsContent>
           <TabsContent value="supplier">
@@ -193,9 +212,11 @@ console.log("shipping line",shippingLine)
               bulkDeleteDescription="This will delete the selected suppliers, and they will not be recoverable."
               bulkDeleteToastMessage="Selected suppliers deleted successfully"
               deleteRoute="/shipment/supplier/deletemany"
-              searchKey="name"
+              searchKey="supplierName"
               columns={suppliercolumns}
-              data={supplier as any}
+              data={supplier}
+              organizationId={organisationID}
+              token={token}
             />
           </TabsContent>
           <TabsContent value="consignee">
@@ -207,32 +228,27 @@ console.log("shipping line",shippingLine)
               deleteRoute="/shipment/consignee/deletemany"
               searchKey="name"
               columns={consigneecolumns}
-              data={consignee as any}
+              data={consignee}
+              organizationId={organisationID}
+              token={token}
+            />
+          </TabsContent>
+          <TabsContent value="cbName">
+            <DataTable
+              bulkDeleteIdName="_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected Cb Name's ?"
+              bulkDeleteDescription="This will delete the selected Cb Name, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected Cb Name's deleted successfully"
+              deleteRoute="/shipment/cbname/deletemany"
+              searchKey="cbName"
+              columns={cbNamecolumns}
+              data={cbName}
+              organizationId={organisationID}
+              token={token}
             />
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
