@@ -26,7 +26,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import { putData } from "@/axiosUtility/api";
+import { postData, putData } from "@/axiosUtility/api";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 
 // Define the Zod schema
@@ -84,7 +84,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface AddBlockFormProps {
   LotData: {
-    lotId: string;
+    _id: string;
     lotName: string;
     materialType: string;
     blocksId: string[];
@@ -156,7 +156,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
   const factoryId = useParams().factoryid;
   const organizationId = "674b0a687d4f4b21c6c980ba";
-  const lotId = LotData.lotId;
+  const lotId = LotData?._id;
+
 
   const blocks = watch("blocks") || [];
   const prevMarkerCost = LotData?.markerCost || 0;
@@ -259,7 +260,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
 
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { length, breadth, height } = block.dimensions;
+      const { length, breadth, height    } = block.dimensions;
       const volume = (length.value * breadth.value * height.value) / 1_000_000;
       return total + (volume || 0);
     }, 0);
@@ -430,6 +431,111 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                 Apply Weight to all rows
               </label>
             </div>
+            <div>
+              <Input
+                value={globalLength}
+                onChange={(e) => setGlobalLength(e.target.value)}
+                placeholder="Length (inches)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyLengthToAll}
+                  onChange={(e) => {
+                    setApplyLengthToAll(e.target.checked);
+                    if (e.target.checked && globalLength) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          length: {
+                            ...block.dimensions.length,
+                            value: parseFloat(globalLength) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply Length to all rows
+              </label>
+            </div>
+            
+           
+            <div>
+              <Input
+                value={globalBreadth}
+                onChange={(e) => setGlobalBreadth(e.target.value)}
+                placeholder="Breadth (inches)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyBreadthToAll}
+                  onChange={(e) => {
+                    setApplyBreadthToAll(e.target.checked);
+                    if (e.target.checked && globalBreadth) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          breadth: {
+                            ...block.dimensions.breadth,
+                            value: parseFloat(globalBreadth) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply Breadth to all rows
+              </label>
+            </div>
+            <div>
+              <Input
+                value={globalHeight}
+                onChange={(e) => setGlobalHeight(e.target.value)}
+                placeholder="Height (inch)"
+                type="number"
+                disabled={isLoading}
+                onBlur={() => saveProgressSilently(getValues())}
+              />
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                <input
+                  type="checkbox"
+                  checked={applyHeightToAll}
+                  onChange={(e) => {
+                    setApplyHeightToAll(e.target.checked);
+                    if (e.target.checked && globalHeight) {
+                      const updatedBlocks = blocks.map((block) => ({
+                        ...block,
+                        dimensions: {
+                          ...block.dimensions,
+                          height: {
+                            ...block.dimensions.height,
+                            value: parseFloat(globalHeight) || 0.1,
+                          },
+                        },
+                      }));
+                      setValue("blocks", updatedBlocks);
+                      saveProgressSilently(getValues());
+                    }
+                  }}
+                />{" "}
+                Apply height to all rows
+              </label>
+            </div>
+            
 
           </div>
 
