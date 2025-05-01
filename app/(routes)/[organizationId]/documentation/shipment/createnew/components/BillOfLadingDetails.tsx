@@ -34,6 +34,7 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
+import { FileUploadField } from "./FileUploadField";
 
 interface BillOfLadingDetailsProps {
   saveProgress: (data: any) => void;
@@ -245,9 +246,9 @@ export function BillOfLadingDetails({
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>BL Number</TableHead>
+                <TableHead>Upload BL</TableHead>
                 <TableHead>BL Date</TableHead>
                 <TableHead>Telex Date</TableHead>
-                <TableHead>Upload BL</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -271,6 +272,18 @@ export function BillOfLadingDetails({
                           </FormControl>
                           <FormMessage />
                         </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`blDetails.Bl[${index}].uploadBLUrl`}
+                      render={({ field }) => (
+                        <FileUploadField
+                          name={`blDetails.Bl[${index}].uploadBLUrl`}
+                          storageKey={`blDetails_Bl${index}`}
+                        />
                       )}
                     />
                   </TableCell>
@@ -344,42 +357,7 @@ export function BillOfLadingDetails({
                       )}
                     />
                   </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`blDetails.Bl[${index}].uploadBLUrl`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `blDetails.Bl[${index}].uploadBLUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
+
                   <TableCell>
                     <Button
                       variant="destructive"
