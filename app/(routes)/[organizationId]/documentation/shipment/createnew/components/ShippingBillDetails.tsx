@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Eye, Trash, UploadCloud, View } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -33,6 +33,7 @@ import CBNameForm from "../../../parties/components/forms/CBNameForm";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
+import { FileUploadField } from "./FileUploadField";
 
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
@@ -58,11 +59,22 @@ export function ShippingBillDetails({
   const organizationId = Array.isArray(params) ? params[0] : params;
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
   const selectedCbName = watch("shippingBillDetails.cbName");
-  const [uploading, setUploading] = useState(false);
   const [CBNames, setCBNames] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<(File | null)[]>([]);
+  const [uploadedStatus, setUploadedStatus] = useState<boolean[]>([]);
   const GlobalModal = useGlobalModal();
+
+  useEffect(() => {
+    const initialStatus = shippingBillsFromForm.map((bill: any) =>
+      bill.shippingBillUrl ? true : false
+    );
+    const initialFiles = shippingBillsFromForm.map(() => null);
+    setUploadedStatus(initialStatus);
+    setSelectedFiles(initialFiles);
+  }, [shippingBillsFromForm.length]);
+
 
   // Fetch CB Names 
   useEffect(() => {
@@ -72,14 +84,12 @@ export function ShippingBillDetails({
           `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
         );
         const CBNameData = await CBNameResponse.json();
-        console.log("this is CBNameData", CBNameData)
         const mappedCBNames = CBNameData.map((cbData: any) => ({
           _id: cbData._id,
           name: cbData.cbName,
           cbCode: cbData.cbCode,
         }));
         setCBNames(mappedCBNames);
-        console.log("THis is cb names", mappedCBNames)
       } catch (error) {
         console.error("Error fetching CB Names:", error);
         // toast.error("Failed to load CB names");
@@ -156,31 +166,6 @@ export function ShippingBillDetails({
     setShowConfirmation(false);
   };
 
-  const handleFileUpload = async (file: File, fieldName: string) => {
-    if (!file) return;
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await response.json();
-      const storageUrl = data.url;
-      setValue(fieldName, storageUrl);
-      saveProgressSilently(getValues());
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload file. Please try again.");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   const openCBNameForm = () => {
     GlobalModal.title = "Add New CB Name";
     GlobalModal.children = (
@@ -201,7 +186,6 @@ export function ShippingBillDetails({
             saveProgressSilently(getValues());
           } catch (error) {
             console.error("Error refreshing CB names:", error);
-            toast.error("Failed to refresh CB names");
           }
           GlobalModal.onClose();
         }}
@@ -323,34 +307,10 @@ export function ShippingBillDetails({
                       control={control}
                       name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `shippingBillDetails.ShippingBills[${index}].shippingBillUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <FileUploadField
+                          name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
+                          storageKey={`shippingBill_${index}`}
+                        />
                       )}
                     />
                   </TableCell>
