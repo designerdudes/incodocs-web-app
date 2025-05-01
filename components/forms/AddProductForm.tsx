@@ -49,6 +49,7 @@ const productSchema = z.object({
 
 interface ProductFormProps {
     onSuccess?: () => void;
+    orgId?: string
 }
 
 export default function ProductFormPage({ onSuccess }: ProductFormProps) {
