@@ -256,10 +256,13 @@ export default function CreateNewShipmentFormPage() {
 
             <Button
               type="button"
-              onClick={handleSectionSubmit}
-              disabled={currentStep === 6 || isLoading}
+              onClick={currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft
+              }
+              disabled={isLoading}
             >
-              Save and Next
+              {currentStep < steps.length - 1
+                ? "Save and Next"
+                : "Save and Submit"}
               {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
             </Button>
           </div>
@@ -321,20 +324,6 @@ export default function CreateNewShipmentFormPage() {
           )}
         </form>
       </FormProvider>
-
-      {/* Final Submit Button on Last Step */}
-      {currentStep === steps.length - 1 && (
-        <div className="flex justify-end mt-4">
-          <Button
-            type="button"
-            onClick={submitDraft}
-            disabled={isLoading}
-          >
-            Submit Shipment
-            {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
