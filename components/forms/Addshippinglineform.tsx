@@ -30,13 +30,15 @@ const formSchema = z.object({
     .refine((val) => !isNaN(val))
     .optional(),
   email: z.string().optional(),
+  organizationId: z.string().optional()
 });
 
 interface ShippinglineFormProps {
   onSuccess?: () => void;
+  orgId?: string
 }
 
-function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
+function ShippinglineForm({ onSuccess, orgId }: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const organizationId = useParams().organizationId as string;
 
@@ -48,6 +50,7 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
       responsiblePerson: "",
       mobileNo: undefined,
       email: "",
+      organizationId: orgId
     },
   });
 
@@ -55,7 +58,6 @@ function ShippinglineForm({ onSuccess }: ShippinglineFormProps) {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values);
     try {
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipment/shippingline/create",

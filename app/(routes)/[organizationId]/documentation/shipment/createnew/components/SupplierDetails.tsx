@@ -231,6 +231,7 @@ export function SupplierDetails({
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
       <SupplierForm
+        orgId={organizationId}
         onSuccess={async () => {
           try {
             const res = await fetch(

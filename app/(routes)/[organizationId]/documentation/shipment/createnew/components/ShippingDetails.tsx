@@ -35,6 +35,7 @@ import TransporterForm from "@/components/forms/Addtransporterform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import toast from "react-hot-toast";
 
 // Form data types
 interface Invoice {
@@ -59,8 +60,6 @@ interface FormData {
   shipmentId?: string;
   shippingDetails: ShippingDetails;
 }
-
-
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -237,7 +236,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
-      alert("Failed to upload file. Please try again.");
+      toast.error("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
@@ -285,6 +284,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
+        orgId={organizationId}
         onSuccess={() => {
           fetch(
             `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
@@ -407,12 +407,13 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                                   });
                                 }
                               }}
+                              onBlur={() => saveProgressSilently(getValues())}
                               disabled={uploading}
                             />
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={uploading || !selectedForwarderFiles[index]}
+                              disabled={uploading}
                               onClick={() => {
                                 if (selectedForwarderFiles[index]) {
                                   handleFileUpload(
@@ -616,13 +617,15 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                                     return newFiles;
                                   });
                                 }
+
                               }}
+                              onBlur={() => saveProgressSilently(getValues())}
                               disabled={uploading}
                             />
                             <Button
                               variant="secondary"
                               className="bg-blue-500 text-white"
-                              disabled={uploading || !selectedTransporterFiles[index]}
+                              disabled={uploading}
                               onClick={() => {
                                 if (selectedTransporterFiles[index]) {
                                   handleFileUpload(

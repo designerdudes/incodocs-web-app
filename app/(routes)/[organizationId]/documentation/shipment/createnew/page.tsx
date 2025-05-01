@@ -152,7 +152,7 @@ export default function CreateNewShipmentFormPage() {
           destinationPort: values?.bookingDetails?.destinationPort || "",
           vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
           vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
-          containers: values?.bookingDetails?.containers || [], // Includes containerType
+          containers: values?.bookingDetails?.containers || undefined, // Includes containerType
           review: values.bookingDetails?.review || ""
         },
         shippingDetails:
@@ -160,11 +160,16 @@ export default function CreateNewShipmentFormPage() {
           forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
           transporterName: values.shippingDetails?.transporterName || undefined,
-          transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
+          transporterInvoices: values.shippingDetails?.transporterInvoices || undefined,
           review: values.shippingDetails?.review || ""
         },
         shippingBillDetails: values.shippingBillDetails || {},
-        supplierDetails: values.supplierDetails || {},
+        supplierDetails: {
+          review: values.supplierDetails?.review || "",
+          noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || "",
+          suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
+          actual: values.supplierDetails?.actual || undefined
+        },
         saleInvoiceDetails: {
           review: values.saleInvoiceDetails?.review ?? "",
           consignee: values.saleInvoiceDetails?.consignee || undefined,

@@ -32,13 +32,15 @@ const formSchema = z.object({
     .refine((val) => !isNaN(val))
     .optional(),
   email: z.string().optional(),
+  organizationId: z.string().optional()
 });
 
 interface TransporterFormProps {
   onSuccess?: () => void;
+  orgId?: string
 }
 
-function TransporterForm({ onSuccess }: TransporterFormProps) {
+function TransporterForm({ onSuccess, orgId }: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const organizationId = useParams().organizationId as string; // Get organizationId from URL params
 
@@ -51,6 +53,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
       responsiblePerson: "",
       mobileNo: undefined,
       email: "",
+      organizationId: orgId
     },
   });
 
@@ -96,9 +99,9 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
           name="transporterName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Forwarder Name</FormLabel>
+              <FormLabel>Transporter Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Name1" {...field} />
+                <Input placeholder="e.g., VS Trans" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -112,7 +115,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Sanatnagar" {...field} />
+                <Input placeholder="e.g., Chennai, Tamil Nadu" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -142,7 +145,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
               <FormControl>
                 <Input
                   type="tel"
-                  placeholder="e.g., 7545345"
+                  placeholder="e.g., 044 4668 5500"
                   {...field}
                   value={field.value || ""}
                   onChange={(e) => field.onChange(e.target.value)} // Keep as string until transform
@@ -162,7 +165,7 @@ function TransporterForm({ onSuccess }: TransporterFormProps) {
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="e.g., unknownname@123.com"
+                  placeholder="e.g., support@vstrans.in"
                   {...field}
                 />
               </FormControl>

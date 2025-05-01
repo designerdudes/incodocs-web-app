@@ -186,7 +186,9 @@ export function BookingDetails({
         const ProductsResponse = await fetch(
           `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
         );
+        console.log("This is product response", ProductsResponse)
         const ProductsData = await ProductsResponse.json();
+        console.log("This  is ProductData", ProductsData)
         const mappedProduct = ProductsData.map((product: any) => ({
           _id: product._id,
           code: product.code,
@@ -194,6 +196,7 @@ export function BookingDetails({
           name: product.code + ": " + product.description
         }));
         setProducts(mappedProduct);
+        console.log("This is mapped products", mappedProduct)
 
       } catch (error) {
         console.error("Error fetching Product Data:", error);
@@ -208,6 +211,7 @@ export function BookingDetails({
     GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
       <ProductFormPage
+        orgId={organizationId}
         onSuccess={async () => {
           try {
             const ProductsResponse = await fetchData("/shipment/productdetails/get");
@@ -523,7 +527,7 @@ export function BookingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`bookingDetails.containers[${index}].addProductDetails[${index}]`}
+                      name={`bookingDetails.containers[${index}].addProductDetails`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -566,7 +570,7 @@ export function BookingDetails({
                               <TableHead>Gross Weight</TableHead>
                               <TableHead>Action</TableHead>
                             </TableRow>
-                          </TableHeader>
+                          </TableHeader> 
                           <TableBody>
                             {container.addProductDetails.map((productId: string) => {
                               const product = productsCache.find(
