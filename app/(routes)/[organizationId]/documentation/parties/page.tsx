@@ -25,6 +25,7 @@ export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
   const organisationID = params.organizationId; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
+  console.log("PartiesPage - organisationID:", organisationID);
 
   // Fetch data (unchanged)
   const shippingLineRes = await fetch(
