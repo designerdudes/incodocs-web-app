@@ -60,7 +60,7 @@ type FormData = z.infer<typeof formSchema>;
 
 interface LotFormWrapperProps {
     lotData: {
-        lotId: string;
+        _id: string;
         lotName: string;
         materialType: string;
         blocksId: string[];

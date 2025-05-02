@@ -34,13 +34,15 @@ const formSchema = z.object({
   factoryAddress: z
     .string()
     .optional(),
+  organizationId: z.string().optional()
 });
 
 interface SupplierFormProps {
   onSuccess?: () => void;
+  orgId?: string
 }
 
-export default function SupplierForm({ onSuccess }: SupplierFormProps) {
+export default function SupplierForm({ onSuccess, orgId }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const organizationId = useParams().organizationId as string;
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,6 +55,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
       mobileNumber: undefined,
       state: "",
       factoryAddress: "",
+      organizationId: orgId
     },
   });
 
@@ -100,9 +103,9 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
           name="supplierName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Supplier Name</FormLabel>
+              <FormLabel>Company Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., ahmed" {...field} />
+                <Input placeholder="e.g., Rajshree Granites" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -116,7 +119,8 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>GST Number</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., hsdfjkghog89r" {...field} />
+                <Input placeholder="e.g., 22AAAAA0000A1Z5"
+                  {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -130,7 +134,8 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., hyd" {...field} />
+                <Input placeholder="e.g., Ongole, Andhra Pradesh"
+                  {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,7 +149,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Responsible Person</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., khaja" {...field} />
+                <Input placeholder="e.g., Naveen" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -160,7 +165,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
               <FormControl>
                 <Input
                   type="tel"
-                  placeholder="e.g., 89734"
+                  placeholder="e.g., 8973483738"
                   {...field}
                   value={field.value || ""}
                   onChange={(e) => field.onChange(e.target.value)}
@@ -178,7 +183,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>State</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., telangana" {...field} />
+                <Input placeholder="e.g., Andhra Pradesh" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -192,7 +197,7 @@ export default function SupplierForm({ onSuccess }: SupplierFormProps) {
             <FormItem>
               <FormLabel>Factory Address</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., mehdipatnam" {...field} />
+                <Input placeholder="e.g., Chimakurthy" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

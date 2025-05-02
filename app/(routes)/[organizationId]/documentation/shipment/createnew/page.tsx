@@ -152,7 +152,7 @@ export default function CreateNewShipmentFormPage() {
           destinationPort: values?.bookingDetails?.destinationPort || "",
           vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
           vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
-          containers: values?.bookingDetails?.containers || [], // Includes containerType
+          containers: values?.bookingDetails?.containers || undefined, // Includes containerType
           review: values.bookingDetails?.review || ""
         },
         shippingDetails:
@@ -160,11 +160,16 @@ export default function CreateNewShipmentFormPage() {
           forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
           transporterName: values.shippingDetails?.transporterName || undefined,
-          transporterInvoices: values.shippingDetails?.transporterInvoices ?? [],
+          transporterInvoices: values.shippingDetails?.transporterInvoices || undefined,
           review: values.shippingDetails?.review || ""
         },
         shippingBillDetails: values.shippingBillDetails || {},
-        supplierDetails: values.supplierDetails || {},
+        supplierDetails: {
+          review: values.supplierDetails?.review || "",
+          noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || "",
+          suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
+          actual: values.supplierDetails?.actual || undefined
+        },
         saleInvoiceDetails: {
           review: values.saleInvoiceDetails?.review ?? "",
           consignee: values.saleInvoiceDetails?.consignee || undefined,
@@ -251,10 +256,13 @@ export default function CreateNewShipmentFormPage() {
 
             <Button
               type="button"
-              onClick={handleSectionSubmit}
-              disabled={currentStep === 6 || isLoading}
+              onClick={currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft
+              }
+              disabled={isLoading}
             >
-              Save and Next
+              {currentStep < steps.length - 1
+                ? "Save and Next"
+                : "Save and Submit"}
               {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
             </Button>
           </div>
@@ -316,20 +324,6 @@ export default function CreateNewShipmentFormPage() {
           )}
         </form>
       </FormProvider>
-
-      {/* Final Submit Button on Last Step */}
-      {currentStep === steps.length - 1 && (
-        <div className="flex justify-end mt-4">
-          <Button
-            type="button"
-            onClick={submitDraft}
-            disabled={isLoading}
-          >
-            Submit Shipment
-            {isLoading && <Icons.spinner className="ml-2 w-4 animate-spin" />}
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
