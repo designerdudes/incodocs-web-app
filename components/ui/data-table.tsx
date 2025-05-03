@@ -396,31 +396,34 @@ console.log("this is bulk delete",bulkDeleteIdName)
               Delete Selected
             </Button>
           )}
-          {tab === "inPolishing" &&
-            table.getFilteredSelectedRowModel().rows.length > 1 && (
-              <Button
-                variant="destructive"
-                className="ml-2 hover:bg-green-400 bg-green-500"
-                onClick={() => {
-                  modal.title =
-                    bulkPolishTitle ?? "Enter triming Values of Slab:";
-                  modal.description =
-                    bulkPOlishDescription ??
-                    "Are you sure you want to polish these slabs? This action cannot be undone.";
-                  modal.children = (
-                    <MarkMultipleSlabsPolishForm
-                      table={table}
-                      bulkPolishIdName={bulkPolishIdName}
-                      updateRoute={updateRoute}
-                      bulkPolisToastMessage={bulkPolisToastMessage}
-                    />
-                  );
-                  modal.onOpen();
-                }}
-              >
-                Mark Polished
-              </Button>
-            )}
+          
+          {(tab === "cuttingInchesWithAllowance" || tab === "inPolishing") &&
+  table.getFilteredSelectedRowModel().rows.length > 1 && (
+    
+    <Button
+      variant="destructive"
+      className="ml-2 hover:bg-green-400 bg-green-500"
+      onClick={() => {
+        modal.title = bulkPolishTitle ?? "Enter trimming Values of Slab:";
+        modal.description =
+          bulkPOlishDescription ??
+          "Are you sure you want to polish these slabs? This action cannot be undone.";
+        modal.children = (
+          <MarkMultipleSlabsPolishForm
+            table={table}
+            bulkPolishIdName={bulkPolishIdName}
+            updateRoute={updateRoute}
+            bulkPolisToastMessage={bulkPolisToastMessage}
+          />
+        );
+        modal.onOpen();
+      }}
+    >
+      Mark Polished
+    </Button>
+)}
+
+            
         </div>
         <div>
           <DataTablePagination table={table} />

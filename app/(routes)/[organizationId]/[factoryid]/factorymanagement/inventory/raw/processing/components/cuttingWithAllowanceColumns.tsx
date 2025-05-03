@@ -118,7 +118,24 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
           return <span className="font-medium text-gray-600">Total Amount: {totalAmount.toFixed(2)}</span>;
         },
       },
-      
+      {
+        accessorKey: "status",
+        header: "Payment",
+        cell: ({ row }) => {
+          const amount = (
+            (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144 * (row.original?.workersCuttingPay)
+          ).toFixed(2);
+          const statusbar = row.original?.status || "Unknown";
+          return <div>{statusbar}</div>;
+        },
+        footer: ({ table }) => {
+          const totalpayment = table.getRowModel().rows.reduce((sum, row) => {
+            const amt = ((row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144) * (row.original?.workersCuttingPay);
+            return sum + amt;
+          }, 0);
+          return <span className="font-medium text-gray-600">Total Payment: {totalpayment.toFixed(2)}</span>;
+        },
+      },
 
     {
         id: "actions",
