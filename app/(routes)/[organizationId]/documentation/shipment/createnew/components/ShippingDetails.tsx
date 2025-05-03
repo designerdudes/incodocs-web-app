@@ -35,6 +35,8 @@ import TransporterForm from "@/components/forms/Addtransporterform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import toast from "react-hot-toast";
+import { FileUploadField } from "./FileUploadField";
 
 // Form data types
 interface Invoice {
@@ -59,8 +61,6 @@ interface FormData {
   shipmentId?: string;
   shippingDetails: ShippingDetails;
 }
-
-
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -237,7 +237,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
       saveProgressSilently(getValues());
     } catch (error) {
-      alert("Failed to upload file. Please try again.");
+      toast.error("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
     } finally {
       setUploading(false);
@@ -285,6 +285,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
+        orgId={organizationId}
         onSuccess={() => {
           fetch(
             `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
@@ -393,45 +394,10 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                         control={control}
                         name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
                         render={({ field }) => (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              accept=".pdf,.jpg,.png,.jpeg"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setSelectedForwarderFiles((prev) => {
-                                    const newFiles = [...prev];
-                                    newFiles[index] = file;
-                                    return newFiles;
-                                  });
-                                }
-                              }}
-                              disabled={uploading}
-                            />
-                            <Button
-                              variant="secondary"
-                              className="bg-blue-500 text-white"
-                              disabled={uploading || !selectedForwarderFiles[index]}
-                              onClick={() => {
-                                if (selectedForwarderFiles[index]) {
-                                  handleFileUpload(
-                                    selectedForwarderFiles[index]!,
-                                    `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
-                                  ).then(() => {
-                                    setSelectedForwarderFiles((prev) => {
-                                      const newFiles = [...prev];
-                                      newFiles[index] = null;
-                                      return newFiles;
-                                    });
-                                  });
-                                }
-                              }}
-                            >
-                              <UploadCloud className="w-5 h-5 mr-2" />
-                              {uploading ? "Uploading..." : "Upload"}
-                            </Button>
-                          </div>
+                          <FileUploadField
+                            name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
+                            storageKey={`shippingBill_forwarderInvoices${index}`}
+                          />
                         )}
                       />
                     </TableCell>
@@ -603,45 +569,10 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                         control={control}
                         name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
                         render={({ field }) => (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              type="file"
-                              accept=".pdf,.jpg,.png,.jpeg"
-                              onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) {
-                                  setSelectedTransporterFiles((prev) => {
-                                    const newFiles = [...prev];
-                                    newFiles[index] = file;
-                                    return newFiles;
-                                  });
-                                }
-                              }}
-                              disabled={uploading}
-                            />
-                            <Button
-                              variant="secondary"
-                              className="bg-blue-500 text-white"
-                              disabled={uploading || !selectedTransporterFiles[index]}
-                              onClick={() => {
-                                if (selectedTransporterFiles[index]) {
-                                  handleFileUpload(
-                                    selectedTransporterFiles[index]!,
-                                    `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
-                                  ).then(() => {
-                                    setSelectedTransporterFiles((prev) => {
-                                      const newFiles = [...prev];
-                                      newFiles[index] = null;
-                                      return newFiles;
-                                    });
-                                  });
-                                }
-                              }}
-                            >
-                              <UploadCloud className="w-5 h-5 mr-2" />
-                              {uploading ? "Uploading..." : "Upload"}
-                            </Button>
-                          </div>
+                          <FileUploadField
+                            name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
+                            storageKey={`shippingBill_transporterInvoices${index}`}
+                          />
                         )}
                       />
                     </TableCell>

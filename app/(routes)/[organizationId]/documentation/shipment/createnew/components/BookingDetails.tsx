@@ -48,22 +48,6 @@ interface BookingDetailsProps extends SaveDetailsProps {
   params: string | string[];
 }
 
-interface Product {
-  _id: string;
-  code: string;
-  HScode: string;
-  dscription: string;
-  unitOfMeasurements: string;
-  countryOfOrigin: string;
-  variantName: string;
-  varianntType: string;
-  sellPrice: number;
-  buyPrice: number;
-  netWeight: number;
-  grossWeight: number;
-  cubicMeasurement: number;
-}
-
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
@@ -82,7 +66,6 @@ export function BookingDetails({
   const [containerCountToBeDeleted, setContainerCountToBeDeleted] = useState<
     number | null
   >(null);
-  const [productsCache, setProductsCache] = useState<Product[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
@@ -127,9 +110,6 @@ export function BookingDetails({
     setValue("NumberOfContainer", containersFromForm.length);
   }, []);
 
-
-
-
   const handleDelete = (index: number) => {
     const updatedContainers = containersFromForm.filter(
       (_: any, i: number) => i !== index
@@ -140,7 +120,7 @@ export function BookingDetails({
   };
 
   const handleContainerCountChange = (value: string) => {
-    const newCount = Number(value);
+    const newCount = Number(value) || 1;
 
     if (newCount < containersFromForm.length) {
       setShowConfirmation(true);
@@ -194,7 +174,6 @@ export function BookingDetails({
           name: product.code + ": " + product.description
         }));
         setProducts(mappedProduct);
-
       } catch (error) {
         console.error("Error fetching Product Data:", error);
       }
@@ -208,6 +187,7 @@ export function BookingDetails({
     GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
       <ProductFormPage
+        orgId={organizationId}
         onSuccess={async () => {
           try {
             const ProductsResponse = await fetchData("/shipment/productdetails/get");
@@ -231,16 +211,6 @@ export function BookingDetails({
     );
     GlobalModal.onOpen();
   };
-
-  // const removeProduct = (containerIndex: number, productId: string) => {
-  //   const updatedContainers = [...containersFromForm];
-  //   updatedContainers[containerIndex].addProductDetails = updatedContainers[
-  //     containerIndex
-  //   ].addProductDetails.filter((id: string) => id !== productId);
-  //   setValue("bookingDetails.containers", updatedContainers);
-  //   saveProgressSilently(getValues());
-  //   toast.success("Product removed from container");
-  // };
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -407,6 +377,7 @@ export function BookingDetails({
                   field.onChange(numericValue.toString());
                   handleContainerCountChange(numericValue.toString());
                 }}
+                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -523,7 +494,7 @@ export function BookingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`bookingDetails.containers[${index}].addProductDetails[${index}]`}
+                      name={`bookingDetails.containers[${index}].addProductDetails`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
@@ -566,7 +537,7 @@ export function BookingDetails({
                               <TableHead>Gross Weight</TableHead>
                               <TableHead>Action</TableHead>
                             </TableRow>
-                          </TableHeader>
+                          </TableHeader> 
                           <TableBody>
                             {container.addProductDetails.map((productId: string) => {
                               const product = productsCache.find(

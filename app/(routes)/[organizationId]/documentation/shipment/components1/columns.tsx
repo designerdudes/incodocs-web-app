@@ -400,7 +400,7 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.shippingBillDetails?.cbName || "N/A"}
+          {row.original.shippingBillDetails?.cbName?.cbName || "N/A"}
         </span>
       </div>
     ),

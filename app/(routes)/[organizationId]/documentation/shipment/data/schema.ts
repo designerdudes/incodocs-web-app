@@ -108,7 +108,9 @@ export const shipmentSchema = z.object({
   }),
   shippingBillDetails: z.object({
     portCode: z.string(),
-    cbName: z.string(), // Not always a datetime in data
+    cbName: z.object({
+      cbName: z.string()
+    }),
     cdCode: z.string().optional(), // cdCode in data, not cbCode
     ShippingBills: z.array(
       z.object({

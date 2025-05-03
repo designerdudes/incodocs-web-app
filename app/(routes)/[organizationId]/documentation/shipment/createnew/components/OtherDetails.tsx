@@ -28,6 +28,7 @@ import {
   TableCell,
   Table,
 } from "@/components/ui/table";
+import { FileUploadField } from "./FileUploadField";
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -123,11 +124,11 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Certificate Name</TableHead>
-                <TableHead>Certificate Number</TableHead>
+                <TableHead>Document Name</TableHead>
+                <TableHead>Document Number</TableHead>
+                <TableHead>Upload Document</TableHead>
                 <TableHead>Date</TableHead>
                 <TableHead>Issuer</TableHead>
-                <TableHead>Upload Certificate</TableHead>
                 <TableHead>Remarks</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
@@ -165,6 +166,18 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                             required // Enforce required field
                           />
                         </FormControl>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`otherDetails[${index}].uploadCopyOfCertificate`}
+                      render={({ field }) => (
+                        <FileUploadField
+                          name={`otherDetails[${index}].uploadCopyOfCertificate`}
+                          storageKey={`otherDetails_Certificate${index}`}
+                        />
                       )}
                     />
                   </TableCell>
@@ -216,39 +229,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`otherDetails[${index}].uploadCopyOfCertificate`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleFileUpload(file, `otherDetails[${index}].uploadCopyOfCertificate`);
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                type="button"
-                                variant="secondary"
-                                className="text-white bg-blue-500 hover:bg-blue-600"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
+
                   <TableCell>
                     <FormField
                       control={control}

@@ -10,17 +10,24 @@ export interface ShipmentContainer {
   truckNumber: string;
   truckDriverContactNumber: number; // Fixed typo
   addProductDetails?: {
-    productCategory: string;
-    graniteAndMarble?: string;
-    tiles?: {
-      noOfBoxes: number;
-      noOfPiecesPerBoxes: number;
-      sizePerTile: {
-        length: { value: number; units: string };
-        breadth: { value: number; units: string };
-      };
-    };
-  };
+    code: string;
+    description: string;
+    unitOfMeasurements: string;
+    countryOfOrigin: string;
+    HScode: string;
+    prices: [
+      {
+        variantName: string;
+        sellPrice: number;
+        buyPrice: number;
+        _id: string;
+      }
+    ];
+    netWeight: number;
+    grossWeight: number;
+    cubicMeasurement: number;
+    organizationId: string;
+  }[];
 }
 
 export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
@@ -92,22 +99,23 @@ export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
     accessorKey: "addProductDetails",
     header: "Product Details",
     cell: ({ row }) => {
-      const product = row.original.addProductDetails;
-      return product ? (
-        <div>
-          {product.productCategory}{" "}
-          {product.tiles && (
-            <span>
-              ({product.tiles.noOfBoxes} boxes,{" "}
-              {product.tiles.sizePerTile.length.value}x{product.tiles.sizePerTile.breadth.value}{" "}
-              {product.tiles.sizePerTile.length.units})
-            </span>
-          )}
+      const products = row.original.addProductDetails;
+
+      if (!products || products.length === 0) return "N/A";
+
+      return (
+        <div className="space-y-2">
+          {products.map((product, idx) => (
+            <div key={idx} className="border-b pb-1">
+              <div><strong>Code:</strong> {product.code}</div>
+              <div><strong>Description:</strong> {product.description}</div>
+              <div><strong>HS Code:</strong> {product.HScode}</div>
+            </div>
+          ))}
         </div>
-      ) : (
-        "N/A"
       );
     },
     enableSorting: false,
-  },
+  }
+
 ];

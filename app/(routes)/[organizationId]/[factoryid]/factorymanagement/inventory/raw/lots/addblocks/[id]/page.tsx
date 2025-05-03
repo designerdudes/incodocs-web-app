@@ -30,7 +30,7 @@ interface Props {
 
 // Define the expected shape of LotData
 interface LotData {
-  lotId: string;
+  _id: string;
   lotName: string;
   materialType: string;
   blocksId: string[];
@@ -80,6 +80,7 @@ export default async function AddBlockFormPage({ params }: Props) {
     }
   );
   const lotData: LotData = await lotResponse.json();
+ 
 
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">
