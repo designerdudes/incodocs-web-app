@@ -12,7 +12,7 @@ import { forwardercolumns } from "./components/forwarderColumn";
 import { transportercolumns } from "./components/transporterColumn";
 import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
-import PartiesDropdown from "./components/PartiesDropdown";
+import PartiesDropdown from "./components/PartiesDropdown"; 
 
 interface Props {
   params: {
@@ -177,7 +177,7 @@ console.log("shipping line",shippingLine)
           <TabsContent value="transporter">
             <DataTable
               bulkDeleteIdName="_id"
-              bulkDeleteTitle="Are you sure you want to delete the selected transporters?"
+              bulkDeleteTitle="Are you sure you want to delete the selected transporter?"
               bulkDeleteDescription="This will delete the selected transporters, and they will not be recoverable."
               bulkDeleteToastMessage="Selected transporters deleted successfully"
               deleteRoute="/shipment/transporter/deletemany"
