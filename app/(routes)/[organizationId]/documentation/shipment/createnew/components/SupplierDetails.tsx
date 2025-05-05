@@ -34,6 +34,7 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
+import { FileUploadField } from "./FileUploadField";
 
 interface SupplierDetailsProps {
   saveProgress: (data: any) => void;
@@ -383,33 +384,10 @@ export function SupplierDetails({
                               control={control}
                               name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`}
                               render={({ field }) => (
-                                <FormItem>
-                                  <FormControl>
-                                    <div className="flex items-center gap-2">
-                                      <Input
-                                        type="file"
-                                        onChange={(e) => {
-                                          const file = e.target.files?.[0];
-                                          if (file)
-                                            handleFileUpload(
-                                              file,
-                                              `supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`
-                                            );
-                                        }}
-                                        disabled={uploading}
-                                      />
-                                      <Button
-                                        variant="secondary"
-                                        className="bg-blue-500 text-white"
-                                        disabled={uploading}
-                                      >
-                                        <UploadCloud className="w-5 h-5 mr-2" />
-                                        {uploading ? "Uploading..." : "Upload"}
-                                      </Button>
-                                    </div>
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
+                                <FileUploadField
+                                  name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl` as any}
+                                  storageKey={`supplierDetails_clearance_suppliers${supplierIndex}`}
+                                />
                               )}
                             />
                           </TableCell>
@@ -560,33 +538,11 @@ export function SupplierDetails({
           name="supplierDetails.actual.actualSupplierInvoiceUrl"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Actual Supplier Invoice</FormLabel>
-              <div className="flex items-center gap-2">
-                <FormControl>
-                  <Input
-                    type="file"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file)
-                        handleFileUpload(
-                          file,
-                          "supplierDetails.actual.actualSupplierInvoiceUrl"
-                        );
-                    }}
-                    disabled={uploading}
-                  />
-                </FormControl>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="bg-blue-500 text-white"
-                  disabled={uploading}
-                >
-                  <UploadCloud className="w-5 h-5 mr-2" />
-                  {uploading ? "Uploading..." : "Upload"}
-                </Button>
-              </div>
-              <FormMessage />
+              <FormLabel>Upload Actual Supplier Invoice</FormLabel>
+              <FileUploadField
+                name={`supplierDetails.actual.actualSupplierInvoiceUrl` as any}
+                storageKey={`supplierDetails_actualSupplierInvoice`}
+              />
             </FormItem>
           )}
         />
@@ -613,13 +569,10 @@ export function SupplierDetails({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Shipping Bill URL</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="e.g., https://example.com/shipping-bill"
-                  {...field}
-                  onBlur={() => saveProgressSilently(getValues())}
-                />
-              </FormControl>
+              <FileUploadField
+                name={`supplierDetails.actual.shippingBillUrl` as any}
+                storageKey={`supplierDetails_shippingBillUrl`}
+              />
               <FormMessage />
             </FormItem>
           )}

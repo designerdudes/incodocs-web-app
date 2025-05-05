@@ -305,18 +305,6 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
-                      render={({ field }) => (
-                        <FileUploadField
-                          name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
-                          storageKey={`shippingBill_${index}`}
-                        />
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
                       name={`shippingBillDetails.ShippingBills[${index}].shippingBillNumber`}
                       render={({ field }) => (
                         <FormItem>
@@ -333,6 +321,19 @@ export function ShippingBillDetails({
                       )}
                     />
                   </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
+                      render={({ field }) => (
+                        <FileUploadField
+                          name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
+                          storageKey={`shippingBill_${index}`}
+                        />
+                      )}
+                    />
+                  </TableCell>
+
                   <TableCell>
                     <FormField
                       control={control}

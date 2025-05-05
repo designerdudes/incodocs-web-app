@@ -15,6 +15,7 @@ import { consigneecolumns } from "./components/consigneeColumn";
 import PartiesDropdown from "./components/PartiesDropdown";
 import { cbNamecolumns } from "./components/CbNameColumn";
 
+
 interface Props {
   params: {
     organizationId: string;
@@ -195,7 +196,7 @@ export default async function PartiesPage({ params }: Props) {
           <TabsContent value="transporter">
             <DataTable
               bulkDeleteIdName="_id"
-              bulkDeleteTitle="Are you sure you want to delete the selected transporters?"
+              bulkDeleteTitle="Are you sure you want to delete the selected transporter?"
               bulkDeleteDescription="This will delete the selected transporters, and they will not be recoverable."
               bulkDeleteToastMessage="Selected transporters deleted successfully"
               deleteRoute="/shipment/transporter/deletemany"

@@ -24,6 +24,7 @@ import {
 import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
+import { FileUploadField } from "./FileUploadField";
 
 interface SaleInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
@@ -241,34 +242,10 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                       control={control}
                       name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`}
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <FileUploadField
+                          name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl` as any}
+                          storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
+                        />
                       )}
                     />
                   </TableCell>
@@ -277,34 +254,10 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                       control={control}
                       name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`}
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <FileUploadField
+                          name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl` as any}
+                          storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
+                        />
                       )}
                     />
                   </TableCell>
@@ -313,34 +266,10 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                       control={control}
                       name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`}
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              <Input
-                                type="file"
-                                accept=".pdf,.jpg,.png,.jpeg"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleFileUpload(
-                                      file,
-                                      `saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`
-                                    );
-                                }}
-                                disabled={uploading}
-                              />
-                              <Button
-                                variant="secondary"
-                                className="bg-blue-500 text-white"
-                                disabled={uploading}
-                              >
-                                <UploadCloud className="w-5 h-5 mr-2" />
-                                {uploading ? "Uploading..." : "Upload"}
-                              </Button>
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <FileUploadField
+                          name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl` as any}
+                          storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
+                        />
                       )}
                     />
                   </TableCell>
