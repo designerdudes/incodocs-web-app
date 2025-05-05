@@ -81,24 +81,28 @@ export const deleteData = async (endpoint: string, config = {}) => {
   }
 };
 
-export const deleteAllData = async (endpoint: string, data: any, config = {}) => {
-  const token = document.cookie?.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string | undefined;
- 
+export const deleteAllData = async (endpoint: string, data: { ids: string[]; token?: string }, config = {}) => {
+  const token = data.token || document.cookie?.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') || "";
+  const url = endpoint.startsWith("/") ? endpoint : `/${endpoint}`; // Ensure leading slash
   try {
-    const response = await instance.delete(endpoint, {
+    const response = await instance.delete(url, {
       headers: {
         Authorization: `Bearer ${token}`,
-        
+        "Content-Type": "application/json",
       },
+      data: { id: data.ids }, // Match backend expectation
       ...config,
-      data, // Assuming Axios expects the data to be passed in the 'data' property for DELETE requests
     });
-
+    console.log("DELETE response:", response.data);
     return response.data;
-  } catch (error) {
-    console.error('Axios delete request error:', error);
+  } catch (error: any) {
+    console.error("DELETE error:", {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message,
+    });
     throw {
-      message: 'Error making delete request',
+      message: "Error making delete request",
       originalError: error,
     };
   }
