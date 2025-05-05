@@ -1,9 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, Download, Eye } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { format } from "date-fns";
 
 export interface DocumentsColumns {
   documentName: string;
@@ -12,11 +11,9 @@ export interface DocumentsColumns {
 }
 
 export const extFn = (url: string) => {
-    
-
-    const match = url.match(/\.[0-9a-z]+$/i);
-    return match ? match[0].slice(1) : "";
-}
+  const match = url.match(/\.[0-9a-z]+$/i);
+  return match ? match[0].slice(1) : "";
+};
 
 export const DocColumns: ColumnDef<DocumentsColumns>[] = [
   {
@@ -56,7 +53,7 @@ export const DocColumns: ColumnDef<DocumentsColumns>[] = [
     filterFn: "includesString",
   },
   {
-    accessorKey: "Document Number",
+    accessorKey: "documentNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -66,7 +63,7 @@ export const DocColumns: ColumnDef<DocumentsColumns>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.documentNumber}</div>,
+    cell: ({ row }) => <div>{row.original.documentNumber || "N/A"}</div>,
     filterFn: "includesString",
   },
   {
@@ -80,17 +77,16 @@ export const DocColumns: ColumnDef<DocumentsColumns>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="flex gap-2">
+    cell: ({ row }) => (
+      <div className="flex gap-2">
         <Eye
           className="h-4 w-4"
           onClick={() => {
-            //view document from url
             window.open(row.original.documentUrl, "_blank");
           }}
         />
-    </div>,
+      </div>
+    ),
     filterFn: "includesString",
   },
-
- 
 ];
