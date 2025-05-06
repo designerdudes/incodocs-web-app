@@ -55,6 +55,7 @@ import { Icons } from "./icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MarkMultipleSlabsPolishForm from "./MarkMultipleSlabsPolishForm";
+import { MarkPaidForm } from "../forms/MarkPaidForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -122,6 +123,10 @@ export function DataTable<TData, TValue>({
   });
 
   const modal = useGlobalModal();
+
+  const selectedIdsForMarkPaid = table
+  .getFilteredSelectedRowModel()
+  .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
   const handleBulkDelete = async () => {
     const selectedIds = table
@@ -407,7 +412,7 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
           
-          {(tab === "cuttingInchesWithAllowance" || tab === "inPolishing") &&
+          {(tab === "inPolishing") &&
   table.getFilteredSelectedRowModel().rows.length > 1 && (
     
     <Button
@@ -430,6 +435,32 @@ export function DataTable<TData, TValue>({
       }}
     >
       Mark Polished
+    </Button>
+)}
+ {(tab === "cuttingInchesWithAllowance") &&
+  table.getFilteredSelectedRowModel().rows.length > 1 && (
+    
+    <Button
+      variant="destructive"
+      className="ml-2 hover:bg-green-400 bg-green-500"
+      onClick={() => {
+        modal.title = bulkPolishTitle ?? "Do you want to mark these slabs as paid?";
+        modal.description =
+          bulkPOlishDescription ??
+          "Are you sure you want to mark these slabs as paid?";
+        modal.children = (
+          <MarkPaidForm
+            // table={table}
+            // bulkPolishIdName={bulkPolishIdName}
+            selectedSlabs={selectedIdsForMarkPaid}
+            // updateRoute={updateRoute}
+            // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}          
+            />
+        );
+        modal.onOpen();
+      }}
+    >
+      Mark Paid
     </Button>
 )}
 

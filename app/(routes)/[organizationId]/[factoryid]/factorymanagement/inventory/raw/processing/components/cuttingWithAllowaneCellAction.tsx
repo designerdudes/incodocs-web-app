@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
 import { FinishedMaterial } from '../page';
+import SendForPolish from './sendForPolsih';
+import { ScissorsIcon } from 'lucide-react';
 
 interface Props {
     data: FinishedMaterial
@@ -65,6 +67,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         className="focus:bg-destructive focus:text-destructive-foreground">
                         <Trash className="mr-2 h-4 w-4" />
                         Delete Slab</DropdownMenuItem>
+                        
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

@@ -179,7 +179,7 @@ function TabsDataTable( {
             searchKey="slabNumber"
             columns={CuttingInchesWithAllowanceColumns}
             data={slabsData}
-          tab="cuttingInchesWithAllowance"
+            tab="cuttingInchesWithAllowance"
 
           />
         </TabsContent>
