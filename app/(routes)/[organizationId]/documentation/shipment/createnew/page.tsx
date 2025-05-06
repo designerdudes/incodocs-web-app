@@ -166,9 +166,11 @@ export default function CreateNewShipmentFormPage() {
         shippingBillDetails: values.shippingBillDetails || {},
         supplierDetails: {
           review: values.supplierDetails?.review || "",
-          noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || "",
-          suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
-          actual: values.supplierDetails?.actual || undefined
+          clearance: {
+            noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || undefined,
+            suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
+          },
+          actual: values.supplierDetails?.actual || undefined,
         },
         saleInvoiceDetails: {
           review: values.saleInvoiceDetails?.review ?? "",
