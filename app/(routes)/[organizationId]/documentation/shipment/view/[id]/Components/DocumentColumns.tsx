@@ -79,12 +79,14 @@ export const DocColumns: ColumnDef<DocumentsColumns>[] = [
     ),
     cell: ({ row }) => (
       <div className="flex gap-2">
-        <Eye
-          className="h-4 w-4"
-          onClick={() => {
-            window.open(row.original.documentUrl, "_blank");
-          }}
-        />
+        {row.original.documentUrl && row.original.documentUrl !== "N/A" ? (
+          <Eye
+            className="h-4 w-4 cursor-pointer"
+            onClick={() => {
+              window.open(row.original.documentUrl, "_blank");
+            }}
+          />
+        ) : null}
       </div>
     ),
     filterFn: "includesString",

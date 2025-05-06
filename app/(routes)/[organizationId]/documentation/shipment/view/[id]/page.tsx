@@ -55,53 +55,50 @@ export default async function Page({ params }: Props) {
   if (!res.ok) {
     return <div>Error loading shipment data</div>;
   }
-  const shipmentData = await res.json();
+  const responseData = await res.json();
+  const shipmentData = responseData?.shipment || {};
 
-  //extract documents from shipmentData in this format where i want it want document name and url
-  // Transporter Invoices
+  // Extract documents from shipmentData
   const transporterInvoices =
     shipmentData?.shippingDetails?.transporterInvoices?.map(
       (invoice: { invoiceNumber: any; uploadInvoiceUrl: any }) => ({
         documentName: "Transporter Invoice",
         documentNumber: invoice.invoiceNumber,
-        documentUrl: invoice.uploadInvoiceUrl,
+        documentUrl: invoice.uploadInvoiceUrl || "N/A",
       })
     ) || [];
 
-  // Forwarder Invoices
   const forwarderInvoices =
     shipmentData?.shippingDetails?.forwarderInvoices?.map(
       (invoice: { invoiceNumber: any; uploadInvoiceUrl: any }) => ({
         documentName: "Forwarder Invoice",
         documentNumber: invoice.invoiceNumber,
-        documentUrl: invoice.uploadInvoiceUrl,
+        documentUrl: invoice.uploadInvoiceUrl || "N/A",
       })
     ) || [];
 
-  // Shipping Bills
   const shippingBills =
     shipmentData?.shippingBillDetails?.ShippingBills?.map(
       (invoice: { shippingBillNumber: any; shippingBillUrl: any }) => ({
         documentName: "Shipping Bill",
         documentNumber: invoice.shippingBillNumber,
-        documentUrl: invoice.shippingBillUrl,
+        documentUrl: invoice.shippingBillUrl || "N/A",
       })
     ) || [];
 
-  // Supplier Invoice
   const supplierInvoice = shipmentData?.supplierDetails?.actual
     ? [
         {
           documentName: "Supplier Invoice",
           documentNumber:
-            shipmentData.supplierDetails.actual.actualSupplierName,
+            shipmentData.supplierDetails.actual.actualSupplierName || "N/A",
           documentUrl:
-            shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl,
+            shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl ||
+            "N/A",
         },
       ]
     : [];
 
-  // Commercial Invoices
   const commercialInvoices =
     shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
       (invoice: {
@@ -109,12 +106,11 @@ export default async function Page({ params }: Props) {
         clearanceCommercialInvoiceUrl: any;
       }) => ({
         documentName: "Commercial Invoice",
-        documentNumber: invoice.commercialInvoiceNumber,
-        documentUrl: invoice.clearanceCommercialInvoiceUrl,
+        documentNumber: invoice.commercialInvoiceNumber || "N/A",
+        documentUrl: invoice.clearanceCommercialInvoiceUrl || "N/A",
       })
     ) || [];
 
-  // Actual Invoices
   const actualInvoices =
     shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
       (invoice: {
@@ -127,7 +123,6 @@ export default async function Page({ params }: Props) {
       })
     ) || [];
 
-  // SABER Invoices
   const saberInvoices =
     shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
       (invoice: { commercialInvoiceNumber: any; saberInvoiceUrl: any }) => ({
@@ -137,81 +132,32 @@ export default async function Page({ params }: Props) {
       })
     ) || [];
 
-  // Bill of Lading
   const billsOfLading =
     shipmentData?.blDetails?.Bl?.map(
       (invoice: { blNumber: any; uploadBLUrl: any }) => ({
         documentName: "Bill of Lading",
-        documentNumber: invoice.blNumber,
-        documentUrl: invoice.uploadBLUrl,
+        documentNumber: invoice.blNumber || "N/A",
+        documentUrl: invoice.uploadBLUrl || "N/A",
       })
     ) || [];
 
-  // Certificates
   const certificates =
-    shipmentData?.blDetails?.Bl?.map(
-      (invoice: {
-        certificateName: any;
-        certificateNumber: any;
-        uploadCopyOfCertificate: any;
-      }) => ({
-        documentName: invoice.certificateName || "Certificate",
-        documentNumber: invoice.certificateNumber,
-        documentUrl: invoice.uploadCopyOfCertificate,
-      })
-    ).filter(
-      (doc: { documentName: any; documentNumber: any; documentUrl: any }) =>
-        doc.documentName && (doc.documentNumber || doc.documentUrl)
-    ) || [];
-
-  //  const documents = [
-  //   shipmentData?.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
-  //     documentName: "Transporter Invoice",
-  //     documentNumber: invoice.invoiceNumber,
-  //     documentUrl: invoice.uploadInvoiceUrl,
-  //   })),
-  //   shipmentData?.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
-  //     documentName: "Forwarder Invoice",
-  //     documentNumber: invoice.invoiceNumber,
-  //     documentUrl: invoice.uploadInvoiceUrl,
-  //   })),
-  //   shipmentData?.shippingBillDetails?.ShippingBills?.map((invoice: any) => ({
-  //     documentName: "Shipping Bill",
-  //     documentNumber: invoice.shippingBillNumber,
-  //     documentUrl: invoice.shippingBillUrl,
-  //   })),
-  //  {
-  //       documentName: "Supplier Invoice",
-  //       documentNumber: shipmentData?.supplierDetails?.actual?.actualSupplierName,
-  //       documentUrl: shipmentData?.supplierDetails?.actual?.actualSupplierInvoiceUrl}
-  //     ,
-
-  //   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-  //     documentName: "Commercial Invoice",
-  //     documentNumber: invoice.commercialInvoiceNumber,
-  //     documentUrl: invoice.clearanceCommercialInvoiceUrl,
-  //   })),
-  //   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-  //     documentName: "Actual Invoice",
-  //     documentNumber: invoice.saleInvoiceNumber,
-  //     documentUrl: invoice.actualCommercialInvoiceUrl,
-  //   })),
-  //   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-  //     documentName: "SABER Invoice",
-  //     documentNumber: invoice.saleInvoiceNumber,
-  //     documentUrl: invoice.saberInvoiceUrl,
-  //   })),
-  //   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
-  //     documentName: "Bill of Lading",
-  //     documentNumber: invoice.blNumber,
-  //     documentUrl: invoice.uploadBLUrl,
-  //   })),
-  //   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
-  //     documentName: invoice.certificateName,
-  //     documentNumber: invoice.certificateNumber,
-  //     documentUrl: invoice.uploadCopyOfCertificate,
-  //   })),
-  //  ]
+    shipmentData?.otherDetails
+      ?.map(
+        (cert: {
+          certificateName: any;
+          certificateNumber: any;
+          uploadCopyOfCertificate: any;
+        }) => ({
+          documentName: "Certificate",
+          documentNumber: cert.certificateNumber || "N/A",
+          documentUrl: cert.uploadCopyOfCertificate || "N/A",
+        })
+      )
+      .filter(
+        (doc: { documentName: any; documentNumber: any; documentUrl: any }) =>
+          doc.documentName && (doc.documentNumber || doc.documentUrl)
+      ) || [];
 
   const documents = [
     ...transporterInvoices,
@@ -224,10 +170,6 @@ export default async function Page({ params }: Props) {
     ...billsOfLading,
     ...certificates,
   ];
-
-  console.log("this is documents", documents);
-
-  // console.log("this is shipment", shipmentData)
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -243,7 +185,7 @@ export default async function Page({ params }: Props) {
             <Heading
               className="leading-tight"
               title={`Shipment: ${
-                shipmentData?.bookingDetails.invoiceNumber || "N/A"
+                shipmentData?.bookingDetails?.invoiceNumber || "N/A"
               }`}
             />
             <p className="text-muted-foreground text-sm mt-2">
@@ -265,15 +207,17 @@ export default async function Page({ params }: Props) {
           <div className="flex w-1/2 items-center justify-between gap-4">
             <div className="flex flex-col">
               <Heading
-                title={shipmentData?.bookingDetails?.portOfLoading}
-                className="text-2xl font-semibold "
+                title={shipmentData?.bookingDetails?.portOfLoading || "N/A"}
+                className="text-2xl font-semibold"
               />
               <p className="text-muted-foreground text-xs">
                 Vessel Sailing Date:{" "}
                 <span className="font-semibold text-black">
-                  {moment(
-                    shipmentData?.bookingDetails?.vesselSailingDate
-                  ).format("MMM Do YY")}
+                  {shipmentData?.bookingDetails?.vesselSailingDate
+                    ? moment(
+                        shipmentData.bookingDetails.vesselSailingDate
+                      ).format("MMM Do YY")
+                    : "N/A"}
                 </span>
               </p>
             </div>
@@ -282,15 +226,17 @@ export default async function Page({ params }: Props) {
             </div>
             <div className="flex flex-col">
               <Heading
-                title={shipmentData?.bookingDetails?.destinationPort}
-                className="text-2xl font-semibold "
+                title={shipmentData?.bookingDetails?.destinationPort || "N/A"}
+                className="text-2xl font-semibold"
               />
               <p className="text-muted-foreground text-xs">
                 Vessel Arriving Date:{" "}
                 <span className="font-semibold text-black">
-                  {moment(
-                    shipmentData?.bookingDetails?.vesselArrivingDate
-                  ).format("MMM Do YY")}
+                  {shipmentData?.bookingDetails?.vesselArrivingDate
+                    ? moment(
+                        shipmentData.bookingDetails.vesselArrivingDate
+                      ).format("MMM Do YY")
+                    : "N/A"}
                 </span>
               </p>
             </div>
@@ -332,7 +278,7 @@ export default async function Page({ params }: Props) {
                     "bg-muted-foreground/60 text-primary-foreground"
                 )}
               >
-                {shipmentData?.status}
+                {shipmentData?.status || "N/A"}
               </Badge>
             </div>
           </div>
@@ -376,26 +322,26 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Invoice Number</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails.invoiceNumber}
+                          {shipmentData?.bookingDetails?.invoiceNumber || "N/A"}
                         </TableCell>
                       </TableRow>
-
                       <TableRow>
                         <TableCell>Booking Number</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.bookingNumber}
+                          {shipmentData?.bookingDetails?.bookingNumber || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Port Of Loading</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.portOfLoading}
+                          {shipmentData?.bookingDetails?.portOfLoading || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Destination Port</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.destinationPort}
+                          {shipmentData?.bookingDetails?.destinationPort ||
+                            "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -440,11 +386,10 @@ export default async function Page({ params }: Props) {
                   bulkDeleteTitle="Are you sure you want to delete the selected containers?"
                   bulkDeleteDescription="This will delete the selected containers from this shipment."
                   bulkDeleteToastMessage="Selected containers deleted successfully"
-                  deleteRoute="shipment/deleteall" // Adjust if needed
+                  deleteRoute="shipment/deleteall"
                   searchKey="containerNumber"
                   data={shipmentData?.bookingDetails?.containers || []}
                   columns={BookingDetailsColumn}
-                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -497,7 +442,6 @@ export default async function Page({ params }: Props) {
                       shipmentData?.shippingDetails?.forwarderInvoices || []
                     }
                     columns={ForwarderDetailsColumn}
-                    // showDropdown={true}
                   />
                 </div>
               </div>
@@ -547,7 +491,6 @@ export default async function Page({ params }: Props) {
                       shipmentData?.shippingDetails?.transporterInvoices || []
                     }
                     columns={TransporterDetailsColumn}
-                    // showDropdown={true}
                   />
                 </div>
               </div>
@@ -742,7 +685,6 @@ export default async function Page({ params }: Props) {
                     shipmentData?.supplierDetails?.clearance?.invoices || []
                   }
                   columns={SupplierDetailscolumn}
-                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -807,7 +749,6 @@ export default async function Page({ params }: Props) {
                     shipmentData?.saleInvoiceDetails?.commercialInvoices || []
                   }
                   columns={SaleInvoiceDetailscolumn}
-                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -832,7 +773,7 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Shipping Line Name</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingDetails?.shippingLineName
+                          {shipmentData?.blDetails?.shippingLineName
                             ?.shippingLineName || "N/A"}
                         </TableCell>
                       </TableRow>
@@ -846,7 +787,7 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Review</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingDetails?.review || "N/A"}
+                          {shipmentData?.blDetails?.review || "N/A"}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -865,7 +806,6 @@ export default async function Page({ params }: Props) {
                     shipmentData?.shippingDetails?.shippingLineInvoices || []
                   }
                   columns={ShippingDetailsColumn}
-                  // showDropdown={true}
                 />
               </div>
             </div>
@@ -887,15 +827,15 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>BL Number</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.blNumber || "N/A"}
+                          {shipmentData?.blDetails?.Bl?.[0]?.blNumber || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>BL Date</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.blDate
+                          {shipmentData?.blDetails?.Bl?.[0]?.blDate
                             ? format(
-                                new Date(shipmentData.blDetails.blDate),
+                                new Date(shipmentData.blDetails.Bl[0].blDate),
                                 "PPP"
                               )
                             : "N/A"}
@@ -904,9 +844,11 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Telex Date</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.telexDate
+                          {shipmentData?.blDetails?.Bl?.[0]?.telexDate
                             ? format(
-                                new Date(shipmentData.blDetails.telexDate),
+                                new Date(
+                                  shipmentData.blDetails.Bl[0].telexDate
+                                ),
                                 "PPP"
                               )
                             : "N/A"}
@@ -915,9 +857,9 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Uploaded BL</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.uploadBL ? (
+                          {shipmentData?.blDetails?.Bl?.[0]?.uploadBLUrl ? (
                             <a
-                              href={shipmentData.blDetails.uploadBL}
+                              href={shipmentData.blDetails.Bl[0].uploadBLUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-500 hover:underline"
@@ -955,13 +897,12 @@ export default async function Page({ params }: Props) {
                   searchKey="certificateNumber"
                   data={shipmentData?.otherDetails || []}
                   columns={OtherDetailsColumn}
-                  // showDropdown={true}
                 />
               </div>
             </div>
           </TabsContent>
 
-          {/* Documents  */}
+          {/* Documents */}
           <TabsContent value="Documents">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="w-full">
