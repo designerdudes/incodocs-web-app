@@ -164,6 +164,7 @@ export const formSchema = z.object({
         .array(
           z.object({
             commercialInvoiceNumber: z.string().optional(),
+            packingListUrl: z.string().url("Invalid URL").optional(),
             clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
             actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
             saberInvoiceUrl: z.string().url("Invalid URL").optional(),

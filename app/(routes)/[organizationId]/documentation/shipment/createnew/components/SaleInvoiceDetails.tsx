@@ -211,6 +211,7 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Commercial Invoice Number</TableHead>
+                <TableHead>Packing list</TableHead>
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
                 <TableHead>SABER Invoice</TableHead>
@@ -234,6 +235,18 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                             required // Enforce required field
                           />
                         </FormControl>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].packingListUrl`}
+                      render={({ field }) => (
+                        <FileUploadField
+                          name={`saleInvoiceDetails.commercialInvoices[${index}].packingListUrl` as any}
+                          storageKey={`saleInvoiceDetails_packingListUrl${index}`}
+                        />
                       )}
                     />
                   </TableCell>
