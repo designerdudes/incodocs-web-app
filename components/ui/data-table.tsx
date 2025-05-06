@@ -73,26 +73,27 @@ interface DataTableProps<TData, TValue> {
   bulkPolishIdName?: string;
   updateRoute?: string;
   bulkPolisToastMessage?: string;
+  organizationId?: string;
+  token?: string; // Add token prop
 }
 
-export function
-  DataTable<TData, TValue>({
-    columns,
-    data,
-    searchKey,
-    bulkDeleteIdName,
-    bulkDeleteTitle,
-    bulkDeleteDescription,
-    bulkDeleteToastMessage,
-    deleteRoute,
-    showDropdown = false, // ✅ Set a default value (false)
-    tab, // Get the tab name from props
-    bulkPolishTitle,
-    bulkPOlishDescription,
-    bulkPolishIdName,
-    updateRoute,
-    bulkPolisToastMessage,
-  }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({
+  columns,
+  data,
+  searchKey,
+  bulkDeleteIdName,
+  bulkDeleteTitle,
+  bulkDeleteDescription,
+  bulkDeleteToastMessage,
+  deleteRoute,
+  showDropdown = false, // ✅ Set a default value (false)
+  tab, // Get the tab name from props
+  bulkPolishTitle,
+  bulkPOlishDescription,
+  bulkPolishIdName,
+  updateRoute,
+  bulkPolisToastMessage,
+}: DataTableProps<TData, TValue>) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -123,12 +124,11 @@ export function
   const modal = useGlobalModal();
 
   const handleBulkDelete = async () => {
-  
     const selectedIds = table
       .getFilteredSelectedRowModel()
       .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
-      console.log(selectedIds)
-console.log("this is bulk delete",bulkDeleteIdName)
+    console.log(selectedIds);
+    console.log("this is bulk delete", bulkDeleteIdName);
     if (selectedIds.length === 0) {
       toast.error("No product selected for deletion.");
       return;
@@ -154,13 +154,13 @@ console.log("this is bulk delete",bulkDeleteIdName)
     }
   };
 
-
   // Function to extract all nested keys
   const getAllKeys = (obj: Record<string, any>, prefix = ""): string[] => {
-    return Object.entries(obj).flatMap(([key, value]) =>
-      value && typeof value === "object" && !Array.isArray(value)
-        ? getAllKeys(value, `${prefix}${key}.`) // Recursively get nested keys
-        : `${prefix}${key}` // Add the key with prefix for clarity
+    return Object.entries(obj).flatMap(
+      ([key, value]) =>
+        value && typeof value === "object" && !Array.isArray(value)
+          ? getAllKeys(value, `${prefix}${key}.`) // Recursively get nested keys
+          : `${prefix}${key}` // Add the key with prefix for clarity
     );
   };
 
@@ -186,7 +186,6 @@ console.log("this is bulk delete",bulkDeleteIdName)
     shippingBillDetails: {
       shippingBillNumber: "",
       shippingBillDate: new Date(),
-
     },
     supplierDetails: {
       supplierName: "",
@@ -208,13 +207,11 @@ console.log("this is bulk delete",bulkDeleteIdName)
     blDetails: {
       blNumber: "",
       blDate: new Date(),
-
     },
   };
 
   // Get all dropdown options (nested keys)
   const dropdownOptions = getAllKeys(formData);
-
 
   return (
     <div>
@@ -227,7 +224,6 @@ console.log("this is bulk delete",bulkDeleteIdName)
               (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
             }
             onChange={(event) => {
-              console.log("Search Input:", event.target.value); // Debug input
               table.getColumn(searchKey)?.setFilterValue(event.target.value);
             }}
             className="max-w-sm"
@@ -235,14 +231,16 @@ console.log("this is bulk delete",bulkDeleteIdName)
         </div>
 
         <div className=" ml-3 ">
-
           {/* dropdown Only visible on Shipment Page */}
           {showDropdown && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">Select Field</Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto">
+              <DropdownMenuContent
+                align="start"
+                className="max-h-64 overflow-y-auto"
+              >
                 {dropdownOptions.map((option) => (
                   <DropdownMenuCheckboxItem
                     key={option}
@@ -294,14 +292,18 @@ console.log("this is bulk delete",bulkDeleteIdName)
                   return (
                     <TableHead
                       key={header.id}
-                      className={header.column.id === "actions" ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10" : ""}
+                      className={
+                        header.column.id === "actions"
+                          ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10"
+                          : ""
+                      }
                     >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   );
                 })}
@@ -317,7 +319,11 @@ console.log("this is bulk delete",bulkDeleteIdName)
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className={`h-fit py-2 text-sm ${cell.column.id === "actions" ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10" : ""}`}
+                      className={`h-fit py-2 text-sm ${
+                        cell.column.id === "actions"
+                          ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10"
+                          : ""
+                      }`}
                       key={cell.id}
                     >
                       {flexRender(
@@ -345,14 +351,18 @@ console.log("this is bulk delete",bulkDeleteIdName)
                 {footerGroup.headers.map((header) => (
                   <TableCell
                     key={header.id}
-                    className={`font-medium pb-4 ${header.column.id === "actions" ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10" : ""}`}
+                    className={`font-medium pb-4 ${
+                      header.column.id === "actions"
+                        ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10"
+                        : ""
+                    }`}
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
                   </TableCell>
                 ))}
               </TableRow>

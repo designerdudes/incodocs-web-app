@@ -27,13 +27,12 @@ const formSchema = z.object({
       message: "Enter a valid email",
     }),
   mobileNo: z
-    .union([z.string(), z.number()])
+    .string()
     .optional()
     .refine(
       (val) => {
         if (!val) return true;
-        const strVal = val.toString();
-        return strVal.length >= 10 && /^\d+$/.test(strVal);
+        return val.length >= 10 && /^\d+$/.test(val);
       },
       {
         message:
@@ -41,8 +40,7 @@ const formSchema = z.object({
       }
     ),
   address: z.string().optional(),
-  organizationId: z.string().optional()
-
+  organizationId: z.string().optional(),
 });
 
 interface CBNameFormProps {
@@ -53,6 +51,7 @@ interface CBNameFormProps {
 export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const GlobalModal = useGlobalModal();
+  console.log("CBNameForm - orgId:", orgId); // Log orgId
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -62,40 +61,62 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
       email: "",
       mobileNo: "",
       address: "",
-      organizationId: orgId
-    }
+      organizationId: orgId,
+    },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
       const payload = {
-        cbName: values.cbName, // API expects 'name' based on original CBNameForm
+        cbName: values.cbName,
         cbCode: values.cbCode,
         email: values.email,
-        mobileNo: values.mobileNo,
+        mobileNo: values.mobileNo ? Number(values.mobileNo) : undefined,
         address: values.address,
         organizationId: orgId,
       };
+      const token =
+        document.cookie?.replace(
+          /(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/,
+          "$1"
+        ) || "";
+      console.log(
+        "POST URL:",
+        "https://incodocs-server.onrender.com/shipment/cbname/add"
+      );
+      console.log("Payload:", payload);
+      console.log("Token:", token);
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipment/cbname/add",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify(payload),
         }
       );
-      if (!response.ok) throw new Error("Failed to create customs broker");
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", response.status, errorData);
+        throw new Error(
+          `Failed to create customs broker: ${
+            errorData.message || response.statusText
+          }`
+        );
+      }
       const result = await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Customs Broker created successfully");
       form.reset();
       onSuccess(result._id);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating customs broker:", error);
       setIsLoading(false);
-      toast.error("Failed to create customs broker");
+      toast.error(error.message || "Failed to create customs broker");
     }
   };
 
@@ -175,4 +196,3 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
     </Form>
   );
 }
-

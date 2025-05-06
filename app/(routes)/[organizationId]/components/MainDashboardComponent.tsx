@@ -1,6 +1,6 @@
 "use client";
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Heading from "@/components/ui/heading";
 import {
@@ -22,6 +22,7 @@ import { Building, CircleXIcon, Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface Address {
+  Prefix: string | number | readonly string[] | undefined;
   coordinates: {
     type: string;
     coordinates: [number, number];
@@ -34,6 +35,7 @@ interface Address {
 interface Organization {
   _id: string;
   name: string;
+  Prefix: string;
   owner: string;
   address: Address;
   description?: string;
@@ -138,7 +140,7 @@ const CreateOrgForm: React.FC<{
         />
       </div>
       <div>
-        <Label htmlFor="location">Address </Label>
+        <Label htmlFor="location">Address</Label>
         <Input
           id="location"
           value={formData.address.location}
@@ -149,6 +151,20 @@ const CreateOrgForm: React.FC<{
             })
           }
           placeholder="e.g., 343 Example Street"
+        />
+      </div>
+      <div>
+        <Label htmlFor="Prefix">Prefix</Label>
+        <Input
+          id="Prefix"
+          value={formData.address.Prefix}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              address: { ...formData.address, Prefix: e.target.value },
+            })
+          }
+          placeholder="e.g., NJ"
         />
       </div>
       <div>
@@ -168,27 +184,25 @@ const CreateOrgForm: React.FC<{
       {error && <p className="text-sm text-red-600">{error}</p>}
       <div className="flex justify-center gap-4">
         <Button onClick={handleSubmit}>Submit Organization</Button>
-        <Button onClick={openAddFactoryModal} >
-          <FiPlus className="mr-2 h-4 w-4" /> Add Factory
-        </Button>
       </div>
     </div>
   );
 };
 
-const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any) => {
+const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) => {
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState(
     userData?.ownedOrganizations || []
-  ) as any
+  );
 
   const [newOrg, setNewOrg] = useState({
     name: "",
     description: "",
     owner: userData?._id || "",
     address: {
+      Prefix: "",
       location: "",
       coordinates: { type: "Point", coordinates: [0, 0] as [number, number] },
       pincode: "",
@@ -210,7 +224,10 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(formData),
+          body: JSON.stringify({
+            ...formData,
+            Prefix: formData.address.Prefix, // Add top-level Prefix for backend
+          }),
         }
       );
       if (!response.ok) {
@@ -242,7 +259,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     modal.onOpen();
   };
 
-  const openAddFactoryModal = (orgID:any) => {
+  const openAddFactoryModal = (orgID: any) => {
     if (organizations.length === 0) {
       modal.title = "No Organizations Available";
       modal.description = "Please create an organization before adding a factory.";
@@ -264,7 +281,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
       <FactoryForm
         organizationId={orgID}
         token={token}
-        organizations={organizations.map((org: { _id: any; name: any; }) => ({
+        organizations={organizations.map((org: { _id: any; name: any }) => ({
           id: org._id,
           name: org.name,
         }))}
@@ -273,28 +290,23 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
     modal.onOpen();
   };
 
-
-
   const [orgSearch, setOrgSearch] = useState("");
 
   useEffect(() => {
     if (orgSearch === "") {
-      setOrganizations(userData.ownedOrganizations);
+      setOrganizations(userData?.ownedOrganizations || []);
     }
-  }
-    , [userData, orgSearch]);
+  }, [userData, orgSearch]);
 
   return (
-    <main className="flex h-full flex-col  p-10">
+    <main className="flex h-full flex-col p-10">
       <Topbar
         userData={{
-          name: userData.fullName || "",
-          email: userData.email || "",
+          name: userData?.fullName || "",
+          email: userData?.email || "",
         }}
-
       />
-   { 
-     <div className="text-center my-10">
+      <div className="text-center my-10">
         <Heading
           className="text-4xl font-bold text-gray-800"
           title="Your Organizations"
@@ -303,24 +315,20 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
           Choose the organization you want to continue with.
         </p>
         <div className="mt-4 flex flex-row items-center justify-center gap-4">
-
           <div className="relative bg-white">
-            <Input className={cn(
-              "peer w-[550px] ps-9",
-              orgSearch && "pe-9"
-            )}
+            <Input
+              className={cn("peer w-[550px] ps-9", orgSearch && "pe-9")}
               value={orgSearch}
               onChange={(e) => {
                 setOrgSearch(e.target.value);
                 setOrganizations(
-                  organizations.filter((org: { name: string; }) =>
+                  organizations.filter((org: { name: string }) =>
                     org.name
                       .toLowerCase()
                       .includes(e.target.value.toLowerCase())
                   )
-                )
-              }
-              }
+                );
+              }}
               placeholder="Search for an organization"
               type="text"
             />
@@ -333,7 +341,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                 aria-label="Clear filter"
                 onClick={() => {
                   setOrgSearch("");
-                  setOrganizations(userData.ownedOrganizations);
+                  setOrganizations(userData?.ownedOrganizations || []);
                 }}
               >
                 <CircleXIcon size={16} aria-hidden="true" />
@@ -341,13 +349,11 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
             )}
           </div>
           <span className="text-sm text-gray-500">--or--</span>
-            <Button onClick={openCreateOrgModal}>
-              <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-            </Button>
-
+          <Button onClick={openCreateOrgModal}>
+            <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+          </Button>
         </div>
-      </div>}
-
+      </div>
       <div className="grid h-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {organizations && organizations.length > 0 ? (
           organizations.map((org: any) => (
@@ -372,22 +378,22 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                 <p className="text-sm text-gray-500">
                   {org.members.length} Members
                 </p>
-               <Separator className="my-4" />
-               <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-500">
-                  Quick Links to Factories
-                </p>
-                <Button
-                  variant="outline"
-                  className="h-8 w-8 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openAddFactoryModal(org._id);
-                  }}
-                >
-                  <FiPlus className="h-4 w-4" />
-                </Button>
-              </div>
+                <Separator className="my-4" />
+                <div className="flex justify-between items-center">
+                  <p className="text-sm text-gray-500">
+                    Quick Links to Factories
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="h-8 w-8 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openAddFactoryModal(org._id);
+                    }}
+                  >
+                    <FiPlus className="h-4 w-4" />
+                  </Button>
+                </div>
                 <div className="flex flex-row gap-2">
                   {org.factory && org.factory.length > 0 ? (
                     org.factory.map((factory: any) => (
@@ -397,9 +403,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                         className="text-left text-sm text-gray-500 hover:text-gray-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(
-                            `/${org._id}/${factory._id}/dashboard`
-                          );
+                          router.push(`/${org._id}/${factory._id}/dashboard`);
                         }}
                       >
                         {factory.factoryName}
@@ -410,26 +414,22 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }:any
                       No factories available.
                     </p>
                   )}
-                  
-                 
                 </div>
               </CardContent>
             </Card>
           ))
         ) : (
           <div className="col-span-full flex flex-col my-8 h-full justify-center items-center gap-4 text-center">
-            {/* Add Svg */}
             <Heading
-          className="text-3xl font-bold text-gray-800"
-          title="No Organizations Found"
-        />
-        <p className="text-lg text-gray-600">
-          You don&apos;t have any organizations yet. Create one to get started.
+              className="text-3xl font-bold text-gray-800"
+              title="No Organizations Found"
+            />
+            <p className="text-lg text-gray-600">
+              You don&apos;t have any organizations yet. Create one to get started.
             </p>
-        
-              <Button onClick={openCreateOrgModal}>
-                <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-              </Button>
+            <Button onClick={openCreateOrgModal}>
+              <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+            </Button>
             {createOrgError && (
               <p className="text-sm text-red-600 mt-2">{createOrgError}</p>
             )}
