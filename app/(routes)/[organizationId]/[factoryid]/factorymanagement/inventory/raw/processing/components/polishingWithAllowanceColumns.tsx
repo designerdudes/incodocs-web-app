@@ -41,6 +41,7 @@ function calculateAdjustedDimensions(
   const amount = (((adjustedLength * adjustedHeight) / 144) * workersPolishingPay).toFixed(2); // Calculate amount
 
   return {
+    
     adjustedLength: adjustedLength.toFixed(2),
     adjustedHeight: adjustedHeight.toFixed(2),
     lengthInCm,
@@ -237,6 +238,21 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         );
       },
     },
+
+    {
+      accessorKey: "polishingPaymentStatus",
+      header: "Payment Status",
+      cell: ({ row }) => {
+        // Log polishingPaymentStatus for this slab
+        console.log(`Polishing Payment Status for slab ${row.original?.slabNumber}:`, row.original?.polishingPaymentStatus?.status);
+        return (
+          <div className="capitalize">
+            {row.original?.polishingPaymentStatus?.status || "Pending"}
+          </div>
+        );
+      },
+    },
+
 
     {
       id: "actions",

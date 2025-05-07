@@ -410,6 +410,8 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
 
+          
+
           {(tab === "inPolishing") &&
             table.getFilteredSelectedRowModel().rows.length > 1 && (
 
@@ -435,7 +437,12 @@ export function DataTable<TData, TValue>({
                 Mark Polished
               </Button>
             )}
-          {(tab === "cuttingInchesWithAllowance") &&
+
+
+
+            
+{(tab === "cuttingInchesWithAllowance" || tab === "polishingInchesWithAllowance") &&          
+        
             table.getFilteredSelectedRowModel().rows.length > 1 && (
 
               <Button
