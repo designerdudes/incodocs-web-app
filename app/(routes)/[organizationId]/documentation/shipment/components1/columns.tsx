@@ -648,6 +648,6 @@ export const columns: ColumnDef<Shipment>[] = [
     header: ({ column }) => <ColumnHeader column={column} title="Action" />,
     cell: ({ row }) => <DataTableCellActions row={row} />,
     size: 70,
-    enablePinning: true,
+    enablePinning: false,
   },
 ];
