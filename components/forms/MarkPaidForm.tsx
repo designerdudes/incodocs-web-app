@@ -20,30 +20,15 @@ import { useEffect, useState } from "react";
 
 // Props
 interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
-  BlockData: any;
-  gap: number;
   selectedSlabs: { slabId: string; amount: number }[];
 }
 
 const formSchema = z.object({
-  _id: z.string().optional(),
-  blockNumber: z.string().min(3, { message: "Block number is required" }),
-  slabId: z.string().min(3, { message: "Slab ID is required" }),
-  paymentMethod: z.string().min(2, { message: "Select a payment method" }),
-  trimValue: z.object({
-    length: z.string().min(1).refine((val) => parseFloat(val) > 0, {
-      message: "Length must be greater than zero",
-    }),
-    height: z.string().min(1).refine((val) => parseFloat(val) > 0, {
-      message: "Height must be greater than zero",
-    }),
-  }),
+  paymentMethod: z.enum(["cash", "card", "online"]),
 });
 
+
 export function MarkPaidForm({
-  BlockData,
-  className,
-  gap,
   selectedSlabs,
   ...props
 }: MarkPaidForm) {
@@ -53,21 +38,18 @@ export function MarkPaidForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      _id: BlockData?._id || "",
-      slabId: BlockData?.slabId || "",
-      blockNumber: BlockData?.blockNumber || "",
       paymentMethod: "cash",
-      trimValue: { length: "", height: "" },
     },
   });
-console.log(selectedSlabs, "this is seleted slabs");
-const [slabData, setSlabData] = useState();
+
+  console.log(selectedSlabs, "this is seleted slabs");
+  const [slabData, setSlabData] = useState<any[]>([]);
 
 
 
-useEffect(() => {
+  useEffect(() => {
     const fetchSlabData = async () => {
-      if (!selectedSlabs || selectedSlabs.length === 0) return; 
+      if (!selectedSlabs || selectedSlabs.length === 0) return;
       // Exit if no slabs selected
 
       setIsLoading(true);
@@ -103,15 +85,16 @@ useEffect(() => {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      await putData(
-        `/factory-management/inventory/finished/put/${BlockData._id}`,
-        {
-          ...values,
-          status: "polished",
-        }
-      );
-      toast.success("Slab data updated successfully");
-      router.push("../../");
+      const payload = {
+        ids: selectedSlabs,
+        cuttingPaymentStatus: {
+          status: "paid",
+          modeOfPayment: values.paymentMethod,
+        },
+      };
+      console.log(payload, "payload");
+      await putData(`/factory-management/inventory/finished/updatepaymentstatus`, payload);
+      toast.success("Payment status updated successfully");
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
@@ -119,52 +102,43 @@ useEffect(() => {
     }
   }
 
+
   return (
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          
-           
-
-            {/* Payment Method */}
-            <FormField
-              name="paymentMethod"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Payment Method</FormLabel>
-                  <FormControl>
-                    <select
-                      className="w-full border rounded p-2"
-                      disabled={isLoading}
-                      {...field}
-                    >
-                      <option value="cash">Cash</option>
-                      <option value="upi">UPI</option>
-                      <option value="online">Online</option>
-                    </select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-        
+          {/* Payment Method */}
+          <FormField
+            name="paymentMethod"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Method</FormLabel>
+                <FormControl>
+                  <select
+                    className="w-full border rounded p-2"
+                    disabled={isLoading}
+                    {...field}
+                  >
+                    <option value="cash">Cash</option>
+                    <option value="upi">UPI</option>
+                    <option value="online">Online</option>
+                  </select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           {/* Slab Details List */}
           {slabData && slabData.length > 0 && (
             <div className="border rounded p-4 bg-muted/50 space-y-2">
               <h4 className="font-semibold text-sm">Selected Slabs</h4>
               <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
-                {slabData.map((slab : any, idx: any) => (
-                  <li
-                    key={idx}
-                    className="flex justify-between items-center border-b pb-1"
-                  >
-                   <span>Slab ID: {Array.isArray(slabData) ? slabData.join(', ') : slabData}</span>
-                    <span className="text-muted-foreground text-xs">
-                      ₹{slab.amount}
-                    </span>
+                {slabData.map((slab: any, idx: number) => (
+                  <li key={idx} className="flex justify-between items-center border-b pb-1">
+                    <span>Slab ID: {slab.slabNumber}</span>
+                    <span className="text-muted-foreground text-xs">₹{slab.amount}</span>
                   </li>
                 ))}
               </ul>
