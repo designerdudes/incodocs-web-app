@@ -21,8 +21,8 @@ export default function AddFactoryButton() {
 
   return (
     <Button
-      variant="outline"
-      className="mt-3 w-full px-4 py-3 default"
+      variant="default"
+      className="mt-3 w-25 px-4 py-3 default"
       onClick={openFactoryForm} // Trigger modal open
     >
       Add Factory

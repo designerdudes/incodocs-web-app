@@ -103,7 +103,7 @@ export default function OrganizationSettingPage() {
       }
     };
     fetchOrganization();
-  }, [form]);
+  }, [form, organizationId]);
 
   // Handle form submission
   const onSubmit = async (values: OrganizationFormValues) => {
