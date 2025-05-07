@@ -17,6 +17,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import { useEffect, useState } from "react";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 
 // Props
 interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
@@ -29,11 +30,7 @@ const formSchema = z.object({
 
 });
 
-
-export function MarkPaidForm({
-  selectedSlabs,
-  ...props
-}: MarkPaidForm) {
+export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
@@ -47,7 +44,7 @@ export function MarkPaidForm({
   console.log(selectedSlabs, "this is seleted slabs");
   const [slabData, setSlabData] = useState<any[]>([]);
 
-
+  const modal = useGlobalModal();
 
   useEffect(() => {
     const fetchSlabData = async () => {
@@ -60,7 +57,7 @@ export function MarkPaidForm({
         // Creating an array of promises to fetch data for all selected slabs
         const slabDataPromises = selectedSlabs.map(async (slabid) => {
           const response = await fetchData(
-            `factory-management/inventory/finished/get/${slabid}`,
+            `factory-management/inventory/finished/get/${slabid}`
           );
           console.log(response, "response");
           return response; // Return the fetched data for this slab
@@ -69,7 +66,6 @@ export function MarkPaidForm({
         // Wait for all the data to be fetched using Promise.all
         const allSlabData = await Promise.all(slabDataPromises);
         console.log(allSlabData, "allSlabData");
-
         // Store the fetched slab data in state
         setSlabData(allSlabData);
       } catch (error) {
@@ -82,8 +78,6 @@ export function MarkPaidForm({
     fetchSlabData();
   }, [selectedSlabs]);
 
-
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
@@ -95,8 +89,12 @@ export function MarkPaidForm({
         },
       };
       console.log(payload, "payload");
-      await putData(`/factory-management/inventory/finished/updatepaymentstatus`, payload);
+      await putData(
+        `/factory-management/inventory/finished/updatepaymentstatus`,
+        payload
+      );
       toast.success("Payment status updated successfully");
+      modal.onClose();
     } catch (error) {
       toast.error("An error occurred while updating data");
     } finally {
@@ -105,6 +103,7 @@ export function MarkPaidForm({
   }
 
   
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -131,17 +130,34 @@ export function MarkPaidForm({
             )}
           />
 
+          {/* Slab ID */}
           {/* Slab Details List */}
           {slabData && slabData.length > 0 && (
             <div className="border rounded p-4 bg-muted/50 space-y-2">
               <h4 className="font-semibold text-sm">Selected Slab NO</h4>
               <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
-                {slabData.map((slab: any, idx: number) => (
-                  <li key={idx} className="flex justify-between items-center border-b pb-1">
-                    <span> {slab.slabNumber}</span>
-                    <span className="text-muted-foreground text-xs">₹{slab.amount}</span>
-                  </li>
-                ))}
+                {slabData.map((slab: any, idx: number) => {
+                  const amount =
+                    (((slab?.dimensions?.length?.value || 0) *
+                      (slab?.dimensions?.height?.value || 0)) /
+                      144) *
+                    (slab?.factoryId?.workersCuttingPay || 0);
+
+                  return (
+                    <li
+                      key={idx}
+                      className="flex justify-between items-center border-b pb-1"
+                    >
+                      <span>Slab ID: {slab.slabNumber}</span>
+                      <span className="text-muted-foreground text-xs">
+                        ₹{slab?.cuttingPaymentStatus?.status}
+                      </span>
+                      <span className="text-muted-foreground text-xs">
+                        ₹{amount.toFixed(2)}
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           )}
