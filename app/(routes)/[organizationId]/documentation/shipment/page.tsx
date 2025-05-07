@@ -34,8 +34,8 @@ export default async function Page(params: params) {
   shipmentData = res;
 
   return (
-    <div className="flex flex-col p-6">
-      <div className="flex justify-between items-center gap-2">
+    <div className="flex flex-col p-6 h-[92%]">
+      <div className="flex justify-between h-[8%] items-center gap-2">
         <Link href="/documentation/dashboard">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
@@ -56,7 +56,7 @@ export default async function Page(params: params) {
         </Link>
       </div>
       <Separator className="my-2" />
-      <div>
+      <div className="h-[92%]">
         {/* <DataTable
                     bulkDeleteIdName="_id"
                     bulkDeleteTitle="Are you sure you want to delete the selected Shipment?"
