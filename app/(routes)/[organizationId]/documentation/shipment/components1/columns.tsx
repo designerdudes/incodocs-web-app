@@ -1,51 +1,93 @@
 "use client";
-import { Column, ColumnDef, FilterFn } from "@tanstack/react-table";
+import { ColumnDef, FilterFn } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnHeader } from "./column-header";
 import moment from "moment";
 import { DataTableCellActions } from "./cell-actions";
 import { Copy, Eye } from "lucide-react";
 import { Shipment } from "../data/schema";
-import { Button } from "@/components/ui/button";
-import ViewAllComponent from "./viewAllComponent";
-import { CSSProperties } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ViewAllComponent from "./viewAllComponent";
 
-const multiColumnFilterFn: FilterFn<Shipment> = (row, columnId, filterValue) => {
-  const searchableRowContent =
-    `${row.original.shipmentId} ${row.original.bookingDetails?.invoiceNumber} ${row.original.saleInvoiceDetails?.consignee?.name} ${row.original.blDetails?.Bl?.map((bl) => bl.blNumber)} ${row.original.bookingDetails?.containers.map(
-      (container) => container.containerNumber 
-    )} ${row.original.bookingDetails?.containers.map(
-      (container) => container.truckNumber
-    )} ${row.original.bookingDetails?.containers.map(
-      (container) => container.containerNumber
-    )} ${row.original.bookingDetails?.containers.map(
-      (container) => container.truckNumber
-    )} ${row.original.bookingDetails?.vesselSailingDate} ${row.original.bookingDetails?.vesselArrivingDate} ${row.original.shippingDetails?.shippingLineInvoices?.length > 0
-      ? row.original.shippingDetails.shippingLineInvoices[0].uploadInvoiceUrl
-      : null} ${row.original.bookingDetails?.containers.map(
-      (container) => container.containerNumber
-    )} ${row.original.bookingDetails?.containers.map(
-      (container) => container.truckNumber
-    )}
-    ${row.original.bookingDetails?.portOfLoading} ${row.original.bookingDetails?.destinationPort} ${row.original.saleInvoiceDetails?.commercialInvoices?.map((invoice) => invoice.commercialInvoiceNumber)} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.bookingDetails?.bookingNumber} ${row.original.shippingDetails?.transporterName?.transporterName} ${row.original.shippingDetails?.forwarderName?.forwarderName} ${row.original.shippingBillDetails?.portCode} ${row.original.shippingBillDetails?.cbName} ${row.original.shippingBillDetails?.ShippingBills.map(
+const multiColumnFilterFn: FilterFn<Shipment> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  const consigneeName =
+    typeof row.original.saleInvoiceDetails?.consignee === "string"
+      ? row.original.saleInvoiceDetails.consignee
+      : row.original.saleInvoiceDetails?.consignee?.name || "";
+  const transporterName =
+    typeof row.original.shippingDetails?.transporterName === "string"
+      ? row.original.shippingDetails.transporterName
+      : row.original.shippingDetails?.transporterName?.transporterName || "";
+  const forwarderName =
+    typeof row.original.shippingDetails?.forwarderName === "string"
+      ? row.original.shippingDetails.forwarderName
+      : row.original.shippingDetails?.forwarderName?.forwarderName || "";
+  const cbName =
+    typeof row.original.shippingBillDetails?.cbName === "string"
+      ? row.original.shippingBillDetails.cbName
+      : row.original.shippingBillDetails?.cbName?.cbName || "";
+  const firstSupplier = row.original.supplierDetails?.clearance?.suppliers?.[0];
+  const supplierName = firstSupplier
+    ? typeof firstSupplier.supplierName === "string"
+      ? firstSupplier.supplierName
+      : firstSupplier.supplierName?.supplierName ||
+        row.original.supplierDetails?.actual?.actualSupplierName ||
+        ""
+    : row.original.supplierDetails?.actual?.actualSupplierName || "";
+
+  const searchableRowContent = [
+    row.original.shipmentId || "",
+    row.original.bookingDetails?.invoiceNumber || "",
+    consigneeName,
+    row.original.blDetails?.Bl?.map((bl) => bl.blNumber).join(", ") || "",
+    row.original.bookingDetails?.containers
+      ?.map((container) => container.containerNumber)
+      .join(", ") || "",
+    row.original.bookingDetails?.containers
+      ?.map((container) => container.truckNumber)
+      .join(", ") || "",
+    row.original.bookingDetails?.vesselSailingDate || "",
+    row.original.bookingDetails?.vesselArrivingDate || "",
+    row.original.shippingDetails?.shippingLineInvoices?.[0]?.uploadInvoiceUrl ||
+      "",
+    row.original.bookingDetails?.portOfLoading || "",
+    row.original.bookingDetails?.destinationPort || "",
+    row.original.saleInvoiceDetails?.commercialInvoices
+      ?.map((invoice) => invoice.commercialInvoiceNumber)
+      .join(", ") || "",
+    supplierName,
+    row.original.bookingDetails?.bookingNumber || "",
+    transporterName,
+    forwarderName,
+    row.original.shippingBillDetails?.portCode || "",
+    cbName,
+    row.original.shippingBillDetails?.ShippingBills?.map(
       (bill) => bill.shippingBillNumber
-    )} ${row.original.supplierDetails?.clearance?.supplierName?.supplierName || row.original.supplierDetails?.actual?.actualSupplierName} ${row.original.saleInvoiceDetails?.actualBuyer}`.toLowerCase()
-  const searchTerm = (filterValue ?? "").toLowerCase()
-  return searchableRowContent.includes(searchTerm)
-}
+    ).join(", ") || "",
+    row.original.saleInvoiceDetails?.actualBuyer || "",
+  ]
+    .join(" ")
+    .toLowerCase();
+
+  const searchTerm = (filterValue ?? "").toLowerCase();
+  return searchableRowContent.includes(searchTerm);
+};
 
 const statusFilterFn: FilterFn<Shipment> = (
   row,
   columnId,
   filterValue: string[]
 ) => {
-  if (!filterValue?.length) return true
-  const status = row.getValue(columnId) as string
-  return filterValue.includes(status)
-}
+  if (!filterValue?.length) return true;
+  const status = row.getValue(columnId) as string | undefined;
+  return status ? filterValue.includes(status) : false;
+};
 
 export const columns: ColumnDef<Shipment>[] = [
   {
@@ -73,24 +115,31 @@ export const columns: ColumnDef<Shipment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "ShipmentId",
-    header: ({ column }) => <ColumnHeader column={column} title="Shipment ID" />,
+    accessorKey: "shipmentId",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Shipment ID" />
+    ),
     cell: ({ row }) => (
       <div className="flex items-center space-x-2">
-        <span className="truncate font-medium">{row.original.shipmentId || "N/A"}</span>
-    { row.original.shipmentId &&   <Copy
-          className="h-3 w-3 text-gray-500 cursor-pointer hover:text-blue-700"
-          onClick={() => navigator.clipboard.writeText(row.original.shipmentId)}
-        />}
+        <span className="truncate font-medium">
+          {row.original.shipmentId || "N/A"}
+        </span>
+        {row.original.shipmentId && (
+          <Copy
+            className="h-3 w-3 text-gray-500 cursor-pointer hover:text-blue-700"
+            onClick={() => {
+              if (row.original.shipmentId) {
+                navigator.clipboard.writeText(row.original.shipmentId);
+              }
+            }}
+          />
+        )}
       </div>
     ),
     filterFn: multiColumnFilterFn,
   },
   {
-    accessorKey: "Invoice Number",
-    // header: ({ column }) => (
-    //   <ColumnHeader column={column} title=" Invoice Number" />
-    // ),
+    accessorKey: "invoiceNumber",
     header: "Invoice Number",
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -102,122 +151,127 @@ export const columns: ColumnDef<Shipment>[] = [
     filterFn: multiColumnFilterFn,
   },
   {
-    accessorKey: "Consignee",
-    // header: ({ column }) => (
-    //   <ColumnHeader column={column} title="Consignee Name" />
-    // ),
+    accessorKey: "consignee",
     header: "Consignee Name",
-
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
+          {typeof row.original.saleInvoiceDetails?.consignee === "string"
+            ? row.original.saleInvoiceDetails.consignee
+            : row.original.saleInvoiceDetails?.consignee?.name || "N/A"}
         </span>
       </div>
     ),
     size: 300,
   },
   {
-    accessorKey: "Description of goods",
-    // header: ({ column }) => (
-    //   <ColumnHeader column={column} title="Description of Goods" />
-    // ),
+    accessorKey: "descriptionOfGoods",
     header: "Description of Goods",
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.bookingDetails.containers[0]?.addProductDetails[0]?.description || "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const addProductDetails =
+        row.original.bookingDetails?.containers?.[0]?.addProductDetails;
+      let displayText = "No product details added";
+      if (addProductDetails && addProductDetails.length > 0) {
+        const firstProduct = addProductDetails[0];
+        if (typeof firstProduct === "string") {
+          displayText = `Product ID: ${firstProduct}`;
+        } else if (firstProduct?.description) {
+          displayText = firstProduct.description;
+        }
+      }
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">{displayText}</span>
+        </div>
+      );
+    },
     size: 300,
-    
   },
   {
-    accessorKey: "BL Number",
+    accessorKey: "blNumber",
     header: ({ column }) => <ColumnHeader column={column} title="BL Number" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.blDetails?.Bl[0]?.blNumber || "N/A"}
+          {row.original.blDetails?.Bl?.[0]?.blNumber || "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Container Numbers",
+    accessorKey: "containerNumbers",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Container Number" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {/* {row.original.bookingDetails?.containers?.length > 0
-            ? row.original.bookingDetails.containers
-              .map((container) => container.containerNumber)
-              .join(", ")
-            : "N/A"} */}
-          {row.original.bookingDetails?.containers?.length > 0
-            ? <>
-         {   row.original.bookingDetails.containers[0]?.containerNumber}
-         {/* <Button variant="link" className="text-blue-500 pl-3 hover:text-blue-700">
-         View All
-          </Button> */}
-          <ViewAllComponent
-          title={"Container Numbers"}
-          params={{ organizationId: "your-organization-id" }}
-          data={ row.original.bookingDetails.containers
-            .map((container) => container.containerNumber)
-            .join(", ")}
-          setIsFetching={() => {}}
-          setIsLoading={() => {}}       
-          />
-            </>
-            : "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const containers = row.original.bookingDetails?.containers;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {containers && containers.length > 0 ? (
+              <>
+                {containers[0]?.containerNumber || "N/A"}
+                <ViewAllComponent
+                  title="Container Numbers"
+                  params={{
+                    organizationId:
+                      row.original.organizationId?._id || "unknown",
+                  }}
+                  data={containers
+                    .map((container) => container.containerNumber || "N/A")
+                    .join(", ")}
+                  setIsFetching={() => {}}
+                  setIsLoading={() => {}}
+                />
+              </>
+            ) : (
+              "N/A"
+            )}
+          </span>
+        </div>
+      );
+    },
     filterFn: multiColumnFilterFn,
     size: 200,
   },
   {
-    accessorKey: "Truck Number",
+    accessorKey: "truckNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Truck Number" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {/* {row.original.bookingDetails?.containers?.length > 0
-            ? row.original.bookingDetails.containers
-              .map((container) => container.containerNumber)
-              .join(", ")
-            : "N/A"} */}
-          {row.original.bookingDetails?.containers?.length > 0
-            ? <>
-         {   row.original.bookingDetails.containers[0]?.truckNumber}
-         {/* <Button variant="link" className="text-blue-500 pl-3 hover:text-blue-700">
-         View All
-          </Button> */}
-          <ViewAllComponent
-          title="Truck Numbers"
-          params={{ organizationId: "your-organization-id" }}
-          data={ row.original.bookingDetails.containers
-            .map((container) => container.truckNumber)
-            .join(", ")}
-          setIsFetching={() => {}}
-          setIsLoading={() => {}}
-          />
-            </>
-            : "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const containers = row.original.bookingDetails?.containers;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {containers && containers.length > 0 ? (
+              <>
+                {containers[0]?.truckNumber || "N/A"}
+                <ViewAllComponent
+                  title="Truck Numbers"
+                  params={{
+                    organizationId:
+                      row.original.organizationId?._id || "unknown",
+                  }}
+                  data={containers
+                    .map((container) => container.truckNumber || "N/A")
+                    .join(", ")}
+                  setIsFetching={() => {}}
+                  setIsLoading={() => {}}
+                />
+              </>
+            ) : (
+              "N/A"
+            )}
+          </span>
+        </div>
+      );
+    },
     filterFn: multiColumnFilterFn,
     size: 200,
   },
   {
-    accessorKey: "Port Of Loading",
+    accessorKey: "portOfLoading",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Port of Loading" />
     ),
@@ -230,9 +284,9 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "Destination Port",
+    accessorKey: "destinationPort",
     header: ({ column }) => (
-      <ColumnHeader column={column} title=" Port Of Destination " />
+      <ColumnHeader column={column} title="Port Of Destination" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -243,46 +297,48 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "Commercial Invoices Number",
+    accessorKey: "commercialInvoiceNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Commercial Invoice Number" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.saleInvoiceDetails?.commercialInvoices[0]?.commercialInvoiceNumber || "N/A"}
+          {row.original.saleInvoiceDetails?.commercialInvoices?.[0]
+            ?.commercialInvoiceNumber || "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Actual Invoice Value",
+    accessorKey: "actualInvoiceValue",
     header: ({ column }) => (
-      <ColumnHeader column={column} title=" Actual invoice value" />
+      <ColumnHeader column={column} title="Actual Invoice Value" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {
-          row.original.supplierDetails?.actual?.actualSupplierInvoiceValue ?
-          new Intl.NumberFormat("en-IN", {
-            style: "currency",
-            currency: "INR",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-            notation: "compact",
-            compactDisplay: "short",
-          }).format(
-            parseFloat(row.original.supplierDetails?.actual?.actualSupplierInvoiceValue)
-          )
-          : "N/A"
-        }   
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const value =
+        row.original.supplierDetails?.actual?.actualSupplierInvoiceValue;
+      const formattedValue = value
+        ? isNaN(parseFloat(value))
+          ? "Invalid Value"
+          : new Intl.NumberFormat("en-IN", {
+              style: "currency",
+              currency: "INR",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+              notation: "compact",
+              compactDisplay: "short",
+            }).format(parseFloat(value))
+        : "N/A";
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">{formattedValue}</span>
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "Booking Number",
+    accessorKey: "bookingNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Booking Number" />
     ),
@@ -294,12 +350,8 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-
- 
-
-
   {
-    accessorKey: "Vessel Sailing Date",
+    accessorKey: "vesselSailingDate",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Sailing Date" />
     ),
@@ -308,15 +360,15 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {row.original.bookingDetails?.vesselSailingDate
             ? moment(row.original.bookingDetails.vesselSailingDate).format(
-              "MMM Do YY"
-            )
+                "MMM Do YY"
+              )
             : "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Vessel Arriving Date",
+    accessorKey: "vesselArrivingDate",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Vessel Arriving Date" />
     ),
@@ -325,56 +377,61 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {row.original.bookingDetails?.vesselArrivingDate
             ? moment(row.original.bookingDetails.vesselArrivingDate).format(
-              "MMM Do YY"
-            )
+                "MMM Do YY"
+              )
             : "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Transporter Name",
+    accessorKey: "transporterName",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Transporter Name" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.shippingDetails?.transporterName?.transporterName ||
-            "N/A"}
+          {typeof row.original.shippingDetails?.transporterName === "string"
+            ? row.original.shippingDetails.transporterName
+            : row.original.shippingDetails?.transporterName?.transporterName ||
+              "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Forwarder Name",
+    accessorKey: "forwarderName",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Forwarder Name" />
     ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.shippingDetails?.forwarderName?.forwarderName || "N/A"}
+          {typeof row.original.shippingDetails?.forwarderName === "string"
+            ? row.original.shippingDetails.forwarderName
+            : row.original.shippingDetails?.forwarderName?.forwarderName ||
+              "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Shipping Line Invoices",
+    accessorKey: "shippingLineInvoices",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Line Invoice" />
     ),
     cell: ({ row }) => {
+      const shippingLineInvoices =
+        row.original.shippingDetails?.shippingLineInvoices;
       const fileUrl =
-        row.original.shippingDetails?.shippingLineInvoices?.length > 0
-          ? row.original.shippingDetails.shippingLineInvoices[0].uploadInvoiceUrl
-          : null;
+        shippingLineInvoices && shippingLineInvoices.length > 0
+          ? shippingLineInvoices[0].uploadInvoiceUrl || "No Invoice"
+          : "No Invoice";
       return (
         <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">
-            {fileUrl || "No Invoice"}
-          </span>
-          {fileUrl && (
+          <span className="truncate font-medium">{fileUrl}</span>
+          {fileUrl !== "No Invoice" && (
             <a href={fileUrl} target="_blank" rel="noopener noreferrer">
               <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
             </a>
@@ -384,7 +441,7 @@ export const columns: ColumnDef<Shipment>[] = [
     },
   },
   {
-    accessorKey: "Port Code",
+    accessorKey: "portCode",
     header: ({ column }) => <ColumnHeader column={column} title="Port Code" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
@@ -395,67 +452,80 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "CB Name",
+    accessorKey: "cbName",
     header: ({ column }) => <ColumnHeader column={column} title="CB Name" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.shippingBillDetails?.cbName?.cbName || "N/A"}
+          {typeof row.original.shippingBillDetails?.cbName === "string"
+            ? row.original.shippingBillDetails.cbName
+            : row.original.shippingBillDetails?.cbName?.cbName || "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Shipping Bills",
+    accessorKey: "shippingBills",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Shipping Bill Number" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.shippingBillDetails?.ShippingBills?.length > 0
-            ? row.original.shippingBillDetails.ShippingBills.map(
-              (bill) => bill.shippingBillNumber
-            ).join(", ")
-            : "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const shippingBills = row.original.shippingBillDetails?.ShippingBills;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {shippingBills && shippingBills.length > 0
+              ? shippingBills.map((bill) => bill.shippingBillNumber).join(", ")
+              : "N/A"}
+          </span>
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "Supplier Name",
+    accessorKey: "supplierName",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Supplier Name" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.supplierDetails?.clearance?.supplierName?.supplierName ||
+    cell: ({ row }) => {
+      const firstSupplier =
+        row.original.supplierDetails?.clearance?.suppliers?.[0];
+      const supplierName = firstSupplier
+        ? typeof firstSupplier.supplierName === "string"
+          ? firstSupplier.supplierName
+          : firstSupplier.supplierName?.supplierName ||
             row.original.supplierDetails?.actual?.actualSupplierName ||
-            "N/A"}
-        </span>
-      </div>
-    ),
+            "N/A"
+        : row.original.supplierDetails?.actual?.actualSupplierName || "N/A";
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">{supplierName}</span>
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "Supplier Invoice Number",
+    accessorKey: "supplierInvoiceNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Supplier Invoice Number" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.supplierDetails?.clearance?.invoices?.length > 0
-            ? row.original.supplierDetails.clearance.invoices[0]
-              .supplierInvoiceNumber
-            : "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const suppliers = row.original.supplierDetails?.clearance?.suppliers;
+      const invoices =
+        suppliers && suppliers.length > 0 ? suppliers[0].invoices : undefined;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {invoices && invoices.length > 0
+              ? invoices[0].supplierInvoiceNumber
+              : "N/A"}
+          </span>
+        </div>
+      );
+    },
   },
-
   {
-    accessorKey: "Actual Buyer",
+    accessorKey: "actualBuyer",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Actual Buyer" />
     ),
@@ -467,101 +537,106 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-
-
   {
-    accessorKey: "BL Date",
+    accessorKey: "blDate",
     header: ({ column }) => <ColumnHeader column={column} title="BL Date" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.blDetails?.Bl[0]?.blDate
-            ? moment(row.original.blDetails?.Bl[0]?.blDate).format("MMM Do YY")
+          {row.original.blDetails?.Bl?.[0]?.blDate
+            ? moment(row.original.blDetails.Bl[0].blDate).format("MMM Do YY")
             : "N/A"}
         </span>
       </div>
     ),
   },
   {
-    accessorKey: "Other Documents",
+    accessorKey: "otherDocuments",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Other Documents" />
     ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.otherDetails?.length > 0
-            ? row.original.otherDetails[0].certificateNumber || "N/A"
-            : "N/A"}
-        </span>
-      </div>
-    ),
+    cell: ({ row }) => {
+      const otherDetails = row.original.otherDetails;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {otherDetails &&
+            otherDetails.length > 0 &&
+            otherDetails[0].certificateNumber
+              ? otherDetails[0].certificateNumber
+              : "N/A"}
+          </span>
+        </div>
+      );
+    },
   },
   {
     accessorKey: "status",
     header: ({ column }) => <ColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
       <Badge
-      className={cn(
-        row.getValue("status") === "Trucks Dispatched" && "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
-        row.getValue("status") === "Trucks Arrived" && "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
-        row.getValue("status") === "Trucks Halted" && "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
-        row.getValue("status") === "Stuffing" && "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
-        row.getValue("status") === "In Clearance" && "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
-        row.getValue("status") === "Loaded On Vessel" && "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
-        row.getValue("status") === "In Transit" && "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
-        row.getValue("status") === "Arrived At POD" && "bg-green-200 text-green-800 hover:bg-green-300/80",
-        row.getValue("status") === "Delivery Completed" && "bg-green-200 text-green-800 hover:bg-green-500/80",
-        ![
-          "Trucks Dispatched",
-          "Trucks Arrived",
-          "Trucks Halted",
-          "Stuffing",
-          "In Clearance",
-          "Loaded On Vessel",
-          "In Transit",
-          "Arrived At POD",
-          "Delivery Completed",
-        ].includes(row.original.status) && "bg-muted-foreground/60 text-primary-foreground"
-      )}
-    >
-      {row.original.status}
-    </Badge>
+        className={cn(
+          row.original.status === "Trucks Dispatched" &&
+            "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+          row.original.status === "Trucks Arrived" &&
+            "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+          row.original.status === "Trucks Halted" &&
+            "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+          row.original.status === "Stuffing" &&
+            "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+          row.original.status === "In Clearance" &&
+            "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+          row.original.status === "Loaded On Vessel" &&
+            "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+          row.original.status === "In Transit" &&
+            "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+          row.original.status === "Arrived At POD" &&
+            "bg-green-200 text-green-800 hover:bg-green-300/80",
+          row.original.status === "Delivery Completed" &&
+            "bg-green-200 text-green-800 hover:bg-green-500/80",
+          !row.original.status &&
+            "bg-muted-foreground/60 text-primary-foreground"
+        )}
+      >
+        {row.original.status || "Draft"}
+      </Badge>
     ),
     filterFn: statusFilterFn,
     size: 200,
   },
-  
   {
     accessorKey: "createdBy",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Created By" />
-    ),
+    header: ({ column }) => <ColumnHeader column={column} title="Created By" />,
     cell: ({ row }) => (
-          <div className="flex items-center space-x-2 truncate">
-          <Avatar className="h-6 w-6">
-              <AvatarImage src={row.original.createdBy.profileImg} alt={row.original.createdBy.fullName} />
-              <AvatarFallback>{row.original.createdBy.fullName.charAt(0)}</AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col space-y-1 leading-none">
-          <span className="capitalize">{row.original.createdBy.fullName}</span>
-          <span className="text-xs truncate text-muted-foreground">
-              {row.original.createdBy.email}
+      <div className="flex items-center space-x-2 truncate">
+        <Avatar className="h-6 w-6">
+          <AvatarImage
+            src={row.original.createdBy?.profileImg || ""}
+            alt={row.original.createdBy?.fullName || "Unknown"}
+          />
+          <AvatarFallback>
+            {row.original.createdBy?.fullName?.charAt(0) || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex flex-col space-y-1 leading-none">
+          <span className="capitalize">
+            {row.original.createdBy?.fullName || "Unknown"}
           </span>
-          </div>
+          <span className="text-xs truncate text-muted-foreground">
+            {row.original.createdBy?.email || "N/A"}
+          </span>
+        </div>
       </div>
     ),
     size: 280,
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Created At" />
-    ),
+    header: ({ column }) => <ColumnHeader column={column} title="Created At" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-        {row.original.createdAt
+          {row.original.createdAt
             ? moment(row.original.createdAt).format("MMM Do YY")
             : "N/A"}
         </span>
@@ -574,6 +649,5 @@ export const columns: ColumnDef<Shipment>[] = [
     cell: ({ row }) => <DataTableCellActions row={row} />,
     size: 70,
     enablePinning: true,
-    
   },
 ];
