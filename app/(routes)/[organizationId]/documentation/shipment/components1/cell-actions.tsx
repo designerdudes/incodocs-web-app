@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, Scissors, Trash } from "lucide-react";
+import {  EyeIcon, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
@@ -56,7 +56,7 @@ const logs =  [
         {
             "_id": "6817441ebd1655856267f06e",
             "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
+            "updatedBy": "Perumbakam Simla",
             "changes": [
                 {
                     "field": "bookingDetails",
@@ -121,7 +121,7 @@ const logs =  [
         {
             "_id": "6817448044213feed3f29ac1",
             "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
+            "updatedBy": "Rakshith Poojari",
             "changes": [
                 {
                     "field": "bookingDetails",
@@ -186,7 +186,7 @@ const logs =  [
         {
             "_id": "6819f06970bc5d58c6452fa8",
             "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
+            "updatedBy": "Perumbakam Simla",
             "changes": [
                 {
                     "field": "bookingDetails",
@@ -270,7 +270,6 @@ const logs =  [
           {/* View Shipment */}
           <DropdownMenuItem
             onClick={() => router.push(`./shipment/view/${shipmentId}`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <EyeIcon className="mr-2 h-4 w-4" />
             View Shipment
@@ -279,9 +278,8 @@ const logs =  [
           {/* Edit Shipment */}
           <DropdownMenuItem
             onClick={() => router.push(`./shipment/edit/${shipmentId}`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
           >
-            <Scissors className="mr-2 h-4 w-4" />
+            <Pencil className="mr-2 h-4 w-4" />
             Edit Shipment
           </DropdownMenuItem>
 
