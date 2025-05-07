@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, Scissors, Trash } from "lucide-react";
+import {  EyeIcon, MoreHorizontal, Pencil, Trash } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
@@ -22,6 +23,204 @@ import { ShipmentLogs } from "@/components/shipmentLogs";
 interface props {
   row: Row<Shipment>;
 }
+
+export const logs =  [
+  {
+      "_id": "6817441ebd1655856267f06e",
+      "shipmentId": "680cd8e4e14172d39932be8f",
+      "updatedBy": "Perumbakam Simla",
+      "changes": [
+          {
+              "field": "bookingDetails",
+              "oldValue": {
+                  "review": "this is some random comment for some random  booking Details",
+                  "invoiceNumber": "N123",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerType": "Type 1",
+                          "containerNumber": "3244",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": "7702791728",
+                          "addProductDetails": [
+                              "680a882b8938056d9c324034"
+                          ],
+                          "_id": "680cd8e4e14172d39932be91"
+                      }
+                  ],
+                  "_id": "680cd8e4e14172d39932be90"
+              },
+              "newValue": {
+                  "review": "this is some random comment for some random  booking Details",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerNumber": "3244",
+                          "containerType": "Type 1",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": 7702791728,
+                          "addProductDetails": [
+                              "6808de91c9a2b5ab721c95cd"
+                          ]
+                      }
+                  ]
+              },
+              "_id": "6817441ebd1655856267f06f"
+          },
+          {
+              "field": "organizationId",
+              "oldValue": "680a331f9d82eab31ed929eb",
+              "newValue": "6808eff236363ebda97e4cb0",
+              "_id": "6817441ebd1655856267f070"
+          },
+          {
+              "field": "userId",
+              "newValue": "680ce9f78c32fd289cf134b7",
+              "_id": "6817441ebd1655856267f071"
+          }
+      ],
+      "updatedAt": "2025-05-04T10:40:30.364Z",
+      "__v": 0
+  },
+  {
+      "_id": "6817448044213feed3f29ac1",
+      "shipmentId": "680cd8e4e14172d39932be8f",
+      "updatedBy": "Rakshith Poojari",
+      "changes": [
+          {
+              "field": "bookingDetails",
+              "oldValue": {
+                  "review": "this is some random comment for some random  booking Details",
+                  "invoiceNumber": "N123",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerType": "Type 1",
+                          "containerNumber": "3244",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": "7702791728",
+                          "addProductDetails": [
+                              "680a882b8938056d9c324034"
+                          ],
+                          "_id": "680cd8e4e14172d39932be91"
+                      }
+                  ],
+                  "_id": "680cd8e4e14172d39932be90"
+              },
+              "newValue": {
+                  "review": "this is some random comment for some random  booking ",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerNumber": "3244",
+                          "containerType": "Type 1",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": 7702791728,
+                          "addProductDetails": [
+                              "6808de91c9a2b5ab721c95cd"
+                          ]
+                      }
+                  ]
+              },
+              "_id": "6817448044213feed3f29ac2"
+          },
+          {
+              "field": "organizationId",
+              "oldValue": "6808eff236363ebda97e4cb0",
+              "newValue": "6808eff236363ebda97e4cb0",
+              "_id": "6817448044213feed3f29ac3"
+          },
+          {
+              "field": "userId",
+              "newValue": "680ce9f78c32fd289cf134b7",
+              "_id": "6817448044213feed3f29ac4"
+          }
+      ],
+      "updatedAt": "2025-05-04T10:42:08.300Z",
+      "__v": 0
+  },
+  {
+      "_id": "6819f06970bc5d58c6452fa8",
+      "shipmentId": "680cd8e4e14172d39932be8f",
+      "updatedBy": "Perumbakam Simla",
+      "changes": [
+          {
+              "field": "bookingDetails",
+              "oldValue": {
+                  "review": "this is some random comment for some random  booking ",
+                  "invoiceNumber": "N123",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerType": "Type 1",
+                          "containerNumber": "3244",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": "7702791728",
+                          "addProductDetails": [
+                              "680a882b8938056d9c324034"
+                          ],
+                          "_id": "680cd8e4e14172d39932be91"
+                      }
+                  ],
+                  "_id": "680cd8e4e14172d39932be90"
+              },
+              "newValue": {
+                  "review": "this is some random comment for some random  booking ",
+                  "bookingNumber": "shipment 4",
+                  "portOfLoading": "ysdf87",
+                  "destinationPort": "few5",
+                  "vesselSailingDate": "2024-04-10T00:00:00.000Z",
+                  "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
+                  "containers": [
+                      {
+                          "containerNumber": "3244",
+                          "containerType": "Type 1",
+                          "truckNumber": "ts13eq9882",
+                          "truckDriverContactNumber": 7702791728,
+                          "addProductDetails": [
+                              "6808de91c9a2b5ab721c95cd"
+                          ]
+                      }
+                  ]
+              },
+              "_id": "6819f06970bc5d58c6452fa9"
+          },
+          {
+              "field": "organizationId",
+              "oldValue": "6808eff236363ebda97e4cb0",
+              "newValue": "6808eff236363ebda97e4cb0",
+              "_id": "6819f06970bc5d58c6452faa"
+          },
+          {
+              "field": "userId",
+              "newValue": "680ce9f78c32fd289cf134b7",
+              "_id": "6819f06970bc5d58c6452fab"
+          }
+      ],
+      "updatedAt": "2025-05-06T11:20:09.203Z",
+      "__v": 0
+  }
+]
 
 export function DataTableCellActions({ row }: props) {
   const router = useRouter();
@@ -52,203 +251,7 @@ export function DataTableCellActions({ row }: props) {
       toast.error("Failed to delete shipment");
     }
   };
-const logs =  [
-        {
-            "_id": "6817441ebd1655856267f06e",
-            "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
-            "changes": [
-                {
-                    "field": "bookingDetails",
-                    "oldValue": {
-                        "review": "this is some random comment for some random  booking Details",
-                        "invoiceNumber": "N123",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerType": "Type 1",
-                                "containerNumber": "3244",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": "7702791728",
-                                "addProductDetails": [
-                                    "680a882b8938056d9c324034"
-                                ],
-                                "_id": "680cd8e4e14172d39932be91"
-                            }
-                        ],
-                        "_id": "680cd8e4e14172d39932be90"
-                    },
-                    "newValue": {
-                        "review": "this is some random comment for some random  booking Details",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerNumber": "3244",
-                                "containerType": "Type 1",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": 7702791728,
-                                "addProductDetails": [
-                                    "6808de91c9a2b5ab721c95cd"
-                                ]
-                            }
-                        ]
-                    },
-                    "_id": "6817441ebd1655856267f06f"
-                },
-                {
-                    "field": "organizationId",
-                    "oldValue": "680a331f9d82eab31ed929eb",
-                    "newValue": "6808eff236363ebda97e4cb0",
-                    "_id": "6817441ebd1655856267f070"
-                },
-                {
-                    "field": "userId",
-                    "newValue": "680ce9f78c32fd289cf134b7",
-                    "_id": "6817441ebd1655856267f071"
-                }
-            ],
-            "updatedAt": "2025-05-04T10:40:30.364Z",
-            "__v": 0
-        },
-        {
-            "_id": "6817448044213feed3f29ac1",
-            "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
-            "changes": [
-                {
-                    "field": "bookingDetails",
-                    "oldValue": {
-                        "review": "this is some random comment for some random  booking Details",
-                        "invoiceNumber": "N123",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerType": "Type 1",
-                                "containerNumber": "3244",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": "7702791728",
-                                "addProductDetails": [
-                                    "680a882b8938056d9c324034"
-                                ],
-                                "_id": "680cd8e4e14172d39932be91"
-                            }
-                        ],
-                        "_id": "680cd8e4e14172d39932be90"
-                    },
-                    "newValue": {
-                        "review": "this is some random comment for some random  booking ",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerNumber": "3244",
-                                "containerType": "Type 1",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": 7702791728,
-                                "addProductDetails": [
-                                    "6808de91c9a2b5ab721c95cd"
-                                ]
-                            }
-                        ]
-                    },
-                    "_id": "6817448044213feed3f29ac2"
-                },
-                {
-                    "field": "organizationId",
-                    "oldValue": "6808eff236363ebda97e4cb0",
-                    "newValue": "6808eff236363ebda97e4cb0",
-                    "_id": "6817448044213feed3f29ac3"
-                },
-                {
-                    "field": "userId",
-                    "newValue": "680ce9f78c32fd289cf134b7",
-                    "_id": "6817448044213feed3f29ac4"
-                }
-            ],
-            "updatedAt": "2025-05-04T10:42:08.300Z",
-            "__v": 0
-        },
-        {
-            "_id": "6819f06970bc5d58c6452fa8",
-            "shipmentId": "680cd8e4e14172d39932be8f",
-            "updatedBy": "680ce9f78c32fd289cf134b7",
-            "changes": [
-                {
-                    "field": "bookingDetails",
-                    "oldValue": {
-                        "review": "this is some random comment for some random  booking ",
-                        "invoiceNumber": "N123",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerType": "Type 1",
-                                "containerNumber": "3244",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": "7702791728",
-                                "addProductDetails": [
-                                    "680a882b8938056d9c324034"
-                                ],
-                                "_id": "680cd8e4e14172d39932be91"
-                            }
-                        ],
-                        "_id": "680cd8e4e14172d39932be90"
-                    },
-                    "newValue": {
-                        "review": "this is some random comment for some random  booking ",
-                        "bookingNumber": "shipment 4",
-                        "portOfLoading": "ysdf87",
-                        "destinationPort": "few5",
-                        "vesselSailingDate": "2024-04-10T00:00:00.000Z",
-                        "vesselArrivingDate": "2024-04-10T00:00:00.000Z",
-                        "containers": [
-                            {
-                                "containerNumber": "3244",
-                                "containerType": "Type 1",
-                                "truckNumber": "ts13eq9882",
-                                "truckDriverContactNumber": 7702791728,
-                                "addProductDetails": [
-                                    "6808de91c9a2b5ab721c95cd"
-                                ]
-                            }
-                        ]
-                    },
-                    "_id": "6819f06970bc5d58c6452fa9"
-                },
-                {
-                    "field": "organizationId",
-                    "oldValue": "6808eff236363ebda97e4cb0",
-                    "newValue": "6808eff236363ebda97e4cb0",
-                    "_id": "6819f06970bc5d58c6452faa"
-                },
-                {
-                    "field": "userId",
-                    "newValue": "680ce9f78c32fd289cf134b7",
-                    "_id": "6819f06970bc5d58c6452fab"
-                }
-            ],
-            "updatedAt": "2025-05-06T11:20:09.203Z",
-            "__v": 0
-        }
-    ]
+
 
     const [open, setOpen] = React.useState(false)
   return (
@@ -270,7 +273,6 @@ const logs =  [
           {/* View Shipment */}
           <DropdownMenuItem
             onClick={() => router.push(`./shipment/view/${shipmentId}`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <EyeIcon className="mr-2 h-4 w-4" />
             View Shipment
@@ -279,9 +281,8 @@ const logs =  [
           {/* Edit Shipment */}
           <DropdownMenuItem
             onClick={() => router.push(`./shipment/edit/${shipmentId}`)}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
           >
-            <Scissors className="mr-2 h-4 w-4" />
+            <Pencil className="mr-2 h-4 w-4" />
             Edit Shipment
           </DropdownMenuItem>
 
@@ -292,7 +293,7 @@ const logs =  [
           }}
           > */}
        
-        <ShipmentLogs  logs={logs} />
+        <ShipmentLogs isView={false} logs={logs} />
           {/* </DropdownMenuItem> */}
         
 

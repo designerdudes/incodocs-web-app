@@ -30,6 +30,8 @@ import moment from "moment";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DocColumns } from "./Components/DocumentColumns";
+import { ShipmentLogs } from "@/components/shipmentLogs";
+import { logs } from "../../components1/cell-actions";
 
 interface Props {
   params: {
@@ -202,6 +204,7 @@ export default async function Page({ params }: Props) {
             </p>
           </div>
           <div className="flex gap-2">
+            <ShipmentLogs isView={true}  logs={logs} />
             <Link href={`../edit/${params.id}`}>
               <Button variant="outline">Edit</Button>
             </Link>
