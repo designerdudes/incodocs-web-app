@@ -19,6 +19,7 @@ import {
 import { useParams } from "next/navigation";
 import { sidebarTabs } from "@/lib/constants";
 import { ItemIndicator } from "@radix-ui/react-select";
+import Link from "next/link";
 
 type NavItem = {
     title: string;
@@ -86,6 +87,7 @@ export default function NavMain({  orgId, factoryId }: NavMainProps) {
                     defaultOpen={item.isActive}
                     className="group/collapsible"
                 >
+                    <Link href={itemUrl}>
                     <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                             <SidebarMenuButton tooltip={item.title}>
@@ -107,6 +109,7 @@ export default function NavMain({  orgId, factoryId }: NavMainProps) {
                             </CollapsibleContent>
                         )}
                     </SidebarMenuItem>
+                        </Link>
                 </Collapsible>
             );
         });
