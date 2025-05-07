@@ -21,7 +21,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 
 // Props
 interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
-  selectedSlabs: { slabId: string; amount: number }[];
+  selectedSlabs?: { slabId: string; }[];
 }
 
 const formSchema = z.object({
