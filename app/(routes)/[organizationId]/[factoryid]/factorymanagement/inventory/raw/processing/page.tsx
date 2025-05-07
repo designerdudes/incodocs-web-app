@@ -117,6 +117,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const slabsData = res;
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
+  console.log("Slabdata", Slabdata);
 
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
