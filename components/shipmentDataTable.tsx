@@ -181,6 +181,7 @@ function ShipmentDataTable<T>({
   useEffect(() => {
     table.setColumnPinning({
       left: ["select"],
+      right: ["actions"],
     });
 
     const filterValue = dateFilter.from && dateFilter.to ? dateFilter : undefined;
@@ -290,9 +291,9 @@ function ShipmentDataTable<T>({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full">
       {/* Filters */}
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between h-[6%] mt-2 gap-3">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Input
@@ -644,9 +645,11 @@ function ShipmentDataTable<T>({
       </div>
 
       {/* Table */}
-      <div className="bg-background overflow-hidden rounded-md border">
-        <Table className="table-fixed">
-          <TableHeader>
+      <div className="bg-background overflow-hidden h-[80%] rounded-md border">
+        <Table className="table-fixed h-full">
+          <TableHeader
+          className="bg-background/90 sticky top-0 z-10 backdrop-blur-xs"
+          >
             {table.getHeaderGroups()?.map((headerGroup) => (
               //   <TableRow key={headerGroup.id} className="hover:bg-transparent">
               //     {headerGroup.headers?.map((header) => (
@@ -848,10 +851,6 @@ function ShipmentDataTable<T>({
                               left: `${column.getStart("left")}px`
 
                             } :
-                            //pin it to right
-                            column.id === "actions" ?
-                              { right: `${column.getAfter("right")}px` } :
-                              //default
 
                               {
 
@@ -888,7 +887,7 @@ function ShipmentDataTable<T>({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between gap-8">
+      <div className="flex items-center justify-between gap-8 h-[5%]">
         <div className="flex items-center gap-3">
           <Label htmlFor={id} className="max-sm:sr-only">
             Rows per page
