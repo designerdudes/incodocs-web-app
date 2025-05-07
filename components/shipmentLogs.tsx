@@ -50,6 +50,7 @@ type ShipmentLog = {
 
 interface ShipmentLogsProps {
     logs: ShipmentLog[];
+    isView: boolean;
 }
 
 const getNestedChanges = (oldValue: any, newValue: any, path: string = "") => {
@@ -73,7 +74,7 @@ const getNestedChanges = (oldValue: any, newValue: any, path: string = "") => {
     return changes;
 };
 
-export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs }) => {
+export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
     const items = logs.map((log) => ({
         id: log._id,
         date: format(new Date(log.updatedAt), "PPP p"),
@@ -89,7 +90,7 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs }) => {
 
         <Sheet>
             <SheetTrigger asChild>
-                <Button variant="ghost" className="m-0 p-2 text-sm font-normal align-left" >
+                <Button variant={isView ? "secondary" : "ghost"} className={`${isView === false && "m-0 p-2 "}text-sm font-normal align-left` }>
                     <Eye className="w-4 h-4" />
                     View Shipment Logs
                 </Button>
