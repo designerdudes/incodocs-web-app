@@ -9,8 +9,8 @@ import { TermsOfUse } from "./components/TermsOfUse";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 
 export const metadata: Metadata = {
-  title: "Create an Account | Incodocs",
-  description: "Create an Account | Incodocs",
+  title: "Create an Account | StoneDocs",
+  description: "Create an Account | StoneDocs",
 };
 
 export default function AuthenticationPage() {
@@ -21,7 +21,7 @@ export default function AuthenticationPage() {
           <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[450px] lg:w-full">
             <RegisterForm />
             <span className="text-xs text-center text-gray-500">
-              By signing up, you agree to IncoDocs{"'"} <TermsOfUse />
+              By signing up, you agree to StoneDocs{"'"} <TermsOfUse />
               and <PrivacyPolicy />. .
             </span>
           </div>

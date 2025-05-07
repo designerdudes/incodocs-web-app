@@ -24,7 +24,7 @@ import AddFactoryButton from "@/app/(routes)/[organizationId]/settings/factory/c
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
 import Heading from "../ui/heading";
-import { blockedRegexes } from "@/lib/constants";
+import { blockedRegexes, BrandName } from "@/lib/constants";
 
 interface Factory {
     factoryName: string;
@@ -89,7 +89,7 @@ function FactorySwitcher({ FactoriesData, organizationId, token }: FactorySwitch
                         size="lg"
                         className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                     >
-                        <Heading className="text-xl" title={"IncoDocs"} />
+                        <Heading className="text-xl" title={BrandName} />
                     </SidebarMenuButton>
                 </div>
             </div>

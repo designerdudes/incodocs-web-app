@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { ForgotPasswordForm } from "@/components/forms/forgotPasswordForm"
 
 export const metadata: Metadata = {
-    title: 'Recover your account password | Incodocs',
-    description: 'Recover your account password | Incodocs',
+    title: 'Recover your account password | StoneDocs',
+    description: 'Recover your account password | StoneDocs',
 }
 
 export default function Page() {

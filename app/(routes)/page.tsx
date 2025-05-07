@@ -11,7 +11,7 @@ function page() {
 <div>
     <RetroGrid/>
 
-        <TextHoverEffect text="IncoDocs" />
+        <TextHoverEffect text="StoneDocs" />
 </div>
      
   

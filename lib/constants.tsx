@@ -28,7 +28,7 @@ import { url } from "inspector";
 
 
 
-const BrandName = "IncoDocs";
+const BrandName = "StoneDocs";
 
 // const sidebarTabs = [
 //   {

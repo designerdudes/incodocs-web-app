@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { usePathname, useRouter } from "next/navigation";
 import { fetchData } from "@/axiosUtility/api";
+import { blockedRegexes } from "@/lib/constants";
 
 interface Organization {
   _id: string;
@@ -40,9 +41,12 @@ function BreadCrumb() {
 
   // Split pathname
   const segments = pathname.split("/").filter((segment) => segment);
+
+  console.log("segs",segments)
   const organizationId = segments[0] || "";
   const potentialFactoryId = segments[1] || "";
-  const remainingSegments = segments.slice(2);
+  const remainingSegments = pathname.includes("factorymanagement") ? segments.slice(2) : segments.slice(1);
+  console.log(remainingSegments)
 
   // Determine if the route expects a factoryId
   const factoryRoutes = [ "factorymanagement", `/${organizationId}/${potentialFactoryId}/dashboard`];
@@ -70,6 +74,7 @@ function BreadCrumb() {
 
         if (!token) {
           console.error("No token found");
+          router.push("/login");
           return;
         }
 
@@ -117,11 +122,11 @@ function BreadCrumb() {
         setFactories(factories || []);
         setCurrentOrg(newOrg);
         const defaultFactoryId = factories[0]?._id || "";
-        const newRoute = `/${newOrgId}/${defaultFactoryId}/dashboard`;
+        const newRoute = `/${newOrgId}/${defaultFactoryId}/${remainingSegments.join("/")}`;
         router.push(newRoute);
       } else {
         // For non-factory routes, redirect without factoryId
-        const newRoute = `/${newOrgId}/${remainingSegments.join("/") || "dashboard"}`;
+        const newRoute = `/${newOrgId}/${remainingSegments.join("/")}`;
         router.push(newRoute);
       }
     } catch (error) {
@@ -136,7 +141,7 @@ function BreadCrumb() {
     console.log("Stored Factory ID:", storeFact);
 
     
-    const newRoute = `/${organizationId}/${newFactoryId}/dashboard`;
+    const newRoute = `/${organizationId}/${newFactoryId}/${remainingSegments.join("/")}`;
     router.push(newRoute);
   };
 
@@ -175,7 +180,7 @@ function BreadCrumb() {
             <span>{currentOrg?.name || "Unknown Org"}</span>
           )}
         </BreadcrumbItem>
-        {isFactoryRoute || potentialFactoryId && (
+        { pathname.includes("factorymanagement") && (
           <>
             <BreadcrumbSeparator className="hidden md:block" />
     {//only show in factorymanagement routes 
@@ -208,7 +213,7 @@ function BreadCrumb() {
           const basePath = isFactoryRoute
             ? `/${organizationId}/${factoryId}`
             : `/${organizationId}`;
-          const route = `${basePath}/${remainingSegments.slice(0, index + 1).join("/")}`;
+          const route = `${basePath}/${remainingSegments.join("/")}`;
           const label =
             segment.charAt(0).toUpperCase() + segment.slice(1).replace(/-/g, " ");
 
