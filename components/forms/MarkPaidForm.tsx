@@ -25,7 +25,9 @@ interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const formSchema = z.object({
-  paymentMethod: z.enum(["cash", "card", "online"]),
+  paymentMethod: z.enum(["cash", "online"]),
+
+
 });
 
 export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
@@ -100,6 +102,8 @@ export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
     }
   }
 
+  
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -130,7 +134,7 @@ export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
           {/* Slab Details List */}
           {slabData && slabData.length > 0 && (
             <div className="border rounded p-4 bg-muted/50 space-y-2">
-              <h4 className="font-semibold text-sm">Selected Slabs</h4>
+              <h4 className="font-semibold text-sm">Selected Slab NO</h4>
               <ul className="text-sm space-y-1 max-h-40 overflow-y-auto">
                 {slabData.map((slab: any, idx: number) => {
                   const amount =

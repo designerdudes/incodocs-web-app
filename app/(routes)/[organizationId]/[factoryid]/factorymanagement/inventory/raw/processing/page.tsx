@@ -63,6 +63,8 @@ export type FinishedMaterial = {
   updatedAt: string; // ISO 8601 timestamp
   workersCuttingPay: number;
   workersPolishingPay: number;
+  cuttingPaymentStatus: { status: string };
+  polishingPaymentStatus: { status: string };
 };
 
 interface Props {
