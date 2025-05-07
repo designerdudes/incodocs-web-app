@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -25,12 +25,11 @@ import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscol
 import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
 import { OtherDetailsColumn } from "./Components/OtherDetailsColumn";
-import ExportCsvButton from "./Components/ExportCsvButton"
+import ExportCsvButton from "./Components/ExportCsvButton";
 import moment from "moment";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DocColumns } from "./Components/DocumentColumns";
-
 
 interface Props {
   params: {
@@ -41,7 +40,6 @@ interface Props {
 export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
 
   const res = await fetch(
     `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
@@ -57,155 +55,130 @@ export default async function Page({ params }: Props) {
   if (!res.ok) {
     return <div>Error loading shipment data</div>;
   }
-  const shipmentData = await res.json();
+  const responseData = await res.json();
+  const shipmentData = responseData?.shipment || {};
+  console.log("shipmentData", shipmentData);
 
- //extract documents from shipmentData in this format where i want it want document name and url
- // Transporter Invoices
- const transporterInvoices = shipmentData?.shippingDetails?.transporterInvoices?.map(
-  (invoice: { invoiceNumber: any; uploadInvoiceUrl: any; }) => ({
-    documentName: 'Transporter Invoice',
-    documentNumber: invoice.invoiceNumber,
-    documentUrl: invoice.uploadInvoiceUrl,
-  })
-) || [];
+  // Extract documents from shipmentData
+  const transporterInvoices =
+    shipmentData?.shippingDetails?.transporterInvoices?.map(
+      (invoice: { invoiceNumber: any; uploadInvoiceUrl: any }) => ({
+        documentName: "Transporter Invoice",
+        documentNumber: invoice.invoiceNumber,
+        documentUrl: invoice.uploadInvoiceUrl || "N/A",
+      })
+    ) || [];
 
-// Forwarder Invoices
-const forwarderInvoices = shipmentData?.shippingDetails?.forwarderInvoices?.map(
-  (invoice: { invoiceNumber: any; uploadInvoiceUrl: any; }) => ({
-    documentName: 'Forwarder Invoice',
-    documentNumber: invoice.invoiceNumber,
-    documentUrl: invoice.uploadInvoiceUrl,
-  })
-) || [];
+  const forwarderInvoices =
+    shipmentData?.shippingDetails?.forwarderInvoices?.map(
+      (invoice: { invoiceNumber: any; uploadInvoiceUrl: any }) => ({
+        documentName: "Forwarder Invoice",
+        documentNumber: invoice.invoiceNumber,
+        documentUrl: invoice.uploadInvoiceUrl || "N/A",
+      })
+    ) || [];
 
-// Shipping Bills
-const shippingBills = shipmentData?.shippingBillDetails?.ShippingBills?.map(
-  (invoice: { shippingBillNumber: any; shippingBillUrl: any; }) => ({
-    documentName: 'Shipping Bill',
-    documentNumber: invoice.shippingBillNumber,
-    documentUrl: invoice.shippingBillUrl,
-  })
-) || [];
+  const shippingBills =
+    shipmentData?.shippingBillDetails?.ShippingBills?.map(
+      (invoice: { shippingBillNumber: any; shippingBillUrl: any }) => ({
+        documentName: "Shipping Bill",
+        documentNumber: invoice.shippingBillNumber,
+        documentUrl: invoice.shippingBillUrl || "N/A",
+      })
+    ) || [];
 
-// Supplier Invoice
-const supplierInvoice = shipmentData?.supplierDetails?.actual
-  ? [{
-      documentName: 'Supplier Invoice',
-      documentNumber: shipmentData.supplierDetails.actual.actualSupplierName,
-      documentUrl: shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl,
-    }]
-  : [];
+  const supplierActualInvoice = shipmentData?.supplierDetails?.actual
+    ? [
+      {
+        documentName: "Supplier Actual Invoice",
+        documentNumber:
+          shipmentData.supplierDetails.actual.actualSupplierName || "N/A",
+        documentUrl:
+          shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl ||
+          "N/A",
+      },
+    ]
+    : [];
+  const supplierInvoice = shipmentData?.supplierDetails?.clearance?.suppliers?.invoices?.map(
+    (invoice: { supplierInvoiceNumber: any; clearanceSupplierInvoiceUrl: any }) => ({
+      documentName: "Supplier Invoice",
+      documentNumber: invoice.supplierInvoiceNumber,
+      documentUrl: invoice.clearanceSupplierInvoiceUrl || "N/A",
+    })
+  ) || [];
 
-// Commercial Invoices
-const commercialInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
-  (invoice: { commercialInvoiceNumber: any; clearanceCommercialInvoiceUrl: any; }) => ({
-    documentName: 'Commercial Invoice',
-    documentNumber: invoice.commercialInvoiceNumber,
-    documentUrl: invoice.clearanceCommercialInvoiceUrl,
-  })
-) || [];
+  const commercialInvoices =
+    shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+      (invoice: {
+        commercialInvoiceNumber: any;
+        clearanceCommercialInvoiceUrl: any;
+      }) => ({
+        documentName: "Commercial Invoice",
+        documentNumber: invoice.commercialInvoiceNumber || "N/A",
+        documentUrl: invoice.clearanceCommercialInvoiceUrl || "N/A",
+      })
+    ) || [];
 
-// Actual Invoices
-const actualInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
-  (invoice: { saleInvoiceNumber: any; actualCommercialInvoiceUrl: any; }) => ({
-    documentName: 'Actual Invoice',
-    documentNumber: invoice.saleInvoiceNumber,
-    documentUrl: invoice.actualCommercialInvoiceUrl,
-  })
-) || [];
+  const actualInvoices =
+    shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+      (invoice: {
+        commercialInvoiceNumber: any;
+        actualCommercialInvoiceUrl: any;
+      }) => ({
+        documentName: "Actual Invoice",
+        documentNumber: invoice.commercialInvoiceNumber || "N/A",
+        documentUrl: invoice.actualCommercialInvoiceUrl || "N/A",
+      })
+    ) || [];
 
-// SABER Invoices
-const saberInvoices = shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
-  (invoice: { saleInvoiceNumber: any; saberInvoiceUrl: any; }) => ({
-    documentName: 'SABER Invoice',
-    documentNumber: invoice.saleInvoiceNumber,
-    documentUrl: invoice.saberInvoiceUrl,
-  })
-) || [];
+  const saberInvoices =
+    shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
+      (invoice: { commercialInvoiceNumber: any; saberInvoiceUrl: any }) => ({
+        documentName: "SABER Invoice",
+        documentNumber: invoice.commercialInvoiceNumber || "N/A",
+        documentUrl: invoice.saberInvoiceUrl || "N/A",
+      })
+    ) || [];
 
-// Bill of Lading
-const billsOfLading = shipmentData?.blDetails?.Bl?.map(
-  (invoice: { blNumber: any; uploadBLUrl: any; }) => ({
-    documentName: 'Bill of Lading',
-    documentNumber: invoice.blNumber,
-    documentUrl: invoice.uploadBLUrl,
-  })
-) || [];
+  const billsOfLading =
+    shipmentData?.blDetails?.Bl?.map(
+      (invoice: { blNumber: any; uploadBLUrl: any }) => ({
+        documentName: "Bill of Lading",
+        documentNumber: invoice.blNumber || "N/A",
+        documentUrl: invoice.uploadBLUrl || "N/A",
+      })
+    ) || [];
 
-// Certificates
-const certificates = shipmentData?.blDetails?.Bl?.map(
-  (invoice: { certificateName: any; certificateNumber: any; uploadCopyOfCertificate: any; }) => ({
-    documentName: invoice.certificateName || 'Certificate',
-    documentNumber: invoice.certificateNumber,
-    documentUrl: invoice.uploadCopyOfCertificate,
-  })
-).filter((doc: { documentName: any; documentNumber: any; documentUrl: any; }) => doc.documentName && (doc.documentNumber || doc.documentUrl)) || [];
+  const certificates =
+    shipmentData?.otherDetails
+      ?.map(
+        (cert: {
+          certificateName: any;
+          certificateNumber: any;
+          uploadCopyOfCertificate: any;
+        }) => ({
+          documentName: "Certificate",
+          documentNumber: cert.certificateNumber || "N/A",
+          documentUrl: cert.uploadCopyOfCertificate || "N/A",
+        })
+      )
+      .filter(
+        (doc: { documentName: any; documentNumber: any; documentUrl: any }) =>
+          doc.documentName && (doc.documentNumber || doc.documentUrl)
+      ) || [];
 
-//  const documents = [
-//   shipmentData?.shippingDetails?.transporterInvoices?.map((invoice: any) => ({
-//     documentName: "Transporter Invoice",
-//     documentNumber: invoice.invoiceNumber,
-//     documentUrl: invoice.uploadInvoiceUrl,
-//   })),
-//   shipmentData?.shippingDetails?.forwarderInvoices?.map((invoice: any) => ({
-//     documentName: "Forwarder Invoice",
-//     documentNumber: invoice.invoiceNumber,
-//     documentUrl: invoice.uploadInvoiceUrl,
-//   })),
-//   shipmentData?.shippingBillDetails?.ShippingBills?.map((invoice: any) => ({
-//     documentName: "Shipping Bill",
-//     documentNumber: invoice.shippingBillNumber,
-//     documentUrl: invoice.shippingBillUrl,
-//   })),
-//  {
-//       documentName: "Supplier Invoice",
-//       documentNumber: shipmentData?.supplierDetails?.actual?.actualSupplierName,
-//       documentUrl: shipmentData?.supplierDetails?.actual?.actualSupplierInvoiceUrl}
-//     ,
-
-//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-//     documentName: "Commercial Invoice",
-//     documentNumber: invoice.commercialInvoiceNumber,
-//     documentUrl: invoice.clearanceCommercialInvoiceUrl,
-//   })),
-//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-//     documentName: "Actual Invoice",
-//     documentNumber: invoice.saleInvoiceNumber,
-//     documentUrl: invoice.actualCommercialInvoiceUrl,
-//   })),
-//   shipmentData?.saleInvoiceDetails?.commercialInvoices?.map((invoice: any) => ({
-//     documentName: "SABER Invoice",
-//     documentNumber: invoice.saleInvoiceNumber,
-//     documentUrl: invoice.saberInvoiceUrl,
-//   })),
-//   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
-//     documentName: "Bill of Lading",
-//     documentNumber: invoice.blNumber,
-//     documentUrl: invoice.uploadBLUrl,
-//   })),
-//   shipmentData?.blDetails?.Bl?.map((invoice: any) => ({
-//     documentName: invoice.certificateName,
-//     documentNumber: invoice.certificateNumber,
-//     documentUrl: invoice.uploadCopyOfCertificate,
-//   })),
-//  ]
-
-const documents = [
-  ...transporterInvoices,
-  ...forwarderInvoices,
-  ...shippingBills,
-  ...supplierInvoice,
-  ...commercialInvoices,
-  ...actualInvoices,
-  ...saberInvoices,
-  ...billsOfLading,
-  ...certificates
-  
-]
-
- console.log("this is documents", documents)
-
-  // console.log("this is shipment", shipmentData)
+  const documents = [
+    ...transporterInvoices,
+    ...forwarderInvoices,
+    ...shippingBills,
+    ...supplierActualInvoice,
+    ...supplierInvoice,
+    ...commercialInvoices,
+    ...actualInvoices,
+    ...saberInvoices,
+    ...billsOfLading,
+    ...certificates,
+  ];
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -220,9 +193,8 @@ const documents = [
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`Shipment: ${shipmentData?.bookingDetails.invoiceNumber || "N/A"
+              title={`Shipment: ${shipmentData?.bookingDetails?.invoiceNumber || "N/A"
                 }`}
-
             />
             <p className="text-muted-foreground text-sm mt-2">
               View and manage shipment details with insights into tracking,
@@ -242,50 +214,81 @@ const documents = [
         <Card className="w-full flex flex-row items-center space-between p-6">
           <div className="flex w-1/2 items-center justify-between gap-4">
             <div className="flex flex-col">
-              <Heading title={shipmentData?.bookingDetails?.portOfLoading}
-                className="text-2xl font-semibold " />
-              <p className="text-muted-foreground text-xs">Vessel Sailing Date: <span className="font-semibold text-black">{moment(shipmentData?.bookingDetails?.vesselSailingDate).format("MMM Do YY")}</span></p>
+              <Heading
+                title={shipmentData?.bookingDetails?.portOfLoading || "N/A"}
+                className="text-2xl font-semibold"
+              />
+              <p className="text-muted-foreground text-xs">
+                Vessel Sailing Date:{" "}
+                <span className="font-semibold text-black">
+                  {shipmentData?.bookingDetails?.vesselSailingDate
+                    ? moment(
+                      shipmentData.bookingDetails.vesselSailingDate
+                    ).format("MMM Do YY")
+                    : "N/A"}
+                </span>
+              </p>
             </div>
             <div className="h-0.5 flex justify-center items-center w-full bg-gray-300">
               <ChevronRight className="h-6 w-6 text-gray-300" />
             </div>
             <div className="flex flex-col">
-              <Heading title={shipmentData?.bookingDetails?.destinationPort}
-                className="text-2xl font-semibold " />
-              <p className="text-muted-foreground text-xs">Vessel Arriving Date: <span className="font-semibold text-black">{moment(shipmentData?.bookingDetails?.vesselArrivingDate).format("MMM Do YY")}</span></p>
+              <Heading
+                title={shipmentData?.bookingDetails?.destinationPort || "N/A"}
+                className="text-2xl font-semibold"
+              />
+              <p className="text-muted-foreground text-xs">
+                Vessel Arriving Date:{" "}
+                <span className="font-semibold text-black">
+                  {shipmentData?.bookingDetails?.vesselArrivingDate
+                    ? moment(
+                      shipmentData.bookingDetails.vesselArrivingDate
+                    ).format("MMM Do YY")
+                    : "N/A"}
+                </span>
+              </p>
             </div>
           </div>
           <div className="flex w-1/2 items-center justify-end gap-4">
-          <div className="flex flex-col gap-2">
-<p className="text-muted-foreground text-xs">Shipment Status:</p>   
-          <Badge
-      className={cn(
-         shipmentData?.status === "Trucks Dispatched" && "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
-         shipmentData?.status === "Trucks Arrived" && "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
-         shipmentData?.status === "Trucks Halted" && "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
-         shipmentData?.status === "Stuffing" && "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
-         shipmentData?.status === "In Clearance" && "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
-         shipmentData?.status === "Loaded On Vessel" && "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
-         shipmentData?.status === "In Transit" && "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
-         shipmentData?.status === "Arrived At POD" && "bg-green-200 text-green-800 hover:bg-green-300/80",
-         shipmentData?.status === "Delivery Completed" && "bg-green-200 text-green-800 hover:bg-green-500/80",
-        ![
-          "Trucks Dispatched",
-          "Trucks Arrived",
-          "Trucks Halted",
-          "Stuffing",
-          "In Clearance",
-          "Loaded On Vessel",
-          "In Transit",
-          "Arrived At POD",
-          "Delivery Completed",
-        ].includes(shipmentData?.status) && "bg-muted-foreground/60 text-primary-foreground"
-      )}
-    >
-       {shipmentData?.status}
-    </Badge>
-          </div>
-           
+            <div className="flex flex-col gap-2">
+              <p className="text-muted-foreground text-xs">Shipment Status:</p>
+              <Badge
+                className={cn(
+                  shipmentData?.status === "Trucks Dispatched" &&
+                  "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+                  shipmentData?.status === "Trucks Arrived" &&
+                  "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+                  shipmentData?.status === "Trucks Halted" &&
+                  "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+                  shipmentData?.status === "Stuffing" &&
+                  "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+                  shipmentData?.status === "In Clearance" &&
+                  "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+                  shipmentData?.status === "Loaded On Vessel" &&
+                  "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+                  shipmentData?.status === "In Transit" &&
+                  "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+                  shipmentData?.status === "Arrived At POD" &&
+                  "bg-green-200 text-green-800 hover:bg-green-300/80",
+                  shipmentData?.status === "Delivery Completed" &&
+                  "bg-green-200 text-green-800 hover:bg-green-500/80",
+                  ![
+                    "Trucks Dispatched",
+                    "Trucks Arrived",
+                    "Trucks Halted",
+                    "Stuffing",
+                    "In Clearance",
+                    "Loaded On Vessel",
+                    "In Transit",
+                    "Arrived At POD",
+                    "Delivery Completed",
+                  ].includes(shipmentData?.status) &&
+                  "bg-muted-foreground/60 text-primary-foreground"
+                )}
+              >
+                {shipmentData?.status || "N/A"}
+              </Badge>
+            </div>
           </div>
         </Card>
         <Tabs defaultValue="Booking details" className="w-full">
@@ -306,7 +309,6 @@ const documents = [
               Other details
             </TabsTrigger>
             <TabsTrigger value="Documents">Documents</TabsTrigger>
-
           </TabsList>
 
           {/* Booking Details */}
@@ -325,31 +327,29 @@ const documents = [
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-
                       <TableRow>
                         <TableCell>Invoice Number</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails.invoiceNumber}
+                          {shipmentData?.bookingDetails?.invoiceNumber || "N/A"}
                         </TableCell>
                       </TableRow>
-
-
                       <TableRow>
                         <TableCell>Booking Number</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.bookingNumber}
+                          {shipmentData?.bookingDetails?.bookingNumber || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Port Of Loading</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.portOfLoading}
+                          {shipmentData?.bookingDetails?.portOfLoading || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Destination Port</TableCell>
                         <TableCell>
-                          {shipmentData?.bookingDetails?.destinationPort}
+                          {shipmentData?.bookingDetails?.destinationPort ||
+                            "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
@@ -394,11 +394,10 @@ const documents = [
                   bulkDeleteTitle="Are you sure you want to delete the selected containers?"
                   bulkDeleteDescription="This will delete the selected containers from this shipment."
                   bulkDeleteToastMessage="Selected containers deleted successfully"
-                  deleteRoute="shipment/deleteall" // Adjust if needed
+                  deleteRoute="shipment/deleteall"
                   searchKey="containerNumber"
                   data={shipmentData?.bookingDetails?.containers || []}
                   columns={BookingDetailsColumn}
-                // showDropdown={true}
                 />
               </div>
             </div>
@@ -406,7 +405,6 @@ const documents = [
           {/* Shipping Details */}
           <TabsContent value="Shipping Details">
             <div className="space-y-6">
-
               {/* Forwarder Details */}
               <div className="flex flex-col md:flex-row gap-4">
                 <Card className="mt-4 w-full md:w-1/3">
@@ -452,7 +450,6 @@ const documents = [
                       shipmentData?.shippingDetails?.forwarderInvoices || []
                     }
                     columns={ForwarderDetailsColumn}
-                  // showDropdown={true}
                   />
                 </div>
               </div>
@@ -502,7 +499,6 @@ const documents = [
                       shipmentData?.shippingDetails?.transporterInvoices || []
                     }
                     columns={TransporterDetailsColumn}
-                  // showDropdown={true}
                   />
                 </div>
               </div>
@@ -511,69 +507,73 @@ const documents = [
 
           {/* Shipping Bills Details */}
           <TabsContent value="Shipping Bills Details">
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="mt-4 w-full md:w-1/3">
-                <CardHeader>
-                  <CardTitle>Shipping Bills Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>Port Code</TableCell>
-                        <TableCell>
-                          {shipmentData?.shippingBillDetails?.portCode || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>CB Name</TableCell>
-                        <TableCell>
-                          {shipmentData?.shippingBillDetails?.cbName || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>CB Code</TableCell>
-                        <TableCell>
-                          {shipmentData?.shippingBillDetails?.cbCode || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Number Of Bills</TableCell>
-                        <TableCell>
-                          {shipmentData?.shippingBillDetails?.ShippingBills
-                            ?.length || 0}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Review</TableCell>
-                        <TableCell>
-                          {shipmentData?.shippingBillDetails?.review || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-              <div className=" w-full md:w-2/3">
-                <DataTable
-                  bulkDeleteIdName="_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected bills?"
-                  bulkDeleteDescription="This will delete the selected shipping bills."
-                  bulkDeleteToastMessage="Selected bills deleted successfully"
-                  deleteRoute="shipment/deleteall"
-                  searchKey="shippingBillNumber"
-                  data={shipmentData?.shippingBillDetails?.ShippingBills || []}
-                  columns={ShippingBillsDetailscolumn}
-                // showDropdown={true}
-                />
+            {!shipmentData?.shippingBillDetails ? (
+              <div>No shipping bill details available</div>
+            ) : (
+              <div className="flex flex-col md:flex-row gap-4">
+                <Card className="mt-4 w-full md:w-1/3">
+                  <CardHeader>
+                    <CardTitle>Shipping Bills Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>Port Code</TableCell>
+                          <TableCell>
+                            {shipmentData.shippingBillDetails.portCode || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>CB Name</TableCell>
+                          <TableCell>
+                            {shipmentData.shippingBillDetails.cbName?.cbName ||
+                              "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>CB Code</TableCell>
+                          <TableCell>
+                            {shipmentData.shippingBillDetails.cbCode || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Number Of Bills</TableCell>
+                          <TableCell>
+                            {shipmentData.shippingBillDetails.ShippingBills
+                              ?.length || 0}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Review</TableCell>
+                          <TableCell>
+                            {shipmentData.shippingBillDetails.review || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+                <div className="w-full md:w-2/3">
+                  <DataTable
+                    bulkDeleteIdName="_id"
+                    bulkDeleteTitle="Are you sure you want to delete the selected bills?"
+                    bulkDeleteDescription="This will delete the selected shipping bills."
+                    bulkDeleteToastMessage="Selected bills deleted successfully"
+                    deleteRoute="shipment/deleteall"
+                    searchKey="shippingBillNumber"
+                    data={shipmentData.shippingBillDetails.ShippingBills || []}
+                    columns={ShippingBillsDetailscolumn}
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </TabsContent>
 
           {/* Supplier Details */}
@@ -601,13 +601,13 @@ const documents = [
                           <TableCell>Supplier Name</TableCell>
                           <TableCell>
                             {shipmentData?.supplierDetails?.clearance
-                              ?.supplierName?.supplierName || "N/A"}
+                              ?.suppliers[0]?.supplierName?.supplierName || "N/A"}
                           </TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell>Number Of Invoices</TableCell>
                           <TableCell>
-                            {shipmentData?.supplierDetails?.clearance?.invoices
+                            {shipmentData?.supplierDetails?.clearance?.suppliers?.invoices
                               ?.length || 0}
                           </TableCell>
                         </TableRow>
@@ -656,7 +656,7 @@ const documents = [
                                 rel="noopener noreferrer"
                                 className="text-blue-500 hover:underline"
                               >
-                                View
+                                <EyeIcon className="h-4 w-4 cursor-pointer" />
                               </a>
                             ) : (
                               "N/A"
@@ -667,7 +667,21 @@ const documents = [
                           <TableCell>Shipping Bill URL</TableCell>
                           <TableCell>
                             {shipmentData?.supplierDetails?.actual
-                              ?.shippingBillUrl || "N/A"}
+                              ?.shippingBillUrl ? (
+                              <a
+                                href={
+                                  shipmentData.supplierDetails.actual
+                                    .actualSupplierInvoiceUrl
+                                }
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                              >
+                                <EyeIcon className="h-4 w-4 cursor-pointer" />
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
                           </TableCell>
                         </TableRow>
                         <TableRow>
@@ -690,10 +704,9 @@ const documents = [
                   deleteRoute="shipment/deleteall"
                   searchKey="supplierInvoiceNumber"
                   data={
-                    shipmentData?.supplierDetails?.clearance?.invoices || []
+                    shipmentData?.supplierDetails?.clearance?.suppliers?.invoices || []
                   }
                   columns={SupplierDetailscolumn}
-                // showDropdown={true}
                 />
               </div>
             </div>
@@ -758,7 +771,6 @@ const documents = [
                     shipmentData?.saleInvoiceDetails?.commercialInvoices || []
                   }
                   columns={SaleInvoiceDetailscolumn}
-                // showDropdown={true}
                 />
               </div>
             </div>
@@ -766,7 +778,6 @@ const documents = [
 
           {/* Bill Of Lading Details */}
           <TabsContent value="Bill Of Lading Details">
-
             <div className="flex flex-col md:flex-row gap-4 mt-4">
               <Card className="mt-4 w-full md:w-1/3">
                 <CardHeader>
@@ -784,7 +795,7 @@ const documents = [
                       <TableRow>
                         <TableCell>Shipping Line Name</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingDetails?.shippingLineName
+                          {shipmentData?.blDetails?.shippingLineName
                             ?.shippingLineName || "N/A"}
                         </TableCell>
                       </TableRow>
@@ -798,7 +809,7 @@ const documents = [
                       <TableRow>
                         <TableCell>Review</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingDetails?.review || "N/A"}
+                          {shipmentData?.blDetails?.review || "N/A"}
                         </TableCell>
                       </TableRow>
                     </TableBody>
@@ -817,14 +828,11 @@ const documents = [
                     shipmentData?.shippingDetails?.shippingLineInvoices || []
                   }
                   columns={ShippingDetailsColumn}
-                // showDropdown={true}
                 />
               </div>
             </div>
 
-
             <div className="flex flex-col md:flex-row gap-4">
-
               <Card className="mt-4 w-full md:w-1/2">
                 <CardHeader>
                   <CardTitle>Bill Of Lading Details</CardTitle>
@@ -841,15 +849,15 @@ const documents = [
                       <TableRow>
                         <TableCell>BL Number</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.blNumber || "N/A"}
+                          {shipmentData?.blDetails?.Bl?.[0]?.blNumber || "N/A"}
                         </TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>BL Date</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.blDate
+                          {shipmentData?.blDetails?.Bl?.[0]?.blDate
                             ? format(
-                              new Date(shipmentData.blDetails.blDate),
+                              new Date(shipmentData.blDetails.Bl[0].blDate),
                               "PPP"
                             )
                             : "N/A"}
@@ -858,9 +866,11 @@ const documents = [
                       <TableRow>
                         <TableCell>Telex Date</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.telexDate
+                          {shipmentData?.blDetails?.Bl?.[0]?.telexDate
                             ? format(
-                              new Date(shipmentData.blDetails.telexDate),
+                              new Date(
+                                shipmentData.blDetails.Bl[0].telexDate
+                              ),
                               "PPP"
                             )
                             : "N/A"}
@@ -869,9 +879,9 @@ const documents = [
                       <TableRow>
                         <TableCell>Uploaded BL</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.uploadBL ? (
+                          {shipmentData?.blDetails?.Bl?.[0]?.uploadBLUrl ? (
                             <a
-                              href={shipmentData.blDetails.uploadBL}
+                              href={shipmentData.blDetails.Bl[0].uploadBLUrl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-500 hover:underline"
@@ -909,22 +919,25 @@ const documents = [
                   searchKey="certificateNumber"
                   data={shipmentData?.otherDetails || []}
                   columns={OtherDetailsColumn}
-                // showDropdown={true}
                 />
               </div>
             </div>
           </TabsContent>
 
-          {/* Documents  */}
+          {/* Documents */}
           <TabsContent value="Documents">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="w-full">
-                <DataTable
-                  searchKey="documentName"
-                  data={documents || []}
-                  columns={DocColumns}
-                showDropdown={true}
-                />
+                {documents.length === 0 ? (
+                  <div>No documents available</div>
+                ) : (
+                  <DataTable
+                    searchKey="documentName"
+                    data={documents}
+                    columns={DocColumns}
+                    showDropdown={true}
+                  />
+                )}
               </div>
             </div>
           </TabsContent>

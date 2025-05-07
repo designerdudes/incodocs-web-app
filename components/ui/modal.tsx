@@ -30,7 +30,7 @@ export const Modal: React.FC<ModalProps> = ({
         <Dialog
 
             open={isOpen} onOpenChange={onChange}>
-            <DialogContent>
+            <DialogContent className="w-full max-h-[90vh] overflow-y-scroll">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription className="text-sm ">{description}</DialogDescription>
