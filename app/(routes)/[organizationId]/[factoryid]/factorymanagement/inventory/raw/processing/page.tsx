@@ -28,6 +28,7 @@ export type FinishedMaterial = {
   quantity: number; // Quantity of the finished material
   status: string; // Status (e.g., "polished")
   inStock: boolean; // Availability status
+  cuttingPaymentStatus: { status: 'string' },
   blockId: {
     _id: string;
     lotId?: {
