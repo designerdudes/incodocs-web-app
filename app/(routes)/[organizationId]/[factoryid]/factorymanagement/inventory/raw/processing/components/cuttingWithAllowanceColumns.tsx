@@ -125,9 +125,12 @@ export const CuttingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] = 
           const amount = (
             (row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144 * (row.original?.workersCuttingPay)
           ).toFixed(2);
-          const statusbar = row.original?.status || "Unknown";
+          const statusbar = row.original?.cuttingPaymentStatus?.status || "Unknown";
           return <div>{statusbar}</div>;
         },
+
+
+
         footer: ({ table }) => {
           const totalpayment = table.getRowModel().rows.reduce((sum, row) => {
             const amt = ((row.original?.dimensions?.length?.value * row.original?.dimensions?.height?.value) / 144) * (row.original?.workersCuttingPay);

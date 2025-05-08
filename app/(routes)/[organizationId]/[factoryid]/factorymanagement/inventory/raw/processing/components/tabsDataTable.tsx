@@ -229,6 +229,7 @@ function TabsDataTable( {
             searchKey="slabNumber"
             columns={polishingInchesWithAllowanceColumns}
             data={slabsData}
+              tab="polishingInchesWithAllowance"
           />
         </TabsContent>
         <TabsContent value="PolishingInchesWithOutAllowance">
