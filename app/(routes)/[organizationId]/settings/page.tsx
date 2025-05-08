@@ -15,9 +15,9 @@ export default function SettingsPage({ params }: SettingsPageProps) {
     const { organizationId } = params;
 
     const settingsOptions = [
-        { name: "Factory Settings", path: `${organizationId}/settings/factory` },
-        { name: "General Settings", path: `${organizationId}/settings/general` },
-        { name: "Organization", path: `${organizationId}/settings/organization` }
+        { name: "Factory Settings", path: `/${organizationId}/settings/factory` },
+        { name: "General Settings", path: `/${organizationId}/settings/general` },
+        { name: "Organization", path: `/${organizationId}/settings/organization` }
     ];
 
     return (

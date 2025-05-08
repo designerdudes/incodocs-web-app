@@ -1,11 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
 import { cookies } from "next/headers";
 import CellAction from "./components/cell-actions";
-import FactoryForm from "@/components/forms/AddFactoryForm";
 import AddFactoryButton from "./components/AddFactoryButton";
 import { Separator } from "@/components/ui/separator";
 
@@ -22,28 +20,37 @@ export interface Factory {
   workersPolishingPay?: number;
 }
 
-export default async function FactoryPage() {
+interface FactoryPageProps {
+  params: {
+    organizationId: string;
+}; 
+}
+
+export default async function FactoryPage({ params  }: FactoryPageProps, ) {
   const cookieStore = cookies();
-  const token = (await cookieStore).get("AccessToken")?.value || "";
+  const token = cookieStore.get("AccessToken")?.value || "";
   let factories: Factory[] = [];
-  try {
-    const res = await fetch("https://incodocs-server.onrender.com/factory/getAll", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    });
+  if (params?.organizationId && token) {
+    try {
+      const res = await fetch(`https://incodocs-server.onrender.com/factory/getbyorg/${params?.organizationId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        cache: "no-store", // Ensure fresh data in server component
+      });
 
-    if (!res.ok) {
-      throw new Error("Failed to fetch factories");
+      if (!res.ok) {
+        throw new Error(`Failed to fetch factories: ${res.statusText}`);
+      }
+      factories = await res.json();
+    } catch (error) {
+      console.error("Error fetching factories:", error);
     }
-    factories = await res.json();
-  } catch (error) {
-    console.error("Error fetching factories:", error);
+  } else {
+    console.error("Missing organizationId or token");
   }
-
-
 
   return (
     <div className="space-y-6 ml-7">
@@ -55,10 +62,7 @@ export default async function FactoryPage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading
-            className="leading-tight"
-            title="Factory Settings"
-          />
+          <Heading className="leading-tight" title="Factory Settings" />
           <p className="text-muted-foreground text-sm">
             Adjust your factory-related settings here.
           </p>
@@ -71,17 +75,17 @@ export default async function FactoryPage() {
       <div className="space-y-4 mr-6">
         {factories.length > 0 ? (
           factories.map((factory) => (
-            <div key={factory._id} className="flex justify-between items-center p-4 bg-gray-100  hover:bg-gray-200 rounded-lg shadow-md">
+            <div
+              key={factory._id}
+              className="flex justify-between items-center p-4 bg-gray-100 hover:bg-gray-200 rounded-lg shadow-md"
+            >
               <div>
                 <h2 className="text-lg font-medium">{factory.factoryName}</h2>
                 <p className="text-gray-500 text-sm">{factory.address.location}</p>
               </div>
-              <div className="flex   gap-3">
-                {/* <Link href={`/settings/factory/edit/${factory._id}`} className="text-blue-600 hover:underline">
-                  Edit
-                </Link>  */}
+              <div className="flex gap-3">
+                <CellAction data={factory} />
               </div>
-              <CellAction data={factory} />
             </div>
           ))
         ) : (
@@ -90,13 +94,10 @@ export default async function FactoryPage() {
       </div>
 
       <div>
-
-        {/* <button className=" mt-3 px-1 text-sm rounded-md py-3 bg-black text-white">Add factory</button> */}
-
-        <AddFactoryButton />
+        
+          <AddFactoryButton />
+        
       </div>
-
-
     </div>
   );
 }

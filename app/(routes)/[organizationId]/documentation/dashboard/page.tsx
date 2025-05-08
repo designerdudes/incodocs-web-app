@@ -20,15 +20,15 @@ import { BiPurchaseTag } from "react-icons/bi";
 import { HiOutlineDocumentCurrencyRupee } from "react-icons/hi2";
 import { HiOutlineUserGroup } from "react-icons/hi";
 
-function FactoryManagementPage() {
-  const params = useParams();
-  const factoryId = params.factoryid as string; // Extract factory ID from route
 
+export default function DocumentationPage() {
+  const params = useParams();
+  const organizationId = params.organizationId;
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <Link href={`/${factoryId}/dashboard`}>
+        <Link href={`/${organizationId}/dashboard`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -42,7 +42,7 @@ function FactoryManagementPage() {
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <Link href={`/documentation/expodocs`} passHref>
+        <Link href={`${organizationId}/documentation/expodocs`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Export Docs</CardTitle>
@@ -62,7 +62,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/shipment`} passHref>
+        <Link href={`/${organizationId}/documentation/shipment`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Shipments</CardTitle>
@@ -82,7 +82,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/products`} passHref>
+        <Link href={`/${organizationId}/documentation/products`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Products</CardTitle>
@@ -102,7 +102,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/invoices`} passHref>
+        <Link href={`${organizationId}/documentation/invoices`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Invoices</CardTitle>
@@ -121,7 +121,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/purchaseOrders`} passHref>
+        <Link href={`${organizationId}/documentation/purchaseOrders`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">
@@ -142,7 +142,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/quotes`} passHref>
+        <Link href={`${organizationId}/documentation/quotes`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Quotes</CardTitle>
@@ -161,7 +161,7 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/documentation/parties`} passHref>
+        <Link href={`/${organizationId}/documentation/parties`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Parties</CardTitle>
@@ -186,4 +186,4 @@ function FactoryManagementPage() {
   );
 }
 
-export default FactoryManagementPage;
+// export default ProductsPage;
