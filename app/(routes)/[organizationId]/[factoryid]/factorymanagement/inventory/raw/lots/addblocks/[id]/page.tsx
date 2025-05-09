@@ -80,7 +80,7 @@ export default async function AddBlockFormPage({ params }: Props) {
     }
   );
   const lotData: LotData = await lotResponse.json();
- 
+
 
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">
