@@ -21,13 +21,11 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 
 // Props
 interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
-  selectedSlabs?: { slabId: string; }[];
+  selectedSlabs?: { slabId: string }[];
 }
 
 const formSchema = z.object({
   paymentMethod: z.enum(["cash", "online"]),
-
-
 });
 
 export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
@@ -102,8 +100,6 @@ export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
     }
   }
 
-  
-
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -150,15 +146,30 @@ export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
                     >
                       <span>Slab ID: {slab.slabNumber}</span>
                       <span className="text-muted-foreground text-xs">
-                        ₹{slab?.cuttingPaymentStatus?.status}
-                      </span>
-                      <span className="text-muted-foreground text-xs">
                         ₹{amount.toFixed(2)}
                       </span>
                     </li>
                   );
                 })}
               </ul>
+
+              {/* Total Amount Calculation */}
+              <div className="flex justify-between font-semibold text-primary pt-2 border-t mt-2">
+                <span>Total Amount</span>
+                <span>
+                  ₹
+                  {slabData
+                    .reduce((acc, slab) => {
+                      const amt =
+                        (((slab?.dimensions?.length?.value || 0) *
+                          (slab?.dimensions?.height?.value || 0)) /
+                          144) *
+                        (slab?.factoryId?.workersCuttingPay || 0);
+                      return acc + amt;
+                    }, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
             </div>
           )}
 
