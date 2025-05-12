@@ -394,7 +394,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                     <FiPlus className="h-4 w-4" />
                   </Button>
                 </div>
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-wrap gap-2">
                   {org.factory && org.factory.length > 0 ? (
                     org.factory.map((factory: any) => (
                       <Button

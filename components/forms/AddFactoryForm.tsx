@@ -32,8 +32,8 @@ const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
   prefix: z.string().min(3,{message: "enter prefix"}) ,
   organizationId: z
-    .string()
-    .min(1, { message: "Organization must be selected" }),
+     .string()
+     .min(1, { message: "Organization must be selected" }),
   gstNo: z.string().min(1, { message: "GST number is required" }),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
@@ -64,10 +64,8 @@ export default function FactoryForm({
 }: FactoryFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fallback to hardcoded organizations if none provided
-  const orgList = organizations.length > 0
-    ? organizations
-    : [{ id: organizationId, name: "Organization Jabal" }];
+  
+  
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,10 +98,7 @@ export default function FactoryForm({
         <p>
           <strong>Prefix:</strong> {values.prefix}
         </p>
-        <p>
-          <strong>Organization:</strong>{" "}
-          {orgList.find((org) => org.id === values.organizationId)?.name}
-        </p>
+      
         <p>
           <strong>GST Number:</strong> {values.gstNo}
         </p>
@@ -189,34 +184,6 @@ export default function FactoryForm({
               <FormLabel>Prefix</FormLabel>
               <FormControl>
                 <Input placeholder="Eg: SAA " {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="organizationId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Organization</FormLabel>
-              <FormControl>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select an organization" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {orgList.map((org) => (
-                      <SelectItem key={org.id} value={org.id as any}>
-                        {org.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
