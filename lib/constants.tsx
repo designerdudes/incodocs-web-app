@@ -375,7 +375,7 @@ const sidebarTabs = {
     },
     {
       title: "Team Management",
-      url: "/teamManagement",
+      url: "/teamManagement/dashboard",
       icon: User,
       isActive: true,
     },
