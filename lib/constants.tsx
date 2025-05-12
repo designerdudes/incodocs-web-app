@@ -28,7 +28,7 @@ import { url } from "inspector";
 
 
 
-const BrandName = "IncoDocs";
+const BrandName = "StoneDocs";
 
 // const sidebarTabs = [
 //   {
@@ -403,8 +403,10 @@ const sidebarTabs = {
 
 const blockedRegexes = [
   /^\/[^\/]+\/dashboard$/,                            // e.g., /abc/dashboard
+  /^\/[^\/]+\/documentation(\/.*)?$/,              // e.g., /abc/documentation/shipment
   /^\/[^\/]+\/documentation\/shipment(\/.*)?$/,              // e.g., /abc/documentation/shipment
   /^\/[^\/]+\/settings(\/.*)?$/,                      // e.g., /abc/settings and /abc/settings/*
+  /^\/[^\/]+\/teamManagement(\/.*)?$/,           // e.g., /abc/factorymanagement and /abc/teamManagement/*
 ];
 
 export {

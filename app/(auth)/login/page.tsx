@@ -7,8 +7,8 @@ import { LoginForm } from "@/components/forms/loginForm"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
-  title: 'Login to Admin Dashboard | Incodocs',
-  description: 'Login to Admin Dashboard | Incodocs',
+  title: 'Login to Admin Dashboard | StoneDocs',
+  description: 'Login to Admin Dashboard | StoneDocs',
 }
 
 export default function AuthenticationPage() {
