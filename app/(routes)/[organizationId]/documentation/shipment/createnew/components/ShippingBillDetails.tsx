@@ -167,7 +167,7 @@ export function ShippingBillDetails({
   };
 
   const openCBNameForm = () => {
-    GlobalModal.title = "Add New CB Name";
+    GlobalModal.title = "Add New Custom Broker";
     GlobalModal.children = (
       <CBNameForm
         orgId={organizationId}
@@ -202,7 +202,7 @@ export function ShippingBillDetails({
         name="shippingBillDetails.cbName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CB Name</FormLabel>
+            <FormLabel>Custom Broker</FormLabel>
             <FormControl>
               <EntityCombobox
                 entities={CBNames}
@@ -212,9 +212,9 @@ export function ShippingBillDetails({
                   saveProgressSilently(getValues());
                 }}
                 displayProperty="name"
-                placeholder="Select a CB Name"
+                placeholder="Select a Custom Broker "
                 onAddNew={openCBNameForm}
-                addNewLabel="Add New CB Name"
+                addNewLabel="Add New Custom Broker"
               />
             </FormControl>
             <FormMessage />
@@ -227,12 +227,12 @@ export function ShippingBillDetails({
         name="shippingBillDetails.cbCode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CB Code</FormLabel>
+            <FormLabel>Custom Broker Code</FormLabel>
             <FormControl>
               <Input
                 value={field.value || ""}
                 readOnly
-                placeholder="Select a CB Name to auto-fill"
+                placeholder="Select a Custom Broker to auto-fill"
                 className="uppercase bg-gray-100 cursor-not-allowed"
               />
             </FormControl>
@@ -290,8 +290,8 @@ export function ShippingBillDetails({
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Upload Shipping Bill</TableHead>
                 <TableHead>Shipping Bill Number</TableHead>
+                <TableHead>Upload Shipping Bill</TableHead>
                 <TableHead>Shipping Bill Date</TableHead>
                 <TableHead>Drawback Value</TableHead>
                 <TableHead>RODTEP Value</TableHead>

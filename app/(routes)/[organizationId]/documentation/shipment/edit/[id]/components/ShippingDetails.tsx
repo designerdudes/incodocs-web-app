@@ -296,7 +296,7 @@ export function ShippingDetails({
           name="shippingDetails.forwarderName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Select Forwarder Name</FormLabel>
+              <FormLabel>Select Forwarder</FormLabel>
               <FormControl>
                 <EntityCombobox
                   entities={forwarders}
@@ -549,7 +549,7 @@ export function ShippingDetails({
           name="shippingDetails.transporterName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Select Transporter Name</FormLabel>
+              <FormLabel>Select Transporter</FormLabel>
               <FormControl>
                 <EntityCombobox
                   entities={transporters}

@@ -297,7 +297,7 @@ export function SupplierDetails({
                   name={`supplierDetails.clearance.suppliers[${supplierIndex}].supplierName`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Supplier Name</FormLabel>
+                      <FormLabel>Supplier</FormLabel>
                       <FormControl>
                         <EntityCombobox
                           entities={supplierNames}
@@ -307,7 +307,7 @@ export function SupplierDetails({
                             saveProgressSilently(getValues());
                           }}
                           displayProperty="name"
-                          placeholder="Select a Supplier Name"
+                          placeholder="Select a Supplier"
                           onAddNew={openSupplierForm}
                           addNewLabel="Add New Supplier"
                         />
@@ -520,7 +520,7 @@ export function SupplierDetails({
           name="supplierDetails.actual.actualSupplierName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Actual Supplier Name</FormLabel>
+              <FormLabel>Actual Supplier</FormLabel>
               <FormControl>
                 <Input
                   placeholder="e.g., ASI101"

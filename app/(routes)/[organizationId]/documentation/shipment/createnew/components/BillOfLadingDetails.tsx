@@ -195,7 +195,7 @@ export function BillOfLadingDetails({
           name="blDetails.shippingLineName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Shipping Line Name</FormLabel>
+              <FormLabel>Shipping Line</FormLabel>
               <FormControl>
                 <EntityCombobox
                   entities={shippingLines}
