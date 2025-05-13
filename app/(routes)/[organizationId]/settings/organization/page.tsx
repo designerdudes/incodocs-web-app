@@ -291,15 +291,15 @@ export default function OrganizationSettingPage() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Owner Name</TableCell>
-                    <TableCell>{organization?.owner.fullName || "N/A"}</TableCell>
+                    <TableCell>{organization?.owner?.fullName || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Owner Email</TableCell>
-                    <TableCell>{organization?.owner.email || "N/A"}</TableCell>
+                    <TableCell>{organization?.owner?.email || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Owner Contact</TableCell>
-                    <TableCell>{organization?.owner.mobileNumber || "N/A"}</TableCell>
+                    <TableCell>{organization?.owner?.mobileNumber || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Teams</TableCell>
