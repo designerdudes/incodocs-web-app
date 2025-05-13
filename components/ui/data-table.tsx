@@ -56,6 +56,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import MarkMultipleSlabsPolishForm from "./MarkMultipleSlabsPolishForm";
 import { MarkPaidForm } from "../forms/MarkPaidForm";
+import { MarkPolishingPaidForm } from "../forms/MarkPolishingPaidForm";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -306,9 +307,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                     </TableHead>
                   );
                 })}
@@ -324,10 +325,11 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className={`h-fit py-2 text-sm ${cell.column.id === "actions"
+                      className={`h-fit py-2 text-sm ${
+                        cell.column.id === "actions"
                           ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10"
                           : ""
-                        }`}
+                      }`}
                       key={cell.id}
                     >
                       {flexRender(
@@ -355,17 +357,18 @@ export function DataTable<TData, TValue>({
                 {footerGroup.headers.map((header) => (
                   <TableCell
                     key={header.id}
-                    className={`font-medium pb-4 ${header.column.id === "actions"
+                    className={`font-medium pb-4 ${
+                      header.column.id === "actions"
                         ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10"
                         : ""
-                      }`}
+                    }`}
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.footer,
+                          header.getContext()
+                        )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -410,16 +413,14 @@ export function DataTable<TData, TValue>({
             </Button>
           )}
 
-          
-
-          {(tab === "inPolishing") &&
+          {tab === "inPolishing" &&
             table.getFilteredSelectedRowModel().rows.length > 1 && (
-
               <Button
                 variant="destructive"
                 className="ml-2 hover:bg-green-400 bg-green-500"
                 onClick={() => {
-                  modal.title = bulkPolishTitle ?? "Enter trimming Values of Slab:";
+                  modal.title =
+                    bulkPolishTitle ?? "Enter trimming Values of Slab:";
                   modal.description =
                     bulkPOlishDescription ??
                     "Are you sure you want to polish these slabs? This action cannot be undone.";
@@ -438,18 +439,15 @@ export function DataTable<TData, TValue>({
               </Button>
             )}
 
-
-
-            
-{(tab === "cuttingInchesWithAllowance" || tab === "polishingInchesWithAllowance") &&          
-        
+          {tab === "cuttingInchesWithAllowance" &&
             table.getFilteredSelectedRowModel().rows.length > 1 && (
-
               <Button
                 variant="destructive"
                 className="ml-2 hover:bg-green-400 bg-green-500"
                 onClick={() => {
-                  modal.title = bulkPolishTitle ?? "Do you want to mark these slabs as paid?";
+                  modal.title =
+                    bulkPolishTitle ??
+                    "Do you want to mark these slabs as paid?";
                   modal.description =
                     bulkPOlishDescription ??
                     "Are you sure you want to mark these slabs as paid?";
@@ -458,8 +456,8 @@ export function DataTable<TData, TValue>({
                       // table={table}
                       // bulkPolishIdName={bulkPolishIdName}
                       selectedSlabs={selectedIdsForMarkPaid}
-                    // updateRoute={updateRoute}
-                    // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}          
+                      // updateRoute={updateRoute}
+                      // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
                     />
                   );
                   modal.onOpen();
@@ -469,7 +467,33 @@ export function DataTable<TData, TValue>({
               </Button>
             )}
 
-
+          {tab === "polishingInchesWithAllowance" &&
+            table.getFilteredSelectedRowModel().rows.length > 1 && (
+              <Button
+                variant="destructive"
+                className="ml-2 hover:bg-green-400 bg-green-500"
+                onClick={() => {
+                  modal.title =
+                    bulkPolishTitle ??
+                    "Do you want to mark these slabs as paid?";
+                  modal.description =
+                    bulkPOlishDescription ??
+                    "Are you sure you want to mark these slabs as paid?";
+                  modal.children = (
+                    <MarkPolishingPaidForm
+                      // table={table}
+                      // bulkPolishIdName={bulkPolishIdName}
+                      selectedSlabs={selectedIdsForMarkPaid}
+                      // updateRoute={updateRoute}
+                      // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
+                    />
+                  );
+                  modal.onOpen();
+                }}
+              >
+                Mark Paid
+              </Button>
+            )}
         </div>
         <div>
           <DataTablePagination table={table} />
