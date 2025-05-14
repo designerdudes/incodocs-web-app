@@ -23,6 +23,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
+import { Props } from "recharts/types/cartesian/YAxis";
 
 const formSchema = z.object({
   teamMemberName: z.string().min(1, { message: "Name is required" }),
@@ -50,11 +52,46 @@ const formSchema = z.object({
   }),
 });
 
-const organizations = [
-  { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
-];
+interface OrgData {
+  OrgData: {
+    _id: string;
+    name: string;
+  }[];
+}
 
-export default function TeamFormPage() {
+export default function TeamFormPage({ OrgData }: OrgData) {
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const [errors, setErrors] = useState({
+    password: "",
+    confirmPassword: "",
+  });
+
+  const validatePassword = (value: string) => {
+    if (!value) return "Password is required";
+    if (value.length < 6) return "Minimum 6 characters required";
+    if (/\s/.test(value)) return "No spaces allowed";
+    if (!/[0-9]/.test(value)) return "Include at least one number";
+    if (!/[A-Z]/.test(value)) return "Include an uppercase letter";
+    if (!/[a-z]/.test(value)) return "Include a lowercase letter";
+    if (!/[!@#$%^&*()_+\-=\[\]{};:\\|,.<>?]/.test(value))
+      return "Add one special character";
+    return "";
+  };
+
+  const validateAll = () => {
+    const newErrors = {
+      password: validatePassword(password),
+      confirmPassword:
+        confirmPassword === password ? "" : "Passwords do not match",
+    };
+    setErrors(newErrors);
+  };
+
+  console.log("OrgData:", OrgData); // Debugging line
+
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -65,6 +102,8 @@ export default function TeamFormPage() {
       role: "",
       position: "",
       address: { location: "", pincode: "" },
+      password: "",
+      confirmPassword: "",
       contactInformation: {
         contactPerson: "",
         email: "",
@@ -77,27 +116,30 @@ export default function TeamFormPage() {
   const router = useRouter();
 
   const handleSubmit = async (values: any) => {
+    console.log("Form values:", values);
     setIsLoading(true);
     try {
-        await postData("/employers/add/", values);
-        toast.success("Employee added successfully");
-        router.push("./");
+      await postData("/employers/add/", values);
+      toast.success("Employee added successfully");
+      router.push("./");
     } catch (error: any) {
-        console.error("Error creating/updating employee:", error);
+      console.error("Error creating/updating employee:", error);
 
-        if (error.response && error.response.status === 400) {
-            if (error.response.data.message === "Employee ID exists, please try a unique ID") {
-                toast.error("Employee already exists, please use a unique ID.");
-            } else {
-                toast.error(error.response.data.message || "Bad Request");
-            }
+      if (error.response && error.response.status === 400) {
+        if (
+          error.response.data.message ===
+          "Employee ID exists, please try a unique ID"
+        ) {
+          toast.error("Employee already exists, please use a unique ID.");
         } else {
-            toast.error("Error creating/updating employee");
+          toast.error(error.response.data.message || "Bad Request");
         }
+      } else {
+        toast.error("Error creating/updating employee");
+      }
     }
     setIsLoading(false);
-};
-
+  };
 
   return (
     <div className="space-y-6">
@@ -130,11 +172,17 @@ export default function TeamFormPage() {
                         <SelectValue placeholder="Select an organization" />
                       </SelectTrigger>
                       <SelectContent>
-                        {organizations.map((org) => (
-                          <SelectItem key={org.id} value={org.id}>
-                            {org.name}
+                        {OrgData.length > 0 ? (
+                          OrgData.map((org) => (
+                            <SelectItem key={org._id} value={org._id}>
+                              {org.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem value="no-org">
+                            No organizations available
                           </SelectItem>
-                        ))}
+                        )}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -213,6 +261,67 @@ export default function TeamFormPage() {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter your password"
+                      {...field}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(e);
+                        setPassword(val);
+                        setErrors((prev) => ({
+                          ...prev,
+                          password: validatePassword(val),
+                        }));
+                      }}
+                    />
+                  </FormControl>
+                  {errors.password && (
+                    <p className="text-red-500 text-sm">{errors.password}</p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Re-enter your password"
+                      {...field}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        field.onChange(e);
+                        setConfirmPassword(val);
+                        setErrors((prev) => ({
+                          ...prev,
+                          confirmPassword:
+                            val === password ? "" : "Passwords do not match",
+                        }));
+                      }}
+                    />
+                  </FormControl>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-sm">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md">
@@ -286,39 +395,36 @@ export default function TeamFormPage() {
             Submit
           </Button> */}
 
-<Button
-  disabled={isLoading}
-  onClick={form.handleSubmit(async (values) => {
-    setIsLoading(true);
-    try {
-      await postData("/employers/add/", {
-        ...values,
-        status: "active", 
-      });
+          <Button
+            disabled={isLoading}
+            onClick={form.handleSubmit(async (values) => {
+              setIsLoading(true);
+              try {
+                await postData("/employers/add/", {
+                  ...values,
+                  status: "active",
+                });
 
-      toast.success("Team member added successfully");
+                toast.success("Team member added successfully");
 
-      router.push("./"); 
+                router.push("./");
 
-    
-      //  setTimeout(() => {
-      // }, 500);
-    } catch (error: any) {
-      console.error("Error creating team member:", error);
-      if (error.response?.status === 400) {
-        toast.error(error.response.data.message || "Bad Request");
-      } else {
-        toast.error("Failed to create team member");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  })}
->
-  Confirm
-</Button>
-
-
+                //  setTimeout(() => {
+                // }, 500);
+              } catch (error: any) {
+                console.error("Error creating team member:", error);
+                if (error.response?.status === 400) {
+                  toast.error(error.response.data.message || "Bad Request");
+                } else {
+                  toast.error("Failed to create team member");
+                }
+              } finally {
+                setIsLoading(false);
+              }
+            })}
+          >
+            Confirm
+          </Button>
         </form>
       </Form>
     </div>

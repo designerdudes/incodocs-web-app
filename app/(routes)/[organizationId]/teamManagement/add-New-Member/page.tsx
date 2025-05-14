@@ -5,11 +5,24 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import AddTeamMemberForm from "@/components/forms/AddTeamMemberForm";
-
+import { cookies } from "next/headers";
 
 console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
 
-export default function CreateNewFormPage() {
+export default async function CreateNewFormPage() {
+     const cookieStore = cookies();
+      const token = cookieStore.get("AccessToken")?.value || "";
+      const OrgData = await fetch(`http://localhost:4080/organizations/token`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }).then((response) => {
+        return response.json();
+      });
+
+
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
@@ -31,7 +44,7 @@ export default function CreateNewFormPage() {
             </div>
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
-                <AddTeamMemberForm  />
+                <AddTeamMemberForm OrgData={OrgData} />
             </div>
         </div>
     );

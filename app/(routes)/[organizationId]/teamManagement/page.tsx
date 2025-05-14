@@ -41,7 +41,7 @@ export default async function TeamMemberPage({ params }: Props) {
           </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
-        <Link href="./dashboard/add-New-Member">
+        <Link href="./teamManagement/add-New-Member">
           <Button> Add Member</Button>
         </Link>
         {/* <CreateNewLotButton /> */}
