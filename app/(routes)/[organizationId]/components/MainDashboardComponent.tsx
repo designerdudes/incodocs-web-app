@@ -59,6 +59,7 @@ interface User {
   password?: string;
   profileImg?: string;
   ownedOrganizations?: Organization[];
+  memberInOrganizations?: Organization[];
 }
 
 interface UserDataProps {
@@ -193,8 +194,11 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
+  const combinedOrgs = userData?.ownedOrganizations?.concat(userData?.memberInOrganizations as any)
+  
+
   const [organizations, setOrganizations] = useState(
-    userData?.ownedOrganizations || []
+    combinedOrgs || []
   );
 
   const [newOrg, setNewOrg] = useState({
@@ -260,7 +264,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
   };
 
   const openAddFactoryModal = (orgID: any) => {
-    if (organizations.length === 0) {
+    if (organizations?.length === 0) {
       modal.title = "No Organizations Available";
       modal.description = "Please create an organization before adding a factory.";
       modal.children = (
@@ -282,8 +286,8 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
         organizationId={orgID}
         token={token}
         organizations={organizations.map((org: { _id: any; name: any }) => ({
-          id: org._id,
-          name: org.name,
+          id: org?._id,
+          name: org?.name,
         }))}
       />
     );
@@ -294,7 +298,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
 
   useEffect(() => {
     if (orgSearch === "") {
-      setOrganizations(userData?.ownedOrganizations || []);
+      setOrganizations(combinedOrgs as any || []);
     }
   }, [userData, orgSearch]);
 
@@ -322,7 +326,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
               onChange={(e) => {
                 setOrgSearch(e.target.value);
                 setOrganizations(
-                  organizations.filter((org: { name: string }) =>
+                  organizations?.filter((org: { name: string }) =>
                     org.name
                       .toLowerCase()
                       .includes(e.target.value.toLowerCase())
@@ -341,7 +345,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                 aria-label="Clear filter"
                 onClick={() => {
                   setOrgSearch("");
-                  setOrganizations(userData?.ownedOrganizations || []);
+                  setOrganizations(combinedOrgs || []);
                 }}
               >
                 <CircleXIcon size={16} aria-hidden="true" />
@@ -358,25 +362,25 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
         {organizations && organizations.length > 0 ? (
           organizations.map((org: any) => (
             <Card
-              key={org._id}
+              key={org?._id}
               className="bg-white dark:bg-card h-full flex flex-col cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               onClick={() => router.push(`/${org._id}/dashboard`)}
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-lg font-medium">
-                  {org.name}
+                  {org?.name}
                 </CardTitle>
                 <Building className="h-6 w-6 text-muted-foreground" />
               </CardHeader>
               <CardContent className="space-y-3 flex-grow">
                 <CardDescription className="text-base text-gray-600">
-                  {org.description || "No description available."}
+                  {org?.description || "No description available."}
                 </CardDescription>
                 <p className="text-sm text-gray-700">
-                  {org.address.location}, {org.address.pincode}
+                  {org?.address?.location}, {org?.address?.pincode}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {org.members.length} Members
+                  {org?.members?.length} Members
                 </p>
                 <Separator className="my-4" />
                 <div className="flex justify-between items-center">
@@ -395,8 +399,8 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                   </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {org.factory && org.factory.length > 0 ? (
-                    org.factory.map((factory: any) => (
+                  {org?.factory && org?.factory?.length > 0 ? (
+                    org?.factory.map((factory: any) => (
                       <Button
                         key={factory._id}
                         variant={"secondary"}
@@ -406,7 +410,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                           router.push(`/${org._id}/${factory._id}/dashboard`);
                         }}
                       >
-                        {factory.factoryName}
+                        {factory?.factoryName}
                       </Button>
                     ))
                   ) : (
