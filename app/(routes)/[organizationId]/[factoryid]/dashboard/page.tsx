@@ -36,7 +36,7 @@ export default async function Home({ params }: Props) {
       <div className="text-center mb-10">
         <Heading
           className="text-4xl font-bold text-gray-800"
-          title="Welcome, To IncoDocs"
+          title="Welcome, To StoneDocs"
         />
         <p className="text-lg mt-4 text-gray-600">
           Efficiently manage your factory operations and streamline your
