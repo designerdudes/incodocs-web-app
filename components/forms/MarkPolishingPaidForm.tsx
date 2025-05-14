@@ -168,8 +168,29 @@ export function MarkPolishingPaidForm({
                   );
                 })}
               </ul>
+
+
+               {/* Total Amount Calculation */}
+              <div className="flex justify-between font-semibold text-primary pt-2 border-t mt-2">
+                <span>Total Amount</span>
+                <span>
+                  ₹
+                  {slabData
+                    .reduce((acc, slab) => {
+                      const amt =
+                        (((slab?.dimensions?.length?.value || 0) *
+                          (slab?.dimensions?.height?.value || 0)) /
+                          144) *
+                        (slab?.factoryId?.workersPolishingPay || 0);
+                      return acc + amt;
+                    }, 0)
+                    .toFixed(2)}
+                </span>
+              </div>
             </div>
           )}
+
+          
 
           {/* Submit Button */}
           <Button type="submit" className="w-full" disabled={isLoading}>
