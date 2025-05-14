@@ -20,6 +20,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
   cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
+  portCode: z.string().min(1, { message: "Port Code is required" }),
   email: z
     .string()
     .optional()
@@ -58,6 +59,7 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
     defaultValues: {
       cbName: "",
       cbCode: "",
+      portCode:"",
       email: "",
       mobileNo: "",
       address: "",
@@ -71,6 +73,7 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
       const payload = {
         cbName: values.cbName,
         cbCode: values.cbCode,
+        portCode: values.portCode,
         email: values.email,
         mobileNo: values.mobileNo ? Number(values.mobileNo) : undefined,
         address: values.address,
@@ -128,7 +131,7 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
           name="cbName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>CB Name</FormLabel>
+              <FormLabel>Custom Broker </FormLabel>
               <FormControl>
                 <Input placeholder="e.g., XYZ Clearing" {...field} />
               </FormControl>
@@ -141,9 +144,22 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
           name="cbCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>CB Code</FormLabel>
+              <FormLabel>Custom Broker Code</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., CB123" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="portCode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Port Code</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., PORt123" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

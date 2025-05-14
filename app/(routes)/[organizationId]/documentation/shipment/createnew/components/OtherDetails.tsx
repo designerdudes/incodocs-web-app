@@ -124,7 +124,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Document Name</TableHead>
+                <TableHead>Document</TableHead>
                 <TableHead>Document Number</TableHead>
                 <TableHead>Upload Document</TableHead>
                 <TableHead>Date</TableHead>

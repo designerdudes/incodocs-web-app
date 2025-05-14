@@ -261,7 +261,7 @@ export function ShippingBillDetails({
         name="shippingBillDetails.cbName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CB Name</FormLabel>
+            <FormLabel>Custom Broker</FormLabel>
             <FormControl>
               <EntityCombobox
                 key={customsBrokers.length}
@@ -283,7 +283,7 @@ export function ShippingBillDetails({
         name="shippingBillDetails.cbCode"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>CB Code</FormLabel>
+            <FormLabel>Custom Broker Code</FormLabel>
             <FormControl>
               <Input
                 placeholder="e.g. CB123"
