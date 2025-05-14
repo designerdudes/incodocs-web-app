@@ -327,7 +327,7 @@ export function SupplierDetails({
                   );
                   return (
                     <FormItem>
-                      <FormLabel>Select Supplier Name</FormLabel>
+                      <FormLabel>Select Supplier</FormLabel>
                       <FormControl>
                         {fetchError ? (
                           <p className="text-sm text-red-500">
@@ -370,7 +370,7 @@ export function SupplierDetails({
                               );
                             }}
                             displayProperty="name"
-                            placeholder="Select a Supplier Name"
+                            placeholder="Select a Supplier"
                             onAddNew={openSupplierForm}
                             addNewLabel="Add New Supplier"
                             disabled={isLoadingSuppliers || !!fetchError}
@@ -707,7 +707,7 @@ export function SupplierDetails({
         name="supplierDetails.actual.actualSupplierName"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Actual Supplier Name</FormLabel>
+            <FormLabel>Actual Supplier</FormLabel>
             <FormControl>
               <Input
                 placeholder="eg. Actual Supplier Inc."

@@ -534,14 +534,14 @@ export default async function Page({ params }: Props) {
                           </TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell>CB Name</TableCell>
+                          <TableCell>Custom Broker</TableCell>
                           <TableCell>
                             {shipmentData.shippingBillDetails.cbName?.cbName ||
                               "N/A"}
                           </TableCell>
                         </TableRow>
                         <TableRow>
-                          <TableCell>CB Code</TableCell>
+                          <TableCell>Custom Broker Code</TableCell>
                           <TableCell>
                             {shipmentData.shippingBillDetails.cbCode || "N/A"}
                           </TableCell>
