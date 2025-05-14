@@ -22,7 +22,7 @@ export default function AuthenticationPage() {
             <RegisterForm />
             <span className="text-xs text-center text-gray-500">
               By signing up, you agree to StoneDocs{"'"} <TermsOfUse />
-              and <PrivacyPolicy />. .
+              and <PrivacyPolicy />
             </span>
           </div>
         </div>
