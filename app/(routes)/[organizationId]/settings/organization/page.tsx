@@ -7,18 +7,31 @@ import { ChevronLeft, Edit, X } from "lucide-react";
 import Link from "next/link";
 import Heading from "@/components/ui/heading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import toast from "react-hot-toast";
 import { Icons } from "@/components/ui/icons";
 import { useParams } from "next/navigation";
-
-
+import { format } from "date-fns";
 
 // Define schema for form validation
 const organizationFormSchema = z.object({
@@ -44,13 +57,14 @@ interface Organization {
     location: string;
     pincode: string;
   };
+  factory: string;
   owner: {
     fullName: string;
     email: string;
     mobileNumber: number;
   };
   teams: string[];
-  employees: string[];
+  members: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -60,7 +74,6 @@ export default function OrganizationSettingPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { organizationId } = useParams();
-  
 
   // Initialize form
   const form = useForm<OrganizationFormValues>({
@@ -192,7 +205,10 @@ export default function OrganizationSettingPage() {
           <CardContent>
             {isEditing ? (
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={form.control}
                     name="name"
@@ -229,7 +245,10 @@ export default function OrganizationSettingPage() {
                       <FormItem>
                         <FormLabel>Address</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., 343 Example Street" {...field} />
+                          <Input
+                            placeholder="e.g., 343 Example Street"
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -250,7 +269,9 @@ export default function OrganizationSettingPage() {
                   />
                   <div className="flex gap-2">
                     <Button type="submit" disabled={isLoading}>
-                      {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+                      {isLoading && (
+                        <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Save
                     </Button>
                     <Button
@@ -283,31 +304,57 @@ export default function OrganizationSettingPage() {
                   </TableRow>
                   <TableRow>
                     <TableCell>Address</TableCell>
-                    <TableCell>{organization?.address.location || "N/A"}</TableCell>
+                    <TableCell>
+                      {organization?.address.location || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Pincode</TableCell>
-                    <TableCell>{organization?.address.pincode || "N/A"}</TableCell>
+                    <TableCell>
+                      {organization?.address.pincode || "N/A"}
+                    </TableCell>
                   </TableRow>
+                  {organization &&
+                    organization.factory &&
+                    organization.factory.length > 0 && (
+                      <TableRow>
+                        <TableCell>Factories</TableCell>
+                        <TableCell>{organization.factory.length}</TableCell>
+                      </TableRow>
+                    )}
                   <TableRow>
                     <TableCell>Owner Name</TableCell>
-                    <TableCell>{organization?.owner.fullName || "N/A"}</TableCell>
+                    <TableCell>
+                      {organization?.owner?.fullName || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Owner Email</TableCell>
-                    <TableCell>{organization?.owner.email || "N/A"}</TableCell>
+                    <TableCell>{organization?.owner?.email || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Owner Contact</TableCell>
-                    <TableCell>{organization?.owner.mobileNumber || "N/A"}</TableCell>
+                    <TableCell>
+                      {organization?.owner?.mobileNumber || "N/A"}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Teams</TableCell>
-                    <TableCell>{organization?.teams?.length || 0} team(s)</TableCell>
+                    <TableCell>{organization?.teams?.length || 0} </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Employees</TableCell>
-                    <TableCell>{organization?.employees.length || 0} employee(s)</TableCell>
+                    <TableCell>Team Members</TableCell>
+                    <TableCell>
+                      {organization?.members?.length || 0}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>CreatedAt</TableCell>
+                    <TableCell>
+                      {organization?.createdAt
+                        ? format(new Date(organization.createdAt), "dd MM yyyy")
+                        : "N/A"}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
