@@ -7,6 +7,7 @@ import { LoginForm } from "@/components/forms/loginForm";
 import { RegisterForm } from "@/components/forms/RegisterForm";
 import { TermsOfUse } from "./components/TermsOfUse";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
 
 export const metadata: Metadata = {
   title: "Create an Account | StoneDocs",
@@ -29,6 +30,7 @@ export default function AuthenticationPage() {
         <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:text-black dark:border-r lg:flex">
           <div className="absolute inset-0 bg-primary" />
           <div className="relative z-20 flex items-center text-lg font-bold">
+
             <Image
               src={"/assets/logos/SymbolWhite.svg"}
               width={35}
@@ -39,6 +41,9 @@ export default function AuthenticationPage() {
             {BrandName}
           </div>
           <div className="relative z-20 mt-auto">
+            <div className="relative z-20 flex items-center text-lg font-bold">
+        <TextHoverEffect text="StoneDocs" />
+            </div>
             <blockquote className="space-y-2">
               <p className="text-lg">
                 “A Great way to Manage Your <b>ExIm Business.</b>”

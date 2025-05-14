@@ -5,6 +5,7 @@ import Link from "next/link"
 import { BrandName } from "@/lib/constants"
 import { LoginForm } from "@/components/forms/loginForm"
 import { Button } from "@/components/ui/button"
+import { TextHoverEffect } from "@/components/ui/text-hover-effect"
 
 export const metadata: Metadata = {
   title: 'Login to Admin Dashboard | StoneDocs',
@@ -31,6 +32,9 @@ export default function AuthenticationPage() {
             {BrandName}
           </div>
           <div className="relative z-20 mt-auto">
+          <div className="relative z-20 flex items-center text-lg font-bold">
+        <TextHoverEffect text="StoneDocs" />
+            </div>
             <blockquote className="space-y-2">
               <p className="text-lg">
                 &ldquo;A Great way to Manage Your <b>ExIm Business.</b>&rdquo;
