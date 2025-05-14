@@ -16,10 +16,9 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
-import { SaveDetailsProps } from "./BookingDetails";
+import { useState, useEffect } from "react";
 import {
   TableHeader,
   TableRow,
@@ -29,42 +28,110 @@ import {
   Table,
 } from "@/components/ui/table";
 import { FileUploadField } from "./FileUploadField";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { Path } from "react-hook-form";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+
+// Define interfaces for TypeScript
+interface OtherDetail {
+  review: string;
+  certificateName: string;
+  certificateNumber: string;
+  date: string | null;
+  issuerOfCertificate: string;
+  uploadCopyOfCertificate: string;
+}
+
+interface FormData {
+  otherDetailsCount: number;
+  otherDetails: OtherDetail[];
+}
+
+interface SaveDetailsProps {
+  saveProgress: (data: any) => void;
+}
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
+// Helper function to generate type-safe field names
+const getFieldName = <T extends FormData>(
+  index: number,
+  field: keyof OtherDetail
+): Path<T> => `otherDetails[${index}].${field}` as Path<T>;
+
 export function OtherDetails({ saveProgress }: SaveDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const [uploading, setUploading] = useState(false);
   const otherDetailsFromForm = watch("otherDetails") || [];
-  const [otherDetails, setOtherDetails] = useState(otherDetailsFromForm);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [certificateCountToBeDeleted, setCertificateCountToBeDeleted] = useState<number | null>(null);
 
-  const handleCertificateCountChange = (value: string) => {
-    const count = parseInt(value, 10) || 0;
-    const currentDetails = watch("otherDetails") || [];
-    const newDetails = Array.from(
-      { length: count },
-      (_, i) =>
-        currentDetails[i] || {
+  // Initialize form fields
+  useEffect(() => {
+    if (!otherDetailsFromForm.length) {
+      setValue("otherDetails", [
+        {
           review: "",
           certificateName: "",
           certificateNumber: "",
           date: null,
           issuerOfCertificate: "",
           uploadCopyOfCertificate: "",
-        }
-    );
-    setOtherDetails(newDetails);
-    setValue("otherDetails", newDetails);
-    saveProgressSilently(getValues());
+        },
+      ]);
+    }
+    setValue("otherDetailsCount", otherDetailsFromForm.length || 1);
+  }, [setValue, otherDetailsFromForm.length]);
+
+  const handleCertificateCountChange = (value: string) => {
+    const newCount = Number(value) || 1;
+
+    if (newCount < otherDetailsFromForm.length) {
+      setShowConfirmation(true);
+      setCertificateCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "otherDetails",
+        createNewItem: () => ({
+          review: "",
+          certificateName: "",
+          certificateNumber: "",
+          date: null,
+          issuerOfCertificate: "",
+          uploadCopyOfCertificate: "",
+        }),
+        customFieldSetters: {
+          otherDetails: (items: OtherDetail[], setValue) => {
+            setValue("otherDetailsCount", items.length);
+          },
+        },
+        saveCallback: saveProgressSilently,
+      });
+    }
+  };
+
+  const handleConfirmChange = () => {
+    if (certificateCountToBeDeleted !== null) {
+      const updatedDetails = otherDetailsFromForm.slice(0, certificateCountToBeDeleted);
+      setValue("otherDetails", updatedDetails);
+      setValue("otherDetailsCount", updatedDetails.length);
+      saveProgressSilently(getValues());
+      setCertificateCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
   };
 
   const handleDeleteDetail = (index: number) => {
-    const updatedDetails = otherDetails.filter((_: any, i: number) => i !== index);
-    setOtherDetails(updatedDetails);
+    const updatedDetails = otherDetailsFromForm.filter((_: any, i: number) => i !== index);
     setValue("otherDetails", updatedDetails);
+    setValue("otherDetailsCount", updatedDetails.length);
     saveProgressSilently(getValues());
   };
 
@@ -80,7 +147,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
       });
       const data = await response.json();
       const storageUrl = data.url;
-      setValue(fieldName, storageUrl);
+      setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
       alert("Failed to upload file. Please try again.");
@@ -95,7 +162,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
       {/* Number of Certificates */}
       <FormField
         control={control}
-        name="otherDetails.length"
+        name="otherDetailsCount"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Number of Certificates</FormLabel>
@@ -103,14 +170,19 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
               <Input
                 type="number"
                 placeholder="Enter number of certificates"
-                value={field.value || ""}
+                value={field.value || 1}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  if (!isNaN(value) && value >= 0) {
-                    field.onChange(value);
-                    handleCertificateCountChange(e.target.value);
+                  const value = e.target.value;
+                  if (value === "") {
+                    field.onChange(1);
+                    handleCertificateCountChange("1");
+                    return;
                   }
+                  const numericValue = Number(value);
+                  field.onChange(numericValue);
+                  handleCertificateCountChange(numericValue.toString());
                 }}
+                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -118,13 +190,13 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
         )}
       />
 
-      {otherDetails.length > 0 && (
+      {otherDetailsFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Document</TableHead>
+                <TableHead>Document Name</TableHead>
                 <TableHead>Document Number</TableHead>
                 <TableHead>Upload Document</TableHead>
                 <TableHead>Date</TableHead>
@@ -134,57 +206,76 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {otherDetails.map((_: any, index: number) => (
+              {otherDetailsFromForm.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].certificateName`}
+                      name={getFieldName<FormData>(index, "certificateName")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., coo"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., coo"
+                              value ={field.value as any || ""}
+                              onChange={field.onChange}
+                              onBlur={() => {
+                                field.onBlur();
+                                saveProgressSilently(getValues());
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].certificateNumber`}
+                      name={getFieldName<FormData>(index, "certificateNumber")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., hfsd89"
-                            className="uppercase"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                            required // Enforce required field
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., hfsd89"
+                              className="uppercase"
+                              value={field.value as any|| ""}
+                              onChange={field.onChange}
+                              onBlur={() => {
+                                field.onBlur();
+                                saveProgressSilently(getValues());
+                              }}
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].uploadCopyOfCertificate`}
+                      name={getFieldName<FormData>(index, "uploadCopyOfCertificate")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`otherDetails[${index}].uploadCopyOfCertificate`}
-                          storageKey={`otherDetails_Certificate${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "uploadCopyOfCertificate")}
+                              storageKey={`otherDetails_Certificate${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].date`}
+                      name={getFieldName<FormData>(index, "date")}
                       render={({ field }) => (
                         <FormItem className="flex flex-col gap-2">
                           <Popover>
@@ -192,7 +283,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                               <FormControl>
                                 <Button variant="outline" className="w-full">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -201,7 +292,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                             <PopoverContent className="w-auto p-0" align="start">
                               <Calendar
                                 mode="single"
-                                selected={field.value ? new Date(field.value) : undefined}
+                                selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -217,31 +308,44 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].issuerOfCertificate`}
+                      name={getFieldName<FormData>(index, "issuerOfCertificate")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., don't know"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., don't know"
+                              value={field.value as any|| ""}
+                              onChange={field.onChange}
+                              onBlur={() => {
+                                field.onBlur();
+                                saveProgressSilently(getValues());
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
-
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`otherDetails[${index}].review`}
+                      name={getFieldName<FormData>(index, "review")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Textarea
-                            placeholder="e.g., this is some random comment"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Textarea
+                              placeholder="e.g., this is some random comment"
+                              value={field.value as any || ""}
+                              onChange={field.onChange}
+                              onBlur={() => {
+                                field.onBlur();
+                                saveProgressSilently(getValues());
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
@@ -261,6 +365,17 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
           </Table>
         </div>
       )}
+
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setCertificateCountToBeDeleted(null);
+        }}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of certificates. This action cannot be undone."
+      />
     </div>
   );
 }
