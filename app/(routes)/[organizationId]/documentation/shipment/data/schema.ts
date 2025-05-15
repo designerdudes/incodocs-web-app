@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+
 export const shipmentSchema = z.object({
   _id: z.string().optional(),
   shipmentId: z.string().optional(),
@@ -306,6 +307,7 @@ export const shipmentSchema = z.object({
       profileImg: z.string(),
     })
     .optional(),
+    shipmentLogs: z.any().optional(),
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   __v: z.number().optional(),
