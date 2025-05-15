@@ -293,7 +293,7 @@ export function DataTableCellActions({ row }: props) {
           }}
           > */}
        
-        <ShipmentLogs isView={false} logs={logs} />
+        <ShipmentLogs isView={false} logs={row.original.shipmentLogs} />
           {/* </DropdownMenuItem> */}
         
 

@@ -12,7 +12,7 @@ console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
 export default async function CreateNewFormPage() {
      const cookieStore = cookies();
       const token = cookieStore.get("AccessToken")?.value || "";
-      const OrgData = await fetch(`http://localhost:4080/organizations/token`, {
+      const OrgData = await fetch(`https://incodocs-server.onrender.com/organizations/token`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
