@@ -34,6 +34,7 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
@@ -352,8 +353,7 @@ export function ShippingBillDetails({
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
+                              <CalendarComponent
                                 selected={
                                   field.value ? new Date(field.value) : undefined
                                 }
