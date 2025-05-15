@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import {
   TableHeader,
   TableRow,
@@ -25,6 +25,10 @@ import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 import { FileUploadField } from "./FileUploadField";
+import CalendarComponent from "@/components/CalendarComponent";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+
 
 interface SaleInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
@@ -215,6 +219,8 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
                 <TableHead>SABER Invoice</TableHead>
+                <TableHead>Commercial Invoice Value</TableHead>
+                <TableHead>Commercial Invoice Date</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -283,6 +289,56 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                           name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl` as any}
                           storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
                         />
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceValue`}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="e.g., 1000"
+                            {...field}
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceDate`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button variant="outline">
+                                  {field.value
+                                    ? format(new Date(field.value), "PPPP")
+                                    : "Pick a date"}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent align="start">
+                              <CalendarComponent
+                                selected={
+                                  field.value ? new Date(field.value) : undefined
+                                }
+                                onSelect={(date) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>

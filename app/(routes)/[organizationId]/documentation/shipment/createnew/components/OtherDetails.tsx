@@ -31,6 +31,7 @@ import { FileUploadField } from "./FileUploadField";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { Path } from "react-hook-form";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import CalendarComponent from "@/components/CalendarComponent";
 
 // Define interfaces for TypeScript
 interface OtherDetail {
@@ -165,11 +166,11 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
         name="otherDetailsCount"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Number of Certificates</FormLabel>
+            <FormLabel>Number of Documents</FormLabel>
             <FormControl>
               <Input
                 type="number"
-                placeholder="Enter number of certificates"
+                placeholder="Enter number of documents"
                 value={field.value || 1}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -218,7 +219,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <FormControl>
                             <Input
                               placeholder="e.g., coo"
-                              value ={field.value as any || ""}
+                              value={field.value as any || ""}
                               onChange={field.onChange}
                               onBlur={() => {
                                 field.onBlur();
@@ -241,7 +242,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                             <Input
                               placeholder="e.g., hfsd89"
                               className="uppercase"
-                              value={field.value as any|| ""}
+                              value={field.value as any || ""}
                               onChange={field.onChange}
                               onBlur={() => {
                                 field.onBlur();
@@ -290,8 +291,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
+                              <CalendarComponent
                                 selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
@@ -314,7 +314,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <FormControl>
                             <Input
                               placeholder="e.g., don't know"
-                              value={field.value as any|| ""}
+                              value={field.value as any || ""}
                               onChange={field.onChange}
                               onBlur={() => {
                                 field.onBlur();
