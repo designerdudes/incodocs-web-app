@@ -78,7 +78,7 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
     const items = logs.map((log) => ({
         id: log._id,
         date: format(new Date(log.updatedAt), "PPP p"),
-        title: log.updatedBy,
+        title: log?.updatedBy,
         action: "updated shipment",
         description: `Updated ${log.changes
             .map((change) => change.field.replace(/([A-Z])/g, " $1").trim())
@@ -128,8 +128,8 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                   className="size-6 rounded-full"
                 /> */}
                                             <Avatar>
-                                                <AvatarImage src={item.image} alt={item.title} />
-                                                <AvatarFallback>{item.title[0]}</AvatarFallback>
+                                                <AvatarImage src={item.image} alt={item?.title} />
+                                                {/* <AvatarFallback>{item?.title[0]}</AvatarFallback> */}
                                             </Avatar>
 
                                         </TimelineIndicator>

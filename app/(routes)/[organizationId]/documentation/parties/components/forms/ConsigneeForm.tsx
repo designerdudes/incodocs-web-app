@@ -41,7 +41,8 @@ const formSchema = z.object({
       }
     ),
   address: z.string().optional(),
-  organizationId: z.string().optional()
+  organizationId: z.string().optional(),
+  upload: z.any().optional(),
 });
 
 interface AddConsigneeFormProps {
@@ -52,7 +53,6 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = useParams().organizationId;
 
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -60,7 +60,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
       email: "",
       mobileNo: "",
       address: "",
-      organizationId: ""
+      organizationId: "",
     },
   });
 
@@ -74,7 +74,7 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
         email: values.email,
         mobileNo: values.mobileNo,
         address: values.address,
-        organizationId: orgid
+        organizationId: orgid,
       };
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipment/consignee/create",
@@ -157,6 +157,23 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="upload"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload your documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}

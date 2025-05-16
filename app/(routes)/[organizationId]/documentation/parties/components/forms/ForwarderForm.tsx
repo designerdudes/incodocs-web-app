@@ -37,8 +37,8 @@ const formSchema = z.object({
       (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
       { message: "Enter a valid email" }
     ),
-  organizationId: z.string().optional()
-
+  organizationId: z.string().optional(),
+  upload:z.any().optional(),
 });
 
 interface ForwarderFormProps {
@@ -57,7 +57,8 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
-      organizationId: ""
+      organizationId: "",
+      upload:[]
 
     },
   });
@@ -174,6 +175,24 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
                   type="email"
                   placeholder="e.g., unknownname@123.com"
                   {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="upload"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload Documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e)=>field.onChange(e.target.files?.[0])}
                 />
               </FormControl>
               <FormMessage />

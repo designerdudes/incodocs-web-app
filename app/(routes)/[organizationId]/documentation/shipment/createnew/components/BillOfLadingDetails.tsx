@@ -54,6 +54,8 @@ interface FormData {
   };
 }
 
+import CalendarComponent from "@/components/CalendarComponent";
+
 interface BillOfLadingDetailsProps {
   saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
@@ -348,10 +350,11 @@ export function BillOfLadingDetails({
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? new Date(field.value as any) : undefined}
+                            <PopoverContent align="start">
+                              <CalendarComponent
+                                selected={
+                                  field.value ? new Date(field.value) : undefined
+                                }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -381,10 +384,11 @@ export function BillOfLadingDetails({
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value ? new Date(field.value as any) : undefined}
+                            <PopoverContent align="start">
+                              <CalendarComponent
+                                selected={
+                                  field.value ? new Date(field.value) : undefined
+                                }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());

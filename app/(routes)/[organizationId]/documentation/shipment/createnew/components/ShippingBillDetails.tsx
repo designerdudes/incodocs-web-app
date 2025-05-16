@@ -55,6 +55,8 @@ interface FormData {
   };
 }
 
+import CalendarComponent from "@/components/CalendarComponent";
+
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
@@ -386,8 +388,7 @@ export function ShippingBillDetails({
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
+                              <CalendarComponent
                                 selected={
                                   field.value ? new Date(field.value as any) : undefined
                                 }

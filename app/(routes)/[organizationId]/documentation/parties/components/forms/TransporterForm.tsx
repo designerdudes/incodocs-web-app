@@ -33,7 +33,8 @@ const formSchema = z.object({
     (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
     { message: "Enter a valid email address" }
   ),
-  organizationId: z.string().optional()
+  organizationId: z.string().optional(),
+  upload:z.any().optional()
 
 });
 
@@ -165,6 +166,19 @@ function Transporterform({ onSuccess }: TransporterFormProps) {
                 <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
               </FormControl>
               <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+
+          control={form.control}
+          name="upload"
+          render={({field})=>(
+            <FormItem>
+            <FormLabel>Upload Documents</FormLabel>
+            <FormControl>
+              <Input type="file" onChange={(e)=> field.onChange(e.target.files?.[0])}></Input>
+            </FormControl>
             </FormItem>
           )}
         />

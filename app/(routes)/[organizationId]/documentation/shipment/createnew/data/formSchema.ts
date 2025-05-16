@@ -168,6 +168,11 @@ export const formSchema = z.object({
             clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
             actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
             saberInvoiceUrl: z.string().url("Invalid URL").optional(),
+            commercialInvoiceValue: z.string().optional(),
+            commercialInvoiceDate: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
           })
         )
         .optional(),
