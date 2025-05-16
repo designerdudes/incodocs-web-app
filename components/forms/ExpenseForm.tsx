@@ -21,6 +21,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import CalendarComponent from "../CalendarComponent";
 
 const formSchema = z.object({
   expenseName: z
@@ -32,6 +33,9 @@ const formSchema = z.object({
   gstPercentage: z.enum(["0", "1", "5", "12", "18"], {
     errorMap: () => ({ message: "Invalid GST percentage selected" }),
   }),
+  paidBy: z.string().nonempty({ message: "Paid by is required" }),
+  purchasedBy: z.string().nonempty({ message: "Purchased by is required" }),
+  paymentProof: z.string().nonempty({ message: "Payment proof is required" }),
   expenseDate: z.string().nonempty({ message: "Expense date is required" }),
 });
 
@@ -45,6 +49,9 @@ export default function ExpenseCreateNewForm() {
       expenseName: "",
       expenseValue: 0,
       gstPercentage: "0",
+      paidBy: "",
+      purchasedBy: "",
+      paymentProof: "",
       expenseDate: "",
     },
   });
@@ -69,7 +76,7 @@ export default function ExpenseCreateNewForm() {
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 grid grid-cols-2 w-full">
           {/* Expense Name */}
           <FormField
             name="expenseName"
@@ -137,6 +144,66 @@ export default function ExpenseCreateNewForm() {
             )}
           />
 
+          {/* Paid By */}
+          <FormField
+            name="paidBy"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Paid By</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Paid By"
+                    disabled={isLoading}
+                    className="w-[40%]" // Limit width to 40%
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Purchased By */}
+          <FormField
+            name="purchasedBy"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Purchased By</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Purchased By"
+                    disabled={isLoading}
+                    className="w-[40%]" // Limit width to 40%
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Payment Proof */}
+          <FormField
+            name="paymentProof"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Proof</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Payment Proof"
+                    disabled={isLoading}
+                    className="w-[40%]" // Limit width to 40%
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Expense Date */}
           <FormField
             name="expenseDate"
@@ -162,15 +229,14 @@ export default function ExpenseCreateNewForm() {
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
+                        <CalendarComponent
                           selected={
                             field.value ? new Date(field.value) : undefined
                           }
                           onSelect={(date) =>
                             field.onChange(date ? date.toISOString() : "")
                           }
-                          initialFocus
+                          
                         />
                       </PopoverContent>
                     </Popover>

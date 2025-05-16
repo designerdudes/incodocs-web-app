@@ -13,8 +13,11 @@ import { cookies } from "next/headers";
 export type expense = {
     _id: string;
     expenseName: string;
-    expenseValue: string;
+    expenseValue: Number;
     gstPercentage: number;
+    paidBy: string;
+    purchasedBy: string;
+    paymentProof: string;
     expenseDate: string;
 }
 

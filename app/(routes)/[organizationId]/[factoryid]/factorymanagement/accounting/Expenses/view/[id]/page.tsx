@@ -88,7 +88,25 @@ export default async function ExpensePage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">GST Percentage</TableCell>
-                    <TableCell>{expenseData.gstPercentage}</TableCell>
+                    <TableCell>{expenseData.gstPercentage}%</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Paid By</TableCell>
+                    <TableCell>{expenseData.paidBy}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Purchased By</TableCell>
+                    <TableCell>{expenseData.purchasedBy}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Payment Proof</TableCell>
+                    <TableCell>
+                      <a href={expenseData.paymentProof} target="_blank" rel="noopener noreferrer">
+                        <Button variant="link" className="p-0 m-0">
+                        View Payment Proof
+                        </Button>
+                      </a>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Expense Date</TableCell>
