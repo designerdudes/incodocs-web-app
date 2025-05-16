@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -35,6 +35,37 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
+import { Path } from "react-hook-form";
+
+interface Invoice {
+  supplierInvoiceNumber: string;
+  supplierInvoiceDate: string;
+  supplierInvoiceValueWithGST: string;
+  supplierInvoiceValueWithOutGST: string;
+  clearanceSupplierInvoiceUrl: string;
+}
+
+interface Supplier {
+  supplierName: string;
+  noOfInvoices: number;
+  invoices: Invoice[];
+}
+
+interface FormData {
+  supplierDetails: {
+    clearance: {
+      noOfSuppliers: number;
+      suppliers: Supplier[];
+    };
+    actual: {
+      actualSupplierName: string;
+      actualSupplierInvoiceUrl: string;
+      actualSupplierInvoiceValue: string;
+      shippingBillUrl: string;
+    };
+    review: string;
+  };
+}
 import CalendarComponent from "@/components/CalendarComponent";
 
 interface SupplierDetailsProps {
@@ -52,75 +83,117 @@ function saveProgressSilently(data: any) {
   }
 }
 
+// Helper function to generate type-safe field names
+const getFieldName = <T extends FormData>(
+  supplierIndex: number,
+  field: keyof Supplier | `invoices[${number}].${keyof Invoice}`
+): Path<T> => `supplierDetails.clearance.suppliers[${supplierIndex}].${field}` as Path<T>;
+
 export function SupplierDetails({
   saveProgress,
   onSectionSubmit,
   params,
 }: SupplierDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
-
   const suppliersFromForm = watch("supplierDetails.clearance.suppliers") || [];
-  const [suppliers, setSuppliers] = useState<any[]>(suppliersFromForm);
   const [uploading, setUploading] = useState(false);
   const [supplierNames, setSupplierNames] = useState<{ _id: string; name: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingSupplierIndex, setPendingSupplierIndex] = useState<number | null>(null);
+  const [pendingSupplierCount, setPendingSupplierCount] = useState<number | null>(null);
   const [pendingInvoiceIndex, setPendingInvoiceIndex] = useState<{
     supplierIndex: number;
     count: number;
   } | null>(null);
   const GlobalModal = useGlobalModal();
 
-  // Sync local suppliers state with form state
+  // Debug confirmation state changes
   useEffect(() => {
-    setSuppliers(suppliersFromForm);
-  }, [suppliersFromForm]);
+    console.log("Confirmation state:", {
+      showConfirmation,
+      pendingSupplierCount,
+      pendingInvoiceIndex,
+      suppliersFromForm,
+    });
+  }, [showConfirmation, pendingSupplierCount, pendingInvoiceIndex, suppliersFromForm]);
 
+  // Fetch supplier names
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const supplierResponse = await fetch(
+          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
+        );
+        const supplierData = await supplierResponse.json();
+        const mappedSuppliers = supplierData.map((supplier: any) => ({
+          _id: supplier._id,
+          name: supplier.supplierName,
+        }));
+        setSupplierNames(mappedSuppliers);
+      } catch (error) {
+        console.error("Error fetching supplier data:", error);
+      }
+    };
+    fetchData();
+  }, [organizationId]);
 
   const handleSupplierCountChange = (value: string) => {
+    console.log("handleSupplierCountChange called with value:", value);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
+
+    if (newCount < suppliersFromForm.length) {
+      console.log("Reducing supplier count from", suppliersFromForm.length, "to", newCount);
+      setShowConfirmation(true);
+      setPendingSupplierCount(newCount);
+      setPendingInvoiceIndex(null);
+      return;
+    }
+
     handleDynamicArrayCountChange({
-      value,
+      value: newCount.toString(),
       watch,
       setValue,
       getValues,
       fieldName: "supplierDetails.clearance.suppliers",
       createNewItem: () => ({
         supplierName: "",
-        noOfInvoices: 0,
-        invoices: [],
+        noOfInvoices: 1,
+        invoices: [
+          {
+            supplierInvoiceNumber: "",
+            supplierInvoiceDate: "",
+            supplierInvoiceValueWithGST: "",
+            supplierInvoiceValueWithOutGST: "",
+            clearanceSupplierInvoiceUrl: "",
+          },
+        ],
       }),
       customFieldSetters: {
         "supplierDetails.clearance.suppliers": (items, setValue) => {
           setValue("supplierDetails.clearance.noOfSuppliers", items.length);
-          setSuppliers(items);
         },
       },
       saveCallback: saveProgressSilently,
-      isDataFilled: (item) =>
-        !!item.supplierName || item.invoices?.length > 0,
-      onRequireConfirmation: (pendingItems, confirmedCallback) => {
-        setShowConfirmation(true);
-        setPendingSupplierIndex(suppliers.length - pendingItems.length);
-        setPendingInvoiceIndex(null);
-      },
     });
   };
 
   const handleInvoiceCountChange = (supplierIndex: number, value: string) => {
-    const supplier = suppliers[supplierIndex];
-    const currentInvoices = supplier?.invoices || [];
-    const newCount = Math.max(0, parseInt(value, 10) || 0);
+    console.log("handleInvoiceCountChange called with value:", value, "for supplierIndex:", supplierIndex);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
 
+    const currentInvoices = suppliersFromForm[supplierIndex]?.invoices || [];
     if (newCount < currentInvoices.length) {
+      console.log("Reducing invoice count from", currentInvoices.length, "to", newCount);
       setShowConfirmation(true);
       setPendingInvoiceIndex({ supplierIndex, count: newCount });
-      setPendingSupplierIndex(null);
+      setPendingSupplierCount(null);
       return;
     }
 
     handleDynamicArrayCountChange({
-      value,
+      value: newCount.toString(),
       watch,
       setValue,
       getValues,
@@ -141,40 +214,30 @@ export function SupplierDetails({
             `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`,
             items.length
           );
-          const updatedSuppliers = [...suppliers];
-          updatedSuppliers[supplierIndex].invoices = items;
-          setSuppliers(updatedSuppliers);
-          setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
         },
       },
       saveCallback: saveProgressSilently,
-      isDataFilled: (item) =>
-        !!item.supplierInvoiceNumber ||
-        !!item.supplierInvoiceDate ||
-        !!item.supplierInvoiceValueWithGST ||
-        !!item.supplierInvoiceValueWithOutGST ||
-        !!item.clearanceSupplierInvoiceUrl,
     });
   };
 
   const handleConfirmChange = () => {
-    if (pendingSupplierIndex !== null) {
-      const updatedSuppliers = suppliers.slice(0, pendingSupplierIndex);
-      setSuppliers(updatedSuppliers);
+    console.log("handleConfirmChange called with:", { pendingSupplierCount, pendingInvoiceIndex });
+    if (pendingSupplierCount !== null) {
+      const updatedSuppliers = suppliersFromForm.slice(0, pendingSupplierCount);
       setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
       setValue("supplierDetails.clearance.noOfSuppliers", updatedSuppliers.length);
       saveProgressSilently(getValues());
-      setPendingSupplierIndex(null);
+      setPendingSupplierCount(null);
     } else if (pendingInvoiceIndex !== null) {
       const { supplierIndex, count } = pendingInvoiceIndex;
-      const updatedSuppliers = [...suppliers];
-      updatedSuppliers[supplierIndex].invoices = updatedSuppliers[
-        supplierIndex
-      ].invoices.slice(0, count);
-      setSuppliers(updatedSuppliers);
+      const updatedSuppliers = [...suppliersFromForm];
+      updatedSuppliers[supplierIndex].invoices = updatedSuppliers[supplierIndex].invoices.slice(
+        0,
+        count
+      );
       setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
       setValue(
-        `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`,
+        `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`as any,
         count
       );
       saveProgressSilently(getValues());
@@ -198,7 +261,7 @@ export function SupplierDetails({
       );
       const data = await response.json();
       const storageUrl = data.url;
-      setValue(fieldName, storageUrl);
+      setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
       console.error("Upload error:", error);
@@ -207,27 +270,6 @@ export function SupplierDetails({
       setUploading(false);
     }
   };
-
-  // Fetch supplier names
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const supplierResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
-        );
-        const supplierData = await supplierResponse.json();
-        const mappedSuppliers = supplierData.map((supplier: any) => ({
-          _id: supplier._id,
-          name: supplier.supplierName,
-        }));
-        setSupplierNames(mappedSuppliers);
-      } catch (error) {
-        console.error("Error fetching supplier data:", error);
-      }
-    };
-    fetchData();
-  }, [organizationId]);
-
 
   const openSupplierForm = () => {
     GlobalModal.title = "Add New Supplier";
@@ -270,13 +312,19 @@ export function SupplierDetails({
                 <Input
                   type="number"
                   placeholder="Enter number of suppliers"
-                  value={field.value || ""}
+                  value={field.value ?? 1}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (value === "" || parseInt(value, 10) < 0) return;
-                    field.onChange(parseInt(value, 10));
+                    if (value === "") {
+                      field.onChange(1);
+                      handleSupplierCountChange("1");
+                      return;
+                    }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
                     handleSupplierCountChange(value);
                   }}
+                  min={1}
                 />
               </FormControl>
               <FormMessage />
@@ -285,9 +333,9 @@ export function SupplierDetails({
         />
       </div>
 
-      {suppliers.length > 0 && (
+      {suppliersFromForm.length > 0 && (
         <div className="col-span-4 mt-4">
-          {suppliers.map((supplier: any, supplierIndex: number) => (
+          {suppliersFromForm.map((supplier: any, supplierIndex: number) => (
             <div key={supplierIndex} className="mb-8">
               <div className="text-lg font-semibold mb-2">
                 Supplier {supplierIndex + 1}
@@ -295,14 +343,14 @@ export function SupplierDetails({
               <div className="grid grid-cols-4 gap-3">
                 <FormField
                   control={control}
-                  name={`supplierDetails.clearance.suppliers[${supplierIndex}].supplierName`}
+                  name={getFieldName(supplierIndex, "supplierName")}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Supplier</FormLabel>
                       <FormControl>
                         <EntityCombobox
                           entities={supplierNames}
-                          value={field.value || ""}
+                          value={field.value as any || ""}
                           onChange={(value) => {
                             field.onChange(value);
                             saveProgressSilently(getValues());
@@ -319,7 +367,7 @@ export function SupplierDetails({
                 />
                 <FormField
                   control={control}
-                  name={`supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`}
+                  name={getFieldName(supplierIndex, "noOfInvoices")}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Number of Invoices</FormLabel>
@@ -327,13 +375,19 @@ export function SupplierDetails({
                         <Input
                           type="number"
                           placeholder="Enter number of invoices"
-                          value={field.value || ""}
+                          value={field.value as any ?? 1}
                           onChange={(e) => {
                             const value = e.target.value;
-                            if (value === "" || parseInt(value, 10) < 0) return;
-                            field.onChange(parseInt(value, 10));
+                            if (value === "") {
+                              field.onChange(1);
+                              handleInvoiceCountChange(supplierIndex, "1");
+                              return;
+                            }
+                            const numericValue = Number(value);
+                            field.onChange(numericValue);
                             handleInvoiceCountChange(supplierIndex, value);
                           }}
+                          min={1}
                         />
                       </FormControl>
                       <FormMessage />
@@ -363,16 +417,18 @@ export function SupplierDetails({
                           <TableCell>
                             <FormField
                               control={control}
-                              name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].supplierInvoiceNumber`}
+                              name={getFieldName(
+                                supplierIndex,
+                                `invoices[${invoiceIndex}].supplierInvoiceNumber`
+                              )}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., INV789"
-                                      {...field}
-                                      onBlur={() =>
-                                        saveProgressSilently(getValues())
-                                      }
+                                      value={field.value as any  || ""}
+                                      onChange={field.onChange}
+                                      onBlur={() => saveProgressSilently(getValues())}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -383,19 +439,33 @@ export function SupplierDetails({
                           <TableCell>
                             <FormField
                               control={control}
-                              name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`}
+                              name={getFieldName(
+                                supplierIndex,
+                                `invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`
+                              )}
                               render={({ field }) => (
-                                <FileUploadField
-                                  name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl` as any}
-                                  storageKey={`supplierDetails_clearance_suppliers${supplierIndex}`}
-                                />
+                                <FormItem>
+                                  <FormControl>
+                                    <FileUploadField
+                                      name={getFieldName(
+                                        supplierIndex,
+                                        `invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`
+                                      )}
+                                      storageKey={`supplierDetails_clearance_suppliers${supplierIndex}_invoice${invoiceIndex}`}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
                               )}
                             />
                           </TableCell>
                           <TableCell>
                             <FormField
                               control={control}
-                              name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].supplierInvoiceDate`}
+                              name={getFieldName(
+                                supplierIndex,
+                                `invoices[${invoiceIndex}].supplierInvoiceDate`
+                              )}
                               render={({ field }) => (
                                 <FormItem>
                                   <Popover>
@@ -403,10 +473,7 @@ export function SupplierDetails({
                                       <FormControl>
                                         <Button variant="outline">
                                           {field.value
-                                            ? format(
-                                              new Date(field.value),
-                                              "PPPP"
-                                            )
+                                            ? format(new Date(field.value as any ), "PPPP")
                                             : "Pick a date"}
                                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -415,9 +482,7 @@ export function SupplierDetails({
                                     <PopoverContent align="start">
                                       <CalendarComponent
                                         selected={
-                                          field.value
-                                            ? new Date(field.value)
-                                            : undefined
+                                          field.value ? new Date(field.value as any ) : undefined
                                         }
                                         onSelect={(date) => {
                                           field.onChange(date?.toISOString());
@@ -434,16 +499,18 @@ export function SupplierDetails({
                           <TableCell>
                             <FormField
                               control={control}
-                              name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].supplierInvoiceValueWithGST`}
+                              name={getFieldName(
+                                supplierIndex,
+                                `invoices[${invoiceIndex}].supplierInvoiceValueWithGST`
+                              )}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., 1000"
-                                      {...field}
-                                      onBlur={() =>
-                                        saveProgressSilently(getValues())
-                                      }
+                                      value={field.value as any|| ""}
+                                      onChange={field.onChange}
+                                      onBlur={() => saveProgressSilently(getValues())}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -454,16 +521,18 @@ export function SupplierDetails({
                           <TableCell>
                             <FormField
                               control={control}
-                              name={`supplierDetails.clearance.suppliers[${supplierIndex}].invoices[${invoiceIndex}].supplierInvoiceValueWithOutGST`}
+                              name={getFieldName(
+                                supplierIndex,
+                                `invoices[${invoiceIndex}].supplierInvoiceValueWithOutGST`
+                              )}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., 900"
-                                      {...field}
-                                      onBlur={() =>
-                                        saveProgressSilently(getValues())
-                                      }
+                                      value={field.value as any|| ""}
+                                      onChange={field.onChange}
+                                      onBlur={() => saveProgressSilently(getValues())}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -477,20 +546,13 @@ export function SupplierDetails({
                               size="sm"
                               type="button"
                               onClick={() => {
-                                const updatedSuppliers = [...suppliers];
-                                updatedSuppliers[supplierIndex].invoices =
-                                  updatedSuppliers[
-                                    supplierIndex
-                                  ].invoices.filter(
-                                    (_: any, i: number) => i !== invoiceIndex
-                                  );
-                                setSuppliers(updatedSuppliers);
+                                const updatedSuppliers = [...suppliersFromForm];
+                                updatedSuppliers[supplierIndex].invoices = updatedSuppliers[
+                                  supplierIndex
+                                ].invoices.filter((_: any, i: number) => i !== invoiceIndex);
+                                setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
                                 setValue(
-                                  "supplierDetails.clearance.suppliers",
-                                  updatedSuppliers
-                                );
-                                setValue(
-                                  `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`,
+                                  `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`as any,
                                   updatedSuppliers[supplierIndex].invoices.length
                                 );
                                 saveProgressSilently(getValues());
@@ -525,7 +587,8 @@ export function SupplierDetails({
                 <Input
                   placeholder="e.g., ASI101"
                   className="uppercase"
-                  {...field}
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
@@ -539,10 +602,13 @@ export function SupplierDetails({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Upload Actual Supplier Invoice</FormLabel>
-              <FileUploadField
-                name={`supplierDetails.actual.actualSupplierInvoiceUrl` as any}
-                storageKey={`supplierDetails_actualSupplierInvoice`}
-              />
+              <FormControl>
+                <FileUploadField
+                  name="supplierDetails.actual.actualSupplierInvoiceUrl"
+                  storageKey="supplierDetails_actualSupplierInvoice"
+                />
+              </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
@@ -555,7 +621,8 @@ export function SupplierDetails({
               <FormControl>
                 <Input
                   placeholder="e.g., 1100"
-                  {...field}
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
@@ -569,10 +636,12 @@ export function SupplierDetails({
           render={({ field }) => (
             <FormItem>
               <FormLabel>Shipping Bill URL</FormLabel>
-              <FileUploadField
-                name={`supplierDetails.actual.shippingBillUrl` as any}
-                storageKey={`supplierDetails_shippingBillUrl`}
-              />
+              <FormControl>
+                <FileUploadField
+                  name="supplierDetails.actual.shippingBillUrl"
+                  storageKey="supplierDetails_shippingBillUrl"
+                />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -586,7 +655,8 @@ export function SupplierDetails({
               <FormControl>
                 <Textarea
                   placeholder="e.g., this is some random comment"
-                  {...field}
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
@@ -600,13 +670,13 @@ export function SupplierDetails({
         isOpen={showConfirmation}
         onClose={() => {
           setShowConfirmation(false);
-          setPendingSupplierIndex(null);
+          setPendingSupplierCount(null);
           setPendingInvoiceIndex(null);
         }}
         onConfirm={handleConfirmChange}
         title="Are you sure?"
         description={
-          pendingSupplierIndex !== null
+          pendingSupplierCount !== null
             ? "You are reducing the number of suppliers. This action cannot be undone."
             : "You are reducing the number of invoices. This action cannot be undone."
         }

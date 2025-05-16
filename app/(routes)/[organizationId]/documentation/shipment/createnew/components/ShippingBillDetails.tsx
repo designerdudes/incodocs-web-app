@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Eye, Trash, UploadCloud, View } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -34,6 +34,27 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
+import { Path } from "react-hook-form";
+
+interface ShippingBill {
+  shippingBillUrl: string;
+  shippingBillNumber: string;
+  shippingBillDate: string;
+  drawbackValue: string;
+  rodtepValue: string;
+}
+
+interface FormData {
+  shippingBillDetails: {
+    cbName: string;
+    cbCode: string;
+    portCode: string;
+    noOfShippingBills: number;
+    ShippingBills: ShippingBill[];
+    review: string;
+  };
+}
+
 import CalendarComponent from "@/components/CalendarComponent";
 
 interface ShippingBillDetailsProps {
@@ -51,33 +72,32 @@ function saveProgressSilently(data: any) {
   }
 }
 
+// Helper function to generate type-safe field names
+const getFieldName = <T extends FormData>(
+  index: number,
+  field: keyof ShippingBill
+): Path<T> => `shippingBillDetails.ShippingBills[${index}].${field}` as Path<T>;
+
 export function ShippingBillDetails({
   saveProgress,
   onSectionSubmit,
   params,
 }: ShippingBillDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
   const selectedCbName = watch("shippingBillDetails.cbName");
   const [CBNames, setCBNames] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<(File | null)[]>([]);
-  const [uploadedStatus, setUploadedStatus] = useState<boolean[]>([]);
   const GlobalModal = useGlobalModal();
 
+  // Debug confirmation state changes
   useEffect(() => {
-    const initialStatus = shippingBillsFromForm.map((bill: any) =>
-      bill.shippingBillUrl ? true : false
-    );
-    const initialFiles = shippingBillsFromForm.map(() => null);
-    setUploadedStatus(initialStatus);
-    setSelectedFiles(initialFiles);
-  }, [shippingBillsFromForm.length]);
+    console.log("Confirmation state:", { showConfirmation, pendingBillCount, shippingBillsFromForm });
+  }, [showConfirmation, pendingBillCount, shippingBillsFromForm]);
 
-
-  // Fetch CB Names 
+  // Fetch CB Names
   useEffect(() => {
     const fetchCBNames = async () => {
       try {
@@ -93,7 +113,7 @@ export function ShippingBillDetails({
         setCBNames(mappedCBNames);
       } catch (error) {
         console.error("Error fetching CB Names:", error);
-        // toast.error("Failed to load CB names");
+        toast.error("Failed to load CB names");
       }
     };
     fetchCBNames();
@@ -115,8 +135,19 @@ export function ShippingBillDetails({
   }, [selectedCbName, CBNames, setValue, getValues]);
 
   const handleShippingBillCountChange = (value: string) => {
+    console.log("handleShippingBillCountChange called with value:", value);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
+
+    if (newCount < shippingBillsFromForm.length) {
+      console.log("Reducing shipping bill count from", shippingBillsFromForm.length, "to", newCount);
+      setShowConfirmation(true);
+      setPendingBillCount(newCount);
+      return;
+    }
+
     handleDynamicArrayCountChange({
-      value,
+      value: newCount.toString(),
       watch,
       setValue,
       getValues,
@@ -134,16 +165,6 @@ export function ShippingBillDetails({
         },
       },
       saveCallback: saveProgressSilently,
-      isDataFilled: (item) =>
-        !!item.shippingBillUrl ||
-        !!item.shippingBillNumber ||
-        !!item.shippingBillDate ||
-        !!item.drawbackValue ||
-        !!item.rodtepValue,
-      onRequireConfirmation: (pendingItems) => {
-        setShowConfirmation(true);
-        setPendingBillCount(pendingItems.length);
-      },
     });
   };
 
@@ -157,6 +178,7 @@ export function ShippingBillDetails({
   };
 
   const handleConfirmChange = () => {
+    console.log("handleConfirmChange called with pendingBillCount:", pendingBillCount);
     if (pendingBillCount !== null) {
       const updatedShippingBills = shippingBillsFromForm.slice(0, pendingBillCount);
       setValue("shippingBillDetails.ShippingBills", updatedShippingBills);
@@ -187,6 +209,7 @@ export function ShippingBillDetails({
             saveProgressSilently(getValues());
           } catch (error) {
             console.error("Error refreshing CB names:", error);
+            toast.error("Failed to refresh CB names");
           }
           GlobalModal.onClose();
         }}
@@ -213,7 +236,7 @@ export function ShippingBillDetails({
                   saveProgressSilently(getValues());
                 }}
                 displayProperty="name"
-                placeholder="Select a Custom Broker "
+                placeholder="Select a Custom Broker"
                 onAddNew={openCBNameForm}
                 addNewLabel="Add New Custom Broker"
               />
@@ -252,7 +275,8 @@ export function ShippingBillDetails({
               <Input
                 placeholder="e.g., SB101"
                 className="uppercase"
-                {...field}
+                value={field.value || ""}
+                onChange={field.onChange}
                 onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
@@ -271,13 +295,19 @@ export function ShippingBillDetails({
               <Input
                 type="number"
                 placeholder="Enter number"
-                value={field.value || ""}
+                value={field.value ?? 1}
                 onChange={(e) => {
                   const value = e.target.value;
-                  if (value === "" || parseInt(value, 10) < 0) return;
-                  field.onChange(parseInt(value, 10));
+                  if (value === "") {
+                    field.onChange(1);
+                    handleShippingBillCountChange("1");
+                    return;
+                  }
+                  const numericValue = Number(value);
+                  field.onChange(numericValue);
                   handleShippingBillCountChange(value);
                 }}
+                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -306,14 +336,15 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillNumber`}
+                      name={getFieldName(index, "shippingBillNumber")}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               placeholder="e.g., 34583"
                               className="uppercase"
-                              {...field}
+                              value={field.value as any || ""}
+                              onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -325,20 +356,24 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
+                      name={getFieldName(index, "shippingBillUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`shippingBillDetails.ShippingBills[${index}].shippingBillUrl`}
-                          storageKey={`shippingBill_${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName(index, "shippingBillUrl")}
+                              storageKey={`shippingBill_${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
-
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].shippingBillDate`}
+                      name={getFieldName(index, "shippingBillDate")}
                       render={({ field }) => (
                         <FormItem>
                           <Popover>
@@ -346,7 +381,7 @@ export function ShippingBillDetails({
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -355,7 +390,7 @@ export function ShippingBillDetails({
                             <PopoverContent align="start">
                               <CalendarComponent
                                 selected={
-                                  field.value ? new Date(field.value) : undefined
+                                  field.value ? new Date(field.value as any) : undefined
                                 }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
@@ -372,13 +407,14 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].drawbackValue`}
+                      name={getFieldName(index, "drawbackValue")}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               placeholder="e.g., 2394"
-                              {...field}
+                              value={field.value as any || ""}
+                              onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -390,13 +426,14 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.ShippingBills[${index}].rodtepValue`}
+                      name={getFieldName(index, "rodtepValue")}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               placeholder="e.g., 8934"
-                              {...field}
+                              value={field.value as any || ""}
+                              onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -431,7 +468,8 @@ export function ShippingBillDetails({
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment"
-                {...field}
+                value={field.value || ""}
+                onChange={field.onChange}
                 onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>

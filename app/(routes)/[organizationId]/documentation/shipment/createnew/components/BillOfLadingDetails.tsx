@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -35,6 +35,25 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
+import { Path } from "react-hook-form";
+
+// Define interfaces for TypeScript
+interface BillOfLading {
+  blNumber: string;
+  blDate: string;
+  telexDate: string;
+  uploadBLUrl: string;
+}
+
+interface FormData {
+  blDetails: {
+    noOfBl: number;
+    shippingLineName: string;
+    review: string;
+    Bl: BillOfLading[];
+  };
+}
+
 import CalendarComponent from "@/components/CalendarComponent";
 
 interface BillOfLadingDetailsProps {
@@ -52,12 +71,18 @@ function saveProgressSilently(data: any) {
   }
 }
 
+// Helper function to generate type-safe field names
+const getFieldName = <T extends FormData>(
+  index: number,
+  field: keyof BillOfLading
+): Path<T> => `blDetails.Bl[${index}].${field}` as Path<T>;
+
 export function BillOfLadingDetails({
   saveProgress,
   onSectionSubmit,
   params,
 }: BillOfLadingDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
   const blFromForm = watch("blDetails.Bl") || [];
   const [uploading, setUploading] = useState(false);
@@ -81,15 +106,31 @@ export function BillOfLadingDetails({
         setShippingLines(mappedShippingLines);
       } catch (error) {
         console.error("Error fetching shipping lines:", error);
-        // toast.error("Failed to load shipping lines");
+        toast.error("Failed to load shipping lines");
       }
     };
     fetchShippingLines();
   }, [organizationId]);
 
+  // Debug confirmation state changes
+  useEffect(() => {
+    console.log("Confirmation state:", { showConfirmation, pendingBlCount, blFromForm });
+  }, [showConfirmation, pendingBlCount, blFromForm]);
+
   const handleBlCountChange = (value: string) => {
+    console.log("handleBlCountChange called with value:", value);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
+
+    if (newCount < blFromForm.length) {
+      console.log("Reducing BL count from", blFromForm.length, "to", newCount);
+      setShowConfirmation(true);
+      setPendingBlCount(newCount);
+      return;
+    }
+
     handleDynamicArrayCountChange({
-      value,
+      value: newCount.toString(),
       watch,
       setValue,
       getValues,
@@ -106,15 +147,6 @@ export function BillOfLadingDetails({
         },
       },
       saveCallback: saveProgressSilently,
-      isDataFilled: (item) =>
-        !!item.blNumber ||
-        !!item.blDate ||
-        !!item.telexDate ||
-        !!item.uploadBLUrl,
-      onRequireConfirmation: (pendingItems, confirmedCallback) => {
-        setShowConfirmation(true);
-        setPendingBlCount(pendingItems.length);
-      },
     });
   };
 
@@ -126,6 +158,7 @@ export function BillOfLadingDetails({
   };
 
   const handleConfirmChange = () => {
+    console.log("handleConfirmChange called with pendingBlCount:", pendingBlCount);
     if (pendingBlCount !== null) {
       const updatedBlEntries = blFromForm.slice(0, pendingBlCount);
       setValue("blDetails.Bl", updatedBlEntries);
@@ -151,7 +184,7 @@ export function BillOfLadingDetails({
       );
       const data = await response.json();
       const storageUrl = data.url;
-      setValue(fieldName, storageUrl);
+      setValue(fieldName as any, storageUrl) ;
       saveProgressSilently(getValues());
     } catch (error) {
       console.error("Upload error:", error);
@@ -225,13 +258,19 @@ export function BillOfLadingDetails({
                 <Input
                   type="number"
                   placeholder="Enter number of BLs"
-                  value={field.value || ""}
+                  value={field.value ?? 1}
                   onChange={(e) => {
                     const value = e.target.value;
-                    if (value === "" || parseInt(value, 10) < 0) return;
-                    field.onChange(parseInt(value, 10));
+                    if (value === "") {
+                      field.onChange(1);
+                      handleBlCountChange("1");
+                      return;
+                    }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
                     handleBlCountChange(value);
                   }}
+                  min={1}
                 />
               </FormControl>
               <FormMessage />
@@ -260,14 +299,15 @@ export function BillOfLadingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`blDetails.Bl[${index}].blNumber`}
+                      name={getFieldName<FormData>(index, "blNumber")}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               placeholder="e.g., BL456"
                               className="uppercase"
-                              {...field}
+                              value={field.value as any|| ""}
+                              onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
                           </FormControl>
@@ -279,27 +319,32 @@ export function BillOfLadingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`blDetails.Bl[${index}].uploadBLUrl`}
+                      name={getFieldName<FormData>(index, "uploadBLUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`blDetails.Bl[${index}].uploadBLUrl`}
-                          storageKey={`blDetails_Bl${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "uploadBLUrl")}
+                              storageKey={`blDetails_Bl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`blDetails.Bl[${index}].blDate`}
+                      name={getFieldName<FormData>(index, "blDate")}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col gap-2">
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
-                                <Button variant="outline">
+                                <Button variant="outline" className="w-full">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -325,15 +370,15 @@ export function BillOfLadingDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`blDetails.Bl[${index}].telexDate`}
+                      name={getFieldName<FormData>(index, "telexDate")}
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="flex flex-col gap-2">
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
-                                <Button variant="outline">
+                                <Button variant="outline" className="w-full">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -356,7 +401,6 @@ export function BillOfLadingDetails({
                       )}
                     />
                   </TableCell>
-
                   <TableCell>
                     <Button
                       variant="destructive"
@@ -385,7 +429,8 @@ export function BillOfLadingDetails({
               <FormControl>
                 <Textarea
                   placeholder="e.g., this is some random comment for bill of lading details"
-                  {...field}
+                  value={field.value || ""}
+                  onChange={field.onChange}
                   onBlur={() => saveProgressSilently(getValues())}
                 />
               </FormControl>
