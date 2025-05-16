@@ -1,10 +1,11 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Eye } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./expensesCell-Action"
 import { expense } from "../page"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export const expensecolumns: ColumnDef<expense>[] = [
     {
@@ -59,7 +60,15 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.expenseValue}
+                {
+                    new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+
+                    }).format(row?.original?.expenseValue as any)
+
+                }
             </div>
         ),
     },
@@ -76,8 +85,84 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.gstPercentage}
+                {row.original.gstPercentage}%
             </div>
+        ),
+    },
+    {
+        accessorKey: "paidBy",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Paid By
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize flex items-center gap-2 ">
+
+                {row.original.paidBy && <Avatar className="h-6 w-6">
+                    <AvatarImage
+                        src={row.original.paidBy || ""}
+                        alt={row.original.paidBy || "Unknown"}
+                    />
+                    <AvatarFallback>
+                        {row.original.paidBy?.charAt(0) || ""}
+                    </AvatarFallback>
+                </Avatar>}
+                {row.original.paidBy}
+            </div>
+
+        ),
+    },
+    {
+        accessorKey: "purchasedBy", // ✅ Correct key
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Purchased By
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize flex items-center gap-2 ">
+
+                {row.original.purchasedBy && <Avatar className="h-6 w-6">
+                    <AvatarImage
+                        src={row.original.purchasedBy || ""}
+                        alt={row.original.purchasedBy || "Unknown"}
+                    />
+                    <AvatarFallback>
+                        {row.original.purchasedBy?.charAt(0) || ""}
+                    </AvatarFallback>
+                </Avatar>}
+                {row.original.purchasedBy}
+            </div>
+
+        ),
+    },
+    {
+        accessorKey: "paymentProof", // ✅ Correct key
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Payment Proof
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize flex items-center justify-center gap-2 ">
+            {row.original.paymentProof &&    <Button size={"icon"} variant="outline"
+            onClick={() => window.open(row.original.paymentProof, "_blank")}
+            ><Eye className="h-4 w-4" /></Button>}
+            </div>
+
         ),
     },
     {
@@ -93,7 +178,7 @@ export const expensecolumns: ColumnDef<expense>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {new Date(row.original.expenseDate).toLocaleDateString()} 
+                {new Date(row.original.expenseDate).toLocaleDateString()}
             </div>
         ),
     },
