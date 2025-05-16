@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Trash, UploadCloud } from "lucide-react";
+import { Trash } from "lucide-react";
 import {
   TableHeader,
   TableRow,
@@ -21,30 +21,63 @@ import {
   TableCell,
   Table,
 } from "@/components/ui/table";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { SaveDetailsProps } from "./BookingDetails";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 import { FileUploadField } from "./FileUploadField";
+import { Path } from "react-hook-form";
 
-interface SaleInvoiceDetailsProps extends SaveDetailsProps {
+interface CommercialInvoice {
+  commercialInvoiceNumber: string;
+  packingListUrl: string;
+  clearanceCommercialInvoiceUrl: string;
+  actualCommercialInvoiceUrl: string;
+  saberInvoiceUrl: string;
+}
+
+interface FormData {
+  saleInvoiceDetails: {
+    consignee: string;
+    actualBuyer: string;
+    numberOfSalesInvoices: number;
+    commercialInvoices: CommercialInvoice[];
+    review: string;
+  };
+}
+
+interface CommercialInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   params: string | string[];
 }
 
-
 function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
+  try {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
 }
 
-export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params }: SaleInvoiceDetailsProps) {
-  const { control, setValue, watch, getValues } = useFormContext();
+// Helper function to generate type-safe field names
+const getFieldName = <T extends FormData>(
+  index: number,
+  field: keyof CommercialInvoice
+): Path<T> => `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
+
+export function CommercialInvoiceDetails({
+  saveProgress,
+  onSectionSubmit,
+  params,
+}: CommercialInvoiceDetailsProps) {
+  const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
-  console.log(organizationId)
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
-  const [invoices, setInvoices] = useState<any[]>(invoicesFromForm);
   const [uploading, setUploading] = useState(false);
   const [consignees, setConsignees] = useState<any[]>([]);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
 
   // Fetch consignees on mount
@@ -61,35 +94,57 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
       }
     };
     fetchConsignees();
-  }, []);
+  }, [organizationId]);
+
+  // Debug confirmation state changes
+  useEffect(() => {
+    console.log("Confirmation state:", { showConfirmation, pendingInvoiceCount, invoicesFromForm });
+  }, [showConfirmation, pendingInvoiceCount, invoicesFromForm]);
 
   const handleDelete = (index: number) => {
-    const updatedInvoices = invoices.filter((_, i) => i !== index);
-    setInvoices(updatedInvoices);
+    const updatedInvoices = invoicesFromForm.filter((_, i) => i !== index);
     setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
     saveProgressSilently(getValues());
   };
 
   const handleInvoiceNumberCountChange = (value: string) => {
-    const count = parseInt(value, 10);
-    if (!isNaN(count) && count > 0) {
-      const currentInvoices = watch("saleInvoiceDetails.commercialInvoices") || [];
-      const newInvoices = Array.from({ length: count }, (_, i) =>
-        currentInvoices[i] || {
-          commercialInvoiceNumber: "",
-          clearanceCommercialInvoiceUrl: "",
-          actualCommercialInvoiceUrl: "",
-          saberInvoiceUrl: "",
-        }
-      );
-      setInvoices(newInvoices);
-      setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
-      saveProgressSilently(getValues());
-    } else {
-      setInvoices([]);
-      setValue("saleInvoiceDetails.commercialInvoices", []);
-      saveProgressSilently(getValues());
+    console.log("handleInvoiceNumberCountChange called with value:", value);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
+
+    if (newCount < invoicesFromForm.length) {
+      console.log("Reducing invoice count from", invoicesFromForm.length, "to", newCount);
+      setShowConfirmation(true);
+      setPendingInvoiceCount(newCount);
+      return;
     }
+
+    const currentInvoices = invoicesFromForm;
+    const newInvoices = Array.from({ length: newCount }, (_, i) =>
+      currentInvoices[i] || {
+        commercialInvoiceNumber: "",
+        packingListUrl: "",
+        clearanceCommercialInvoiceUrl: "",
+        actualCommercialInvoiceUrl: "",
+        saberInvoiceUrl: "",
+      }
+    );
+    setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", newInvoices.length);
+    saveProgressSilently(getValues());
+  };
+
+  const handleConfirmChange = () => {
+    console.log("handleConfirmChange called with pendingInvoiceCount:", pendingInvoiceCount);
+    if (pendingInvoiceCount !== null) {
+      const updatedInvoices = invoicesFromForm.slice(0, pendingInvoiceCount);
+      setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
+      setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+      saveProgressSilently(getValues());
+      setPendingInvoiceCount(null);
+    }
+    setShowConfirmation(false);
   };
 
   const handleFileUpload = async (file: File, fieldName: string) => {
@@ -98,17 +153,20 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
       const data = await response.json();
       const storageUrl = data.url;
-      setValue(fieldName, storageUrl);
+      setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
-      alert("Failed to upload file. Please try again.");
       console.error("Upload error:", error);
+      alert("Failed to upload file. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -122,7 +180,10 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
         onSuccess={() => {
           fetch(`https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())
-            .then((data) => setConsignees(data));
+            .then((data) => {
+              setConsignees(data);
+              saveProgressSilently(getValues());
+            });
         }}
       />
     );
@@ -166,7 +227,8 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
             <FormControl>
               <Input
                 placeholder="e.g., Khan"
-                {...field}
+                value={field.value || ""}
+                onChange={field.onChange}
                 onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
@@ -185,18 +247,19 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
               <Input
                 type="number"
                 placeholder="Enter number of invoices"
-                value={field.value === 0 ? "" : field.value}
+                value={field.value ?? 1}
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === "") {
-                    field.onChange("");
-                    handleInvoiceNumberCountChange("");
+                    field.onChange(1);
+                    handleInvoiceNumberCountChange("1");
                     return;
                   }
-                  const numericValue = Math.max(0, Number(value));
-                  field.onChange(numericValue.toString());
-                  handleInvoiceNumberCountChange(numericValue.toString());
+                  const numericValue = Number(value);
+                  field.onChange(numericValue);
+                  handleInvoiceNumberCountChange(value);
                 }}
+                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -204,14 +267,14 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
         )}
       />
 
-      {invoices.length > 0 && (
+      {invoicesFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Commercial Invoice Number</TableHead>
-                <TableHead>Packing list</TableHead>
+                <TableHead>Packing List</TableHead>
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
                 <TableHead>SABER Invoice</TableHead>
@@ -219,70 +282,94 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
               </TableRow>
             </TableHeader>
             <TableBody>
-              {invoices.map((_: any, index: number) => (
+              {invoicesFromForm.map((_: any, index: number) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceNumber`}
+                      name={getFieldName<FormData>(index, "commercialInvoiceNumber")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., 3458H4"
-                            {...field}
-                            onBlur={() => saveProgressSilently(getValues())}
-                            required // Enforce required field
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 3458H4"
+                              value={field.value as any|| ""}
+                              onChange={field.onChange}
+                              onBlur={() => saveProgressSilently(getValues())}
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].packingListUrl`}
+                      name={getFieldName<FormData>(index, "packingListUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`saleInvoiceDetails.commercialInvoices[${index}].packingListUrl` as any}
-                          storageKey={`saleInvoiceDetails_packingListUrl${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "packingListUrl")}
+                              storageKey={`saleInvoiceDetails_packingListUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl`}
+                      name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`saleInvoiceDetails.commercialInvoices[${index}].clearanceCommercialInvoiceUrl` as any}
-                          storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl`}
+                      name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`saleInvoiceDetails.commercialInvoices[${index}].actualCommercialInvoiceUrl` as any}
-                          storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl`}
+                      name={getFieldName<FormData>(index, "saberInvoiceUrl")}
                       render={({ field }) => (
-                        <FileUploadField
-                          name={`saleInvoiceDetails.commercialInvoices[${index}].saberInvoiceUrl` as any}
-                          storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
-                        />
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "saberInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
@@ -296,7 +383,7 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
                       <Trash className="h-4 w-4" />
                     </Button>
                   </TableCell>
-                </TableRow>
+                  </TableRow>
               ))}
             </TableBody>
           </Table>
@@ -312,7 +399,8 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
             <FormControl>
               <Textarea
                 placeholder="e.g., this is some random comment for sale invoice details"
-                {...field}
+                value={field.value || ""}
+                onChange={field.onChange}
                 onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
@@ -321,6 +409,16 @@ export function CommercialInvoiceDetails({ saveProgress, onSectionSubmit, params
         )}
       />
 
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setPendingInvoiceCount(null);
+        }}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of commercial invoices. This action cannot be undone."
+      />
     </div>
   );
 }

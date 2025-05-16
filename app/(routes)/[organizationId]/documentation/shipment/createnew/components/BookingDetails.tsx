@@ -37,7 +37,7 @@ import { fetchData } from "@/axiosUtility/api";
 import { AddContainerTypeModal } from "./AddContainerTypeModal";
 import { Textarea } from "@/components/ui/textarea";
 import ProductFormPage from "@/components/forms/AddProductForm";
-import { CalendarDay } from "react-day-picker";
+// import { CalendarDay } from "react-day-picker";
 import CalendarComponent from "@/components/CalendarComponent";
 
 export interface SaveDetailsProps {
