@@ -37,6 +37,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
+import CalendarComponent from "@/components/CalendarComponent";
 
 // Form data types
 interface Invoice {
@@ -418,8 +419,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
+                              <CalendarComponent
                                 selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
@@ -593,8 +593,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                               </FormControl>
                             </PopoverTrigger>
                             <PopoverContent align="start">
-                              <Calendar
-                                mode="single"
+                              <CalendarComponent
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());

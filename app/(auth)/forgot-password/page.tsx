@@ -7,7 +7,6 @@ import { LoginForm } from "@/components/forms/loginForm"
 import { Button } from "@/components/ui/button"
 import ForgotPasswordForm from "@/components/forms/forgotPasswordForm"
 
-
 export const metadata: Metadata = {
     title: 'Recover your account password | StoneDocs',
     description: 'Recover your account password | StoneDocs',
