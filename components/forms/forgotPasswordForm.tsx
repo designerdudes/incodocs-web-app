@@ -14,7 +14,7 @@ import { Input } from "../ui/input"
 import { Label } from "../ui/label"
 import { ArrowRight, BadgeCheck, CheckIcon, EyeIcon, EyeOffIcon, XIcon, } from "lucide-react"
 import axios from "axios"
-import { useMemo, useState } from "react"
+import { Suspense, useMemo, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 
 import toast from "react-hot-toast"
@@ -22,7 +22,7 @@ import Link from "next/link"
 import instance, { postData } from "@/axiosUtility/api"
 import { set } from "lodash"
 
-export function ForgotPasswordForm() {
+function ResetPassword() {
     const [email, setEmail] = useState('')
 
     const [error, setError] = useState(false)
@@ -385,4 +385,12 @@ export function ForgotPasswordForm() {
             </CardFooter>
         </Card>
     )
+}
+
+export default function forgotPasswordForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ResetPassword />
+    </Suspense>
+  );
 }
