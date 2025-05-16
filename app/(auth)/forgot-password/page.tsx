@@ -5,7 +5,7 @@ import Link from "next/link"
 import { BrandName } from "@/lib/constants"
 import { LoginForm } from "@/components/forms/loginForm"
 import { Button } from "@/components/ui/button"
-// import { ForgotPasswordForm } from "@/components/forms/forgotPasswordForm"
+import ForgotPasswordForm from "@/components/forms/forgotPasswordForm"
 
 export const metadata: Metadata = {
     title: 'Recover your account password | StoneDocs',
@@ -42,7 +42,7 @@ export default function Page() {
                 </div>
                 <div className="lg:p-8">
                     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-                        {/* <ForgotPasswordForm /> */}
+                        <ForgotPasswordForm />
                     </div>
                 </div>
             </div>
