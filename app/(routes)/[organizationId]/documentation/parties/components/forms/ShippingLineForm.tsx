@@ -19,25 +19,25 @@ import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 
 const formSchema = z.object({
-  shippingLineName: z.string().min(1, { message: "Shipping Line Name is required" }),
+  shippingLineName: z
+    .string()
+    .min(1, { message: "Shipping Line Name is required" }),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
   mobileNo: z
     .string()
     .optional()
-    .refine(
-      (val) => !val || (!isNaN(Number(val)) && val.length >= 7),
-      { message: "Enter a valid mobile number with at least 7 digits" }
-    ),
+    .refine((val) => !val || (!isNaN(Number(val)) && val.length >= 7), {
+      message: "Enter a valid mobile number with at least 7 digits",
+    }),
   email: z
     .string()
     .optional()
-    .refine(
-      (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-      { message: "Enter a valid Email" }
-    ),
-  organizationId: z.string().optional()
-
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Enter a valid Email",
+    }),
+  organizationId: z.string().optional(),
+  upload: z.any().optional(),
 });
 
 interface ShippinglineFormProps {
@@ -48,7 +48,6 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = useParams().organizationId;
 
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -57,8 +56,7 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
-      organizationId: ""
-
+      organizationId: "",
     },
   });
 
@@ -68,18 +66,21 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
     setIsLoading(true);
     console.log(values);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/shippingline/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shippingLineName: values.shippingLineName,
-          address: values.address,
-          responsiblePerson: values.responsiblePerson,
-          mobileNo: values.mobileNo ? parseInt(values.mobileNo) : undefined,
-          email: values.email,
-          organizationId: orgid
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/shippingline/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            shippingLineName: values.shippingLineName,
+            address: values.address,
+            responsiblePerson: values.responsiblePerson,
+            mobileNo: values.mobileNo ? parseInt(values.mobileNo) : undefined,
+            email: values.email,
+            organizationId: orgid,
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create shipping line");
       await response.json();
       setIsLoading(false);
@@ -162,12 +163,33 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., someone@example.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="e.g., someone@example.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="upload"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload your documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit

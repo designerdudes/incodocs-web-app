@@ -31,8 +31,8 @@ const formSchema = z.object({
     }),
   state: z.string().optional(),
   factoryAddress: z.string().optional(),
-  organizationId: z.string().optional()
-
+  organizationId: z.string().optional(),
+  upload: z.any().optional(),
 });
 
 interface SupplierFormProps {
@@ -42,7 +42,6 @@ interface SupplierFormProps {
 export default function Supplierform({ onSuccess }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = useParams().organizationId;
-
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -54,8 +53,7 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
       mobileNumber: "",
       state: "",
       factoryAddress: "",
-      organizationId: ""
-
+      organizationId: "",
     },
   });
 
@@ -64,15 +62,20 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/supplier/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          mobileNumber: values.mobileNumber ? parseInt(values.mobileNumber, 10) : undefined,
-          organizationId: orgid
-        }),
-      });
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipment/supplier/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...values,
+            mobileNumber: values.mobileNumber
+              ? parseInt(values.mobileNumber, 10)
+              : undefined,
+            organizationId: orgid,
+          }),
+        }
+      );
       if (!response.ok) throw new Error("Failed to create supplier");
       await response.json();
       setIsLoading(false);
@@ -187,6 +190,23 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="upload"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload your documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
