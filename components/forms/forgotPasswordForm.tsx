@@ -387,7 +387,7 @@ function ResetPassword() {
     )
 }
 
-export default function forgotPasswordForm() {
+export default function ForgotPasswordForm() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <ResetPassword />

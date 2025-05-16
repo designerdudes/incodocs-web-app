@@ -5,7 +5,8 @@ import Link from "next/link"
 import { BrandName } from "@/lib/constants"
 import { LoginForm } from "@/components/forms/loginForm"
 import { Button } from "@/components/ui/button"
-import { ForgotPasswordForm } from "@/components/forms/forgotPasswordForm"
+import ForgotPasswordForm from "@/components/forms/forgotPasswordForm"
+
 
 export const metadata: Metadata = {
     title: 'Recover your account password | StoneDocs',
