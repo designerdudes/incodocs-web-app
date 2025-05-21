@@ -36,6 +36,8 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
 import { Path } from "react-hook-form";
+import CalendarComponent from "@/components/CalendarComponent";
+
 
 // Define interfaces for TypeScript
 interface BillOfLading {
@@ -54,7 +56,6 @@ interface FormData {
   };
 }
 
-import CalendarComponent from "@/components/CalendarComponent";
 
 interface BillOfLadingDetailsProps {
   saveProgress: (data: any) => void;
@@ -184,7 +185,7 @@ export function BillOfLadingDetails({
       );
       const data = await response.json();
       const storageUrl = data.url;
-      setValue(fieldName as any, storageUrl) ;
+      setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());
     } catch (error) {
       console.error("Upload error:", error);
@@ -306,7 +307,7 @@ export function BillOfLadingDetails({
                             <Input
                               placeholder="e.g., BL456"
                               className="uppercase"
-                              value={field.value as any|| ""}
+                              value={field.value as any || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
@@ -353,7 +354,7 @@ export function BillOfLadingDetails({
                             <PopoverContent align="start">
                               <CalendarComponent
                                 selected={
-                                  field.value ? new Date(field.value) : undefined
+                                  field.value ? new Date(field.value as any) : undefined
                                 }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
@@ -387,7 +388,7 @@ export function BillOfLadingDetails({
                             <PopoverContent align="start">
                               <CalendarComponent
                                 selected={
-                                  field.value ? new Date(field.value) : undefined
+                                  field.value ? new Date(field.value as any) : undefined
                                 }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());

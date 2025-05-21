@@ -106,8 +106,7 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
         const errorData = await response.json();
         console.error("Error response:", response.status, errorData);
         throw new Error(
-          `Failed to create customs broker: ${
-            errorData.message || response.statusText
+          `Failed to create customs broker: ${errorData.message || response.statusText
           }`
         );
       }

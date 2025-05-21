@@ -237,7 +237,7 @@ export function SupplierDetails({
       );
       setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
       setValue(
-        `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`as any,
+        `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices` as any,
         count
       );
       saveProgressSilently(getValues());
@@ -426,7 +426,7 @@ export function SupplierDetails({
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., INV789"
-                                      value={field.value as any  || ""}
+                                      value={field.value as any || ""}
                                       onChange={field.onChange}
                                       onBlur={() => saveProgressSilently(getValues())}
                                     />
@@ -473,7 +473,7 @@ export function SupplierDetails({
                                       <FormControl>
                                         <Button variant="outline">
                                           {field.value
-                                            ? format(new Date(field.value as any ), "PPPP")
+                                            ? format(new Date(field.value as any), "PPPP")
                                             : "Pick a date"}
                                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                         </Button>
@@ -482,7 +482,7 @@ export function SupplierDetails({
                                     <PopoverContent align="start">
                                       <CalendarComponent
                                         selected={
-                                          field.value ? new Date(field.value as any ) : undefined
+                                          field.value ? new Date(field.value as any) : undefined
                                         }
                                         onSelect={(date) => {
                                           field.onChange(date?.toISOString());
@@ -508,7 +508,7 @@ export function SupplierDetails({
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., 1000"
-                                      value={field.value as any|| ""}
+                                      value={field.value as any || ""}
                                       onChange={field.onChange}
                                       onBlur={() => saveProgressSilently(getValues())}
                                     />
@@ -530,7 +530,7 @@ export function SupplierDetails({
                                   <FormControl>
                                     <Input
                                       placeholder="e.g., 900"
-                                      value={field.value as any|| ""}
+                                      value={field.value as any || ""}
                                       onChange={field.onChange}
                                       onBlur={() => saveProgressSilently(getValues())}
                                     />
@@ -552,7 +552,7 @@ export function SupplierDetails({
                                 ].invoices.filter((_: any, i: number) => i !== invoiceIndex);
                                 setValue("supplierDetails.clearance.suppliers", updatedSuppliers);
                                 setValue(
-                                  `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices`as any,
+                                  `supplierDetails.clearance.suppliers[${supplierIndex}].noOfInvoices` as any,
                                   updatedSuppliers[supplierIndex].invoices.length
                                 );
                                 saveProgressSilently(getValues());

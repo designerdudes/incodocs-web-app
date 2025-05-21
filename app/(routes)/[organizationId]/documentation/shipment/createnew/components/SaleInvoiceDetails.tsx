@@ -30,6 +30,7 @@ import { Path } from "react-hook-form";
 import CalendarComponent from "@/components/CalendarComponent";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { fetchData } from "@/axiosUtility/api";
 
 interface CommercialInvoice {
   commercialInvoiceNumber: string;
@@ -37,6 +38,8 @@ interface CommercialInvoice {
   clearanceCommercialInvoiceUrl: string;
   actualCommercialInvoiceUrl: string;
   saberInvoiceUrl: string;
+  commercialInvoiceValue: string;
+  commercialInvoiceDate: string;
 }
 
 interface FormData {
@@ -87,10 +90,10 @@ export function CommercialInvoiceDetails({
   useEffect(() => {
     const fetchConsignees = async () => {
       try {
-        const consigneeResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`
+        const consigneeResponse = await fetchData(
+          `/shipment/consignee/getbyorg/${organizationId}`
         );
-        const consigneeData = await consigneeResponse.json();
+        const consigneeData = await consigneeResponse
         setConsignees(consigneeData);
       } catch (error) {
         console.error("Error fetching consignees:", error);
@@ -156,7 +159,7 @@ export function CommercialInvoiceDetails({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
+      const response = await fetchData(
         "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
@@ -181,7 +184,7 @@ export function CommercialInvoiceDetails({
       <AddConsigneeForm
         orgId={organizationId}
         onSuccess={() => {
-          fetch(`https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organizationId}`)
+          fetchData(`/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())
             .then((data) => {
               setConsignees(data);
@@ -299,7 +302,7 @@ export function CommercialInvoiceDetails({
                           <FormControl>
                             <Input
                               placeholder="e.g., 3458H4"
-                              value={field.value as any|| ""}
+                              value={field.value as any || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                               required
@@ -381,13 +384,12 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceValue`}
+                      name={getFieldName<FormData>(index, "commercialInvoiceValue")}
                       render={({ field }) => (
                         <FormControl>
                           <Input
-                            type="number"
+                            value={field.value as any || ""}
                             placeholder="e.g., 1000"
-                            {...field}
                             onBlur={() => saveProgressSilently(getValues())}
                           />
                         </FormControl>
@@ -397,7 +399,7 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.commercialInvoices[${index}].commercialInvoiceDate`}
+                      name={getFieldName<FormData>(index, "commercialInvoiceDate")}
                       render={({ field }) => (
                         <FormItem>
                           <Popover>
@@ -405,7 +407,7 @@ export function CommercialInvoiceDetails({
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value
-                                    ? format(new Date(field.value), "PPPP")
+                                    ? format(new Date(field.value as any), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -414,7 +416,7 @@ export function CommercialInvoiceDetails({
                             <PopoverContent align="start">
                               <CalendarComponent
                                 selected={
-                                  field.value ? new Date(field.value) : undefined
+                                  field.value ? new Date(field.value as any) : undefined
                                 }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
@@ -438,7 +440,7 @@ export function CommercialInvoiceDetails({
                       <Trash className="h-4 w-4" />
                     </Button>
                   </TableCell>
-                  </TableRow>
+                </TableRow>
               ))}
             </TableBody>
           </Table>

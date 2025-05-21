@@ -16,6 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { fetchData, postData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -64,13 +65,13 @@ export default function AddConsigneeForm({
         address: values.address,
         organizationId: orgId, // Use dynamic orgId prop
       };
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/consignee/create",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
+      const response = await postData(
+        "/shipment/consignee/create/", payload
+        // {
+        //   method: "POST",
+        //   headers: { "Content-Type": "application/json" },
+        //   body: JSON.stringify(payload),
+        // }
       );
       if (!response.ok) throw new Error("Failed to create consignee");
       await response.json();

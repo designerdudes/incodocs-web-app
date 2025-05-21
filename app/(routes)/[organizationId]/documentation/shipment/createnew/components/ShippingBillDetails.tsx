@@ -56,6 +56,7 @@ interface FormData {
 }
 
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
 
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
@@ -101,10 +102,10 @@ export function ShippingBillDetails({
   useEffect(() => {
     const fetchCBNames = async () => {
       try {
-        const CBNameResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+        const CBNameResponse = await fetchData(
+          `/shipment/cbname/getbyorg/${organizationId}`
         );
-        const CBNameData = await CBNameResponse.json();
+        const CBNameData = await CBNameResponse
         const mappedCBNames = CBNameData.map((cbData: any) => ({
           _id: cbData._id,
           name: cbData.cbName,
@@ -196,10 +197,10 @@ export function ShippingBillDetails({
         orgId={organizationId}
         onSuccess={async () => {
           try {
-            const res = await fetch(
-              `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organizationId}`
+            const res = await fetchData(
+              `/shipment/cbname/getbyorg/${organizationId}`
             );
-            const data = await res.json();
+            const data = await res
             const mappedCBNames = data.map((cbData: any) => ({
               _id: cbData._id,
               name: cbData.cbName,
