@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -17,8 +17,37 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
-
+import { FileUploadField } from "../../../shipment/createnew/components/FileUploadField";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Path } from "react-hook-form";
+import { postData } from "@/axiosUtility/api";
+import CalendarComponent from "@/components/CalendarComponent";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Trash } from "lucide-react";
+import { format } from "date-fns";
 // ✅ Schema - Only forwarderName is required
+
+interface ForwarderForm {
+  fileName: string;
+  fileUrl: string;
+  uploadedBy: string;
+  date: string | null;
+  review: string;
+}
+
+interface FormData {
+  forwarderdetails: number;
+  forwarderForm: ForwarderForm[];
+}
+
+
 const formSchema = z.object({
   forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
   address: z.string().optional(),
@@ -37,8 +66,24 @@ const formSchema = z.object({
       (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
       { message: "Enter a valid email" }
     ),
+    numberOfDocuments: z
+        .number(),
+    documents: z
+        .array(
+          z.object({
+            fileName: z.string().optional(),
+            fileUrl: z.string().optional(),
+            uploadedBy: z.string().optional(),
+            date: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
+            review: z.string().optional()
+          })
+        ),
+
   organizationId: z.string().optional(),
-  upload:z.any().optional(),
+  upload: z.array(z.string()).optional(),
 });
 
 interface ForwarderFormProps {
@@ -68,19 +113,10 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/forwarder/create",
+      const response = await postData(
+        "/shipment/forwarder/create",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            forwarderName: values.forwarderName,
-            address: values.address,
-            responsiblePerson: values.responsiblePerson,
-            mobileNo: values.mobileNo,
-            email: values.email,
-            organizationId: orgid
-          }),
+          ...values,
         }
       );
       if (!response.ok) throw new Error("Failed to create Forwarder");
@@ -97,6 +133,32 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
       toast.error("Error creating Forwarder");
     }
   };
+
+  const handleCertificateCountChange = (count: string) => {
+    const numericCount = parseInt(count, 10);
+    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
+      fileName: "",
+      fileUrl: "",
+      uploadedBy: "",
+      date: "",
+      review: ""
+    }));
+    form.setValue("documents", newDocuments);
+  };
+
+  const { control, setValue, watch, getValues } = form;
+const forwarderDetailsFromForm = watch("documents") || [];
+
+const getFieldName = <T extends FormData>(
+  index: number,
+  field: keyof ForwarderForm
+): Path<T> => `documents[${index}].${field}` as Path<T>;
+
+
+function saveProgressSilently(data: any) {
+  localStorage.setItem("shipmentFormData", JSON.stringify(data));
+  localStorage.setItem("lastSaved", new Date().toISOString());
+}
 
   return (
     <Form {...form}>
@@ -181,24 +243,191 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
             </FormItem>
           )}
         />
+         <FormField
+        control={form.control}
+        name="numberOfDocuments"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Number of Documents</FormLabel>
+            <FormControl>
+              <Input
+                type="number"
+                placeholder="Enter number of documents"
+                value={field.value as any || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    field.onChange(1);
+                    handleCertificateCountChange("1");
+                    return;
+                  }
+                  const numericValue = Number(value);
+                  field.onChange(numericValue);
+                  handleCertificateCountChange(numericValue.toString());
+                }}
+                min={1}
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />  
 
-        <FormField
-          control={form.control}
-          name="upload"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Upload Documents</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={(e)=>field.onChange(e.target.files?.[0])}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+     <Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead colSpan={5} className="text-center text-lg font-semibold">
+        Upload Documents
+      </TableHead>
+    </TableRow>
+    <TableRow>
+      <TableHead>#</TableHead>
+      <TableHead>File Name</TableHead>
+      <TableHead>File URL</TableHead>
+      <TableHead>Uploaded By</TableHead>
+      <TableHead>Date</TableHead>
+      <TableHead>Review</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {forwarderDetailsFromForm.map((_, index: number) => (
+      <TableRow key={index}>
+        <TableCell>{index + 1}</TableCell>
+
+        <TableCell>
+          <FormField
+            control={control}
+            name={getFieldName<FormData>(index, "fileName")}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., coo"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={() => {
+                      field.onBlur();
+                      saveProgressSilently(getValues());
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+        </TableCell>
+         <TableCell>
+          <FormField
+            control={control}
+            name={getFieldName<FormData>(index, "fileUrl")}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., https://example.com/file.pdf"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={() => {
+                      field.onBlur();
+                      saveProgressSilently(getValues());
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+        </TableCell>
+         <TableCell>
+          <FormField
+            control={control}
+            name={getFieldName<FormData>(index, "uploadedBy")}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="e.g., Ahmed"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={() => {
+                      field.onBlur();
+                      saveProgressSilently(getValues());
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+        </TableCell>
+         <TableCell>
+          <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "date")}
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col gap-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button variant="outline" className="w-full">
+                                  {field.value
+                                    ? format(new Date(field.value as any), "PPPP")
+                                    : "Pick a date"}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <CalendarComponent
+                                selected={field.value ? new Date(field.value as any) : undefined}
+                                onSelect={(date: Date | undefined) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+        </TableCell>
+         <TableCell>
+          <FormField
+            control={control}
+            name={getFieldName<FormData>(index, "review")}
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Input
+                    placeholder="review your docs"
+                    value={field.value || ""}
+                    onChange={field.onChange}
+                    onBlur={() => {
+                      field.onBlur();
+                      saveProgressSilently(getValues());
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+        </TableCell>
+
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+
+
+ 
         {/* Submit */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && (
