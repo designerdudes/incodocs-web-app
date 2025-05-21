@@ -37,6 +37,7 @@ import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
 import { Path } from "react-hook-form";
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
 
 
 // Define interfaces for TypeScript
@@ -96,11 +97,13 @@ export function BillOfLadingDetails({
   useEffect(() => {
     const fetchShippingLines = async () => {
       try {
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organizationId}`
+        const response = await fetchData(
+          `/shipment/shippingline/getbyorg/${organizationId}`
         );
-        const data = await response.json();
-        const mappedShippingLines = data.map((shippingLine: any) => ({
+        const data = await response;
+        console.log( "shipping linessssssss",data)
+
+         const mappedShippingLines = data.map((shippingLine: any) => ({
           _id: shippingLine._id,
           name: shippingLine.name || shippingLine.shippingLineName,
         }));
@@ -177,7 +180,7 @@ export function BillOfLadingDetails({
       const formData = new FormData();
       formData.append("file", file);
       const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+        "/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
@@ -201,10 +204,10 @@ export function BillOfLadingDetails({
       <ShippinglineForm
         onSuccess={async () => {
           try {
-            const res = await fetch(
-              `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organizationId}`
+            const res = await fetchData(
+              `/shipment/shippingline/getbyorg/${organizationId}`
             );
-            const data = await res.json();
+            const data = await res
             const mappedShippingLines = data.map((shippingLine: any) => ({
               _id: shippingLine._id,
               name: shippingLine.name || shippingLine.shippingLineName,

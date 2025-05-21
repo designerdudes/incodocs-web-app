@@ -38,6 +38,7 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
 
 // Form data types
 interface Invoice {
@@ -225,14 +226,14 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+      const response = await fetchData(
+        "/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
         }
       );
-      const data = await response.json();
+      const data = await response;
       const storageUrl = data.url;
       console.log("File uploaded successfully:", storageUrl);
       setValue(fieldName, storageUrl as any, { shouldDirty: false }); // TODO: Fix type
@@ -246,24 +247,24 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
   };
 
   React.useEffect(() => {
-    const fetchData = async () => {
+    const fetchingData = async () => {
       try {
-        const forwarderResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
+        const forwarderResponse = await fetchData(
+          `/shipment/forwarder/getbyorg/${organizationId}`
         );
-        const forwarderData = await forwarderResponse.json();
+        const forwarderData = await forwarderResponse;
         setForwarders(forwarderData);
 
-        const transporterResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
+        const transporterResponse = await fetchData(
+          `/shipment/transporter/getbyorg/${organizationId}`
         );
-        const transporterData = await transporterResponse.json();
+        const transporterData = await transporterResponse;
         setTransporters(transporterData);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
-    fetchData();
+    fetchingData();
   }, []);
 
   const openForwarderForm = () => {
