@@ -419,7 +419,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent align="start">
+                            <PopoverContent className="w-auto p-0" align="start">
                               <CalendarComponent
                                 selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date) => {
@@ -593,7 +593,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent align="start">
+                            <PopoverContent className="w-auto p-0" align="start">
                               <CalendarComponent
                                 selected={field.value ? new Date(field.value) : undefined}
                                 onSelect={(date) => {
