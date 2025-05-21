@@ -67,6 +67,7 @@ interface FormData {
   };
 }
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
 
 interface SupplierDetailsProps {
   saveProgress: (data: any) => void;
@@ -119,12 +120,12 @@ export function SupplierDetails({
 
   // Fetch supplier names
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchingData = async () => {
       try {
-        const supplierResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
+        const supplierResponse = await fetchData(
+          `/shipment/supplier/getbyorg/${organizationId}`
         );
-        const supplierData = await supplierResponse.json();
+        const supplierData = await supplierResponse
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
           name: supplier.supplierName,
@@ -134,7 +135,7 @@ export function SupplierDetails({
         console.error("Error fetching supplier data:", error);
       }
     };
-    fetchData();
+    fetchingData();
   }, [organizationId]);
 
   const handleSupplierCountChange = (value: string) => {
