@@ -21,77 +21,86 @@ import { putData } from "@/axiosUtility/api";
 import { useRouter, useParams } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
+import Cookies from "js-cookie";
 
 interface ShipmentApiResponse {
-  _id?: string;
-  shipmentId?: string;
-  organizationId?: { _id: string } | string;
-  createdAt?: string;
-  updatedAt?: string;
-  createdBy?: string;
-  saleInvoiceDetails?: {
-    review?: string;
-    consignee?: { _id: string; name: string } | string;
-    actualBuyer?: string;
-    numberOfSalesInvoices?: number;
-    commercialInvoices?: {
-      commercialInvoiceNumber?: string;
-      clearanceCommercialInvoiceUrl?: string;
-      actualCommercialInvoiceUrl?: string;
-      saberInvoiceUrl?: string;
-      addProductDetails?: any[];
+  shipment: {
+    _id?: string;
+    shipmentId?: string;
+    organizationId?: { _id: string } | string;
+    createdAt?: string;
+    updatedAt?: string;
+    createdBy?: string;
+    saleInvoiceDetails?: {
+      review?: string;
+      consignee?: { _id: string; name: string } | string;
+      actualBuyer?: string;
+      numberOfSalesInvoices?: number;
+      commercialInvoices?: {
+        commercialInvoiceNumber?: string;
+        clearanceCommercialInvoiceUrl?: string;
+        actualCommercialInvoiceUrl?: string;
+        saberInvoiceUrl?: string;
+        addProductDetails?: any[];
+        _id?: string;
+      }[];
       _id?: string;
-    }[];
-    _id?: string;
+    };
+    bookingDetails?: {
+      review?: string;
+      invoiceNumber?: string;
+      bookingNumber?: string;
+      portOfLoading?: string;
+      destinationPort?: string;
+      vesselSailingDate?: string;
+      vesselArrivingDate?: string;
+      numberOfContainer?: number;
+      containers?: any[];
+      _id?: string;
+    };
+    shippingDetails?: {
+      review?: string;
+      transporterName?: string;
+      noOftransportinvoices?: number;
+      transporterInvoices?: any[];
+      forwarderName?: string;
+      noOfForwarderinvoices?: number;
+      forwarderInvoices?: any[];
+      _id?: string;
+    };
+    shippingBillDetails?: {
+      review?: string;
+      portCode?: string;
+      cbName?: string;
+      cbCode?: string;
+      numberOFShippingBill?: number;
+      ShippingBills?: any[];
+      _id?: string;
+    };
+    supplierDetails?: {
+      review?: string;
+      clearance?: any;
+      actual?: any;
+      _id?: string;
+    };
+    blDetails?: {
+      review?: string;
+      shippingLineName?: string;
+      noOfBl?: number;
+      Bl?: {
+        blNumber?: string;
+        blDate?: string;
+        telexDate?: string;
+        uploadBLUrl?: string;
+        _id?: string;
+      }[];
+      _id?: string;
+    };
+    otherDetails?: any[];
   };
-  bookingDetails?: {
-    review?: string;
-    invoiceNumber?: string;
-    bookingNumber?: string;
-    portOfLoading?: string;
-    destinationPort?: string;
-    vesselSailingDate?: string;
-    vesselArrivingDate?: string;
-    numberOfContainer?: number;
-    containers?: any[];
-    _id?: string;
-  };
-  shippingDetails?: {
-    review?: string;
-    transporterName?: string;
-    noOftransportinvoices?: number;
-    transporterInvoices?: any[];
-    forwarderName?: string;
-    noOfForwarderinvoices?: number;
-    forwarderInvoices?: any[];
-    _id?: string;
-  };
-  shippingBillDetails?: {
-    review?: string;
-    portCode?: string;
-    cbName?: string;
-    cbCode?: string;
-    numberOFShippingBill?: number;
-    ShippingBills?: any[];
-    _id?: string;
-  };
-  supplierDetails?: {
-    review?: string;
-    clearance?: any;
-    actual?: any;
-    _id?: string;
-  };
-  blDetails?: {
-    review?: string;
-    shippingLineName?: string;
-    noOfBl?: number;
-    Bl?: any[];
-    _id?: string;
-  };
-  otherDetails?: any[];
+  shipmentLogs: any[];
 }
 
-// Type for backend ShippingBill data
 type BackendShippingBill = {
   shippingBillUrl?: string;
   shippingBillNumber?: string;
@@ -101,16 +110,6 @@ type BackendShippingBill = {
   _id?: string;
 };
 
-// Type for backend Bl data
-type BackendBl = {
-  blNumber?: string;
-  blDate?: string;
-  telexDate?: string;
-  uploadBLUrl?: string;
-  _id?: string;
-};
-
-// Zod Schema with all fields optional
 const formSchema = z.object({
   shipmentId: z.string().optional(),
   organizationId: z.string().optional(),
@@ -397,10 +396,8 @@ const formSchema = z.object({
     .default([]),
 });
 
-// Infer the type from the schema
 export type FormValues = z.infer<typeof formSchema>;
 
-// Default form values
 const defaultFormValues: FormValues = {
   shipmentId: undefined,
   organizationId: undefined,
@@ -471,7 +468,6 @@ const defaultFormValues: FormValues = {
   otherDetails: [],
 };
 
-// Save progress functions
 const saveProgressSilently = (data: any, shipmentId: string) => {
   localStorage.setItem(`shipmentDraft_${shipmentId}`, JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
@@ -496,6 +492,7 @@ export default function EditShipmentPage({ params }: Props) {
   const [organizationId, setOrganizationId] = useState<string | undefined>(
     undefined
   );
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const router = useRouter();
   const urlOrgId = useParams().organizationId as string | undefined;
   const isInitialLoad = useRef(true);
@@ -935,46 +932,122 @@ export default function EditShipmentPage({ params }: Props) {
       try {
         setIsFetching(true);
         console.log("Fetching shipment data for ID:", params.id);
+
+        const token = Cookies.get("AccessToken");
+        console.log("AccessToken:", token ? `${token.slice(0, 10)}...` : "No token found");
+
+        if (!token) {
+          console.warn("No AccessToken found in cookies");
+          toast.error("Please log in to view shipment data");
+          router.push("/login");
+          return;
+        }
+
+        const isValidJwt = token.split(".").length === 3;
+        console.log("Token format valid (JWT):", isValidJwt);
+        if (!isValidJwt) {
+          console.warn("Invalid token format:", token);
+          toast.error("Invalid authentication token. Please log in again.");
+          Cookies.remove("AccessToken");
+          router.push("/login");
+          return;
+        }
+
+        try {
+          const payload = JSON.parse(atob(token.split(".")[1]));
+          console.log("Token payload:", { role: payload.role, userId: payload.userId });
+        } catch (e) {
+          console.warn("Failed to decode token payload:", e);
+        }
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+        console.log("Request headers:", headers);
+
         const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`
+          `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
+          {
+            method: "GET",
+            headers,
+            // Removed credentials: "include" to avoid CORS issue
+          }
         );
-        if (!response.ok) throw new Error("Failed to fetch shipment data");
+
+        console.log("API Response Status:", response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("API Error Response:", {
+            status: response.status,
+            data: errorData,
+          });
+          if (response.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            Cookies.remove("AccessToken");
+            router.push("/login");
+            return;
+          }
+          if (response.status === 403) {
+            if (errorData.message === "Forbidden877") {
+              toast.error("You do not have permission to view this shipment. Required role: owner, admin, or teamMember.");
+            } else {
+              toast.error("You are not authorized to view this shipment.");
+            }
+            router.push("/dashboard");
+            return;
+          }
+          if (response.status === 404) {
+            toast.error("Shipment not found.");
+            router.push("/dashboard");
+            return;
+          }
+          throw new Error(
+            errorData.message || `Failed to fetch shipment data: ${response.status}`
+          );
+        }
 
         const data: ShipmentApiResponse = await response.json();
-        console.log("Raw API response:", data);
-        console.log("API saleInvoiceDetails:", data.saleInvoiceDetails);
+        console.log("Raw API response:", JSON.stringify(data, null, 2));
 
-        // Set organizationId from API response
+        if (!data.shipment) {
+          console.warn("No shipment data in response:", data);
+          throw new Error("Shipment data not found in response");
+        }
+
+        console.log("Shipment data:", JSON.stringify(data.shipment, null, 2));
+
         const fetchedOrgId =
-          typeof data.organizationId === "object"
-            ? data.organizationId?._id
-            : data.organizationId;
+          typeof data.shipment.organizationId === "object"
+            ? data.shipment.organizationId?._id
+            : data.shipment.organizationId;
         setOrganizationId(fetchedOrgId || urlOrgId || undefined);
+        console.log("Set organizationId:", fetchedOrgId || urlOrgId);
 
         const updatedValues: FormValues = {
-          shipmentId: data.shipmentId || undefined,
+          shipmentId: data.shipment.shipmentId || undefined,
           organizationId: fetchedOrgId || urlOrgId || undefined,
-          createdAt: data.createdAt || undefined,
-          updatedAt: data.updatedAt || undefined,
-          createdBy: data.createdBy || undefined,
-          bookingDetails: data.bookingDetails
+          createdAt: data.shipment.createdAt || undefined,
+          updatedAt: data.shipment.updatedAt || undefined,
+          createdBy: data.shipment.createdBy || undefined,
+          bookingDetails: data.shipment.bookingDetails
             ? {
-                review: data.bookingDetails.review || undefined,
-                invoiceNumber: data.bookingDetails.invoiceNumber || undefined,
-                bookingNumber: data.bookingDetails.bookingNumber || undefined,
-                portOfLoading: data.bookingDetails.portOfLoading || undefined,
-                destinationPort:
-                  data.bookingDetails.destinationPort || undefined,
+                review: data.shipment.bookingDetails.review || undefined,
+                invoiceNumber: data.shipment.bookingDetails.invoiceNumber || undefined,
+                bookingNumber: data.shipment.bookingDetails.bookingNumber || undefined,
+                portOfLoading: data.shipment.bookingDetails.portOfLoading || undefined,
+                destinationPort: data.shipment.bookingDetails.destinationPort || undefined,
                 vesselSailingDate:
-                  data.bookingDetails.vesselSailingDate || undefined,
+                  data.shipment.bookingDetails.vesselSailingDate || undefined,
                 vesselArrivingDate:
-                  data.bookingDetails.vesselArrivingDate || undefined,
+                  data.shipment.bookingDetails.vesselArrivingDate || undefined,
                 numberOfContainer:
-                  data.bookingDetails.numberOfContainer ||
-                  data.bookingDetails.containers?.length ||
+                  data.shipment.bookingDetails.numberOfContainer ||
+                  data.shipment.bookingDetails.containers?.length ||
                   undefined,
-                containers: Array.isArray(data.bookingDetails?.containers)
-                  ? data.bookingDetails.containers.map((container: any) => ({
+                containers: Array.isArray(data.shipment.bookingDetails?.containers)
+                  ? data.shipment.bookingDetails.containers.map((container: any) => ({
                       containerType: container.containerType || undefined,
                       containerNumber: container.containerNumber || undefined,
                       truckNumber: container.truckNumber || undefined,
@@ -985,47 +1058,45 @@ export default function EditShipmentPage({ params }: Props) {
                       )
                         ? container.addProductDetails.map((product: any) => ({
                             _id: product._id || undefined,
-                            productId: product._id || undefined,
+                            productId: product.productId || product._id || undefined,
                             code: product.code || undefined,
                             description: product.description || undefined,
                             unitOfMeasurements:
                               product.unitOfMeasurements || undefined,
-                            countryOfOrigin:
-                              product.countryOfOrigin || undefined,
-                            HScode: undefined,
-                            variantName: undefined,
-                            varianntType: undefined,
-                            sellPrice: undefined,
-                            buyPrice: undefined,
+                            countryOfOrigin: product.countryOfOrigin || undefined,
+                            HScode: product.HScode || undefined,
+                            variantName: product.variantName || undefined,
+                            varianntType: product.varianntType || undefined,
+                            sellPrice: product.sellPrice || undefined,
+                            buyPrice: product.buyPrice || undefined,
                             netWeight: product.netWeight || undefined,
                             grossWeight: product.grossWeight || undefined,
-                            cubicMeasurement:
-                              product.cubicMeasurement || undefined,
+                            cubicMeasurement: product.cubicMeasurement || undefined,
                             __v: product.__v || undefined,
                           }))
                         : [],
                       _id: container._id || undefined,
                     }))
                   : [],
-                _id: data.bookingDetails._id || undefined,
+                _id: data.shipment.bookingDetails._id || undefined,
               }
             : undefined,
-          shippingDetails: data.shippingDetails
+          shippingDetails: data.shipment.shippingDetails
             ? {
-                review: data.shippingDetails.review || undefined,
+                review: data.shipment.shippingDetails.review || undefined,
                 transporterName:
-                  data.shippingDetails.transporterName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.transporterName)
-                    ? data.shippingDetails.transporterName
+                  data.shipment.shippingDetails.transporterName &&
+                  /^[0-9a-fA-F]{24}$/.test(data.shipment.shippingDetails.transporterName)
+                    ? data.shipment.shippingDetails.transporterName
                     : undefined,
                 noOftransportinvoices:
-                  data.shippingDetails.noOftransportinvoices ||
-                  data.shippingDetails.transporterInvoices?.length ||
+                  data.shipment.shippingDetails.noOftransportinvoices ||
+                  data.shipment.shippingDetails.transporterInvoices?.length ||
                   undefined,
                 transporterInvoices: Array.isArray(
-                  data.shippingDetails?.transporterInvoices
+                  data.shipment.shippingDetails?.transporterInvoices
                 )
-                  ? data.shippingDetails.transporterInvoices.map(
+                  ? data.shipment.shippingDetails.transporterInvoices.map(
                       (invoice: any) => ({
                         invoiceNumber: invoice.invoiceNumber || undefined,
                         uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
@@ -1037,18 +1108,18 @@ export default function EditShipmentPage({ params }: Props) {
                     )
                   : [],
                 forwarderName:
-                  data.shippingDetails.forwarderName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shippingDetails.forwarderName)
-                    ? data.shippingDetails.forwarderName
+                  data.shipment.shippingDetails.forwarderName &&
+                  /^[0-9a-fA-F]{24}$/.test(data.shipment.shippingDetails.forwarderName)
+                    ? data.shipment.shippingDetails.forwarderName
                     : undefined,
                 noOfForwarderinvoices:
-                  data.shippingDetails.noOfForwarderinvoices ||
-                  data.shippingDetails.forwarderInvoices?.length ||
+                  data.shipment.shippingDetails.noOfForwarderinvoices ||
+                  data.shipment.shippingDetails.forwarderInvoices?.length ||
                   undefined,
                 forwarderInvoices: Array.isArray(
-                  data.shippingDetails?.forwarderInvoices
+                  data.shipment.shippingDetails?.forwarderInvoices
                 )
-                  ? data.shippingDetails.forwarderInvoices.map(
+                  ? data.shipment.shippingDetails.forwarderInvoices.map(
                       (invoice: any) => ({
                         invoiceNumber: invoice.invoiceNumber || undefined,
                         uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
@@ -1059,23 +1130,22 @@ export default function EditShipmentPage({ params }: Props) {
                       })
                     )
                   : [],
-                _id: data.shippingDetails._id || undefined,
+                _id: data.shipment.shippingDetails._id || undefined,
               }
             : undefined,
-          shippingBillDetails: data.shippingBillDetails
+          shippingBillDetails: data.shipment.shippingBillDetails
             ? {
-                review: data.shippingBillDetails.review || undefined,
-                portCode: data.shippingBillDetails.portCode || undefined,
-                cbName: data.shippingBillDetails.cbName || undefined,
-                cbCode: data.shippingBillDetails.cbCode || undefined,
+                review: data.shipment.shippingBillDetails.review || undefined,
+                portCode: data.shipment.shippingBillDetails.portCode || undefined,
+                cbName: data.shipment.shippingBillDetails.cbName || undefined,
+                cbCode: data.shipment.shippingBillDetails.cbCode || undefined,
                 numberOFShippingBill:
-                  data.shippingBillDetails.ShippingBills?.length || 0,
-                bills: Array.isArray(data.shippingBillDetails?.ShippingBills)
-                  ? data.shippingBillDetails.ShippingBills.map(
+                  data.shipment.shippingBillDetails.ShippingBills?.length || 0,
+                bills: Array.isArray(data.shipment.shippingBillDetails?.ShippingBills)
+                  ? data.shipment.shippingBillDetails.ShippingBills.map(
                       (bill: BackendShippingBill) => ({
                         uploadShippingBill: bill.shippingBillUrl || undefined,
-                        shippingBillNumber:
-                          bill.shippingBillNumber || undefined,
+                        shippingBillNumber: bill.shippingBillNumber || undefined,
                         shippingBillDate: bill.shippingBillDate || undefined,
                         drawbackValue: bill.drawbackValue
                           ? Number(bill.drawbackValue)
@@ -1087,22 +1157,22 @@ export default function EditShipmentPage({ params }: Props) {
                       })
                     )
                   : [],
-                _id: data.shippingBillDetails._id || undefined,
+                _id: data.shipment.shippingBillDetails._id || undefined,
               }
             : undefined,
-          supplierDetails: data.supplierDetails
+          supplierDetails: data.shipment.supplierDetails
             ? {
-                review: data.supplierDetails.review || undefined,
-                clearance: data.supplierDetails.clearance
+                review: data.shipment.supplierDetails.review || undefined,
+                clearance: data.shipment.supplierDetails.clearance
                   ? {
                       noOfSuppliers:
-                        data.supplierDetails.clearance.noOfSuppliers ||
-                        data.supplierDetails.clearance.suppliers?.length ||
+                        data.shipment.supplierDetails.clearance.noOfSuppliers ||
+                        data.shipment.supplierDetails.clearance.suppliers?.length ||
                         undefined,
                       suppliers: Array.isArray(
-                        data.supplierDetails.clearance?.suppliers
+                        data.shipment.supplierDetails.clearance?.suppliers
                       )
-                        ? data.supplierDetails.clearance.suppliers.map(
+                        ? data.shipment.supplierDetails.clearance.suppliers.map(
                             (supplier: any) => ({
                               supplierName: supplier.supplierName
                                 ? {
@@ -1171,74 +1241,75 @@ export default function EditShipmentPage({ params }: Props) {
                             })
                           )
                         : [],
-                      _id: data.supplierDetails.clearance._id || undefined,
+                      _id: data.shipment.supplierDetails.clearance._id || undefined,
                     }
                   : undefined,
-                actual: data.supplierDetails.actual
+                actual: data.shipment.supplierDetails.actual
                   ? {
                       actualSupplierName:
-                        data.supplierDetails.actual.actualSupplierName ||
+                        data.shipment.supplierDetails.actual.actualSupplierName ||
                         undefined,
                       actualSupplierInvoiceUrl:
-                        data.supplierDetails.actual.actualSupplierInvoiceUrl ||
+                        data.shipment.supplierDetails.actual.actualSupplierInvoiceUrl ||
                         undefined,
-                      actualSupplierInvoiceValue: data.supplierDetails.actual
+                      actualSupplierInvoiceValue: data.shipment.supplierDetails.actual
                         .actualSupplierInvoiceValue
                         ? Number(
-                            data.supplierDetails.actual
+                            data.shipment.supplierDetails.actual
                               .actualSupplierInvoiceValue
                           )
                         : undefined,
                       shippingBillUrl:
-                        data.supplierDetails.actual.shippingBillUrl ||
+                        data.shipment.supplierDetails.actual.shippingBillUrl ||
                         undefined,
-                      _id: data.supplierDetails.actual._id || undefined,
+                      _id: data.shipment.supplierDetails.actual._id || undefined,
                     }
                   : undefined,
-                _id: data.supplierDetails._id || undefined,
+                _id: data.shipment.supplierDetails._id || undefined,
               }
             : undefined,
-          saleInvoiceDetails: {
-            review: data.saleInvoiceDetails?.review || undefined,
-            consignee:
-              typeof data.saleInvoiceDetails?.consignee === "object"
-                ? data.saleInvoiceDetails?.consignee?._id
-                : data.saleInvoiceDetails?.consignee &&
-                  /^[0-9a-fA-F]{24}$/.test(data.saleInvoiceDetails.consignee)
-                ? data.saleInvoiceDetails.consignee
-                : undefined,
-            actualBuyer: data.saleInvoiceDetails?.actualBuyer || undefined,
-            numberOfSalesInvoices:
-              data.saleInvoiceDetails?.numberOfSalesInvoices ||
-              data.saleInvoiceDetails?.commercialInvoices?.length ||
-              0,
-            invoice: Array.isArray(data.saleInvoiceDetails?.commercialInvoices)
-              ? data.saleInvoiceDetails.commercialInvoices.map((inv: any) => ({
-                  commercialInvoiceNumber: inv.commercialInvoiceNumber || "",
-                  clearanceCommercialInvoice:
-                    inv.clearanceCommercialInvoiceUrl || "",
-                  actualCommercialInvoice: inv.actualCommercialInvoiceUrl || "",
-                  saberInvoice: inv.saberInvoiceUrl || "",
-                  addProductDetails: inv.addProductDetails || [],
-                  _id: inv._id || undefined,
-                }))
-              : [],
-            _id: data.saleInvoiceDetails?._id || undefined,
-          },
-          blDetails: data.blDetails
+          saleInvoiceDetails: data.shipment.saleInvoiceDetails
             ? {
-                review: data.blDetails.review || undefined,
+                review: data.shipment.saleInvoiceDetails.review || undefined,
+                consignee:
+                  typeof data.shipment.saleInvoiceDetails.consignee === "object"
+                    ? data.shipment.saleInvoiceDetails.consignee?._id
+                    : data.shipment.saleInvoiceDetails.consignee &&
+                      /^[0-9a-fA-F]{24}$/.test(data.shipment.saleInvoiceDetails.consignee)
+                    ? data.shipment.saleInvoiceDetails.consignee
+                    : undefined,
+                actualBuyer: data.shipment.saleInvoiceDetails.actualBuyer || undefined,
+                numberOfSalesInvoices:
+                  data.shipment.saleInvoiceDetails.numberOfSalesInvoices ||
+                  data.shipment.saleInvoiceDetails.commercialInvoices?.length ||
+                  undefined,
+                invoice: Array.isArray(data.shipment.saleInvoiceDetails?.commercialInvoices)
+                  ? data.shipment.saleInvoiceDetails.commercialInvoices.map((inv: any) => ({
+                      commercialInvoiceNumber: inv.commercialInvoiceNumber || undefined,
+                      clearanceCommercialInvoice: inv.clearanceCommercialInvoiceUrl || undefined,
+                      actualCommercialInvoice: inv.actualCommercialInvoiceUrl || undefined,
+                      saberInvoice: inv.saberInvoiceUrl || undefined,
+                      addProductDetails: inv.addProductDetails || [],
+                      _id: inv._id || undefined,
+                    }))
+                  : [],
+                _id: data.shipment.saleInvoiceDetails._id || undefined,
+              }
+            : undefined,
+          blDetails: data.shipment.blDetails
+            ? {
+                review: data.shipment.blDetails.review || undefined,
                 shippingLineName:
-                  data.blDetails.shippingLineName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.blDetails.shippingLineName)
-                    ? data.blDetails.shippingLineName
+                  data.shipment.blDetails.shippingLineName &&
+                  /^[0-9a-fA-F]{24}$/.test(data.shipment.blDetails.shippingLineName)
+                    ? data.shipment.blDetails.shippingLineName
                     : undefined,
                 noOfBl:
-                  data.blDetails.noOfBl ||
-                  data.blDetails.Bl?.length ||
+                  data.shipment.blDetails.noOfBl ||
+                  data.shipment.blDetails.Bl?.length ||
                   undefined,
-                Bl: Array.isArray(data.blDetails?.Bl)
-                  ? data.blDetails.Bl.map((bl: any) => ({
+                Bl: Array.isArray(data.shipment.blDetails?.Bl)
+                  ? data.shipment.blDetails.Bl.map((bl: any) => ({
                       blNumber: bl.blNumber || undefined,
                       blDate: bl.blDate || undefined,
                       telexDate: bl.telexDate || undefined,
@@ -1246,18 +1317,17 @@ export default function EditShipmentPage({ params }: Props) {
                       _id: bl._id || undefined,
                     }))
                   : [],
-                _id: data.blDetails._id || undefined,
+                _id: data.shipment.blDetails._id || undefined,
               }
             : undefined,
-          otherDetails: Array.isArray(data.otherDetails)
-            ? data.otherDetails.map((item: any) => ({
+          otherDetails: Array.isArray(data.shipment.otherDetails)
+            ? data.shipment.otherDetails.map((item: any) => ({
                 review: item.review || undefined,
                 certificateName: item.certificateName || undefined,
                 certificateNumber: item.certificateNumber || undefined,
                 date: item.date || undefined,
                 issuerOfCertificate: item.issuerOfCertificate || undefined,
-                uploadCopyOfCertificate:
-                  item.uploadCopyOfCertificate || undefined,
+                uploadCopyOfCertificate: item.uploadCopyOfCertificate || undefined,
                 _id: item._id || undefined,
               }))
             : [],
@@ -1269,9 +1339,14 @@ export default function EditShipmentPage({ params }: Props) {
         );
         form.reset(updatedValues);
         isInitialLoad.current = false;
-      } catch (error) {
-        console.error("Error fetching shipment data:", error);
-        toast.error("Failed to load shipment data");
+        toast.success("Shipment data loaded successfully!");
+      } catch (error: any) {
+        console.error("Error fetching shipment data:", {
+          message: error.message,
+          stack: error.stack,
+        });
+        setFetchError(error.message || "Failed to load shipment data");
+        toast.error(error.message || "Failed to load shipment data");
         isInitialLoad.current = false;
       } finally {
         setIsFetching(false);
@@ -1279,12 +1354,44 @@ export default function EditShipmentPage({ params }: Props) {
     }
 
     fetchShipmentData();
-  }, [params.id, form, urlOrgId]);
+  }, [params.id, form, urlOrgId, router]);
 
-  if (isFetching || !organizationId) {
+  const retryFetch = () => {
+    setFetchError(null);
+    setIsFetching(true);
+    // Trigger a new fetch by resetting the effect dependency
+    form.reset(form.getValues());
+  };
+
+  if (isFetching) {
     return (
       <div className="w-full h-full flex items-center justify-center">
         <p>Loading shipment data...</p>
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center p-6">
+        <p className="text-red-600">{fetchError}</p>
+        <Button onClick={retryFetch} className="mt-4">
+          Retry
+        </Button>
+        <a href="/dashboard" className="text-blue-600 underline mt-2">
+          Return to Dashboard
+        </a>
+      </div>
+    );
+  }
+
+  if (!organizationId) {
+    return (
+      <div className="w-full h-full flex items-center justify-center">
+        <p>Error: Organization ID not found. Please try again.</p>
+        <a href="/dashboard" className="text-blue-600 underline">
+          Return to Dashboard
+        </a>
       </div>
     );
   }
@@ -1352,4 +1459,4 @@ export default function EditShipmentPage({ params }: Props) {
       </FormProvider>
     </div>
   );
-}
+} 
