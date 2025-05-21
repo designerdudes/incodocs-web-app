@@ -29,6 +29,7 @@ export const fetchData = async (endpoint:any, config = {}) => {
 
 export const postData = async (endpoint: any, data: any, config = {}) => {
 const token = document.cookie.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') as string;
+console.log("Token:", token); // Log the token for debugging  
   try {
     const response = await instance.post(endpoint, data, {
       headers: {
