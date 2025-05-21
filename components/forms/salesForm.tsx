@@ -31,6 +31,7 @@ import {
   TableRow,
 } from "../ui/table";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import CalendarComponent from "../CalendarComponent";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -83,12 +84,12 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] =React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =React.useState<boolean>(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [customerLoading, setCustomerLoading] = React.useState(false);
   const [customers, setCustomers] = React.useState<{ _id: string; name: string }[]>([]);
-  
+
   const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -117,7 +118,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
           throw new Error(`Error: ${response.status}`);
         }
         const customerData = await response.json();
-  
+
         // Validate response before mapping
         if (Array.isArray(customerData)) {
           const mappedCustomers = customerData.map((customer: any) => ({
@@ -126,7 +127,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
           }));
           setCustomers(mappedCustomers);
           console.log(customers); // ✅ Check if customer data is available here
-
         } else {
           console.error("Invalid response format:", customerData);
           toast.error("Unexpected response format");
@@ -140,7 +140,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
     };
     fetchCustomers();
   }, []);
-  
 
   const handleAddNewCustomer = () => {
     toast("Add new customer functionality to be implemented");
@@ -234,10 +233,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-
-           
-
-           
           </div>
 
           {/* Row 2: GST Number, No of Slabs */}
@@ -322,7 +317,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       value={field.value === 0 ? "" : field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0) }
                     />
                   </FormControl>
                   <FormMessage />
@@ -336,38 +331,30 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Sales Date</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-[40%] justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value
-                              ? format(new Date(field.value), "PPP")
-                              : "Sale date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <Calendar
-                            mode="single"
-                            selected={
-                              field.value ? new Date(field.value) : undefined
-                            }
-                            onSelect={(date) =>
-                              field.onChange(date ? date.toISOString() : "")
-                            }
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" className="w-full">
+                          {field.value ? (
+                            format(new Date(field.value), "PPPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        onSelect={(date: any) => {
+                          field.onChange(date ? date.toISOString() :"")
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

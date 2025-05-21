@@ -413,7 +413,7 @@ export function CommercialInvoiceDetails({
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent align="start">
+                            <PopoverContent className="w-auto p-0" align="start">
                               <CalendarComponent
                                 selected={
                                   field.value ? new Date(field.value as any) : undefined
