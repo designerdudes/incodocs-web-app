@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { FieldValues, useFormContext } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -24,6 +24,7 @@ import ShippinglineForm from "@/components/forms/Addshippinglineform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Icons } from "@/components/ui/icons";
 import { Textarea } from "@/components/ui/textarea";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
@@ -38,7 +39,7 @@ export function BillOfLadingDetails({
   saveProgress,
   onSectionSubmit,
 }: BillOfLadingDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue,getValues, watch } = useFormContext();
   const [shippingLines, setShippingLines] = useState<
     { _id: string; shippingLineName: string }[]
   >([]);
@@ -172,6 +173,9 @@ export function BillOfLadingDetails({
     }
   };
 
+  function saveProgressSilently(arg0: FieldValues): void {
+      saveProgress({ BillOfLadingDetails: getValues().BillOfLadingDetails });
+    }
   return (
     <div className="grid grid-cols-4 gap-3">
       {/* Shipping Line */}
@@ -238,15 +242,13 @@ export function BillOfLadingDetails({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    field.value && !isNaN(new Date(field.value).getTime())
-                      ? new Date(field.value)
-                      : undefined
-                  }
-                  onSelect={(date) => field.onChange(date?.toISOString())}
-                />
+                <CalendarComponent
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={(date: any) => {
+                                    field.onChange(date?.toISOString());
+                                    saveProgressSilently(getValues());
+                                  }}
+                                />
               </PopoverContent>
             </Popover>
             <FormMessage />
@@ -275,15 +277,13 @@ export function BillOfLadingDetails({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={
-                    field.value && !isNaN(new Date(field.value).getTime())
-                      ? new Date(field.value)
-                      : undefined
-                  }
-                  onSelect={(date) => field.onChange(date?.toISOString())}
-                />
+                <CalendarComponent
+                                  selected={field.value ? new Date(field.value) : undefined}
+                                  onSelect={(date: any) => {
+                                    field.onChange(date?.toISOString());
+                                    saveProgressSilently(getValues());
+                                  }}
+                                />
               </PopoverContent>
             </Popover>
             <FormMessage />
