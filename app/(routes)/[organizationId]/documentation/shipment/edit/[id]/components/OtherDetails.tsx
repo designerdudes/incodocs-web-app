@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -27,6 +27,7 @@ import {
   TableCell,
   TableHead,
 } from "@/components/ui/table";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface OtherDetailsProps {
   shipmentId: string;
@@ -34,7 +35,7 @@ interface OtherDetailsProps {
 }
 
 export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
-  const { control, setValue, watch } = useFormContext();
+  const { control, setValue,getValues, watch } = useFormContext();
   const [uploading, setUploading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
@@ -88,6 +89,10 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
       uploadCopyOfCertificate: "",
     });
   };
+
+  function saveProgressSilently(arg0: FieldValues): void {
+      saveProgress({ OtherDetails: getValues().OtherDetails });
+    }
 
   return (
     <div className="space-y-4">
@@ -184,18 +189,13 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                               className="w-auto p-0"
                               align="start"
                             >
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  field.value &&
-                                  !isNaN(new Date(field.value).getTime())
-                                    ? new Date(field.value)
-                                    : undefined
-                                }
-                                onSelect={(date) =>
-                                  field.onChange(date?.toISOString())
-                                }
-                              />
+                              <CalendarComponent
+                                                selected={field.value ? new Date(field.value) : undefined}
+                                                onSelect={(date: any) => {
+                                                  field.onChange(date?.toISOString());
+                                                  saveProgressSilently(getValues());
+                                                }}
+                                              />
                             </PopoverContent>
                           </Popover>
                           <FormMessage />

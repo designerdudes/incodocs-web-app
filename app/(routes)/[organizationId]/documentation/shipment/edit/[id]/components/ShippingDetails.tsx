@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormControl,
@@ -34,6 +34,7 @@ import TransporterForm from "@/components/forms/Addtransporterform";
 import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/ui/icons";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface ShippingDetailsProps {
   shipmentId: string;
@@ -284,6 +285,10 @@ export function ShippingDetails({
     }
   };
 
+  function saveProgressSilently(arg0: FieldValues): void {
+    saveProgress({ shippingDetails: getValues().shippingDetails });
+  }
+
   return (
     <div>
       <div className="text-xl font-bold my-3">
@@ -456,16 +461,16 @@ export function ShippingDetails({
                                 </FormControl>
                               </PopoverTrigger>
                               <PopoverContent align="start">
-                                <Calendar
-                                  mode="single"
+                                <CalendarComponent
                                   selected={
                                     field.value
                                       ? new Date(field.value)
                                       : undefined
                                   }
-                                  onSelect={(date) =>
-                                    field.onChange(date?.toISOString())
-                                  }
+                                  onSelect={(date: any) => {
+                                    field.onChange(date?.toISOString());
+                                    saveProgressSilently(getValues());
+                                  }}
                                 />
                               </PopoverContent>
                             </Popover>
@@ -707,16 +712,16 @@ export function ShippingDetails({
                                 </FormControl>
                               </PopoverTrigger>
                               <PopoverContent align="start">
-                                <Calendar
-                                  mode="single"
+                                <CalendarComponent
                                   selected={
                                     field.value
                                       ? new Date(field.value)
                                       : undefined
                                   }
-                                  onSelect={(date) =>
-                                    field.onChange(date?.toISOString())
-                                  }
+                                  onSelect={(date: any) => {
+                                    field.onChange(date?.toISOString());
+                                    saveProgressSilently(getValues());
+                                  }}
                                 />
                               </PopoverContent>
                             </Popover>

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
   FormField,
@@ -33,6 +33,7 @@ import SupplierForm from "@/components/forms/Addsupplierform";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface SupplierDetailsProps {
   shipmentId: string;
@@ -56,7 +57,7 @@ export function SupplierDetails({
   saveProgress,
   onSectionSubmit,
 }: SupplierDetailsProps) {
-  const { control, setValue, watch, trigger } = useFormContext();
+  const { control, setValue, watch, getValues, trigger } = useFormContext();
   const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
   >([]);
@@ -257,6 +258,9 @@ export function SupplierDetails({
     }
   };
 
+  function saveProgressSilently(arg0: FieldValues): void {
+    saveProgress({ SupplierDetails: getValues().SupplierDetails });
+  }
   return (
     <div className="grid grid-cols-4 gap-3">
       {/* Number of Suppliers */}
@@ -504,19 +508,16 @@ export function SupplierDetails({
                                       </FormControl>
                                     </PopoverTrigger>
                                     <PopoverContent align="start">
-                                      <Calendar
-                                        mode="single"
+                                      <CalendarComponent
                                         selected={
-                                          field.value &&
-                                          !isNaN(
-                                            new Date(field.value).getTime()
-                                          )
+                                          field.value
                                             ? new Date(field.value)
                                             : undefined
                                         }
-                                        onSelect={(date) =>
-                                          field.onChange(date?.toISOString())
-                                        }
+                                        onSelect={(date: any) => {
+                                          field.onChange(date?.toISOString());
+                                          saveProgressSilently(getValues());
+                                        }}
                                       />
                                     </PopoverContent>
                                   </Popover>

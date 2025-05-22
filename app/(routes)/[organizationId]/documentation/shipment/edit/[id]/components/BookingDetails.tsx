@@ -37,6 +37,7 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Textarea } from "@/components/ui/textarea";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import CalendarComponent from "@/components/CalendarComponent";
 
 interface AddProductDetails {
   productId?: string;
@@ -662,10 +663,12 @@ export function BookingDetails({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
+                <CalendarComponent
                   selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  onSelect={(date: any) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
@@ -697,10 +700,12 @@ export function BookingDetails({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
+              <CalendarComponent
                   selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date) => field.onChange(date?.toISOString())}
+                  onSelect={(date: any) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
                 />
               </PopoverContent>
             </Popover>
