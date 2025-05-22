@@ -32,20 +32,6 @@ import CalendarComponent from "@/components/CalendarComponent";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
-// ✅ Schema - Only forwarderName is required
-
-interface ForwarderForm {
-  fileName: string;
-  fileUrl: string;
-  uploadedBy: string;
-  date: string | null;
-  review: string;
-}
-
-interface FormData {
-  forwarderdetails: number;
-  forwarderForm: ForwarderForm[];
-}
 
 
 const formSchema = z.object({
@@ -121,7 +107,6 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
       );
       if (!response.ok) throw new Error("Failed to create Forwarder");
 
-      await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Forwarder created successfully");
@@ -145,14 +130,6 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
     }));
     form.setValue("documents", newDocuments);
   };
-
-  const { control, setValue, watch, getValues } = form;
-const forwarderDetailsFromForm = watch("documents") || [];
-
-const getFieldName = <T extends FormData>(
-  index: number,
-  field: keyof ForwarderForm
-): Path<T> => `documents[${index}].${field}` as Path<T>;
 
 
 function saveProgressSilently(data: any) {
@@ -290,14 +267,14 @@ function saveProgressSilently(data: any) {
     </TableRow>
   </TableHeader>
   <TableBody>
-    {forwarderDetailsFromForm.map((_, index: number) => (
+    {form.watch("documents")?.map((_, index) => (       
       <TableRow key={index}>
         <TableCell>{index + 1}</TableCell>
 
         <TableCell>
           <FormField
-            control={control}
-            name={getFieldName<FormData>(index, "fileName")}
+            control={form.control}
+            name={`documents.${index}.fileName`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -307,7 +284,7 @@ function saveProgressSilently(data: any) {
                     onChange={field.onChange}
                     onBlur={() => {
                       field.onBlur();
-                      saveProgressSilently(getValues());
+                      saveProgressSilently(form.getValues());
                     }}
                   />
                 </FormControl>
@@ -319,8 +296,8 @@ function saveProgressSilently(data: any) {
         </TableCell>
          <TableCell>
           <FormField
-            control={control}
-            name={getFieldName<FormData>(index, "fileUrl")}
+            control={form.control}
+            name={`documents.${index}.fileUrl`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -330,7 +307,7 @@ function saveProgressSilently(data: any) {
                     onChange={field.onChange}
                     onBlur={() => {
                       field.onBlur();
-                      saveProgressSilently(getValues());
+                      saveProgressSilently(form.getValues());
                     }}
                   />
                 </FormControl>
@@ -342,8 +319,8 @@ function saveProgressSilently(data: any) {
         </TableCell>
          <TableCell>
           <FormField
-            control={control}
-            name={getFieldName<FormData>(index, "uploadedBy")}
+            control={form.control}
+            name={`documents.${index}.uploadedBy`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -353,7 +330,7 @@ function saveProgressSilently(data: any) {
                     onChange={field.onChange}
                     onBlur={() => {
                       field.onBlur();
-                      saveProgressSilently(getValues());
+                      saveProgressSilently(form.getValues());
                     }}
                   />
                 </FormControl>
@@ -365,8 +342,8 @@ function saveProgressSilently(data: any) {
         </TableCell>
          <TableCell>
           <FormField
-                      control={control}
-                      name={getFieldName<FormData>(index, "date")}
+                      control={form.control}
+                      name={`documents.${index}.date`}
                       render={({ field }) => (
                         <FormItem className="flex flex-col gap-2">
                           <Popover>
@@ -385,7 +362,7 @@ function saveProgressSilently(data: any) {
                                 selected={field.value ? new Date(field.value as any) : undefined}
                                 onSelect={(date: Date | undefined) => {
                                   field.onChange(date?.toISOString());
-                                  saveProgressSilently(getValues());
+                                  saveProgressSilently(form.getValues());
                                 }}
                               />
                             </PopoverContent>
@@ -398,8 +375,8 @@ function saveProgressSilently(data: any) {
         </TableCell>
          <TableCell>
           <FormField
-            control={control}
-            name={getFieldName<FormData>(index, "review")}
+            control={form.control}
+            name={`documents.${index}.review`}
             render={({ field }) => (
               <FormItem>
                 <FormControl>
@@ -409,7 +386,7 @@ function saveProgressSilently(data: any) {
                     onChange={field.onChange}
                     onBlur={() => {
                       field.onBlur();
-                      saveProgressSilently(getValues());
+                      saveProgressSilently(form.getValues());
                     }}
                   />
                 </FormControl>
