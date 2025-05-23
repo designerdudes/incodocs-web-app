@@ -645,7 +645,7 @@ function ShipmentDataTable<T>({
       </div>
 
       {/* Table */}
-      <div className="bg-background overflow-hidden h-[80%] rounded-md border">
+      <div className="bg-background overflow-hidden max-h-[80%] rounded-md border">
         <Table className="table-fixed h-full">
           <TableHeader
           className="bg-background/90 sticky top-0 z-10 backdrop-blur-xs"

@@ -72,7 +72,7 @@ export default async function Page(params: params) {
           columns={columns as any}
           data={shipmentData}
           searchKeys={[
-            "ShipmentId",
+            "shipmentId",
             "saleInvoiceDetails.consingeeName",
             "bookingDetails.invoiceNumber",
             "bookingDetails.bookingNumber",
