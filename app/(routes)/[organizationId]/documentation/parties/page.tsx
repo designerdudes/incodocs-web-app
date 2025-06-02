@@ -14,6 +14,7 @@ import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
 import PartiesDropdown from "./components/PartiesDropdown";
 import { cbNamecolumns } from "./components/CbNameColumn";
+import AddParties from "./components/PartiesDropdown";
 
 interface Props {
   params: {
@@ -97,6 +98,8 @@ export default async function PartiesPage({ params }: Props) {
     }
   ).then((response) => response.json());
   const consignee = consigneeRes;
+  
+
 
   const cbNameRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organisationID}`,
@@ -127,10 +130,10 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
         <div className="flex justify-end mb-4">
-          <PartiesDropdown organizationId={organisationID} currentUser={currentUser} />
+          <AddParties organizationId={organisationID} currentUser={currentUser} />
         </div>
       </div>
-      {/* Moved PartiesDropdown here */}
+      {/* Moved AddParties here */}
 
       <Separator className="my-2" />
       <div>
@@ -168,7 +171,7 @@ export default async function PartiesPage({ params }: Props) {
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="cbName">
-              Cb name
+              CustomBroker name
               <Badge className="text-bg-primary-foreground" variant="outline">
                 {cbName?.length ?? 0}
               </Badge>

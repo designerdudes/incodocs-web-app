@@ -18,7 +18,11 @@ import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useParams } from "next/navigation";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import {
   Table,
   TableBody,
@@ -29,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { CalendarIcon, Trash } from "lucide-react";
+import { postData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   transporterName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -37,60 +42,39 @@ const formSchema = z.object({
   mobileNo: z
     .string()
     .optional()
-    .refine(
-      (val) => !val || /^\d{7,}$/.test(val),
-      { message: "Mobile number must be at least 7 digits" }
-    ),
-  email: z.string().optional().refine(
-    (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-    { message: "Enter a valid email address" }
+    .refine((val) => !val || /^\d{7,}$/.test(val), {
+      message: "Mobile number must be at least 7 digits",
+    }),
+  email: z
+    .string()
+    .optional()
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Enter a valid email address",
+    }),
+  numberOfDocuments: z.number().optional(),
+  documents: z.array(
+    z.object({
+      fileName: z.string().optional(),
+      fileUrl: z.string().optional(),
+      uploadedBy: z.string().optional(),
+      date: z.string().datetime({ message: "Invalid date format" }).optional(),
+      review: z.string().optional(),
+    })
   ),
-  numberOfDocuments:z.number(),
-  documents: z
-          .array(
-            z.object({
-              fileName: z.string().optional(),
-              fileUrl: z.string().optional(),
-              uploadedBy: z.string().optional(),
-              date: z
-                .string()
-                .datetime({ message: "Invalid date format" })
-                .optional(),
-              review: z.string().optional()
-            })
-          ),
   organizationId: z.string().optional(),
-  upload:z.any().optional()
-
+  createdBy: z.string().optional(),
 });
 
 interface TransporterFormProps {
   onSuccess?: () => void;
+  orgId?: string;
+  currentUser?: string;
 }
 
-function Transporterform({ onSuccess }: TransporterFormProps) {
+function Transporterform({onSuccess,orgId,currentUser,}: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = useParams().organizationId;
-
-  function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
-
-
-const handleCertificateCountChange = (count: string) => {
-    const numericCount = parseInt(count, 10);
-    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-      fileName: "",
-      fileUrl: "",
-      uploadedBy: "",
-      date: "",
-      review: ""
-    }));
-    form.setValue("documents", newDocuments);
-  };
-
-
+  const orgid = orgId;
+  console.log("THi sis Org id",orgId)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -100,38 +84,49 @@ const handleCertificateCountChange = (count: string) => {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
-      organizationId: ""
-
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
     },
   });
-
   const GlobalModal = useGlobalModal();
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+    console.log(values);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipment/transporter/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...values,
-          organizationId: orgid
-        }),
+      const response = await postData("/shipment/transporter/create", {
+        ...values,
+        organizationId: orgid,
       });
-
-      if (!response.ok) throw new Error("Failed to create Transporter");
-      await response.json();
-      toast.success("Transporter created successfully");
+      setIsLoading(false);
       GlobalModal.onClose();
+      toast.success("Transporter created successfully");
       window.location.reload();
       if (onSuccess) onSuccess();
     } catch (error) {
       console.error("Error creating Transporter:", error);
-      toast.error("Error creating Transporter");
-    } finally {
       setIsLoading(false);
-    }
+      toast.error("Error creating Transporter");
+    };
+    
   };
+
+  const handleCertificateCountChange = (count: string) => {
+      const numericCount = parseInt(count, 10);
+      const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
+        fileName: "",
+        fileUrl: "",
+        date: "",
+        review: "",
+      }));
+      form.setValue("documents", newDocuments);
+  };
+
+  function saveProgressSilently(data: any) {
+      localStorage.setItem("shipmentFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+    }
 
   return (
     <Form {...form}>
@@ -189,11 +184,7 @@ const handleCertificateCountChange = (count: string) => {
             <FormItem>
               <FormLabel>Mobile Number</FormLabel>
               <FormControl>
-                <Input
-                  type="tel"
-                  placeholder="e.g., 7545345"
-                  {...field}
-                />
+                <Input type="tel" placeholder="e.g., 7545345" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -208,193 +199,167 @@ const handleCertificateCountChange = (count: string) => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="e.g., unknownname@123.com" {...field} />
+                <Input
+                  type="email"
+                  placeholder="e.g., unknownname@123.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-         <FormField
-                control={form.control}
-                name="numberOfDocuments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Documents</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter number of documents"
-                        value={field.value as any || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === "") {
-                            field.onChange(1);
-                            handleCertificateCountChange("1");
-                            return;
-                          }
-                          const numericValue = Number(value);
-                          field.onChange(numericValue);
-                          handleCertificateCountChange(numericValue.toString());
-                        }}
-                        min={1}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />  
-        
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead colSpan={5} className="text-center text-lg font-semibold">
-                  Upload Documents
-                </TableHead>
+        <FormField
+          control={form.control}
+          name="numberOfDocuments"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of documents"
+                  value={(field.value as any) || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(1);
+                      handleCertificateCountChange("1");
+                      return;
+                    }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
+                    handleCertificateCountChange(numericValue.toString());
+                  }}
+                  min={1}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>File Name</TableHead>
+              <TableHead>File URL</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Review</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {form.watch("documents")?.map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileName`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., coo"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileUrl`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., https://example.com/file.pdf"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full">
+                                {field.value
+                                  ? format(new Date(field.value as any), "PPPP")
+                                  : "Pick a date"}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              selected={
+                                field.value
+                                  ? new Date(field.value as any)
+                                  : undefined
+                              }
+                              onSelect={(date: Date | undefined) => {
+                                field.onChange(date?.toISOString());
+                                saveProgressSilently(form.getValues());
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.review`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="review your docs"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TableCell>
               </TableRow>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>File Name</TableHead>
-                <TableHead>File URL</TableHead>
-                <TableHead>Uploaded By</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Review</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {form.watch("documents")?.map((_, index) => (       
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-          
-                  <TableCell>
-                    <FormField
-                      control={form.control}
-                      name={`documents.${index}.fileName`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., coo"
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              onBlur={() => {
-                                field.onBlur();
-                                saveProgressSilently(form.getValues());
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-          
-                  </TableCell>
-                   <TableCell>
-                    <FormField
-                      control={form.control}
-                      name={`documents.${index}.fileUrl`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., https://example.com/file.pdf"
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              onBlur={() => {
-                                field.onBlur();
-                                saveProgressSilently(form.getValues());
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-          
-                  </TableCell>
-                   <TableCell>
-                    <FormField
-                      control={form.control}
-                      name={`documents.${index}.uploadedBy`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="e.g., Ahmed"
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              onBlur={() => {
-                                field.onBlur();
-                                saveProgressSilently(form.getValues());
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-          
-                  </TableCell>
-                   <TableCell>
-                    <FormField
-                                control={form.control}
-                                name={`documents.${index}.date`}
-                                render={({ field }) => (
-                                  <FormItem className="flex flex-col gap-2">
-                                    <Popover>
-                                      <PopoverTrigger asChild>
-                                        <FormControl>
-                                          <Button variant="outline" className="w-full">
-                                            {field.value
-                                              ? format(new Date(field.value as any), "PPPP")
-                                              : "Pick a date"}
-                                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                          </Button>
-                                        </FormControl>
-                                      </PopoverTrigger>
-                                      <PopoverContent className="w-auto p-0" align="start">
-                                        <CalendarComponent
-                                          selected={field.value ? new Date(field.value as any) : undefined}
-                                          onSelect={(date: Date | undefined) => {
-                                            field.onChange(date?.toISOString());
-                                            saveProgressSilently(form.getValues());
-                                          }}
-                                        />
-                                      </PopoverContent>
-                                    </Popover>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-          
-                  </TableCell>
-                   <TableCell>
-                    <FormField
-                      control={form.control}
-                      name={`documents.${index}.review`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="review your docs"
-                              value={field.value || ""}
-                              onChange={field.onChange}
-                              onBlur={() => {
-                                field.onBlur();
-                                saveProgressSilently(form.getValues());
-                              }}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-          
-                  </TableCell>
-          
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+            ))}
+          </TableBody>
+        </Table>
 
         {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
