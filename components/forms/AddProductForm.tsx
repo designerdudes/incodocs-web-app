@@ -134,6 +134,10 @@ const stepRiserSchema = z.object({
         .number()
         .min(0, { message: "Number of step boxes must be positive" })
         .optional(),
+      noOfPiecesPerBoxOfSteps: z
+        .number()
+        .min(0, { message: "Pieces per box of steps must be positive" })
+        .optional(),
       sizeOfBoxOfSteps: z
         .object({
           length: z
@@ -153,6 +157,10 @@ const stepRiserSchema = z.object({
       noOfBoxOfRisers: z
         .number()
         .min(0, { message: "Number of riser boxes must be positive" })
+        .optional(),
+      noOfPiecesPerBoxOfRisers: z
+        .number()
+        .min(0, { message: "Pieces per box of risers must be positive" })
         .optional(),
       sizeOfBoxOfRisers: z
         .object({
@@ -229,8 +237,10 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
         },
         seperateBox: {
           noOfBoxOfSteps: 0,
+          noOfPiecesPerBoxOfSteps: 0,
           sizeOfBoxOfSteps: { length: 0, breadth: 0, thickness: 0 },
           noOfBoxOfRisers: 0,
+          noOfPiecesPerBoxOfRisers: 0,
           sizeOfBoxOfRisers: { length: 0, breadth: 0, thickness: 0 },
         },
       },
@@ -269,6 +279,94 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       setIsLoading(false);
     }
   };
+
+  const length = form.watch("tileDetails.size.length") || 0;
+  const breadth = form.watch("tileDetails.size.breadth") || 0;
+  const piecesPerBox = form.watch("tileDetails.piecesPerBox") || 0;
+  const noOfBoxes = form.watch("tileDetails.noOfBoxes") || 0;
+
+  const noOfMixedBoxes = form.watch("stepRiserDetails.mixedBox.noOfBoxes") || 0;
+  const noOfSteps = form.watch("stepRiserDetails.mixedBox.noOfSteps") || 0;
+  const noOfRiser = form.watch("stepRiserDetails.mixedBox.noOfRiser") || 0;
+  const mixedBoxStepLength =
+    form.watch("stepRiserDetails.mixedBox.sizeOfStep.length") || 0;
+  const mixedBoxStepBreadth =
+    form.watch("stepRiserDetails.mixedBox.sizeOfStep.breadth") || 0;
+  const mixedBoxRiserLength =
+    form.watch("stepRiserDetails.mixedBox.sizeOfRiser.length") || 0;
+  const mixedBoxRiserBreadth =
+    form.watch("stepRiserDetails.mixedBox.sizeOfRiser.breadth") || 0;
+
+  const noOfSeparateStepBoxes =
+    form.watch("stepRiserDetails.seperateBox.noOfBoxOfSteps") || 0;
+  const noOfPiecesPerBoxOfSteps =
+    form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps") || 0;
+  const separateBoxStepLength =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.length") || 0;
+  const separateBoxStepBreadth =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.breadth") || 0;
+  const noOfSeparateRisersBoxes =
+    form.watch("stepRiserDetails.seperateBox.noOfBoxOfRisers") || 0;
+  const noOfPiecesPerBoxOfRisers =
+    form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers") || 0;
+  const separateBoxRiserLength =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.length") || 0;
+  const separateBoxRiserBreadth =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.breadth") || 0;
+
+  const totalSquareMeter =
+    length && breadth && piecesPerBox && noOfBoxes
+      ? (((length * breadth) / 929) * piecesPerBox * noOfBoxes) / 10.764
+      : 0;
+
+  const totalMixedBoxSquareMeter =
+    noOfMixedBoxes && noOfSteps && mixedBoxStepLength && mixedBoxStepBreadth
+      ? (noOfMixedBoxes *
+          noOfSteps *
+          mixedBoxStepLength *
+          mixedBoxStepBreadth) /
+        929 /
+        10.764
+      : 0;
+  const totalMixedBoxRiserSquareMeter =
+    noOfMixedBoxes && noOfRiser && mixedBoxRiserLength && mixedBoxRiserBreadth
+      ? (noOfMixedBoxes *
+          noOfRiser *
+          mixedBoxRiserLength *
+          mixedBoxRiserBreadth) /
+        929 /
+        10.764
+      : 0;
+  const totalSeparateBoxStepSquareMeter =
+    noOfSeparateStepBoxes &&
+    noOfPiecesPerBoxOfSteps &&
+    separateBoxStepLength &&
+    separateBoxStepBreadth
+      ? (noOfSeparateStepBoxes *
+          noOfPiecesPerBoxOfSteps *
+          separateBoxStepLength *
+          separateBoxStepBreadth) /
+        929 /
+        10.764
+      : 0;
+  const totalSeparateBoxRiserSquareMeter =
+    noOfSeparateRisersBoxes &&
+    noOfPiecesPerBoxOfRisers &&
+    separateBoxRiserLength &&
+    separateBoxRiserBreadth
+      ? (noOfSeparateRisersBoxes *
+          noOfPiecesPerBoxOfRisers *
+          separateBoxRiserLength *
+          separateBoxRiserBreadth) /
+        929 /
+        10.764
+      : 0;
+
+  const total =
+    totalMixedBoxSquareMeter +
+    totalMixedBoxRiserSquareMeter +
+    totalSeparateBoxStepSquareMeter +
+    totalSeparateBoxRiserSquareMeter;
 
   return (
     <div className="space-y-6">
@@ -343,6 +441,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <Input
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -364,6 +463,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <Input
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -386,6 +486,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -468,6 +569,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -489,6 +591,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -500,6 +603,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                   )}
                 />
               </div>
+              <h1 className="mt-2">
+                Total square meter - {totalSquareMeter.toFixed(3)}
+              </h1>
             </div>
           )}
 
@@ -609,202 +715,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                 </div>
               </div>
               <div className="flex flex-col gap-4 border p-4 rounded-md">
-                <h4 className="text-md font-semibold col-span-3">Mixed Box</h4>
-                <FormField
-                  control={form.control}
-                  name="stepRiserDetails.mixedBox.noOfBoxes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Boxes</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                          min={0}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="stepRiserDetails.mixedBox.noOfSteps"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Steps</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                          min={0}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfStep.length"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Step Length (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfStep.breadth"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Step Breadth (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfStep.thickness"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Step Thickness (mm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="stepRiserDetails.mixedBox.noOfRiser"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Number of Risers</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                          min={0}
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfRiser.length"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Riser Length (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfRiser.breadth"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Riser Breadth (cm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="stepRiserDetails.mixedBox.sizeOfRiser.thickness"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Riser Thickness (mm)</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                            min={0}
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(Number(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-              <div className="flex flex-col gap-4 border p-4 rounded-md">
                 <h4 className="text-md font-semibold col-span-3">
                   Separate Box
                 </h4>
@@ -819,6 +729,29 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pieces per Box of Steps</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -841,6 +774,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -862,6 +798,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -883,6 +822,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -905,6 +847,29 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pieces per Box of Risers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -927,6 +892,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -948,6 +916,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -969,6 +940,9 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -981,6 +955,241 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                   />
                 </div>
               </div>
+              <div className="flex flex-col gap-4 border p-4 rounded-md">
+                <h4 className="text-md font-semibold col-span-3">Mixed Box</h4>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfBoxes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Boxes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfSteps"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Steps</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfRiser"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Risers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            min={0}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            } // This disables scroll wheel interaction
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <h1>
+                Total square meter of seperate box step -{" "}
+                {totalSeparateBoxStepSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of seperate box risers -{" "}
+                {totalSeparateBoxRiserSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of mixed box step -{" "}
+                {totalMixedBoxSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of mixed box risers -{" "}
+                {totalMixedBoxRiserSquareMeter.toFixed(3)}
+              </h1>
+              <h1>Total square meter - {total}</h1>
             </div>
           )}
 
