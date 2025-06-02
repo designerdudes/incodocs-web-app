@@ -16,7 +16,6 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -29,6 +28,8 @@ import CalendarComponent from "@/components/CalendarComponent";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
+import { postData } from "@/axiosUtility/api";
+
 
 const formSchema = z.object({
   shippingLineName: z
@@ -48,31 +49,29 @@ const formSchema = z.object({
     .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
       message: "Enter a valid Email",
     }),
-     documents: z
-            .array(
-              z.object({
-                fileName: z.string().optional(),
-                fileUrl: z.string().optional(),
-                uploadedBy: z.string().optional(),
-                date: z
-                  .string()
-                  .datetime({ message: "Invalid date format" })
-                  .optional(),
-                review: z.string().optional()
-              })
-            ),
-  numberOfDocuments: z.number(),
+  documents: z
+    .array(
+      z.object({
+        fileName: z.string().optional(),
+        fileUrl: z.string().optional(),
+        date: z.string().datetime({ message: "Invalid date format" }).optional(),
+        review: z.string().optional()
+      })
+    ).optional(),
+  numberOfDocuments: z.number().optional(),
   organizationId: z.string().optional(),
-  upload: z.any().optional(),
+  createdBy: z.string().optional(),
 });
 
 interface ShippinglineFormProps {
   onSuccess?: () => void;
+  orgId?: string;
+  currentUser?: string;
 }
 
-function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
+function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = useParams().organizationId;
+  const orgid = orgId
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,7 +81,9 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
-      organizationId: "",
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
     },
   });
 
@@ -90,25 +91,15 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    console.log(values);
+    // console.log(values);
     try {
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/shippingline/create",
+      const response = await postData(
+        "shipment/shippingline/create",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            shippingLineName: values.shippingLineName,
-            address: values.address,
-            responsiblePerson: values.responsiblePerson,
-            mobileNo: values.mobileNo ? parseInt(values.mobileNo) : undefined,
-            email: values.email,
-            organizationId: orgid,
-          }),
+          ...values,
+          organizationId: orgid,
         }
       );
-      if (!response.ok) throw new Error("Failed to create shipping line");
-      await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Shipping line created successfully");
@@ -126,7 +117,6 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
     const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
       fileName: "",
       fileUrl: "",
-      uploadedBy: "",
       date: "",
       review: ""
     }));
@@ -134,10 +124,10 @@ function ShippingLineForm({ onSuccess }: ShippinglineFormProps) {
   };
 
 
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
+  function saveProgressSilently(data: any) {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  }
 
   return (
     <Form {...form}>
@@ -217,74 +207,55 @@ function saveProgressSilently(data: any) {
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="upload"
+          name="numberOfDocuments"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Upload your documents</FormLabel>
+              <FormLabel>Number of Documents</FormLabel>
               <FormControl>
                 <Input
-                  type="file"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
+                  type="number"
+                  placeholder="Enter number of documents"
+                  value={field.value as any || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(1);
+                      handleCertificateCountChange("1");
+                      return;
+                    }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
+                    handleCertificateCountChange(numericValue.toString());
+                  }}
+                  min={1}
                 />
               </FormControl>
+              <FormMessage />
             </FormItem>
           )}
         />
-        <FormField
-                control={form.control}
-                name="numberOfDocuments"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Number of Documents</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="Enter number of documents"
-                        value={field.value as any || ""}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === "") {
-                            field.onChange(1);
-                            handleCertificateCountChange("1");
-                            return;
-                          }
-                          const numericValue = Number(value);
-                          field.onChange(numericValue);
-                          handleCertificateCountChange(numericValue.toString());
-                        }}
-                        min={1}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />  
-
-
-         <Table>
+        <Table>
           <TableHeader>
             <TableRow>
-              <TableHead colSpan={5} className="text-center text-lg font-semibold">
+              {/* <TableHead colSpan={5} className="text-center text-lg font-semibold">
                 Upload Documents
-              </TableHead>
+              </TableHead> */}
             </TableRow>
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>File Name</TableHead>
               <TableHead>File URL</TableHead>
-              <TableHead>Uploaded By</TableHead>
+              {/* <TableHead>Uploaded By</TableHead> */}
               <TableHead>Date</TableHead>
               <TableHead>Review</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {form.watch("documents")?.map((_, index) => (       
+            {form.watch("documents")?.map((_, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>
-        
                 <TableCell>
                   <FormField
                     control={form.control}
@@ -306,9 +277,9 @@ function saveProgressSilently(data: any) {
                       </FormItem>
                     )}
                   />
-        
+
                 </TableCell>
-                 <TableCell>
+                <TableCell>
                   <FormField
                     control={form.control}
                     name={`documents.${index}.fileUrl`}
@@ -329,9 +300,9 @@ function saveProgressSilently(data: any) {
                       </FormItem>
                     )}
                   />
-        
+
                 </TableCell>
-                 <TableCell>
+                {/* <TableCell>
                   <FormField
                     control={form.control}
                     name={`documents.${index}.uploadedBy`}
@@ -340,54 +311,55 @@ function saveProgressSilently(data: any) {
                         <FormControl>
                           <Input
                             placeholder="e.g., Ahmed"
-                            value={field.value || ""}
+                            value={currentUser || ""}
                             onChange={field.onChange}
                             onBlur={() => {
                               field.onBlur();
                               saveProgressSilently(form.getValues());
                             }}
+                            readOnly
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-        
-                </TableCell>
-                 <TableCell>
+
+                </TableCell> */}
+                <TableCell>
                   <FormField
-                              control={form.control}
-                              name={`documents.${index}.date`}
-                              render={({ field }) => (
-                                <FormItem className="flex flex-col gap-2">
-                                  <Popover>
-                                    <PopoverTrigger asChild>
-                                      <FormControl>
-                                        <Button variant="outline" className="w-full">
-                                          {field.value
-                                            ? format(new Date(field.value as any), "PPPP")
-                                            : "Pick a date"}
-                                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                        </Button>
-                                      </FormControl>
-                                    </PopoverTrigger>
-                                    <PopoverContent className="w-auto p-0" align="start">
-                                      <CalendarComponent
-                                        selected={field.value ? new Date(field.value as any) : undefined}
-                                        onSelect={(date: Date | undefined) => {
-                                          field.onChange(date?.toISOString());
-                                          saveProgressSilently(form.getValues());
-                                        }}
-                                      />
-                                    </PopoverContent>
-                                  </Popover>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
+                    control={form.control}
+                    name={`documents.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full">
+                                {field.value
+                                  ? format(new Date(field.value as any), "PPPP")
+                                  : "Pick a date"}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              selected={field.value ? new Date(field.value) : undefined}
+                              onSelect={(date: any) => {
+                                field.onChange(date?.toISOString());
+                                saveProgressSilently(form.getValues());
+                              }}
                             />
-        
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
                 </TableCell>
-                 <TableCell>
+                <TableCell>
                   <FormField
                     control={form.control}
                     name={`documents.${index}.review`}
@@ -408,9 +380,9 @@ function saveProgressSilently(data: any) {
                       </FormItem>
                     )}
                   />
-        
+
                 </TableCell>
-        
+
               </TableRow>
             ))}
           </TableBody>
