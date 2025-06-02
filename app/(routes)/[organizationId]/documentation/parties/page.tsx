@@ -15,7 +15,6 @@ import { consigneecolumns } from "./components/consigneeColumn";
 import PartiesDropdown from "./components/PartiesDropdown";
 import { cbNamecolumns } from "./components/CbNameColumn";
 
-
 interface Props {
   params: {
     organizationId: string;
@@ -26,9 +25,19 @@ export default async function PartiesPage({ params }: Props) {
   const cookieStore = cookies();
   const organisationID = params.organizationId; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
-  console.log("PartiesPage - organisationID:", organisationID);
-
   // Fetch data (unchanged)
+  const GetCurrentUser = await fetch(
+    `https://incodocs-server.onrender.com/user/currentUser`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => response.json());
+  const currentUser = GetCurrentUser._id;
+
   const shippingLineRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organisationID}`,
     {
@@ -40,7 +49,7 @@ export default async function PartiesPage({ params }: Props) {
     }
   ).then((response) => response.json());
   const shippingLine = shippingLineRes;
-  console.log("shipping line", shippingLine);
+
   const ForwarderRes = await fetch(
     `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
     {
@@ -118,7 +127,7 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
         <div className="flex justify-end mb-4">
-          <PartiesDropdown organizationId={organisationID} />
+          <PartiesDropdown organizationId={organisationID} currentUser={currentUser} />
         </div>
       </div>
       {/* Moved PartiesDropdown here */}
