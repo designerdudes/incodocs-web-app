@@ -25,6 +25,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Icons } from "@/components/ui/icons";
 import { Textarea } from "@/components/ui/textarea";
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
@@ -39,7 +40,7 @@ export function BillOfLadingDetails({
   saveProgress,
   onSectionSubmit,
 }: BillOfLadingDetailsProps) {
-  const { control, setValue,getValues, watch } = useFormContext();
+  const { control, setValue, getValues, watch } = useFormContext();
   const [shippingLines, setShippingLines] = useState<
     { _id: string; shippingLineName: string }[]
   >([]);
@@ -109,15 +110,10 @@ export function BillOfLadingDetails({
 
   // Fetch shipping lines on component mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchShippingLines = async () => {
       try {
         const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
-        const shippingResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgIdToUse}`
-        );
-        if (!shippingResponse.ok)
-          throw new Error("Failed to fetch shipping lines");
-        const shippingData = await shippingResponse.json();
+        const shippingData = await fetchData(`/shipment/shippingline/getbyorg/${orgIdToUse}`);
         setShippingLines(
           Array.isArray(shippingData)
             ? shippingData.map((line: any) => ({
@@ -131,29 +127,29 @@ export function BillOfLadingDetails({
         toast.error("Failed to load shipping lines");
       }
     };
-    fetchData();
+    fetchShippingLines();
   }, [orgId]);
 
   const openShippingLineForm = () => {
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
       <ShippinglineForm
-        onSuccess={() => {
-          const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${orgIdToUse}`
-          )
-            .then((res) => res.json())
-            .then((data) => {
-              setShippingLines(
-                Array.isArray(data)
-                  ? data.map((line: any) => ({
-                      _id: line._id,
-                      shippingLineName: line.shippingLineName,
-                    }))
-                  : []
-              );
-            });
+        onSuccess={async () => {
+          try {
+            const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
+            const data = await fetchData(`/shipment/shippingline/getbyorg/${orgIdToUse}`);
+            setShippingLines(
+              Array.isArray(data)
+                ? data.map((line: any) => ({
+                    _id: line._id,
+                    shippingLineName: line.shippingLineName,
+                  }))
+                : []
+            );
+          } catch (error) {
+            console.error("Error refreshing shipping lines:", error);
+            toast.error("Failed to refresh shipping lines");
+          }
         }}
       />
     );
@@ -174,8 +170,9 @@ export function BillOfLadingDetails({
   };
 
   function saveProgressSilently(arg0: FieldValues): void {
-      saveProgress({ BillOfLadingDetails: getValues().BillOfLadingDetails });
-    }
+    saveProgress({ BillOfLadingDetails: getValues().BillOfLadingDetails });
+  }
+
   return (
     <div className="grid grid-cols-4 gap-3">
       {/* Shipping Line */}
@@ -243,12 +240,12 @@ export function BillOfLadingDetails({
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
-                                  selected={field.value ? new Date(field.value) : undefined}
-                                  onSelect={(date: any) => {
-                                    field.onChange(date?.toISOString());
-                                    saveProgressSilently(getValues());
-                                  }}
-                                />
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date: any) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
+                />
               </PopoverContent>
             </Popover>
             <FormMessage />
@@ -278,12 +275,12 @@ export function BillOfLadingDetails({
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <CalendarComponent
-                                  selected={field.value ? new Date(field.value) : undefined}
-                                  onSelect={(date: any) => {
-                                    field.onChange(date?.toISOString());
-                                    saveProgressSilently(getValues());
-                                  }}
-                                />
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date: any) => {
+                    field.onChange(date?.toISOString());
+                    saveProgressSilently(getValues());
+                  }}
+                />
               </PopoverContent>
             </Popover>
             <FormMessage />

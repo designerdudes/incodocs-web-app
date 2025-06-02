@@ -35,6 +35,8 @@ import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/ui/icons";
 import CalendarComponent from "@/components/CalendarComponent";
+import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
 
 interface ShippingDetailsProps {
   shipmentId: string;
@@ -55,6 +57,7 @@ export function ShippingDetails({
   const [uploading, setUploading] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
+  const router = useRouter();
 
   const {
     fields: forwarderFields,
@@ -131,7 +134,7 @@ export function ShippingDetails({
     }
   };
 
-  // Handle File Upload
+  // Handle File Upload with Authorization
   const handleFileUpload = async (file: File, fieldName: string) => {
     if (!file) return;
     if (!["application/pdf", "image/jpeg", "image/png"].includes(file.type)) {
@@ -142,8 +145,24 @@ export function ShippingDetails({
       toast.error("File size must be less than 5MB");
       return;
     }
+
     setUploading(true);
     try {
+      const token = Cookies.get("AccessToken");
+      if (!token) {
+        toast.error("Please log in to upload files");
+        router.push("/login");
+        return;
+      }
+
+      const isValidJwt = token.split(".").length === 3;
+      if (!isValidJwt) {
+        toast.error("Invalid authentication token. Please log in again.");
+        Cookies.remove("AccessToken");
+        router.push("/login");
+        return;
+      }
+
       const formData = new FormData();
       formData.append("file", file);
       console.log("Uploading file:", {
@@ -151,15 +170,21 @@ export function ShippingDetails({
         type: file.type,
         size: file.size,
       });
+
       const response = await fetch(
         "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
           body: formData,
         }
       );
+
       const responseText = await response.text();
       console.log("Raw API response text:", responseText);
+
       if (!response.ok) {
         let errorData;
         try {
@@ -167,20 +192,30 @@ export function ShippingDetails({
         } catch {
           errorData = { message: responseText || "Unknown error" };
         }
+
+        if (response.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          Cookies.remove("AccessToken");
+          router.push("/login");
+          return;
+        }
+
         throw new Error(
           `File upload failed: ${
             errorData.message || response.statusText
           } (Status: ${response.status})`
         );
       }
+
       let data;
       try {
         data = JSON.parse(responseText);
       } catch {
         throw new Error("Invalid JSON response from server: " + responseText);
       }
+
       console.log("Parsed API response:", data);
-      // Try multiple possible field names for the URL
+
       const fileUrl =
         data.storageLink ||
         data.url ||
@@ -189,7 +224,9 @@ export function ShippingDetails({
         data.file ||
         (data.file && data.file.url) ||
         null;
+
       console.log("Extracted file URL:", fileUrl);
+
       if (
         !fileUrl ||
         typeof fileUrl !== "string" ||
@@ -205,51 +242,143 @@ export function ShippingDetails({
           ).join(", ")}`
         );
       }
+
       setValue(fieldName, fileUrl, { shouldDirty: true });
       console.log("Form state after upload:", watch(fieldName));
       toast.success(`File uploaded successfully: ${file.name}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload file");
+      toast.error(error.message || "Failed to upload file");
     } finally {
       setUploading(false);
     }
   };
 
-  // Fetch data on component mount
+  // Fetch Forwarders and Transporters with Authorization
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const orgIdToUse = orgId;
+        const token = Cookies.get("AccessToken");
+        if (!token) {
+          toast.error("Please log in to view shipping details");
+          router.push("/login");
+          return;
+        }
+
+        const isValidJwt = token.split(".").length === 3;
+        if (!isValidJwt) {
+          toast.error("Invalid authentication token. Please log in again.");
+          Cookies.remove("AccessToken");
+          router.push("/login");
+          return;
+        }
+
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        if (!orgId) {
+          toast.error("Organization ID is required");
+          return;
+        }
+
+        // Fetch Forwarders
         const forwarderResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgIdToUse}`
+          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgId}`,
+          {
+            method: "GET",
+            headers,
+          }
         );
+
+        if (!forwarderResponse.ok) {
+          const errorData = await forwarderResponse.json();
+          if (forwarderResponse.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            Cookies.remove("AccessToken");
+            router.push("/login");
+            return;
+          }
+          throw new Error(
+            errorData.message || `Failed to fetch forwarders: ${forwarderResponse.status}`
+          );
+        }
+
         const forwarderData = await forwarderResponse.json();
         setForwarders(Array.isArray(forwarderData) ? forwarderData : []);
 
+        // Fetch Transporters
         const transporterResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgIdToUse}`
+          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgId}`,
+          {
+            method: "GET",
+            headers,
+          }
         );
+
+        if (!transporterResponse.ok) {
+          const errorData = await transporterResponse.json();
+          if (transporterResponse.status === 401) {
+            toast.error("Session expired. Please log in again.");
+            Cookies.remove("AccessToken");
+            router.push("/login");
+            return;
+          }
+          throw new Error(
+            errorData.message || `Failed to fetch transporters: ${transporterResponse.status}`
+          );
+        }
+
         const transporterData = await transporterResponse.json();
         setTransporters(Array.isArray(transporterData) ? transporterData : []);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error fetching data:", error);
-        toast.error("Failed to fetch forwarders or transporters");
+        toast.error(error.message || "Failed to fetch forwarders or transporters");
       }
     };
+
     fetchData();
-  }, []);
+  }, [orgId, router]);
 
   const openForwarderForm = () => {
     GlobalModal.title = "Add New Forwarder";
     GlobalModal.children = (
       <ForwarderForm
         onSuccess={() => {
+          const token = Cookies.get("AccessToken");
+          if (!token) {
+            toast.error("Please log in to add forwarders");
+            router.push("/login");
+            return;
+          }
+
           fetch(
-            "https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/674b0a687d4f4b21c6c980ba"
+            `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
           )
-            .then((res) => res.json())
-            .then((data) => setForwarders(Array.isArray(data) ? data : []));
+            .then((res) => {
+              if (!res.ok) {
+                if (res.status === 401) {
+                  toast.error("Session expired. Please log in again.");
+                  Cookies.remove("AccessToken");
+                  router.push("/login");
+                }
+                throw new Error(`Failed to fetch forwarders: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((data) => setForwarders(Array.isArray(data) ? data : []))
+            .catch((error) => {
+              console.error("Error refreshing forwarders:", error);
+              toast.error("Failed to refresh forwarders");
+            });
         }}
       />
     );
@@ -261,11 +390,39 @@ export function ShippingDetails({
     GlobalModal.children = (
       <TransporterForm
         onSuccess={() => {
+          const token = Cookies.get("AccessToken");
+          if (!token) {
+            toast.error("Please log in to add transporters");
+            router.push("/login");
+            return;
+          }
+
           fetch(
-            "https://incodocs-server.onrender.com/shipment/transporter/getbyorg/674b0a687d4f4b21c6c980ba"
+            `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgId}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
           )
-            .then((res) => res.json())
-            .then((data) => setTransporters(Array.isArray(data) ? data : []));
+            .then((res) => {
+              if (!res.ok) {
+                if (res.status === 401) {
+                  toast.error("Session expired. Please log in again.");
+                  Cookies.remove("AccessToken");
+                  router.push("/login");
+                }
+                throw new Error(`Failed to fetch transporters: ${res.status}`);
+              }
+              return res.json();
+            })
+            .then((data) => setTransporters(Array.isArray(data) ? data : []))
+            .catch((error) => {
+              console.error("Error refreshing transporters:", error);
+              toast.error("Failed to refresh transporters");
+            });
         }}
       />
     );
