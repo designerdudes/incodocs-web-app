@@ -239,15 +239,9 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
         <Table>
           <TableHeader>
             <TableRow>
-              {/* <TableHead colSpan={5} className="text-center text-lg font-semibold">
-                Upload Documents
-              </TableHead> */}
-            </TableRow>
-            <TableRow>
               <TableHead>#</TableHead>
               <TableHead>File Name</TableHead>
               <TableHead>File URL</TableHead>
-              {/* <TableHead>Uploaded By</TableHead> */}
               <TableHead>Date</TableHead>
               <TableHead>Review</TableHead>
             </TableRow>
@@ -302,30 +296,6 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                   />
 
                 </TableCell>
-                {/* <TableCell>
-                  <FormField
-                    control={form.control}
-                    name={`documents.${index}.uploadedBy`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Ahmed"
-                            value={currentUser || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
-                            readOnly
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                </TableCell> */}
                 <TableCell>
                   <FormField
                     control={form.control}
