@@ -15,7 +15,6 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import {
@@ -27,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import toast from "react-hot-toast";
+import { fetchData } from "@/axiosUtility/api"; // Import fetchData for API calls
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import CBNameForm from "../../../../parties/components/forms/CBNameForm";
@@ -78,18 +78,10 @@ export function ShippingBillDetails({
     }
   }, [formValues, saveProgress]);
 
-  // Fetch customs brokers
-  const fetchCustomsBrokers = async (orgIdToUse: string) => {
+  // Fetch customs brokers using fetchData
+  const fetchCustomsBrokers = async (organizationId: string) => {
     try {
-      const response = await fetch(
-        `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${orgIdToUse}`
-      );
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch customs brokers: ${response.statusText}`
-        );
-      }
-      const data = await response.json();
+      const data = await fetchData(`/shipment/cbname/getbyorg/${organizationId}`);
       const brokers = Array.isArray(data)
         ? data.map((broker: any) => ({
             _id: broker._id,
@@ -255,8 +247,15 @@ export function ShippingBillDetails({
     GlobalModal.onOpen();
   };
 
-  function saveProgressSilently(arg0: FieldValues): void {
-    saveProgress({ShippingBillDetails: getValues().ShippingBillDetails});
+  // Modified saveProgressSilently to match the first code's behavior
+  function saveProgressSilently(data: FieldValues): void {
+    try {
+      localStorage.setItem("shipmentFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+      saveProgress({ shippingBillDetails: getValues().shippingBillDetails });
+    } catch (error) {
+      console.error("Failed to save progress to localStorage:", error);
+    }
   }
 
   return (
@@ -276,7 +275,7 @@ export function ShippingBillDetails({
                 displayProperty="name"
                 placeholder="Select a Customs Broker"
                 onAddNew={openCustomsBrokerForm}
-                addNewLabel="Add New cavCustoms Broker"
+                addNewLabel="Add New Customs Broker"
               />
             </FormControl>
             <FormMessage />
@@ -467,12 +466,12 @@ export function ShippingBillDetails({
                             </PopoverTrigger>
                             <PopoverContent align="start">
                               <CalendarComponent
-                                                selected={field.value ? new Date(field.value) : undefined}
-                                                onSelect={(date: any) => {
-                                                  field.onChange(date?.toISOString());
-                                                  saveProgressSilently(getValues());
-                                                }}
-                                              />
+                                selected={field.value ? new Date(field.value) : undefined}
+                                onSelect={(date: any) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
                             </PopoverContent>
                           </Popover>
                           <FormMessage />

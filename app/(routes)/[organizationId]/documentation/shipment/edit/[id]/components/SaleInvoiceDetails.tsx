@@ -25,12 +25,14 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
+import { fetchData } from "@/axiosUtility/api";
+import Cookies from "js-cookie";
 
 interface SaleInvoiceDetailsProps {
   shipmentId: string;
   orgId: string | undefined;
   saveProgress: (data: any) => void;
-  onSectionSubmit: () => Promise<any>; // Adjust return type if onSectionSubmit returns data
+  onSectionSubmit: () => Promise<any>;
 }
 
 export function SaleInvoiceDetails({
@@ -40,9 +42,7 @@ export function SaleInvoiceDetails({
   onSectionSubmit,
 }: SaleInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
-  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>(
-    []
-  );
+  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
 
@@ -59,31 +59,36 @@ export function SaleInvoiceDetails({
     saveProgress({ saleInvoiceDetails: formValues });
   }, [formValues, saveProgress]);
 
-  // Fetch consignees
+  // Fetch consignees using fetchData
   const fetchConsignees = async () => {
     if (!orgId) {
+      console.warn("fetchConsignees: No orgId provided");
       setConsignees([]);
       return;
     }
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`
-      );
-      const data = await response.json();
+      const data = await fetchData(`/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`);
       console.log("API Response (Consignees):", data);
       const mappedConsignees = Array.isArray(data)
         ? data.map((consignee: any) => ({
             _id: consignee._id,
-            name:
-              consignee.name || consignee.consigneeName || "Unknown Consignee",
+            name: consignee.name || consignee.consigneeName || "Unknown Consignee",
           }))
         : [];
       console.log("Mapped Consignees:", mappedConsignees);
       setConsignees(mappedConsignees);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error fetching consignees:", error);
-      toast.error("Failed to fetch consignees");
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please log in again.");
+        Cookies.remove("AccessToken");
+        window.location.href = "/login";
+      } else if (error.response?.status === 403) {
+        toast.error("You are not authorized to fetch consignees.");
+      } else {
+        toast.error("Failed to fetch consignees");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -188,7 +193,7 @@ export function SaleInvoiceDetails({
       <AddConsigneeForm
         orgId={orgId}
         onSuccess={() => {
-          fetchConsignees(); // Reuse fetchConsignees function
+          fetchConsignees();
         }}
       />
     );
