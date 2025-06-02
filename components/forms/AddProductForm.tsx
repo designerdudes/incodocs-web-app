@@ -342,6 +342,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -362,6 +363,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -382,6 +384,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -463,6 +466,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -483,6 +487,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -614,6 +619,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -634,6 +640,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -655,6 +662,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -675,6 +683,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -695,6 +704,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -716,6 +726,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -737,6 +748,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -757,6 +769,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -777,6 +790,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -803,6 +817,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -824,6 +839,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -844,6 +860,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -864,6 +881,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -885,6 +903,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormControl>
                         <Input
                           type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -906,6 +925,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -926,6 +946,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
@@ -946,6 +967,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             {...field}
                             onChange={(e) =>
