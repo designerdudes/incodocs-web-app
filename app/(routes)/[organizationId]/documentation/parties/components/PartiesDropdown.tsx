@@ -11,17 +11,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { useRouter } from "next/navigation";
-import ShippingLineButton from "./buttons/ShippingLineButton";
-import ForwarderButton from "./buttons/ForwarderButton";
-import TransporterButton from "./buttons/TransporterButton";
-import Supplierform from "./forms/SupplierForm";
-import ConsigneeButton from "./buttons/ConsigneeButton";
-import CbnameButton from "./buttons/CbnameButton";
-import ShippingLineForm from "./forms/ShippingLineForm";
-import Forwarderform from "./forms/ForwarderForm";
-import Transporterform from "./forms/TransporterForm";
-import ConsigneeForm from "./forms/ConsigneeForm";
-import CBNameForm from "./forms/CBNameForm";
+import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
+import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
+import Addshippinglineform from "@/components/forms/Addshippinglineform";
+import Forwarderdetailsform from "@/components/forms/Forwarderdetailsform";
+import Addtransporterform from "@/components/forms/Addtransporterform";
+import Addsupplierform from "@/components/forms/Addsupplierform";
 
 interface AddPartiesProps {
   organizationId: string;
@@ -44,7 +39,7 @@ export default function AddParties({
 
   const openSupplierForm = () => {
     setTitle("Enter Supplier Details");
-    setChildren(<Supplierform onSuccess={handleSuccess} />);
+    setChildren(<Addsupplierform onSuccess={handleSuccess} />);
     onOpen();
   };
 
@@ -60,7 +55,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter Shippingline Details`;
             GlobalModal.children = (
-              <ShippingLineForm
+              <Addshippinglineform
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -77,7 +72,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter Forwarder Details`;
             GlobalModal.children = (
-              <Forwarderform
+              <Forwarderdetailsform
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -94,7 +89,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter Transporter Details`;
             GlobalModal.children = (
-              <Transporterform
+              <Addtransporterform
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -112,7 +107,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter Supplier Details`;
             GlobalModal.children = (
-              <Supplierform
+              <Addsupplierform
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -129,7 +124,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter Consignee Details`;
             GlobalModal.children = (
-              <ConsigneeForm
+              <AddConsigneeForm
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -147,7 +142,7 @@ export default function AddParties({
           onSelect={() => {
             GlobalModal.title = `Enter CustomBroker Name Details`;
             GlobalModal.children = (
-              <CBNameForm
+              <CustomBrokerForm
                 onSuccess={onSuccess}
                 orgId={organizationId}
                 currentUser={currentUser}
@@ -156,7 +151,7 @@ export default function AddParties({
             GlobalModal.onOpen();
           }}
         >
-          CustomBroker Name
+          CustomBroker 
           {/* <CbName onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
       </DropdownMenuContent>

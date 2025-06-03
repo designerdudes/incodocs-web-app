@@ -12,7 +12,6 @@ import { forwardercolumns } from "./components/forwarderColumn";
 import { transportercolumns } from "./components/transporterColumn";
 import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
-import PartiesDropdown from "./components/PartiesDropdown";
 import { cbNamecolumns } from "./components/CbNameColumn";
 import AddParties from "./components/PartiesDropdown";
 
@@ -171,7 +170,7 @@ export default async function PartiesPage({ params }: Props) {
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="cbName">
-              CustomBroker name
+              CustomBroker 
               <Badge className="text-bg-primary-foreground" variant="outline">
                 {cbName?.length ?? 0}
               </Badge>

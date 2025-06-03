@@ -66,15 +66,16 @@ interface FormData {
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
+  localStorage.setItem("lastSaved", new Date().toISOString()); 
 }
 
 interface ShippingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   params: string | string[];
+  currentUser : string
 }
 
-export function ShippingDetails({ saveProgress, onSectionSubmit, params }: ShippingDetailsProps) {
+export function ShippingDetails({ saveProgress, onSectionSubmit, params, currentUser }: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
 
@@ -271,6 +272,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     GlobalModal.title = "Add New Forwarder";
     GlobalModal.children = (
       <ForwarderForm
+        currentUser = {currentUser}
+        orgId={organizationId}
         onSuccess={() => {
           fetch(
             `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
@@ -287,6 +290,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params }: Shipp
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
+        currentUser = {currentUser}
         orgId={organizationId}
         onSuccess={() => {
           fetch(

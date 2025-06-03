@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import TransporterForm from "@/components/forms/Addtransporterform";
+import Addtransporterform from "@/components/forms/Addtransporterform";
 
 interface AddTransporterButtonProps {
   onSuccess?: () => void;
@@ -13,7 +13,7 @@ export default function AddtransporterButton({ onSuccess }: AddTransporterButton
 
   const openTransporterForm = () => {
     setTitle("Enter Transporter Details");
-    setChildren(<TransporterForm onSuccess={onSuccess} />);
+    setChildren(<Addtransporterform onSuccess={onSuccess} />);
     onOpen();
   };
 

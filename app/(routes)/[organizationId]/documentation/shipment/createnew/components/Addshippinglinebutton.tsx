@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import ShippinglineForm from "@/components/forms/Addshippinglineform";
+import Addshippinglineform from "@/components/forms/Addshippinglineform";
 
 interface AddShippinglineButtonProps {
   onSuccess?: () => void;
@@ -13,7 +13,7 @@ export default function AddshippinglineButton({ onSuccess }: AddShippinglineButt
 
   const openShippinglineForm = () => {
     setTitle("Enter Shippingline Details");
-    setChildren(<ShippinglineForm onSuccess={onSuccess} />);
+    setChildren(<Addshippinglineform onSuccess={onSuccess} />);
     onOpen();
   };
 

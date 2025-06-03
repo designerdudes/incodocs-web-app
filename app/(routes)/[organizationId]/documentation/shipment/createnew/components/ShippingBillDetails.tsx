@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/table";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import CBNameForm from "../../../parties/components/forms/CBNameForm";
+
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import toast from "react-hot-toast";
@@ -57,11 +57,14 @@ interface FormData {
 
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api";
+import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
 
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
   params: string | string[];
+  onSuccess?: () => void;
+  currentUser?: string;
 }
 
 function saveProgressSilently(data: any) {
@@ -82,6 +85,7 @@ const getFieldName = <T extends FormData>(
 export function ShippingBillDetails({
   saveProgress,
   onSectionSubmit,
+  currentUser,
   params,
 }: ShippingBillDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
@@ -193,8 +197,9 @@ export function ShippingBillDetails({
   const openCBNameForm = () => {
     GlobalModal.title = "Add New Custom Broker";
     GlobalModal.children = (
-      <CBNameForm
+      <CustomBrokerForm
         orgId={organizationId}
+        currentUser={currentUser}
         onSuccess={async () => {
           try {
             const res = await fetchData(

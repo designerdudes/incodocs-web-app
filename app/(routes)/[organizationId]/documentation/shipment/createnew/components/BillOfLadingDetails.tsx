@@ -62,6 +62,7 @@ interface BillOfLadingDetailsProps {
   saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
   params: string | string[];
+  currentUser?: string;
 }
 
 function saveProgressSilently(data: any) {
@@ -82,6 +83,7 @@ const getFieldName = <T extends FormData>(
 export function BillOfLadingDetails({
   saveProgress,
   onSectionSubmit,
+  currentUser,
   params,
 }: BillOfLadingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
@@ -202,6 +204,8 @@ export function BillOfLadingDetails({
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
       <ShippinglineForm
+      orgId={organizationId}
+      currentUser={currentUser}
         onSuccess={async () => {
           try {
             const res = await fetchData(
