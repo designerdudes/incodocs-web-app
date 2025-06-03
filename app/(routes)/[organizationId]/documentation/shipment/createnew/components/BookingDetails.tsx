@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
@@ -59,7 +58,7 @@ export function BookingDetails({
   saveProgress,
   onSectionSubmit,
   setInvoiceNumber,
-  params
+  params,
 }: BookingDetailsProps) {
   const { control, setValue, watch, getValues, register } = useFormContext();
   const containersFromForm = watch("bookingDetails.containers") || [];
@@ -69,11 +68,11 @@ export function BookingDetails({
     number | null
   >(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [customContainerTypes, setCustomContainerTypes] = useState(containerTypes);
+  const [customContainerTypes, setCustomContainerTypes] =
+    useState(containerTypes);
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
   const organizationId = Array.isArray(params) ? params[0] : params;
   const [products, setProducts] = useState<any[]>([]);
-
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -153,7 +152,10 @@ export function BookingDetails({
 
   const handleConfirmChange = () => {
     if (containerCountToBeDeleted !== null) {
-      const updatedContainers = containersFromForm.slice(0, containerCountToBeDeleted);
+      const updatedContainers = containersFromForm.slice(
+        0,
+        containerCountToBeDeleted
+      );
       setValue("bookingDetails.containers", updatedContainers);
       setValue("NumberOfContainer", updatedContainers.length);
       saveProgressSilently(getValues());
@@ -165,24 +167,30 @@ export function BookingDetails({
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const ProductsResponse = await fetch(
+        const ProductsResponse = await fetchData(
           `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${organizationId}`
         );
-        const ProductsData = await ProductsResponse.json();
-        const mappedProduct = ProductsData.map((product: any) => ({
-          _id: product._id,
-          code: product.code,
-          description: product.description,
-          name: product.code + ": " + product.description
-        }));
+        const ProductsData = ProductsResponse;
+        const mappedProduct = ProductsData.map((product: any) => {
+          const stoneName =
+            product?.tileDetails?.stoneName ||
+            product?.slabDetails?.stoneName ||
+            product?.stepRiserDetails?.stoneName;
+
+          return {
+            _id: product._id,
+            code: product.productType,
+            description: stoneName,
+            name: product.productType + ": " + stoneName,
+          };
+        });
         setProducts(mappedProduct);
       } catch (error) {
         console.error("Error fetching Product Data:", error);
       }
     };
     fetchProducts();
-  }, []);
-
+  }, [products]);
 
   const openProductForm = () => {
     GlobalModal.title = "Add New Product";
@@ -192,14 +200,23 @@ export function BookingDetails({
         orgId={organizationId}
         onSuccess={async () => {
           try {
-            const ProductsResponse = await fetchData("/shipment/productdetails/get");
-            const ProductsData = await ProductsResponse.json();
-            const mappedProduct = ProductsData.map((product: any) => ({
-              _id: product._id,
-              code: product.code,
-              description: product.description,
-              name: product.code + ": " + product.description
-            }));
+            const ProductsResponse = await fetchData(
+              "/shipment/productdetails/get"
+            );
+            const ProductsData = await ProductsResponse;
+            const mappedProduct = ProductsData.map((product: any) => {
+              const stoneName =
+                product?.tileDetails?.stoneName ||
+                product?.slabDetails?.stoneName ||
+                product?.stepRiserDetails?.stoneName;
+
+              return {
+                _id: product._id,
+                code: product.productType,
+                description: stoneName,
+                name: product.productType + ": " + stoneName,
+              };
+            });
             setProducts(mappedProduct || []);
             saveProgressSilently(getValues());
             toast.success("Product created successfully");
