@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import ForwarderForm from "@/components/forms/Forwarderdetailsform";
+import Forwarderdetailsform from "@/components/forms/Forwarderdetailsform";
 
 interface AddForwarderButtonProps {
   onSuccess?: () => void;
@@ -13,7 +13,7 @@ export default function AddForwarderButton({ onSuccess }: AddForwarderButtonProp
 
   const openForwarderForm = () => {
     setTitle("Enter Forwarder Details");
-    setChildren(<ForwarderForm onSuccess={onSuccess} />);
+    setChildren(<Forwarderdetailsform onSuccess={onSuccess} />);
     onOpen();
   };
 

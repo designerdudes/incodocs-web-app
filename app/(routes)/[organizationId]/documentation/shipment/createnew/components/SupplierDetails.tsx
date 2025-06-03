@@ -29,7 +29,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Separator } from "@/components/ui/separator";
-import SupplierForm from "@/components/forms/Addsupplierform";
+import Addsupplierform from "@/components/forms/Addsupplierform";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -73,6 +73,7 @@ interface SupplierDetailsProps {
   saveProgress: (data: any) => void;
   onSectionSubmit: () => void;
   params: string | string[];
+  currentUser?: string;
 }
 
 function saveProgressSilently(data: any) {
@@ -94,6 +95,7 @@ export function SupplierDetails({
   saveProgress,
   onSectionSubmit,
   params,
+  currentUser
 }: SupplierDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
@@ -275,8 +277,9 @@ export function SupplierDetails({
   const openSupplierForm = () => {
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
-      <SupplierForm
+      <Addsupplierform
         orgId={organizationId}
+        currentUser={currentUser}
         onSuccess={async () => {
           try {
             const res = await fetch(

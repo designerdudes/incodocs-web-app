@@ -55,6 +55,7 @@ interface FormData {
 interface CommercialInvoiceDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   params: string | string[];
+  currentUser?: string;
 }
 
 function saveProgressSilently(data: any) {
@@ -75,6 +76,7 @@ const getFieldName = <T extends FormData>(
 export function CommercialInvoiceDetails({
   saveProgress,
   onSectionSubmit,
+  currentUser,
   params,
 }: CommercialInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
@@ -183,6 +185,7 @@ export function CommercialInvoiceDetails({
     GlobalModal.children = (
       <AddConsigneeForm
         orgId={organizationId}
+        currentUser={currentUser}
         onSuccess={() => {
           fetchData(`/shipment/consignee/getbyorg/${organizationId}`)
             .then((res) => res.json())

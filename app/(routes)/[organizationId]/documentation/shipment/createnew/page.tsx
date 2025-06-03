@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import ProgressBar from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
@@ -16,7 +16,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, postData } from "@/axiosUtility/api";
 import { useParams, useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
@@ -40,6 +40,23 @@ export default function CreateNewShipmentFormPage() {
   const router = useRouter();
   const orgid = useParams().organizationId;
   const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
+const [currentUser, setCurrentUser] = useState<string>("");
+
+
+   React.useEffect(() => {
+      const fetchCurrentUser = async () => {
+        try {
+          const GetCurrentUser = await fetchData(
+            `/user/currentUser`
+          );
+          const currentUserId = GetCurrentUser._id;
+          setCurrentUser(currentUserId);
+        } catch (error) {
+          console.error("Error fetching slab data:", error);
+        }
+      };
+      fetchCurrentUser();
+    }, []);
 
   const steps = [
     {
@@ -62,6 +79,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           params={orgid}
+          currentUser={currentUser}
         />
       ),
     },
@@ -73,6 +91,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           params={orgid}
+          currentUser={currentUser}
         />
       ),
     },
@@ -84,6 +103,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           params={orgid}
+          currentUser={currentUser}
         />
       ),
     },
@@ -95,6 +115,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           params={orgid}
+          currentUser={currentUser}
         />
       ),
     },
@@ -106,6 +127,7 @@ export default function CreateNewShipmentFormPage() {
           saveProgress={saveProgressWithFeedback}
           onSectionSubmit={handleSectionSubmit}
           params={orgid}
+          currentUser={currentUser}
         />
       ),
     },
@@ -291,6 +313,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               params={orgid}
+              currentUser={currentUser}
             />
           )}
           {steps[currentStep].id === 3 && (
@@ -298,6 +321,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               params={orgid}
+              currentUser={currentUser}
             />
           )}
           {steps[currentStep].id === 4 && (
@@ -305,6 +329,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               params={orgid}
+              currentUser={currentUser}
             />
           )}
           {steps[currentStep].id === 5 && (
@@ -312,6 +337,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               params={orgid}
+              currentUser={currentUser}
             />
           )}
           {steps[currentStep].id === 6 && (
@@ -319,6 +345,7 @@ export default function CreateNewShipmentFormPage() {
               saveProgress={saveProgressWithFeedback}
               onSectionSubmit={handleSectionSubmit}
               params={orgid}
+              currentUser={currentUser}
             />
           )}
           {steps[currentStep].id === 7 && (

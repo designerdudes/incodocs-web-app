@@ -32,8 +32,8 @@ import { postData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
-  cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
-  portCode: z.string().min(1, { message: "Port Code is required" }),
+  cbCode: z.string().optional(),
+  portCode: z.string().optional(),
   email: z
     .string()
     .optional()
@@ -72,13 +72,13 @@ numberOfDocuments:z.number().optional(),
   createdBy: z.string().optional(),
 });
 
-interface CBNameFormProps {
+interface CustomBrokerFormProps {
   onSuccess?: () => void;
   orgId?: string;
   currentUser?: string;
 }
 
-export default function CBNameForm({ onSuccess, orgId, currentUser }: CBNameFormProps) {
+export default function CustomBrokerForm({ onSuccess, orgId, currentUser }: CustomBrokerFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const GlobalModal = useGlobalModal();
   const orgid = orgId
