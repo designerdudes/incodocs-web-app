@@ -18,17 +18,23 @@ import Supplierform from "./forms/SupplierForm";
 import ConsigneeButton from "./buttons/ConsigneeButton";
 import CbnameButton from "./buttons/CbnameButton";
 import ShippingLineForm from "./forms/ShippingLineForm";
+import Forwarderform from "./forms/ForwarderForm";
+import Transporterform from "./forms/TransporterForm";
+import ConsigneeForm from "./forms/ConsigneeForm";
+import CBNameForm from "./forms/CBNameForm";
 
-interface PartiesDropdownProps {
+interface AddPartiesProps {
   organizationId: string;
   onSuccess?: () => void;
   currentUser?: string;
 }
 
-export default function PartiesDropdown({
-  organizationId, onSuccess, currentUser
-}: PartiesDropdownProps) {
-  const { onOpen, setTitle, setChildren, } = useGlobalModal();
+export default function AddParties({
+  organizationId,
+  onSuccess,
+  currentUser,
+}: AddPartiesProps) {
+  const { onOpen, setTitle, setChildren } = useGlobalModal();
   const router = useRouter();
   const GlobalModal = useGlobalModal();
 
@@ -54,35 +60,105 @@ export default function PartiesDropdown({
           onSelect={() => {
             GlobalModal.title = `Enter Shippingline Details`;
             GlobalModal.children = (
-              <ShippingLineForm onSuccess={onSuccess} orgId={organizationId} currentUser={currentUser} />
+              <ShippingLineForm
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
             );
             GlobalModal.onOpen();
-          }}>
+          }}
+        >
           Shipping Line
           {/* <ShippingLineButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <ForwarderButton onSuccess={handleSuccess} />
+        <DropdownMenuItem
+          onSelect={() => {
+            GlobalModal.title = `Enter Forwarder Details`;
+            GlobalModal.children = (
+              <Forwarderform
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
+            );
+            GlobalModal.onOpen();
+          }}
+        >
+          Forwarder
+          {/* <ForwarderButton onSuccess={handleSuccess} /> */}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => {
+            GlobalModal.title = `Enter Transporter Details`;
+            GlobalModal.children = (
+              <Transporterform
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
+            );
+            GlobalModal.onOpen();
+          }}
+        >
+          Transporter
+          {/* <TransporterButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        <TransporterButton onSuccess={handleSuccess} />
-        <DropdownMenuSeparator />
-
-        <Button
-          variant="ghost"
-          className="w-full justify-start hover:bg-gray-100"
-          onClick={openSupplierForm}
+        <DropdownMenuItem
+          onSelect={() => {
+            GlobalModal.title = `Enter Supplier Details`;
+            GlobalModal.children = (
+              <Supplierform
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
+            );
+            GlobalModal.onOpen();
+          }}
         >
           Supplier
-        </Button>
+          {/* <SupplierButton onSuccess={handleSuccess} /> */}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          onSelect={() => {
+            GlobalModal.title = `Enter Consignee Details`;
+            GlobalModal.children = (
+              <ConsigneeForm
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
+            );
+            GlobalModal.onOpen();
+          }}
+        >
+          Consignee
+          {/* <ConsigneeButton onSuccess={handleSuccess} /> */}
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        <ConsigneeButton onSuccess={handleSuccess} />
-        <DropdownMenuSeparator />
-
-        <CbnameButton orgId={organizationId} onSuccess={handleSuccess} />
+        <DropdownMenuItem
+          onSelect={() => {
+            GlobalModal.title = `Enter CustomBroker Name Details`;
+            GlobalModal.children = (
+              <CBNameForm
+                onSuccess={onSuccess}
+                orgId={organizationId}
+                currentUser={currentUser}
+              />
+            );
+            GlobalModal.onOpen();
+          }}
+        >
+          CustomBroker Name
+          {/* <CbName onSuccess={handleSuccess} /> */}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

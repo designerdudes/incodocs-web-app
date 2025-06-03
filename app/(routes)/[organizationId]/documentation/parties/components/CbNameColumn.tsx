@@ -111,7 +111,7 @@ export const cbNamecolumns: ColumnDef<CbName>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="capitalize">{row.original?.email}</div>,
+    cell: ({ row }) => <div>{row.original?.email}</div>,
   },
   {
     header: ({ column }) => <Button variant="ghost">Action</Button>,

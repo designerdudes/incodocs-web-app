@@ -150,7 +150,7 @@ const formSchema = z.object({
                   countryOfOrigin: z.string().optional(),
                   HScode: z.string().optional(),
                   variantName: z.string().optional(),
-                  varianntType: z.string().optional(),
+                  variantType: z.string().optional(),
                   sellPrice: z.number().optional(),
                   buyPrice: z.number().optional(),
                   netWeight: z.number().optional(),
@@ -158,6 +158,24 @@ const formSchema = z.object({
                   cubicMeasurement: z.number().optional(),
                   __v: z.number().optional(),
                 })
+                .refine(
+                  (data) =>
+                    data._id ||
+                    data.productId ||
+                    data.code ||
+                    data.description ||
+                    data.unitOfMeasurements ||
+                    data.countryOfOrigin ||
+                    data.HScode ||
+                    data.variantName ||
+                    data.variantType ||
+                    data.sellPrice ||
+                    data.buyPrice ||
+                    data.netWeight ||
+                    data.grossWeight ||
+                    data.cubicMeasurement,
+                  { message: "At least one product detail field must be provided" }
+                )
               )
               .optional()
               .default([]),
@@ -510,11 +528,13 @@ export default function EditShipmentPage({ params }: Props) {
   });
 
   const watchedValues = form.watch();
-  const debouncedSave = debounce((data: any) => {
-    if (!isInitialLoad.current) {
-      saveProgressSilently(data, params.id);
-    }
-  }, 1000);
+  const debouncedSave = useRef(
+    debounce((data: FormValues) => {
+      if (!isInitialLoad.current) {
+        saveProgressSilently(data, params.id);
+      }
+    }, 500)
+  ).current;
 
   useEffect(() => {
     debouncedSave(watchedValues);
@@ -634,12 +654,38 @@ export default function EditShipmentPage({ params }: Props) {
     setIsLoading(true);
     try {
       const values = form.getValues();
-      console.log(
-        "Submitting shipment update for ID:",
-        params.id,
-        "Values:",
-        values
+      console.log("Submitting shipment update for ID:", params.id, "Values:", values);
+
+      // Validate containers for invalid product details
+      const hasInvalidProducts = values.bookingDetails?.containers?.some(
+        (container) =>
+          container.addProductDetails?.some(
+            (product) =>
+              !(
+                product._id ||
+                product.productId ||
+                product.code ||
+                product.description ||
+                product.unitOfMeasurements ||
+                product.countryOfOrigin ||
+                product.HScode ||
+                product.variantName ||
+                product.variantType ||
+                product.sellPrice ||
+                product.buyPrice ||
+                product.netWeight ||
+                product.grossWeight ||
+                product.cubicMeasurement
+              )
+          )
       );
+
+      if (hasInvalidProducts) {
+        toast.error("One or more product details are invalid. Please provide at least one detail for each product.");
+        setIsLoading(false);
+        return;
+      }
+
       const payload = {
         shipmentId: values.shipmentId || undefined,
         organizationId: values.organizationId || organizationId || undefined,
@@ -652,8 +698,7 @@ export default function EditShipmentPage({ params }: Props) {
               invoiceNumber: values.bookingDetails.invoiceNumber || undefined,
               bookingNumber: values.bookingDetails.bookingNumber || undefined,
               portOfLoading: values.bookingDetails.portOfLoading || undefined,
-              destinationPort:
-                values.bookingDetails.destinationPort || undefined,
+              destinationPort: values.bookingDetails.destinationPort || undefined,
               vesselSailingDate:
                 values.bookingDetails.vesselSailingDate || undefined,
               vesselArrivingDate:
@@ -670,24 +715,42 @@ export default function EditShipmentPage({ params }: Props) {
                   truckDriverContactNumber:
                     container.truckDriverContactNumber || undefined,
                   addProductDetails:
-                    container.addProductDetails?.map((product) => ({
-                      _id: product._id || undefined,
-                      productId: product.productId || undefined,
-                      code: product.code || undefined,
-                      description: product.description || undefined,
-                      unitOfMeasurements:
-                        product.unitOfMeasurements || undefined,
-                      countryOfOrigin: product.countryOfOrigin || undefined,
-                      HScode: product.HScode || undefined,
-                      variantName: product.variantName || undefined,
-                      varianntType: product.varianntType || undefined,
-                      sellPrice: product.sellPrice || undefined,
-                      buyPrice: product.buyPrice || undefined,
-                      netWeight: product.netWeight || undefined,
-                      grossWeight: product.grossWeight || undefined,
-                      cubicMeasurement: product.cubicMeasurement || undefined,
-                      __v: product.__v || undefined,
-                    })) || [],
+                    container.addProductDetails
+                      ?.filter((product) => {
+                        return (
+                          product._id ||
+                          product.productId ||
+                          product.code ||
+                          product.description ||
+                          product.unitOfMeasurements ||
+                          product.countryOfOrigin ||
+                          product.HScode ||
+                          product.variantName ||
+                          product.variantType ||
+                          product.sellPrice ||
+                          product.buyPrice ||
+                          product.netWeight ||
+                          product.grossWeight ||
+                          product.cubicMeasurement
+                        );
+                      })
+                      .map((product) => ({
+                        _id: product._id || undefined,
+                        productId: product.productId || undefined,
+                        code: product.code || undefined,
+                        description: product.description || undefined,
+                        unitOfMeasurements: product.unitOfMeasurements || undefined,
+                        countryOfOrigin: product.countryOfOrigin || undefined,
+                        HScode: product.HScode || undefined,
+                        variantName: product.variantName || undefined,
+                        variantType: product.variantType || undefined,
+                        sellPrice: product.sellPrice || undefined,
+                        buyPrice: product.buyPrice || undefined,
+                        netWeight: product.netWeight || undefined,
+                        grossWeight: product.grossWeight || undefined,
+                        cubicMeasurement: product.cubicMeasurement || undefined,
+                        __v: product.__v || undefined,
+                      })) || [],
                   _id: container._id || undefined,
                 })) || [],
               _id: values.bookingDetails._id || undefined,
@@ -899,14 +962,11 @@ export default function EditShipmentPage({ params }: Props) {
           })) || [],
       };
 
+      console.log("Payload being sent to API:", JSON.stringify(payload, null, 2));
       await putData(`/shipment/update/${params.id}`, payload);
       toast.success("Shipment updated successfully!");
+      localStorage.removeItem(`shipmentDraft_${params.id}`);
       router.push("../");
-      setTimeout(
-        () => localStorage.removeItem(`shipmentDraft_${params.id}`),
-        2000
-      );
-      setTimeout(() => window.location.reload(), 5000);
     } catch (error: any) {
       console.error("Error submitting shipment update:", error);
       if (error.response) {
@@ -971,7 +1031,6 @@ export default function EditShipmentPage({ params }: Props) {
           {
             method: "GET",
             headers,
-            // Removed credentials: "include" to avoid CORS issue
           }
         );
 
@@ -1066,7 +1125,7 @@ export default function EditShipmentPage({ params }: Props) {
                             countryOfOrigin: product.countryOfOrigin || undefined,
                             HScode: product.HScode || undefined,
                             variantName: product.variantName || undefined,
-                            varianntType: product.varianntType || undefined,
+                            variantType: product.variantType || undefined,
                             sellPrice: product.sellPrice || undefined,
                             buyPrice: product.buyPrice || undefined,
                             netWeight: product.netWeight || undefined,
@@ -1359,7 +1418,6 @@ export default function EditShipmentPage({ params }: Props) {
   const retryFetch = () => {
     setFetchError(null);
     setIsFetching(true);
-    // Trigger a new fetch by resetting the effect dependency
     form.reset(form.getValues());
   };
 
@@ -1446,7 +1504,10 @@ export default function EditShipmentPage({ params }: Props) {
       </div>
 
       <FormProvider {...form}>
-        <form className="flex flex-col gap-3 w-full p-3">
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="flex flex-col gap-3 w-full p-3"
+        >
           <div className="flex justify-between">
             <Heading className="text-xl" title={steps[currentStep].name} />
             <p className="text-sm text-muted-foreground">
@@ -1459,4 +1520,4 @@ export default function EditShipmentPage({ params }: Props) {
       </FormProvider>
     </div>
   );
-} 
+}

@@ -29,6 +29,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
+import { postData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
@@ -41,7 +42,7 @@ const formSchema = z.object({
     .refine((val) => !val || /^\d{7,}$/.test(val), {
       message: "Enter a valid mobile number with at least 7 digits",
     }),
-    numberOfDocuments:z.number(),
+    numberOfDocuments:z.number().optional(),
     documents: z
             .array(
               z.object({
@@ -58,16 +59,18 @@ const formSchema = z.object({
   state: z.string().optional(),
   factoryAddress: z.string().optional(),
   organizationId: z.string().optional(),
-  upload: z.any().optional(),
+   createdBy: z.string().optional(),
 });
 
 interface SupplierFormProps {
   onSuccess?: () => void;
+  orgId?: string;
+  currentUser?: string;
 }
 
-export default function Supplierform({ onSuccess }: SupplierFormProps) {
+export default function Supplierform({ onSuccess, orgId, currentUser}: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = useParams().organizationId;
+  const orgid = orgId;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -79,7 +82,10 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
       mobileNumber: "",
       state: "",
       factoryAddress: "",
-      organizationId: "",
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
+
     },
   });
 
@@ -88,31 +94,22 @@ export default function Supplierform({ onSuccess }: SupplierFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/supplier/create",
+      const response = await postData(
+        "shipment/supplier/create",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...values,
-            mobileNumber: values.mobileNumber
-              ? parseInt(values.mobileNumber, 10)
-              : undefined,
-            organizationId: orgid,
-          }),
+          ...values,
+          organizationId: orgid,
         }
       );
-      if (!response.ok) throw new Error("Failed to create supplier");
-      await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Supplier created successfully");
       window.location.reload();
       if (onSuccess) onSuccess();
     } catch (error) {
-      console.error("Error creating supplier:", error);
+      console.error("Error creating Supplier:", error);
       setIsLoading(false);
-      toast.error("Error creating supplier");
+      toast.error("Error creating Supplier");
     }
   };
 
@@ -127,7 +124,6 @@ const handleCertificateCountChange = (count: string) => {
     const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
       fileName: "",
       fileUrl: "",
-      uploadedBy: "",
       date: "",
       review: ""
     }));
@@ -268,15 +264,9 @@ const handleCertificateCountChange = (count: string) => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead colSpan={5} className="text-center text-lg font-semibold">
-                Upload Documents
-              </TableHead>
-            </TableRow>
-            <TableRow>
               <TableHead>#</TableHead>
               <TableHead>File Name</TableHead>
               <TableHead>File URL</TableHead>
-              <TableHead>Uploaded By</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Review</TableHead>
             </TableRow>
@@ -318,29 +308,6 @@ const handleCertificateCountChange = (count: string) => {
                         <FormControl>
                           <Input
                             placeholder="e.g., https://example.com/file.pdf"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-        
-                </TableCell>
-                 <TableCell>
-                  <FormField
-                    control={form.control}
-                    name={`documents.${index}.uploadedBy`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Ahmed"
                             value={field.value || ""}
                             onChange={field.onChange}
                             onBlur={() => {

@@ -29,10 +29,13 @@ import {
 import { Path } from "react-hook-form";
 import { postData } from "@/axiosUtility/api";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
-
 
 const formSchema = z.object({
   forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -41,44 +44,43 @@ const formSchema = z.object({
   mobileNo: z
     .string()
     .optional()
-    .refine(
-      (val) => !val || /^[0-9]{7,}$/.test(val),
-      { message: "Mobile number must be at least 7 digits" }
-    ),
+    .refine((val) => !val || /^[0-9]{7,}$/.test(val), {
+      message: "Mobile number must be at least 7 digits",
+    }),
   email: z
     .string()
     .optional()
-    .refine(
-      (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-      { message: "Enter a valid email" }
-    ),
-    numberOfDocuments: z
-        .number(),
+    .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+      message: "Enter a valid email",
+    }),
     documents: z
-        .array(
-          z.object({
-            fileName: z.string().optional(),
-            fileUrl: z.string().optional(),
-            uploadedBy: z.string().optional(),
-            date: z
-              .string()
-              .datetime({ message: "Invalid date format" })
-              .optional(),
-            review: z.string().optional()
-          })
-        ),
-
+    .array(
+      z.object({
+        fileName: z.string().optional(),
+        fileUrl: z.string().optional(),
+        date: z
+        .string()
+        .datetime({ message: "Invalid date format" })
+        .optional(),
+        review: z.string().optional(),
+      })
+    )
+    .optional(),
+    
+    numberOfDocuments: z.number().optional(),
   organizationId: z.string().optional(),
-  upload: z.array(z.string()).optional(),
+  createdBy: z.string().optional(),
 });
 
 interface ForwarderFormProps {
   onSuccess?: () => void;
+  orgId?: string;
+  currentUser?: string;
 }
 
-function Forwarderform({ onSuccess }: ForwarderFormProps) {
+function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = useParams().organizationId;
+  const orgid = orgId;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,9 +90,9 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
       responsiblePerson: "",
       mobileNo: "",
       email: "",
-      organizationId: "",
-      upload:[]
-
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
     },
   });
 
@@ -99,14 +101,10 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      const response = await postData(
-        "/shipment/forwarder/create",
-        {
-          ...values,
-        }
-      );
-      if (!response.ok) throw new Error("Failed to create Forwarder");
-
+      const response = await postData("/shipment/forwarder/create", {
+        ...values,
+        organizationId: orgid,
+      });
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Forwarder created successfully");
@@ -124,18 +122,16 @@ function Forwarderform({ onSuccess }: ForwarderFormProps) {
     const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
       fileName: "",
       fileUrl: "",
-      uploadedBy: "",
       date: "",
-      review: ""
+      review: "",
     }));
     form.setValue("documents", newDocuments);
   };
 
-
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
+  function saveProgressSilently(data: any) {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  }
 
   return (
     <Form {...form}>
@@ -220,196 +216,161 @@ function saveProgressSilently(data: any) {
             </FormItem>
           )}
         />
-         <FormField
-        control={form.control}
-        name="numberOfDocuments"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Number of Documents</FormLabel>
-            <FormControl>
-              <Input
-                type="number"
-                placeholder="Enter number of documents"
-                value={field.value as any || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "") {
-                    field.onChange(1);
-                    handleCertificateCountChange("1");
-                    return;
-                  }
-                  const numericValue = Number(value);
-                  field.onChange(numericValue);
-                  handleCertificateCountChange(numericValue.toString());
-                }}
-                min={1}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />  
+        <FormField
+          control={form.control}
+          name="numberOfDocuments"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Number of Documents</FormLabel>
+              <FormControl>
+                <Input
+                  type="number"
+                  placeholder="Enter number of documents"
+                  value={(field.value as any) || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "") {
+                      field.onChange(1);
+                      handleCertificateCountChange("1");
+                      return;
+                    }
+                    const numericValue = Number(value);
+                    field.onChange(numericValue);
+                    handleCertificateCountChange(numericValue.toString());
+                  }}
+                  min={1}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-     <Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead colSpan={5} className="text-center text-lg font-semibold">
-        Upload Documents
-      </TableHead>
-    </TableRow>
-    <TableRow>
-      <TableHead>#</TableHead>
-      <TableHead>File Name</TableHead>
-      <TableHead>File URL</TableHead>
-      <TableHead>Uploaded By</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Review</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    {form.watch("documents")?.map((_, index) => (       
-      <TableRow key={index}>
-        <TableCell>{index + 1}</TableCell>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>File Name</TableHead>
+              <TableHead>File URL</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Review</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {form.watch("documents")?.map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
 
-        <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.fileName`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., coo"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileName`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., coo"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.fileUrl`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., https://example.com/file.pdf"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileUrl`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., https://example.com/file.pdf"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.uploadedBy`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Ahmed"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full">
+                                {field.value
+                                  ? format(new Date(field.value as any), "PPPP")
+                                  : "Pick a date"}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              selected={
+                                field.value
+                                  ? new Date(field.value as any)
+                                  : undefined
+                              }
+                              onSelect={(date: Date | undefined) => {
+                                field.onChange(date?.toISOString());
+                                saveProgressSilently(form.getValues());
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-                      control={form.control}
-                      name={`documents.${index}.date`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col gap-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button variant="outline" className="w-full">
-                                  {field.value
-                                    ? format(new Date(field.value as any), "PPPP")
-                                    : "Pick a date"}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <CalendarComponent
-                                selected={field.value ? new Date(field.value as any) : undefined}
-                                onSelect={(date: Date | undefined) => {
-                                  field.onChange(date?.toISOString());
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.review`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="review your docs"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.review`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="review your docs"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
-        </TableCell>
-
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-
-
-
- 
         {/* Submit */}
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading && (
-            <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-          )}
+          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
         </Button>
       </form>

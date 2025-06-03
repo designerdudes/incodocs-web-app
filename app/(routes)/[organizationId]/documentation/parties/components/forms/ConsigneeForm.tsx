@@ -26,9 +26,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
+import { postData } from "@/axiosUtility/api";
+
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z
@@ -52,31 +58,28 @@ const formSchema = z.object({
       }
     ),
   address: z.string().optional(),
-   documents: z
-        .array(
-          z.object({
-            fileName: z.string().optional(),
-            fileUrl: z.string().optional(),
-            uploadedBy: z.string().optional(),
-            date: z
-              .string()
-              .datetime({ message: "Invalid date format" })
-              .optional(),
-            review: z.string().optional()
-          })
-        ),
-numberOfDocuments:z.number(),
+  documents: z.array(
+    z.object({
+      fileName: z.string().optional(),
+      fileUrl: z.string().optional(),
+      date: z.string().datetime({ message: "Invalid date format" }).optional(),
+      review: z.string().optional(),
+    })
+  ),
+  numberOfDocuments: z.number().optional(),
   organizationId: z.string().optional(),
-  upload: z.any().optional(),
+  createdBy: z.string().optional(),
 });
 
 interface AddConsigneeFormProps {
-  onSuccess?: () => void;
+ onSuccess?: () => void;
+  orgId?: string;
+  currentUser?: string;
 }
 
-export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
+export default function ConsigneeForm({ onSuccess, orgId, currentUser }: AddConsigneeFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = useParams().organizationId;
+  const orgid = orgId
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,31 +88,29 @@ export default function ConsigneeForm({ onSuccess }: AddConsigneeFormProps) {
       email: "",
       mobileNo: "",
       address: "",
-      organizationId: "",
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
     },
   });
 
   const GlobalModal = useGlobalModal();
 
-  
   const handleCertificateCountChange = (count: string) => {
     const numericCount = parseInt(count, 10);
     const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
       fileName: "",
       fileUrl: "",
-      uploadedBy: "",
       date: "",
-      review: ""
+      review: "",
     }));
     form.setValue("documents", newDocuments);
   };
 
-
-function saveProgressSilently(data: any) {
-  localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString());
-}
-
+  function saveProgressSilently(data: any) {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  }
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -121,26 +122,23 @@ function saveProgressSilently(data: any) {
         address: values.address,
         organizationId: orgid,
       };
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/consignee/create",
+      const response = await postData(
+        "/shipment/consignee/create",
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          ...values,
+          organizationId: orgid,
         }
       );
-      if (!response.ok) throw new Error("Failed to create consignee");
-      await response.json();
-      setIsLoading(false);
-      GlobalModal.onClose();
-      toast.success("Consignee created successfully");
-      window.location.reload();
-      if (onSuccess) onSuccess();
-    } catch (error) {
-      console.error("Error creating consignee:", error);
-      setIsLoading(false);
-      toast.error("Failed to create consignee");
-    }
+            setIsLoading(false);
+            GlobalModal.onClose();
+            toast.success("consignee created successfully");
+             window.location.reload();
+            if (onSuccess) onSuccess();
+          } catch (error) {
+            console.error("Error creating consignee:", error);
+            setIsLoading(false);
+            toast.error("Error creating consignee");
+          }
   };
 
   return (
@@ -205,21 +203,6 @@ function saveProgressSilently(data: any) {
 
         <FormField
           control={form.control}
-          name="upload"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Upload your documents</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
-  <FormField
-          control={form.control}
           name="numberOfDocuments"
           render={({ field }) => (
             <FormItem>
@@ -228,7 +211,7 @@ function saveProgressSilently(data: any) {
                 <Input
                   type="number"
                   placeholder="Enter number of documents"
-                  value={field.value as any || ""}
+                  value={(field.value as any) || ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === "") {
@@ -246,158 +229,128 @@ function saveProgressSilently(data: any) {
               <FormMessage />
             </FormItem>
           )}
-        />  
-         <Table>
-  <TableHeader>
-    <TableRow>
-      <TableHead colSpan={5} className="text-center text-lg font-semibold">
-        Upload Documents
-      </TableHead>
-    </TableRow>
-    <TableRow>
-      <TableHead>#</TableHead>
-      <TableHead>File Name</TableHead>
-      <TableHead>File URL</TableHead>
-      <TableHead>Uploaded By</TableHead>
-      <TableHead>Date</TableHead>
-      <TableHead>Review</TableHead>
-    </TableRow>
-  </TableHeader>
-  <TableBody>
-    {form.watch("documents")?.map((_, index) => (       
-      <TableRow key={index}>
-        <TableCell>{index + 1}</TableCell>
+        />
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>#</TableHead>
+              <TableHead>File Name</TableHead>
+              <TableHead>File URL</TableHead>              
+              <TableHead>Date</TableHead>
+              <TableHead>Review</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {form.watch("documents")?.map((_, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
 
-        <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.fileName`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., coo"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileName`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., coo"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.fileUrl`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., https://example.com/file.pdf"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.fileUrl`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="e.g., https://example.com/file.pdf"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.uploadedBy`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Ahmed"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.date`}
+                    render={({ field }) => (
+                      <FormItem className="flex flex-col gap-2">
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button variant="outline" className="w-full">
+                                {field.value
+                                  ? format(new Date(field.value as any), "PPPP")
+                                  : "Pick a date"}
+                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              selected={
+                                field.value
+                                  ? new Date(field.value as any)
+                                  : undefined
+                              }
+                              onSelect={(date: Date | undefined) => {
+                                field.onChange(date?.toISOString());
+                                saveProgressSilently(form.getValues());
+                              }}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-                      control={form.control}
-                      name={`documents.${index}.date`}
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col gap-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button variant="outline" className="w-full">
-                                  {field.value
-                                    ? format(new Date(field.value as any), "PPPP")
-                                    : "Pick a date"}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <CalendarComponent
-                                selected={field.value ? new Date(field.value as any) : undefined}
-                                onSelect={(date: Date | undefined) => {
-                                  field.onChange(date?.toISOString());
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.review`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="review your docs"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
+                </TableCell>
+                <TableCell>
+                  <FormField
+                    control={form.control}
+                    name={`documents.${index}.review`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            placeholder="review your docs"
+                            value={field.value || ""}
+                            onChange={field.onChange}
+                            onBlur={() => {
+                              field.onBlur();
+                              saveProgressSilently(form.getValues());
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
 
         {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">

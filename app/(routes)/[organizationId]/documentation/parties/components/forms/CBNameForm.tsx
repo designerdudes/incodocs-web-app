@@ -28,6 +28,7 @@ import CalendarComponent from "@/components/CalendarComponent";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
+import { postData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
@@ -66,20 +67,21 @@ const formSchema = z.object({
             review: z.string().optional()
           })
         ),
-numberOfDocuments:z.number(),
+numberOfDocuments:z.number().optional(),
   organizationId: z.string().optional(),
-  upload: z.any().optional(),
+  createdBy: z.string().optional(),
 });
 
 interface CBNameFormProps {
+  onSuccess?: () => void;
   orgId?: string;
-  onSuccess: (newBrokerId: string) => void;
+  currentUser?: string;
 }
 
-export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
+export default function CBNameForm({ onSuccess, orgId, currentUser }: CBNameFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const GlobalModal = useGlobalModal();
-  console.log("CBNameForm - orgId:", orgId); // Log orgId
+  const orgid = orgId
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -90,7 +92,9 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
       email: "",
       mobileNo: "",
       address: "",
-      organizationId: orgId,
+      organizationId: orgid,
+      documents: [],
+      createdBy: currentUser || "",
     },
   });
 
@@ -100,7 +104,6 @@ export default function CBNameForm({ orgId, onSuccess }: CBNameFormProps) {
     const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
       fileName: "",
       fileUrl: "",
-      uploadedBy: "",
       date: "",
       review: ""
     }));
@@ -124,48 +127,24 @@ function saveProgressSilently(data: any) {
         email: values.email,
         mobileNo: values.mobileNo ? Number(values.mobileNo) : undefined,
         address: values.address,
-        organizationId: orgId,
+        organizationId: orgid,
       };
-      const token =
-        document.cookie?.replace(
-          /(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/,
-          "$1"
-        ) || "";
-      console.log(
-        "POST URL:",
-        "https://incodocs-server.onrender.com/shipment/cbname/add"
-      );
-      console.log("Payload:", payload);
-      console.log("Token:", token);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipment/cbname/add",
+      const response = await postData(
+        "shipment/cbname/add",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+          ...values,
+          organizationId: orgid,
         }
       );
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error response:", response.status, errorData);
-        throw new Error(
-          `Failed to create customs broker: ${errorData.message || response.statusText
-          }`
-        );
-      }
-      const result = await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
-      toast.success("Customs Broker created successfully");
-      form.reset();
-      onSuccess(result._id);
-    } catch (error: any) {
-      console.error("Error creating customs broker:", error);
+      toast.success("CustomsBroker Name created successfully");
+      window.location.reload();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error creating CustomsBroker Name:", error);
       setIsLoading(false);
-      toast.error(error.message || "Failed to create customs broker");
+      toast.error("Error creating CustomsBroker Name");
     }
   };
 
@@ -283,15 +262,9 @@ function saveProgressSilently(data: any) {
          <Table>
   <TableHeader>
     <TableRow>
-      <TableHead colSpan={5} className="text-center text-lg font-semibold">
-        Upload Documents
-      </TableHead>
-    </TableRow>
-    <TableRow>
       <TableHead>#</TableHead>
       <TableHead>File Name</TableHead>
       <TableHead>File URL</TableHead>
-      <TableHead>Uploaded By</TableHead>
       <TableHead>Date</TableHead>
       <TableHead>Review</TableHead>
     </TableRow>
@@ -333,29 +306,6 @@ function saveProgressSilently(data: any) {
                 <FormControl>
                   <Input
                     placeholder="e.g., https://example.com/file.pdf"
-                    value={field.value || ""}
-                    onChange={field.onChange}
-                    onBlur={() => {
-                      field.onBlur();
-                      saveProgressSilently(form.getValues());
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-        </TableCell>
-         <TableCell>
-          <FormField
-            control={form.control}
-            name={`documents.${index}.uploadedBy`}
-            render={({ field }) => (
-              <FormItem>
-                <FormControl>
-                  <Input
-                    placeholder="e.g., Ahmed"
                     value={field.value || ""}
                     onChange={field.onChange}
                     onBlur={() => {

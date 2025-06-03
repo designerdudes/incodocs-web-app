@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import {
   Popover,
@@ -34,6 +33,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api"; // Import fetchData
 
 interface SupplierDetailsProps {
   shipmentId: string;
@@ -82,19 +82,12 @@ export function SupplierDetails({
 
   // Fetch supplier names
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchSuppliers = async () => {
       try {
         setIsLoadingSuppliers(true);
         setFetchError(null);
         const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
-        const supplierResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${orgIdToUse}`
-        );
-        if (!supplierResponse.ok) {
-          throw new Error(`HTTP error! Status: ${supplierResponse.status}`);
-        }
-        const supplierData = await supplierResponse.json();
-        console.log("Raw API response:", JSON.stringify(supplierData, null, 2));
+        const supplierData = await fetchData(`/shipment/supplier/getbyorg/${orgIdToUse}`);
         const suppliers = Array.isArray(supplierData)
           ? supplierData.map((supplier: any) => ({
               _id: supplier._id,
@@ -120,7 +113,7 @@ export function SupplierDetails({
         setIsLoadingSuppliers(false);
       }
     };
-    fetchData();
+    fetchSuppliers();
   }, [orgId]);
 
   // Fetch individual supplier if not in supplierNames
@@ -138,11 +131,7 @@ export function SupplierDetails({
             }`
           );
           try {
-            const response = await fetch(
-              `https://incodocs-server.onrender.com/shipment/supplier/${supplierId}`
-            );
-            if (!response.ok) throw new Error("Failed to fetch supplier");
-            const data = await response.json();
+            const data = await fetchData(`/shipment/supplier/${supplierId}`);
             console.log(
               "Individual supplier response:",
               JSON.stringify(data, null, 2)
@@ -215,30 +204,26 @@ export function SupplierDetails({
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
       <SupplierForm
-        onSuccess={() => {
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${
-              orgId || "674b0a687d4f4b21c6c980ba"
-            }`
-          )
-            .then((res) => res.json())
-            .then((data) => {
-              const suppliers = Array.isArray(data)
-                ? data.map((supplier: any) => ({
-                    _id: supplier._id,
-                    name: supplier.supplierName,
-                  }))
-                : [];
-              setSupplierNames(suppliers);
-              console.log(
-                "Updated supplier names after adding new:",
-                JSON.stringify(suppliers, null, 2)
-              );
-            })
-            .catch((error) => {
-              console.error("Error refreshing suppliers:", error);
-              toast.error("Failed to refresh suppliers");
-            });
+        onSuccess={async () => {
+          try {
+            const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
+            const data = await fetchData(`/shipment/supplier/getbyorg/${orgIdToUse}`);
+            const suppliers = Array.isArray(data)
+              ? data.map((supplier: any) => ({
+                  _id: supplier._id,
+                  name: supplier.supplierName,
+                }))
+              : [];
+            setSupplierNames(suppliers);
+            console.log(
+              "Updated supplier names after adding new:",
+              JSON.stringify(suppliers, null, 2)
+            );
+            GlobalModal.onClose();
+          } catch (error) {
+            console.error("Error refreshing suppliers:", error);
+            toast.error("Failed to refresh suppliers");
+          }
         }}
       />
     );
@@ -258,9 +243,17 @@ export function SupplierDetails({
     }
   };
 
-  function saveProgressSilently(arg0: FieldValues): void {
-    saveProgress({ SupplierDetails: getValues().SupplierDetails });
+  // Updated saveProgressSilently to match previous components
+  function saveProgressSilently(data: FieldValues): void {
+    try {
+      localStorage.setItem("shipmentFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+      saveProgress({ supplierDetails: getValues().supplierDetails });
+    } catch (error) {
+      console.error("Failed to save progress to localStorage:", error);
+    }
   }
+
   return (
     <div className="grid grid-cols-4 gap-3">
       {/* Number of Suppliers */}
@@ -600,7 +593,7 @@ export function SupplierDetails({
                                           size="sm"
                                           onClick={() =>
                                             setValue(
-                                              "supplierDetails.actual.actualSupplierInvoiceUrl",
+                                              `supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`,
                                               "",
                                               { shouldDirty: true }
                                             )
