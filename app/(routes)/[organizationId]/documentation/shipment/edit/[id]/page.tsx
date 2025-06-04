@@ -577,7 +577,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} params={""}        />
+          currentUser={currentUser}
+        />
       ),
     },
     {
@@ -589,7 +590,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} params={""}        />
+          currentUser={currentUser}   />
       ),
     },
     {
@@ -601,7 +602,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} params={""}        />
+          currentUser={currentUser}     />
       ),
     },
     {
@@ -613,7 +614,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} params={""}        />
+          currentUser={currentUser}     />
       ),
     },
     {
@@ -625,7 +626,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} params={""}        />
+          currentUser={currentUser}
+         />
       ),
     },
     {
