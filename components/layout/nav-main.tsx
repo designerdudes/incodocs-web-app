@@ -34,9 +34,9 @@ interface NavMainProps {
   factoryId?: string;
 }
 
-export default function NavMain({ orgId, factoryId }: NavMainProps) {
+export default function NavMain({ orgId }: NavMainProps) {
+  const factoryId = localStorage.getItem("activeFactoryId") || "";
   const RenderNavTabs = (navItems: NavItem[], orgId: string) => {
-    const factoryId = useParams().factoryid;
     const organisationId = useParams().organizationId;
 
     return navItems.map((item) => {
