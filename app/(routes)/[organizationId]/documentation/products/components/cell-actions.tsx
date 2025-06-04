@@ -81,6 +81,8 @@ const CellActions: React.FC<Props> = ({ data }) => {
                         className="focus:bg-destructive focus:text-destructive-foreground"
                     >
                         <Trash className="mr-2 h-4 w-4" />
+
+                        
                         Delete
                     </DropdownMenuItem>
                 </DropdownMenuContent>

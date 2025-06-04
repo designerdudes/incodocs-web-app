@@ -82,17 +82,17 @@ export const deleteData = async (endpoint: string, config = {}) => {
     throw error;
   }
 };
-
 export const deleteAllData = async (endpoint: string, data: { ids: string[]; token?: string }, config = {}) => {
-  const token = data.token || document.cookie?.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, '$1') || "";
-  const url = endpoint.startsWith("/") ? endpoint : `/${endpoint}`; // Ensure leading slash
+  const token = data.token || document.cookie?.replace(/(?:(?:^|.*;\s*)AccessToken\s*=\s*([^;]*).*$)|^.*$/, "$1") || "";
+  console.log("Token in deleteAllData:", token); // Debug token
+  const url = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
   try {
     const response = await instance.delete(url, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      data: { id: data.ids }, // Match backend expectation
+      data: { ids: data.ids }, // Fixed: Use 'ids' instead of 'id'
       ...config,
     });
     console.log("DELETE response:", response.data);
@@ -102,9 +102,10 @@ export const deleteAllData = async (endpoint: string, data: { ids: string[]; tok
       status: error.response?.status,
       data: error.response?.data,
       message: error.message,
+      endpoint: url,
     });
     throw {
-      message: "Error making delete request",
+      message: error.response?.data?.message || "Error making delete request",
       originalError: error,
     };
   }

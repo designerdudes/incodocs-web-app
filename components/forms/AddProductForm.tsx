@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm, UseFormReturn, FieldPath } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -268,6 +268,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       await postData("/shipment/productdetails/add", payload);
       toast.success("Product created successfully");
       if (onSuccess) onSuccess();
+      // Delay redirect to show toast
+      setTimeout(() => {
+        router.push(`/${orgId}/documentation/products`);
+        router.refresh(); // Refresh the products page
+      }, 1500);
     } catch (error: any) {
       console.error("Error creating product:", error);
       if (error.response && error.response.status === 400) {
@@ -441,7 +446,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <Input
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -463,7 +468,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <Input
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
                           onChange={(e) =>
@@ -486,7 +491,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -569,7 +574,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -591,7 +596,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -665,7 +670,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FileUploadField
                         name="slabDetails.uploadMeasurement"
                         storageKey="slabDetails_uploadMeasurement"
-                        accept=".pdf,.jpg,.jpeg,.png" // optional: restrict file types if needed
+                        accept=".pdf,.jpg,.jpeg,.png"
                       />
                     </FormControl>
                     <FormMessage />
@@ -729,7 +734,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -751,7 +756,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -776,7 +781,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -800,7 +805,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -824,7 +829,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -847,7 +852,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -869,7 +874,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -894,7 +899,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -918,7 +923,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -942,7 +947,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -968,7 +973,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -990,7 +995,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -1015,7 +1020,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1039,7 +1044,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1063,7 +1068,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1086,7 +1091,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                           type="number"
                           className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()} // This disables scroll wheel interaction
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
                           onChange={(e) =>
                             field.onChange(Number(e.target.value))
@@ -1107,11 +1112,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1131,11 +1136,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormControl>
                           <Input
                             type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1159,7 +1164,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
-                            } // This disables scroll wheel interaction
+                            }
                             {...field}
                             onChange={(e) =>
                               field.onChange(Number(e.target.value))
@@ -1174,11 +1179,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
               </div>
 
               <h1>
-                Total square meter of seperate box step -{" "}
+                Total square meter of separate box step -{" "}
                 {totalSeparateBoxStepSquareMeter.toFixed(3)}
               </h1>
               <h1>
-                Total square meter of seperate box risers -{" "}
+                Total square meter of separate box risers -{" "}
                 {totalSeparateBoxRiserSquareMeter.toFixed(3)}
               </h1>
               <h1>
@@ -1189,7 +1194,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                 Total square meter of mixed box risers -{" "}
                 {totalMixedBoxRiserSquareMeter.toFixed(3)}
               </h1>
-              <h1>Total square meter - {total}</h1>
+              <h1>Total square meter - {total.toFixed(2)}</h1>
             </div>
           )}
 
