@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useId, useMemo, useRef, useEffect, CSSProperties } from "react";
+import {
+  useState,
+  useId,
+  useMemo,
+  useRef,
+  useEffect,
+  CSSProperties,
+} from "react";
 import {
   Column,
   ColumnDef,
@@ -89,7 +96,15 @@ import {
 } from "@/components/ui/table";
 import { useRouter } from "next/navigation";
 import { DayPicker } from "react-day-picker";
-import { subDays, startOfMonth, startOfYear, endOfMonth, endOfYear, subMonths, subYears } from "date-fns";
+import {
+  subDays,
+  startOfMonth,
+  startOfYear,
+  endOfMonth,
+  endOfYear,
+  subMonths,
+  subYears,
+} from "date-fns";
 import { Calendar } from "./ui/calendar";
 import { Shipment } from "@/app/(routes)/[organizationId]/documentation/shipment/data/schema";
 import toast from "react-hot-toast";
@@ -109,7 +124,6 @@ interface TanDataTableProps<T> {
   bulkDeleteTitle?: string;
   bulkDeleteDescription?: string;
   bulkDeleteToastMessage?: string;
-
 }
 
 function ShipmentDataTable<T>({
@@ -138,9 +152,10 @@ function ShipmentDataTable<T>({
   const router = useRouter();
 
   // Date filter state
-  const [dateFilter, setDateFilter] = useState<{ from?: Date; to?: Date }>({} as any);
+  const [dateFilter, setDateFilter] = useState<{ from?: Date; to?: Date }>(
+    {} as any
+  );
   const [month, setMonth] = useState(new Date() as any);
-
 
   const table = useReactTable({
     data,
@@ -172,7 +187,11 @@ function ShipmentDataTable<T>({
         fromDate.setHours(0, 0, 0, 0);
         toDate.setHours(23, 59, 59, 999);
 
-        console.log(`Row Date: ${rowDate}, From: ${fromDate}, To: ${toDate}, Match: ${rowDate >= fromDate && rowDate <= toDate}`);
+        console.log(
+          `Row Date: ${rowDate}, From: ${fromDate}, To: ${toDate}, Match: ${
+            rowDate >= fromDate && rowDate <= toDate
+          }`
+        );
         return rowDate >= fromDate && rowDate <= toDate;
       },
     },
@@ -184,15 +203,18 @@ function ShipmentDataTable<T>({
       right: ["actions"],
     });
 
-    const filterValue = dateFilter.from && dateFilter.to ? dateFilter : undefined;
+    const filterValue =
+      dateFilter.from && dateFilter.to ? dateFilter : undefined;
     table.getColumn("booking_date")?.setFilterValue(filterValue);
     console.log("Applied Date Filter:", filterValue);
-    console.log("Filtered Rows:", table.getFilteredRowModel().rows.map(row => row.original));
+    console.log(
+      "Filtered Rows:",
+      table.getFilteredRowModel().rows.map((row) => row.original)
+    );
   }, [dateFilter, table]);
 
-
   const getPinningStyles = (column: Column<Shipment>): CSSProperties => {
-    const isPinned = column.getIsPinned()
+    const isPinned = column.getIsPinned();
 
     return {
       left: isPinned === "left" ? `${column.getStart("left")}px` : undefined,
@@ -201,31 +223,29 @@ function ShipmentDataTable<T>({
       position: isPinned ? "sticky" : "relative",
       width: column.getSize(),
       zIndex: isPinned ? 1 : 0,
-    }
-  }
+    };
+  };
   // Predefined date ranges
   const today = new Date();
   const yesterday = { from: subDays(today, 1), to: subDays(today, 1) };
   const last7Days = { from: subDays(today, 6), to: today };
   const last30Days = { from: subDays(today, 29), to: today };
   const monthToDate = { from: startOfMonth(today), to: today };
-  const lastMonth = { from: startOfMonth(subMonths(today, 1)), to: endOfMonth(subMonths(today, 1)) };
+  const lastMonth = {
+    from: startOfMonth(subMonths(today, 1)),
+    to: endOfMonth(subMonths(today, 1)),
+  };
   const yearToDate = { from: startOfYear(today), to: today };
-  const lastYear = { from: startOfYear(subYears(today, 1)), to: endOfYear(subYears(today, 1)) };
-
-
-
-
-
-
-
+  const lastYear = {
+    from: startOfYear(subYears(today, 1)),
+    to: endOfYear(subYears(today, 1)),
+  };
 
   const handleBulkDelete = async () => {
-   
     const selectedIds = table
       .getFilteredSelectedRowModel()
       .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
-    console.log(bulkDeleteIdName)
+    console.log(bulkDeleteIdName);
     if (selectedIds.length === 0) {
       toast.error("No product selected for deletion.");
       return;
@@ -234,23 +254,17 @@ function ShipmentDataTable<T>({
     try {
       await deleteAllData(deleteRoute as string, { ids: selectedIds });
 
-      toast.success(
-       "Selected Shipment deleted successfully."
-      );
+      toast.success("Selected Shipment deleted successfully.");
 
       // Clear selection after deletion
       table.resetRowSelection();
 
-      
-
       // Refresh data (optional, better to use state update)
-    
+
       if (onDeleteRows) {
         onDeleteRows(table.getSelectedRowModel().rows);
       }
-     window.location.reload();
-      
-
+      window.location.reload();
     } catch (error) {
       console.error("Error deleting data:", error);
       toast.error("Error deleting data. Please try again.");
@@ -270,12 +284,16 @@ function ShipmentDataTable<T>({
   }, [table.getColumn(statusColumnName)?.getFacetedUniqueValues()]);
 
   const selectedStatuses = useMemo(() => {
-    const filterValue = table.getColumn(statusColumnName)?.getFilterValue() as string[];
+    const filterValue = table
+      .getColumn(statusColumnName)
+      ?.getFilterValue() as string[];
     return filterValue ?? [];
   }, [table.getColumn(statusColumnName)?.getFilterValue()]);
 
   const handleStatusChange = (checked: boolean, value: string) => {
-    const filterValue = table.getColumn(statusColumnName)?.getFilterValue() as string[];
+    const filterValue = table
+      .getColumn(statusColumnName)
+      ?.getFilterValue() as string[];
     const newFilterValue = filterValue ? [...filterValue] : [];
     if (checked) {
       newFilterValue.push(value);
@@ -301,16 +319,22 @@ function ShipmentDataTable<T>({
               ref={inputRef}
               className={cn(
                 "peer w-[550px] ps-9",
-                Boolean(table.getColumn(searchKeys[0])?.getFilterValue()) && "pe-9"
+                Boolean(table.getColumn(searchKeys[0])?.getFilterValue()) &&
+                  "pe-9"
               )}
-              value={(table.getColumn(searchKeys[0])?.getFilterValue() ?? "") as string}
+              value={
+                (table.getColumn(searchKeys[0])?.getFilterValue() ??
+                  "") as string
+              }
               onChange={(e) =>
                 table.getColumn(searchKeys[0])?.setFilterValue(e.target.value)
               }
               // placeholder={`Filter by ${searchKeys?.join(", ").replace("_", " ").replace(/_/g, " ")}`}
               placeholder="Filter by ShipmentID, Consignee Name, Invoice Number, Booking Number"
               type="text"
-              aria-label={`Filter by ${searchKeys?.join(", ").replace("_", " ")}`}
+              aria-label={`Filter by ${searchKeys
+                ?.join(", ")
+                .replace("_", " ")}`}
             />
             <div className="text-muted-foreground/80 pointer-events-none absolute inset-y-0 start-0 flex items-center justify-center ps-3 peer-disabled:opacity-50">
               <ListFilterIcon size={16} aria-hidden="true" />
@@ -332,7 +356,11 @@ function ShipmentDataTable<T>({
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline">
-                <FilterIcon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                <FilterIcon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
                 Status
                 {selectedStatuses.length > 0 && (
                   <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
@@ -343,35 +371,47 @@ function ShipmentDataTable<T>({
             </PopoverTrigger>
             <PopoverContent className="w-auto min-w-40 p-3" align="start">
               <div className="space-y-3">
-                <div className="text-muted-foreground text-xs font-medium">Filters</div>
+                <div className="text-muted-foreground text-xs font-medium">
+                  Filters
+                </div>
                 <div className="space-y-3">
                   {uniqueStatusValues?.map((value, i) => (
                     <div key={value} className="flex items-center gap-2">
                       <Checkbox
                         id={`${id}-${i}`}
                         checked={selectedStatuses.includes(value)}
-                        onCheckedChange={(checked: boolean) => handleStatusChange(checked, value)}
+                        onCheckedChange={(checked: boolean) =>
+                          handleStatusChange(checked, value)
+                        }
                       />
                       <Label
                         htmlFor={`${id}-${i}`}
                         className="flex grow justify-between gap-2 font-normal"
                       >
-                        {value}{" "} 
-                        <div className={`h-4 w-4 items-center justify-center rounded-md  text-center text-xs ${
-                         value === "Trucks Dispatched" ? "bg-gray-200 text-gray-800": 
-                         value === "Trucks Arrived" ? "bg-blue-200 text-blue-800":
-                         value === "Trucks Halted" ? "bg-yellow-200 text-yellow-800":
-                         value === "Stuffing" ? "bg-orange-200 text-orange-800":
-                         value === "In Clearance" ? "bg-purple-200 text-purple-800":
-                         value === "Loaded On Vessel" ? "bg-teal-200 text-teal-800":
-                         value === "In Transit" ? "bg-cyan-200 text-grcyanay-800":
-                         value === "Arrived At POD" ? "bg-green-200 text-green-800":
-                         value === "Delivery Completed" && "bg-green-200 text-green-800"
-
-                        }`} >
-                     
+                        {value}{" "}
+                        <div
+                          className={`h-4 w-4 items-center justify-center rounded-md  text-center text-xs ${
+                            value === "Trucks Dispatched"
+                              ? "bg-gray-200 text-gray-800"
+                              : value === "Trucks Arrived"
+                              ? "bg-blue-200 text-blue-800"
+                              : value === "Trucks Halted"
+                              ? "bg-yellow-200 text-yellow-800"
+                              : value === "Stuffing"
+                              ? "bg-orange-200 text-orange-800"
+                              : value === "In Clearance"
+                              ? "bg-purple-200 text-purple-800"
+                              : value === "Loaded On Vessel"
+                              ? "bg-teal-200 text-teal-800"
+                              : value === "In Transit"
+                              ? "bg-cyan-200 text-grcyanay-800"
+                              : value === "Arrived At POD"
+                              ? "bg-green-200 text-green-800"
+                              : value === "Delivery Completed" &&
+                                "bg-green-200 text-green-800"
+                          }`}
+                        >
                           {statusCounts.get(value)}
-              
                         </div>
                       </Label>
                     </div>
@@ -386,7 +426,11 @@ function ShipmentDataTable<T>({
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline">
-                  <CalendarIcon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                  <CalendarIcon
+                    className="-ms-1 opacity-60"
+                    size={16}
+                    aria-hidden="true"
+                  />
                   Date
                   {dateFilter.from && (
                     <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
@@ -508,7 +552,7 @@ function ShipmentDataTable<T>({
                       selected={dateFilter as any}
                       onSelect={(newDate) => {
                         if (newDate) {
-                          setDateFilter(newDate)
+                          setDateFilter(newDate);
                         }
                       }}
                       month={month}
@@ -527,11 +571,18 @@ function ShipmentDataTable<T>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
-                <Columns3Icon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                <Columns3Icon
+                  className="-ms-1 opacity-60"
+                  size={16}
+                  aria-hidden="true"
+                />
                 View
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="h-[500px] overflow-y-scroll">
+            <DropdownMenuContent
+              align="end"
+              className="h-[500px] overflow-y-scroll"
+            >
               <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
               {table
                 .getAllColumns()
@@ -541,7 +592,9 @@ function ShipmentDataTable<T>({
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                    onCheckedChange={(value) =>
+                      column.toggleVisibility(!!value)
+                    }
                     onSelect={(event) => event.preventDefault()}
                   >
                     {column.id.replace(/_/g, " ")}
@@ -556,7 +609,11 @@ function ShipmentDataTable<T>({
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button className="m-auto" variant="outline">
-                  <TrashIcon className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                  <TrashIcon
+                    className="-ms-1 opacity-60"
+                    size={16}
+                    aria-hidden="true"
+                  />
                   Delete
                   <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
                     {table.getSelectedRowModel().rows?.length}
@@ -572,17 +629,24 @@ function ShipmentDataTable<T>({
                     <CircleAlertIcon className="opacity-80" size={16} />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                       This action cannot be undone. This will permanently delete{" "}
                       {table.getSelectedRowModel().rows?.length} selected{" "}
-                      {table.getSelectedRowModel().rows?.length === 1 ? "shipment" : "shipments"}.
+                      {table.getSelectedRowModel().rows?.length === 1
+                        ? "shipment"
+                        : "shipments"}
+                      .
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleBulkDelete}>Delete</AlertDialogAction>
+                  <AlertDialogAction onClick={handleBulkDelete}>
+                    Delete
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -601,7 +665,11 @@ function ShipmentDataTable<T>({
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline">
-                  <Download className="-ms-1 opacity-60" size={16} aria-hidden="true" />
+                  <Download
+                    className="-ms-1 opacity-60"
+                    size={16}
+                    aria-hidden="true"
+                  />
                   Export
                   {
                     <span className="bg-background text-muted-foreground/70 -me-1 inline-flex h-5 max-h-full items-center rounded border px-1 font-[inherit] text-[0.625rem] font-medium">
@@ -612,16 +680,27 @@ function ShipmentDataTable<T>({
               </PopoverTrigger>
               <PopoverContent className="w-auto min-w-36 p-3" align="start">
                 <div className="space-y-3">
-                  <div className="text-muted-foreground text-xs font-medium">Export</div>
+                  <div className="text-muted-foreground text-xs font-medium">
+                    Export
+                  </div>
                   <div className="space-y-3">
                     <Button
                       onClick={() => {
                         // Implement CSV export logic here wuth selected values
-                        const selectedRows = table.getSelectedRowModel().rows.map((row) => row.original);
-                        const csvContent = selectedRows.map((row:any) =>
-                          Object.values(row).map((value) => `"${value}"`)?.map((value) => value.replace(/,/g, ""))?.join(",")
-                        ).join("\n")
-                        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+                        const selectedRows = table
+                          .getSelectedRowModel()
+                          .rows.map((row) => row.original);
+                        const csvContent = selectedRows
+                          .map((row: any) =>
+                            Object.values(row)
+                              .map((value) => `"${value}"`)
+                              ?.map((value) => value.replace(/,/g, ""))
+                              ?.join(",")
+                          )
+                          .join("\n");
+                        const blob = new Blob([csvContent], {
+                          type: "text/csv;charset=utf-8;",
+                        });
                         const link = document.createElement("a");
                         link.href = URL.createObjectURL(blob);
                         link.setAttribute("download", "selected_rows.csv");
@@ -629,13 +708,10 @@ function ShipmentDataTable<T>({
                         link.click();
                         document.body.removeChild(link);
                         URL.revokeObjectURL(link.href);
-
-
                       }}
                     >
                       Export Selected in CSV
                     </Button>
-
                   </div>
                 </div>
               </PopoverContent>
@@ -645,15 +721,13 @@ function ShipmentDataTable<T>({
       </div>
 
       {/* Table */}
-      <div className="bg-background overflow-hidden max-h-[80%] rounded-md border">
+      <div className="bg-background overflow-hidden overflow-y-auto max-h-[80%] rounded-md border">
         <Table className="table-fixed h-full">
-          <TableHeader
-          className="bg-background/90 sticky top-0 z-10 backdrop-blur-xs"
-          >
+          <TableHeader className="bg-background/90 sticky top-0 z-10 backdrop-blur-xs">
             {table.getHeaderGroups()?.map((headerGroup) => (
               //   <TableRow key={headerGroup.id} className="hover:bg-transparent">
               //     {headerGroup.headers?.map((header) => (
-              //       <TableHead key={header.id} 
+              //       <TableHead key={header.id}
               //     //   style={{ width: `${header.getSize()}px` }}
               //     style={{ ...getPinningStyles(column) }}
               //     className="[&[data-pinned][data-last-col]]:border-border data-pinned:bg-muted/90 relative h-10 truncate border-t data-pinned:backdrop-blur-xs [&:not([data-pinned]):has(+[data-pinned])_div.cursor-col-resize:last-child]:opacity-0 [&[data-last-col=left]_div.cursor-col-resize:last-child]:opacity-0 [&[data-pinned=left][data-last-col=left]]:border-r [&[data-pinned=right]:last-child_div.cursor-col-resize:last-child]:opacity-0 [&[data-pinned=right][data-last-col=right]]:border-l"
@@ -687,12 +761,12 @@ function ShipmentDataTable<T>({
               //   </TableRow>
               <TableRow key={headerGroup.id} className="bg-muted">
                 {headerGroup.headers.map((header) => {
-                  const { column } = header as any
-                  const isPinned = column.getIsPinned()
+                  const { column } = header as any;
+                  const isPinned = column.getIsPinned();
                   const isLastLeftPinned =
-                    isPinned === "left" && column.getIsLastColumn("left")
+                    isPinned === "left" && column.getIsLastColumn("left");
                   const isFirstRightPinned =
-                    isPinned === "right" && column.getIsFirstColumn("right")
+                    isPinned === "right" && column.getIsFirstColumn("right");
 
                   return (
                     <TableHead
@@ -705,8 +779,8 @@ function ShipmentDataTable<T>({
                         isLastLeftPinned
                           ? "left"
                           : isFirstRightPinned
-                            ? "right"
-                            : undefined
+                          ? "right"
+                          : undefined
                       }
                     >
                       {/* {table.getColumn("select") && (
@@ -725,9 +799,9 @@ function ShipmentDataTable<T>({
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
                         </span>
                         {/* Pin/Unpin column controls with enhanced accessibility */}
                         {!header.isPlaceholder &&
@@ -738,8 +812,12 @@ function ShipmentDataTable<T>({
                               variant="ghost"
                               className="-mr-1 size-7 shadow-none"
                               onClick={() => header.column.pin(false)}
-                              aria-label={`Unpin ${header.column.columnDef.header as string} column`}
-                              title={`Unpin ${header.column.columnDef.header as string} column`}
+                              aria-label={`Unpin ${
+                                header.column.columnDef.header as string
+                              } column`}
+                              title={`Unpin ${
+                                header.column.columnDef.header as string
+                              } column`}
                             >
                               <PinOffIcon
                                 className="opacity-60"
@@ -754,8 +832,12 @@ function ShipmentDataTable<T>({
                                   size="icon"
                                   variant="ghost"
                                   className="-mr-1 size-7 shadow-none"
-                                  aria-label={`Pin options for ${header.column.columnDef.header as string} column`}
-                                  title={`Pin options for ${header.column.columnDef.header as string} column`}
+                                  aria-label={`Pin options for ${
+                                    header.column.columnDef.header as string
+                                  } column`}
+                                  title={`Pin options for ${
+                                    header.column.columnDef.header as string
+                                  } column`}
                                 >
                                   <EllipsisIcon
                                     className="opacity-60"
@@ -801,7 +883,7 @@ function ShipmentDataTable<T>({
                         )}
                       </div>
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -833,37 +915,34 @@ function ShipmentDataTable<T>({
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => {
-                    const { column } = cell as any
-                    const isPinned = column.getIsPinned()
+                    const { column } = cell as any;
+                    const isPinned = column.getIsPinned();
                     const isLastLeftPinned =
-                      isPinned === "left" && column.getIsLastColumn("left")
+                      isPinned === "left" && column.getIsLastColumn("left");
                     const isFirstRightPinned =
-                      isPinned === "right" && column.getIsFirstColumn("right")
+                      isPinned === "right" && column.getIsFirstColumn("right");
 
                     return (
                       <TableCell
                         key={cell.id}
                         className="[&[data-pinned][data-last-col]]:border-border [&[data-pinned]]:bg-background/90 [&[data-pinned]]:backdrop-blur-sm  [&[data-pinned=left][data-last-col=left]]:border-r [&[data-pinned=right][data-last-col=right]]:border-l"
                         style={
-                          column.id === "ShipmentId" ?
-                            //pin it to left 
-                            {
-                              left: `${column.getStart("left")}px`
-
-                            } :
-
+                          column.id === "ShipmentId"
+                            ? //pin it to left
                               {
-
-                                ...getPinningStyles(column)
-
-                              }}
+                                left: `${column.getStart("left")}px`,
+                              }
+                            : {
+                                ...getPinningStyles(column),
+                              }
+                        }
                         data-pinned={isPinned || undefined}
                         data-last-col={
                           isLastLeftPinned
                             ? "left"
                             : isFirstRightPinned
-                              ? "right"
-                              : undefined
+                            ? "right"
+                            : undefined
                         }
                       >
                         {flexRender(
@@ -871,13 +950,16 @@ function ShipmentDataTable<T>({
                           cell.getContext()
                         )}
                       </TableCell>
-                    )
+                    );
                   })}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -909,19 +991,29 @@ function ShipmentDataTable<T>({
           </Select>
         </div>
         <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-          <p className="text-muted-foreground text-sm whitespace-nowrap" aria-live="polite">
+          <p
+            className="text-muted-foreground text-sm whitespace-nowrap"
+            aria-live="polite"
+          >
             <span className="text-foreground">
-              {table.getState().pagination.pageIndex * table.getState().pagination.pageSize + 1}-
+              {table.getState().pagination.pageIndex *
+                table.getState().pagination.pageSize +
+                1}
+              -
               {Math.min(
                 Math.max(
-                  table.getState().pagination.pageIndex * table.getState().pagination.pageSize +
-                  table.getState().pagination.pageSize,
+                  table.getState().pagination.pageIndex *
+                    table.getState().pagination.pageSize +
+                    table.getState().pagination.pageSize,
                   0
                 ),
                 table.getRowCount()
               )}
             </span>{" "}
-            of <span className="text-foreground">{table.getRowCount().toString()}</span>
+            of{" "}
+            <span className="text-foreground">
+              {table.getRowCount().toString()}
+            </span>
           </p>
         </div>
         <div>
