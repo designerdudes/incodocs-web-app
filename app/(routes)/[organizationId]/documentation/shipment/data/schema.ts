@@ -241,7 +241,7 @@ export const shipmentSchema = z.object({
       commercialInvoices: z
         .array(
           z.object({
-            commercialInvoiceNumber: z.string().optional(),
+            clearanceCommercialInvoiceNumber: z.string().optional(),
             clearanceCommercialInvoiceUrl: z.string().optional(),
             actualCommercialInvoiceUrl: z.string().optional(),
             saberInvoiceUrl: z.string().optional(),

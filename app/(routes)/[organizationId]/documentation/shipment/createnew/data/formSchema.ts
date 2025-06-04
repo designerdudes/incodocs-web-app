@@ -163,16 +163,15 @@ export const formSchema = z.object({
       commercialInvoices: z
         .array(
           z.object({
-            commercialInvoiceNumber: z.string().optional(),
-            packingListUrl: z.string().url("Invalid URL").optional(),
+            clearanceCommercialInvoiceNumber: z.string().optional(),
             clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            clearancecommercialInvoiceDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+            clearanceCommercialInvoiceValue: z.string().optional(),
             actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            actualCommercialInvoiceValue: z.string().optional(),
+            packingListUrl: z.string().url("Invalid URL").optional(),
             saberInvoiceUrl: z.string().url("Invalid URL").optional(),
-            commercialInvoiceValue: z.string().optional(),
-            commercialInvoiceDate: z
-              .string()
-              .datetime({ message: "Invalid date format" })
-              .optional(),
+            saberInvoiceValue: z.string().optional(),
           })
         )
         .optional(),

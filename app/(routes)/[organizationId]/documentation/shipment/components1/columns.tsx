@@ -59,7 +59,7 @@ const multiColumnFilterFn: FilterFn<Shipment> = (
     row.original.bookingDetails?.portOfLoading || "",
     row.original.bookingDetails?.destinationPort || "",
     row.original.saleInvoiceDetails?.commercialInvoices
-      ?.map((invoice) => invoice.commercialInvoiceNumber)
+      ?.map((invoice) => invoice.clearanceCommercialInvoiceNumber)
       .join(", ") || "",
     supplierName,
     row.original.bookingDetails?.bookingNumber || "",
@@ -297,7 +297,7 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "commercialInvoiceNumber",
+    accessorKey: "clearanceCommercialInvoiceNumber",
     header: ({ column }) => (
       <ColumnHeader column={column} title="Commercial Invoice Number" />
     ),
@@ -305,7 +305,7 @@ export const columns: ColumnDef<Shipment>[] = [
       <div className="flex space-x-2">
         <span className="truncate font-medium">
           {row.original.saleInvoiceDetails?.commercialInvoices?.[0]
-            ?.commercialInvoiceNumber || "N/A"}
+            ?.clearanceCommercialInvoiceNumber || "N/A"}
         </span>
       </div>
     ),

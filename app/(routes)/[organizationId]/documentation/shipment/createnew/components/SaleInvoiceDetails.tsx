@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash, UploadCloud } from "lucide-react";
 import {
   TableHeader,
@@ -28,18 +28,24 @@ import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
 import { FileUploadField } from "./FileUploadField";
 import { Path } from "react-hook-form";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { fetchData } from "@/axiosUtility/api";
 
 interface CommercialInvoice {
-  commercialInvoiceNumber: string;
-  packingListUrl: string;
+  clearanceCommercialInvoiceNumber: string;
+  clearancecommercialInvoiceDate: string;
   clearanceCommercialInvoiceUrl: string;
+  clearanceCommercialInvoiceValue: string;
   actualCommercialInvoiceUrl: string;
+  actualCommercialInvoiceValue: string;
   saberInvoiceUrl: string;
-  commercialInvoiceValue: string;
-  commercialInvoiceDate: string;
+  saberInvoiceValue: string;
+  packingListUrl: string;
 }
 
 interface FormData {
@@ -71,7 +77,8 @@ function saveProgressSilently(data: any) {
 const getFieldName = <T extends FormData>(
   index: number,
   field: keyof CommercialInvoice
-): Path<T> => `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
+): Path<T> =>
+  `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
 
 export function CommercialInvoiceDetails({
   saveProgress,
@@ -85,7 +92,9 @@ export function CommercialInvoiceDetails({
   const [uploading, setUploading] = useState(false);
   const [consignees, setConsignees] = useState<any[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(null);
+  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(
+    null
+  );
   const GlobalModal = useGlobalModal();
 
   // Fetch consignees on mount
@@ -95,7 +104,7 @@ export function CommercialInvoiceDetails({
         const consigneeResponse = await fetchData(
           `/shipment/consignee/getbyorg/${organizationId}`
         );
-        const consigneeData = await consigneeResponse
+        const consigneeData = await consigneeResponse;
         setConsignees(consigneeData);
       } catch (error) {
         console.error("Error fetching consignees:", error);
@@ -106,13 +115,20 @@ export function CommercialInvoiceDetails({
 
   // Debug confirmation state changes
   useEffect(() => {
-    console.log("Confirmation state:", { showConfirmation, pendingInvoiceCount, invoicesFromForm });
+    console.log("Confirmation state:", {
+      showConfirmation,
+      pendingInvoiceCount,
+      invoicesFromForm,
+    });
   }, [showConfirmation, pendingInvoiceCount, invoicesFromForm]);
 
   const handleDelete = (index: number) => {
     const updatedInvoices = invoicesFromForm.filter((_, i) => i !== index);
     setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
-    setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+    setValue(
+      "saleInvoiceDetails.numberOfSalesInvoices",
+      updatedInvoices.length
+    );
     saveProgressSilently(getValues());
   };
 
@@ -122,21 +138,28 @@ export function CommercialInvoiceDetails({
     if (newCount < 1) return;
 
     if (newCount < invoicesFromForm.length) {
-      console.log("Reducing invoice count from", invoicesFromForm.length, "to", newCount);
+      console.log(
+        "Reducing invoice count from",
+        invoicesFromForm.length,
+        "to",
+        newCount
+      );
       setShowConfirmation(true);
       setPendingInvoiceCount(newCount);
       return;
     }
 
     const currentInvoices = invoicesFromForm;
-    const newInvoices = Array.from({ length: newCount }, (_, i) =>
-      currentInvoices[i] || {
-        commercialInvoiceNumber: "",
-        packingListUrl: "",
-        clearanceCommercialInvoiceUrl: "",
-        actualCommercialInvoiceUrl: "",
-        saberInvoiceUrl: "",
-      }
+    const newInvoices = Array.from(
+      { length: newCount },
+      (_, i) =>
+        currentInvoices[i] || {
+          clearanceCommercialInvoiceNumber: "",
+          packingListUrl: "",
+          clearanceCommercialInvoiceUrl: "",
+          actualCommercialInvoiceUrl: "",
+          saberInvoiceUrl: "",
+        }
     );
     setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
     setValue("saleInvoiceDetails.numberOfSalesInvoices", newInvoices.length);
@@ -144,11 +167,17 @@ export function CommercialInvoiceDetails({
   };
 
   const handleConfirmChange = () => {
-    console.log("handleConfirmChange called with pendingInvoiceCount:", pendingInvoiceCount);
+    console.log(
+      "handleConfirmChange called with pendingInvoiceCount:",
+      pendingInvoiceCount
+    );
     if (pendingInvoiceCount !== null) {
       const updatedInvoices = invoicesFromForm.slice(0, pendingInvoiceCount);
       setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
-      setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+      setValue(
+        "saleInvoiceDetails.numberOfSalesInvoices",
+        updatedInvoices.length
+      );
       saveProgressSilently(getValues());
       setPendingInvoiceCount(null);
     }
@@ -282,13 +311,15 @@ export function CommercialInvoiceDetails({
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Commercial Invoice Number</TableHead>
+                <TableHead>Clearance Commercial Invoice Number</TableHead>
+                <TableHead>Clearance Commercial Invoice Date</TableHead>
+                <TableHead>Clearance Commercial Invoice Url</TableHead>
+                <TableHead>Clearance Commercial Invoice Value</TableHead>
+                <TableHead>Actual Commercial Invoice Url</TableHead>
+                <TableHead>Actual Commercial Value</TableHead>
+                <TableHead>SABER Invoice Url</TableHead>
+                <TableHead>SABER Invoice Value</TableHead>
                 <TableHead>Packing List</TableHead>
-                <TableHead>Clearance Commercial Invoice</TableHead>
-                <TableHead>Actual Commercial Invoice</TableHead>
-                <TableHead>SABER Invoice</TableHead>
-                <TableHead>Commercial Invoice Value</TableHead>
-                <TableHead>Commercial Invoice Date</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -299,13 +330,16 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "commercialInvoiceNumber")}
+                      name={getFieldName<FormData>(
+                        index,
+                        "clearanceCommercialInvoiceNumber"
+                      )}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
                               placeholder="e.g., 3458H4"
-                              value={field.value as any || ""}
+                              value={(field.value as any) || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                               required
@@ -319,15 +353,43 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "packingListUrl")}
+                      name={getFieldName<FormData>(
+                        index,
+                        "clearancecommercialInvoiceDate"
+                      )}
                       render={({ field }) => (
                         <FormItem>
-                          <FormControl>
-                            <FileUploadField
-                              name={getFieldName<FormData>(index, "packingListUrl")}
-                              storageKey={`saleInvoiceDetails_packingListUrl${index}`}
-                            />
-                          </FormControl>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button variant="outline">
+                                  {field.value
+                                    ? format(
+                                        new Date(field.value as any),
+                                        "PPPP"
+                                      )
+                                    : "Pick a date"}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
+                              <CalendarComponent
+                                selected={
+                                  field.value
+                                    ? new Date(field.value as any)
+                                    : undefined
+                                }
+                                onSelect={(date) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -336,12 +398,18 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
+                      name={getFieldName<FormData>(
+                        index,
+                        "clearanceCommercialInvoiceUrl"
+                      )}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <FileUploadField
-                              name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
+                              name={getFieldName<FormData>(
+                                index,
+                                "clearanceCommercialInvoiceUrl"
+                              )}
                               storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
                             />
                           </FormControl>
@@ -350,15 +418,41 @@ export function CommercialInvoiceDetails({
                       )}
                     />
                   </TableCell>
+                  
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
+                      name={getFieldName<FormData>(
+                        index,
+                        "clearanceCommercialInvoiceValue"
+                      )}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            value={(field.value as any) || ""}
+                            onChange={field.onChange}
+                            placeholder="e.g., 1000"
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(
+                        index,
+                        "actualCommercialInvoiceUrl"
+                      )}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <FileUploadField
-                              name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
+                              name={getFieldName<FormData>(
+                                index,
+                                "actualCommercialInvoiceUrl"
+                              )}
                               storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
                             />
                           </FormControl>
@@ -370,12 +464,34 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
+                      name={getFieldName<FormData>(
+                        index,
+                        "actualCommercialInvoiceValue"
+                      )}
+                      render={({ field }) => (
+                        <FormControl>
+                          <Input
+                            value={(field.value as any) || ""}
+                            onChange={field.onChange}
+                            placeholder="e.g., 1000"
+                            onBlur={() => saveProgressSilently(getValues())}
+                          />
+                        </FormControl>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
                       name={getFieldName<FormData>(index, "saberInvoiceUrl")}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <FileUploadField
-                              name={getFieldName<FormData>(index, "saberInvoiceUrl")}
+                              name={getFieldName<FormData>(
+                                index,
+                                "saberInvoiceUrl"
+                              )}
                               storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
                             />
                           </FormControl>
@@ -387,11 +503,12 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "commercialInvoiceValue")}
+                      name={getFieldName<FormData>(index, "saberInvoiceValue")}
                       render={({ field }) => (
                         <FormControl>
                           <Input
-                            value={field.value as any || ""}
+                            value={(field.value as any) || ""}
+                            onChange={field.onChange}
                             placeholder="e.g., 1000"
                             onBlur={() => saveProgressSilently(getValues())}
                           />
@@ -402,32 +519,18 @@ export function CommercialInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={getFieldName<FormData>(index, "commercialInvoiceDate")}
+                      name={getFieldName<FormData>(index, "packingListUrl")}
                       render={({ field }) => (
                         <FormItem>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button variant="outline">
-                                  {field.value
-                                    ? format(new Date(field.value as any), "PPPP")
-                                    : "Pick a date"}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <CalendarComponent
-                                selected={
-                                  field.value ? new Date(field.value as any) : undefined
-                                }
-                                onSelect={(date) => {
-                                  field.onChange(date?.toISOString());
-                                  saveProgressSilently(getValues());
-                                }}
-                              />
-                            </PopoverContent>
-                          </Popover>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(
+                                index,
+                                "packingListUrl"
+                              )}
+                              storageKey={`saleInvoiceDetails_packingListUrl${index}`}
+                            />
+                          </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
