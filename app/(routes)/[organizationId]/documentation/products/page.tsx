@@ -6,25 +6,61 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import { ProductsColumns } from "./components/columns";
-
+import { log } from "console";
 export interface Product {
-    _id: any;
-    code: string;
-    description: string;
-    unitOfMeasurements: string;
-    countryOfOrigin: string;
-    HScode: string;
-    netWeight: number;
-    grossWeight: number;
-    cubicMeasurement: number;
-    prices: {
-        variantName: string;
-        varianntType: string;
-        sellPrice: number;
-        buyPrice: number;
-    }[];
+  _id: string;
+  productType?: string;
+  code?: string;
+  description?: string;
+  unitOfMeasurements?: string;
+  countryOfOrigin?: string;
+  HScode?: string;
+  netWeight?: number;
+  grossWeight?: number;
+  cubicMeasurement?: number;
+  prices?: {
+    variantName: string;
+    variantType?: string;
+    sellPrice: number;
+    buyPrice: number;
+  }[];
+  slabDetails?: {
+    stoneName: string;
+    stonePhoto: string;
+    manualMeasurement: string;
+    uploadMeasurement: string;
+  };
+  tileDetails?: {
+    stoneName: string;
+    stonePhoto: string;
+    noOfBoxes: number;
+    piecesPerBox: number;
+    size: { length: number; breadth: number };
+    thickness?: { value: number };
+    moulding?: { mouldingSide: string; typeOfMoulding: string };
+  };
+  stepRiserDetails?: {
+    stoneName: string;
+    stonePhoto: string;
+    mixedBox?: {
+      sizeOfStep: { length: number; breadth: number; thickness: number };
+      sizeOfRiser: { length: number; breadth: number; thickness: number };
+      noOfBoxes: number;
+      noOfSteps: number;
+      noOfRiser: number;
+    };
+    seperateBox?: {
+      sizeOfBoxOfSteps: { length: number; breadth: number; thickness: number };
+      sizeOfBoxOfRisers: { length: number; breadth: number; thickness: number };
+      noOfBoxOfSteps: number;
+      noOfBoxOfRisers: number;
+    };
+  };
+  createdAt?: string;
+  updatedAt?: string;
+  organizationId: string;
+  shipments?: any[];
 }
-
 interface Props {
     params: {
         organizationId: string;
@@ -48,6 +84,13 @@ export default async function ProductPage({ params }: Props) {
         }
     ).then((response) => response.json());
     const ProductsData = res;
+
+    console.log("gggg");
+    
+    console.log(
+        ProductsData
+    );
+    
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -73,16 +116,17 @@ export default async function ProductPage({ params }: Props) {
 
             <Separator className="my-2" />
             <div>
-                <DataTable
-                    bulkDeleteIdName="_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
-                    bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
-                    bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-                    deleteRoute="/shipment/productdetails/deletemany"
-                    searchKey="name"
-                    columns={ProductsColumns}
-                    data={ProductsData as any}
-                />
+           <DataTable
+  bulkDeleteIdName="_id"
+  bulkDeleteTitle="Are you sure you want to delete the selected products?"
+  bulkDeleteDescription="This will delete the selected products, and they will not be recoverable."
+  bulkDeleteToastMessage="Selected products deleted successfully"
+  deleteRoute="/shipment/productdetails/deletemany" // Verify this endpoint
+  searchKey="productType"
+  columns={ProductsColumns}
+  data={ProductsData}
+  token={token}
+/>
             </div>
         </div>
     );

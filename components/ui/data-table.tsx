@@ -95,7 +95,9 @@ export function DataTable<TData, TValue>({
   bulkPolishIdName,
   updateRoute,
   bulkPolisToastMessage,
+  token, // <-- Add token here
 }: DataTableProps<TData, TValue>) {
+  const [tableData, setData] = React.useState<TData[]>(data);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [rowSelection, setRowSelection] = React.useState({});
@@ -105,7 +107,7 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const table = useReactTable({
-    data,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -129,36 +131,41 @@ export function DataTable<TData, TValue>({
     .getFilteredSelectedRowModel()
     .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
-  const handleBulkDelete = async () => {
-    const selectedIds = table
-      .getFilteredSelectedRowModel()
-      .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
-    console.log(selectedIds);
-    console.log("this is bulk delete", bulkDeleteIdName);
-    if (selectedIds.length === 0) {
-      toast.error("No product selected for deletion.");
-      return;
-    }
+ const handleBulkDelete = async () => {
+  const selectedIds = table
+    .getFilteredSelectedRowModel()
+    .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
-    try {
-      await deleteAllData(deleteRoute as string, { ids: selectedIds });
+  if (selectedIds.length === 0) {
+    toast.error("No products selected for deletion.");
+    return;
+  }
 
-      toast.success(
-        bulkDeleteToastMessage ?? "Selected product deleted successfully"
-      );
+  setIsLoading(true);
+  try {
+    console.log("Deleting IDs:", selectedIds, "at route:", deleteRoute);
+    await deleteAllData(deleteRoute as string, { ids: selectedIds, token }, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-      // Clear selection after deletion
-      table.resetRowSelection();
+    // Update local table data to remove deleted items
+    setData((prev) =>
+      prev.filter((item: any) => !selectedIds.includes(item[bulkDeleteIdName as string]))
+    );
 
-      // Refresh data (optional, better to use state update)
-      window.location.reload();
+    toast.success(bulkDeleteToastMessage ?? "Selected products deleted successfully");
+    table.resetRowSelection();
+    modal.onClose();
 
-      modal.onClose();
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      toast.error("Error deleting data. Please try again.");
-    }
-  };
+    // Trigger a full page refresh
+    window.location.reload();
+  } catch (error: any) {
+    console.error("Error deleting data:", error);
+    toast.error(error.message || "Error deleting products. Please check the API endpoint.");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Function to extract all nested keys
   const getAllKeys = (obj: Record<string, any>, prefix = ""): string[] => {
@@ -192,7 +199,7 @@ export function DataTable<TData, TValue>({
     shippingBillDetails: {
       shippingBillNumber: "",
       shippingBillDate: new Date(),
-    },
+    } ,
     supplierDetails: {
       supplierName: "",
       actualSupplierName: "",
@@ -326,7 +333,7 @@ export function DataTable<TData, TValue>({
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
                       className={`h-fit py-2 text-sm ${
-                        cell.column.id === "actions"
+                        cell.column.id === "actions" 
                           ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10"
                           : ""
                       }`}
