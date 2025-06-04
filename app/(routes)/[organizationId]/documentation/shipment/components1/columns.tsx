@@ -453,7 +453,7 @@ export const columns: ColumnDef<Shipment>[] = [
   },
   {
     accessorKey: "cbName",
-    header: ({ column }) => <ColumnHeader column={column} title="CB Name" />,
+    header: ({ column }) => <ColumnHeader column={column} title="CustomBroker" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
+import { useFormContext, useFieldArray, Path } from "react-hook-form";
 import {
   FormField,
   FormItem,
@@ -18,7 +18,7 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table";
-import { Trash } from "lucide-react";
+import { CalendarIcon, Trash } from "lucide-react";
 import toast from "react-hot-toast";
 import { Textarea } from "@/components/ui/textarea";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -27,24 +27,56 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
 import { fetchData } from "@/axiosUtility/api";
 import Cookies from "js-cookie";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import CalendarComponent from "@/components/CalendarComponent";
+import { format } from "date-fns";
+ 
 
+
+interface CommercialInvoice {
+  commercialInvoiceNumber: string;
+  packingListUrl: string;
+  clearanceCommercialInvoiceUrl: string;
+  actualCommercialInvoiceUrl: string;
+  saberInvoiceUrl: string;
+  commercialInvoiceValue: string;
+  commercialInvoiceDate: string;
+}
 interface SaleInvoiceDetailsProps {
   shipmentId: string;
-  orgId: string | undefined;
+  orgId?: string;
+  params: string | string[];
+currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<any>;
+}
+function saveProgressSilently(data: any) {
+  try {
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  } catch (error) {
+    console.error("Failed to save progress to localStorage:", error);
+  }
 }
 
 export function SaleInvoiceDetails({
   shipmentId,
   orgId,
+  params,
+  currentUser,
   saveProgress,
   onSectionSubmit,
 }: SaleInvoiceDetailsProps) {
+  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues } = useFormContext();
   const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
+  const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(null);
 
   const { fields, append, remove, replace } = useFieldArray({
     control,
@@ -157,31 +189,32 @@ export function SaleInvoiceDetails({
   }, [formValues, fields.length, append, remove, replace]);
 
   // Handle Number of Invoices Change
-  const handleInvoiceNumberCountChange = (value: number) => {
-    if (isNaN(value) || value < 0) return;
-    console.log("handleInvoiceNumberCountChange:", value);
-    setValue("saleInvoiceDetails.numberOfSalesInvoices", value, {
-      shouldDirty: true,
-    });
-    const currentInvoices = formValues?.invoice ?? [];
-    if (value > currentInvoices.length) {
-      const newInvoices = Array(value - currentInvoices.length)
-        .fill(null)
-        .map(() => ({
-          commercialInvoiceNumber: "",
-          clearanceCommercialInvoice: "",
-          actualCommercialInvoice: "",
-          saberInvoice: "",
-          addProductDetails: [],
-        }));
-      append(newInvoices, { shouldFocus: false });
-    } else if (value < currentInvoices.length) {
-      for (let i = currentInvoices.length - 1; i >= value; i--) {
-        remove(i);
-      }
-    }
-  };
+  const handleInvoiceNumberCountChange = (value: string) => {
+    console.log("handleInvoiceNumberCountChange called with value:", value);
+    const newCount = value === "" ? 1 : Number(value) || 1;
+    if (newCount < 1) return;
 
+    if (newCount < invoicesFromForm.length) {
+      console.log("Reducing invoice count from", invoicesFromForm.length, "to", newCount);
+      setShowConfirmation(true);
+      setPendingInvoiceCount(newCount);
+      return;
+    }
+
+    const currentInvoices = invoicesFromForm;
+    const newInvoices = Array.from({ length: newCount }, (_, i) =>
+      currentInvoices[i] || {
+        commercialInvoiceNumber: "",
+        packingListUrl: "",
+        clearanceCommercialInvoiceUrl: "",
+        actualCommercialInvoiceUrl: "",
+        saberInvoiceUrl: "",
+      }
+    );
+    setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", newInvoices.length);
+    saveProgressSilently(getValues());
+  };
   const openConsigneeForm = () => {
     if (!orgId) {
       toast.error("Cannot add consignee: Organization ID is missing");
@@ -191,6 +224,7 @@ export function SaleInvoiceDetails({
     GlobalModal.title = "Add New Consignee";
     GlobalModal.children = (
       <AddConsigneeForm
+        currentUser = {currentUser}
         orgId={orgId}
         onSuccess={() => {
           fetchConsignees();
@@ -198,6 +232,29 @@ export function SaleInvoiceDetails({
       />
     );
     GlobalModal.onOpen();
+  };
+
+  const getFieldName = <T extends FormData>(
+    index: number,
+    field: keyof CommercialInvoice
+  ): Path<T> => `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
+
+  const handleConfirmChange = () => {
+    console.log("handleConfirmChange called with pendingInvoiceCount:", pendingInvoiceCount);
+    if (pendingInvoiceCount !== null) {
+      const updatedInvoices = invoicesFromForm.slice(0, pendingInvoiceCount);
+      setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
+      setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+      saveProgressSilently(getValues());
+      setPendingInvoiceCount(null);
+    }
+    setShowConfirmation(false);
+  };
+  const handleDelete = (index: number) => {
+    const updatedInvoices = invoicesFromForm.filter((_: any, i: number) => i !== index);
+    setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
+    setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+    saveProgressSilently(getValues());
   };
 
   return (
@@ -213,19 +270,20 @@ export function SaleInvoiceDetails({
               <EntityCombobox
                 entities={consignees}
                 value={field.value || ""}
-                onChange={(value) => field.onChange(value)}
+                onChange={(value) => {
+                  field.onChange(value);
+                  saveProgressSilently(getValues());
+                }}
                 displayProperty="name"
                 placeholder="Select a Consignee"
                 onAddNew={openConsigneeForm}
                 addNewLabel="Add New Consignee"
-                disabled={isLoading}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
       {/* Actual Buyer */}
       <FormField
         control={control}
@@ -235,16 +293,16 @@ export function SaleInvoiceDetails({
             <FormLabel>Actual Buyer</FormLabel>
             <FormControl>
               <Input
-                placeholder="Enter buyer name"
-                {...field}
-                value={field.value ?? ""}
+                placeholder="e.g., Khan"
+                value={field.value || ""}
+                onChange={field.onChange}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
       />
-
       {/* Number of Commercial Invoices */}
       <FormField
         control={control}
@@ -255,13 +313,20 @@ export function SaleInvoiceDetails({
             <FormControl>
               <Input
                 type="number"
-                placeholder="Enter number of Commercial Invoices"
-                value={field.value ?? ""}
+                placeholder="Enter number of invoices"
+                value={field.value ?? 1}
                 onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  field.onChange(value);
+                  const value = e.target.value;
+                  if (value === "") {
+                    field.onChange(1);
+                    handleInvoiceNumberCountChange("1");
+                    return;
+                  }
+                  const numericValue = Number(value);
+                  field.onChange(numericValue);
                   handleInvoiceNumberCountChange(value);
                 }}
+                min={1}
               />
             </FormControl>
             <FormMessage />
@@ -269,34 +334,124 @@ export function SaleInvoiceDetails({
         )}
       />
 
-      {/* Invoices Table */}
-      {fields.length > 0 ? (
+      {invoicesFromForm.length > 0 && (
         <div className="col-span-4 overflow-x-auto mt-4">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Commercial Invoice Number</TableHead>
+                <TableHead>Packing List</TableHead>
                 <TableHead>Clearance Commercial Invoice</TableHead>
                 <TableHead>Actual Commercial Invoice</TableHead>
                 <TableHead>SABER Invoice</TableHead>
+                <TableHead>Commercial Invoice Value</TableHead>
+                <TableHead>Commercial Invoice Date</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {fields.map((item, index) => (
-                <TableRow key={item.id}>
+              {invoicesFromForm.map((_: any, index: number) => (
+                <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].commercialInvoiceNumber`}
+                      name={getFieldName<FormData>(index, "commercialInvoiceNumber")}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="e.g., 3458H4"
+                              value={field.value as any || ""}
+                              onChange={field.onChange}
+                              onBlur={() => saveProgressSilently(getValues())}
+                              required
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "packingListUrl")}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "packingListUrl")}
+                              storageKey={`saleInvoiceDetails_packingListUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "clearanceCommercialInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "actualCommercialInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "saberInvoiceUrl")}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={getFieldName<FormData>(index, "saberInvoiceUrl")}
+                              storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={getFieldName<FormData>(index, "commercialInvoiceValue")}
                       render={({ field }) => (
                         <FormControl>
                           <Input
-                            placeholder="Eg: 123456898"
-                            {...field}
-                            value={field.value ?? ""}
+                            value={field.value as any || ""}
+                            placeholder="e.g., 1000"
+                            onBlur={() => saveProgressSilently(getValues())}
                           />
                         </FormControl>
                       )}
@@ -305,45 +460,34 @@ export function SaleInvoiceDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].clearanceCommercialInvoice`}
+                      name={getFieldName<FormData>(index, "commercialInvoiceDate")}
                       render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="Eg: 123456898"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].actualCommercialInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="Eg: 123456898"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      control={control}
-                      name={`saleInvoiceDetails.invoice[${index}].saberInvoice`}
-                      render={({ field }) => (
-                        <FormControl>
-                          <Input
-                            placeholder="Eg: 123456898"
-                            {...field}
-                            value={field.value ?? ""}
-                          />
-                        </FormControl>
+                        <FormItem>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button variant="outline">
+                                  {field.value
+                                    ? format(new Date(field.value as any), "PPPP")
+                                    : "Pick a date"}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <CalendarComponent
+                                selected={
+                                  field.value ? new Date(field.value as any) : undefined
+                                }
+                                onSelect={(date) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
                       )}
                     />
                   </TableCell>
@@ -352,7 +496,7 @@ export function SaleInvoiceDetails({
                       variant="destructive"
                       size="sm"
                       type="button"
-                      onClick={() => remove(index)}
+                      onClick={() => handleDelete(index)}
                     >
                       <Trash className="h-4 w-4" />
                     </Button>
@@ -362,29 +506,36 @@ export function SaleInvoiceDetails({
             </TableBody>
           </Table>
         </div>
-      ) : (
-        <div className="col-span-4 mt-4 text-muted-foreground">
-          No invoices added. Set the number of commercial invoices to add one.
-        </div>
       )}
-
-      {/* Review */}
+      {/* Review Field */}
       <FormField
         control={control}
         name="saleInvoiceDetails.review"
         render={({ field }) => (
-          <FormItem className="col-span-4">
+          <FormItem className="col-span-4 mt-4">
             <FormLabel>Remarks</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="e.g., this is some random comment"
-                {...field}
-                value={field.value ?? ""}
+                placeholder="e.g., this is some random comment for sale invoice details"
+                value={field.value || ""}
+                onChange={field.onChange}
+                onBlur={() => saveProgressSilently(getValues())}
               />
             </FormControl>
             <FormMessage />
           </FormItem>
         )}
+      />
+
+      <ConfirmationDialog
+        isOpen={showConfirmation}
+        onClose={() => {
+          setShowConfirmation(false);
+          setPendingInvoiceCount(null);
+        }}
+        onConfirm={handleConfirmChange}
+        title="Are you sure?"
+        description="You are reducing the number of commercial invoices. This action cannot be undone."
       />
     </div>
   );
