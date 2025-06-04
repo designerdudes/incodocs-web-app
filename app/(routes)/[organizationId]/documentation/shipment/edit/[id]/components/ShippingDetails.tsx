@@ -43,11 +43,13 @@ interface ShippingDetailsProps {
   orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
+  currentUser : string;
 }
 
 export function ShippingDetails({
   shipmentId,
   orgId,
+  currentUser,
   saveProgress,
   onSectionSubmit,
 }: ShippingDetailsProps) {
@@ -58,6 +60,7 @@ export function ShippingDetails({
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
+  const orgid = orgId
 
   const {
     fields: forwarderFields,
@@ -345,6 +348,8 @@ export function ShippingDetails({
     GlobalModal.title = "Add New Forwarder";
     GlobalModal.children = (
       <ForwarderForm
+        currentUser = {currentUser}
+        orgId={orgId}
         onSuccess={() => {
           const token = Cookies.get("AccessToken");
           if (!token) {
@@ -389,6 +394,8 @@ export function ShippingDetails({
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
+        currentUser = {currentUser}
+        orgId={orgId}
         onSuccess={() => {
           const token = Cookies.get("AccessToken");
           if (!token) {

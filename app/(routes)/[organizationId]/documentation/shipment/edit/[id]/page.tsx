@@ -17,11 +17,12 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import { useRouter, useParams } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
 import Cookies from "js-cookie";
+import React from "react";
 
 interface ShipmentApiResponse {
   shipment: {
@@ -142,40 +143,40 @@ const formSchema = z.object({
             addProductDetails: z
               .array(
                 z.object({
-                  _id: z.string().optional(),
-                  productId: z.string().optional(),
-                  code: z.string().optional(),
-                  description: z.string().optional(),
-                  unitOfMeasurements: z.string().optional(),
-                  countryOfOrigin: z.string().optional(),
-                  HScode: z.string().optional(),
-                  variantName: z.string().optional(),
-                  variantType: z.string().optional(),
-                  sellPrice: z.number().optional(),
-                  buyPrice: z.number().optional(),
-                  netWeight: z.number().optional(),
-                  grossWeight: z.number().optional(),
-                  cubicMeasurement: z.number().optional(),
-                  __v: z.number().optional(),
-                })
-                .refine(
-                  (data) =>
-                    data._id ||
-                    data.productId ||
-                    data.code ||
-                    data.description ||
-                    data.unitOfMeasurements ||
-                    data.countryOfOrigin ||
-                    data.HScode ||
-                    data.variantName ||
-                    data.variantType ||
-                    data.sellPrice ||
-                    data.buyPrice ||
-                    data.netWeight ||
-                    data.grossWeight ||
-                    data.cubicMeasurement,
-                  { message: "At least one product detail field must be provided" }
-                )
+                    _id: z.string().optional(),
+                    productId: z.string().optional(),
+                    code: z.string().optional(),
+                    description: z.string().optional(),
+                    unitOfMeasurements: z.string().optional(),
+                    countryOfOrigin: z.string().optional(),
+                    HScode: z.string().optional(),
+                    variantName: z.string().optional(),
+                    variantType: z.string().optional(),
+                    sellPrice: z.number().optional(),
+                    buyPrice: z.number().optional(),
+                    netWeight: z.number().optional(),
+                    grossWeight: z.number().optional(),
+                    cubicMeasurement: z.number().optional(),
+                    __v: z.number().optional(),
+                  })
+                  .refine(
+                    (data) =>
+                      data._id ||
+                      data.productId ||
+                      data.code ||
+                      data.description ||
+                      data.unitOfMeasurements ||
+                      data.countryOfOrigin ||
+                      data.HScode ||
+                      data.variantName ||
+                      data.variantType ||
+                      data.sellPrice ||
+                      data.buyPrice ||
+                      data.netWeight ||
+                      data.grossWeight ||
+                      data.cubicMeasurement,
+                    { message: "At least one product detail field must be provided" }
+                  )
               )
               .optional()
               .default([]),
@@ -497,6 +498,7 @@ const saveProgressWithFeedback = (data: any, shipmentId: string) => {
 };
 
 interface Props {
+  organizationId: string;
   params: {
     id: string;
   };
@@ -507,13 +509,25 @@ export default function EditShipmentPage({ params }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | undefined>(
-    undefined
-  );
+  const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const router = useRouter();
   const urlOrgId = useParams().organizationId as string | undefined;
   const isInitialLoad = useRef(true);
+  const [currentUser, setCurrentUser] = useState<string>("");
+
+  React.useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const GetCurrentUser = await fetchData(`/user/currentUser`);
+        const currentUserId = GetCurrentUser._id;
+        setCurrentUser(currentUserId);
+      } catch (error) {
+        console.error("Error fetching slab data:", error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const loadDraft = (shipmentId: string): FormValues => {
     const draft = localStorage.getItem(`shipmentDraft_${shipmentId}`);
@@ -563,6 +577,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
+          currentUser={currentUser}
         />
       ),
     },
@@ -575,7 +590,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-        />
+          currentUser={currentUser}   />
       ),
     },
     {
@@ -587,7 +602,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-        />
+          currentUser={currentUser}     />
       ),
     },
     {
@@ -599,7 +614,7 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-        />
+          currentUser={currentUser}     />
       ),
     },
     {
@@ -611,7 +626,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-        />
+          currentUser={currentUser}
+         />
       ),
     },
     {
@@ -1107,35 +1123,35 @@ export default function EditShipmentPage({ params }: Props) {
                   undefined,
                 containers: Array.isArray(data.shipment.bookingDetails?.containers)
                   ? data.shipment.bookingDetails.containers.map((container: any) => ({
-                      containerType: container.containerType || undefined,
-                      containerNumber: container.containerNumber || undefined,
-                      truckNumber: container.truckNumber || undefined,
-                      truckDriverContactNumber:
-                        container.truckDriverContactNumber || undefined,
-                      addProductDetails: Array.isArray(
-                        container.addProductDetails
-                      )
-                        ? container.addProductDetails.map((product: any) => ({
-                            _id: product._id || undefined,
-                            productId: product.productId || product._id || undefined,
-                            code: product.code || undefined,
-                            description: product.description || undefined,
-                            unitOfMeasurements:
-                              product.unitOfMeasurements || undefined,
-                            countryOfOrigin: product.countryOfOrigin || undefined,
-                            HScode: product.HScode || undefined,
-                            variantName: product.variantName || undefined,
-                            variantType: product.variantType || undefined,
-                            sellPrice: product.sellPrice || undefined,
-                            buyPrice: product.buyPrice || undefined,
-                            netWeight: product.netWeight || undefined,
-                            grossWeight: product.grossWeight || undefined,
-                            cubicMeasurement: product.cubicMeasurement || undefined,
-                            __v: product.__v || undefined,
-                          }))
-                        : [],
-                      _id: container._id || undefined,
-                    }))
+                        containerType: container.containerType || undefined,
+                        containerNumber: container.containerNumber || undefined,
+                        truckNumber: container.truckNumber || undefined,
+                        truckDriverContactNumber:
+                          container.truckDriverContactNumber || undefined,
+                        addProductDetails: Array.isArray(
+                          container.addProductDetails
+                        )
+                          ? container.addProductDetails.map((product: any) => ({
+                              _id: product._id || undefined,
+                              productId: product.productId || product._id || undefined,
+                              code: product.code || undefined,
+                              description: product.description || undefined,
+                              unitOfMeasurements:
+                                product.unitOfMeasurements || undefined,
+                              countryOfOrigin: product.countryOfOrigin || undefined,
+                              HScode: product.HScode || undefined,
+                              variantName: product.variantName || undefined,
+                              variantType: product.variantType || undefined,
+                              sellPrice: product.sellPrice || undefined,
+                              buyPrice: product.buyPrice || undefined,
+                              netWeight: product.netWeight || undefined,
+                              grossWeight: product.grossWeight || undefined,
+                              cubicMeasurement: product.cubicMeasurement || undefined,
+                              __v: product.__v || undefined,
+                            }))
+                          : [],
+                        _id: container._id || undefined,
+                      }))
                   : [],
                 _id: data.shipment.bookingDetails._id || undefined,
               }
@@ -1307,12 +1323,12 @@ export default function EditShipmentPage({ params }: Props) {
                   ? {
                       actualSupplierName:
                         data.shipment.supplierDetails.actual.actualSupplierName ||
-                        undefined,
+                         undefined,
                       actualSupplierInvoiceUrl:
                         data.shipment.supplierDetails.actual.actualSupplierInvoiceUrl ||
-                        undefined,
+                         undefined,
                       actualSupplierInvoiceValue: data.shipment.supplierDetails.actual
-                        .actualSupplierInvoiceValue
+                      .actualSupplierInvoiceValue
                         ? Number(
                             data.shipment.supplierDetails.actual
                               .actualSupplierInvoiceValue
@@ -1344,13 +1360,13 @@ export default function EditShipmentPage({ params }: Props) {
                   undefined,
                 invoice: Array.isArray(data.shipment.saleInvoiceDetails?.commercialInvoices)
                   ? data.shipment.saleInvoiceDetails.commercialInvoices.map((inv: any) => ({
-                      commercialInvoiceNumber: inv.commercialInvoiceNumber || undefined,
-                      clearanceCommercialInvoice: inv.clearanceCommercialInvoiceUrl || undefined,
-                      actualCommercialInvoice: inv.actualCommercialInvoiceUrl || undefined,
-                      saberInvoice: inv.saberInvoiceUrl || undefined,
-                      addProductDetails: inv.addProductDetails || [],
-                      _id: inv._id || undefined,
-                    }))
+                        commercialInvoiceNumber: inv.commercialInvoiceNumber || undefined,
+                        clearanceCommercialInvoice: inv.clearanceCommercialInvoiceUrl || undefined,
+                        actualCommercialInvoice: inv.actualCommercialInvoiceUrl || undefined,
+                        saberInvoice: inv.saberInvoiceUrl || undefined,
+                        addProductDetails: inv.addProductDetails || [],
+                        _id: inv._id || undefined,
+                      }))
                   : [],
                 _id: data.shipment.saleInvoiceDetails._id || undefined,
               }

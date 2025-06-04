@@ -34,10 +34,12 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { Icons } from "@/components/ui/icons";
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api"; // Import fetchData
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
 
 interface SupplierDetailsProps {
   shipmentId: string;
   orgId?: string;
+  currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
@@ -54,6 +56,7 @@ interface Invoice {
 export function SupplierDetails({
   shipmentId,
   orgId,
+  currentUser,
   saveProgress,
   onSectionSubmit,
 }: SupplierDetailsProps) {
@@ -68,6 +71,7 @@ export function SupplierDetails({
   const GlobalModal = useGlobalModal();
 
   // Watch form values
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const formValues = watch("supplierDetails") || {};
 
   // Manage suppliers with useFieldArray
@@ -86,7 +90,7 @@ export function SupplierDetails({
       try {
         setIsLoadingSuppliers(true);
         setFetchError(null);
-        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
+        const orgIdToUse = orgId
         const supplierData = await fetchData(`/shipment/supplier/getbyorg/${orgIdToUse}`);
         const suppliers = Array.isArray(supplierData)
           ? supplierData.map((supplier: any) => ({
@@ -94,20 +98,10 @@ export function SupplierDetails({
               name: supplier.supplierName,
             }))
           : [];
-        if (suppliers.length === 0) {
-          console.warn(
-            "No suppliers found for organization 674b0a687d4f4b21c6c980ba"
-          );
-        }
+       
         setSupplierNames(suppliers);
-        console.log(
-          "Fetched supplier names:",
-          JSON.stringify(suppliers, null, 2)
-        );
       } catch (error: any) {
         console.error("Error fetching supplier data:", error);
-        setFetchError(error.message || "Failed to load suppliers");
-        toast.error("Failed to load suppliers");
         setSupplierNames([]);
       } finally {
         setIsLoadingSuppliers(false);
@@ -116,43 +110,7 @@ export function SupplierDetails({
     fetchSuppliers();
   }, [orgId]);
 
-  // Fetch individual supplier if not in supplierNames
-  useEffect(() => {
-    if (!isLoadingSuppliers && supplierFields.length > 0) {
-      supplierFields.forEach(async (supplier, index) => {
-        const supplierNameObj = watch(
-          `supplierDetails.clearance.suppliers.${index}.supplierName`
-        );
-        const supplierId = supplierNameObj?._id;
-        if (supplierId && !supplierNames.find((s) => s._id === supplierId)) {
-          console.warn(
-            `Supplier ID ${supplierId} not found in supplierNames for Supplier ${
-              index + 1
-            }`
-          );
-          try {
-            const data = await fetchData(`/shipment/supplier/${supplierId}`);
-            console.log(
-              "Individual supplier response:",
-              JSON.stringify(data, null, 2)
-            );
-            if (data?._id && data?.supplierName) {
-              setSupplierNames((prev) => [
-                ...prev,
-                { _id: data._id, name: data.supplierName },
-              ]);
-              console.log(
-                `Added supplier ${data._id}: ${data.supplierName} to supplierNames`
-              );
-            }
-          } catch (error) {
-            console.error(`Error fetching supplier ${supplierId}:`, error);
-            toast.error(`Failed to load supplier ${supplierId}`);
-          }
-        }
-      });
-    }
-  }, [supplierNames, supplierFields, watch, isLoadingSuppliers]);
+ 
 
   // Autosave form data when supplierDetails changes
   useEffect(() => {
@@ -204,6 +162,8 @@ export function SupplierDetails({
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
       <SupplierForm
+      currentUser = {currentUser}
+        orgId={orgId}
         onSuccess={async () => {
           try {
             const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
@@ -376,12 +336,8 @@ export function SupplierDetails({
                       </FormControl>
                       {field.value?._id &&
                         !selectedSupplier &&
-                        !isLoadingSuppliers &&
-                        !fetchError && (
-                          <p className="text-sm text-red-500 mt-1">
-                            Supplier ID {field.value._id} not found. Fetching...
-                          </p>
-                        )}
+                        !isLoadingSuppliers
+                       }
                       <FormMessage />
                     </FormItem>
                   );
@@ -806,22 +762,21 @@ export function SupplierDetails({
       />
 
       <FormField
-        control={control}
-        name="supplierDetails.actual.shippingBillUrl"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Shipping Bill URL</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="eg. http://example.com/shipping-bill.pdf"
-                {...field}
-                value={field.value ?? ""}
+                control={control}
+                name="supplierDetails.actual.shippingBillUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Shipping Bill URL</FormLabel>
+                    <FormControl>
+                      <FileUploadField
+                        name="supplierDetails.actual.shippingBillUrl"
+                        storageKey="supplierDetails_shippingBillUrl"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
 
       {/* Remarks */}
       <FormField

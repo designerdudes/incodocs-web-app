@@ -30,6 +30,7 @@ import { fetchData } from "@/axiosUtility/api";
 interface BillOfLadingDetailsProps {
   shipmentId: string;
   orgId?: string;
+ currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
@@ -37,6 +38,7 @@ interface BillOfLadingDetailsProps {
 export function BillOfLadingDetails({
   shipmentId,
   orgId,
+  currentUser,
   saveProgress,
   onSectionSubmit,
 }: BillOfLadingDetailsProps) {
@@ -134,6 +136,8 @@ export function BillOfLadingDetails({
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
       <ShippinglineForm
+      currentUser = {currentUser}
+        orgId={orgId}
         onSuccess={async () => {
           try {
             const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
