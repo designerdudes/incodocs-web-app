@@ -32,9 +32,14 @@ import FactorySwitcher from "./factory-switcher";
 import { cookies } from "next/headers";
 import { Button } from "../ui/button";
 import { sidebarTabs } from "@/lib/constants";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
 import FactoryForm from "../forms/AddFactoryForm";
-
 
 interface Params {
   organizationId: string;
@@ -124,17 +129,19 @@ export default async function AppSidebar({ params }: { params: Params }) {
   const blockedUrls = [
     "/[organizationId]/dashboard",
     "/[organizationId]/shipment/",
-  ]
+  ];
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-    
-          <FactorySwitcher FactoriesData={transformedFactories} organizationId={organizationId} token={token} />
-   
+        <FactorySwitcher
+          FactoriesData={transformedFactories}
+          organizationId={organizationId}
+          token={token}
+        />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain orgId={organizationId} factoryId={factoryid} />
+        <NavMain orgId={organizationId} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />
