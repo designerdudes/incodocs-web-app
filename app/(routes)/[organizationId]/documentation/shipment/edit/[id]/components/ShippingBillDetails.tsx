@@ -29,22 +29,27 @@ import toast from "react-hot-toast";
 import { fetchData } from "@/axiosUtility/api"; // Import fetchData for API calls
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import CBNameForm from "../../../../parties/components/forms/CBNameForm";
 import CalendarComponent from "@/components/CalendarComponent";
+import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
   orgId?: string;
+  params: string | string[];
+  currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
 export function ShippingBillDetails({
   shipmentId,
-  orgId,
+   orgId,
+  params,
+  currentUser,
   saveProgress,
   onSectionSubmit,
 }: ShippingBillDetailsProps) {
+  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
   const [customsBrokers, setCustomsBrokers] = useState<
@@ -232,14 +237,26 @@ export function ShippingBillDetails({
   const openCustomsBrokerForm = () => {
     GlobalModal.title = "Add New Customs Broker";
     GlobalModal.children = (
-      <CBNameForm
-        orgId={orgId || "674b0a687d4f4b21c6c980ba"}
-        onSuccess={async (newBrokerId: string) => {
-          const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-          await fetchCustomsBrokers(orgIdToUse);
-          setValue("shippingBillDetails.cbName", newBrokerId, {
-            shouldDirty: true,
-          });
+      <CustomBrokerForm
+        orgId={orgId}
+        currentUser={currentUser}
+        onSuccess={async () => {
+          try {
+            const res = await fetchData(
+              `/shipment/cbname/getbyorg/${organizationId}`
+            );
+            const data = await res
+            const mappedCBNames = data.map((cbData: any) => ({
+              _id: cbData._id,
+              name: cbData.cbName,
+              cbCode: cbData.cbCode,
+            }));
+            setCBNames(mappedCBNames);
+            saveProgressSilently(getValues());
+          } catch (error) {
+            console.error("Error refreshing CB names:", error);
+            toast.error("Failed to refresh CB names");
+          }
           GlobalModal.onClose();
         }}
       />
@@ -556,4 +573,8 @@ export function ShippingBillDetails({
       )}
     </div>
   );
+}
+
+function setCBNames(mappedCBNames: any) {
+  throw new Error("Function not implemented.");
 }
