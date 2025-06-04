@@ -47,7 +47,6 @@ interface CommercialInvoice {
 interface SaleInvoiceDetailsProps {
   shipmentId: string;
   orgId?: string;
-  params: string | string[];
 currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<any>;
@@ -64,12 +63,10 @@ function saveProgressSilently(data: any) {
 export function SaleInvoiceDetails({
   shipmentId,
   orgId,
-  params,
   currentUser,
   saveProgress,
   onSectionSubmit,
 }: SaleInvoiceDetailsProps) {
-  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues } = useFormContext();
   const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(false);

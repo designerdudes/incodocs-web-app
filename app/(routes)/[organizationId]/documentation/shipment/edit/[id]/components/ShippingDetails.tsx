@@ -41,7 +41,6 @@ import { useRouter } from "next/navigation";
 interface ShippingDetailsProps {
   shipmentId: string;
   orgId?: string;
-  params: string | string[];
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
   currentUser : string;

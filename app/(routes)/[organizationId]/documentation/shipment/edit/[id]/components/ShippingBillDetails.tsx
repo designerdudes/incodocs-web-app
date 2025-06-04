@@ -35,7 +35,7 @@ import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
 interface ShippingBillDetailsProps {
   shipmentId: string;
   orgId?: string;
-  params: string | string[];
+  
   currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
@@ -44,12 +44,10 @@ interface ShippingBillDetailsProps {
 export function ShippingBillDetails({
   shipmentId,
    orgId,
-  params,
   currentUser,
   saveProgress,
   onSectionSubmit,
 }: ShippingBillDetailsProps) {
-  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues } = useFormContext();
   const [uploading, setUploading] = useState(false);
   const [customsBrokers, setCustomsBrokers] = useState<
@@ -243,7 +241,7 @@ export function ShippingBillDetails({
         onSuccess={async () => {
           try {
             const res = await fetchData(
-              `/shipment/cbname/getbyorg/${organizationId}`
+              `/shipment/cbname/getbyorg/${orgId}`
             );
             const data = await res
             const mappedCBNames = data.map((cbData: any) => ({

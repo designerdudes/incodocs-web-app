@@ -30,7 +30,6 @@ import { fetchData } from "@/axiosUtility/api";
 interface BillOfLadingDetailsProps {
   shipmentId: string;
   orgId?: string;
-  params: string | string[];
  currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
@@ -39,12 +38,10 @@ interface BillOfLadingDetailsProps {
 export function BillOfLadingDetails({
   shipmentId,
   orgId,
-  params,
   currentUser,
   saveProgress,
   onSectionSubmit,
 }: BillOfLadingDetailsProps) {
-  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, getValues, watch } = useFormContext();
   const [shippingLines, setShippingLines] = useState<
     { _id: string; shippingLineName: string }[]

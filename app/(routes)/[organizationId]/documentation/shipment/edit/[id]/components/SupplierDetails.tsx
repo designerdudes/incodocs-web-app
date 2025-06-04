@@ -39,8 +39,7 @@ import { FileUploadField } from "../../../createnew/components/FileUploadField";
 interface SupplierDetailsProps {
   shipmentId: string;
   orgId?: string;
-  params: string | string[];
-currentUser : string;
+  currentUser : string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
@@ -57,12 +56,10 @@ interface Invoice {
 export function SupplierDetails({
   shipmentId,
   orgId,
-  params,
   currentUser,
   saveProgress,
   onSectionSubmit,
 }: SupplierDetailsProps) {
-  const organizationId = Array.isArray(params) ? params[0] : params;
   const { control, setValue, watch, getValues, trigger } = useFormContext();
   const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
