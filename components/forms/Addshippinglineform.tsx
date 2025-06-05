@@ -25,11 +25,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { postData } from "@/axiosUtility/api";
-
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   shippingLineName: z
@@ -54,10 +58,14 @@ const formSchema = z.object({
       z.object({
         fileName: z.string().optional(),
         fileUrl: z.string().optional(),
-        date: z.string().datetime({ message: "Invalid date format" }).optional(),
-        review: z.string().optional()
+        date: z
+          .string()
+          .datetime({ message: "Invalid date format" })
+          .optional(),
+        review: z.string().optional(),
       })
-    ).optional(),
+    )
+    .optional(),
   numberOfDocuments: z.number().optional(),
   organizationId: z.string().optional(),
   createdBy: z.string().optional(),
@@ -69,9 +77,13 @@ interface ShippinglineFormProps {
   currentUser?: string;
 }
 
-function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormProps) {
+function ShippingLineForm({
+  onSuccess,
+  orgId,
+  currentUser,
+}: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = orgId
+  const orgid = orgId;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -93,13 +105,10 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
     setIsLoading(true);
     // console.log(values);
     try {
-      const response = await postData(
-        "shipment/shippingline/create",
-        {
-          ...values,
-          organizationId: orgid,
-        }
-      );
+      const response = await postData("shipment/shippingline/create", {
+        ...values,
+        organizationId: orgid,
+      });
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Shipping line created successfully");
@@ -118,11 +127,10 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
       fileName: "",
       fileUrl: "",
       date: "",
-      review: ""
+      review: "",
     }));
     form.setValue("documents", newDocuments);
   };
-
 
   function saveProgressSilently(data: any) {
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -217,7 +225,7 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                 <Input
                   type="number"
                   placeholder="Enter number of documents"
-                  value={field.value as any || ""}
+                  value={(field.value as any) || ""}
                   onChange={(e) => {
                     const value = e.target.value;
                     if (value === "") {
@@ -271,30 +279,23 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                       </FormItem>
                     )}
                   />
-
                 </TableCell>
                 <TableCell>
                   <FormField
-                    control={form.control}
                     name={`documents.${index}.fileUrl`}
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormControl>
-                          <Input
-                            placeholder="e.g., https://example.com/file.pdf"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
+                          <FileUploadField
+                            name={`documents.${index}.fileUrl`}
+                            storageKey="documents_fileUrl"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
+                    control={form.control}
                   />
-
                 </TableCell>
                 <TableCell>
                   <FormField
@@ -315,7 +316,9 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                           </PopoverTrigger>
                           <PopoverContent className="w-auto p-0" align="start">
                             <CalendarComponent
-                              selected={field.value ? new Date(field.value) : undefined}
+                              selected={
+                                field.value ? new Date(field.value) : undefined
+                              }
                               onSelect={(date: any) => {
                                 field.onChange(date?.toISOString());
                                 saveProgressSilently(form.getValues());
@@ -327,7 +330,6 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                       </FormItem>
                     )}
                   />
-
                 </TableCell>
                 <TableCell>
                   <FormField
@@ -350,9 +352,7 @@ function ShippingLineForm({ onSuccess, orgId, currentUser }: ShippinglineFormPro
                       </FormItem>
                     )}
                   />
-
                 </TableCell>
-
               </TableRow>
             ))}
           </TableBody>

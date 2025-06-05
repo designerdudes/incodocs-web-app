@@ -34,6 +34,7 @@ import {
 import { format } from "date-fns";
 import { CalendarIcon, Trash } from "lucide-react";
 import { postData } from "@/axiosUtility/api";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   transporterName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -71,10 +72,14 @@ interface TransporterFormProps {
   currentUser?: string;
 }
 
-function Transporterform({onSuccess,orgId,currentUser,}: TransporterFormProps) {
+function Transporterform({
+  onSuccess,
+  orgId,
+  currentUser,
+}: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = orgId;
-  console.log("THi sis Org id",orgId)
+  console.log("THi sis Org id", orgId);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -108,25 +113,24 @@ function Transporterform({onSuccess,orgId,currentUser,}: TransporterFormProps) {
       console.error("Error creating Transporter:", error);
       setIsLoading(false);
       toast.error("Error creating Transporter");
-    };
-    
+    }
   };
 
   const handleCertificateCountChange = (count: string) => {
-      const numericCount = parseInt(count, 10);
-      const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-        fileName: "",
-        fileUrl: "",
-        date: "",
-        review: "",
-      }));
-      form.setValue("documents", newDocuments);
+    const numericCount = parseInt(count, 10);
+    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
+      fileName: "",
+      fileUrl: "",
+      date: "",
+      review: "",
+    }));
+    form.setValue("documents", newDocuments);
   };
 
   function saveProgressSilently(data: any) {
-      localStorage.setItem("shipmentFormData", JSON.stringify(data));
-      localStorage.setItem("lastSaved", new Date().toISOString());
-    }
+    localStorage.setItem("shipmentFormData", JSON.stringify(data));
+    localStorage.setItem("lastSaved", new Date().toISOString());
+  }
 
   return (
     <Form {...form}>
@@ -278,24 +282,19 @@ function Transporterform({onSuccess,orgId,currentUser,}: TransporterFormProps) {
                 </TableCell>
                 <TableCell>
                   <FormField
-                    control={form.control}
                     name={`documents.${index}.fileUrl`}
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormControl>
-                          <Input
-                            placeholder="e.g., https://example.com/file.pdf"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
+                          <FileUploadField
+                            name={`documents.${index}.fileUrl`}
+                            storageKey="documents_fileUrl"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
+                    control={form.control}
                   />
                 </TableCell>
                 <TableCell>
