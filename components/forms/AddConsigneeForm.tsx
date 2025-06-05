@@ -34,6 +34,7 @@ import {
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { postData } from "@/axiosUtility/api";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -72,14 +73,18 @@ const formSchema = z.object({
 });
 
 interface AddConsigneeFormProps {
- onSuccess?: () => void;
+  onSuccess?: () => void;
   orgId?: string;
   currentUser?: string;
 }
 
-export default function ConsigneeForm({ onSuccess, orgId, currentUser }: AddConsigneeFormProps) {
+export default function ConsigneeForm({
+  onSuccess,
+  orgId,
+  currentUser,
+}: AddConsigneeFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const orgid = orgId
+  const orgid = orgId;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -122,23 +127,20 @@ export default function ConsigneeForm({ onSuccess, orgId, currentUser }: AddCons
         address: values.address,
         organizationId: orgid,
       };
-      const response = await postData(
-        "/shipment/consignee/create",
-        {
-          ...values,
-          organizationId: orgid,
-        }
-      );
-            setIsLoading(false);
-            GlobalModal.onClose();
-            toast.success("consignee created successfully");
-             window.location.reload();
-            if (onSuccess) onSuccess();
-          } catch (error) {
-            console.error("Error creating consignee:", error);
-            setIsLoading(false);
-            toast.error("Error creating consignee");
-          }
+      const response = await postData("/shipment/consignee/create", {
+        ...values,
+        organizationId: orgid,
+      });
+      setIsLoading(false);
+      GlobalModal.onClose();
+      toast.success("consignee created successfully");
+      window.location.reload();
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error("Error creating consignee:", error);
+      setIsLoading(false);
+      toast.error("Error creating consignee");
+    }
   };
 
   return (
@@ -235,7 +237,7 @@ export default function ConsigneeForm({ onSuccess, orgId, currentUser }: AddCons
             <TableRow>
               <TableHead>#</TableHead>
               <TableHead>File Name</TableHead>
-              <TableHead>File URL</TableHead>              
+              <TableHead>File URL</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Review</TableHead>
             </TableRow>
@@ -269,24 +271,19 @@ export default function ConsigneeForm({ onSuccess, orgId, currentUser }: AddCons
                 </TableCell>
                 <TableCell>
                   <FormField
-                    control={form.control}
                     name={`documents.${index}.fileUrl`}
-                    render={({ field }) => (
+                    render={() => (
                       <FormItem>
                         <FormControl>
-                          <Input
-                            placeholder="e.g., https://example.com/file.pdf"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
+                          <FileUploadField
+                            name={`documents.${index}.fileUrl`}
+                            storageKey="documents_fileUrl"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
+                    control={form.control}
                   />
                 </TableCell>
                 <TableCell>

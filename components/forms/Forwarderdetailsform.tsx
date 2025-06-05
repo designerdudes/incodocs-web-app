@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -284,25 +285,20 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 </TableCell>
                 <TableCell>
                   <FormField
-                    control={form.control}
-                    name={`documents.${index}.fileUrl`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., https://example.com/file.pdf"
-                            value={field.value || ""}
-                            onChange={field.onChange}
-                            onBlur={() => {
-                              field.onBlur();
-                              saveProgressSilently(form.getValues());
-                            }}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                     name={`documents.${index}.fileUrl`}
+                     render={() => (
+                       <FormItem>
+                       <FormControl>
+                           <FileUploadField
+                             name={`documents.${index}.fileUrl`}
+                             storageKey="documents_fileUrl"
+                           />
+                         </FormControl>
+                         <FormMessage />
+                       </FormItem>
+                     )}
+                     control={form.control}
+                   />
                 </TableCell>
                 <TableCell>
                   <FormField
