@@ -1,21 +1,15 @@
-import { RetroGrid } from '@/components/magicui/retro-grid'
-import { TextHoverEffect } from '@/components/ui/text-hover-effect'
-import Image from 'next/image'
-import React from 'react'
+import { RetroGrid } from "@/components/magicui/retro-grid";
+import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import Image from "next/image";
+import React from "react";
 
 function page() {
   return (
-
-    
-       
-<div>
-    <RetroGrid/>
-
-        <TextHoverEffect text="StoneDocs" />
-</div>
-     
-  
-  )
+    <div>
+      <RetroGrid />
+      <TextHoverEffect text="StoneDocs" />
+    </div>
+  );
 }
 
-export default page
+export default page;
