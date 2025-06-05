@@ -6,12 +6,17 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 
 export interface ShipmentSupplierInvoice {
-  supplierGSTN: string;
-  supplierInvoiceNumber: string;
-  supplierInvoiceDate: string;
-  supplierInvoiceValueWithGST: string;
-  supplierInvoiceValueWithOutGST: string;
-  clearanceSupplierInvoiceUrl: string;
+  
+  supplierName: {
+    supplierName: string
+  };
+  invoices?: {
+   supplierInvoiceNumber: string;
+   supplierInvoiceDate: string;
+   supplierInvoiceValueWithGST: string;
+   supplierInvoiceValueWithOutGST: string;
+   clearanceSupplierInvoiceUrl: string;
+  };
 }
 
 export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
@@ -38,18 +43,18 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "supplierGSTN",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Supplier GSTN
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div>{row.original.supplierGSTN}</div>,
-    filterFn: "includesString",
+        accessorKey: "supplierName",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                 Supplier Name
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => <div>{row.original.supplierName?.supplierName}</div>,
+        filterFn: "includesString",
   },
   {
     accessorKey: "supplierInvoiceNumber",
@@ -58,11 +63,11 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Invoice Number
+         Invoice Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.supplierInvoiceNumber}</div>,
+    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceNumber}</div>,
     filterFn: "includesString",
   },
   {
@@ -78,8 +83,8 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
     ),
     cell: ({ row }) => (
       <div>
-        {row.original.supplierInvoiceDate
-          ? format(new Date(row.original.supplierInvoiceDate), "PPP")
+        {row.original.invoices?.supplierInvoiceDate
+          ? format(new Date(row.original.invoices?.supplierInvoiceDate), "PPP")
           : "N/A"}
       </div>
     ),
@@ -96,7 +101,7 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.supplierInvoiceValueWithGST}</div>,
+    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceValueWithGST}</div>,
     filterFn: "includesString",
   },
   {
@@ -110,7 +115,7 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.supplierInvoiceValueWithOutGST}</div>,
+    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceValueWithOutGST}</div>,
     filterFn: "includesString",
   },
   {
@@ -125,8 +130,8 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
       </Button>
     ),
     cell: ({ row }) =>
-      row.original.clearanceSupplierInvoiceUrl ? (
-        <a href={row.original.clearanceSupplierInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+      row.original.invoices?.clearanceSupplierInvoiceUrl ? (
+        <a href={row.original.invoices?.clearanceSupplierInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
           View
         </a>
       ) : (

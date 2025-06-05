@@ -41,6 +41,7 @@ export default function CreateNewShipmentFormPage() {
   const orgid = useParams().organizationId;
   const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
 const [currentUser, setCurrentUser] = useState<string>("");
+// console.log("this is organization id", orgid);
 
 
    React.useEffect(() => {
@@ -165,52 +166,52 @@ const [currentUser, setCurrentUser] = useState<string>("");
     setIsLoading(true);
     try {
       const values = form.getValues();
-      // const payload = {
-      //   shipmentId: values.shipmentId || undefined,
-      //   bookingDetails: {
-      //     invoiceNumber: values?.bookingDetails?.invoiceNumber || "",
-      //     bookingNumber: values?.bookingDetails?.bookingNumber || "",
-      //     portOfLoading: values?.bookingDetails?.portOfLoading || "",
-      //     destinationPort: values?.bookingDetails?.destinationPort || "",
-      //     vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
-      //     vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
-      //     containers: values?.bookingDetails?.containers || undefined, // Includes containerType
-      //     review: values.bookingDetails?.review || ""
-      //   },
-      //   shippingDetails:
-      //   {
-      //     forwarderName: values.shippingDetails?.forwarderName || undefined,
-      //     forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
-      //     transporterName: values.shippingDetails?.transporterName || undefined,
-      //     transporterInvoices: values.shippingDetails?.transporterInvoices || undefined,
-      //     review: values.shippingDetails?.review || ""
-      //   },
-      //   shippingBillDetails: values.shippingBillDetails || {},
-      //   supplierDetails: {
-      //     review: values.supplierDetails?.review || "",
-      //     clearance: {
-      //       noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || undefined,
-      //       suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
-      //     },
-      //     actual: values.supplierDetails?.actual || undefined,
-      //   },
-      //   saleInvoiceDetails: {
-      //     review: values.saleInvoiceDetails?.review ?? "",
-      //     consignee: values.saleInvoiceDetails?.consignee || undefined,
-      //     actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
-      //     commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
-      //   },
-      //   blDetails: {
-      //     shippingLineName: values.blDetails?.shippingLineName || undefined,
-      //     noOfBl: values.blDetails?.noOfBl ?? 0,
-      //     review: values.blDetails?.review ?? "",
-      //     Bl: values.blDetails?.Bl ?? [],
-      //   },
-      //   otherDetails: values.otherDetails || [],
-      //   organizationId: orgid,
-      // };
-      console.log("Payload to be sent:", values);
-      await postData("/shipment/add/", {...values, organizationId: orgid,});
+      const payload = {
+        shipmentId: values.shipmentId || undefined,
+        bookingDetails: {
+          invoiceNumber: values?.bookingDetails?.invoiceNumber || "",
+          bookingNumber: values?.bookingDetails?.bookingNumber || "",
+          portOfLoading: values?.bookingDetails?.portOfLoading || "",
+          destinationPort: values?.bookingDetails?.destinationPort || "",
+          vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
+          vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
+          containers: values?.bookingDetails?.containers || undefined, // Includes containerType
+          review: values.bookingDetails?.review || ""
+        },
+        shippingDetails:
+        {
+          forwarderName: values.shippingDetails?.forwarderName || undefined,
+          forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
+          transporterName: values.shippingDetails?.transporterName || undefined,
+          transporterInvoices: values.shippingDetails?.transporterInvoices || undefined,
+          review: values.shippingDetails?.review || ""
+        },
+        shippingBillDetails: values.shippingBillDetails || {},
+        supplierDetails: {
+          review: values.supplierDetails?.review || "",
+          clearance: {
+            noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || undefined,
+            suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
+          },
+          actual: values.supplierDetails?.actual || undefined,
+        },
+        saleInvoiceDetails: {
+          review: values.saleInvoiceDetails?.review ?? "",
+          consignee: values.saleInvoiceDetails?.consignee || undefined,
+          actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
+          commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
+        },
+        blDetails: {
+          shippingLineName: values.blDetails?.shippingLineName || undefined,
+          noOfBl: values.blDetails?.noOfBl ?? 0,
+          review: values.blDetails?.review ?? "",
+          Bl: values.blDetails?.Bl ?? [],
+        },
+        otherDetails: values.otherDetails || [],
+        organizationId: orgid,
+      };
+      console.log("Payload to be sent:", payload);
+      await postData("/shipment/add/",payload);
       toast.success("Shipment created successfully!");
       router.push("./");
       setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;

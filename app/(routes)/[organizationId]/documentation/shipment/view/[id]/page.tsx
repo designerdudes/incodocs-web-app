@@ -20,7 +20,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { BookingDetailsColumn } from "./Components/BookingDetailsColumn";
 import { ShippingDetailsColumn } from "./Components/ShippingDetailscolumn";
 import { SupplierDetailscolumn } from "./Components/SupplierDetailscolumn";
-import { SaleInvoiceDetailscolumn } from "./Components/SaleInvoiceDetailscolumn";
+import { CommercialInvoiceDetailscolumn } from "./Components/CommercialInvoiceDetailscolumn";
 import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscolumn";
 import { ForwarderDetailsColumn } from "./Components/ForwarderDetailscolumn";
 import { TransporterDetailsColumn } from "./Components/TransporterDetailscolumn";
@@ -59,7 +59,7 @@ export default async function Page({ params }: Props) {
   }
   const responseData = await res.json();
   const shipmentData = responseData?.shipment || {};
-  console.log("shipmentData", shipmentData);
+  // console.log("shipmentData", shipmentData);
 
   // Extract documents from shipmentData
   const transporterInvoices =
@@ -91,23 +91,23 @@ export default async function Page({ params }: Props) {
 
   const supplierActualInvoice = shipmentData?.supplierDetails?.actual
     ? [
-      {
-        documentName: "Supplier Actual Invoice",
-        documentNumber:
-          shipmentData.supplierDetails.actual.actualSupplierName || "N/A",
-        documentUrl:
-          shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl ||
-          "N/A",
-      },
-    ]
+        {
+          documentName: "Supplier Actual Invoice",
+          documentNumber:
+            shipmentData.supplierDetails.actual.actualSupplierName || "N/A",
+          documentUrl:
+            shipmentData.supplierDetails.actual.actualSupplierInvoiceUrl ||
+            "N/A",
+        },
+      ]
     : [];
   const supplierInvoice = shipmentData?.supplierDetails?.clearance?.suppliers?.invoices?.map(
-    (invoice: { supplierInvoiceNumber: any; clearanceSupplierInvoiceUrl: any }) => ({
-      documentName: "Supplier Invoice",
-      documentNumber: invoice.supplierInvoiceNumber,
-      documentUrl: invoice.clearanceSupplierInvoiceUrl || "N/A",
-    })
-  ) || [];
+      (invoice: { supplierInvoiceNumber: any; clearanceSupplierInvoiceUrl: any }) => ({
+        documentName: "Supplier Invoice",
+        documentNumber: invoice.supplierInvoiceNumber,
+        documentUrl: invoice.clearanceSupplierInvoiceUrl || "N/A",
+      })
+    ) || [];
 
   const commercialInvoices =
     shipmentData?.saleInvoiceDetails?.commercialInvoices?.map(
@@ -196,7 +196,7 @@ export default async function Page({ params }: Props) {
             <Heading
               className="leading-tight"
               title={`Shipment: ${shipmentData?.bookingDetails?.invoiceNumber || "N/A"
-                }`}
+              }`}
             />
             <p className="text-muted-foreground text-sm mt-2">
               View and manage shipment details with insights into tracking,
@@ -226,8 +226,8 @@ export default async function Page({ params }: Props) {
                 <span className="font-semibold text-black">
                   {shipmentData?.bookingDetails?.vesselSailingDate
                     ? moment(
-                      shipmentData.bookingDetails.vesselSailingDate
-                    ).format("MMM Do YY")
+                        shipmentData.bookingDetails.vesselSailingDate
+                      ).format("MMM Do YY")
                     : "N/A"}
                 </span>
               </p>
@@ -245,8 +245,8 @@ export default async function Page({ params }: Props) {
                 <span className="font-semibold text-black">
                   {shipmentData?.bookingDetails?.vesselArrivingDate
                     ? moment(
-                      shipmentData.bookingDetails.vesselArrivingDate
-                    ).format("MMM Do YY")
+                        shipmentData.bookingDetails.vesselArrivingDate
+                      ).format("MMM Do YY")
                     : "N/A"}
                 </span>
               </p>
@@ -258,23 +258,23 @@ export default async function Page({ params }: Props) {
               <Badge
                 className={cn(
                   shipmentData?.status === "Trucks Dispatched" &&
-                  "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+                    "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
                   shipmentData?.status === "Trucks Arrived" &&
-                  "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+                    "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
                   shipmentData?.status === "Trucks Halted" &&
-                  "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+                    "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
                   shipmentData?.status === "Stuffing" &&
-                  "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+                    "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
                   shipmentData?.status === "In Clearance" &&
-                  "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+                    "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
                   shipmentData?.status === "Loaded On Vessel" &&
-                  "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+                    "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
                   shipmentData?.status === "In Transit" &&
-                  "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+                    "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
                   shipmentData?.status === "Arrived At POD" &&
-                  "bg-green-200 text-green-800 hover:bg-green-300/80",
+                    "bg-green-200 text-green-800 hover:bg-green-300/80",
                   shipmentData?.status === "Delivery Completed" &&
-                  "bg-green-200 text-green-800 hover:bg-green-500/80",
+                    "bg-green-200 text-green-800 hover:bg-green-500/80",
                   ![
                     "Trucks Dispatched",
                     "Trucks Arrived",
@@ -286,7 +286,7 @@ export default async function Page({ params }: Props) {
                     "Arrived At POD",
                     "Delivery Completed",
                   ].includes(shipmentData?.status) &&
-                  "bg-muted-foreground/60 text-primary-foreground"
+                    "bg-muted-foreground/60 text-primary-foreground"
                 )}
               >
                 {shipmentData?.status || "N/A"}
@@ -302,8 +302,8 @@ export default async function Page({ params }: Props) {
               Shipping Bills Details
             </TabsTrigger>
             <TabsTrigger value="Supplier Details">Supplier Details</TabsTrigger>
-            <TabsTrigger value="Sale Invoice Details">
-              Sale Invoice Details
+            <TabsTrigger value="Commercial Invoice Details">
+              Commercial Invoice Details
             </TabsTrigger>
             <TabsTrigger value="Bill Of Lading Details">
               Bill Of Lading Details
@@ -360,11 +360,11 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselSailingDate
                             ? format(
-                              new Date(
-                                shipmentData.bookingDetails.vesselSailingDate
-                              ),
-                              "PPP"
-                            )
+                                new Date(
+                                  shipmentData.bookingDetails.vesselSailingDate
+                                ),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -373,11 +373,11 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.bookingDetails?.vesselArrivingDate
                             ? format(
-                              new Date(
-                                shipmentData.bookingDetails.vesselArrivingDate
-                              ),
-                              "PPP"
-                            )
+                                new Date(
+                                  shipmentData.bookingDetails.vesselArrivingDate
+                                ),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -582,47 +582,29 @@ export default async function Page({ params }: Props) {
           {/* Supplier Details */}
           <TabsContent value="Supplier Details">
             <div className="flex flex-col md:flex-row gap-4">
-              <Card className="mt-4 w-full md:w-1/3">
+              <div className="w-full">
+                <DataTable
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
+                  bulkDeleteDescription="This will delete the selected supplier invoices."
+                  bulkDeleteToastMessage="Selected invoices deleted successfully"
+                  deleteRoute="shipment/deleteall"
+                  searchKey="supplierInvoiceNumber"
+                  data={
+                    shipmentData?.supplierDetails?.clearance?.suppliers || []
+                  }
+                  columns={SupplierDetailscolumn}
+                />
+              </div>
+            </div>
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Actual Supplier Details Section */}
+              <Card className="mt-4 w-full md:w-1/3 ">
                 <CardHeader>
-                  <CardTitle>Supplier Details</CardTitle>
+                  <CardTitle>Actual Supplier Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {/* Clearance Supplier Details Section */}
-                  <div className="mb-6">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Clearance Supplier Details
-                    </h3>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Field</TableHead>
-                          <TableHead>Details</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        <TableRow>
-                          <TableCell>Supplier Name</TableCell>
-                          <TableCell>
-                            {shipmentData?.supplierDetails?.clearance
-                              ?.suppliers[0]?.supplierName?.supplierName || "N/A"}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell>Number Of Invoices</TableCell>
-                          <TableCell>
-                            {shipmentData?.supplierDetails?.clearance?.suppliers?.invoices
-                              ?.length || 0}
-                          </TableCell>
-                        </TableRow>
-                      </TableBody>
-                    </Table>
-                  </div>
-
-                  {/* Actual Supplier Details Section */}
                   <div>
-                    <h3 className="text-lg font-semibold mb-2">
-                      Actual Supplier Details
-                    </h3>
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -698,29 +680,15 @@ export default async function Page({ params }: Props) {
                   </div>
                 </CardContent>
               </Card>
-              <div className="w-full md:w-2/3">
-                <DataTable
-                  bulkDeleteIdName="_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected invoices?"
-                  bulkDeleteDescription="This will delete the selected supplier invoices."
-                  bulkDeleteToastMessage="Selected invoices deleted successfully"
-                  deleteRoute="shipment/deleteall"
-                  searchKey="supplierInvoiceNumber"
-                  data={
-                    shipmentData?.supplierDetails?.clearance?.suppliers?.invoices || []
-                  }
-                  columns={SupplierDetailscolumn}
-                />
-              </div>
             </div>
           </TabsContent>
 
-          {/* Sale Invoice Details */}
-          <TabsContent value="Sale Invoice Details">
+          {/* Commercial Invoice Details */}
+          <TabsContent value="Commercial Invoice Details">
             <div className="flex flex-col md:flex-row gap-4">
               <Card className="mt-4 w-full md:w-1/3">
                 <CardHeader>
-                  <CardTitle>Sale Invoice Details</CardTitle>
+                  <CardTitle>Commercial Details</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <Table>
@@ -773,7 +741,7 @@ export default async function Page({ params }: Props) {
                   data={
                     shipmentData?.saleInvoiceDetails?.commercialInvoices || []
                   }
-                  columns={SaleInvoiceDetailscolumn}
+                  columns={CommercialInvoiceDetailscolumn}
                 />
               </div>
             </div>
@@ -860,9 +828,9 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.blDetails?.Bl?.[0]?.blDate
                             ? format(
-                              new Date(shipmentData.blDetails.Bl[0].blDate),
-                              "PPP"
-                            )
+                                new Date(shipmentData.blDetails.Bl[0].blDate),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
@@ -871,11 +839,11 @@ export default async function Page({ params }: Props) {
                         <TableCell>
                           {shipmentData?.blDetails?.Bl?.[0]?.telexDate
                             ? format(
-                              new Date(
-                                shipmentData.blDetails.Bl[0].telexDate
-                              ),
-                              "PPP"
-                            )
+                                new Date(
+                                  shipmentData.blDetails.Bl[0].telexDate
+                                ),
+                                "PPP"
+                              )
                             : "N/A"}
                         </TableCell>
                       </TableRow>
