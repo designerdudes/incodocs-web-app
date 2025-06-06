@@ -297,7 +297,7 @@ const sidebarTabs = {
     },
     {
       title: "Factory Management",
-      url: "/dashboard",
+      url: "/factorymanagement",
       icon: FactoryIcon,
       isActive: true,
       items: [
