@@ -289,11 +289,6 @@ export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
             </div>
           );
         })}
-        {totalSquareMeters > 0 && (
-          <div className="font-semibold">
-            Total Square Meters: {totalSquareMeters.toFixed(3)}
-          </div>
-        )}
       </div>
     );
   },
