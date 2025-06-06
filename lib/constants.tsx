@@ -285,7 +285,7 @@ const sidebarTabs = {
   navMain: [
     {
       title: "Home",
-      url: "/dashboard",
+      url: "/home",
       icon: HomeIcon, // Component function
       isActive: true,
     },
