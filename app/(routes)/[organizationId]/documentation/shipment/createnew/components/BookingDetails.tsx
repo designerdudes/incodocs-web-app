@@ -251,7 +251,6 @@ export function BookingDetails({
       const res = await fetchData(
         `/shipment/port/get?limit=${limit}&page=${destPage}`
       );
-      console.log(res, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
       const newPorts: Port[] = res.data || [];
       setDestinationPorts((prev) => [...prev, ...newPorts]);
       setDestPage((prev) => prev + 1);
