@@ -407,7 +407,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                         className="text-left text-sm text-gray-500 hover:text-gray-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/${org._id}/${factory._id}/dashboard`);
+                          router.push(`/${org._id}/${factory._id}/factorymanagement`);
                         }}
                       >
                         {factory?.factoryName}
