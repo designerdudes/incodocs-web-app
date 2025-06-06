@@ -6,17 +6,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 
 export interface ShipmentSupplierInvoice {
-  
   supplierName: {
-    supplierName: string
+    supplierName: string;
   };
   invoices?: {
-   supplierInvoiceNumber: string;
-   supplierInvoiceDate: string;
-   supplierInvoiceValueWithGST: string;
-   supplierInvoiceValueWithOutGST: string;
-   clearanceSupplierInvoiceUrl: string;
-  };
+    supplierInvoiceNumber: string;
+    supplierInvoiceDate: string;
+    supplierInvoiceValueWithGST: string;
+    supplierInvoiceValueWithOutGST: string;
+    clearanceSupplierInvoiceUrl: string;
+  }[];
 }
 
 export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
@@ -43,35 +42,44 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
     enableHiding: false,
   },
   {
-        accessorKey: "supplierName",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                 Supplier Name
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => <div>{row.original.supplierName?.supplierName}</div>,
-        filterFn: "includesString",
-  },
-  {
-    accessorKey: "supplierInvoiceNumber",
+    accessorKey: "supplierName",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-         Invoice Number
+        Supplier Name
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceNumber}</div>,
+    cell: ({ row }) => <div>{row.original.supplierName?.supplierName}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "supplierInvoiceDate",
+    id: "supplierInvoiceNumber",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Invoice Number
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const invoices = row.original.invoices;
+      if (!invoices || invoices.length === 0) return <div>N/A</div>;
+      return (
+        <div className="flex flex-col gap-1">
+          {invoices.map((inv, idx) => (
+            <div key={idx}>{inv.supplierInvoiceNumber || "N/A"}</div>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
+    id: "supplierInvoiceDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -81,17 +89,24 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div>
-        {row.original.invoices?.supplierInvoiceDate
-          ? format(new Date(row.original.invoices?.supplierInvoiceDate), "PPP")
-          : "N/A"}
-      </div>
-    ),
-    filterFn: "includesString",
+    cell: ({ row }) => {
+      const invoices = row.original.invoices;
+      if (!invoices || invoices.length === 0) return <div>N/A</div>;
+      return (
+        <div className="flex flex-col gap-1">
+          {invoices.map((inv, idx) => (
+            <div key={idx}>
+              {inv.supplierInvoiceDate
+                ? format(new Date(inv.supplierInvoiceDate), "PPP")
+                : "N/A"}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "supplierInvoiceValueWithGST",
+    id: "supplierInvoiceValueWithGST",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -101,11 +116,20 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceValueWithGST}</div>,
-    filterFn: "includesString",
+    cell: ({ row }) => {
+      const invoices = row.original.invoices;
+      if (!invoices || invoices.length === 0) return <div>N/A</div>;
+      return (
+        <div className="flex flex-col gap-1">
+          {invoices.map((inv, idx) => (
+            <div key={idx}>{inv.supplierInvoiceValueWithGST || "N/A"}</div>
+          ))}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "supplierInvoiceValueWithOutGST",
+    id: "supplierInvoiceValueWithOutGST",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -115,11 +139,20 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.invoices?.supplierInvoiceValueWithOutGST}</div>,
-    filterFn: "includesString",
+    cell: ({ row }) => {
+      const invoices = row.original.invoices;
+      if (!invoices || invoices.length === 0) return <div>N/A</div>;
+      return (
+        <div className="flex flex-col gap-1">
+          {invoices.map((inv, idx) => (
+            <div key={idx}>{inv.supplierInvoiceValueWithOutGST || "N/A"}</div>
+          ))}
+        </div>
+      );
+    },
   },
   {
-    accessorKey: "clearanceSupplierInvoiceUrl",
+    id: "clearanceSupplierInvoiceUrl",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -129,14 +162,29 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) =>
-      row.original.invoices?.clearanceSupplierInvoiceUrl ? (
-        <a href={row.original.invoices?.clearanceSupplierInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-          View
-        </a>
-      ) : (
-        "N/A"
-      ),
-    filterFn: "includesString",
+    cell: ({ row }) => {
+      const invoices = row.original.invoices;
+      if (!invoices || invoices.length === 0) return <div>N/A</div>;
+      return (
+        <div className="flex flex-col gap-1">
+          {invoices.map((inv, idx) => (
+            <div key={idx}>
+              {inv.clearanceSupplierInvoiceUrl ? (
+                <a
+                  href={inv.clearanceSupplierInvoiceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-500 hover:underline"
+                >
+                  View
+                </a>
+              ) : (
+                "N/A"
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    },
   },
 ];
