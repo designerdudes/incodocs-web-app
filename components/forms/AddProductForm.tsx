@@ -270,7 +270,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       if (onSuccess) onSuccess();
       // Delay redirect to show toast
       setTimeout(() => {
-        router.push(`/${orgId}/documentation/products`);
+        // router.push(`/${orgId}/documentation/products`);
+        // router.back()
         router.refresh(); // Refresh the products page
       }, 1500);
     } catch (error: any) {

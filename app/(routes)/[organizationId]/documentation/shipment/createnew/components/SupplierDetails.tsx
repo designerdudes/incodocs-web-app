@@ -46,7 +46,7 @@ interface Invoice {
 }
 
 interface Supplier {
-  supplierName: string;
+  supplierName?: string;
   noOfInvoices: number;
   invoices: Invoice[];
 }
@@ -160,7 +160,6 @@ export function SupplierDetails({
       getValues,
       fieldName: "supplierDetails.clearance.suppliers",
       createNewItem: () => ({
-        supplierName: "",
         noOfInvoices: 1,
         invoices: [
           {
