@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -16,7 +16,7 @@ import {
   PopoverContent,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Trash } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown, Trash } from "lucide-react";
 import { format } from "date-fns";
 import {
   Table,
@@ -38,6 +38,14 @@ import { Textarea } from "@/components/ui/textarea";
 import ProductFormPage from "@/components/forms/AddProductForm";
 // import { CalendarDay } from "react-day-picker";
 import CalendarComponent from "@/components/CalendarComponent";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
@@ -53,6 +61,11 @@ function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
   localStorage.setItem("lastSaved", new Date().toISOString());
 }
+
+type Port = {
+  _id: string;
+  port: string;
+};
 
 export function BookingDetails({
   saveProgress,
@@ -73,6 +86,17 @@ export function BookingDetails({
   const invoiceNumber = watch("bookingDetails.invoiceNumber");
   const organizationId = Array.isArray(params) ? params[0] : params;
   const [products, setProducts] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const pageRef = useRef(1);
+  const [ports, setPorts] = useState<Port[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 300;
+  const [destOpen, setDestOpen] = useState(false);
+  const [destinationPorts, setDestinationPorts] = useState<Port[]>([]);
+  const [destPage, setDestPage] = useState(1);
+  const [destHasMore, setDestHasMore] = useState(true);
+  const [destLoading, setDestLoading] = useState(false);
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -192,6 +216,60 @@ export function BookingDetails({
     fetchProducts();
   }, [products]);
 
+  const fetchPorts = async () => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    try {
+      const page = pageRef.current;
+      // console.log("Fetching page:", page);
+      const res = await fetchData(
+        `/shipment/port/get?limit=${limit}&page=${page}`
+      );
+      const newPorts: Port[] = res.data || [];
+      // Prevent duplicates
+      setPorts((prev) => {
+        const existingIds = new Set(prev.map((p) => p._id));
+        const unique = newPorts.filter((p) => !existingIds.has(p._id));
+        return [...prev, ...unique];
+      });
+      if (newPorts.length < limit) {
+        setHasMore(false);
+      } else {
+        pageRef.current += 1;
+      }
+    } catch (err) {
+      console.error("Error fetching ports:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDestPorts = async () => {
+    if (destLoading) return;
+    setDestLoading(true);
+    try {
+      const res = await fetchData(
+        `/shipment/port/get?limit=${limit}&page=${destPage}`
+      );
+      console.log(res, "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+      const newPorts: Port[] = res.data || [];
+      setDestinationPorts((prev) => [...prev, ...newPorts]);
+      setDestPage((prev) => prev + 1);
+      if (newPorts.length < 20) {
+        setDestHasMore(false);
+      }
+    } catch (error) {
+      console.error("Failed to fetch destination ports", error);
+    } finally {
+      setDestLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPorts();
+    fetchDestPorts();
+  }, []);
+
   const openProductForm = () => {
     GlobalModal.title = "Add New Product";
     GlobalModal.description = "Fill in the details to create a new product.";
@@ -276,14 +354,64 @@ export function BookingDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Port of Loading</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., CHENNAI"
-                className="uppercase"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  role="combobox"
+                  aria-expanded={open}
+                  className={cn(
+                    "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value || "Select a port"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="start"
+                className="w-2/3 p-0 max-h-60 overflow-auto"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  if (
+                    el.scrollTop + el.clientHeight >= el.scrollHeight - 10 &&
+                    hasMore &&
+                    !loading
+                  ) {
+                    fetchPorts();
+                  }
+                }}
+              >
+                <Command>
+                  <CommandInput placeholder="Search port..." />
+                  <CommandEmpty>No port found.</CommandEmpty>
+                  <CommandGroup>
+                    {ports.map((port) => (
+                      <CommandItem
+                        key={port._id}
+                        value={port.port}
+                        onSelect={(val) => {
+                          field.onChange(val.toUpperCase());
+                          setOpen(false);
+                          saveProgressSilently(getValues());
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            field.value === port.port
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {port.port}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <FormMessage />
           </FormItem>
         )}
@@ -294,14 +422,65 @@ export function BookingDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Destination Port</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., UMM QASAR"
-                className="uppercase"
-                {...field}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-            </FormControl>
+            <Popover open={destOpen} onOpenChange={setDestOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  role="combobox"
+                  aria-expanded={destOpen}
+                  className={cn(
+                    "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value || "Select a port"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent
+                side="top"
+                align="start"
+                className="w-2/3 p-0 max-h-60 overflow-auto"
+                onScroll={(e) => {
+                  const el = e.currentTarget;
+                  if (
+                    el.scrollTop + el.clientHeight >= el.scrollHeight - 10 &&
+                    destHasMore &&
+                    !destLoading
+                  ) {
+                    fetchDestPorts(); // fetches more ports on scroll
+                  }
+                }}
+              >
+                <Command>
+                  <CommandInput placeholder="Search port..." />
+                  <CommandEmpty>No port found.</CommandEmpty>
+                  <CommandGroup>
+                    {destinationPorts.map((port) => (
+                      <CommandItem
+                        key={port._id}
+                        value={port.port}
+                        onSelect={(val) => {
+                          field.onChange(val.toUpperCase());
+                          setDestOpen(false);
+                          saveProgressSilently(getValues());
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            field.value === port.port
+                              ? "opacity-100"
+                              : "opacity-0"
+                          )}
+                        />
+                        {port.port}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <FormMessage />
           </FormItem>
         )}
