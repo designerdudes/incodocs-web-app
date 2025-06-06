@@ -19,7 +19,8 @@ import { MdAccountBalance } from "react-icons/md";
 
 function FactoryManagementPage() {
   const params = useParams();
-  const factoryId = params.factoryid as string; // Extract factory ID from route
+  const organisationId = params.organizationId as string;
+  const factoryId = params.factoryid as string;
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -40,13 +41,13 @@ function FactoryManagementPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-        <Link href={`/${params.factoryid}/factorymanagement/inventory`} passHref>
+        <Link
+          href={`/${organisationId}/${factoryId}/factorymanagement/inventory`}
+          passHref
+        >
           <Card className="bg-white dark:bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Inventory
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Inventory</CardTitle>
               <FiGrid className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
@@ -61,12 +62,13 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/${params.factoryid}/factorymanagement/accounting`} passHref>
+        <Link
+          href={`/${organisationId}/${factoryId}/factorymanagement/accounting`}
+          passHref
+        >
           <Card className="bg-white dark:bg-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">
-                Accounting
-              </CardTitle>
+              <CardTitle className="text-lg font-medium">Accounting</CardTitle>
               <MdAccountBalance className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">

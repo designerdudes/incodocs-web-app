@@ -49,8 +49,8 @@ interface Params {
 export default async function AppSidebar({ params }: { params: Params }) {
   const { organizationId, factoryid } = params;
 
-  console.log("Params:", params);
-  console.log("orgid:", organizationId);
+  // console.log("Params:", params);
+  // console.log("orgid:", organizationId);
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value;
