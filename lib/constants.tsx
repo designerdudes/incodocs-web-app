@@ -285,7 +285,7 @@ const sidebarTabs = {
   navMain: [
     {
       title: "Home",
-      url: "/dashboard",
+      url: "/home",
       icon: HomeIcon, // Component function
       isActive: true,
     },
@@ -297,7 +297,7 @@ const sidebarTabs = {
     },
     {
       title: "Factory Management",
-      url: "/dashboard",
+      url: "/factorymanagement",
       icon: FactoryIcon,
       isActive: true,
       items: [

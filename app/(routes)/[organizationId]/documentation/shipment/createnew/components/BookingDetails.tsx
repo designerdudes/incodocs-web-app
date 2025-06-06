@@ -44,6 +44,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 
@@ -367,47 +368,48 @@ export function BookingDetails({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="start"
-                className="w-2/3 p-0 max-h-60 overflow-auto"
-                onScroll={(e) => {
-                  const el = e.currentTarget;
-                  if (
-                    el.scrollTop + el.clientHeight >= el.scrollHeight - 10 &&
-                    hasMore &&
-                    !loading
-                  ) {
-                    fetchPorts();
-                  }
-                }}
-              >
+              <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
                 <Command>
                   <CommandInput placeholder="Search port..." />
-                  <CommandEmpty>No port found.</CommandEmpty>
-                  <CommandGroup>
-                    {ports.map((port) => (
-                      <CommandItem
-                        key={port._id}
-                        value={port.port}
-                        onSelect={(val) => {
-                          field.onChange(val.toUpperCase());
-                          setOpen(false);
-                          saveProgressSilently(getValues());
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            field.value === port.port
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {port.port}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  <CommandList
+                    className="max-h-60 overflow-auto"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      if (
+                        el.scrollTop + el.clientHeight >=
+                          el.scrollHeight - 10 &&
+                        hasMore &&
+                        !loading
+                      ) {
+                        fetchPorts();
+                      }
+                    }}
+                  >
+                    <CommandEmpty>No port found.</CommandEmpty>
+                    <CommandGroup>
+                      {ports.map((port) => (
+                        <CommandItem
+                          key={port._id}
+                          value={port.port}
+                          onSelect={(val) => {
+                            field.onChange(val.toUpperCase());
+                            setOpen(false);
+                            saveProgressSilently(getValues());
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value === port.port
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {port.port}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
@@ -436,47 +438,48 @@ export function BookingDetails({
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent
-                side="top"
-                align="start"
-                className="w-2/3 p-0 max-h-60 overflow-auto"
-                onScroll={(e) => {
-                  const el = e.currentTarget;
-                  if (
-                    el.scrollTop + el.clientHeight >= el.scrollHeight - 10 &&
-                    destHasMore &&
-                    !destLoading
-                  ) {
-                    fetchDestPorts(); // fetches more ports on scroll
-                  }
-                }}
-              >
+              <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
                 <Command>
                   <CommandInput placeholder="Search port..." />
-                  <CommandEmpty>No port found.</CommandEmpty>
-                  <CommandGroup>
-                    {destinationPorts.map((port) => (
-                      <CommandItem
-                        key={port._id}
-                        value={port.port}
-                        onSelect={(val) => {
-                          field.onChange(val.toUpperCase());
-                          setDestOpen(false);
-                          saveProgressSilently(getValues());
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            field.value === port.port
-                              ? "opacity-100"
-                              : "opacity-0"
-                          )}
-                        />
-                        {port.port}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
+                  <CommandList
+                    className="max-h-60 overflow-auto"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      if (
+                        el.scrollTop + el.clientHeight >=
+                          el.scrollHeight - 10 &&
+                        destHasMore &&
+                        !destLoading
+                      ) {
+                        fetchDestPorts(); // fetches more ports on scroll
+                      }
+                    }}
+                  >
+                    <CommandEmpty>No port found.</CommandEmpty>
+                    <CommandGroup>
+                      {destinationPorts.map((port) => (
+                        <CommandItem
+                          key={port._id}
+                          value={port.port}
+                          onSelect={(val) => {
+                            field.onChange(val.toUpperCase());
+                            setDestOpen(false);
+                            saveProgressSilently(getValues());
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value === port.port
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {port.port}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
                 </Command>
               </PopoverContent>
             </Popover>
@@ -484,6 +487,7 @@ export function BookingDetails({
           </FormItem>
         )}
       />
+
       <FormField
         control={control}
         name="bookingDetails.vesselSailingDate"

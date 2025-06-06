@@ -42,21 +42,31 @@ export default function NavMain({ orgId }: NavMainProps) {
     return navItems.map((item) => {
       let itemUrl = item.url;
 
+      const needHome = item.url.includes("home");
+
+      const needDashboard = item.url.includes("dashboard");
+
       const needsFactoryAndOrg =
-        (item.url.includes("factorymanagement") ||
-          item.url.includes("inventory") ||
-          item.url.includes("accounting") ||
-          (item.url.includes("dashboard") &&
-            !item.url.toLowerCase().includes("documentation"))) &&
-        factoryId; // dashboard with factory context
+        item.url.includes("factorymanagement") ||
+        item.url.includes("inventory") ||
+        item.url.includes("accounting");
+      //   (item.url.includes("dashboard") &&
+      //     !item.url.toLowerCase().includes("documentation"))) &&
+      // factoryId; // dashboard with factory context
 
       const needsOnlyOrg =
         item.url.toLowerCase().includes("documentation") ||
         item.url.toLowerCase().includes("teammanagement") ||
         item.url.toLowerCase().includes("settings");
 
+      if (needHome) {
+        itemUrl = `/dashboard`;
+      } else if (needDashboard) {
+        itemUrl = `/${organisationId}/dashboard`;
+      }
+
       //  Prepend /orgId/factoryId for specific modules
-      if (needsFactoryAndOrg && organisationId && factoryId) {
+      else if (needsFactoryAndOrg && organisationId && factoryId) {
         itemUrl = `/${organisationId}/${factoryId}${
           item.url.startsWith("/") ? item.url : "/" + item.url
         }`;
