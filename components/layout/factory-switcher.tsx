@@ -57,7 +57,6 @@ function FactorySwitcher({
   const [activeFactory, setActiveFactory] = React.useState<Factory | null>(
     FactoriesData?.length > 0 ? FactoriesData[0] : null // Default to the first factory
   );
-
   const handleFactorySelect = (factory: Factory) => {
     setActiveFactory(factory);
     localStorage.setItem("activeFactoryId", factory.factoryId); // Store the selected factory ID
@@ -73,8 +72,11 @@ function FactorySwitcher({
       if (foundFactory) {
         setActiveFactory(foundFactory); // Set the active factory from localStorage
       }
-    } else if (FactoriesData?.length > 0) {
+    } else if (FactoriesData?.length > 0 && !storedFactoryId) {
       setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
+      // console.log(FactoriesData[0]);
+      alert(FactoriesData[0]);
+      localStorage.setItem("activeFactoryId", FactoriesData[0]?.factoryId);
     }
   }, [FactoriesData, localStorage.getItem("activeFactoryId")]);
 
