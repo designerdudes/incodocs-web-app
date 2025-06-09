@@ -91,8 +91,8 @@ export function ShippingBillDetails({
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
-  const selectedCbName = watch("shippingBillDetails.cbName");
-  const [CBNames, setCBNames] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
+  const selectedCustomBorker = watch("shippingBillDetails.cbName");
+  const [CustomBrokers, setCustomBrokers] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
@@ -104,30 +104,30 @@ export function ShippingBillDetails({
 
   // Fetch CB Names
   useEffect(() => {
-    const fetchCBNames = async () => {
+    const fetchCustomBroker = async () => {
       try {
-        const CBNameResponse = await fetchData(
+        const CustomBrokerResponse = await fetchData(
           `/shipment/cbname/getbyorg/${organizationId}`
         );
-        const CBNameData = await CBNameResponse
-        const mappedCBNames = CBNameData.map((cbData: any) => ({
+        const CustomBrokersData = await CustomBrokerResponse
+        const mappedCBNames = CustomBrokersData.map((cbData: any) => ({
           _id: cbData._id,
           name: cbData.cbName,
           cbCode: cbData.cbCode,
         }));
-        setCBNames(mappedCBNames);
+        setCustomBrokers(mappedCBNames);
       } catch (error) {
-        console.error("Error fetching CB Names:", error);
-        toast.error("Failed to load CB names");
+        console.error("Error fetching Custom Brokers:", error);
+        toast.error("Failed to load Custom Brokers");
       }
     };
-    fetchCBNames();
+    fetchCustomBroker();
   }, [organizationId]);
 
   // Update cbCode when cbName changes
   useEffect(() => {
-    if (selectedCbName) {
-      const selectedCB = CBNames.find((cb) => cb._id === selectedCbName);
+    if (selectedCustomBorker) {
+      const selectedCB = CustomBrokers.find((cb) => cb._id === selectedCustomBorker);
       if (selectedCB) {
         setValue("shippingBillDetails.cbCode", selectedCB.cbCode);
         saveProgressSilently(getValues());
@@ -137,7 +137,7 @@ export function ShippingBillDetails({
     } else {
       setValue("shippingBillDetails.cbCode", "");
     }
-  }, [selectedCbName, CBNames, setValue, getValues]);
+  }, [selectedCustomBorker, CustomBrokers, setValue, getValues]);
 
   const handleShippingBillCountChange = (value: string) => {
     console.log("handleShippingBillCountChange called with value:", value);
@@ -211,11 +211,11 @@ export function ShippingBillDetails({
               name: cbData.cbName,
               cbCode: cbData.cbCode,
             }));
-            setCBNames(mappedCBNames);
+            setCustomBrokers(mappedCBNames);
             saveProgressSilently(getValues());
           } catch (error) {
-            console.error("Error refreshing CB names:", error);
-            toast.error("Failed to refresh CB names");
+            console.error("Error refreshing Custom Brokers:", error);
+            toast.error("Failed to refresh Custom Brokers");
           }
           GlobalModal.onClose();
         }}
@@ -235,7 +235,7 @@ export function ShippingBillDetails({
             <FormLabel>Custom Broker</FormLabel>
             <FormControl>
               <EntityCombobox
-                entities={CBNames}
+                entities={CustomBrokers}
                 value={field.value || ""}
                 onChange={(value) => {
                   field.onChange(value);
