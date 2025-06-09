@@ -75,7 +75,7 @@ function FactorySwitcher({
     } else if (FactoriesData?.length > 0 && !storedFactoryId) {
       setActiveFactory(FactoriesData[0]); // Default to the first factory if no selection is stored
       // console.log(FactoriesData[0]);
-      alert(FactoriesData[0]);
+      // alert(FactoriesData[0]);
       localStorage.setItem("activeFactoryId", FactoriesData[0]?.factoryId);
     }
   }, [FactoriesData, localStorage.getItem("activeFactoryId")]);
