@@ -1,19 +1,19 @@
-import StatsCard from '@/components/statsCard'
-import { Button } from '@/components/ui/button'
-import Heading from '@/components/ui/heading'
-import { ChevronLeft } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
-import { InventoryCards } from '@/lib/constants'
+import StatsCard from "@/components/statsCard";
+import { Button } from "@/components/ui/button";
+import Heading from "@/components/ui/heading";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import React from "react";
+import { InventoryCards } from "@/lib/constants";
 
 interface Props {
   params: {
     factoryid: string;
-  }
+    organizationId: string;
+  };
 }
 
 function Page({ params }: Props) {
-
   return (
     <div className="flex flex-col p-6">
       <div className="flex justify-between items-center gap-2">
@@ -26,30 +26,30 @@ function Page({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Inventory" />
           <p className="mt-2">
-            Effectively oversee your factory&apos;s Inventory and processing goods inventory.
+            Effectively oversee your factory&apos;s Inventory and processing
+            goods inventory.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-        {
-          InventoryCards?.map((card, index) => {
-            // Ensure that the href is prefixed with the factoryid
-            const updatedButtonUrl = `/${params.factoryid}${card.buttonUrl}`;
+        {InventoryCards?.map((card, index) => {
+          // Ensure that the href is prefixed with the factoryid
+          // const updatedButtonUrl = `/${params.factoryid}${card.buttonUrl}`;
 
-            return (
-              <StatsCard
-                key={index}
-                title={card.title}
-                stat={card.value}
-                icon={card.icon}
-                desc=""
-                href={updatedButtonUrl} // Corrected href with factoryid
-                factoryId={params.factoryid}
-              />
-            );
-          })
-        }
+          return (
+            <StatsCard
+              key={index}
+              title={card.title}
+              stat={card.value}
+              icon={card.icon}
+              desc=""
+              href={card.buttonUrl} // Corrected href with factoryid
+              factoryId={params.factoryid}
+              organizationId={params.organizationId}
+            />
+          );
+        })}
       </div>
     </div>
   );
