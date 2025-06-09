@@ -15,7 +15,7 @@ interface StatsCardProps {
   className?: string;
   href: string;
   factoryId: string; // Factory ID is now dynamically passed
-  organizationId: string;
+  organizationId?: string;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
