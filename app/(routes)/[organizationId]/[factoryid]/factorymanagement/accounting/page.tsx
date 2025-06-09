@@ -1,17 +1,20 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
-import Heading from '@/components/ui/heading'
-import StatsCard from '@/components/statsCard'
-import { AccountingCard, AccountingCard as BaseInventoryCards } from '@/lib/constants'
+import React from "react";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import Heading from "@/components/ui/heading";
+import StatsCard from "@/components/statsCard";
+import {
+  AccountingCard,
+  AccountingCard as BaseInventoryCards,
+} from "@/lib/constants";
 interface Props {
   params: {
     factoryid: string;
-  }
+    organizationId: string;
+  };
 }
 function page({ params }: Props) {
-
   const AccountingCard = BaseInventoryCards.map((card) => ({
     ...card,
     buttonUrl: `/${card.buttonUrl}`, // Prepend factoryId to the URL
@@ -26,8 +29,8 @@ function page({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className='leading-tight ' title='Accounting' />
-          <p className='mt-2'>Effectively oversee your Accounting details.</p>
+          <Heading className="leading-tight " title="Accounting" />
+          <p className="mt-2">Effectively oversee your Accounting details.</p>
         </div>
         {/* <Link href={`/shipments/new`}>
                     <Button className="bg-primary text-white">New Button</Button>
@@ -35,21 +38,21 @@ function page({ params }: Props) {
       </div>
 
       <div className="flex flex-row gap-4 mt-10 ">
-        {
-          AccountingCard?.map((card, index) => (
-            <StatsCard
-              key={index}
-              title={card.title}
-              stat={card.value}
-              icon={card.icon}
-              desc=""
-              href={card.buttonUrl}
-              factoryId={params.factoryid} />
-          ))
-        }
+        {AccountingCard?.map((card, index) => (
+          <StatsCard
+            key={index}
+            title={card.title}
+            stat={card.value}
+            icon={card.icon}
+            desc=""
+            href={card.buttonUrl}
+            factoryId={params.factoryid}
+            organizationId={params.organizationId}
+          />
+        ))}
       </div>
     </div>
-  )
+  );
 }
 
-export default page
+export default page;
