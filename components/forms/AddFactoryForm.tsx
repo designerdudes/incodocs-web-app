@@ -30,7 +30,7 @@ import toast from "react-hot-toast";
 // Factory Form Schema
 const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
-  prefix: z.string().min(3,{message: "enter prefix"}) ,
+  prefix: z.string().min(2,{message: "Prefix must be atleast 2 characters"}) ,
   organizationId: z
      .string()
      .min(1, { message: "Organization must be selected" }),
@@ -233,7 +233,7 @@ export default function FactoryForm({
               <FormControl>
                 <Input
                   placeholder="Eg: 500081"
-                  type="number"
+                  // type="number"
                   value={field.value === 0 ? "" : field.value}
                   onChange={(e) => {
                     const value = Number(e.target.value);
@@ -258,7 +258,7 @@ export default function FactoryForm({
                 <FormLabel>Workers Cutting Pay</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    // type="number"
                     placeholder="Eg: 1500"
                     step="any"
                     value={field.value === 0 ? "" : field.value}
@@ -284,7 +284,7 @@ export default function FactoryForm({
                 <FormLabel>Workers Polishing Pay</FormLabel>
                 <FormControl>
                   <Input
-                    type="number"
+                    // type="number"
                     placeholder="Eg: 1200"
                     step="any"
                     value={field.value === 0 ? "" : field.value}
