@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 interface Props {
   params: {
     factoryid: string;
+    organizationId: string;
   };
 }
 
@@ -54,7 +55,7 @@ export default async function page({ params }: Props) {
         ? slabData.length || 0
         : card.value,
     // Prepend factoryId to the buttonUrl to create the full route
-    buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
+    // buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
     desc:
       card.title === "Total Lots"
         ? "Number of lots currently available in inventory."
@@ -90,6 +91,7 @@ export default async function page({ params }: Props) {
             desc=""
             href={card.buttonUrl} // Pass the correct button URL with factoryId
             factoryId={params.factoryid} // Correctly pass factoryId here
+            organizationId={params.organizationId}
           />
         ))}
       </div>
