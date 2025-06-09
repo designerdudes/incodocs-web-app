@@ -51,9 +51,16 @@ export default async function Page(params: params) {
         <Link href={`./shipment/drafts`}>
           <Button variant="outline">View Drafts</Button>
         </Link>
-        <Link href={`./shipment/createnew`}>
+        {/* <Link href={`./shipment/createnew`}>
           <Button className="bg-primary text-white">Add New Shipment</Button>
-        </Link>
+        </Link> */}
+        <a
+          href="./shipment/createnew"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button className="bg-primary text-white">Add New Shipment</Button>
+        </a>
       </div>
       <Separator className="my-2" />
       <div className="h-[92%]">
