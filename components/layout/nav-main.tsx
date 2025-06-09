@@ -44,15 +44,13 @@ export default function NavMain({ orgId }: NavMainProps) {
 
       const needHome = item.url.includes("home");
 
-      const needDashboard = item.url.includes("dashboard");
+      const needDashboard =
+        item.url.includes("dashboard") && !item.url.includes("documentaion");
 
       const needsFactoryAndOrg =
         item.url.includes("factorymanagement") ||
         item.url.includes("inventory") ||
         item.url.includes("accounting");
-      //   (item.url.includes("dashboard") &&
-      //     !item.url.toLowerCase().includes("documentation"))) &&
-      // factoryId; // dashboard with factory context
 
       const needsOnlyOrg =
         item.url.toLowerCase().includes("documentation") ||
@@ -61,8 +59,6 @@ export default function NavMain({ orgId }: NavMainProps) {
 
       if (needHome) {
         itemUrl = `/dashboard`;
-      } else if (needDashboard) {
-        itemUrl = `/${organisationId}/dashboard`;
       }
 
       //  Prepend /orgId/factoryId for specific modules
@@ -73,7 +69,7 @@ export default function NavMain({ orgId }: NavMainProps) {
       }
 
       //  Prepend /orgId for others like documentation/settings/teammanagement
-      else if (needsOnlyOrg && organisationId) {
+      else if ((needsOnlyOrg && organisationId) || needDashboard) {
         itemUrl = `/${organisationId}${
           item.url.startsWith("/") ? item.url : "/" + item.url
         }`;
