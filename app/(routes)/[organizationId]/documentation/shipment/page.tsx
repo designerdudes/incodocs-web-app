@@ -32,11 +32,12 @@ export default async function Page(params: params) {
   });
   let shipmentData;
   shipmentData = res;
-
   return (
     <div className="flex flex-col p-6 h-[92%]">
       <div className="flex justify-between h-[8%] items-center gap-2">
-        <Link href="/documentation/dashboard">
+        <Link
+          href={`/${params?.params?.organizationId}/documentation/dashboard`}
+        >
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>

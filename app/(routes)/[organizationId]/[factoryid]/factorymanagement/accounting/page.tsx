@@ -17,7 +17,7 @@ interface Props {
 function page({ params }: Props) {
   const AccountingCard = BaseInventoryCards.map((card) => ({
     ...card,
-    buttonUrl: `/${card.buttonUrl}`, // Prepend factoryId to the URL
+    buttonUrl: `${params.organizationId}/${card.buttonUrl}`, // Prepend factoryId to the URL
   }));
   return (
     <div className="flex  flex-col p-6">
@@ -47,7 +47,6 @@ function page({ params }: Props) {
             desc=""
             href={card.buttonUrl}
             factoryId={params.factoryid}
-            organizationId={params.organizationId}
           />
         ))}
       </div>

@@ -26,7 +26,7 @@ function FactoryManagementPage() {
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <Link href={`/${factoryId}/dashboard`}>
+        <Link href={`/${organisationId}/dashboard`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>

@@ -89,9 +89,8 @@ export default async function page({ params }: Props) {
             stat={card.value}
             icon={card.icon}
             desc=""
-            href={card.buttonUrl} // Pass the correct button URL with factoryId
+            href={`/${params.organizationId}/${card.buttonUrl}`} // Pass the correct button URL with factoryId
             factoryId={params.factoryid} // Correctly pass factoryId here
-            organizationId={params.organizationId}
           />
         ))}
       </div>

@@ -44,9 +44,8 @@ function Page({ params }: Props) {
               stat={card.value}
               icon={card.icon}
               desc=""
-              href={card.buttonUrl} // Corrected href with factoryid
+              href={`/${params.organizationId}/${card.buttonUrl}`} // Corrected href with factoryid
               factoryId={params.factoryid}
-              organizationId={params.organizationId}
             />
           );
         })}
