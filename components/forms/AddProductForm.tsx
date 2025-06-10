@@ -269,11 +269,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       toast.success("Product created successfully");
       if (onSuccess) onSuccess();
       // Delay redirect to show toast
-      setTimeout(() => {
-        // router.push(`/${orgId}/documentation/products`);
-        // router.back()
-        router.refresh(); // Refresh the products page
-      }, 1500);
+      // setTimeout(() => {
+      // router.push(`/${orgId}/documentation/products`);
+      // router.back()
+      // router.refresh(); // Refresh the products page
+      // }, 1500);
     } catch (error: any) {
       console.error("Error creating product:", error);
       if (error.response && error.response.status === 400) {
@@ -445,8 +445,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Size Length (cm)</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
@@ -467,8 +467,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Size Breadth (cm)</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
@@ -489,8 +489,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Thickness (mm)</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -572,8 +572,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Boxes</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -594,8 +594,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Pieces per Box</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -732,8 +732,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Step Boxes</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -754,8 +754,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Pieces per Box of Steps</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -777,8 +777,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Length (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -801,8 +801,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Breadth (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -825,8 +825,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Thickness (mm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -850,8 +850,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Riser Boxes</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -872,8 +872,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Pieces per Box of Risers</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -895,8 +895,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Length (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -919,8 +919,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Breadth (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -943,8 +943,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Thickness (mm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -971,8 +971,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Boxes</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -993,8 +993,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Steps</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -1016,8 +1016,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Length (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -1040,8 +1040,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Breadth (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -1064,8 +1064,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Step Thickness (mm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -1089,8 +1089,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                       <FormLabel>Number of Risers</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                          // type="number"
+                          // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
@@ -1112,8 +1112,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Length (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -1136,8 +1136,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Breadth (cm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:text-field"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
@@ -1160,8 +1160,8 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                         <FormLabel>Riser Thickness (mm)</FormLabel>
                         <FormControl>
                           <Input
-                            type="number"
-                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
+                            // type="number"
+                            // className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-moz-appearance]:textfield"
                             min={0}
                             onWheel={(e) =>
                               (e.target as HTMLInputElement).blur()
