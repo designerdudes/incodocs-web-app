@@ -114,7 +114,7 @@ export default async function AppSidebar({ params }: { params: Params }) {
   } catch (error) {
     console.error("Error fetching user data:", error);
   }
-
+  // console.log(factories,"facsssssssssssssssssssss");
   // Transform factories to ensure serializable data
   const transformedFactories = factories.map((factory: any) => ({
     factoryName: factory.name || factory.factoryName || "Unnamed Factory",
@@ -124,7 +124,10 @@ export default async function AppSidebar({ params }: { params: Params }) {
     organizationId: factory.organization || organizationId,
   }));
 
-  console.log("Transformed Factories:", transformedFactories);
+  // console.log(
+  //   "Transformed Factories:ssssssssssssssssssssssssssssssss",
+  //   transformedFactories
+  // );
 
   const blockedUrls = [
     "/[organizationId]/dashboard",

@@ -15,7 +15,7 @@ interface StatsCardProps {
   className?: string;
   href: string;
   factoryId: string; // Factory ID is now dynamically passed
-  organizationId?: string;
+  // organizationId?: string;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -27,7 +27,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className,
   href,
   factoryId,
-  organizationId,
+  // organizationId,
 }) => {
   const router = useRouter();
 
@@ -46,7 +46,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       </CardHeader>
       <CardContent>
         <Button
-          onClick={() => router.push(`/${organizationId}/${factoryId}${href}`)}
+          onClick={() => router.push(`/${factoryId}${href}`)}
           variant="default"
           className="w-full mt-2 flex justify-center items-center space-x-2"
         >

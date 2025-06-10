@@ -22,7 +22,7 @@ export default function DashboardLayout({
   children,
   params, // Destructure params to get organizationId and factoryId
 }: DashboardLayoutProps) {
-  console.log("Params:", params); // Debug params
+  // console.log("Params::::::::::::::::::::::::::::::::::::::::::::::", params); // Debug params
   return (
     <>
       <div className='flex flex-row h-screen'>
