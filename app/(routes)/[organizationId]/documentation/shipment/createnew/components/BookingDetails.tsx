@@ -94,10 +94,13 @@ export function BookingDetails({
   const [hasMore, setHasMore] = useState(true);
   const limit = 300;
   const [destOpen, setDestOpen] = useState(false);
-  const [destinationPorts, setDestinationPorts] = useState<Port[]>([]);
   const [destPage, setDestPage] = useState(1);
-  const [destHasMore, setDestHasMore] = useState(true);
+  const [destinationPorts, setDestinationPorts] = useState<Port[]>([]);
   const [destLoading, setDestLoading] = useState(false);
+  const [destHasMore, setDestHasMore] = useState(true);
+  const destPageRef = useRef(1); // <-- this was missing
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchDestTerm, setSearchDestTerm] = useState("");
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -219,50 +222,88 @@ export function BookingDetails({
 
   const fetchPorts = async () => {
     if (loading || !hasMore) return;
+
     setLoading(true);
+    let cancelled = false;
+
     try {
       const page = pageRef.current;
-      // console.log("Fetching page:", page);
       const res = await fetchData(
-        `/shipment/port/get?limit=${limit}&page=${page}`
+        `/shipment/port/get?limit=${limit}&page=${page}&search=${encodeURIComponent(
+          searchTerm
+        )}`
       );
       const newPorts: Port[] = res.data || [];
-      // Prevent duplicates
-      setPorts((prev) => {
-        const existingIds = new Set(prev.map((p) => p._id));
-        const unique = newPorts.filter((p) => !existingIds.has(p._id));
-        return [...prev, ...unique];
-      });
-      if (newPorts.length < limit) {
-        setHasMore(false);
-      } else {
-        pageRef.current += 1;
+
+      if (!cancelled) {
+        setPorts((prev) => {
+          const existingIds = new Set(prev.map((p) => p._id));
+          const unique = newPorts.filter((p) => !existingIds.has(p._id));
+          return [...prev, ...unique];
+        });
+
+        if (newPorts.length < limit) {
+          setHasMore(false);
+        } else {
+          pageRef.current += 1;
+        }
       }
     } catch (err) {
-      console.error("Error fetching ports:", err);
+      if (!cancelled) {
+        console.error("Error fetching ports:", err);
+      }
     } finally {
-      setLoading(false);
+      if (!cancelled) {
+        setLoading(false);
+      }
     }
+
+    return () => {
+      cancelled = true;
+    };
   };
 
   const fetchDestPorts = async () => {
-    if (destLoading) return;
+    if (destLoading || !destHasMore) return;
+
     setDestLoading(true);
+    let cancelled = false;
+
     try {
+      const page = destPageRef.current;
       const res = await fetchData(
-        `/shipment/port/get?limit=${limit}&page=${destPage}`
+        `/shipment/port/get?limit=${limit}&page=${page}&search=${encodeURIComponent(
+          searchDestTerm
+        )}`
       );
       const newPorts: Port[] = res.data || [];
-      setDestinationPorts((prev) => [...prev, ...newPorts]);
-      setDestPage((prev) => prev + 1);
-      if (newPorts.length < 20) {
-        setDestHasMore(false);
+
+      if (!cancelled) {
+        setDestinationPorts((prev) => {
+          const existingIds = new Set(prev.map((p) => p._id));
+          const unique = newPorts.filter((p) => !existingIds.has(p._id));
+          return [...prev, ...unique];
+        });
+
+        if (newPorts.length < limit) {
+          setDestHasMore(false);
+        } else {
+          destPageRef.current += 1;
+        }
       }
-    } catch (error) {
-      console.error("Failed to fetch destination ports", error);
+    } catch (err) {
+      if (!cancelled) {
+        console.error("Error fetching destination ports:", err);
+      }
     } finally {
-      setDestLoading(false);
+      if (!cancelled) {
+        setDestLoading(false);
+      }
     }
+
+    return () => {
+      cancelled = true;
+    };
   };
 
   useEffect(() => {
@@ -354,7 +395,18 @@ export function BookingDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Port of Loading</FormLabel>
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover
+              open={open}
+              onOpenChange={(state) => {
+                setOpen(state);
+                if (state) {
+                  pageRef.current = 1;
+                  setPorts([]);
+                  setHasMore(true);
+                  fetchPorts();
+                }
+              }}
+            >
               <PopoverTrigger asChild>
                 <button
                   role="combobox"
@@ -370,7 +422,17 @@ export function BookingDetails({
               </PopoverTrigger>
               <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
                 <Command>
-                  <CommandInput placeholder="Search port..." />
+                  <CommandInput
+                    placeholder="Search port..."
+                    value={searchTerm}
+                    onValueChange={(value) => {
+                      setSearchTerm(value);
+                      pageRef.current = 1;
+                      setPorts([]);
+                      setHasMore(true);
+                      fetchPorts(); // Fetch fresh results on search
+                    }}
+                  />
                   <CommandList
                     className="max-h-60 overflow-auto"
                     onScroll={(e) => {
@@ -423,7 +485,18 @@ export function BookingDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Destination Port</FormLabel>
-            <Popover open={destOpen} onOpenChange={setDestOpen}>
+            <Popover
+              open={destOpen}
+              onOpenChange={(state) => {
+                setDestOpen(state);
+                if (state) {
+                  destPageRef.current = 1;
+                  setDestinationPorts([]);
+                  setDestHasMore(true);
+                  fetchDestPorts();
+                }
+              }}
+            >
               <PopoverTrigger asChild>
                 <button
                   type="button"
@@ -440,7 +513,17 @@ export function BookingDetails({
               </PopoverTrigger>
               <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
                 <Command>
-                  <CommandInput placeholder="Search port..." />
+                  <CommandInput
+                    placeholder="Search port..."
+                    value={searchDestTerm}
+                    onValueChange={(value) => {
+                      setSearchDestTerm(value);
+                      destPageRef.current = 1;
+                      setDestinationPorts([]);
+                      setDestHasMore(true);
+                      fetchDestPorts();
+                    }}
+                  />
                   <CommandList
                     className="max-h-60 overflow-auto"
                     onScroll={(e) => {
