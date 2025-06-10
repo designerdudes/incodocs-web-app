@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useFormContext, useFieldArray, FieldValues } from "react-hook-form";
 import { format } from "date-fns";
 import {
@@ -12,7 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Trash, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  CalendarIcon,
+  Trash,
+  ChevronDown,
+  ChevronUp,
+  Check,
+  ChevronsUpDown,
+} from "lucide-react";
 import { fetchData } from "@/axiosUtility/api";
 import {
   Popover,
@@ -38,6 +45,15 @@ import { Textarea } from "@/components/ui/textarea";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import CalendarComponent from "@/components/CalendarComponent";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
 
 interface AddProductDetails {
   productId?: string;
@@ -100,6 +116,11 @@ interface ProductDetailsSubTableProps {
   onEdit: () => void;
 }
 
+type Port = {
+  _id: string;
+  port: string;
+};
+
 export function BookingDetails({
   shipmentId,
   orgId,
@@ -127,6 +148,20 @@ export function BookingDetails({
     Record<string, ProductDetails>
   >({});
   const [products, setProducts] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const pageRef = useRef(1);
+  const [ports, setPorts] = useState<Port[]>([]);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 300;
+  const [destOpen, setDestOpen] = useState(false);
+  const [destPage, setDestPage] = useState(1);
+  const [destinationPorts, setDestinationPorts] = useState<Port[]>([]);
+  const [destLoading, setDestLoading] = useState(false);
+  const [destHasMore, setDestHasMore] = useState(true);
+  const destPageRef = useRef(1); // <-- this was missing
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchDestTerm, setSearchDestTerm] = useState("");
 
   const { fields, append, remove, replace } = useFieldArray({
     control,
@@ -287,6 +322,97 @@ export function BookingDetails({
     },
     [productDetailsCache]
   );
+
+  const fetchPorts = async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    let cancelled = false;
+
+    try {
+      const page = pageRef.current;
+      const res = await fetchData(
+        `/shipment/port/get?limit=${limit}&page=${page}&search=${encodeURIComponent(
+          searchTerm
+        )}`
+      );
+      const newPorts: Port[] = res.data || [];
+
+      if (!cancelled) {
+        setPorts((prev) => {
+          const existingIds = new Set(prev.map((p) => p._id));
+          const unique = newPorts.filter((p) => !existingIds.has(p._id));
+          return [...prev, ...unique];
+        });
+
+        if (newPorts.length < limit) {
+          setHasMore(false);
+        } else {
+          pageRef.current += 1;
+        }
+      }
+    } catch (err) {
+      if (!cancelled) {
+        console.error("Error fetching ports:", err);
+      }
+    } finally {
+      if (!cancelled) {
+        setLoading(false);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  };
+
+  const fetchDestPorts = async () => {
+    if (destLoading || !destHasMore) return;
+
+    setDestLoading(true);
+    let cancelled = false;
+
+    try {
+      const page = destPageRef.current;
+      const res = await fetchData(
+        `/shipment/port/get?limit=${limit}&page=${page}&search=${encodeURIComponent(
+          searchDestTerm
+        )}`
+      );
+      const newPorts: Port[] = res.data || [];
+
+      if (!cancelled) {
+        setDestinationPorts((prev) => {
+          const existingIds = new Set(prev.map((p) => p._id));
+          const unique = newPorts.filter((p) => !existingIds.has(p._id));
+          return [...prev, ...unique];
+        });
+
+        if (newPorts.length < limit) {
+          setDestHasMore(false);
+        } else {
+          destPageRef.current += 1;
+        }
+      }
+    } catch (err) {
+      if (!cancelled) {
+        console.error("Error fetching destination ports:", err);
+      }
+    } finally {
+      if (!cancelled) {
+        setDestLoading(false);
+      }
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  };
+
+  useEffect(() => {
+    fetchPorts();
+    fetchDestPorts();
+  }, []);
 
   const openProductForm = (index: number, isEditing: boolean = false) => {
     const initialValues = getInitialValues(index);
@@ -607,38 +733,183 @@ export function BookingDetails({
         render={({ field }) => (
           <FormItem>
             <FormLabel>Port of Loading</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., CHENNAI"
-                className="uppercase"
-                {...field}
-                value={field.value ?? ""}
-                disabled={isLoading}
-              />
-            </FormControl>
+            <Popover
+              open={open}
+              onOpenChange={(state) => {
+                setOpen(state);
+                if (state) {
+                  pageRef.current = 1;
+                  setPorts([]);
+                  setHasMore(true);
+                  fetchPorts();
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <button
+                  role="combobox"
+                  aria-expanded={open}
+                  className={cn(
+                    "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value || "Select a port"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search port..."
+                    value={searchTerm}
+                    onValueChange={(value) => {
+                      setSearchTerm(value);
+                      pageRef.current = 1;
+                      setPorts([]);
+                      setHasMore(true);
+                      fetchPorts(); // Fetch fresh results on search
+                    }}
+                  />
+                  <CommandList
+                    className="max-h-60 overflow-auto"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      if (
+                        el.scrollTop + el.clientHeight >=
+                          el.scrollHeight - 10 &&
+                        hasMore &&
+                        !loading
+                      ) {
+                        fetchPorts();
+                      }
+                    }}
+                  >
+                    <CommandEmpty>No port found.</CommandEmpty>
+                    <CommandGroup>
+                      {ports.map((port) => (
+                        <CommandItem
+                          key={port._id}
+                          value={port.port}
+                          onSelect={(val) => {
+                            field.onChange(val.toUpperCase());
+                            setOpen(false);
+                            saveProgressSilently(getValues());
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value === port.port
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {port.port}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <FormMessage />
           </FormItem>
         )}
       />
+
       <FormField
         control={control}
         name="bookingDetails.destinationPort"
         render={({ field }) => (
           <FormItem>
             <FormLabel>Destination Port</FormLabel>
-            <FormControl>
-              <Input
-                placeholder="e.g., UMM QASAR"
-                className="uppercase"
-                {...field}
-                value={field.value ?? ""}
-                disabled={isLoading}
-              />
-            </FormControl>
+            <Popover
+              open={destOpen}
+              onOpenChange={(state) => {
+                setDestOpen(state);
+                if (state) {
+                  destPageRef.current = 1;
+                  setDestinationPorts([]);
+                  setDestHasMore(true);
+                  fetchDestPorts();
+                }
+              }}
+            >
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  role="combobox"
+                  aria-expanded={destOpen}
+                  className={cn(
+                    "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
+                    !field.value && "text-muted-foreground"
+                  )}
+                >
+                  {field.value || "Select a port"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="min-w-2/3 max-w-2/3 p-0">
+                <Command>
+                  <CommandInput
+                    placeholder="Search port..."
+                    value={searchDestTerm}
+                    onValueChange={(value) => {
+                      setSearchDestTerm(value);
+                      destPageRef.current = 1;
+                      setDestinationPorts([]);
+                      setDestHasMore(true);
+                      fetchDestPorts();
+                    }}
+                  />
+                  <CommandList
+                    className="max-h-60 overflow-auto"
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      if (
+                        el.scrollTop + el.clientHeight >=
+                          el.scrollHeight - 10 &&
+                        destHasMore &&
+                        !destLoading
+                      ) {
+                        fetchDestPorts(); // fetches more ports on scroll
+                      }
+                    }}
+                  >
+                    <CommandEmpty>No port found.</CommandEmpty>
+                    <CommandGroup>
+                      {destinationPorts.map((port) => (
+                        <CommandItem
+                          key={port._id}
+                          value={port.port}
+                          onSelect={(val) => {
+                            field.onChange(val.toUpperCase());
+                            setDestOpen(false);
+                            saveProgressSilently(getValues());
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              field.value === port.port
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {port.port}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
             <FormMessage />
           </FormItem>
         )}
       />
+
       <FormField
         control={control}
         name="bookingDetails.vesselSailingDate"
@@ -700,7 +971,7 @@ export function BookingDetails({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-              <CalendarComponent
+                <CalendarComponent
                   selected={field.value ? new Date(field.value) : undefined}
                   onSelect={(date: any) => {
                     field.onChange(date?.toISOString());
