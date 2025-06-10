@@ -87,7 +87,7 @@ const Topbar = ({ userData }: { userData: { name: string; email: string } }) => 
                                 </div>
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
+                        {/* <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <User className="mr-2 h-4 w-4" />
@@ -97,7 +97,7 @@ const Topbar = ({ userData }: { userData: { name: string; email: string } }) => 
                                 <Settings className="mr-2 h-4 w-4" />
                                 <span>Settings</span>
                             </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        </DropdownMenuGroup> */}
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onSelect={logout}>
                             <LogOutIcon className="mr-2 h-4 w-4" />
