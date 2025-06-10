@@ -95,7 +95,8 @@ const CreateOrgForm: React.FC<{
   const openAddFactoryModal = () => {
     if (organizations.length === 0) {
       modal.title = "No Organizations Available";
-      modal.description = "Please create an organization before adding a factory.";
+      modal.description =
+        "Please create an organization before adding a factory.";
       modal.children = (
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -190,16 +191,19 @@ const CreateOrgForm: React.FC<{
   );
 };
 
-const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) => {
+const MainDashboardComponent: React.FC<UserDataProps> = ({
+  token,
+  userData,
+}) => {
   const modal = useGlobalModal();
   const router = useRouter();
   const [createOrgError, setCreateOrgError] = useState<string | null>(null);
-  const combinedOrgs = userData?.ownedOrganizations?.concat(userData?.memberInOrganizations as any)
-  
-
-  const [organizations, setOrganizations] = useState(
-    combinedOrgs || []
+  const combinedOrgs = userData?.ownedOrganizations?.concat(
+    userData?.memberInOrganizations as any
   );
+
+  const [organizations, setOrganizations] = useState(combinedOrgs || []);
+  const [isOwner, setIsOwner] = useState(false);
 
   const [newOrg, setNewOrg] = useState({
     name: "",
@@ -266,7 +270,8 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
   const openAddFactoryModal = (orgID: any) => {
     if (organizations?.length === 0) {
       modal.title = "No Organizations Available";
-      modal.description = "Please create an organization before adding a factory.";
+      modal.description =
+        "Please create an organization before adding a factory.";
       modal.children = (
         <div className="space-y-4">
           <p className="text-sm text-gray-600">
@@ -297,8 +302,16 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
   const [orgSearch, setOrgSearch] = useState("");
 
   useEffect(() => {
+    if (userData?.role === "owner" || userData?.role === "admin") {
+      setIsOwner(true);
+    } else {
+      setIsOwner(false);
+    }
+  }, [userData]);
+
+  useEffect(() => {
     if (orgSearch === "") {
-      setOrganizations(combinedOrgs as any || []);
+      setOrganizations((combinedOrgs as any) || []);
     }
   }, [userData, orgSearch]);
 
@@ -352,10 +365,14 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
               </button>
             )}
           </div>
-          <span className="text-sm text-gray-500">--or--</span>
-          <Button onClick={openCreateOrgModal}>
-            <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-          </Button>
+          {isOwner && (
+            <>
+              <span className="text-sm text-gray-500">--or--</span>
+              <Button onClick={openCreateOrgModal}>
+                <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+              </Button>
+            </>
+          )}
         </div>
       </div>
       <div className="grid h-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -407,7 +424,9 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
                         className="text-left text-sm text-gray-500 hover:text-gray-700"
                         onClick={(e) => {
                           e.stopPropagation();
-                          router.push(`/${org._id}/${factory._id}/factorymanagement`);
+                          router.push(
+                            `/${org._id}/${factory._id}/factorymanagement`
+                          );
                         }}
                       >
                         {factory?.factoryName}
@@ -429,11 +448,14 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({ token, userData }) =>
               title="No Organizations Found"
             />
             <p className="text-lg text-gray-600">
-              You don&apos;t have any organizations yet. Create one to get started.
+              You don&apos;t have any organizations yet. Create one to get
+              started.
             </p>
-            <Button onClick={openCreateOrgModal}>
-              <FiPlus className="mr-2 h-4 w-4" /> Create Organization
-            </Button>
+            {isOwner && (
+              <Button onClick={openCreateOrgModal}>
+                <FiPlus className="mr-2 h-4 w-4" /> Create Organization
+              </Button>
+            )}
             {createOrgError && (
               <p className="text-sm text-red-600 mt-2">{createOrgError}</p>
             )}
