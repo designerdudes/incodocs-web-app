@@ -5,11 +5,14 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import EditProductsForm from "../../components/EditProductsForm";
+import { cookies } from "next/headers";
 
 
 
 
-export default function EditProductPage() {
+export default async function EditProductPage( {params}: { params: { id: string } }) {
+
+    console.log("params", params);
      const Product = {
                 code: "PRD-00123",
                 description: "High-quality granite slab",
@@ -32,12 +35,28 @@ export default function EditProductPage() {
                 ],
                 _id: 123456
             }
+
+    const cookieStore = cookies();
+      const token = cookieStore.get("AccessToken")?.value || "";
+      const res = await fetch(
+        `https://incodocs-server.onrender.com/shipment/productdetails/get/${params?.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+        }
+      );
+      const productData = await res.json();
+
+      console.log("productData", productData);
         
     
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
-                <Link href="./">
+                <Link href="../">
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
@@ -55,7 +74,11 @@ export default function EditProductPage() {
             </div>
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
-                <EditProductsForm />
+
+                
+                <EditProductsForm params = {productData} />
+
+
             </div>
         </div>
     );

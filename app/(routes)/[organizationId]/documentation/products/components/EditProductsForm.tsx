@@ -4,269 +4,1127 @@ import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { useParams, useRouter } from "next/navigation";
+import { Textarea } from "@/components/ui/textarea";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
-const productSchema = z.object({
-    code: z.string().min(1, { message: "Code is required" }),
-    description: z.string().min(1, { message: "Description is required" }),
-    unit: z.string().min(1, { message: "Unit of Measurement is required" }),
-    countryOfOrigin: z.string().min(1, { message: "Select a country" }),
-    hsCode: z.string().min(1, { message: "HS Code is required" }),
-    prices: z.array(
-        z.object({
-            variantName: z.string().min(1, { message: "Variant name is required" }),
-            variantType: z.string().min(1, { message: "Variant type is required" }),
-            sellPrice: z.number().min(0),
-            buyPrice: z.number().min(0),
-        })
-    ),
-    netWeight: z.number().min(0),
-    grossWeight: z.number().min(0),
-    cubicMeasurement: z.number().min(0),
+// Zod Schemas (unchanged)
+const tileSchema = z.object({
+  stoneName: z.string().optional(),
+  stonePhoto: z.string().optional(),
+  size: z
+    .object({
+      length: z
+        .number()
+        .min(0, { message: "Length must be positive" })
+        .optional(),
+      breadth: z
+        .number()
+        .min(0, { message: "Breadth must be positive" })
+        .optional(),
+    })
+    .optional(),
+  thickness: z
+    .object({
+      value: z
+        .number()
+        .min(0, { message: "Thickness must be positive" })
+        .optional(),
+    })
+    .optional(),
+  moulding: z
+    .object({
+      mouldingSide: z
+        .enum(["one side", "two side", "three side", "four side"])
+        .optional(),
+      typeOfMoulding: z
+        .enum(["half bullnose", "full bullnose", "bevel"])
+        .optional(),
+    })
+    .optional(),
+  noOfBoxes: z
+    .number()
+    .min(0, { message: "Number of boxes must be positive" })
+    .optional(),
+  piecesPerBox: z
+    .number()
+    .min(0, { message: "Pieces per box must be positive" })
+    .optional(),
 });
 
+const slabSchema = z.object({
+  stoneName: z.string().optional(),
+  stonePhoto: z.string().optional(),
+  manualMeasurement: z.string().optional(),
+  uploadMeasurement: z.string().optional(),
+});
 
-const organizations = [
-    { id: "674b0a687d4f4b21c6c980ba", name: "Organization Jabal" },
-];
+const stepRiserSchema = z.object({
+  stoneName: z.string().optional(),
+  stonePhoto: z.string().optional(),
+  mixedBox: z
+    .object({
+      noOfBoxes: z
+        .number()
+        .min(0, { message: "Number of boxes must be positive" })
+        .optional(),
+      noOfSteps: z
+        .number()
+        .min(0, { message: "Number of steps must be positive" })
+        .optional(),
+      sizeOfStep: z
+        .object({
+          length: z
+            .number()
+            .min(0, { message: "Step length must be positive" })
+            .optional(),
+          breadth: z
+            .number()
+            .min(0, { message: "Step breadth must be positive" })
+            .optional(),
+          thickness: z
+            .number()
+            .min(0, { message: "Step thickness must be positive" })
+            .optional(),
+        })
+        .optional(),
+      noOfRiser: z
+        .number()
+        .min(0, { message: "Number of risers must be positive" })
+        .optional(),
+      sizeOfRiser: z
+        .object({
+          length: z
+            .number()
+            .min(0, { message: "Riser length must be positive" })
+            .optional(),
+          breadth: z
+            .number()
+            .min(0, { message: "Riser breadth must be positive" })
+            .optional(),
+          thickness: z
+            .number()
+            .min(0, { message: "Riser thickness must be positive" })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+  seperateBox: z
+    .object({
+      noOfBoxOfSteps: z
+        .number()
+        .min(0, { message: "Number of step boxes must be positive" })
+        .optional(),
+      noOfPiecesPerBoxOfSteps: z
+        .number()
+        .min(0, { message: "Pieces per box of steps must be positive" })
+        .optional(),
+      sizeOfBoxOfSteps: z
+        .object({
+          length: z
+            .number()
+            .min(0, { message: "Step box length must be positive" })
+            .optional(),
+          breadth: z
+            .number()
+            .min(0, { message: "Step box breadth must be positive" })
+            .optional(),
+          thickness: z
+            .number()
+            .min(0, { message: "Step box thickness must be positive" })
+            .optional(),
+        })
+        .optional(),
+      noOfBoxOfRisers: z
+        .number()
+        .min(0, { message: "Number of riser boxes must be positive" })
+        .optional(),
+      noOfPiecesPerBoxOfRisers: z
+        .number()
+        .min(0, { message: "Pieces per box of risers must be positive" })
+        .optional(),
+      sizeOfBoxOfRisers: z
+        .object({
+          length: z
+            .number()
+            .min(0, { message: "Riser box length must be positive" })
+            .optional(),
+          breadth: z
+            .number()
+            .min(0, { message: "Riser box breadth must be positive" })
+            .optional(),
+          thickness: z
+            .number()
+            .min(0, { message: "Riser box thickness must be positive" })
+            .optional(),
+        })
+        .optional(),
+    })
+    .optional(),
+});
 
+const productSchema = z.object({
+  productType: z.enum(["Tiles", "Slabs", "StepsAndRisers"], {
+    message: "Product type must be Tiles, Slabs, or StepsAndRisers",
+  }),
+  tileDetails: tileSchema.optional(),
+  slabDetails: slabSchema.optional(),
+  stepRiserDetails: stepRiserSchema.optional(),
+  organizationId: z.string().optional(),
+  createdBy: z.string().optional(),
+  _id: z.string().optional(),
+});
 
+type ProductFormValues = z.infer<typeof productSchema>;
 
-export default function ProductFormPage() {
-    const [isLoading, setIsLoading] = useState(false);
-    const form = useForm({
-        resolver: zodResolver(productSchema),
-        defaultValues: {
-            code: "",
-            description: "",
-            unit: "",
-            countryOfOrigin: "",
-            hsCode: "",
-            prices: [
-                {
-                    variantName: "",
-                    variantType: "",
-                    sellPrice: 0,
-                    buyPrice: 0,
-                },
-            ],
-            netWeight: 0,
-            grossWeight: 0,
-            cubicMeasurement: 0,
+interface EditProductFormProps {
+  onSuccess?: () => void;
+  initialProduct?: ProductFormValues | null;
+  params: any;
+}
+
+export default function EditProductsForm({ onSuccess, initialProduct, params }: EditProductFormProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  // Debug useParams output
+  console.log("This is product id:", params.products._id);
+  console.log("This is data:", params.products);
+  const organizationId = params.products.organizationId;
+  const productId = params.products._id;
+  const ProductData = params.products;
+
+  // Initialize form with default values from ProductData
+  const form = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      productType: ProductData.productType || "Tiles",
+      tileDetails: {
+        stoneName: ProductData.tileDetails?.stoneName || "",
+        stonePhoto: ProductData.tileDetails?.stonePhoto || "",
+        size: {
+          length: ProductData.tileDetails?.size?.length || 0,
+          breadth: ProductData.tileDetails?.size?.breadth || 0,
         },
-    });
+        thickness: {
+          value: ProductData.tileDetails?.thickness?.value || 0,
+        },
+        moulding: {
+          mouldingSide: ProductData.tileDetails?.moulding?.mouldingSide || "one side",
+          typeOfMoulding: ProductData.tileDetails?.moulding?.typeOfMoulding || "half bullnose",
+        },
+        noOfBoxes: ProductData.tileDetails?.noOfBoxes || 0,
+        piecesPerBox: ProductData.tileDetails?.piecesPerBox || 0,
+      },
+      slabDetails: {
+        stoneName: ProductData.slabDetails?.stoneName || "",
+        stonePhoto: ProductData.slabDetails?.stonePhoto || "",
+        manualMeasurement: ProductData.slabDetails?.manualMeasurement || "",
+        uploadMeasurement: ProductData.slabDetails?.uploadMeasurement || "",
+      },
+      stepRiserDetails: {
+        stoneName: ProductData.stepRiserDetails?.stoneName || "",
+        stonePhoto: ProductData.stepRiserDetails?.stonePhoto || "",
+        mixedBox: {
+          noOfBoxes: ProductData.stepRiserDetails?.mixedBox?.noOfBoxes || 0,
+          noOfSteps: ProductData.stepRiserDetails?.mixedBox?.noOfSteps || 0,
+          sizeOfStep: {
+            length: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.length || 0,
+            breadth: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.breadth || 0,
+            thickness: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.thickness || 0,
+          },
+          noOfRiser: ProductData.stepRiserDetails?.mixedBox?.noOfRiser || 0,
+          sizeOfRiser: {
+            length: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.length || 0,
+            breadth: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.breadth || 0,
+            thickness: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.thickness || 0,
+          },
+        },
+        seperateBox: {
+          noOfBoxOfSteps: ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfSteps || 0,
+          noOfPiecesPerBoxOfSteps: ProductData.stepRiserDetails?.seperateBox?.noOfPiecesPerBoxOfSteps || 0,
+          sizeOfBoxOfSteps: {
+            length: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.length || 0,
+            breadth: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.breadth || 0,
+            thickness: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.thickness || 0,
+          },
+          noOfBoxOfRisers: ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfRisers || 0,
+          noOfPiecesPerBoxOfRisers: ProductData.stepRiserDetails?.seperateBox?.noOfPiecesPerBoxOfRisers || 0,
+          sizeOfBoxOfRisers: {
+            length: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.length || 0,
+            breadth: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.breadth || 0,
+            thickness: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.thickness || 0,
+          },
+        },
+      },
+      organizationId: ProductData.organizationId || organizationId,
+      createdBy: ProductData.createdBy || "",
+      _id: ProductData._id || productId,
+    },
+  });
 
+  const productType = form.watch("productType");
 
-    const router = useRouter();
-
-    const handleSubmit = async (values: any) => {
-        setIsLoading(true);
-        try {
-            await postData("/employers/add/", values);
-            toast.success("Employee added successfully");
-            router.push("./");
-        } catch (error: any) {
-            console.error("Error creating/updating employee:", error);
-
-            if (error.response && error.response.status === 400) {
-                if (error.response.data.message === "Employee ID exists, please try a unique ID") {
-                    toast.error("Employee already exists, please use a unique ID.");
-                } else {
-                    toast.error(error.response.data.message || "Bad Request");
-                }
-            } else {
-                toast.error("Error creating/updating employee");
-            }
-        }
-        setIsLoading(false);
+  const handleSubmit = async (values: ProductFormValues) => {
+  if (!productId) {
+    toast.error("Product ID is missing");
+    return;
+  }
+  setIsLoading(true);
+  try {
+    const payload: ProductFormValues = {
+      productType: values.productType,
+      organizationId: values.organizationId || ProductData.organizationId,
+      createdBy: values.createdBy || ProductData.createdBy,
+      _id: values._id || productId,
+      tileDetails: values.productType === "Tiles" ? values.tileDetails : undefined,
+      slabDetails: values.productType === "Slabs" ? values.slabDetails : undefined,
+      stepRiserDetails: values.productType === "StepsAndRisers" ? values.stepRiserDetails : undefined,
     };
 
+    console.log("Update payload:", JSON.stringify(payload, null, 2));
 
-    return (
-        <div className="space-y-6">
-            {/* <h2 className="text-2xl font-bold mb-4">Add Team Member</h2> */}
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-3 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="code"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Code</FormLabel>
-                                    <FormControl><Input placeholder="Eg: PROD-001" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="description"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Description</FormLabel>
-                                    <FormControl><Input placeholder="Eg: Premium Marble Slab" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="unit"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Unit of Measurement</FormLabel>
-                                    <FormControl><Input placeholder="Eg: Sq. Ft" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="countryOfOrigin"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Country of Origin</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select Country" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="India">India</SelectItem>
-                                            <SelectItem value="China">China</SelectItem>
-                                            <SelectItem value="Turkey">Turkey</SelectItem>
-                                            {/* Add more countries as needed */}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="hsCode"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>HS Code</FormLabel>
-                                    <FormControl><Input placeholder="Eg: 25151200" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+    // Validate payload against schema (optional, for debugging)
+    const validation = productSchema.safeParse(payload);
+    if (!validation.success) {
+      console.error("Payload validation failed:", validation.error);
+      toast.error("Invalid data provided");
+      return;
+    }
 
-                    <div className="grid grid-cols-3 gap-4 border p-4 rounded-md">
-                        <h3 className="text-lg font-semibold col-span-3">Price Variant</h3>
-                        {form.watch("prices").map((_, index) => (
-                            <React.Fragment key={index}>
-                                <FormField
-                                    control={form.control}
-                                    name={`prices.${index}.variantName`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Variant Name</FormLabel>
-                                            <FormControl><Input placeholder="Eg: Retail" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`prices.${index}.variantType`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Variant Type</FormLabel>
-                                            <FormControl><Input placeholder="Eg: Whole" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`prices.${index}.sellPrice`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Sell Price</FormLabel>
-                                            <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name={`prices.${index}.buyPrice`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Buy Price</FormLabel>
-                                            <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                            </React.Fragment>
-                        ))}
-                    </div>
+    const response = await putData(`/shipment/productdetails/put/${productId}`, payload);
+    console.log("API response:", response);
+    toast.success("Product updated successfully");
+    if (onSuccess) onSuccess();
+    setTimeout(() => {
+      router.refresh();
+      router.push(`/${organizationId}/documentation/products`);
 
-                    <div className="grid grid-cols-3 gap-4">
-                        <FormField
-                            control={form.control}
-                            name="netWeight"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Net Weight (Kg)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="grossWeight"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Gross Weight (Kg)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="cubicMeasurement"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Cubic Measurement (m³)</FormLabel>
-                                    <FormControl><Input type="number" step="0.01" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+    }, 1500);
+  } catch (error: any) {
+    console.error("Error updating product:", error);
+    console.error("Server error response:", error.response?.data);
+    if (error.response) {
+      if (error.response.status === 400) {
+        toast.error(error.response.data.message || "Invalid data provided");
+      } else if (error.response.status === 500) {
+        toast.error(error.response.data.message || "Server error occurred");
+      } else {
+        toast.error("Error updating product");
+      }
+    } else {
+      toast.error("Network error or server is unreachable");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-                    <Button type="submit" disabled={isLoading}>
-                        {isLoading ? "Saving..." : "Submit "}
-                    </Button>
-                </form>
-            </Form>
+  const length = form.watch("tileDetails.size.length") || 0;
+  const breadth = form.watch("tileDetails.size.breadth") || 0;
+  const piecesPerBox = form.watch("tileDetails.piecesPerBox") || 0;
+  const noOfBoxes = form.watch("tileDetails.noOfBoxes") || 0;
 
-        </div>
-    );
+  const noOfMixedBoxes = form.watch("stepRiserDetails.mixedBox.noOfBoxes") || 0;
+  const noOfSteps = form.watch("stepRiserDetails.mixedBox.noOfSteps") || 0;
+  const noOfRiser = form.watch("stepRiserDetails.mixedBox.noOfRiser") || 0;
+  const mixedBoxStepLength = form.watch("stepRiserDetails.mixedBox.sizeOfStep.length") || 0;
+  const mixedBoxStepBreadth = form.watch("stepRiserDetails.mixedBox.sizeOfStep.breadth") || 0;
+  const mixedBoxRiserLength = form.watch("stepRiserDetails.mixedBox.sizeOfRiser.length") || 0;
+  const mixedBoxRiserBreadth = form.watch("stepRiserDetails.mixedBox.sizeOfRiser.breadth") || 0;
+
+  const noOfSeparateStepBoxes = form.watch("stepRiserDetails.seperateBox.noOfBoxOfSteps") || 0;
+  const noOfPiecesPerBoxOfSteps = form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps") || 0;
+  const separateBoxStepLength = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.length") || 0;
+  const separateBoxStepBreadth = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.breadth") || 0;
+  const noOfSeparateRiserBoxes = form.watch("stepRiserDetails.seperateBox.noOfBoxOfRisers") || 0;
+  const noOfPiecesPerBoxOfRisers = form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers") || 0;
+  const separateBoxRiserLength = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.length") || 0;
+  const separateBoxRiserBreadth = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.breadth") || 0;
+
+  const totalSquareMeter =
+    length && breadth && piecesPerBox && noOfBoxes
+      ? (((length * breadth) / 929) * piecesPerBox * noOfBoxes) / 10.764
+      : 0;
+
+  const totalMixedBoxSquareMeter =
+    noOfMixedBoxes && noOfSteps && mixedBoxStepLength && mixedBoxStepBreadth
+      ? (noOfMixedBoxes * noOfSteps * mixedBoxStepLength * mixedBoxStepBreadth) / 929 / 10.764
+      : 0;
+  const totalMixedBoxRiserSquareMeter =
+    noOfMixedBoxes && noOfRiser && mixedBoxRiserLength && mixedBoxRiserBreadth
+      ? (noOfMixedBoxes * noOfRiser * mixedBoxRiserLength * mixedBoxRiserBreadth) / 929 / 10.764
+      : 0;
+  const totalSeparateBoxStepSquareMeter =
+    noOfSeparateStepBoxes && noOfPiecesPerBoxOfSteps && separateBoxStepLength && separateBoxStepBreadth
+      ? (noOfSeparateStepBoxes * noOfPiecesPerBoxOfSteps * separateBoxStepLength * separateBoxStepBreadth) / 929 / 10.764
+      : 0;
+  const totalSeparateBoxRiserSquareMeter =
+    noOfSeparateRiserBoxes && noOfPiecesPerBoxOfRisers && separateBoxRiserLength && separateBoxRiserBreadth
+      ? (noOfSeparateRiserBoxes * noOfPiecesPerBoxOfRisers * separateBoxRiserLength * separateBoxRiserBreadth) / 929 / 10.764
+      : 0;
+
+  const total =
+    totalMixedBoxSquareMeter +
+    totalMixedBoxRiserSquareMeter +
+    totalSeparateBoxStepSquareMeter +
+    totalSeparateBoxRiserSquareMeter;
+
+  return (
+    <div className="space-y-6">
+      {isLoading && <div>Loading product data...</div>}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="productType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Product Type</FormLabel>
+                <Select onValueChange={field.onChange} value={ProductData.productType}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Product Type" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="Tiles">Tiles</SelectItem>
+                    <SelectItem value="Slabs">Slabs</SelectItem>
+                    <SelectItem value="StepsAndRisers">Steps and Risers</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {productType === "Tiles" && (
+            <div className="flex flex-col gap-4 border p-4 rounded-md">
+              <h3 className="text-lg font-semibold">Tile Details</h3>
+
+              <FormField
+                control={form.control}
+                name="tileDetails.stoneName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stone Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Granite" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="tileDetails.stonePhoto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stone Photo</FormLabel>
+                    <FormControl>
+                      <FileUploadField
+                        name="tileDetails.stonePhoto"
+                        storageKey="tileDetails_stonePhoto"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="tileDetails.size.length"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Size Length (cm)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tileDetails.size.breadth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Size Breadth (cm)</FormLabel>
+                      <FormControl>
+                        <input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tileDetails.thickness.value"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Thickness (mm)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="w-1/2">
+                  <FormField
+                    control={form.control}
+                    name="tileDetails.moulding.mouldingSide"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Moulding Side</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={ProductData.tileDetails?.moulding?.mouldingSide || "one side"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Moulding Side" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="one side">One Side</SelectItem>
+                            <SelectItem value="two side">Two Side</SelectItem>
+                            <SelectItem value="three side">Three Side</SelectItem>
+                            <SelectItem value="four side">Four Side</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="w-1/2">
+                  <FormField
+                    control={form.control}
+                    name="tileDetails.moulding.typeOfMoulding"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Type of Moulding</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={ProductData.tileDetails?.moulding?.typeOfMoulding || "half bullnose"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Moulding Type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="half bullnose">Half Bullnose</SelectItem>
+                            <SelectItem value="full bullnose">Full Bullnose</SelectItem>
+                            <SelectItem value="bevel">Bevel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <FormField
+                  control={form.control}
+                  name="tileDetails.noOfBoxes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Boxes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="tileDetails.piecesPerBox"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pieces per Box</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <h1 className="mt-2">Total square meter - {totalSquareMeter.toFixed(3)}</h1>
+            </div>
+          )}
+
+          {productType === "Slabs" && (
+            <div className="flex flex-col gap-2 border p-4 rounded-md">
+              <h3 className="text-lg font-semibold col-span-3">Slab Details</h3>
+              <FormField
+                control={form.control}
+                name="slabDetails.stoneName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stone Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Marble" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="slabDetails.stonePhoto"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Stone Photo</FormLabel>
+                    <FormControl>
+                      <FileUploadField
+                        name="slabDetails.stonePhoto"
+                        storageKey="slabDetails_stonePhoto"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="slabDetails.manualMeasurement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Manual Measurement</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="e.g., 120x60 cm" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="slabDetails.uploadMeasurement"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Upload Measurement</FormLabel>
+                    <FormControl>
+                      <FileUploadField
+                        name="slabDetails.uploadMeasurement"
+                        storageKey="slabDetails_uploadMeasurement"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
+
+          {productType === "StepsAndRisers" && (
+            <div className="space-y-4 border p-4 rounded-md">
+              <h3 className="text-lg font-semibold">Steps and Risers Details</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="flex flex-col gap-2 col-span-3">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.stoneName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stone Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g., Sandstone" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.stonePhoto"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Stone Photo</FormLabel>
+                        <FormControl>
+                          <FileUploadField
+                            name="stepRiserDetails.stonePhoto"
+                            storageKey="stepRiserDetails_stonePhoto"
+                            accept=".jpg,.jpeg,.png"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-4 border p-4 rounded-md">
+                <h4 className="text-md font-semibold col-span-3">Separate Box</h4>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfBoxOfSteps"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Step Boxes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pieces per Box of Steps</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-4 border p-4 rounded-md">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfSteps.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfSteps.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfSteps.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfBoxOfRisers"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Riser Boxes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pieces per Box of Risers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-2 border p-4 rounded-md">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfRisers.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfRisers.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.seperateBox.sizeOfBoxOfRisers.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col gap-4 border p-4 rounded-md">
+                <h4 className="text-md font-semibold col-span-3">Mixed Box</h4>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfBoxes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Boxes</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfSteps"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Steps</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfStep.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Step Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="stepRiserDetails.mixedBox.noOfRiser"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Risers</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          min={0}
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.length"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Length (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.breadth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Breadth (cm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="stepRiserDetails.mixedBox.sizeOfRiser.thickness"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Riser Thickness (mm)</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            min={0}
+                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <h1>Total square meter of separate box step - {totalSeparateBoxStepSquareMeter.toFixed(3)}</h1>
+              <h1>Total square meter of separate box risers - {totalSeparateBoxRiserSquareMeter.toFixed(3)}</h1>
+              <h1>Total square meter of mixed box step - {totalMixedBoxSquareMeter.toFixed(3)}</h1>
+              <h1>Total square meter of mixed box risers - {totalMixedBoxRiserSquareMeter.toFixed(3)}</h1>
+              <h1>Total square meter - {total.toFixed(2)}</h1>
+            </div>
+          )}
+
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Updating..." : "Update Product"}
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
 }
