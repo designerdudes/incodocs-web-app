@@ -141,47 +141,7 @@ const formSchema = z.object({
             truckNumber: z.string().optional(),
             truckDriverContactNumber: z.number().optional(),
             addProductDetails: z
-              .array(
-                z
-                  .object({
-                    _id: z.string().optional(),
-                    productId: z.string().optional(),
-                    code: z.string().optional(),
-                    description: z.string().optional(),
-                    unitOfMeasurements: z.string().optional(),
-                    countryOfOrigin: z.string().optional(),
-                    HScode: z.string().optional(),
-                    variantName: z.string().optional(),
-                    variantType: z.string().optional(),
-                    sellPrice: z.number().optional(),
-                    buyPrice: z.number().optional(),
-                    netWeight: z.number().optional(),
-                    grossWeight: z.number().optional(),
-                    cubicMeasurement: z.number().optional(),
-                    __v: z.number().optional(),
-                  })
-                  .refine(
-                    (data) =>
-                      data._id ||
-                      data.productId ||
-                      data.code ||
-                      data.description ||
-                      data.unitOfMeasurements ||
-                      data.countryOfOrigin ||
-                      data.HScode ||
-                      data.variantName ||
-                      data.variantType ||
-                      data.sellPrice ||
-                      data.buyPrice ||
-                      data.netWeight ||
-                      data.grossWeight ||
-                      data.cubicMeasurement,
-                    {
-                      message:
-                        "At least one product detail field must be provided",
-                    }
-                  )
-              )
+              .array(z.string().min(1, "Invalid product ID"))
               .optional()
               .default([]),
             _id: z.string().optional(),
@@ -690,23 +650,7 @@ export default function EditShipmentPage({ params }: Props) {
       const hasInvalidProducts = values.bookingDetails?.containers?.some(
         (container) =>
           container.addProductDetails?.some(
-            (product) =>
-              !(
-                product._id ||
-                product.productId ||
-                product.code ||
-                product.description ||
-                product.unitOfMeasurements ||
-                product.countryOfOrigin ||
-                product.HScode ||
-                product.variantName ||
-                product.variantType ||
-                product.sellPrice ||
-                product.buyPrice ||
-                product.netWeight ||
-                product.grossWeight ||
-                product.cubicMeasurement
-              )
+            (productId) => !productId || typeof productId !== "string"
           )
       );
 
@@ -748,43 +692,9 @@ export default function EditShipmentPage({ params }: Props) {
                   truckDriverContactNumber:
                     container.truckDriverContactNumber || undefined,
                   addProductDetails:
-                    container.addProductDetails
-                      ?.filter((product) => {
-                        return (
-                          product._id ||
-                          product.productId ||
-                          product.code ||
-                          product.description ||
-                          product.unitOfMeasurements ||
-                          product.countryOfOrigin ||
-                          product.HScode ||
-                          product.variantName ||
-                          product.variantType ||
-                          product.sellPrice ||
-                          product.buyPrice ||
-                          product.netWeight ||
-                          product.grossWeight ||
-                          product.cubicMeasurement
-                        );
-                      })
-                      .map((product) => ({
-                        _id: product._id || undefined,
-                        productId: product.productId || undefined,
-                        code: product.code || undefined,
-                        description: product.description || undefined,
-                        unitOfMeasurements:
-                          product.unitOfMeasurements || undefined,
-                        countryOfOrigin: product.countryOfOrigin || undefined,
-                        HScode: product.HScode || undefined,
-                        variantName: product.variantName || undefined,
-                        variantType: product.variantType || undefined,
-                        sellPrice: product.sellPrice || undefined,
-                        buyPrice: product.buyPrice || undefined,
-                        netWeight: product.netWeight || undefined,
-                        grossWeight: product.grossWeight || undefined,
-                        cubicMeasurement: product.cubicMeasurement || undefined,
-                        __v: product.__v || undefined,
-                      })) || [],
+                    container.addProductDetails?.filter(
+                      (productId) => productId && typeof productId === "string"
+                    ) || [],
                   _id: container._id || undefined,
                 })) || [],
               _id: values.bookingDetails._id || undefined,
@@ -1168,27 +1078,15 @@ export default function EditShipmentPage({ params }: Props) {
                         addProductDetails: Array.isArray(
                           container.addProductDetails
                         )
-                          ? container.addProductDetails.map((product: any) => ({
-                              _id: product._id || undefined,
-                              productId:
-                                product.productId || product._id || undefined,
-                              code: product.code || undefined,
-                              description: product.description || undefined,
-                              unitOfMeasurements:
-                                product.unitOfMeasurements || undefined,
-                              countryOfOrigin:
-                                product.countryOfOrigin || undefined,
-                              HScode: product.HScode || undefined,
-                              variantName: product.variantName || undefined,
-                              variantType: product.variantType || undefined,
-                              sellPrice: product.sellPrice || undefined,
-                              buyPrice: product.buyPrice || undefined,
-                              netWeight: product.netWeight || undefined,
-                              grossWeight: product.grossWeight || undefined,
-                              cubicMeasurement:
-                                product.cubicMeasurement || undefined,
-                              __v: product.__v || undefined,
-                            }))
+                          ? container.addProductDetails
+                              .map(
+                                (product: any) =>
+                                  product._id || product.productId
+                              )
+                              .filter(
+                                (id: any) =>
+                                  typeof id === "string" && id.length > 0
+                              )
                           : [],
                         _id: container._id || undefined,
                       })

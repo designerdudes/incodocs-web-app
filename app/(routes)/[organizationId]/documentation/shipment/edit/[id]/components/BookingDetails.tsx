@@ -56,43 +56,51 @@ import {
 import { cn } from "@/lib/utils";
 import ProductFormPage from "@/components/forms/AddProductForm";
 
-interface AddProductDetails {
-  productId?: string;
-  code: string;
-  HScode: string;
-  description: string;
-  unitOfMeasurements: string;
-  countryOfOrigin: string;
-  prices: {
-    variantName: string;
-    variantType: string;
-    sellPrice?: number;
-    buyPrice?: number;
-    _id?: string;
-  }[];
-  netWeight?: number;
-  grossWeight?: number;
-  cubicMeasurement?: number;
-}
+// interface AddProductDetails {
+//   productId?: string;
+//   code: string;
+//   HScode: string;
+//   description: string;
+//   unitOfMeasurements: string;
+//   countryOfOrigin: string;
+//   prices: {
+//     variantName: string;
+//     variantType: string;
+//     sellPrice?: number;
+//     buyPrice?: number;
+//     _id?: string;
+//   }[];
+//   netWeight?: number;
+//   grossWeight?: number;
+//   cubicMeasurement?: number;
+// }
 
-interface ProductDetails {
-  _id?: string;
-  productId?: string;
-  code: string;
-  description: string;
-  unitOfMeasurements?: string;
-  countryOfOrigin?: string;
-  HScode?: string;
-  prices?: {
-    variantName?: string;
-    variantType?: string;
-    sellPrice?: number;
-    buyPrice?: number;
-    _id?: string;
-  }[];
-  netWeight?: number;
-  grossWeight?: number;
-  cubicMeasurement?: number;
+// interface ProductDetails {
+//   _id?: string;
+//   productId?: string;
+//   code: string;
+//   description: string;
+//   unitOfMeasurements?: string;
+//   countryOfOrigin?: string;
+//   HScode?: string;
+//   prices?: {
+//     variantName?: string;
+//     variantType?: string;
+//     sellPrice?: number;
+//     buyPrice?: number;
+//     _id?: string;
+//   }[];
+//   netWeight?: number;
+//   grossWeight?: number;
+//   cubicMeasurement?: number;
+// }
+
+interface BookingDetailsProps {
+  shipmentId: string;
+  orgId?: string;
+  saveProgress: (data: any) => void;
+  onSectionSubmit: () => Promise<void>;
+  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
 interface BookingDetailsProps {
@@ -103,19 +111,11 @@ interface BookingDetailsProps {
   onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
 }
 
-interface BookingDetailsProps {
-  shipmentId: string;
-  orgId?: string;
-  saveProgress: (data: any) => void;
-  onSectionSubmit: () => Promise<void>;
-  onProductDetailsOpenChange?: Dispatch<SetStateAction<boolean>>;
-}
-
-interface ProductDetailsSubTableProps {
-  productId: string;
-  fetchProductDetails: (productId: string) => Promise<ProductDetails | null>;
-  onEdit: () => void;
-}
+// interface ProductDetailsSubTableProps {
+//   productId: string;
+//   fetchProductDetails: (productId: string) => Promise<ProductDetails | null>;
+//   onEdit: () => void;
+// }
 
 type Port = {
   _id: string;
@@ -145,9 +145,9 @@ export function BookingDetails({
   const [expandedRow, setExpandedRow] = useState<number | null>(null);
   const [customContainerTypes, setCustomContainerTypes] =
     useState(containerTypes);
-  const [productDetailsCache, setProductDetailsCache] = useState<
-    Record<string, ProductDetails>
-  >({});
+  // const [productDetailsCache, setProductDetailsCache] = useState<
+  //   Record<string, ProductDetails>
+  // >({});
   const [products, setProducts] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -1130,7 +1130,7 @@ export function BookingDetails({
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`bookingDetails.containers[${index}].addProductDetails[0].productId`}
+                        name={`bookingDetails.containers[${index}].addProductDetails`}
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
