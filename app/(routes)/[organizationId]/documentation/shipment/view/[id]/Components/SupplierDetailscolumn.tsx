@@ -57,26 +57,30 @@ export const SupplierDetailscolumn: ColumnDef<ShipmentSupplierInvoice>[] = [
   },
   {
     id: "supplierInvoiceNumber",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Invoice Number
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const invoices = row.original.invoices;
-      if (!invoices || invoices.length === 0) return <div>N/A</div>;
-      return (
-        <div className="flex flex-col gap-1">
-          {invoices.map((inv, idx) => (
-            <div key={idx}>{inv.supplierInvoiceNumber || "N/A"}</div>
-          ))}
-        </div>
-      );
+    accessorFn: (row) => {
+     const invoiceNumbers = row.invoices?.map((inv) => inv.supplierInvoiceNumber)?.join(", ");
+     return invoiceNumbers || "";
     },
+   header: ({ column }) => (
+    <Button
+      variant="ghost"
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    >
+      Invoice Number
+      <ArrowUpDown className="ml-2 h-4 w-4" />
+    </Button>
+   ),
+   cell: ({ row }) => {
+    const invoices = row.original.invoices;
+    if (!invoices || invoices.length === 0) return <div>N/A</div>;
+    return (
+      <div className="flex flex-col gap-1">
+        {invoices.map((inv, idx) => (
+          <div key={idx}>{inv.supplierInvoiceNumber || "N/A"}</div>
+        ))}
+      </div>
+    );
+   },
   },
   {
     id: "supplierInvoiceDate",

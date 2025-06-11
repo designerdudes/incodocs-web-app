@@ -40,11 +40,11 @@ interface CommercialInvoice {
   clearanceCommercialInvoiceNumber: string;
   clearancecommercialInvoiceDate: string;
   clearanceCommercialInvoiceUrl: string;
-  clearanceCommercialInvoiceValue: string;
+  clearanceCommercialInvoiceValue: number;
   actualCommercialInvoiceUrl: string;
-  actualCommercialInvoiceValue: string;
+  actualCommercialInvoiceValue: number;
   saberInvoiceUrl: string;
-  saberInvoiceValue: string;
+  saberInvoiceValue: number;
   packingListUrl: string;
 }
 
@@ -410,7 +410,7 @@ export function CommercialInvoiceDetails({
                                 index,
                                 "clearanceCommercialInvoiceUrl"
                               )}
-                              storageKey={`saleInvoiceDetails_clearanceCommercialInvoiceUrl${index}`}
+                              storageKey={`clearanceCommercialInvoiceUrl`}
                             />
                           </FormControl>
                           <FormMessage />
@@ -429,6 +429,7 @@ export function CommercialInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -453,7 +454,7 @@ export function CommercialInvoiceDetails({
                                 index,
                                 "actualCommercialInvoiceUrl"
                               )}
-                              storageKey={`saleInvoiceDetails_actualCommercialInvoiceUrl${index}`}
+                              storageKey={`actualCommercialInvoiceUrl`}
                             />
                           </FormControl>
                           <FormMessage />
@@ -471,6 +472,7 @@ export function CommercialInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -492,7 +494,7 @@ export function CommercialInvoiceDetails({
                                 index,
                                 "saberInvoiceUrl"
                               )}
-                              storageKey={`saleInvoiceDetails_saberInvoiceUrl${index}`}
+                              storageKey={`saberInvoiceUrl`}
                             />
                           </FormControl>
                           <FormMessage />
@@ -507,6 +509,7 @@ export function CommercialInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -528,7 +531,7 @@ export function CommercialInvoiceDetails({
                                 index,
                                 "packingListUrl"
                               )}
-                              storageKey={`saleInvoiceDetails_packingListUrl${index}`}
+                              storageKey={`packingListUr`}
                             />
                           </FormControl>
                           <FormMessage />

@@ -40,8 +40,8 @@ interface ShippingBill {
   shippingBillUrl: string;
   shippingBillNumber: string;
   shippingBillDate: string;
-  drawbackValue: string;
-  rodtepValue: string;
+  drawbackValue: number;
+  rodtepValue: number;
 }
 
 interface FormData {
@@ -368,7 +368,7 @@ export function ShippingBillDetails({
                           <FormControl>
                             <FileUploadField
                               name={getFieldName(index, "shippingBillUrl")}
-                              storageKey={`shippingBill_${index}`}
+                              storageKey={`shippingBillUrl`}
                             />
                           </FormControl>
                           <FormMessage />
@@ -418,6 +418,7 @@ export function ShippingBillDetails({
                         <FormItem>
                           <FormControl>
                             <Input
+                              type="number"
                               placeholder="e.g., 2394"
                               value={field.value as any || ""}
                               onChange={field.onChange}
@@ -437,6 +438,7 @@ export function ShippingBillDetails({
                         <FormItem>
                           <FormControl>
                             <Input
+                            type="number"
                               placeholder="e.g., 8934"
                               value={field.value as any || ""}
                               onChange={field.onChange}

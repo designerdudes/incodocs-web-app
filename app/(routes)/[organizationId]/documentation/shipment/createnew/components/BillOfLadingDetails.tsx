@@ -333,7 +333,7 @@ export function BillOfLadingDetails({
                           <FormControl>
                             <FileUploadField
                               name={getFieldName<FormData>(index, "uploadBLUrl")}
-                              storageKey={`blDetails_Bl${index}`}
+                              storageKey={`uploadBLUrl`}
                             />
                           </FormControl>
                           <FormMessage />

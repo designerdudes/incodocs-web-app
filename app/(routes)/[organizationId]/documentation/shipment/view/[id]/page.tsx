@@ -590,9 +590,7 @@ export default async function Page({ params }: Props) {
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
                   searchKey="supplierInvoiceNumber"
-                  data={
-                    shipmentData?.supplierDetails?.clearance?.suppliers || []
-                  }
+                  data={shipmentData?.supplierDetails?.clearance?.suppliers || []}
                   columns={SupplierDetailscolumn}
                 />
               </div>
@@ -737,7 +735,7 @@ export default async function Page({ params }: Props) {
                   bulkDeleteDescription="This will delete the selected commercial invoices."
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
-                  searchKey="commercialInvoiceNumber"
+                  searchKey="clearanceCommercialInvoiceNumber"
                   data={
                     shipmentData?.saleInvoiceDetails?.commercialInvoices || []
                   }

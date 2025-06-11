@@ -45,8 +45,8 @@ interface Invoice {
   invoiceNumber: string;
   uploadInvoiceUrl: string;
   date: string | null;
-  valueWithGst: string;
-  valueWithoutGst: string;
+  valueWithGst: number;
+  valueWithoutGst: number;
 }
 
 interface ShippingDetails {
@@ -85,8 +85,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
       invoiceNumber: "",
       uploadInvoiceUrl: "",
       date: null,
-      valueWithGst: "",
-      valueWithoutGst: "",
+      valueWithGst: 0,
+      valueWithoutGst: 0,
     }))
   );
   const [transporterInvoices, setTransporterInvoices] = useState<Invoice[]>(
@@ -94,8 +94,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
       invoiceNumber: "",
       uploadInvoiceUrl: "",
       date: null,
-      valueWithGst: "",
-      valueWithoutGst: "",
+      valueWithGst: 0,
+      valueWithoutGst: 0,
     }))
   );
   const [uploading, setUploading] = useState(false);
@@ -139,8 +139,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
           invoiceNumber: "",
           uploadInvoiceUrl: "",
           date: null,
-          valueWithGst: "",
-          valueWithoutGst: "",
+          valueWithGst: 0,
+          valueWithoutGst:0 ,
         }),
         customFieldSetters: {
           "shippingDetails.forwarderInvoices": (items: Invoice[], setValue) => {
@@ -193,8 +193,8 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
           invoiceNumber: "",
           uploadInvoiceUrl: "",
           date: null,
-          valueWithGst: "",
-          valueWithoutGst: "",
+          valueWithGst: 0,
+          valueWithoutGst: 0,
         }),
         customFieldSetters: {
           "shippingDetails.transporterInvoices": (items: Invoice[], setValue) => {
@@ -402,7 +402,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <FileUploadField
                             name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
-                            storageKey={`shippingBill_forwarderInvoices${index}`}
+                            storageKey={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
                           />
                         )}
                       />
@@ -442,6 +442,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         name={`shippingDetails.forwarderInvoices[${index}].valueWithGst` as any}
                         render={({ field }) => (
                           <Input
+                            type="number"
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -455,6 +456,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGst` as any}
                         render={({ field }) => (
                           <Input
+                            type="number"
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -576,7 +578,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <FileUploadField
                             name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
-                            storageKey={`shippingBill_transporterInvoices${index}`}
+                            storageKey={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
                           />
                         )}
                       />
@@ -616,6 +618,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         name={`shippingDetails.transporterInvoices[${index}].valueWithGst` as any}
                         render={({ field }) => (
                           <Input
+                            type="number"
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -629,6 +632,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         name={`shippingDetails.transporterInvoices[${index}].valueWithoutGst` as any}
                         render={({ field }) => (
                           <Input
+                            type="number"
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}

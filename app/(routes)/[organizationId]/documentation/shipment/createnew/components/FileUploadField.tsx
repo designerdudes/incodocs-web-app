@@ -4,6 +4,7 @@ import { useFormContext, useController } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Eye, EyeIcon, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { postData } from "@/axiosUtility/api";
 
 interface FileUploadFieldProps {
   name: string;
@@ -49,20 +50,17 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
+      const response = await postData(
+        "/shipmentdocsfile/upload",
+       formData
       );
 
-      const data = await response.json();
+      const data =  response
       const url = data.url;
 
       setUploadedUrl(url);
       setValue(name, url);
-      localStorage.setItem(storageKey, url);
+      // localStorage.setItem(storageKey, url);
       setSelectedFile(null);
 
       toast.success("File uploaded!");

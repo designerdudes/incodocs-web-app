@@ -40,8 +40,8 @@ import { Path } from "react-hook-form";
 interface Invoice {
   supplierInvoiceNumber: string;
   supplierInvoiceDate: string;
-  supplierInvoiceValueWithGST: string;
-  supplierInvoiceValueWithOutGST: string;
+  supplierInvoiceValueWithGST: number;
+  supplierInvoiceValueWithOutGST: number;
   clearanceSupplierInvoiceUrl: string;
 }
 
@@ -60,7 +60,7 @@ interface FormData {
     actual: {
       actualSupplierName: string;
       actualSupplierInvoiceUrl: string;
-      actualSupplierInvoiceValue: string;
+      actualSupplierInvoiceValue: number;
       shippingBillUrl: string;
     };
     review: string;
@@ -454,7 +454,7 @@ export function SupplierDetails({
                                         supplierIndex,
                                         `invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`
                                       )}
-                                      storageKey={`supplierDetails_clearance_suppliers${supplierIndex}_invoice${invoiceIndex}`}
+                                      storageKey={`invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`}
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -510,6 +510,7 @@ export function SupplierDetails({
                                 <FormItem>
                                   <FormControl>
                                     <Input
+                                      type="number"
                                       placeholder="e.g., 1000"
                                       value={field.value as any || ""}
                                       onChange={field.onChange}
@@ -532,6 +533,7 @@ export function SupplierDetails({
                                 <FormItem>
                                   <FormControl>
                                     <Input
+                                      type="number"
                                       placeholder="e.g., 900"
                                       value={field.value as any || ""}
                                       onChange={field.onChange}
@@ -642,7 +644,7 @@ export function SupplierDetails({
               <FormControl>
                 <FileUploadField
                   name="supplierDetails.actual.shippingBillUrl"
-                  storageKey="supplierDetails_shippingBillUrl"
+                  storageKey="supplierDetails.actual.shippingBillUrl"
                 />
               </FormControl>
               <FormMessage />
