@@ -480,6 +480,7 @@ export default function EditShipmentPage({ params }: Props) {
   const urlOrgId = useParams().organizationId as string | undefined;
   const isInitialLoad = useRef(true);
   const [currentUser, setCurrentUser] = useState<string>("");
+  const hasShownToast = useRef(false);
 
   React.useEffect(() => {
     const fetchCurrentUser = async () => {
@@ -1378,7 +1379,10 @@ export default function EditShipmentPage({ params }: Props) {
         );
         form.reset(updatedValues);
         isInitialLoad.current = false;
-        toast.success("Shipment data loaded successfully!");
+        if (!hasShownToast.current) {
+          toast.success("Shipment data loaded successfully!");
+          hasShownToast.current = true;
+        }
       } catch (error: any) {
         console.error("Error fetching shipment data:", {
           message: error.message,
