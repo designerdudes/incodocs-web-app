@@ -69,6 +69,13 @@ const CellActions: React.FC<Props> = ({ data }) => {
                         Edit Product
                     </DropdownMenuItem>
                     <DropdownMenuItem
+                        onClick={() => router.push(`./products/View/${data._id}`)}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
+                    >
+                        <EyeIcon className="mr-2 h-4 w-4" />
+                        View Product
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
                         onSelect={() => {
                             GlobalModal.title = `Delete Product - ${data.code}`;
                             GlobalModal.description =
