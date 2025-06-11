@@ -141,9 +141,14 @@ const [currentUser, setCurrentUser] = useState<string>("");
 
 
   const loadDraft = (): Record<string, any> => {
+  try {
     const draft = localStorage.getItem("shipmentDraft");
     return draft ? JSON.parse(draft) : {};
-  };
+  } catch {
+    localStorage.removeItem("shipmentDraft");
+    return {};
+  }
+};
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -163,10 +168,10 @@ const [currentUser, setCurrentUser] = useState<string>("");
   };
 
   const submitDraft = async () => {
-    setIsLoading(true);
-    try {
-      const values = form.getValues();
-      const payload = {
+  setIsLoading(true);
+  try {
+    const values = form.getValues();
+    const payload = {
         shipmentId: values.shipmentId || undefined,
         bookingDetails: {
           invoiceNumber: values?.bookingDetails?.invoiceNumber || "",
@@ -210,24 +215,25 @@ const [currentUser, setCurrentUser] = useState<string>("");
         otherDetails: values.otherDetails || [],
         organizationId: orgid,
       };
-      console.log("Payload to be sent:", payload);
-      await postData("/shipment/add/",payload);
-      toast.success("Shipment created successfully!");
-      router.push("./");
-      setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
-    } catch (error: any) {
-      console.error("Error submitting draft:", error);
-      const serverMessage = error?.response?.data?.message;
+    await postData("/shipment/add/", payload);
+    toast.success("Shipment created successfully!");
+    setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
+    form.reset();
+    // ✅ Navigate away
+    setTimeout(() => router.push("./"), 1000);
+  } catch (error: any) {
+    console.error("Error submitting draft:", error);
+    const serverMessage = error?.response?.data?.message;
 
-      if (serverMessage === "Booking detail invoice number already exist") {
-        toast.error("Invoice number already exists. Please use a unique one.");
-      } else {
-        toast.error("Error submitting shipment: " + (serverMessage || error.message));
-      }
-    } finally {
-      setIsLoading(false);
+    if (serverMessage === "Booking detail invoice number already exist") {
+      toast.error("Invoice number already exists. Please use a unique one.");
+    } else {
+      toast.error("Error submitting shipment: " + (serverMessage || error.message));
     }
-  };
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   async function handleSectionSubmit() {
     setIsLoading(true);

@@ -265,7 +265,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                           <FormControl>
                             <FileUploadField
                               name={getFieldName<FormData>(index, "uploadCopyOfCertificate")}
-                              storageKey={`otherDetails_Certificate${index}`}
+                              storageKey={`uploadCopyOfCertificate}`}
                             />
                           </FormControl>
                           <FormMessage />
