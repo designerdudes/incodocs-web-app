@@ -54,6 +54,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import ProductFormPage from "@/components/forms/AddProductForm";
 
 interface AddProductDetails {
   productId?: string;
@@ -275,53 +276,81 @@ export function BookingDetails({
   }, [containers, formValues.numberOfContainer, setValue]);
 
   // Fetch product details using API
-  const fetchProductDetails = useCallback(
-    async (productId: string): Promise<ProductDetails | null> => {
-      if (productDetailsCache[productId]) {
-        return productDetailsCache[productId];
-      }
+  // const fetchProductDetails = useCallback(
+  //   async (productId: string): Promise<ProductDetails | null> => {
+  //     if (productDetailsCache[productId]) {
+  //       return productDetailsCache[productId];
+  //     }
+  //     try {
+  //       console.log("Fetching product details for:", productId);
+  //       const response = await fetch(
+  //         `https://incodocs-server.onrender.com/shipment/productdetails/get/${productId}`
+  //       );
+  //       if (!response.ok) throw new Error("Failed to fetch product details");
+  //       const data = await response.json();
+  //       console.log("Product details API response:", data);
+  //       const productDetails: ProductDetails = {
+  //         _id: data._id,
+  //         productId: data._id,
+  //         code: data.code || "",
+  //         description: data.description || "",
+  //         unitOfMeasurements: data.unitOfMeasurements || undefined,
+  //         countryOfOrigin: data.countryOfOrigin || undefined,
+  //         HScode: data.HScode || "",
+  //         prices:
+  //           data.prices?.map((price: any) => ({
+  //             variantName: price.variantName || undefined,
+  //             variantType: price.variantType || price.varianntType || undefined,
+  //             sellPrice: price.sellPrice || undefined,
+  //             buyPrice: price.buyPrice || undefined,
+  //             _id: price._id || undefined,
+  //           })) || [],
+  //         netWeight: data.netWeight || undefined,
+  //         grossWeight: data.grossWeight || undefined,
+  //         cubicMeasurement: data.cubicMeasurement || undefined,
+  //       };
+  //       console.log("Mapped productDetails:", productDetails);
+  //       setProductDetailsCache((prev) => ({
+  //         ...prev,
+  //         [productId]: productDetails,
+  //       }));
+  //       return productDetails;
+  //     } catch (error) {
+  //       console.error("Error fetching product details:", error);
+  //       toast.error("Failed to load product details");
+  //       return null;
+  //     }
+  //   },
+  //   [productDetailsCache]
+  // );
+
+  useEffect(() => {
+    const fetchProducts = async () => {
       try {
-        console.log("Fetching product details for:", productId);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/productdetails/get/${productId}`
+        const ProductsResponse = await fetchData(
+          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${orgId}`
         );
-        if (!response.ok) throw new Error("Failed to fetch product details");
-        const data = await response.json();
-        console.log("Product details API response:", data);
-        const productDetails: ProductDetails = {
-          _id: data._id,
-          productId: data._id,
-          code: data.code || "",
-          description: data.description || "",
-          unitOfMeasurements: data.unitOfMeasurements || undefined,
-          countryOfOrigin: data.countryOfOrigin || undefined,
-          HScode: data.HScode || "",
-          prices:
-            data.prices?.map((price: any) => ({
-              variantName: price.variantName || undefined,
-              variantType: price.variantType || price.varianntType || undefined,
-              sellPrice: price.sellPrice || undefined,
-              buyPrice: price.buyPrice || undefined,
-              _id: price._id || undefined,
-            })) || [],
-          netWeight: data.netWeight || undefined,
-          grossWeight: data.grossWeight || undefined,
-          cubicMeasurement: data.cubicMeasurement || undefined,
-        };
-        console.log("Mapped productDetails:", productDetails);
-        setProductDetailsCache((prev) => ({
-          ...prev,
-          [productId]: productDetails,
-        }));
-        return productDetails;
+        const ProductsData = ProductsResponse;
+        const mappedProduct = ProductsData.map((product: any) => {
+          const stoneName =
+            product?.tileDetails?.stoneName ||
+            product?.slabDetails?.stoneName ||
+            product?.stepRiserDetails?.stoneName;
+
+          return {
+            _id: product._id,
+            code: product.productType,
+            description: stoneName,
+            name: product.productType + ": " + stoneName,
+          };
+        });
+        setProducts(mappedProduct);
       } catch (error) {
-        console.error("Error fetching product details:", error);
-        toast.error("Failed to load product details");
-        return null;
+        console.error("Error fetching Product Data:", error);
       }
-    },
-    [productDetailsCache]
-  );
+    };
+    fetchProducts();
+  }, [products]);
 
   const fetchPorts = async () => {
     if (loading || !hasMore) return;
@@ -414,55 +443,39 @@ export function BookingDetails({
     fetchDestPorts();
   }, []);
 
-  const openProductForm = (index: number, isEditing: boolean = false) => {
-    const initialValues = getInitialValues(index);
-    const hasExistingProduct = !!initialValues.productId;
-
-    GlobalModal.title =
-      isEditing || hasExistingProduct ? "Edit Product" : "Add New Product";
-    GlobalModal.description =
-      isEditing || hasExistingProduct
-        ? "Update the details of the existing product."
-        : "Fill in the details to create a new product.";
+  const openProductForm = () => {
+    GlobalModal.title = "Add New Product";
+    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
-      <EditProductDetails
-        open={true} // Set open to true to ensure the modal is visible
-        onOpenChange={(isOpen) => {
-          if (!isOpen) {
-            GlobalModal.onClose();
-            setSelectedContainerIndex(null);
-          }
-        }}
-        containerIndex={index}
-        initialValues={initialValues}
-        onSubmit={(data, containerIndex) => {
-          handleProductDetailsSubmit(data, containerIndex);
-        }}
+      <ProductFormPage
+        orgId={orgId}
         onSuccess={async () => {
           try {
             const ProductsResponse = await fetchData(
               "/shipment/productdetails/get"
             );
-            const ProductsData = await ProductsResponse.json();
-            const mappedProduct = ProductsData.map((product: any) => ({
-              _id: product._id,
-              code: product.code,
-              description: product.description,
-              name: product.code + ": " + product.description,
-            }));
+            const ProductsData = await ProductsResponse;
+            const mappedProduct = ProductsData.map((product: any) => {
+              const stoneName =
+                product?.tileDetails?.stoneName ||
+                product?.slabDetails?.stoneName ||
+                product?.stepRiserDetails?.stoneName;
+
+              return {
+                _id: product._id,
+                code: product.productType,
+                description: stoneName,
+                name: product.productType + ": " + stoneName,
+              };
+            });
             setProducts(mappedProduct || []);
             saveProgressSilently(getValues());
-            toast.success(
-              isEditing || hasExistingProduct
-                ? "Product updated successfully"
-                : "Product created successfully"
-            );
+            toast.success("Product created successfully");
           } catch (error) {
             console.error("Error refreshing products:", error);
             toast.error("Failed to refresh product list");
           }
           GlobalModal.onClose();
-          setSelectedContainerIndex(null);
         }}
       />
     );
@@ -526,10 +539,10 @@ export function BookingDetails({
   };
 
   // Handle edit product details
-  const handleEditProductDetails = (index: number) => {
-    setSelectedContainerIndex(index);
-    openProductForm(index, true);
-  };
+  // const handleEditProductDetails = (index: number) => {
+  //   setSelectedContainerIndex(index);
+  //   openProductForm(index, true);
+  // };
 
   // Handle product details submission
   const handleProductDetailsSubmit = (
@@ -1125,82 +1138,15 @@ export function BookingDetails({
                                 entities={products}
                                 value={field.value || ""}
                                 onChange={(value) => {
-                                  // Ensure value is a single string or undefined
-                                  const singleValue = Array.isArray(value)
-                                    ? value[0]
-                                    : value;
-                                  field.onChange(singleValue || undefined);
-                                  if (singleValue) {
-                                    fetchProductDetails(singleValue).then(
-                                      (productDetails) => {
-                                        if (productDetails) {
-                                          // Transform ProductDetails to AddProductDetails
-                                          const addProductDetails: AddProductDetails =
-                                            {
-                                              productId: singleValue,
-                                              code: productDetails.code || "",
-                                              HScode:
-                                                productDetails.HScode || "", // Provide default for HScode
-                                              description:
-                                                productDetails.description ||
-                                                "",
-                                              unitOfMeasurements:
-                                                productDetails.unitOfMeasurements ||
-                                                "",
-                                              countryOfOrigin:
-                                                productDetails.countryOfOrigin ||
-                                                "",
-                                              prices: productDetails.prices
-                                                ?.length
-                                                ? productDetails.prices.map(
-                                                    (price) => ({
-                                                      variantName:
-                                                        price.variantName || "",
-                                                      variantType:
-                                                        price.variantType || "",
-                                                      sellPrice:
-                                                        price.sellPrice,
-                                                      buyPrice: price.buyPrice,
-                                                      _id: price._id,
-                                                    })
-                                                  )
-                                                : [
-                                                    {
-                                                      variantName: "",
-                                                      variantType: "",
-                                                      sellPrice: undefined,
-                                                      buyPrice: undefined,
-                                                    },
-                                                  ],
-                                              netWeight:
-                                                productDetails.netWeight,
-                                              grossWeight:
-                                                productDetails.grossWeight,
-                                              cubicMeasurement:
-                                                productDetails.cubicMeasurement,
-                                            };
-                                          handleProductDetailsSubmit(
-                                            addProductDetails,
-                                            index
-                                          );
-                                        }
-                                      }
-                                    );
-                                  } else {
-                                    setValue(
-                                      `bookingDetails.containers[${index}].addProductDetails`,
-                                      [],
-                                      { shouldDirty: true }
-                                    );
-                                  }
+                                  field.onChange(value);
                                   saveProgressSilently(getValues());
                                 }}
                                 displayProperty="name"
                                 valueProperty="_id"
                                 placeholder="Select Product"
-                                onAddNew={() => openProductForm(index)}
+                                onAddNew={openProductForm}
+                                multiple={true}
                                 addNewLabel="Add New Product"
-                                multiple={false}
                               />
                             </FormControl>
                             <FormMessage />
