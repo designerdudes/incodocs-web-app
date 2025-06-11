@@ -393,8 +393,8 @@ const sidebarTabs = {
           url: "/settings/factory",
         },
         {
-          title: "Organisation",
-          url: "/settings/organisation",
+          title: "Organization",
+          url: "/settings/organization",
         },
       ],
     },
