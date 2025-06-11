@@ -214,49 +214,49 @@ export function BookingDetails({
   };
 
   // Fetch booking details on mount
-  useEffect(() => {
-    const fetchBookingDetails = async () => {
-      if (!orgId || !shipmentId) return;
-      setIsLoading(true);
-      try {
-        const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/bookingdetails/get/${orgIdToUse}/${shipmentId}`
-        );
-        if (!response.ok) throw new Error("Failed to fetch booking details");
-        const data = await response.json();
-        if (data && Object.keys(data).length > 0) {
-          setValue(
-            "bookingDetails",
-            {
-              invoiceNumber: data.invoiceNumber || "",
-              bookingNumber: data.bookingNumber || "",
-              portOfLoading: data.portOfLoading || "",
-              destinationPort: data.destinationPort || "",
-              vesselSailingDate: data.vesselSailingDate || undefined,
-              vesselArrivingDate: data.vesselArrivingDate || undefined,
-              numberOfContainer: data.containers?.length || 0,
-              containers:
-                data.containers?.map((container: any) => ({
-                  containerNumber: container.containerNumber || "",
-                  truckNumber: container.truckNumber || "",
-                  truckDriverContactNumber:
-                    container.truckDriverContactNumber || undefined,
-                  addProductDetails: container.addProductDetails || [],
-                })) || [],
-            },
-            { shouldDirty: false }
-          );
-        }
-      } catch (error) {
-        console.error("Error fetching booking details:", error);
-        toast.error("Failed to load booking details");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchBookingDetails();
-  }, [orgId, shipmentId, setValue]);
+  // useEffect(() => {
+  //   const fetchBookingDetails = async () => {
+  //     if (!orgId || !shipmentId) return;
+  //     setIsLoading(true);
+  //     try {
+  //       const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
+  //       const response = await fetch(
+  //         `https://incodocs-server.onrender.com/shipment/bookingdetails/get/${orgIdToUse}/${shipmentId}`
+  //       );
+  //       if (!response.ok) throw new Error("Failed to fetch booking details");
+  //       const data = await response.json();
+  //       if (data && Object.keys(data).length > 0) {
+  //         setValue(
+  //           "bookingDetails",
+  //           {
+  //             invoiceNumber: data.invoiceNumber || "",
+  //             bookingNumber: data.bookingNumber || "",
+  //             portOfLoading: data.portOfLoading || "",
+  //             destinationPort: data.destinationPort || "",
+  //             vesselSailingDate: data.vesselSailingDate || undefined,
+  //             vesselArrivingDate: data.vesselArrivingDate || undefined,
+  //             numberOfContainer: data.containers?.length || 0,
+  //             containers:
+  //               data.containers?.map((container: any) => ({
+  //                 containerNumber: container.containerNumber || "",
+  //                 truckNumber: container.truckNumber || "",
+  //                 truckDriverContactNumber:
+  //                   container.truckDriverContactNumber || undefined,
+  //                 addProductDetails: container.addProductDetails || [],
+  //               })) || [],
+  //           },
+  //           { shouldDirty: false }
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching booking details:", error);
+  //       toast.error("Failed to load booking details");
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
+  //   fetchBookingDetails();
+  // }, [orgId, shipmentId, setValue]);
 
   // Autosave form data when bookingDetails changes
   useEffect(() => {
@@ -328,7 +328,7 @@ export function BookingDetails({
     const fetchProducts = async () => {
       try {
         const ProductsResponse = await fetchData(
-          `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${orgId}`
+          `/shipment/productdetails/getbyorg/${orgId}`
         );
         const ProductsData = ProductsResponse;
         const mappedProduct = ProductsData.map((product: any) => {
@@ -452,7 +452,7 @@ export function BookingDetails({
         onSuccess={async () => {
           try {
             const ProductsResponse = await fetchData(
-              "/shipment/productdetails/get"
+              `/shipment/productdetails/getbyorg/${orgId}`
             );
             const ProductsData = await ProductsResponse;
             const mappedProduct = ProductsData.map((product: any) => {
@@ -534,9 +534,9 @@ export function BookingDetails({
   };
 
   // Handle toggle product details
-  const handleToggleProductDetails = (index: number) => {
-    setExpandedRow(expandedRow === index ? null : index);
-  };
+  // const handleToggleProductDetails = (index: number) => {
+  //   setExpandedRow(expandedRow === index ? null : index);
+  // };
 
   // Handle edit product details
   // const handleEditProductDetails = (index: number) => {
@@ -545,156 +545,156 @@ export function BookingDetails({
   // };
 
   // Handle product details submission
-  const handleProductDetailsSubmit = (
-    data: AddProductDetails,
-    containerIndex: number
-  ) => {
-    const currentValues = getValues();
-    const currentContainers = currentValues.bookingDetails?.containers || [];
-    const productId = data.productId || crypto.randomUUID();
+  // const handleProductDetailsSubmit = (
+  //   data: AddProductDetails,
+  //   containerIndex: number
+  // ) => {
+  //   const currentValues = getValues();
+  //   const currentContainers = currentValues.bookingDetails?.containers || [];
+  //   const productId = data.productId || crypto.randomUUID();
 
-    const updatedContainers = [...currentContainers];
-    updatedContainers[containerIndex] = {
-      ...updatedContainers[containerIndex],
-      addProductDetails: [
-        {
-          productId,
-          code: data.code,
-          description: data.description,
-          unitOfMeasurements: data.unitOfMeasurements || "",
-          countryOfOrigin: data.countryOfOrigin || "",
-          HScode: data.HScode,
-          prices: data.prices || [],
-          netWeight: data.netWeight,
-          grossWeight: data.grossWeight,
-          cubicMeasurement: data.cubicMeasurement,
-        },
-      ],
-    };
+  //   const updatedContainers = [...currentContainers];
+  //   updatedContainers[containerIndex] = {
+  //     ...updatedContainers[containerIndex],
+  //     addProductDetails: [
+  //       {
+  //         productId,
+  //         code: data.code,
+  //         description: data.description,
+  //         unitOfMeasurements: data.unitOfMeasurements || "",
+  //         countryOfOrigin: data.countryOfOrigin || "",
+  //         HScode: data.HScode,
+  //         prices: data.prices || [],
+  //         netWeight: data.netWeight,
+  //         grossWeight: data.grossWeight,
+  //         cubicMeasurement: data.cubicMeasurement,
+  //       },
+  //     ],
+  //   };
 
-    setValue("bookingDetails.containers", updatedContainers, {
-      shouldDirty: true,
-      shouldValidate: true,
-    });
+  //   setValue("bookingDetails.containers", updatedContainers, {
+  //     shouldDirty: true,
+  //     shouldValidate: true,
+  //   });
 
-    const productDetails: ProductDetails = {
-      productId,
-      code: data.code,
-      description: data.description,
-      unitOfMeasurements: data.unitOfMeasurements || "",
-      countryOfOrigin: data.countryOfOrigin || "",
-      HScode: data.HScode,
-      prices: data.prices || [],
-      netWeight: data.netWeight,
-      grossWeight: data.grossWeight,
-      cubicMeasurement: data.cubicMeasurement,
-    };
+  //   const productDetails: ProductDetails = {
+  //     productId,
+  //     code: data.code,
+  //     description: data.description,
+  //     unitOfMeasurements: data.unitOfMeasurements || "",
+  //     countryOfOrigin: data.countryOfOrigin || "",
+  //     HScode: data.HScode,
+  //     prices: data.prices || [],
+  //     netWeight: data.netWeight,
+  //     grossWeight: data.grossWeight,
+  //     cubicMeasurement: data.cubicMeasurement,
+  //   };
 
-    // Update cache with new product details
-    setProductDetailsCache((prev) => ({
-      ...prev,
-      [productId]: productDetails,
-    }));
+  //   // Update cache with new product details
+  //   setProductDetailsCache((prev) => ({
+  //     ...prev,
+  //     [productId]: productDetails,
+  //   }));
 
-    // Update the product in the backend if it exists
-    if (data.productId) {
-      try {
-        fetch(
-          `https://incodocs-server.onrender.com/shipment/productdetails/update/${data.productId}`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(productDetails),
-          }
-        ).then((response) => {
-          if (!response.ok) throw new Error("Failed to update product");
-          console.log("Product updated in backend");
-        });
-      } catch (error) {
-        console.error("Error updating product:", error);
-        toast.error("Failed to update product in backend");
-      }
-    }
+  //   // Update the product in the backend if it exists
+  //   if (data.productId) {
+  //     try {
+  //       fetch(
+  //         `https://incodocs-server.onrender.com/shipment/productdetails/update/${data.productId}`,
+  //         {
+  //           method: "PUT",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify(productDetails),
+  //         }
+  //       ).then((response) => {
+  //         if (!response.ok) throw new Error("Failed to update product");
+  //         console.log("Product updated in backend");
+  //       });
+  //     } catch (error) {
+  //       console.error("Error updating product:", error);
+  //       toast.error("Failed to update product in backend");
+  //     }
+  //   }
 
-    // Trigger autosave
-    saveProgress({ bookingDetails: getValues().bookingDetails });
-  };
+  //   // Trigger autosave
+  //   saveProgress({ bookingDetails: getValues().bookingDetails });
+  // };
 
   // Prepare initial values for EditProductDetailsForm
-  const getInitialValues = (index: number): AddProductDetails => {
-    const product = containers?.[index]?.addProductDetails?.[0];
-    const cachedProduct = product?.productId
-      ? productDetailsCache[product.productId]
-      : null;
+  // const getInitialValues = (index: number): AddProductDetails => {
+  //   const product = containers?.[index]?.addProductDetails?.[0];
+  //   const cachedProduct = product?.productId
+  //     ? productDetailsCache[product.productId]
+  //     : null;
 
-    // Prefer cached API data if available, fallback to container data
-    if (cachedProduct) {
-      console.log("Using cached product for initialValues:", cachedProduct);
-      return {
-        productId: cachedProduct.productId || "",
-        code: cachedProduct.code || "",
-        description: cachedProduct.description || "",
-        unitOfMeasurements: cachedProduct.unitOfMeasurements || "",
-        countryOfOrigin: cachedProduct.countryOfOrigin || "",
-        HScode: cachedProduct.HScode || "",
-        prices: [
-          {
-            variantName: "",
-            variantType: "",
-            sellPrice: undefined,
-            buyPrice: undefined,
-          },
-        ],
-        netWeight: cachedProduct.netWeight,
-        grossWeight: cachedProduct.grossWeight,
-        cubicMeasurement: cachedProduct.cubicMeasurement,
-      };
-    }
+  //   // Prefer cached API data if available, fallback to container data
+  //   if (cachedProduct) {
+  //     console.log("Using cached product for initialValues:", cachedProduct);
+  //     return {
+  //       productId: cachedProduct.productId || "",
+  //       code: cachedProduct.code || "",
+  //       description: cachedProduct.description || "",
+  //       unitOfMeasurements: cachedProduct.unitOfMeasurements || "",
+  //       countryOfOrigin: cachedProduct.countryOfOrigin || "",
+  //       HScode: cachedProduct.HScode || "",
+  //       prices: [
+  //         {
+  //           variantName: "",
+  //           variantType: "",
+  //           sellPrice: undefined,
+  //           buyPrice: undefined,
+  //         },
+  //       ],
+  //       netWeight: cachedProduct.netWeight,
+  //       grossWeight: cachedProduct.grossWeight,
+  //       cubicMeasurement: cachedProduct.cubicMeasurement,
+  //     };
+  //   }
 
-    // Fallback to container data
-    console.log("Using container product for initialValues:", product);
-    return product
-      ? {
-          productId: product.productId || "",
-          code: product.code || "",
-          description: product.description || "",
-          unitOfMeasurements: product.unitOfMeasurements || "",
-          countryOfOrigin: product.countryOfOrigin || "",
-          HScode: product.HScode || "",
-          prices: product.prices?.length
-            ? product.prices
-            : [
-                {
-                  variantName: "",
-                  variantType: "",
-                  sellPrice: undefined,
-                  buyPrice: undefined,
-                },
-              ],
-          netWeight: product.netWeight,
-          grossWeight: product.grossWeight,
-          cubicMeasurement: product.cubicMeasurement,
-        }
-      : {
-          productId: "",
-          code: "",
-          description: "",
-          unitOfMeasurements: "",
-          countryOfOrigin: "",
-          HScode: "",
-          prices: [
-            {
-              variantName: "",
-              variantType: "",
-              sellPrice: undefined,
-              buyPrice: undefined,
-            },
-          ],
-          netWeight: undefined,
-          grossWeight: undefined,
-          cubicMeasurement: undefined,
-        };
-  };
+  //   // Fallback to container data
+  //   console.log("Using container product for initialValues:", product);
+  //   return product
+  //     ? {
+  //         productId: product.productId || "",
+  //         code: product.code || "",
+  //         description: product.description || "",
+  //         unitOfMeasurements: product.unitOfMeasurements || "",
+  //         countryOfOrigin: product.countryOfOrigin || "",
+  //         HScode: product.HScode || "",
+  //         prices: product.prices?.length
+  //           ? product.prices
+  //           : [
+  //               {
+  //                 variantName: "",
+  //                 variantType: "",
+  //                 sellPrice: undefined,
+  //                 buyPrice: undefined,
+  //               },
+  //             ],
+  //         netWeight: product.netWeight,
+  //         grossWeight: product.grossWeight,
+  //         cubicMeasurement: product.cubicMeasurement,
+  //       }
+  //     : {
+  //         productId: "",
+  //         code: "",
+  //         description: "",
+  //         unitOfMeasurements: "",
+  //         countryOfOrigin: "",
+  //         HScode: "",
+  //         prices: [
+  //           {
+  //             variantName: "",
+  //             variantType: "",
+  //             sellPrice: undefined,
+  //             buyPrice: undefined,
+  //           },
+  //         ],
+  //         netWeight: undefined,
+  //         grossWeight: undefined,
+  //         cubicMeasurement: undefined,
+  //       };
+  // };
 
   function saveProgressSilently(arg0: FieldValues): void {
     saveProgress({ bookingDetails: getValues().bookingDetails });

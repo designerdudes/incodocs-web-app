@@ -142,23 +142,24 @@ const formSchema = z.object({
             truckDriverContactNumber: z.number().optional(),
             addProductDetails: z
               .array(
-                z.object({
-                  _id: z.string().optional(),
-                  productId: z.string().optional(),
-                  code: z.string().optional(),
-                  description: z.string().optional(),
-                  unitOfMeasurements: z.string().optional(),
-                  countryOfOrigin: z.string().optional(),
-                  HScode: z.string().optional(),
-                  variantName: z.string().optional(),
-                  variantType: z.string().optional(),
-                  sellPrice: z.number().optional(),
-                  buyPrice: z.number().optional(),
-                  netWeight: z.number().optional(),
-                  grossWeight: z.number().optional(),
-                  cubicMeasurement: z.number().optional(),
-                  __v: z.number().optional(),
-                })
+                z
+                  .object({
+                    _id: z.string().optional(),
+                    productId: z.string().optional(),
+                    code: z.string().optional(),
+                    description: z.string().optional(),
+                    unitOfMeasurements: z.string().optional(),
+                    countryOfOrigin: z.string().optional(),
+                    HScode: z.string().optional(),
+                    variantName: z.string().optional(),
+                    variantType: z.string().optional(),
+                    sellPrice: z.number().optional(),
+                    buyPrice: z.number().optional(),
+                    netWeight: z.number().optional(),
+                    grossWeight: z.number().optional(),
+                    cubicMeasurement: z.number().optional(),
+                    __v: z.number().optional(),
+                  })
                   .refine(
                     (data) =>
                       data._id ||
@@ -175,7 +176,10 @@ const formSchema = z.object({
                       data.netWeight ||
                       data.grossWeight ||
                       data.cubicMeasurement,
-                    { message: "At least one product detail field must be provided" }
+                    {
+                      message:
+                        "At least one product detail field must be provided",
+                    }
                   )
               )
               .optional()
@@ -508,7 +512,9 @@ export default function EditShipmentPage({ params }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isProductDetailsOpen, setIsProductDetailsOpen] = useState(false);
-  const [organizationId, setOrganizationId] = useState<string | undefined>(undefined);
+  const [organizationId, setOrganizationId] = useState<string | undefined>(
+    undefined
+  );
   const [fetchError, setFetchError] = useState<string | null>(null);
   const router = useRouter();
   const urlOrgId = useParams().organizationId as string | undefined;
@@ -561,6 +567,7 @@ export default function EditShipmentPage({ params }: Props) {
       component: (
         <BookingDetails
           shipmentId={params.id}
+          orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
           onProductDetailsOpenChange={setIsProductDetailsOpen}
@@ -589,7 +596,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} />
+          currentUser={currentUser}
+        />
       ),
     },
     {
@@ -601,7 +609,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} />
+          currentUser={currentUser}
+        />
       ),
     },
     {
@@ -613,7 +622,8 @@ export default function EditShipmentPage({ params }: Props) {
           orgId={organizationId}
           saveProgress={(data) => saveProgressSilently(data, params.id)}
           onSectionSubmit={handleSectionSubmit}
-          currentUser={currentUser} />
+          currentUser={currentUser}
+        />
       ),
     },
     {
@@ -669,7 +679,12 @@ export default function EditShipmentPage({ params }: Props) {
     setIsLoading(true);
     try {
       const values = form.getValues();
-      console.log("Submitting shipment update for ID:", params.id, "Values:", values);
+      console.log(
+        "Submitting shipment update for ID:",
+        params.id,
+        "Values:",
+        values
+      );
 
       // Validate containers for invalid product details
       const hasInvalidProducts = values.bookingDetails?.containers?.some(
@@ -696,7 +711,9 @@ export default function EditShipmentPage({ params }: Props) {
       );
 
       if (hasInvalidProducts) {
-        toast.error("One or more product details are invalid. Please provide at least one detail for each product.");
+        toast.error(
+          "One or more product details are invalid. Please provide at least one detail for each product."
+        );
         setIsLoading(false);
         return;
       }
@@ -709,261 +726,263 @@ export default function EditShipmentPage({ params }: Props) {
         createdBy: values.createdBy || undefined,
         bookingDetails: values.bookingDetails
           ? {
-            review: values.bookingDetails.review || undefined,
-            invoiceNumber: values.bookingDetails.invoiceNumber || undefined,
-            bookingNumber: values.bookingDetails.bookingNumber || undefined,
-            portOfLoading: values.bookingDetails.portOfLoading || undefined,
-            destinationPort: values.bookingDetails.destinationPort || undefined,
-            vesselSailingDate:
-              values.bookingDetails.vesselSailingDate || undefined,
-            vesselArrivingDate:
-              values.bookingDetails.vesselArrivingDate || undefined,
-            numberOfContainer:
-              values.bookingDetails.numberOfContainer ||
-              values.bookingDetails.containers?.length ||
-              undefined,
-            containers:
-              values.bookingDetails.containers?.map((container) => ({
-                containerType: container.containerType || undefined,
-                containerNumber: container.containerNumber || undefined,
-                truckNumber: container.truckNumber || undefined,
-                truckDriverContactNumber:
-                  container.truckDriverContactNumber || undefined,
-                addProductDetails:
-                  container.addProductDetails
-                    ?.filter((product) => {
-                      return (
-                        product._id ||
-                        product.productId ||
-                        product.code ||
-                        product.description ||
-                        product.unitOfMeasurements ||
-                        product.countryOfOrigin ||
-                        product.HScode ||
-                        product.variantName ||
-                        product.variantType ||
-                        product.sellPrice ||
-                        product.buyPrice ||
-                        product.netWeight ||
-                        product.grossWeight ||
-                        product.cubicMeasurement
-                      );
-                    })
-                    .map((product) => ({
-                      _id: product._id || undefined,
-                      productId: product.productId || undefined,
-                      code: product.code || undefined,
-                      description: product.description || undefined,
-                      unitOfMeasurements: product.unitOfMeasurements || undefined,
-                      countryOfOrigin: product.countryOfOrigin || undefined,
-                      HScode: product.HScode || undefined,
-                      variantName: product.variantName || undefined,
-                      variantType: product.variantType || undefined,
-                      sellPrice: product.sellPrice || undefined,
-                      buyPrice: product.buyPrice || undefined,
-                      netWeight: product.netWeight || undefined,
-                      grossWeight: product.grossWeight || undefined,
-                      cubicMeasurement: product.cubicMeasurement || undefined,
-                      __v: product.__v || undefined,
-                    })) || [],
-                _id: container._id || undefined,
-              })) || [],
-            _id: values.bookingDetails._id || undefined,
-          }
+              review: values.bookingDetails.review || undefined,
+              invoiceNumber: values.bookingDetails.invoiceNumber || undefined,
+              bookingNumber: values.bookingDetails.bookingNumber || undefined,
+              portOfLoading: values.bookingDetails.portOfLoading || undefined,
+              destinationPort:
+                values.bookingDetails.destinationPort || undefined,
+              vesselSailingDate:
+                values.bookingDetails.vesselSailingDate || undefined,
+              vesselArrivingDate:
+                values.bookingDetails.vesselArrivingDate || undefined,
+              numberOfContainer:
+                values.bookingDetails.numberOfContainer ||
+                values.bookingDetails.containers?.length ||
+                undefined,
+              containers:
+                values.bookingDetails.containers?.map((container) => ({
+                  containerType: container.containerType || undefined,
+                  containerNumber: container.containerNumber || undefined,
+                  truckNumber: container.truckNumber || undefined,
+                  truckDriverContactNumber:
+                    container.truckDriverContactNumber || undefined,
+                  addProductDetails:
+                    container.addProductDetails
+                      ?.filter((product) => {
+                        return (
+                          product._id ||
+                          product.productId ||
+                          product.code ||
+                          product.description ||
+                          product.unitOfMeasurements ||
+                          product.countryOfOrigin ||
+                          product.HScode ||
+                          product.variantName ||
+                          product.variantType ||
+                          product.sellPrice ||
+                          product.buyPrice ||
+                          product.netWeight ||
+                          product.grossWeight ||
+                          product.cubicMeasurement
+                        );
+                      })
+                      .map((product) => ({
+                        _id: product._id || undefined,
+                        productId: product.productId || undefined,
+                        code: product.code || undefined,
+                        description: product.description || undefined,
+                        unitOfMeasurements:
+                          product.unitOfMeasurements || undefined,
+                        countryOfOrigin: product.countryOfOrigin || undefined,
+                        HScode: product.HScode || undefined,
+                        variantName: product.variantName || undefined,
+                        variantType: product.variantType || undefined,
+                        sellPrice: product.sellPrice || undefined,
+                        buyPrice: product.buyPrice || undefined,
+                        netWeight: product.netWeight || undefined,
+                        grossWeight: product.grossWeight || undefined,
+                        cubicMeasurement: product.cubicMeasurement || undefined,
+                        __v: product.__v || undefined,
+                      })) || [],
+                  _id: container._id || undefined,
+                })) || [],
+              _id: values.bookingDetails._id || undefined,
+            }
           : undefined,
         shippingDetails: values.shippingDetails
           ? {
-            review: values.shippingDetails.review || undefined,
-            transporterName:
-              values.shippingDetails.transporterName &&
+              review: values.shippingDetails.review || undefined,
+              transporterName:
+                values.shippingDetails.transporterName &&
                 /^[0-9a-fA-F]{24}$/.test(values.shippingDetails.transporterName)
-                ? values.shippingDetails.transporterName
-                : undefined,
-            noOftransportinvoices:
-              values.shippingDetails.noOftransportinvoices ||
-              values.shippingDetails.transporterInvoices?.length ||
-              undefined,
-            transporterInvoices:
-              values.shippingDetails.transporterInvoices?.map((invoice) => ({
-                invoiceNumber: invoice.invoiceNumber || undefined,
-                uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
-                date: invoice.date || undefined,
-                valueWithGst: invoice.valueWithGst || undefined,
-                valueWithoutGst: invoice.valueWithoutGst || undefined,
-                _id: invoice._id || undefined,
-              })) || [],
-            forwarderName:
-              values.shippingDetails.forwarderName &&
+                  ? values.shippingDetails.transporterName
+                  : undefined,
+              noOftransportinvoices:
+                values.shippingDetails.noOftransportinvoices ||
+                values.shippingDetails.transporterInvoices?.length ||
+                undefined,
+              transporterInvoices:
+                values.shippingDetails.transporterInvoices?.map((invoice) => ({
+                  invoiceNumber: invoice.invoiceNumber || undefined,
+                  uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
+                  date: invoice.date || undefined,
+                  valueWithGst: invoice.valueWithGst || undefined,
+                  valueWithoutGst: invoice.valueWithoutGst || undefined,
+                  _id: invoice._id || undefined,
+                })) || [],
+              forwarderName:
+                values.shippingDetails.forwarderName &&
                 /^[0-9a-fA-F]{24}$/.test(values.shippingDetails.forwarderName)
-                ? values.shippingDetails.forwarderName
-                : undefined,
-            noOfForwarderinvoices:
-              values.shippingDetails.noOfForwarderinvoices ||
-              values.shippingDetails.forwarderInvoices?.length ||
-              undefined,
-            forwarderInvoices:
-              values.shippingDetails.forwarderInvoices?.map((invoice) => ({
-                invoiceNumber: invoice.invoiceNumber || undefined,
-                uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
-                date: invoice.date || undefined,
-                valueWithGst: invoice.valueWithGst || undefined,
-                valueWithoutGst: invoice.valueWithoutGst || undefined,
-                _id: invoice._id || undefined,
-              })) || [],
-            _id: values.shippingDetails._id || undefined,
-          }
+                  ? values.shippingDetails.forwarderName
+                  : undefined,
+              noOfForwarderinvoices:
+                values.shippingDetails.noOfForwarderinvoices ||
+                values.shippingDetails.forwarderInvoices?.length ||
+                undefined,
+              forwarderInvoices:
+                values.shippingDetails.forwarderInvoices?.map((invoice) => ({
+                  invoiceNumber: invoice.invoiceNumber || undefined,
+                  uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
+                  date: invoice.date || undefined,
+                  valueWithGst: invoice.valueWithGst || undefined,
+                  valueWithoutGst: invoice.valueWithoutGst || undefined,
+                  _id: invoice._id || undefined,
+                })) || [],
+              _id: values.shippingDetails._id || undefined,
+            }
           : undefined,
         shippingBillDetails: values.shippingBillDetails
           ? {
-            review: values.shippingBillDetails.review || undefined,
-            portCode: values.shippingBillDetails.portCode || undefined,
-            cbName: values.shippingBillDetails.cbName || undefined,
-            cbCode: values.shippingBillDetails.cbCode || undefined,
-            numberOFShippingBill:
-              values.shippingBillDetails.numberOFShippingBill ||
-              values.shippingBillDetails.bills?.length ||
-              undefined,
-            ShippingBills:
-              values.shippingBillDetails.bills?.map((bill) => ({
-                shippingBillUrl: bill.uploadShippingBill || undefined,
-                shippingBillNumber: bill.shippingBillNumber || undefined,
-                shippingBillDate: bill.shippingBillDate || undefined,
-                drawbackValue: bill.drawbackValue
-                  ? String(bill.drawbackValue)
-                  : undefined,
-                rodtepValue: bill.rodtepValue
-                  ? String(bill.rodtepValue)
-                  : undefined,
-                _id: undefined,
-              })) || [],
-            _id: values.shippingBillDetails._id || undefined,
-          }
+              review: values.shippingBillDetails.review || undefined,
+              portCode: values.shippingBillDetails.portCode || undefined,
+              cbName: values.shippingBillDetails.cbName || undefined,
+              cbCode: values.shippingBillDetails.cbCode || undefined,
+              numberOFShippingBill:
+                values.shippingBillDetails.numberOFShippingBill ||
+                values.shippingBillDetails.bills?.length ||
+                undefined,
+              ShippingBills:
+                values.shippingBillDetails.bills?.map((bill) => ({
+                  shippingBillUrl: bill.uploadShippingBill || undefined,
+                  shippingBillNumber: bill.shippingBillNumber || undefined,
+                  shippingBillDate: bill.shippingBillDate || undefined,
+                  drawbackValue: bill.drawbackValue
+                    ? String(bill.drawbackValue)
+                    : undefined,
+                  rodtepValue: bill.rodtepValue
+                    ? String(bill.rodtepValue)
+                    : undefined,
+                  _id: undefined,
+                })) || [],
+              _id: values.shippingBillDetails._id || undefined,
+            }
           : undefined,
         supplierDetails: values.supplierDetails
           ? {
-            review: values.supplierDetails.review || undefined,
-            clearance: values.supplierDetails.clearance
-              ? {
-                noOfSuppliers:
-                  values.supplierDetails.clearance.noOfSuppliers ||
-                  values.supplierDetails.clearance.suppliers?.length ||
-                  undefined,
-                suppliers:
-                  values.supplierDetails.clearance.suppliers?.map(
-                    (supplier) => ({
-                      supplierName: supplier.supplierName
-                        ? {
-                          _id: supplier.supplierName._id || undefined,
-                          supplierName:
-                            supplier.supplierName.supplierName ||
+              review: values.supplierDetails.review || undefined,
+              clearance: values.supplierDetails.clearance
+                ? {
+                    noOfSuppliers:
+                      values.supplierDetails.clearance.noOfSuppliers ||
+                      values.supplierDetails.clearance.suppliers?.length ||
+                      undefined,
+                    suppliers:
+                      values.supplierDetails.clearance.suppliers?.map(
+                        (supplier) => ({
+                          supplierName: supplier.supplierName
+                            ? {
+                                _id: supplier.supplierName._id || undefined,
+                                supplierName:
+                                  supplier.supplierName.supplierName ||
+                                  undefined,
+                              }
+                            : undefined,
+                          noOfInvoices:
+                            supplier.noOfInvoices ||
+                            supplier.invoices?.length ||
                             undefined,
-                        }
-                        : undefined,
-                      noOfInvoices:
-                        supplier.noOfInvoices ||
-                        supplier.invoices?.length ||
-                        undefined,
-                      invoices:
-                        supplier.invoices?.map((invoice) => ({
-                          supplierInvoiceNumber:
-                            invoice.supplierInvoiceNumber || undefined,
-                          supplierInvoiceDate:
-                            invoice.supplierInvoiceDate || undefined,
-                          supplierInvoiceValueWithGST:
-                            invoice.supplierInvoiceValueWithGST
-                              ? String(invoice.supplierInvoiceValueWithGST)
-                              : undefined,
-                          supplierInvoiceValueWithOutGST:
-                            invoice.supplierInvoiceValueWithOutGST
-                              ? String(
+                          invoices:
+                            supplier.invoices?.map((invoice) => ({
+                              supplierInvoiceNumber:
+                                invoice.supplierInvoiceNumber || undefined,
+                              supplierInvoiceDate:
+                                invoice.supplierInvoiceDate || undefined,
+                              supplierInvoiceValueWithGST:
+                                invoice.supplierInvoiceValueWithGST
+                                  ? String(invoice.supplierInvoiceValueWithGST)
+                                  : undefined,
+                              supplierInvoiceValueWithOutGST:
                                 invoice.supplierInvoiceValueWithOutGST
-                              )
-                              : undefined,
-                          clearanceSupplierInvoiceUrl:
-                            invoice.clearanceSupplierInvoiceUrl ||
-                            undefined,
-                          _id: invoice._id || undefined,
-                        })) || [],
-                      _id: supplier._id || undefined,
-                    })
-                  ) || [],
-                _id: values.supplierDetails.clearance._id || undefined,
-              }
-              : undefined,
-            actual: values.supplierDetails.actual
-              ? {
-                actualSupplierName:
-                  values.supplierDetails.actual.actualSupplierName ||
-                  undefined,
-                actualSupplierInvoiceUrl:
-                  values.supplierDetails.actual.actualSupplierInvoiceUrl ||
-                  undefined,
-                actualSupplierInvoiceValue: values.supplierDetails.actual
-                  .actualSupplierInvoiceValue
-                  ? String(
-                    values.supplierDetails.actual
+                                  ? String(
+                                      invoice.supplierInvoiceValueWithOutGST
+                                    )
+                                  : undefined,
+                              clearanceSupplierInvoiceUrl:
+                                invoice.clearanceSupplierInvoiceUrl ||
+                                undefined,
+                              _id: invoice._id || undefined,
+                            })) || [],
+                          _id: supplier._id || undefined,
+                        })
+                      ) || [],
+                    _id: values.supplierDetails.clearance._id || undefined,
+                  }
+                : undefined,
+              actual: values.supplierDetails.actual
+                ? {
+                    actualSupplierName:
+                      values.supplierDetails.actual.actualSupplierName ||
+                      undefined,
+                    actualSupplierInvoiceUrl:
+                      values.supplierDetails.actual.actualSupplierInvoiceUrl ||
+                      undefined,
+                    actualSupplierInvoiceValue: values.supplierDetails.actual
                       .actualSupplierInvoiceValue
-                  )
-                  : undefined,
-                shippingBillUrl:
-                  values.supplierDetails.actual.shippingBillUrl ||
-                  undefined,
-                _id: values.supplierDetails.actual._id || undefined,
-              }
-              : undefined,
-            _id: values.supplierDetails._id || undefined,
-          }
+                      ? String(
+                          values.supplierDetails.actual
+                            .actualSupplierInvoiceValue
+                        )
+                      : undefined,
+                    shippingBillUrl:
+                      values.supplierDetails.actual.shippingBillUrl ||
+                      undefined,
+                    _id: values.supplierDetails.actual._id || undefined,
+                  }
+                : undefined,
+              _id: values.supplierDetails._id || undefined,
+            }
           : undefined,
         saleInvoiceDetails: values.saleInvoiceDetails
           ? {
-            review: values.saleInvoiceDetails.review || undefined,
-            consignee:
-              values.saleInvoiceDetails.consignee &&
+              review: values.saleInvoiceDetails.review || undefined,
+              consignee:
+                values.saleInvoiceDetails.consignee &&
                 /^[0-9a-fA-F]{24}$/.test(values.saleInvoiceDetails.consignee)
-                ? values.saleInvoiceDetails.consignee
-                : undefined,
-            actualBuyer: values.saleInvoiceDetails.actualBuyer || undefined,
-            numberOfSalesInvoices:
-              values.saleInvoiceDetails.numberOfSalesInvoices ||
-              values.saleInvoiceDetails.invoice?.length ||
-              undefined,
-            commercialInvoices:
-              values.saleInvoiceDetails.invoice?.map((inv) => ({
-                commercialInvoiceNumber:
-                  inv.commercialInvoiceNumber || undefined,
-                clearanceCommercialInvoiceUrl:
-                  inv.clearanceCommercialInvoice || undefined,
-                actualCommercialInvoiceUrl:
-                  inv.actualCommercialInvoice || undefined,
-                saberInvoiceUrl: inv.saberInvoice || undefined,
-                addProductDetails: inv.addProductDetails || undefined,
-                _id: inv._id || undefined,
-              })) || [],
-            _id: values.saleInvoiceDetails._id || undefined,
-          }
+                  ? values.saleInvoiceDetails.consignee
+                  : undefined,
+              actualBuyer: values.saleInvoiceDetails.actualBuyer || undefined,
+              numberOfSalesInvoices:
+                values.saleInvoiceDetails.numberOfSalesInvoices ||
+                values.saleInvoiceDetails.invoice?.length ||
+                undefined,
+              commercialInvoices:
+                values.saleInvoiceDetails.invoice?.map((inv) => ({
+                  commercialInvoiceNumber:
+                    inv.commercialInvoiceNumber || undefined,
+                  clearanceCommercialInvoiceUrl:
+                    inv.clearanceCommercialInvoice || undefined,
+                  actualCommercialInvoiceUrl:
+                    inv.actualCommercialInvoice || undefined,
+                  saberInvoiceUrl: inv.saberInvoice || undefined,
+                  addProductDetails: inv.addProductDetails || undefined,
+                  _id: inv._id || undefined,
+                })) || [],
+              _id: values.saleInvoiceDetails._id || undefined,
+            }
           : undefined,
         blDetails: values.blDetails
           ? {
-            review: values.blDetails.review || undefined,
-            shippingLineName:
-              values.blDetails.shippingLineName &&
+              review: values.blDetails.review || undefined,
+              shippingLineName:
+                values.blDetails.shippingLineName &&
                 /^[0-9a-fA-F]{24}$/.test(values.blDetails.shippingLineName)
-                ? values.blDetails.shippingLineName
-                : undefined,
-            noOfBl:
-              values.blDetails.noOfBl ||
-              values.blDetails.Bl?.length ||
-              undefined,
-            Bl:
-              values.blDetails.Bl?.map((bl) => ({
-                blNumber: bl.blNumber || undefined,
-                blDate: bl.blDate || undefined,
-                telexDate: bl.telexDate || undefined,
-                uploadBLUrl: bl.uploadBLUrl || undefined,
-                _id: bl._id || undefined,
-              })) || [],
-            _id: values.blDetails._id || undefined,
-          }
+                  ? values.blDetails.shippingLineName
+                  : undefined,
+              noOfBl:
+                values.blDetails.noOfBl ||
+                values.blDetails.Bl?.length ||
+                undefined,
+              Bl:
+                values.blDetails.Bl?.map((bl) => ({
+                  blNumber: bl.blNumber || undefined,
+                  blDate: bl.blDate || undefined,
+                  telexDate: bl.telexDate || undefined,
+                  uploadBLUrl: bl.uploadBLUrl || undefined,
+                  _id: bl._id || undefined,
+                })) || [],
+              _id: values.blDetails._id || undefined,
+            }
           : undefined,
         otherDetails:
           values.otherDetails?.map((item) => ({
@@ -977,7 +996,10 @@ export default function EditShipmentPage({ params }: Props) {
           })) || [],
       };
 
-      console.log("Payload being sent to API:", JSON.stringify(payload, null, 2));
+      console.log(
+        "Payload being sent to API:",
+        JSON.stringify(payload, null, 2)
+      );
       await putData(`/shipment/update/${params.id}`, payload);
       toast.success("Shipment updated successfully!");
       localStorage.removeItem(`shipmentDraft_${params.id}`);
@@ -988,7 +1010,8 @@ export default function EditShipmentPage({ params }: Props) {
         console.error("Response status:", error.response.status);
         console.error("Response data:", error.response.data);
         toast.error(
-          `Error updating shipment: ${error.response.data.message || "Server error"
+          `Error updating shipment: ${
+            error.response.data.message || "Server error"
           }`
         );
       } else {
@@ -1008,7 +1031,10 @@ export default function EditShipmentPage({ params }: Props) {
         console.log("Fetching shipment data for ID:", params.id);
 
         const token = Cookies.get("AccessToken");
-        console.log("AccessToken:", token ? `${token.slice(0, 10)}...` : "No token found");
+        console.log(
+          "AccessToken:",
+          token ? `${token.slice(0, 10)}...` : "No token found"
+        );
 
         if (!token) {
           console.warn("No AccessToken found in cookies");
@@ -1029,7 +1055,10 @@ export default function EditShipmentPage({ params }: Props) {
 
         try {
           const payload = JSON.parse(atob(token.split(".")[1]));
-          console.log("Token payload:", { role: payload.role, userId: payload.userId });
+          console.log("Token payload:", {
+            role: payload.role,
+            userId: payload.userId,
+          });
         } catch (e) {
           console.warn("Failed to decode token payload:", e);
         }
@@ -1064,7 +1093,9 @@ export default function EditShipmentPage({ params }: Props) {
           }
           if (response.status === 403) {
             if (errorData.message === "Forbidden877") {
-              toast.error("You do not have permission to view this shipment. Required role: owner, admin, or teamMember.");
+              toast.error(
+                "You do not have permission to view this shipment. Required role: owner, admin, or teamMember."
+              );
             } else {
               toast.error("You are not authorized to view this shipment.");
             }
@@ -1077,7 +1108,8 @@ export default function EditShipmentPage({ params }: Props) {
             return;
           }
           throw new Error(
-            errorData.message || `Failed to fetch shipment data: ${response.status}`
+            errorData.message ||
+              `Failed to fetch shipment data: ${response.status}`
           );
         }
 
@@ -1106,303 +1138,339 @@ export default function EditShipmentPage({ params }: Props) {
           createdBy: data.shipment.createdBy || undefined,
           bookingDetails: data.shipment.bookingDetails
             ? {
-              review: data.shipment.bookingDetails.review || undefined,
-              invoiceNumber: data.shipment.bookingDetails.invoiceNumber || undefined,
-              bookingNumber: data.shipment.bookingDetails.bookingNumber || undefined,
-              portOfLoading: data.shipment.bookingDetails.portOfLoading || undefined,
-              destinationPort: data.shipment.bookingDetails.destinationPort || undefined,
-              vesselSailingDate:
-                data.shipment.bookingDetails.vesselSailingDate || undefined,
-              vesselArrivingDate:
-                data.shipment.bookingDetails.vesselArrivingDate || undefined,
-              numberOfContainer:
-                data.shipment.bookingDetails.numberOfContainer ||
-                data.shipment.bookingDetails.containers?.length ||
-                undefined,
-              containers: Array.isArray(data.shipment.bookingDetails?.containers)
-                ? data.shipment.bookingDetails.containers.map((container: any) => ({
-                  containerType: container.containerType || undefined,
-                  containerNumber: container.containerNumber || undefined,
-                  truckNumber: container.truckNumber || undefined,
-                  truckDriverContactNumber:
-                    container.truckDriverContactNumber || undefined,
-                  addProductDetails: Array.isArray(
-                    container.addProductDetails
-                  )
-                    ? container.addProductDetails.map((product: any) => ({
-                      _id: product._id || undefined,
-                      productId: product.productId || product._id || undefined,
-                      code: product.code || undefined,
-                      description: product.description || undefined,
-                      unitOfMeasurements:
-                        product.unitOfMeasurements || undefined,
-                      countryOfOrigin: product.countryOfOrigin || undefined,
-                      HScode: product.HScode || undefined,
-                      variantName: product.variantName || undefined,
-                      variantType: product.variantType || undefined,
-                      sellPrice: product.sellPrice || undefined,
-                      buyPrice: product.buyPrice || undefined,
-                      netWeight: product.netWeight || undefined,
-                      grossWeight: product.grossWeight || undefined,
-                      cubicMeasurement: product.cubicMeasurement || undefined,
-                      __v: product.__v || undefined,
-                    }))
-                    : [],
-                  _id: container._id || undefined,
-                }))
-                : [],
-              _id: data.shipment.bookingDetails._id || undefined,
-            }
+                review: data.shipment.bookingDetails.review || undefined,
+                invoiceNumber:
+                  data.shipment.bookingDetails.invoiceNumber || undefined,
+                bookingNumber:
+                  data.shipment.bookingDetails.bookingNumber || undefined,
+                portOfLoading:
+                  data.shipment.bookingDetails.portOfLoading || undefined,
+                destinationPort:
+                  data.shipment.bookingDetails.destinationPort || undefined,
+                vesselSailingDate:
+                  data.shipment.bookingDetails.vesselSailingDate || undefined,
+                vesselArrivingDate:
+                  data.shipment.bookingDetails.vesselArrivingDate || undefined,
+                numberOfContainer:
+                  data.shipment.bookingDetails.numberOfContainer ||
+                  data.shipment.bookingDetails.containers?.length ||
+                  undefined,
+                containers: Array.isArray(
+                  data.shipment.bookingDetails?.containers
+                )
+                  ? data.shipment.bookingDetails.containers.map(
+                      (container: any) => ({
+                        containerType: container.containerType || undefined,
+                        containerNumber: container.containerNumber || undefined,
+                        truckNumber: container.truckNumber || undefined,
+                        truckDriverContactNumber:
+                          container.truckDriverContactNumber || undefined,
+                        addProductDetails: Array.isArray(
+                          container.addProductDetails
+                        )
+                          ? container.addProductDetails.map((product: any) => ({
+                              _id: product._id || undefined,
+                              productId:
+                                product.productId || product._id || undefined,
+                              code: product.code || undefined,
+                              description: product.description || undefined,
+                              unitOfMeasurements:
+                                product.unitOfMeasurements || undefined,
+                              countryOfOrigin:
+                                product.countryOfOrigin || undefined,
+                              HScode: product.HScode || undefined,
+                              variantName: product.variantName || undefined,
+                              variantType: product.variantType || undefined,
+                              sellPrice: product.sellPrice || undefined,
+                              buyPrice: product.buyPrice || undefined,
+                              netWeight: product.netWeight || undefined,
+                              grossWeight: product.grossWeight || undefined,
+                              cubicMeasurement:
+                                product.cubicMeasurement || undefined,
+                              __v: product.__v || undefined,
+                            }))
+                          : [],
+                        _id: container._id || undefined,
+                      })
+                    )
+                  : [],
+                _id: data.shipment.bookingDetails._id || undefined,
+              }
             : undefined,
           shippingDetails: data.shipment.shippingDetails
             ? {
-              review: data.shipment.shippingDetails.review || undefined,
-              transporterName:
-                data.shipment.shippingDetails.transporterName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shipment.shippingDetails.transporterName)
-                  ? data.shipment.shippingDetails.transporterName
-                  : undefined,
-              noOftransportinvoices:
-                data.shipment.shippingDetails.noOftransportinvoices ||
-                data.shipment.shippingDetails.transporterInvoices?.length ||
-                undefined,
-              transporterInvoices: Array.isArray(
-                data.shipment.shippingDetails?.transporterInvoices
-              )
-                ? data.shipment.shippingDetails.transporterInvoices.map(
-                  (invoice: any) => ({
-                    invoiceNumber: invoice.invoiceNumber || undefined,
-                    uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
-                    date: invoice.date || undefined,
-                    valueWithGst: invoice.valueWithGst || undefined,
-                    valueWithoutGst: invoice.valueWithoutGst || undefined,
-                    _id: invoice._id || undefined,
-                  })
+                review: data.shipment.shippingDetails.review || undefined,
+                transporterName:
+                  data.shipment.shippingDetails.transporterName &&
+                  /^[0-9a-fA-F]{24}$/.test(
+                    data.shipment.shippingDetails.transporterName
+                  )
+                    ? data.shipment.shippingDetails.transporterName
+                    : undefined,
+                noOftransportinvoices:
+                  data.shipment.shippingDetails.noOftransportinvoices ||
+                  data.shipment.shippingDetails.transporterInvoices?.length ||
+                  undefined,
+                transporterInvoices: Array.isArray(
+                  data.shipment.shippingDetails?.transporterInvoices
                 )
-                : [],
-              forwarderName:
-                data.shipment.shippingDetails.forwarderName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shipment.shippingDetails.forwarderName)
-                  ? data.shipment.shippingDetails.forwarderName
-                  : undefined,
-              noOfForwarderinvoices:
-                data.shipment.shippingDetails.noOfForwarderinvoices ||
-                data.shipment.shippingDetails.forwarderInvoices?.length ||
-                undefined,
-              forwarderInvoices: Array.isArray(
-                data.shipment.shippingDetails?.forwarderInvoices
-              )
-                ? data.shipment.shippingDetails.forwarderInvoices.map(
-                  (invoice: any) => ({
-                    invoiceNumber: invoice.invoiceNumber || undefined,
-                    uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
-                    date: invoice.date || undefined,
-                    valueWithGst: invoice.valueWithGst || undefined,
-                    valueWithoutGst: invoice.valueWithoutGst || undefined,
-                    _id: invoice._id || undefined,
-                  })
+                  ? data.shipment.shippingDetails.transporterInvoices.map(
+                      (invoice: any) => ({
+                        invoiceNumber: invoice.invoiceNumber || undefined,
+                        uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
+                        date: invoice.date || undefined,
+                        valueWithGst: invoice.valueWithGst || undefined,
+                        valueWithoutGst: invoice.valueWithoutGst || undefined,
+                        _id: invoice._id || undefined,
+                      })
+                    )
+                  : [],
+                forwarderName:
+                  data.shipment.shippingDetails.forwarderName &&
+                  /^[0-9a-fA-F]{24}$/.test(
+                    data.shipment.shippingDetails.forwarderName
+                  )
+                    ? data.shipment.shippingDetails.forwarderName
+                    : undefined,
+                noOfForwarderinvoices:
+                  data.shipment.shippingDetails.noOfForwarderinvoices ||
+                  data.shipment.shippingDetails.forwarderInvoices?.length ||
+                  undefined,
+                forwarderInvoices: Array.isArray(
+                  data.shipment.shippingDetails?.forwarderInvoices
                 )
-                : [],
-              _id: data.shipment.shippingDetails._id || undefined,
-            }
+                  ? data.shipment.shippingDetails.forwarderInvoices.map(
+                      (invoice: any) => ({
+                        invoiceNumber: invoice.invoiceNumber || undefined,
+                        uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
+                        date: invoice.date || undefined,
+                        valueWithGst: invoice.valueWithGst || undefined,
+                        valueWithoutGst: invoice.valueWithoutGst || undefined,
+                        _id: invoice._id || undefined,
+                      })
+                    )
+                  : [],
+                _id: data.shipment.shippingDetails._id || undefined,
+              }
             : undefined,
           shippingBillDetails: data.shipment.shippingBillDetails
             ? {
-              review: data.shipment.shippingBillDetails.review || undefined,
-              portCode: data.shipment.shippingBillDetails.portCode || undefined,
-              cbName: data.shipment.shippingBillDetails.cbName || undefined,
-              cbCode: data.shipment.shippingBillDetails.cbCode || undefined,
-              numberOFShippingBill:
-                data.shipment.shippingBillDetails.ShippingBills?.length || 0,
-              bills: Array.isArray(data.shipment.shippingBillDetails?.ShippingBills)
-                ? data.shipment.shippingBillDetails.ShippingBills.map(
-                  (bill: BackendShippingBill) => ({
-                    uploadShippingBill: bill.shippingBillUrl || undefined,
-                    shippingBillNumber: bill.shippingBillNumber || undefined,
-                    shippingBillDate: bill.shippingBillDate || undefined,
-                    drawbackValue: bill.drawbackValue
-                      ? Number(bill.drawbackValue)
-                      : undefined,
-                    rodtepValue: bill.rodtepValue
-                      ? Number(bill.rodtepValue)
-                      : undefined,
-                    _id: bill._id || undefined,
-                  })
+                review: data.shipment.shippingBillDetails.review || undefined,
+                portCode:
+                  data.shipment.shippingBillDetails.portCode || undefined,
+                cbName: data.shipment.shippingBillDetails.cbName || undefined,
+                cbCode: data.shipment.shippingBillDetails.cbCode || undefined,
+                numberOFShippingBill:
+                  data.shipment.shippingBillDetails.ShippingBills?.length || 0,
+                bills: Array.isArray(
+                  data.shipment.shippingBillDetails?.ShippingBills
                 )
-                : [],
-              _id: data.shipment.shippingBillDetails._id || undefined,
-            }
+                  ? data.shipment.shippingBillDetails.ShippingBills.map(
+                      (bill: BackendShippingBill) => ({
+                        uploadShippingBill: bill.shippingBillUrl || undefined,
+                        shippingBillNumber:
+                          bill.shippingBillNumber || undefined,
+                        shippingBillDate: bill.shippingBillDate || undefined,
+                        drawbackValue: bill.drawbackValue
+                          ? Number(bill.drawbackValue)
+                          : undefined,
+                        rodtepValue: bill.rodtepValue
+                          ? Number(bill.rodtepValue)
+                          : undefined,
+                        _id: bill._id || undefined,
+                      })
+                    )
+                  : [],
+                _id: data.shipment.shippingBillDetails._id || undefined,
+              }
             : undefined,
           supplierDetails: data.shipment.supplierDetails
             ? {
-              review: data.shipment.supplierDetails.review || undefined,
-              clearance: data.shipment.supplierDetails.clearance
-                ? {
-                  noOfSuppliers:
-                    data.shipment.supplierDetails.clearance.noOfSuppliers ||
-                    data.shipment.supplierDetails.clearance.suppliers?.length ||
-                    undefined,
-                  suppliers: Array.isArray(
-                    data.shipment.supplierDetails.clearance?.suppliers
-                  )
-                    ? data.shipment.supplierDetails.clearance.suppliers.map(
-                      (supplier: any) => ({
-                        supplierName: supplier.supplierName
-                          ? {
-                            _id: supplier.supplierName._id || undefined,
-                            supplierName:
-                              supplier.supplierName.supplierName ||
-                              undefined,
-                            gstNo:
-                              supplier.supplierName.gstNo || undefined,
-                            address:
-                              supplier.supplierName.address ||
-                              undefined,
-                            responsiblePerson:
-                              supplier.supplierName.responsiblePerson ||
-                              undefined,
-                            mobileNumber:
-                              supplier.supplierName.mobileNumber ||
-                              undefined,
-                            state:
-                              supplier.supplierName.state || undefined,
-                            factoryAddress:
-                              supplier.supplierName.factoryAddress ||
-                              undefined,
-                            organizationId:
-                              supplier.supplierName.organizationId ||
-                              undefined,
-                            createdAt:
-                              supplier.supplierName.createdAt ||
-                              undefined,
-                            updatedAt:
-                              supplier.supplierName.updatedAt ||
-                              undefined,
-                            __v: supplier.supplierName.__v || undefined,
-                          }
-                          : undefined,
-                        noOfInvoices:
-                          supplier.noOfInvoices ||
-                          supplier.invoices?.length ||
-                          undefined,
-                        invoices: Array.isArray(supplier.invoices)
-                          ? supplier.invoices.map((invoice: any) => ({
-                            supplierInvoiceNumber:
-                              invoice.supplierInvoiceNumber ||
-                              undefined,
-                            supplierInvoiceDate:
-                              invoice.supplierInvoiceDate || undefined,
-                            supplierInvoiceValueWithGST:
-                              invoice.supplierInvoiceValueWithGST
-                                ? Number(
-                                  invoice.supplierInvoiceValueWithGST
-                                )
+                review: data.shipment.supplierDetails.review || undefined,
+                clearance: data.shipment.supplierDetails.clearance
+                  ? {
+                      noOfSuppliers:
+                        data.shipment.supplierDetails.clearance.noOfSuppliers ||
+                        data.shipment.supplierDetails.clearance.suppliers
+                          ?.length ||
+                        undefined,
+                      suppliers: Array.isArray(
+                        data.shipment.supplierDetails.clearance?.suppliers
+                      )
+                        ? data.shipment.supplierDetails.clearance.suppliers.map(
+                            (supplier: any) => ({
+                              supplierName: supplier.supplierName
+                                ? {
+                                    _id: supplier.supplierName._id || undefined,
+                                    supplierName:
+                                      supplier.supplierName.supplierName ||
+                                      undefined,
+                                    gstNo:
+                                      supplier.supplierName.gstNo || undefined,
+                                    address:
+                                      supplier.supplierName.address ||
+                                      undefined,
+                                    responsiblePerson:
+                                      supplier.supplierName.responsiblePerson ||
+                                      undefined,
+                                    mobileNumber:
+                                      supplier.supplierName.mobileNumber ||
+                                      undefined,
+                                    state:
+                                      supplier.supplierName.state || undefined,
+                                    factoryAddress:
+                                      supplier.supplierName.factoryAddress ||
+                                      undefined,
+                                    organizationId:
+                                      supplier.supplierName.organizationId ||
+                                      undefined,
+                                    createdAt:
+                                      supplier.supplierName.createdAt ||
+                                      undefined,
+                                    updatedAt:
+                                      supplier.supplierName.updatedAt ||
+                                      undefined,
+                                    __v: supplier.supplierName.__v || undefined,
+                                  }
                                 : undefined,
-                            supplierInvoiceValueWithOutGST:
-                              invoice.supplierInvoiceValueWithOutGST
-                                ? Number(
-                                  invoice.supplierInvoiceValueWithOutGST
-                                )
-                                : undefined,
-                            clearanceSupplierInvoiceUrl:
-                              invoice.clearanceSupplierInvoiceUrl ||
-                              undefined,
-                            _id: invoice._id || undefined,
-                          }))
-                          : [],
-                        _id: supplier._id || undefined,
-                      })
-                    )
-                    : [],
-                  _id: data.shipment.supplierDetails.clearance._id || undefined,
-                }
-                : undefined,
-              actual: data.shipment.supplierDetails.actual
-                ? {
-                  actualSupplierName:
-                    data.shipment.supplierDetails.actual.actualSupplierName ||
-                    undefined,
-                  actualSupplierInvoiceUrl:
-                    data.shipment.supplierDetails.actual.actualSupplierInvoiceUrl ||
-                    undefined,
-                  actualSupplierInvoiceValue: data.shipment.supplierDetails.actual
-                    .actualSupplierInvoiceValue
-                    ? Number(
-                      data.shipment.supplierDetails.actual
-                        .actualSupplierInvoiceValue
-                    )
-                    : undefined,
-                  shippingBillUrl:
-                    data.shipment.supplierDetails.actual.shippingBillUrl ||
-                    undefined,
-                  _id: data.shipment.supplierDetails.actual._id || undefined,
-                }
-                : undefined,
-              _id: data.shipment.supplierDetails._id || undefined,
-            }
+                              noOfInvoices:
+                                supplier.noOfInvoices ||
+                                supplier.invoices?.length ||
+                                undefined,
+                              invoices: Array.isArray(supplier.invoices)
+                                ? supplier.invoices.map((invoice: any) => ({
+                                    supplierInvoiceNumber:
+                                      invoice.supplierInvoiceNumber ||
+                                      undefined,
+                                    supplierInvoiceDate:
+                                      invoice.supplierInvoiceDate || undefined,
+                                    supplierInvoiceValueWithGST:
+                                      invoice.supplierInvoiceValueWithGST
+                                        ? Number(
+                                            invoice.supplierInvoiceValueWithGST
+                                          )
+                                        : undefined,
+                                    supplierInvoiceValueWithOutGST:
+                                      invoice.supplierInvoiceValueWithOutGST
+                                        ? Number(
+                                            invoice.supplierInvoiceValueWithOutGST
+                                          )
+                                        : undefined,
+                                    clearanceSupplierInvoiceUrl:
+                                      invoice.clearanceSupplierInvoiceUrl ||
+                                      undefined,
+                                    _id: invoice._id || undefined,
+                                  }))
+                                : [],
+                              _id: supplier._id || undefined,
+                            })
+                          )
+                        : [],
+                      _id:
+                        data.shipment.supplierDetails.clearance._id ||
+                        undefined,
+                    }
+                  : undefined,
+                actual: data.shipment.supplierDetails.actual
+                  ? {
+                      actualSupplierName:
+                        data.shipment.supplierDetails.actual
+                          .actualSupplierName || undefined,
+                      actualSupplierInvoiceUrl:
+                        data.shipment.supplierDetails.actual
+                          .actualSupplierInvoiceUrl || undefined,
+                      actualSupplierInvoiceValue: data.shipment.supplierDetails
+                        .actual.actualSupplierInvoiceValue
+                        ? Number(
+                            data.shipment.supplierDetails.actual
+                              .actualSupplierInvoiceValue
+                          )
+                        : undefined,
+                      shippingBillUrl:
+                        data.shipment.supplierDetails.actual.shippingBillUrl ||
+                        undefined,
+                      _id:
+                        data.shipment.supplierDetails.actual._id || undefined,
+                    }
+                  : undefined,
+                _id: data.shipment.supplierDetails._id || undefined,
+              }
             : undefined,
           saleInvoiceDetails: data.shipment.saleInvoiceDetails
             ? {
-              review: data.shipment.saleInvoiceDetails.review || undefined,
-              consignee:
-                typeof data.shipment.saleInvoiceDetails.consignee === "object"
-                  ? data.shipment.saleInvoiceDetails.consignee?._id
-                  : data.shipment.saleInvoiceDetails.consignee &&
-                    /^[0-9a-fA-F]{24}$/.test(data.shipment.saleInvoiceDetails.consignee)
+                review: data.shipment.saleInvoiceDetails.review || undefined,
+                consignee:
+                  typeof data.shipment.saleInvoiceDetails.consignee === "object"
+                    ? data.shipment.saleInvoiceDetails.consignee?._id
+                    : data.shipment.saleInvoiceDetails.consignee &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.saleInvoiceDetails.consignee
+                      )
                     ? data.shipment.saleInvoiceDetails.consignee
                     : undefined,
-              actualBuyer: data.shipment.saleInvoiceDetails.actualBuyer || undefined,
-              numberOfSalesInvoices:
-                data.shipment.saleInvoiceDetails.numberOfSalesInvoices ||
-                data.shipment.saleInvoiceDetails.commercialInvoices?.length ||
-                undefined,
-              invoice: Array.isArray(data.shipment.saleInvoiceDetails?.commercialInvoices)
-                ? data.shipment.saleInvoiceDetails.commercialInvoices.map((inv: any) => ({
-                  commercialInvoiceNumber: inv.commercialInvoiceNumber || undefined,
-                  clearanceCommercialInvoice: inv.clearanceCommercialInvoiceUrl || undefined,
-                  actualCommercialInvoice: inv.actualCommercialInvoiceUrl || undefined,
-                  saberInvoice: inv.saberInvoiceUrl || undefined,
-                  addProductDetails: inv.addProductDetails || [],
-                  _id: inv._id || undefined,
-                }))
-                : [],
-              _id: data.shipment.saleInvoiceDetails._id || undefined,
-            }
+                actualBuyer:
+                  data.shipment.saleInvoiceDetails.actualBuyer || undefined,
+                numberOfSalesInvoices:
+                  data.shipment.saleInvoiceDetails.numberOfSalesInvoices ||
+                  data.shipment.saleInvoiceDetails.commercialInvoices?.length ||
+                  undefined,
+                invoice: Array.isArray(
+                  data.shipment.saleInvoiceDetails?.commercialInvoices
+                )
+                  ? data.shipment.saleInvoiceDetails.commercialInvoices.map(
+                      (inv: any) => ({
+                        commercialInvoiceNumber:
+                          inv.commercialInvoiceNumber || undefined,
+                        clearanceCommercialInvoice:
+                          inv.clearanceCommercialInvoiceUrl || undefined,
+                        actualCommercialInvoice:
+                          inv.actualCommercialInvoiceUrl || undefined,
+                        saberInvoice: inv.saberInvoiceUrl || undefined,
+                        addProductDetails: inv.addProductDetails || [],
+                        _id: inv._id || undefined,
+                      })
+                    )
+                  : [],
+                _id: data.shipment.saleInvoiceDetails._id || undefined,
+              }
             : undefined,
           blDetails: data.shipment.blDetails
             ? {
-              review: data.shipment.blDetails.review || undefined,
-              shippingLineName:
-                data.shipment.blDetails.shippingLineName &&
-                  /^[0-9a-fA-F]{24}$/.test(data.shipment.blDetails.shippingLineName)
-                  ? data.shipment.blDetails.shippingLineName
-                  : undefined,
-              noOfBl:
-                data.shipment.blDetails.noOfBl ||
-                data.shipment.blDetails.Bl?.length ||
-                undefined,
-              Bl: Array.isArray(data.shipment.blDetails?.Bl)
-                ? data.shipment.blDetails.Bl.map((bl: any) => ({
-                  blNumber: bl.blNumber || undefined,
-                  blDate: bl.blDate || undefined,
-                  telexDate: bl.telexDate || undefined,
-                  uploadBLUrl: bl.uploadBLUrl || undefined,
-                  _id: bl._id || undefined,
-                }))
-                : [],
-              _id: data.shipment.blDetails._id || undefined,
-            }
+                review: data.shipment.blDetails.review || undefined,
+                shippingLineName:
+                  data.shipment.blDetails.shippingLineName &&
+                  /^[0-9a-fA-F]{24}$/.test(
+                    data.shipment.blDetails.shippingLineName
+                  )
+                    ? data.shipment.blDetails.shippingLineName
+                    : undefined,
+                noOfBl:
+                  data.shipment.blDetails.noOfBl ||
+                  data.shipment.blDetails.Bl?.length ||
+                  undefined,
+                Bl: Array.isArray(data.shipment.blDetails?.Bl)
+                  ? data.shipment.blDetails.Bl.map((bl: any) => ({
+                      blNumber: bl.blNumber || undefined,
+                      blDate: bl.blDate || undefined,
+                      telexDate: bl.telexDate || undefined,
+                      uploadBLUrl: bl.uploadBLUrl || undefined,
+                      _id: bl._id || undefined,
+                    }))
+                  : [],
+                _id: data.shipment.blDetails._id || undefined,
+              }
             : undefined,
           otherDetails: Array.isArray(data.shipment.otherDetails)
             ? data.shipment.otherDetails.map((item: any) => ({
-              review: item.review || undefined,
-              certificateName: item.certificateName || undefined,
-              certificateNumber: item.certificateNumber || undefined,
-              date: item.date || undefined,
-              issuerOfCertificate: item.issuerOfCertificate || undefined,
-              uploadCopyOfCertificate: item.uploadCopyOfCertificate || undefined,
-              _id: item._id || undefined,
-            }))
+                review: item.review || undefined,
+                certificateName: item.certificateName || undefined,
+                certificateNumber: item.certificateNumber || undefined,
+                date: item.date || undefined,
+                issuerOfCertificate: item.issuerOfCertificate || undefined,
+                uploadCopyOfCertificate:
+                  item.uploadCopyOfCertificate || undefined,
+                _id: item._id || undefined,
+              }))
             : [],
         };
 
@@ -1480,8 +1548,9 @@ export default function EditShipmentPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Edit Shipment: ${form.watch("bookingDetails.invoiceNumber") || "N/A"
-              }`}
+            title={`Edit Shipment: ${
+              form.watch("bookingDetails.invoiceNumber") || "N/A"
+            }`}
           />
           <p className="text-muted-foreground text-sm">
             Complete the form below to edit shipment details.
