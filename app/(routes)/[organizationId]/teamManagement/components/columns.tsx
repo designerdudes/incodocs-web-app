@@ -7,24 +7,43 @@ import CellAction from "./cellActions";
 
 export type Employee = {
   _id: string;
-  teamMemberName: string;
+  fullName: string;
   employeeId: string;
-  organizationId: string;
+  email: string;
+  mobileNumber: number;
   role: string;
-  position: string;
+  designation: string;
+  isVerified: boolean;
+  address: {
+    location: string;
+    pincode: number;
+  }; 
+  profileImg: string;
+  ownedOrganizations: string[];
+  memberInOrganizations: Organization[];
   createdAt: string;
   updatedAt: string;
+  __v: number;
+};
+interface Organization {
+  _id: string;
+  name: string;
+  prefix: string;
+  description: string;
+  owner: string;
+  members: string[];
   address: {
     location: string;
     pincode: number;
   };
-  contactInformation: {
-    contactPerson: string;
-    email: string;
-    phoneNumber: string;
-    alternatePhone: string;
-  };
-};
+  shipments: string[];
+  factory: string[];
+  employees: string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+  productIds: string[];
+}
 
 export const columns: ColumnDef<Employee>[] = [
   {
@@ -78,7 +97,7 @@ export const columns: ColumnDef<Employee>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.teamMemberName}</div>
+      <div className="capitalize">{row.original?.fullName}</div>
     ),
   },
   {
@@ -94,7 +113,7 @@ export const columns: ColumnDef<Employee>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {row.original?.contactInformation?.phoneNumber}
+        {row.original?.mobileNumber}
       </div>
     ),
   },
@@ -111,7 +130,7 @@ export const columns: ColumnDef<Employee>[] = [
     ),
     cell: ({ row }) => (
       <div>
-        {row.original?.contactInformation?.email}
+        {row.original?.email}
       </div>
     ),
   },

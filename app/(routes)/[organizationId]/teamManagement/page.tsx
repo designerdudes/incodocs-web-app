@@ -10,14 +10,16 @@ import { columns } from "./components/columns";
 
 interface Props {
   params: {
-    factoryid: string;
+    organizationId : string;
   };
 }
 
 export default async function TeamMemberPage({ params }: Props) {
+  const { organizationId  } = params;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(`https://incodocs-server.onrender.com/employers/getall`, {
+  const res = await fetch(`https://incodocs-server.onrender.com/employers/getbyorg/${organizationId }`, 
+    {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
