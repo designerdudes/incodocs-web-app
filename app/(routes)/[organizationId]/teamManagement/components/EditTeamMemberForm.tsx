@@ -21,7 +21,7 @@ import toast from "react-hot-toast";
 
 // TeamMember Form Schema
 const formSchema = z.object({
-  teamMemberName: z.string().min(1, { message: "Name is required" }),
+  fullName: z.string().min(1, { message: "Name is required" }),
   organizationId: z
     .string()
     .min(1, { message: "Organization must be selected" }),
@@ -30,18 +30,12 @@ const formSchema = z.object({
   position: z.string().min(1, { message: "Position is required" }),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
-    pincode: z
-      .number()
-      .min(6, { message: "Pincode must be at least 6 characters" }),
+    pincode: z.string().min(6, { message: "Pincode must be at least 6 characters" }),
   }),
-  contactInformation: z.object({
-    contactPerson: z.string().min(1, { message: "Contact person is required" }),
-    email: z.string().email({ message: "Invalid email format" }),
-    phoneNumber: z.string().min(1, { message: "Enter phone number" }),
-    alternatePhone: z
-      .string()
-      .min(1, { message: "Enter alternate phone number" }),
-  }),
+  contactPerson: z.string().min(1, { message: "Contact person is required" }),
+  email: z.string().email({ message: "Invalid email format" }),
+  mobileNumber: z.string().min(1, { message: "Enter phone number" }),
+  alternateMobileNumber: z.string().optional(),
 });
 
 interface Props {
@@ -50,7 +44,7 @@ interface Props {
   };
 }
 
-export default function EditFactoryForm({ params }: Props) {
+export default function EditTeamMemberForm({ params }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
@@ -59,41 +53,36 @@ export default function EditFactoryForm({ params }: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      teamMemberName: "",
+      fullName: "",
       organizationId: "",
       employeeId: "",
       role: "",
       position: "",
-      contactInformation: {
-        contactPerson: "",
-        email: "",
-        phoneNumber: "",
-        alternatePhone: "",
-      },
-      address: {
-        location: "",
-        pincode: undefined as number | undefined,
-      },
+      address: { location: "", pincode: "" },
+      contactPerson: "",
+      email: "",
+      mobileNumber: "",
+      alternateMobileNumber:"",
     },
   });
 
   const EmployeeId = params._id;
+  
 
   useEffect(() => {
-    async function fetchLotData() {
+    async function fetchData() {
       try {
         setIsFetching(true);
         const response = await fetch(
-          `https://incodocs-server.onrender.com/employers/getone/${EmployeeId}`
+          `https://incodocs-server.onrender.com/user/populate/${EmployeeId}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch Employee data");
         }
         const data = await response.json();
-
         // Reset form with fetched values
         form.reset({
-          teamMemberName: data.teamMemberName,
+          fullName: data.fullName,
           organizationId: data.organizationId,
           employeeId: data.employeeId,
           role: data.role,
@@ -102,12 +91,10 @@ export default function EditFactoryForm({ params }: Props) {
             location: data.address.location,
             pincode: data.address.pincode || "",
           },
-          contactInformation: {
-            contactPerson: data.contactInformation.contactPerson,
-            email: data.contactInformation.email,
-            phoneNumber: data.contactInformation.phoneNumber,
-            alternatePhone: data.contactInformation.alternatePhone,
-          },
+           contactPerson: data.contactPerson,
+           email: data.email,
+           mobileNumber: data.mobileNumber,
+           alternateMobileNumber: data.alternateMobileNumber
         });
       } catch (error) {
         console.error("Error fetching Employee data:", error);
@@ -117,53 +104,56 @@ export default function EditFactoryForm({ params }: Props) {
       }
     }
 
-    fetchLotData();
+
+    fetchData();
   }, [EmployeeId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-
-    GlobalModal.title = "Confirm Employee Details";
-    GlobalModal.description =
-      "Are you sure you want to update this Employee Details?";
-    GlobalModal.children = (
+  setIsLoading(true);
+  GlobalModal.title = "Confirm Employee Details";
+  GlobalModal.description =
+    "Are you sure you want to update this Employee's details?";
+  GlobalModal.children = (
       <div className="space-y-4">
-        <p>contactPerson: {values.teamMemberName}</p>
-        <p>EmailId: {values.contactInformation.email}</p>
-        <p>phoneNumber: {values.employeeId}</p>
+        <p>Contact Person: {values.fullName}</p>
+        <p>Email ID: {values.email}</p>
+        <p>Employee ID: {values.employeeId}</p>
+    
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
             onClick={() => {
-              GlobalModal.onClose();
+                GlobalModal.onClose();
+                setIsLoading(false);
+              }}
+            >
+              Cancel
+            </Button>
+      <Button
+        
+          onSubmit={async () => {
+            try {
+              await putData(`/employers/put/${EmployeeId}`, values);
               setIsLoading(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={async () => {
-              try {
-                await putData(`/employers/put/${EmployeeId}`, values);
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.success("Employee Details updated successfully");
-                window.location.reload();
-              } catch (error) {
-                console.error("Error updating Employee Details:", error);
-                setIsLoading(false);
-                GlobalModal.onClose();
-                toast.error("Error updating Employee Details");
-              }
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
+              GlobalModal.onClose();
+              toast.success("Employee details updated successfully");
+              window.location.reload();
+            } catch (error) {
+              console.error("Error updating employee details:", error);
+              setIsLoading(false);
+              GlobalModal.onClose();
+              toast.error("Error updating employee details");
+            }
+          }}
+        >
+          Confirm
+        </Button>
       </div>
-    );
-    GlobalModal.onOpen();
-  };
+     </div>
+  );
+
+  GlobalModal.onOpen();
+};
 
   return (
     <Form {...form}>
@@ -171,7 +161,7 @@ export default function EditFactoryForm({ params }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="teamMemberName"
+            name="fullName"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Contact Person</FormLabel>
@@ -184,7 +174,7 @@ export default function EditFactoryForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="contactInformation.email"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email Id</FormLabel>
@@ -201,7 +191,7 @@ export default function EditFactoryForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="contactInformation.phoneNumber"
+            name="mobileNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
@@ -214,7 +204,7 @@ export default function EditFactoryForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="contactInformation.alternatePhone"
+            name="alternateMobileNumber"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Alternate Phone</FormLabel>
@@ -232,7 +222,7 @@ export default function EditFactoryForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Emloyee Id</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 741852963" disabled={true} type="text" {...field} />
+                  <Input placeholder="Eg: 741852963"  type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -283,8 +273,7 @@ export default function EditFactoryForm({ params }: Props) {
           />
         </div>
         <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-          Submit
+          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />} Submit
         </Button>
       </form>
     </Form>

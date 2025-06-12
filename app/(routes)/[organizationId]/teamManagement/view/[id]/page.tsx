@@ -24,28 +24,37 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 
+interface Props {
+  params: {
+    _id: string; 
+  };
+}
+
 interface EmployeeData {
+  [x: string]: any;
+  _id: string;
+  fullName: string;
+  employeeId: string;
+  email: string;
+  mobileNumber: number;
+  contactPerson: string;
+  alternateMobileNumber:number;
+  role: string;
+  designation: string;
+  isVerified: boolean;
   address: {
     location: string;
     pincode: number;
-  };
-  contactInformation: {
-    contactPerson: string;
-    email: string;
-    phoneNumber: number;
-    alternatePhone: number;
-  };
-  _id: string;
-  teamMemberName: string;
-  employeeId: string;
-  organizationId: string;
-  role: string;
-  position: string;
+  }; 
+  profileImg: string;
+  ownedOrganizations: string[];
   createdAt: string;
   updatedAt: string;
-}
+  __v: number;
+};
 
-export default function BlocksPage() {
+
+export default function EmployeeViewPage ({ params }: Props) {
   const { id } = useParams();
   const [teamData, setTeamData] = useState<EmployeeData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,7 +68,7 @@ export default function BlocksPage() {
           ?.split("=")[1];
 
         const res = await fetch(
-          `https://incodocs-server.onrender.com/employers/getone/${id}`,
+          `https://incodocs-server.onrender.com/user/populate/${id}`,
           {
             method: "GET",
             headers: {
@@ -102,7 +111,7 @@ export default function BlocksPage() {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of ${teamData?.teamMemberName}`}
+            title={`Details of ${teamData?.fullName}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Include personal and professional information such as name, employee
@@ -140,21 +149,15 @@ export default function BlocksPage() {
                   <TableCell className="whitespace-nowrap">
                     Employee Name
                   </TableCell>
-                  <TableCell>{teamData?.teamMemberName}</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Organization Id
-                  </TableCell>
-                  <TableCell>{teamData?.organizationId}</TableCell>
+                  <TableCell>{teamData?.fullName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Role</TableCell>
                   <TableCell>{teamData?.role}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">Position</TableCell>
-                  <TableCell>{teamData?.position}</TableCell>
+                  <TableCell className="whitespace-nowrap">Designation</TableCell>
+                  <TableCell>{teamData?.designation}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Location</TableCell>
@@ -165,23 +168,19 @@ export default function BlocksPage() {
                   <TableCell>{teamData?.address?.pincode}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Contact Person
-                  </TableCell>
-                  <TableCell>
-                    {teamData?.contactInformation?.contactPerson}
-                  </TableCell>
+                  <TableCell className="whitespace-nowrap">Contact Person</TableCell>
+                  <TableCell> {teamData?.contactPerson}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Email</TableCell>
-                  <TableCell>{teamData?.contactInformation?.email}</TableCell>
+                  <TableCell>{teamData?.email}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Phone Number
                   </TableCell>
                   <TableCell>
-                    {teamData?.contactInformation?.phoneNumber}
+                    {teamData?.mobileNumber}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -189,7 +188,7 @@ export default function BlocksPage() {
                     Alternate Number
                   </TableCell>
                   <TableCell>
-                    {teamData?.contactInformation?.alternatePhone}
+                    {teamData?.alternateMobileNumber}
                   </TableCell>
                 </TableRow>
                 <TableRow>

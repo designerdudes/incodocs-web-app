@@ -27,7 +27,7 @@ import { useEffect } from "react";
 import { Props } from "recharts/types/cartesian/YAxis";
 
 const formSchema = z.object({
-  teamMemberName: z.string().min(1, { message: "Name is required" }),
+  fullName: z.string().min(1, { message: "Name is required" }),
   organizationId: z
     .string()
     .min(1, { message: "Organization must be selected" }),
@@ -41,15 +41,15 @@ const formSchema = z.object({
       .string()
       .min(6, { message: "Pincode must be at least 6 characters" }),
   }),
-  contactInformation: z.object({
-    contactPerson: z.string().min(1, { message: "Contact person is required" }),
-    email: z.string().email({ message: "Invalid email format" }),
-    phoneNumber: z.string().min(1, { message: "Enter phone number" }),
-    alternatePhone: z
-      .string()
-      // .min(1, { message: "Enter alternate phone number" })
-      .optional(),
-  }),
+  contactPerson: z.string().min(1, { message: "Contact person is required" }),
+  email: z.string().email({ message: "Invalid email format" }),
+  mobileNumber: z.string().min(1, { message: "Enter phone number" }),
+  alternatePhone: z .string(), // .min(1, { message: "Enter alternate phone number" }).optional(),
+  password: z.string().min(6, { message: "Password is required" }),
+  confirmPassword: z.string().min(6, { message: "Confirm Password is required" }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
 interface OrgData {
@@ -90,13 +90,13 @@ export default function TeamFormPage({ OrgData }: OrgData) {
     setErrors(newErrors);
   };
 
-  console.log("OrgData:", OrgData); // Debugging line
+  // console.log("OrgData:", OrgData); // Debugging line
 
   const [isLoading, setIsLoading] = useState(false);
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      teamMemberName: "",
+      fullName: "",
       organizationId: "",
       employeeId: "",
       role: "",
@@ -104,12 +104,10 @@ export default function TeamFormPage({ OrgData }: OrgData) {
       address: { location: "", pincode: "" },
       password: "",
       confirmPassword: "",
-      contactInformation: {
-        contactPerson: "",
-        email: "",
-        phoneNumber: "",
-        alternatePhone: "",
-      },
+      contactPerson: "",
+      email: "",
+      mobileNumber: "",
+      alternatePhone:"",   
     },
   });
 
@@ -149,7 +147,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
           <div className="grid grid-cols-3 gap-3">
             <FormField
               control={form.control}
-              name="teamMemberName"
+              name="fullName"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Team Member Name</FormLabel>
@@ -330,7 +328,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             </h3>
             <FormField
               control={form.control}
-              name="contactInformation.contactPerson"
+              name="contactPerson"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Contact Person</FormLabel>
@@ -344,7 +342,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             {/* Email */}
             <FormField
               control={form.control}
-              name="contactInformation.email"
+              name="email"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Email</FormLabel>
@@ -363,7 +361,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             {/* Phone Number */}
             <FormField
               control={form.control}
-              name="contactInformation.phoneNumber"
+              name="mobileNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
@@ -378,7 +376,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             {/* Alternate Phone Number */}
             <FormField
               control={form.control}
-              name="contactInformation.alternatePhone"
+              name="alternatePhone"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Alternate Phone Number</FormLabel>
