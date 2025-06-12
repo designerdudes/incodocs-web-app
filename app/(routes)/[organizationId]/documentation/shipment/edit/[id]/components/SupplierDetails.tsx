@@ -649,60 +649,10 @@ export function SupplierDetails({
           <FormItem>
             <FormLabel>Upload Actual Supplier Invoice</FormLabel>
             <FormControl>
-              <div className="flex items-center gap-2">
-                {field.value ? (
-                  <div className="flex gap-2 mt-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <a
-                        href={field.value}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setValue(
-                          "supplierDetails.actual.actualSupplierInvoiceUrl",
-                          "",
-                          { shouldDirty: true }
-                        )
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleFileUpload(
-                            file,
-                            "supplierDetails.actual.actualSupplierInvoiceUrl"
-                          );
-                        }
-                      }}
-                      disabled={uploading}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-white bg-blue-500 hover:bg-blue-600"
-                      disabled={uploading}
-                    >
-                      <UploadCloud className="w-5 h-5 mr-2" />
-                      {uploading ? "Uploading..." : "Upload"}
-                    </Button>
-                  </>
-                )}
-              </div>
+              <FileUploadField
+                name="supplierDetails.actual.actualSupplierInvoiceUrl"
+                storageKey="supplierDetails.actual.actualSupplierInvoiceUrl"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
