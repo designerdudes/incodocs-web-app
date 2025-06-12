@@ -472,25 +472,26 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                   )}
                 />
                 <FormField
-                  control={form.control}
-                  name="tileDetails.size.breadth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Size Breadth (cm)</FormLabel>
-                      <FormControl>
-                        <input
-                          type="number"
-                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
-                          min={0}
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+  control={form.control}
+  name="tileDetails.size.breadth"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Size Breadth (cm)</FormLabel>
+      <FormControl>
+        <Input
+          type="number"
+          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+          min={0}
+          {...field}
+          onChange={(e) => field.onChange(Number(e.target.value))}
+        />
+      </FormControl>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
                 <FormField
                   control={form.control}
                   name="tileDetails.thickness.value"
