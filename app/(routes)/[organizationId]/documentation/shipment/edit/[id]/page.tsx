@@ -86,7 +86,7 @@ interface ShipmentApiResponse {
     };
     blDetails?: {
       review?: string;
-      shippingLineName?: string;
+      shippingLineName?: { _id: string; name: string } | string;
       noOfBl?: number;
       Bl?: {
         blNumber?: string;
@@ -1351,10 +1351,12 @@ export default function EditShipmentPage({ params }: Props) {
             ? {
                 review: data.shipment.blDetails.review || undefined,
                 shippingLineName:
-                  data.shipment.blDetails.shippingLineName &&
-                  /^[0-9a-fA-F]{24}$/.test(
-                    data.shipment.blDetails.shippingLineName
-                  )
+                  typeof data.shipment.blDetails.shippingLineName === "object"
+                    ? data.shipment.blDetails.shippingLineName?._id
+                    : data.shipment.blDetails.shippingLineName &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.blDetails.shippingLineName
+                      )
                     ? data.shipment.blDetails.shippingLineName
                     : undefined,
                 noOfBl:
