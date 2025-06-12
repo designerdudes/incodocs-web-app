@@ -28,6 +28,7 @@ import {
   TableHead,
 } from "@/components/ui/table";
 import CalendarComponent from "@/components/CalendarComponent";
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
 
 interface OtherDetailsProps {
   shipmentId: string;
@@ -35,7 +36,7 @@ interface OtherDetailsProps {
 }
 
 export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
-  const { control, setValue,getValues, watch } = useFormContext();
+  const { control, setValue, getValues, watch } = useFormContext();
   const [uploading, setUploading] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
@@ -91,8 +92,8 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
   };
 
   function saveProgressSilently(arg0: FieldValues): void {
-      saveProgress({ OtherDetails: getValues().OtherDetails });
-    }
+    saveProgress({ OtherDetails: getValues().OtherDetails });
+  }
 
   return (
     <div className="space-y-4">
@@ -190,12 +191,16 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                               align="start"
                             >
                               <CalendarComponent
-                                                selected={field.value ? new Date(field.value) : undefined}
-                                                onSelect={(date: any) => {
-                                                  field.onChange(date?.toISOString());
-                                                  saveProgressSilently(getValues());
-                                                }}
-                                              />
+                                selected={
+                                  field.value
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
+                                onSelect={(date: any) => {
+                                  field.onChange(date?.toISOString());
+                                  saveProgressSilently(getValues());
+                                }}
+                              />
                             </PopoverContent>
                           </Popover>
                           <FormMessage />
@@ -228,60 +233,10 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <div className="flex items-center gap-2">
-                              {field.value && field.value.startsWith("http") ? (
-                                <div className="flex gap-2 mt-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a
-                                      href={field.value}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View
-                                    </a>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      setValue(
-                                        `otherDetails[${index}].uploadCopyOfCertificate`,
-                                        "",
-                                        { shouldDirty: true }
-                                      )
-                                    }
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              ) : (
-                                <>
-                                  <Input
-                                    type="file"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleFileUpload(
-                                          file,
-                                          `otherDetails[${index}].uploadCopyOfCertificate`
-                                        );
-                                      }
-                                    }}
-                                    disabled={uploading}
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="secondary"
-                                    className="text-white bg-blue-500 hover:bg-blue-600"
-                                    disabled={uploading}
-                                  >
-                                    <UploadCloud className="w-5 h-5 mr-2" />
-                                    {uploading ? "Uploading..." : "Upload"}
-                                  </Button>
-                                </>
-                              )}
-                            </div>
+                            <FileUploadField
+                              name={`otherDetails[${index}].uploadCopyOfCertificate`}
+                              storageKey={`otherDetails[${index}].uploadCopyOfCertificate}`}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

@@ -61,10 +61,10 @@ interface ShipmentApiResponse {
     };
     shippingDetails?: {
       review?: string;
-      transporterName?: string;
+      transporterName?: { _id: string; name: string } | string;
       noOftransportinvoices?: number;
       transporterInvoices?: any[];
-      forwarderName?: string;
+      forwarderName?: { _id: string; name: string } | string;
       noOfForwarderinvoices?: number;
       forwarderInvoices?: any[];
       _id?: string;
@@ -72,7 +72,7 @@ interface ShipmentApiResponse {
     shippingBillDetails?: {
       review?: string;
       portCode?: string;
-      cbName?: string;
+      cbName?: { _id: string; name: string } | string;
       cbCode?: string;
       numberOFShippingBill?: number;
       ShippingBills?: any[];
@@ -86,7 +86,7 @@ interface ShipmentApiResponse {
     };
     blDetails?: {
       review?: string;
-      shippingLineName?: string;
+      shippingLineName?: { _id: string; name: string } | string;
       noOfBl?: number;
       Bl?: {
         blNumber?: string;
@@ -1100,10 +1100,13 @@ export default function EditShipmentPage({ params }: Props) {
             ? {
                 review: data.shipment.shippingDetails.review || undefined,
                 transporterName:
-                  data.shipment.shippingDetails.transporterName &&
-                  /^[0-9a-fA-F]{24}$/.test(
-                    data.shipment.shippingDetails.transporterName
-                  )
+                  typeof data.shipment.shippingDetails.transporterName ===
+                  "object"
+                    ? data.shipment.shippingDetails.transporterName?._id
+                    : data.shipment.shippingDetails.transporterName &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.shippingDetails.transporterName
+                      )
                     ? data.shipment.shippingDetails.transporterName
                     : undefined,
                 noOftransportinvoices:
@@ -1125,10 +1128,13 @@ export default function EditShipmentPage({ params }: Props) {
                     )
                   : [],
                 forwarderName:
-                  data.shipment.shippingDetails.forwarderName &&
-                  /^[0-9a-fA-F]{24}$/.test(
-                    data.shipment.shippingDetails.forwarderName
-                  )
+                  typeof data.shipment.shippingDetails.forwarderName ===
+                  "object"
+                    ? data.shipment.shippingDetails.forwarderName?._id
+                    : data.shipment.shippingDetails.forwarderName &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.shippingDetails.forwarderName
+                      )
                     ? data.shipment.shippingDetails.forwarderName
                     : undefined,
                 noOfForwarderinvoices:
@@ -1157,7 +1163,15 @@ export default function EditShipmentPage({ params }: Props) {
                 review: data.shipment.shippingBillDetails.review || undefined,
                 portCode:
                   data.shipment.shippingBillDetails.portCode || undefined,
-                cbName: data.shipment.shippingBillDetails.cbName || undefined,
+                cbName:
+                  typeof data.shipment.shippingBillDetails.cbName === "object"
+                    ? data.shipment.shippingBillDetails.cbName?._id
+                    : data.shipment.shippingBillDetails.cbName &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.shippingBillDetails.cbName
+                      )
+                    ? data.shipment.shippingBillDetails.cbName
+                    : undefined,
                 cbCode: data.shipment.shippingBillDetails.cbCode || undefined,
                 numberOFShippingBill:
                   data.shipment.shippingBillDetails.ShippingBills?.length || 0,
@@ -1337,10 +1351,12 @@ export default function EditShipmentPage({ params }: Props) {
             ? {
                 review: data.shipment.blDetails.review || undefined,
                 shippingLineName:
-                  data.shipment.blDetails.shippingLineName &&
-                  /^[0-9a-fA-F]{24}$/.test(
-                    data.shipment.blDetails.shippingLineName
-                  )
+                  typeof data.shipment.blDetails.shippingLineName === "object"
+                    ? data.shipment.blDetails.shippingLineName?._id
+                    : data.shipment.blDetails.shippingLineName &&
+                      /^[0-9a-fA-F]{24}$/.test(
+                        data.shipment.blDetails.shippingLineName
+                      )
                     ? data.shipment.blDetails.shippingLineName
                     : undefined,
                 noOfBl:

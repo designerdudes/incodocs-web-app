@@ -39,7 +39,7 @@ import { FileUploadField } from "../../../createnew/components/FileUploadField";
 interface SupplierDetailsProps {
   shipmentId: string;
   orgId?: string;
-  currentUser : string;
+  currentUser: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
@@ -90,15 +90,17 @@ export function SupplierDetails({
       try {
         setIsLoadingSuppliers(true);
         setFetchError(null);
-        const orgIdToUse = orgId
-        const supplierData = await fetchData(`/shipment/supplier/getbyorg/${orgIdToUse}`);
+        const orgIdToUse = orgId;
+        const supplierData = await fetchData(
+          `/shipment/supplier/getbyorg/${orgIdToUse}`
+        );
         const suppliers = Array.isArray(supplierData)
           ? supplierData.map((supplier: any) => ({
               _id: supplier._id,
               name: supplier.supplierName,
             }))
           : [];
-       
+
         setSupplierNames(suppliers);
       } catch (error: any) {
         console.error("Error fetching supplier data:", error);
@@ -109,8 +111,6 @@ export function SupplierDetails({
     };
     fetchSuppliers();
   }, [orgId]);
-
- 
 
   // Autosave form data when supplierDetails changes
   useEffect(() => {
@@ -162,12 +162,14 @@ export function SupplierDetails({
     GlobalModal.title = "Add New Supplier";
     GlobalModal.children = (
       <SupplierForm
-      currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={orgId}
         onSuccess={async () => {
           try {
             const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-            const data = await fetchData(`/shipment/supplier/getbyorg/${orgIdToUse}`);
+            const data = await fetchData(
+              `/shipment/supplier/getbyorg/${orgIdToUse}`
+            );
             const suppliers = Array.isArray(data)
               ? data.map((supplier: any) => ({
                   _id: supplier._id,
@@ -336,8 +338,7 @@ export function SupplierDetails({
                       </FormControl>
                       {field.value?._id &&
                         !selectedSupplier &&
-                        !isLoadingSuppliers
-                       }
+                        !isLoadingSuppliers}
                       <FormMessage />
                     </FormItem>
                   );
@@ -526,68 +527,15 @@ export function SupplierDetails({
                               control={control}
                               name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`}
                               render={({ field }) => (
-                                <FormControl>
-                                  <div className="flex items-center gap-2">
-                                    {field.value ? (
-                                      <div className="flex gap-2 mt-2">
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          asChild
-                                        >
-                                          <a
-                                            href={field.value}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                          >
-                                            <Eye className="w-4 h-4 mr-2" />
-                                            View
-                                          </a>
-                                        </Button>
-                                        <Button
-                                          variant="outline"
-                                          size="sm"
-                                          onClick={() =>
-                                            setValue(
-                                              `supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`,
-                                              "",
-                                              { shouldDirty: true }
-                                            )
-                                          }
-                                        >
-                                          Remove
-                                        </Button>
-                                      </div>
-                                    ) : (
-                                      <>
-                                        <Input
-                                          type="file"
-                                          onChange={(e) => {
-                                            const file = e.target.files?.[0];
-                                            if (file) {
-                                              handleFileUpload(
-                                                file,
-                                                `supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`
-                                              );
-                                            }
-                                          }}
-                                          disabled={uploading}
-                                        />
-                                        <Button
-                                          type="button"
-                                          variant="secondary"
-                                          className="text-white bg-blue-500 hover:bg-blue-600"
-                                          disabled={uploading}
-                                        >
-                                          <UploadCloud className="w-5 h-5 mr-2" />
-                                          {uploading
-                                            ? "Uploading..."
-                                            : "Upload"}
-                                        </Button>
-                                      </>
-                                    )}
-                                  </div>
-                                </FormControl>
+                                <FormItem>
+                                  <FormControl>
+                                    <FileUploadField
+                                      name={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`}
+                                      storageKey={`supplierDetails.clearance.suppliers.${supplierIndex}.invoices.${invoiceIndex}.clearanceSupplierInvoiceUrl`}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
                               )}
                             />
                           </TableCell>
@@ -701,60 +649,10 @@ export function SupplierDetails({
           <FormItem>
             <FormLabel>Upload Actual Supplier Invoice</FormLabel>
             <FormControl>
-              <div className="flex items-center gap-2">
-                {field.value ? (
-                  <div className="flex gap-2 mt-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <a
-                        href={field.value}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setValue(
-                          "supplierDetails.actual.actualSupplierInvoiceUrl",
-                          "",
-                          { shouldDirty: true }
-                        )
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleFileUpload(
-                            file,
-                            "supplierDetails.actual.actualSupplierInvoiceUrl"
-                          );
-                        }
-                      }}
-                      disabled={uploading}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-white bg-blue-500 hover:bg-blue-600"
-                      disabled={uploading}
-                    >
-                      <UploadCloud className="w-5 h-5 mr-2" />
-                      {uploading ? "Uploading..." : "Upload"}
-                    </Button>
-                  </>
-                )}
-              </div>
+              <FileUploadField
+                name="supplierDetails.actual.actualSupplierInvoiceUrl"
+                storageKey="supplierDetails.actual.actualSupplierInvoiceUrl"
+              />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -762,21 +660,21 @@ export function SupplierDetails({
       />
 
       <FormField
-                control={control}
+        control={control}
+        name="supplierDetails.actual.shippingBillUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Shipping Bill URL</FormLabel>
+            <FormControl>
+              <FileUploadField
                 name="supplierDetails.actual.shippingBillUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Shipping Bill URL</FormLabel>
-                    <FormControl>
-                      <FileUploadField
-                        name="supplierDetails.actual.shippingBillUrl"
-                        storageKey="supplierDetails_shippingBillUrl"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                storageKey="supplierDetails_shippingBillUrl"
               />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
       {/* Remarks */}
       <FormField
