@@ -31,19 +31,20 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import CalendarComponent from "@/components/CalendarComponent";
 import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
   orgId?: string;
-  
-  currentUser : string;
+
+  currentUser: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
 
 export function ShippingBillDetails({
   shipmentId,
-   orgId,
+  orgId,
   currentUser,
   saveProgress,
   onSectionSubmit,
@@ -84,7 +85,9 @@ export function ShippingBillDetails({
   // Fetch customs brokers using fetchData
   const fetchCustomsBrokers = async (organizationId: string) => {
     try {
-      const data = await fetchData(`/shipment/cbname/getbyorg/${organizationId}`);
+      const data = await fetchData(
+        `/shipment/cbname/getbyorg/${organizationId}`
+      );
       const brokers = Array.isArray(data)
         ? data.map((broker: any) => ({
             _id: broker._id,
@@ -240,10 +243,8 @@ export function ShippingBillDetails({
         currentUser={currentUser}
         onSuccess={async () => {
           try {
-            const res = await fetchData(
-              `/shipment/cbname/getbyorg/${orgId}`
-            );
-            const data = await res
+            const res = await fetchData(`/shipment/cbname/getbyorg/${orgId}`);
+            const data = await res;
             const mappedCBNames = data.map((cbData: any) => ({
               _id: cbData._id,
               name: cbData.cbName,
@@ -379,66 +380,16 @@ export function ShippingBillDetails({
                   <TableCell>
                     <FormField
                       control={control}
-                      name={`shippingBillDetails.bills[${index}].uploadShippingBill`}
+                      name={
+                        `shippingBillDetails.bills[${index}].uploadShippingBill` as any
+                      }
                       render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <div className="flex items-center gap-2">
-                              {field.value ? (
-                                <div className="flex gap-2 mt-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a
-                                      href={field.value}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View
-                                    </a>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      setValue(
-                                        `shippingBillDetails.bills[${index}].uploadShippingBill`,
-                                        "",
-                                        { shouldDirty: true }
-                                      )
-                                    }
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              ) : (
-                                <>
-                                  <Input
-                                    type="file"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleFileUpload(
-                                          file,
-                                          `shippingBillDetails.bills[${index}].uploadShippingBill`
-                                        );
-                                      }
-                                    }}
-                                    disabled={uploading}
-                                  />
-                                  <Button
-                                    variant="secondary"
-                                    className="bg-blue-500 text-white"
-                                    disabled={uploading}
-                                  >
-                                    <UploadCloud className="w-5 h-5 mr-2" />
-                                    {uploading ? "Uploading..." : "Upload"}
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                        <FileUploadField
+                          name={
+                            `shippingBillDetails.bills[${index}].uploadShippingBill` as any
+                          }
+                          storageKey={`shippingBillDetails.bills[${index}].uploadShippingBill`}
+                        />
                       )}
                     />
                   </TableCell>
@@ -481,7 +432,11 @@ export function ShippingBillDetails({
                             </PopoverTrigger>
                             <PopoverContent align="start">
                               <CalendarComponent
-                                selected={field.value ? new Date(field.value) : undefined}
+                                selected={
+                                  field.value
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
                                 onSelect={(date: any) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());

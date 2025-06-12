@@ -26,11 +26,12 @@ import { Icons } from "@/components/ui/icons";
 import { Textarea } from "@/components/ui/textarea";
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api";
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
 
 interface BillOfLadingDetailsProps {
   shipmentId: string;
   orgId?: string;
- currentUser : string;
+  currentUser: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
 }
@@ -115,7 +116,9 @@ export function BillOfLadingDetails({
     const fetchShippingLines = async () => {
       try {
         const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba"; // Fallback to hardcoded ID
-        const shippingData = await fetchData(`/shipment/shippingline/getbyorg/${orgIdToUse}`);
+        const shippingData = await fetchData(
+          `/shipment/shippingline/getbyorg/${orgIdToUse}`
+        );
         setShippingLines(
           Array.isArray(shippingData)
             ? shippingData.map((line: any) => ({
@@ -136,12 +139,14 @@ export function BillOfLadingDetails({
     GlobalModal.title = "Add New Shipping Line";
     GlobalModal.children = (
       <ShippinglineForm
-      currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={orgId}
         onSuccess={async () => {
           try {
             const orgIdToUse = orgId || "674b0a687d4f4b21c6c980ba";
-            const data = await fetchData(`/shipment/shippingline/getbyorg/${orgIdToUse}`);
+            const data = await fetchData(
+              `/shipment/shippingline/getbyorg/${orgIdToUse}`
+            );
             setShippingLines(
               Array.isArray(data)
                 ? data.map((line: any) => ({
@@ -298,57 +303,11 @@ export function BillOfLadingDetails({
         name="blDetails.Bl[0].uploadBLUrl"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Upload BL</FormLabel>
             <FormControl>
-              <div className="flex items-center gap-2">
-                {field.value ? (
-                  <div className="flex gap-2 mt-2">
-                    <Button variant="outline" size="sm" asChild>
-                      <a
-                        href={field.value}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Eye className="w-4 h-4 mr-2" />
-                        View
-                      </a>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        setValue("blDetails.Bl[0].uploadBLUrl", "", {
-                          shouldDirty: true,
-                        })
-                      }
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ) : (
-                  <>
-                    <Input
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          handleFileUpload(file, "blDetails.Bl[0].uploadBLUrl");
-                        }
-                      }}
-                      disabled={uploading}
-                    />
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      className="text-white bg-blue-500 hover:bg-blue-600"
-                      disabled={uploading}
-                    >
-                      <UploadCloud className="w-5 h-5 mr-2" />
-                      {uploading ? "Uploading..." : "Upload"}
-                    </Button>
-                  </>
-                )}
-              </div>
+              <FileUploadField
+                name="blDetails.Bl[0].uploadBLUrl"
+                storageKey={`blDetails.Bl[0].uploadBLUrl`}
+              />
             </FormControl>
             <FormMessage />
           </FormItem>

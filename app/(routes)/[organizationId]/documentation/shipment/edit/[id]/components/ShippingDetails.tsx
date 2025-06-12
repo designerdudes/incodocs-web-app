@@ -37,13 +37,14 @@ import { Icons } from "@/components/ui/icons";
 import CalendarComponent from "@/components/CalendarComponent";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { FileUploadField } from "../../../createnew/components/FileUploadField";
 
 interface ShippingDetailsProps {
   shipmentId: string;
   orgId?: string;
   saveProgress: (data: any) => void;
   onSectionSubmit: () => Promise<void>;
-  currentUser : string;
+  currentUser: string;
 }
 
 export function ShippingDetails({
@@ -60,7 +61,7 @@ export function ShippingDetails({
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
-  const orgid = orgId
+  const orgid = orgId;
 
   const {
     fields: forwarderFields,
@@ -304,7 +305,8 @@ export function ShippingDetails({
             return;
           }
           throw new Error(
-            errorData.message || `Failed to fetch forwarders: ${forwarderResponse.status}`
+            errorData.message ||
+              `Failed to fetch forwarders: ${forwarderResponse.status}`
           );
         }
 
@@ -329,7 +331,8 @@ export function ShippingDetails({
             return;
           }
           throw new Error(
-            errorData.message || `Failed to fetch transporters: ${transporterResponse.status}`
+            errorData.message ||
+              `Failed to fetch transporters: ${transporterResponse.status}`
           );
         }
 
@@ -337,7 +340,9 @@ export function ShippingDetails({
         setTransporters(Array.isArray(transporterData) ? transporterData : []);
       } catch (error: any) {
         console.error("Error fetching data:", error);
-        toast.error(error.message || "Failed to fetch forwarders or transporters");
+        toast.error(
+          error.message || "Failed to fetch forwarders or transporters"
+        );
       }
     };
 
@@ -348,7 +353,7 @@ export function ShippingDetails({
     GlobalModal.title = "Add New Forwarder";
     GlobalModal.children = (
       <ForwarderForm
-        currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={orgId}
         onSuccess={() => {
           const token = Cookies.get("AccessToken");
@@ -394,7 +399,7 @@ export function ShippingDetails({
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
-        currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={orgId}
         onSuccess={() => {
           const token = Cookies.get("AccessToken");
@@ -543,68 +548,17 @@ export function ShippingDetails({
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
-                        render={({ field }) => {
-                          return (
-                            <div className="flex items-center justify-between gap-2">
-                              {field.value ? (
-                                <div className="flex flex-col gap-2">
-                                  <div className="flex gap-2">
-                                    <Button variant="outline" size="sm" asChild>
-                                      <a
-                                        href={field.value}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        <Eye className="w-4 h-4 mr-2" />
-                                        View
-                                      </a>
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        setValue(
-                                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`,
-                                          "",
-                                          { shouldDirty: true }
-                                        )
-                                      }
-                                    >
-                                      Remove
-                                    </Button>
-                                  </div>
-                                </div>
-                              ) : (
-                                <>
-                                  <Input
-                                    type="file"
-                                    className="flex-1"
-                                    onChange={(e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        handleFileUpload(
-                                          file,
-                                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`
-                                        );
-                                      }
-                                    }}
-                                    disabled={uploading}
-                                  />
-                                  <Button
-                                    type="button"
-                                    variant="secondary"
-                                    className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                                    disabled={uploading}
-                                  >
-                                    <UploadCloud className="w-5 h-5 mr-2" />
-                                    {uploading ? "Uploading..." : "Upload"}
-                                  </Button>
-                                </>
-                              )}
-                            </div>
-                          );
-                        }}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
+                        }
+                        render={({ field }) => (
+                          <FileUploadField
+                            name={
+                              `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
+                            }
+                            storageKey={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
+                          />
+                        )}
                       />
                     </TableCell>
                     <TableCell>
@@ -796,65 +750,16 @@ export function ShippingDetails({
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
+                        }
                         render={({ field }) => (
-                          <div className="flex items-center justify-between gap-2">
-                            {field.value ? (
-                              <div className="flex flex-col gap-2">
-                                <div className="flex gap-2">
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a
-                                      href={field.value}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                    >
-                                      <Eye className="w-4 h-4 mr-2" />
-                                      View
-                                    </a>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      setValue(
-                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`,
-                                        "",
-                                        { shouldDirty: true }
-                                      )
-                                    }
-                                  >
-                                    Remove
-                                  </Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <>
-                                <Input
-                                  type="file"
-                                  className="flex-1"
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      handleFileUpload(
-                                        file,
-                                        `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`
-                                      );
-                                    }
-                                  }}
-                                  disabled={uploading}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="secondary"
-                                  className="text-white bg-blue-500 hover:bg-blue-600 flex items-center"
-                                  disabled={uploading}
-                                >
-                                  <UploadCloud className="w-5 h-5 mr-2" />
-                                  {uploading ? "Uploading..." : "Upload"}
-                                </Button>
-                              </>
-                            )}
-                          </div>
+                          <FileUploadField
+                            name={
+                              `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
+                            }
+                            storageKey={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
+                          />
                         )}
                       />
                     </TableCell>
