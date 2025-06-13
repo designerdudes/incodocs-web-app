@@ -16,9 +16,10 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
+// ✅ Zod Schema
 const formSchema = z.object({
   forwarderName: z
     .string()
@@ -29,9 +30,7 @@ const formSchema = z.object({
   responsiblePerson: z
     .string()
     .min(3, { message: "Responsible person must be at least 3 characters long" }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email address" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
   mobileNo: z
     .union([z.string(), z.number()])
     .refine((val) => {
@@ -42,13 +41,13 @@ const formSchema = z.object({
 
 interface Props {
   params: {
-    _id: string; // Forwarder ID
+    _id: string;
   };
 }
 
 export default function EditForwarderForm({ params }: Props) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
 
@@ -65,37 +64,42 @@ export default function EditForwarderForm({ params }: Props) {
 
   const forwarderId = params._id;
 
-  // Fetch existing forwarder data and reset form values
+  // ✅ Fetch data and populate form
   useEffect(() => {
-    async function fetchForwarderData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getone/${forwarderId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch forwarder data");
-        }
-        const data = await response.json();
+  const fetchForwarderData = async () => {
+    try {
+      setIsFetching(true);
 
-        // Reset form with fetched values
-        form.reset({
-          forwarderName: data.forwarderName || "",
-          address: data.address || "",
-          responsiblePerson: data.responsiblePerson || "",
-          email: data.email || "",
-          mobileNo: data.mobileNo || "",
-        });
-      } catch (error) {
-        console.error("Error fetching forwarder data:", error);
-        toast.error("Failed to fetch forwarder data");
-      } finally {
-        setIsFetching(false);
+      const data = await fetchData(`/shipment/forwarder/getone/${forwarderId}`);
+      console.log("Forwarder data:", data);
+
+      const forwarder = data?.findForwarder;
+
+      if (!forwarder) {
+        throw new Error("Forwarder data not found");
       }
-    }
-    fetchForwarderData();
-  }, [forwarderId, form]);
 
+      form.reset({
+        forwarderName: forwarder.forwarderName || "",
+        address: forwarder.address || "",
+        responsiblePerson: forwarder.responsiblePerson || "",
+        email: forwarder.email || "",
+        mobileNo: forwarder.mobileNo?.toString() || "",
+      });
+    } catch (error) {
+      console.error("Error fetching forwarder data:", error);
+      toast.error("Failed to fetch forwarder data");
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
+  if (forwarderId) {
+    fetchForwarderData();
+  }
+}, [forwarderId, form]);
+
+  // ✅ Handle Submit with modal
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
@@ -121,14 +125,11 @@ export default function EditForwarderForm({ params }: Props) {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/shipment/forwarder/put/${forwarderId}`,
-                  values
-                );
+                await putData(`/shipment/forwarder/put/${forwarderId}`, values);
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Forwarder updated successfully");
-                window.location.reload();
+                router.refresh(); // or window.location.reload();
               } catch (error) {
                 console.error("Error updating forwarder:", error);
                 setIsLoading(false);
@@ -142,9 +143,11 @@ export default function EditForwarderForm({ params }: Props) {
         </div>
       </div>
     );
+
     GlobalModal.onOpen();
   };
 
+  // ✅ Show loading spinner while fetching
   if (isFetching) {
     return (
       <div className="flex items-center justify-center h-60">
@@ -178,11 +181,7 @@ export default function EditForwarderForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: 303, Ahmed khan manzil, Chanda Naga"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: 303, Ahmed khan manzil" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -195,11 +194,7 @@ export default function EditForwarderForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Responsible Person</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: Ahmed"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: Ahmed" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -212,11 +207,7 @@ export default function EditForwarderForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: mohammedarshad.arsh@gmail.com"
-                    type="email"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: someone@email.com" type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
@@ -29,26 +29,27 @@ const formSchema = z.object({
   responsiblePerson: z
     .string()
     .min(3, { message: "Responsible person must be at least 3 characters long" }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email address" }),
+  email: z.string().email({ message: "Please enter a valid email address" }),
   mobileNo: z
     .union([z.string(), z.number()])
-    .refine((val) => {
-      const strVal = val.toString();
-      return strVal.length >= 10 && /^\d+$/.test(strVal);
-    }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
+    .refine(
+      (val) => {
+        const strVal = val.toString();
+        return strVal.length >= 10 && /^\d+$/.test(strVal);
+      },
+      { message: "Mobile number must be at least 10 digits and contain only numbers" }
+    ),
 });
 
 interface Props {
   params: {
-    _id: string; // Transporter ID
+    _id: string;
   };
 }
 
 export default function EditTransporterForm({ params }: Props) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
 
@@ -65,36 +66,35 @@ export default function EditTransporterForm({ params }: Props) {
 
   const transporterId = params._id;
 
-  // Fetch existing transporter data and reset form values
-  useEffect(() => {
-    async function fetchTransporterData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getone/${transporterId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch transporter data");
-        }
-        const data = await response.json();
+ useEffect(() => {
+  async function fetchTransporterData() {
+    try {
+      setIsFetching(true);
+      const data = await fetchData(
+        `https://incodocs-server.onrender.com/shipment/transporter/getone/${transporterId}`
+      );
 
-        // Reset form with fetched values
-        form.reset({
-          transporterName: data.transporterName || "",
-          address: data.address || "",
-          responsiblePerson: data.responsiblePerson || "",
-          email: data.email || "",
-          mobileNo: data.mobileNo || "",
-        });
-      } catch (error) {
-        console.error("Error fetching transporter data:", error);
-        toast.error("Failed to fetch transporter data");
-      } finally {
-        setIsFetching(false);
-      }
+      console.log("Transporter data:", data); // Optional: for debug
+
+      const transporter = data?.findTransporter;
+
+      form.reset({
+        transporterName: transporter?.transporterName || "",
+        address: transporter?.address || "",
+        responsiblePerson: transporter?.responsiblePerson || "",
+        email: transporter?.email || "",
+        mobileNo: transporter?.mobileNo?.toString() || "",
+      });
+    } catch (error) {
+      console.error("Error fetching transporter data:", error);
+      toast.error("Failed to fetch transporter data");
+    } finally {
+      setIsFetching(false);
     }
-    fetchTransporterData();
-  }, [transporterId, form]);
+  }
+
+  fetchTransporterData();
+}, [transporterId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -195,11 +195,7 @@ export default function EditTransporterForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Responsible Person</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: Ahmed"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: Ahmed" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

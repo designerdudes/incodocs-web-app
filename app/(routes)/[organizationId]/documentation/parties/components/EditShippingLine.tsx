@@ -16,10 +16,10 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
-// Define the form schema for shipping line
+// Schema
 const formSchema = z.object({
   shippingLineName: z
     .string()
@@ -34,24 +34,31 @@ const formSchema = z.object({
     .string()
     .email({ message: "Please enter a valid email address" }),
   mobileNo: z
-    .union([z.string(), z.number()])
-    .refine((val) => {
-      const strVal = val.toString();
-      return strVal.length >= 10 && /^\d+$/.test(strVal);
-    }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
+    .string()
+    .min(10, { message: "Mobile number must be at least 10 digits" })
+    .regex(/^\d+$/, { message: "Mobile number must contain only numbers" }),
 });
+
+interface ShippingLineData {
+  shippingLineName: string;
+  address: string;
+  responsiblePerson: string;
+  email: string;
+  mobileNo: string;
+}
 
 interface Props {
   params: {
-    _id: string; // Shipping Line ID
+    _id: string;
   };
 }
 
 export default function EditShippingLineForm({ params }: Props) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isFetching, setIsFetching] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
+  const shippingLineId = params._id;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,40 +71,39 @@ export default function EditShippingLineForm({ params }: Props) {
     },
   });
 
-  const shippingLineId = params._id;
-
-  // Fetch existing shipping line data and reset form values
+  // ✅ Fetch data and populate form
   useEffect(() => {
-    async function fetchShippingLineData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/shippingline/getone/${shippingLineId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch shipping line data");
-        }
-        const data = await response.json();
+  const fetchShippingLineData = async () => {
+    try {
+      setIsFetching(true);
+      const data = await fetchData(`/shipment/shippingline/getone/${shippingLineId}`);
+      console.log("Fetched shipping line data:", data);
 
-        // Reset form with fetched values
-        form.reset({
-          shippingLineName: data.shippingLineName || "",
-          address: data.address || "",
-          responsiblePerson: data.responsiblePerson || "",
-          email: data.email || "",
-          mobileNo: data.mobileNo || "",
-        });
-      } catch (error) {
-        console.error("Error fetching shipping line data:", error);
-        toast.error("Failed to fetch shipping line data");
-      } finally {
-        setIsFetching(false);
-      }
+      const shippingLine = data?.shipmentLine;
+
+      const formData: ShippingLineData = {
+        shippingLineName: shippingLine?.shippingLineName?.toString() || "",
+        address: shippingLine?.address?.toString() || "",
+        responsiblePerson: shippingLine?.responsiblePerson?.toString() || "",
+        email: shippingLine?.email?.toString() || "",
+        mobileNo: shippingLine?.mobileNo?.toString() || "",
+      };
+
+      form.reset(formData); // ✅ Properly populate form now
+    } catch (error) {
+      console.error("Error fetching shipping line data:", error);
+      toast.error("Failed to fetch shipping line data");
+    } finally {
+      setIsFetching(false);
     }
-    fetchShippingLineData();
-  }, [shippingLineId, form]);
+  };
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  if (shippingLineId) {
+    fetchShippingLineData();
+  }
+}, [shippingLineId, form]);
+
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
     GlobalModal.title = "Confirm Shipping Line Update";
@@ -122,15 +128,11 @@ export default function EditShippingLineForm({ params }: Props) {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/shipment/shippingline/put/${shippingLineId}`,
-                  values
-                );
+                await putData(`/shipment/shippingline/put/${shippingLineId}`, values);
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Shipping line updated successfully");
-
-                window.location.reload();
+                router.refresh();
               } catch (error) {
                 console.error("Error updating shipping line:", error);
                 setIsLoading(false);
@@ -180,11 +182,7 @@ export default function EditShippingLineForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: 303, Ahmed khan manzil"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: 303, Ahmed khan manzil" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -197,11 +195,7 @@ export default function EditShippingLineForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Responsible Person</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: Khaja"
-                    type="text"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: Khaja" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -214,11 +208,7 @@ export default function EditShippingLineForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: example@gmail.com"
-                    type="email"
-                    {...field}
-                  />
+                  <Input placeholder="Eg: example@gmail.com" type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,12 +221,7 @@ export default function EditShippingLineForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Mobile No</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg: 7013396624"
-                    type="text"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
+                  <Input placeholder="Eg: 7013396624" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
