@@ -7,7 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import AddTeamMemberForm from "@/components/forms/AddTeamMemberForm";
 import { cookies } from "next/headers";
 
-console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
+// console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
 
 export default async function CreateNewFormPage() {
      const cookieStore = cookies();

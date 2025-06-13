@@ -17,6 +17,7 @@ import { deleteData } from "@/axiosUtility/api";
 import EditTeamMemberForm from "./EditTeamMemberForm";
 import { Employee } from "./columns";
 
+
 interface Props {
   data: Employee;
 }
@@ -24,6 +25,7 @@ interface Props {
 export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
+
 
   const deleteEmployee = async () => {
     try {
@@ -49,17 +51,24 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          {/* View Lot Details */}
+          {/* View  Details */}
           <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./dashboard/view/${data._id}`);
-            }}
+            onClick={() => router.push(`./teamManagement/view/${data._id}`)}
           >
             <EyeIcon className="mr-2 h-4 w-4" />
             View Team Details
           </DropdownMenuItem>
+          {/* <DropdownMenuItem
+            onSelect={() => {
+              // router.push(`./dashboard/view/${data._id}`);
+              <EmployeeViewPage params={{ _id: data._id }}
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Team Details
+          </DropdownMenuItem> */}
 
-          {/* Edit Lot Details */}
+          {/* Edit  Details */}
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = "Edit Team Member Details"; // Set modal title
@@ -73,10 +82,10 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             Edit Team Member Details
           </DropdownMenuItem>
 
-          {/* Delete Lot */}
+          {/* Delete  */}
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Member - ${data.teamMemberName}`;
+              GlobalModal.title = `Delete Member - ${data.fullName}`;
               GlobalModal.description =
                 "Are you sure you want to delete this member?";
               GlobalModal.children = (

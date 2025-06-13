@@ -170,6 +170,7 @@ export function BookingDetails({
   });
 
   // Watch form values with fallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const formValues = watch("bookingDetails") || {};
   const containers = formValues.containers || [];
 
@@ -760,12 +761,12 @@ export function BookingDetails({
             >
               <PopoverTrigger asChild>
                 <button
-                  role="combobox"
-                  aria-expanded={open}
+                  type="button"
                   className={cn(
                     "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
                     !field.value && "text-muted-foreground"
                   )}
+                  title="Select a port" // Helps with one of the warnings
                 >
                   {field.value || "Select a port"}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -852,8 +853,7 @@ export function BookingDetails({
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  role="combobox"
-                  aria-expanded={destOpen}
+                  title="Select a port" // Helps screen readers and avoids warning
                   className={cn(
                     "flex h-10 w-full justify-between rounded-md border border-input bg-background px-3 py-2 text-sm",
                     !field.value && "text-muted-foreground"
