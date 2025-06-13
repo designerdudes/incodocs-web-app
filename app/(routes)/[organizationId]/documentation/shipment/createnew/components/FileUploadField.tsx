@@ -50,14 +50,10 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await postData(
-        "/shipmentdocsfile/upload",
-       formData
-      );
+      const response = await postData("/shipmentdocsfile/upload", formData);
 
-      const data =  response
+      const data = response;
       const url = data.url;
-
       setUploadedUrl(url);
       setValue(name, url);
       // localStorage.setItem(storageKey, url);
@@ -122,9 +118,9 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       ) : uploadedUrl ? (
         <div
           className="text-xs text-green-600 max-w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis"
-          title={uploadedUrl.split("/").pop()}
+          title={uploadedUrl.split("-").pop()}
         >
-          Uploaded: {uploadedUrl.split("/").pop()}
+          Uploaded: {uploadedUrl.split("-").pop()}
         </div>
       ) : null}
       {!uploadedUrl && (
