@@ -61,21 +61,22 @@ export default function EditCBNameForm({
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
 
-  if (!cbData) {
-    return <div className="text-center text-gray-500">Loading CB Data...</div>;
-  }
-
+  // Always call hooks unconditionally
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cbName: cbData.cbName || "",
-      cbCode: cbData.cbCode || "",
-      email: cbData.email || "",
-      mobileNo: cbData.mobileNo ? cbData.mobileNo.toString() : "",
-      address: cbData.address || "",
-      organizationId: cbData.organizationId || "",
+      cbName: cbData?.cbName || "",
+      cbCode: cbData?.cbCode || "",
+      email: cbData?.email || "",
+      mobileNo: cbData?.mobileNo ? cbData.mobileNo.toString() : "",
+      address: cbData?.address || "",
+      organizationId: cbData?.organizationId || "",
     },
   });
+
+  if (!cbData) {
+    return <div className="text-center text-gray-500">Loading CB Data...</div>;
+  }
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
