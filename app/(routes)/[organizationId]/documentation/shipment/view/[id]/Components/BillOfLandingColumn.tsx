@@ -5,15 +5,14 @@ import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 
-export interface ShipmentShippingDetails {
-  invoiceNumber: string;
-  uploadInvoiceUrl: string;
-  date: string; // Updated to string for ISO date
-  valueWithGst: number;
-  valueWithoutGst: number;
+export interface Bl {
+  blNumber: string,
+  blDate:string,
+  uploadBLUrl: string,
+  telexDate: string
 }
 
-export const ShippingDetailsColumn: ColumnDef<ShipmentShippingDetails>[] = [
+export const BillOfLandingColumn: ColumnDef<Bl>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -37,84 +36,83 @@ export const ShippingDetailsColumn: ColumnDef<ShipmentShippingDetails>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "invoiceNumber",
+    accessorKey: "blNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Invoice Number
+        BL Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.invoiceNumber}</div>,
+    cell: ({ row }) => <div>{row.original?.blNumber}</div>,
     filterFn: "includesString",
   },
   {
-    accessorKey: "uploadInvoiceUrl",
+    accessorKey: "blDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Uploaded Invoice
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) =>
-      row.original.uploadInvoiceUrl ? (
-        <a href={row.original.uploadInvoiceUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-          View
-        </a>
-      ) : (
-        "N/A"
-      ),
-    filterFn: "includesString",
-  },
-  {
-    accessorKey: "date",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Date
+        BL Date
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div>
-        {row.original.date ? format(new Date(row.original.date), "PPP") : "N/A"}
+        {row.original?.blDate
+          ? format(new Date(row.original?.blDate), "PPP")
+          : "N/A"}
       </div>
     ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "valueWithGst",
+    accessorKey: "telexDate",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Value With GST
+        Telex Date
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.valueWithGst}</div>,
+    cell: ({ row }) => (
+      <div>
+        {row.original?.telexDate
+          ? format(new Date(row.original?.telexDate), "PPP")
+          : "N/A"}
+      </div>
+    ),
     filterFn: "includesString",
   },
   {
-    accessorKey: "valueWithoutGst", // Fixed duplicate
+    accessorKey: "uploadBLUrlL",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Value Without GST
+        UploadedBL
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.valueWithoutGst}</div>,
+    cell: ({ row }) =>
+      row.original?.uploadBLUrl ? (
+        <a
+          href={row.original?.uploadBLUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-500 hover:underline"
+        >
+          View
+        </a>
+      ) : (
+        "N/A"
+      ),
     filterFn: "includesString",
   },
 ];

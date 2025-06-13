@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 import { DataTable } from "@/components/ui/data-table";
 import { BookingDetailsColumn } from "./Components/BookingDetailsColumn";
-import { ShippingDetailsColumn } from "./Components/ShippingDetailscolumn";
+import { BillOfLandingColumn } from "./Components/BillOfLandingColumn";
 import { SupplierDetailscolumn } from "./Components/SupplierDetailscolumn";
 import { CommercialInvoiceDetailscolumn } from "./Components/CommercialInvoiceDetailscolumn";
 import { ShippingBillsDetailscolumn } from "./Components/ShippingBillsDetailscolumn";
@@ -769,9 +769,9 @@ export default async function Page({ params }: Props) {
                         </TableCell>
                       </TableRow>
                       <TableRow>
-                        <TableCell>Number Of Invoices</TableCell>
+                        <TableCell>Number Of Bills</TableCell>
                         <TableCell>
-                          {shipmentData?.shippingDetails?.shippingLineInvoices
+                          {shipmentData?.blDetails?.Bl
                             ?.length || 0}
                         </TableCell>
                       </TableRow>
@@ -792,86 +792,11 @@ export default async function Page({ params }: Props) {
                   bulkDeleteDescription="This will delete the selected shipping line invoices."
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
-                  searchKey="invoiceNumber"
-                  data={
-                    shipmentData?.shippingDetails?.shippingLineInvoices || []
-                  }
-                  columns={ShippingDetailsColumn}
+                  searchKey="blNumber"
+                  data={shipmentData?.blDetails?.Bl || []}
+                  columns={BillOfLandingColumn}
                 />
               </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="mt-4 w-full md:w-1/2">
-                <CardHeader>
-                  <CardTitle>Bill Of Lading Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>BL Number</TableCell>
-                        <TableCell>
-                          {shipmentData?.blDetails?.Bl?.[0]?.blNumber || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>BL Date</TableCell>
-                        <TableCell>
-                          {shipmentData?.blDetails?.Bl?.[0]?.blDate
-                            ? format(
-                                new Date(shipmentData.blDetails.Bl[0].blDate),
-                                "PPP"
-                              )
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Telex Date</TableCell>
-                        <TableCell>
-                          {shipmentData?.blDetails?.Bl?.[0]?.telexDate
-                            ? format(
-                                new Date(
-                                  shipmentData.blDetails.Bl[0].telexDate
-                                ),
-                                "PPP"
-                              )
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Uploaded BL</TableCell>
-                        <TableCell>
-                          {shipmentData?.blDetails?.Bl?.[0]?.uploadBLUrl ? (
-                            <a
-                              href={shipmentData.blDetails.Bl[0].uploadBLUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:underline"
-                            >
-                              View
-                            </a>
-                          ) : (
-                            "N/A"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Review</TableCell>
-                        <TableCell>
-                          {shipmentData?.blDetails?.review || "N/A"}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
             </div>
           </TabsContent>
 
