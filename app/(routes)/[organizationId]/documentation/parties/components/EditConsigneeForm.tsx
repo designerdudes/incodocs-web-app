@@ -126,7 +126,7 @@ useEffect(() => {
                   `/shipment/consignee/update/${consigneeId}`,
                   values
                 );
-                setIsLoading(false);
+                setIsLoading(false);  
                 GlobalModal.onClose();
                 toast.success("Consignee updated successfully");
                 window.location.reload();
