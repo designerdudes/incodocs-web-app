@@ -47,6 +47,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export interface SaveDetailsProps {
   saveProgress: (data: any) => void;
@@ -101,6 +102,7 @@ export function BookingDetails({
   const destPageRef = useRef(1); // <-- this was missing
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDestTerm, setSearchDestTerm] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     if (invoiceNumber) {
@@ -311,44 +313,45 @@ export function BookingDetails({
     fetchDestPorts();
   }, []);
 
-  const openProductForm = () => {
-    GlobalModal.title = "Add New Product";
-    GlobalModal.description = "Fill in the details to create a new product.";
-    GlobalModal.children = (
-      <ProductFormPage
-        orgId={organizationId}
-        onSuccess={async () => {
-          try {
-            const ProductsResponse = await fetchData(
-              "/shipment/productdetails/get"
-            );
-            const ProductsData = await ProductsResponse;
-            const mappedProduct = ProductsData.map((product: any) => {
-              const stoneName =
-                product?.tileDetails?.stoneName ||
-                product?.slabDetails?.stoneName ||
-                product?.stepRiserDetails?.stoneName;
+  // const openProductForm = () => {
+  // router.push(`/${organizationId}/documentation/products/createnew`);
+  // GlobalModal.title = "Add New Product";
+  // GlobalModal.description = "Fill in the details to create a new product.";
+  // GlobalModal.children = (
+  //   <ProductFormPage
+  //     orgId={organizationId}
+  //     onSuccess={async () => {
+  //       try {
+  //         const ProductsResponse = await fetchData(
+  //           "/shipment/productdetails/get"
+  //         );
+  //         const ProductsData = await ProductsResponse;
+  //         const mappedProduct = ProductsData.map((product: any) => {
+  //           const stoneName =
+  //             product?.tileDetails?.stoneName ||
+  //             product?.slabDetails?.stoneName ||
+  //             product?.stepRiserDetails?.stoneName;
 
-              return {
-                _id: product._id,
-                code: product.productType,
-                description: stoneName,
-                name: product.productType + ": " + stoneName,
-              };
-            });
-            setProducts(mappedProduct || []);
-            saveProgressSilently(getValues());
-            toast.success("Product created successfully");
-          } catch (error) {
-            console.error("Error refreshing products:", error);
-            toast.error("Failed to refresh product list");
-          }
-          GlobalModal.onClose();
-        }}
-      />
-    );
-    GlobalModal.onOpen();
-  };
+  //           return {
+  //             _id: product._id,
+  //             code: product.productType,
+  //             description: stoneName,
+  //             name: product.productType + ": " + stoneName,
+  //           };
+  //         });
+  //         setProducts(mappedProduct || []);
+  //         saveProgressSilently(getValues());
+  //         toast.success("Product created successfully");
+  //       } catch (error) {
+  //         console.error("Error refreshing products:", error);
+  //         toast.error("Failed to refresh product list");
+  //       }
+  //       GlobalModal.onClose();
+  //     }}
+  //   />
+  // );
+  // GlobalModal.onOpen();
+  // };
 
   return (
     <div className="grid grid-cols-4 gap-3">
@@ -791,7 +794,13 @@ export function BookingDetails({
                               displayProperty="name"
                               valueProperty="_id"
                               placeholder="Select Product"
-                              onAddNew={openProductForm}
+                              onAddNew={() => {
+                                window.open(
+                                  `/${organizationId}/documentation/products/createnew`,
+                                  "_blank"
+                                );
+                              }}
+                              // onAddNew={openProductForm}
                               multiple={true}
                               addNewLabel="Add New Product"
                             />

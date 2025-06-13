@@ -25,6 +25,8 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Textarea } from "../ui/textarea";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import EntityCombobox from "../ui/EntityCombobox";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 
 // Zod Schemas
 const tileSchema = z.object({
@@ -52,12 +54,8 @@ const tileSchema = z.object({
     .optional(),
   moulding: z
     .object({
-      mouldingSide: z
-        .enum(["one side", "two side", "three side", "four side"])
-        .optional(),
-      typeOfMoulding: z
-        .enum(["half bullnose", "full bullnose", "bevel"])
-        .optional(),
+      mouldingSide: z.string().optional(),
+      typeOfMoulding: z.string().optional(),
     })
     .optional(),
   noOfBoxes: z
@@ -203,8 +201,103 @@ interface ProductFormProps {
 
 export default function ProductFormPage({ onSuccess }: ProductFormProps) {
   const orgId = useParams().organizationId;
-  const [isLoading, setIsLoading] = useState(false);
+  const GlobalModal = useGlobalModal();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [mouldingOptions, setMouldingOptions] = useState<any[]>([
+    { label: "One Side", value: "one side" },
+    { label: "Two Side", value: "two side" },
+    { label: "Three Side", value: "three side" },
+    { label: "Four Side", value: "four side" },
+    { label: "None", value: "none" },
+  ]);
+  const [mouldingTypeOptions, setMouldingTypeOptions] = useState<any[]>([
+    { label: "Half Bullnose", value: "Half Bullnose" },
+    { label: "Full Bullnose", value: "Full Bullnose" },
+    { label: "Bevel", value: "Bevel" },
+    { label: "None", value: "none" },
+  ]);
+  const openMouldingForm = () => {
+    let inputValue = "";
+
+    const handleAddMoulding = () => {
+      const trimmed = inputValue.trim().toLowerCase();
+      if (!trimmed) return;
+
+      const newOption = {
+        label: trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+        value: trimmed,
+      };
+
+      setMouldingOptions((prev) => {
+        const exists = prev.some((opt) => opt.value === newOption.value);
+        return exists ? prev : [...prev, newOption];
+      });
+
+      form.setValue("tileDetails.moulding.mouldingSide", newOption.value);
+
+      GlobalModal.onClose();
+    };
+    GlobalModal.title = "Add New Moulding Side";
+    GlobalModal.description = "Fill in the details to create a new product.";
+    GlobalModal.children = (
+      <div className="space-y-4">
+        <input
+          className="w-full px-3 py-2 rounded"
+          placeholder="Enter Moulding Side"
+          onChange={(e) => (inputValue = e.target.value)}
+        />
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={handleAddMoulding}
+        >
+          Save
+        </button>
+      </div>
+    );
+    GlobalModal.onOpen();
+  };
+
+  const openMouldingTypeForm = () => {
+    let inputValue = "";
+
+    const handleAddMouldingType = () => {
+      const trimmed = inputValue.trim().toLowerCase();
+      if (!trimmed) return;
+
+      const newOption = {
+        label: trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+        value: trimmed,
+      };
+
+      setMouldingTypeOptions((prev) => {
+        const exists = prev.some((opt) => opt.value === newOption.value);
+        return exists ? prev : [...prev, newOption];
+      });
+
+      form.setValue("tileDetails.moulding.typeOfMoulding", newOption.value);
+
+      GlobalModal.onClose();
+    };
+    GlobalModal.title = "Add New Moulding Type";
+    GlobalModal.description = "Fill in the details to create a new product.";
+    GlobalModal.children = (
+      <div className="space-y-4">
+        <input
+          className="w-full px-3 py-2 rounded"
+          placeholder="Enter Moulding Side"
+          onChange={(e) => (inputValue = e.target.value)}
+        />
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={handleAddMouldingType}
+        >
+          Save
+        </button>
+      </div>
+    );
+    GlobalModal.onOpen();
+  };
 
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productSchema),
@@ -215,7 +308,7 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
         stonePhoto: "",
         size: { length: 0, breadth: 0 },
         thickness: { value: 0 },
-        moulding: { mouldingSide: "one side", typeOfMoulding: "half bullnose" },
+        moulding: { mouldingSide: "none", typeOfMoulding: "none" },
         noOfBoxes: 0,
         piecesPerBox: 0,
       },
@@ -268,11 +361,11 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       await postData("/shipment/productdetails/add", payload);
       toast.success("Product created successfully");
       if (onSuccess) onSuccess();
+      router.push(`/${orgId}/documentation/products`);
+      // router.refresh(); // Refresh the products page
       // Delay redirect to show toast
       // setTimeout(() => {
-      // router.push(`/${orgId}/documentation/products`);
       // router.back()
-      // router.refresh(); // Refresh the products page
       // }, 1500);
     } catch (error: any) {
       console.error("Error creating product:", error);
@@ -512,24 +605,45 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Moulding Side</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Moulding Side" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="one side">One Side</SelectItem>
-                            <SelectItem value="two side">Two Side</SelectItem>
-                            <SelectItem value="three side">
-                              Three Side
-                            </SelectItem>
-                            <SelectItem value="four side">Four Side</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <EntityCombobox
+                            entities={mouldingOptions}
+                            value={field.value || ""}
+                            onChange={(value) => {
+                              field.onChange(value);
+                            }}
+                            displayProperty="label"
+                            valueProperty="value"
+                            placeholder="Moulding Side"
+                            onAddNew={openMouldingForm}
+                            multiple={false}
+                            addNewLabel="Add New"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
+                      // <FormItem>
+                      //   <FormLabel>Moulding Side</FormLabel>
+                      //   <Select
+                      //     onValueChange={field.onChange}
+                      //     value={field.value}
+                      //   >
+                      //     <SelectTrigger>
+                      //       <SelectValue placeholder="Select Moulding Side" />
+                      //     </SelectTrigger>
+                      //     <SelectContent>
+                      //       <SelectItem value="one side">One Side</SelectItem>
+                      //       <SelectItem value="two side">Two Side</SelectItem>
+                      //       <SelectItem value="three side">
+                      //         Three Side
+                      //       </SelectItem>
+                      //       <SelectItem value="four side">Four Side</SelectItem>{" "}
+                      //       <SelectItem value="none">None</SelectItem>
+
+                      //     </SelectContent>
+                      //   </Select>
+                      //   <FormMessage />
+                      // </FormItem>
                     )}
                   />
                 </div>
@@ -540,25 +654,45 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type of Moulding</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={field.value}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select Moulding Type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="half bullnose">
-                              Half Bullnose
-                            </SelectItem>
-                            <SelectItem value="full bullnose">
-                              Full Bullnose
-                            </SelectItem>
-                            <SelectItem value="bevel">Bevel</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <EntityCombobox
+                            entities={mouldingTypeOptions}
+                            value={field.value || ""}
+                            onChange={(value) => {
+                              field.onChange(value);
+                            }}
+                            displayProperty="label"
+                            valueProperty="value"
+                            placeholder="Type of Moulding"
+                            onAddNew={openMouldingTypeForm}
+                            multiple={false}
+                            addNewLabel="Add New"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
+                      // <FormItem>
+                      //   <FormLabel>Type of Moulding</FormLabel>
+                      //   <Select
+                      //     onValueChange={field.onChange}
+                      //     value={field.value}
+                      //   >
+                      //     <SelectTrigger>
+                      //       <SelectValue placeholder="Select Moulding Type" />
+                      //     </SelectTrigger>
+                      //     <SelectContent>
+                      //       <SelectItem value="half bullnose">
+                      //         Half Bullnose
+                      //       </SelectItem>
+                      //       <SelectItem value="full bullnose">
+                      //         Full Bullnose
+                      //       </SelectItem>
+                      //       <SelectItem value="bevel">Bevel</SelectItem>
+                      //       <SelectItem value="none">None</SelectItem>
+                      //     </SelectContent>
+                      //   </Select>
+                      //   <FormMessage />
+                      // </FormItem>
                     )}
                   />
                 </div>
