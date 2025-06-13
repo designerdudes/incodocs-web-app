@@ -132,6 +132,7 @@ export default async function PartiesPage({ params }: Props) {
           <AddParties organizationId={organisationID} currentUser={currentUser} />
         </div>
       </div>
+      
       {/* Moved AddParties here */}
 
       <Separator className="my-2" />

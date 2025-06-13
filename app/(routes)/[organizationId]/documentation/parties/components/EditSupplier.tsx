@@ -16,8 +16,9 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { log } from "console";
 
 const formSchema = z.object({
   supplierName: z
@@ -70,36 +71,42 @@ export default function EditSupplierForm({ params }: Props) {
   const supplierId = params._id;
 
   // Fetch existing supplier data and reset form values
-  useEffect(() => {
-    async function fetchSupplierData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/supplier/getbyid/${supplierId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch supplier data");
-        }
-        const data = await response.json();
+ useEffect(() => {
+  async function fetchSupplierData() {
+    try {
+      setIsFetching(true);
 
-        // Reset form with fetched values
-        form.reset({
-          supplierName: data.supplierName || "",
-          address: data.address || "",
-          responsiblePerson: data.responsiblePerson || "",
-          mobileNumber: data.mobileNumber || "",
-          state: data.state || "",
-          factoryAddress: data.factoryAddress || "",
-        });
-      } catch (error) {
-        console.error("Error fetching supplier data:", error);
-        toast.error("Failed to fetch supplier data");
-      } finally {
-        setIsFetching(false);
+      const response = await fetchData(
+        `https://incodocs-server.onrender.com/shipment/supplier/getbyid/${supplierId}`
+      );
+
+      console.log("Supplier Data Response:", response);
+
+      const supplier = response?.findsupplier;
+
+      if (!supplier) {
+        throw new Error("Supplier data missing");
       }
+
+      form.reset({
+        supplierName: supplier?.supplierName || "",
+        address: supplier?.address || "",
+        responsiblePerson: supplier?.responsiblePerson || "",
+        mobileNumber: supplier?.mobileNumber?.toString() || "",
+        state: supplier?.state || "",
+        factoryAddress: supplier?.factoryAddress || "",
+      });
+    } catch (error) {
+      console.error("Error fetching supplier data:", error);
+      toast.error("Failed to fetch supplier data");
+    } finally {
+      setIsFetching(false);
     }
-    fetchSupplierData();
-  }, [supplierId, form]);
+  }
+
+  fetchSupplierData();
+}, [supplierId, form]);
+
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);

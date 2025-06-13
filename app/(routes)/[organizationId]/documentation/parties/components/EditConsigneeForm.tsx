@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
@@ -62,34 +62,41 @@ export default function EditConsigneeForm({ params }: Props) {
   const consigneeId = params._id;
 
   // Fetch existing consignee data and reset form values
-  useEffect(() => {
-    async function fetchConsigneeData() {
-      try {
-        setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/consignee/getone/${consigneeId}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch consignee data");
-        }
-        const data = await response.json();
+useEffect(() => {
+  async function fetchConsigneeData() {
+    try {
+      setIsFetching(true);
 
-        // Reset form with fetched values
-        form.reset({
-          name: data.name || "",
-          address: data.address || "",
-          mobileNo: data.mobileNo || "",
-          email: data.email || "",
-        });
-      } catch (error) {
-        console.error("Error fetching consignee data:", error);
-        toast.error("Failed to fetch consignee data");
-      } finally {
-        setIsFetching(false);
+      const response = await fetchData(
+        `https://incodocs-server.onrender.com/shipment/consignee/getone/${consigneeId}`
+      );
+      console.log("Consignee Data:", response);
+
+      // ✅ Directly use response.getConsignee
+      const consignee = response?.getConsignee;
+
+      if (!consignee) {
+        throw new Error("Failed to fetch consignee data");
       }
+
+      // ✅ Populate form with consignee values
+      form.reset({
+        name: consignee.name || "",
+        address: consignee.address || "",
+        mobileNo: consignee.mobileNo?.toString() || "",
+        email: consignee.email || "",
+      });
+    } catch (error) {
+      console.error("Error fetching consignee data:", error);
+      toast.error("Failed to fetch consignee data");
+    } finally {
+      setIsFetching(false);
     }
-    fetchConsigneeData();
-  }, [consigneeId, form]);
+  }
+
+  fetchConsigneeData();
+}, [consigneeId, form]);
+
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
