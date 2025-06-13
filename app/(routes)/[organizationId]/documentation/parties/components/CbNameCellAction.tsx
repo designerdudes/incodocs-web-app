@@ -37,6 +37,9 @@ interface Props {
   data: CbName;
 }
 
+;
+
+
 const CbNameCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
@@ -77,7 +80,6 @@ const CbNameCellActions: React.FC<Props> = ({ data }) => {
                   cbData={data}
                   onSuccess={(updatedId) => {
                     GlobalModal.onClose();
-                    window.location.reload();
                   }}
                 />
               );

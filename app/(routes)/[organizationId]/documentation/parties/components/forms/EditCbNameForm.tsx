@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
+import { putData } from "@/axiosUtility/api";
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
@@ -49,7 +50,7 @@ interface CBData {
 }
 
 interface EditCBNameFormProps {
-  cbData: CBData;
+  cbData?: CBData; // mark optional to allow safety check
   onSuccess: (updatedBrokerId: string) => void;
 }
 
@@ -57,8 +58,12 @@ export default function EditCBNameForm({
   cbData,
   onSuccess,
 }: EditCBNameFormProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
+
+  if (!cbData) {
+    return <div className="text-center text-gray-500">Loading CB Data...</div>;
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,7 +88,8 @@ export default function EditCBNameForm({
         address: values.address,
         organizationId: values.organizationId,
       };
-      const response = await fetch(
+
+      const result = await putData(
         `https://incodocs-server.onrender.com/shipment/cbname/put/${cbData._id}`,
         {
           method: "PUT",
@@ -91,17 +97,22 @@ export default function EditCBNameForm({
           body: JSON.stringify(payload),
         }
       );
-      if (!response.ok) throw new Error("Failed to update customs broker");
-      const result = await response.json();
-      setIsLoading(false);
+
+      console.log("PUT Result:", result);
+
+      if (!result || result.error) {
+        throw new Error(result.message || "Failed to update customs broker");
+      }
+
       GlobalModal.onClose();
       toast.success("Customs Broker updated successfully");
       form.reset();
       onSuccess(cbData._id);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating customs broker:", error);
+      toast.error(error?.message || "Failed to update customs broker");
+    } finally {
       setIsLoading(false);
-      toast.error("Failed to update customs broker");
     }
   };
 
