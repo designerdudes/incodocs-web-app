@@ -51,17 +51,19 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    {/* Edit facotry Details */}
-                    <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = "Edit Factory Details"; // Set modal title
-                            GlobalModal.children = <EditFactoryForm params={{ _id: data._id }} />; // Render Edit Form
-                            GlobalModal.onOpen();
-                        }}
-                    >
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit Factory Details
-                    </DropdownMenuItem>
+                    {/* Edit factory Details */}
+                   <DropdownMenuItem
+  onSelect={() => {
+    GlobalModal.title = "Edit Factory Details";
+    GlobalModal.children = (
+      <EditFactoryForm factoryData={data} />
+    );
+    GlobalModal.onOpen();
+  }}
+>
+  <Edit className="mr-2 h-4 w-4" />
+  Edit Factory Details
+</DropdownMenuItem>
 
                     {/* Delete factory */}
                     <DropdownMenuItem

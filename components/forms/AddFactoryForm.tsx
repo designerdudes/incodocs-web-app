@@ -30,7 +30,13 @@ import toast from "react-hot-toast";
 // Factory Form Schema
 const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
-  prefix: z.string().min(2,{message: "Prefix must be atleast 2 characters"}) ,
+prefix: z
+  .string()
+  .optional()
+  .refine(
+    (val) => !val || val.trim().length >= 2,
+    { message: "Prefix must be at least 2 characters if provided" }
+  ),
   organizationId: z
      .string()
      .min(1, { message: "Organization must be selected" }),
@@ -52,7 +58,7 @@ const formSchema = z.object({
 });
 
 interface FactoryFormProps {
-  organizationId?: string;
+  organizationId: string;
   token?: string;
   organizations?: { id: string; name: string }[]; // Optional prop for dynamic organizations
 }
@@ -176,19 +182,30 @@ export default function FactoryForm({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="prefix"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Prefix</FormLabel>
-              <FormControl>
-                <Input placeholder="Eg: SAA " {...field} disabled={isLoading} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <FormField
+  control={form.control}
+  name="prefix"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Prefix</FormLabel>
+      <FormControl>
+        <Input
+          placeholder="Eg: SAA"
+          {...field}
+          disabled={isLoading}
         />
+      </FormControl>
+      {!field.value && (
+        <p className="text-xs text-muted-foreground">
+If left blank, a default prefix will be created using the first 3 letters of the factory name.
+
+        </p>
+      )}
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
         <FormField
           control={form.control}
           name="gstNo"

@@ -95,7 +95,10 @@ export default async function FactoryPage({ params  }: FactoryPageProps, ) {
 
       <div>
         
-          <AddFactoryButton />
+<AddFactoryButton
+  organizationId={params.organizationId}
+  token={token}
+/>
         
       </div>
     </div>

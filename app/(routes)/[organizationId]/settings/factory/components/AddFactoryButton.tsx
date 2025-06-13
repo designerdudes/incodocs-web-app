@@ -1,29 +1,43 @@
-"use client"; // Ensures the component is client-side
+"use client";
 
-import { Button } from "@/components/ui/button"; // Button component
-import { useGlobalModal } from "@/hooks/GlobalModal"; // Zustand store hook
-import FactoryForm from "@/components/forms/AddFactoryForm"; // Factory form component
+import { Button } from "@/components/ui/button";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import FactoryForm from "@/components/forms/AddFactoryForm";
 
-// AddFactoryButton Component
-export default function AddFactoryButton() {
+interface AddFactoryButtonProps {
+  organizationId: string;
+  token: string;
+  organizations?: { id: string; name: string }[];
+}
+
+export default function AddFactoryButton({
+  organizationId,
+  token,
+  organizations = [],
+}: AddFactoryButtonProps) {
   const { onOpen, setTitle, setChildren } = useGlobalModal((state) => ({
     onOpen: state.onOpen,
     setTitle: state.setTitle,
     setChildren: state.setChildren,
   }));
 
-  // Function to open the modal and set content
   const openFactoryForm = () => {
-    setTitle("Enter Factory Details"); // Set the title of the modal
-    setChildren(<FactoryForm />); // Set the form (or any component) as modal content
-    onOpen(); // Open the modal
+    setTitle("Enter Factory Details");
+    setChildren(
+      <FactoryForm
+        organizationId={organizationId}
+        token={token}
+        organizations={organizations}
+      />
+    );
+    onOpen();
   };
 
   return (
     <Button
       variant="default"
       className="mt-3 w-25 px-4 py-3 default"
-      onClick={openFactoryForm} // Trigger modal open
+      onClick={openFactoryForm}
     >
       Add Factory
     </Button>
