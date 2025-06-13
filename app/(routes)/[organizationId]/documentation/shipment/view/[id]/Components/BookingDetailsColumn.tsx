@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 
@@ -140,160 +140,171 @@ export const BookingDetailsColumn: ColumnDef<ShipmentContainer>[] = [
     filterFn: "includesString",
   },
   {
-  accessorKey: "addProductDetails",
-  header: "Product Details",
-  cell: ({ row }) => {
-    const products = row.original.addProductDetails;
+    accessorKey: "addProductDetails",
+    header: "Product Details",
+    cell: ({ row }) => {
+      const products = row.original.addProductDetails;
 
-    if (!products || products.length === 0) return "N/A";
+      if (!products || products.length === 0) return "N/A";
 
-    // Helper function to calculate square meters for Tiles
-    const calculateTileSquareMeter = (
-      length: number,
-      breadth: number,
-      piecesPerBox: number,
-      noOfBoxes: number
-    ): number => {
-      return length && breadth && piecesPerBox && noOfBoxes
-        ? (((length * breadth) / 929) * piecesPerBox * noOfBoxes) / 10.764
-        : 0;
-    };
-
-    // Helper function to calculate square meters for Steps and Risers
-    const calculateStepRiserSquareMeter = (stepRiserDetails: any): number => {
-      let total = 0;
-
-      // Mixed Box Calculations
-      const {
-        noOfBoxes = 0,
-        noOfSteps = 0,
-        noOfRiser = 0,
-        sizeOfStep = { length: 0, breadth: 0 },
-        sizeOfRiser = { length: 0, breadth: 0 },
-      } = stepRiserDetails?.mixedBox || {};
-
-      const mixedBoxStepSquareMeter =
-        noOfBoxes && noOfSteps && sizeOfStep.length && sizeOfStep.breadth
-          ? (noOfBoxes * noOfSteps * sizeOfStep.length * sizeOfStep.breadth) /
-            929 /
-            10.764
+      // Helper function to calculate square meters for Tiles
+      const calculateTileSquareMeter = (
+        length: number,
+        breadth: number,
+        piecesPerBox: number,
+        noOfBoxes: number
+      ): number => {
+        return length && breadth && piecesPerBox && noOfBoxes
+          ? (((length * breadth) / 929) * piecesPerBox * noOfBoxes) / 10.764
           : 0;
+      };
 
-      const mixedBoxRiserSquareMeter =
-        noOfBoxes && noOfRiser && sizeOfRiser.length && sizeOfRiser.breadth
-          ? (noOfBoxes * noOfRiser * sizeOfRiser.length * sizeOfRiser.breadth) /
-            929 /
-            10.764
-          : 0;
+      // Helper function to calculate square meters for Steps and Risers
+      const calculateStepRiserSquareMeter = (stepRiserDetails: any): number => {
+        let total = 0;
 
-      // Separate Box Calculations
-      const {
-        noOfBoxOfSteps = 0,
-        noOfPiecesPerBoxOfSteps = 0,
-        sizeOfBoxOfSteps = { length: 0, breadth: 0 },
-        noOfBoxOfRisers = 0,
-        noOfPiecesPerBoxOfRisers = 0,
-        sizeOfBoxOfRisers = { length: 0, breadth: 0 },
-      } = stepRiserDetails?.seperateBox || {};
+        // Mixed Box Calculations
+        const {
+          noOfBoxes = 0,
+          noOfSteps = 0,
+          noOfRiser = 0,
+          sizeOfStep = { length: 0, breadth: 0 },
+          sizeOfRiser = { length: 0, breadth: 0 },
+        } = stepRiserDetails?.mixedBox || {};
 
-      const separateBoxStepSquareMeter =
-        noOfBoxOfSteps &&
-        noOfPiecesPerBoxOfSteps &&
-        sizeOfBoxOfSteps.length &&
-        sizeOfBoxOfSteps.breadth
-          ? (noOfBoxOfSteps *
-              noOfPiecesPerBoxOfSteps *
-              sizeOfBoxOfSteps.length *
-              sizeOfBoxOfSteps.breadth) /
-            929 /
-            10.764
-          : 0;
+        const mixedBoxStepSquareMeter =
+          noOfBoxes && noOfSteps && sizeOfStep.length && sizeOfStep.breadth
+            ? (noOfBoxes * noOfSteps * sizeOfStep.length * sizeOfStep.breadth) /
+              929 /
+              10.764
+            : 0;
 
-      const separateBoxRiserSquareMeter =
-        noOfBoxOfRisers &&
-        noOfPiecesPerBoxOfRisers &&
-        sizeOfBoxOfRisers.length &&
-        sizeOfBoxOfRisers.breadth
-          ? (noOfBoxOfRisers *
-              noOfPiecesPerBoxOfRisers *
-              sizeOfBoxOfRisers.length *
-              sizeOfBoxOfRisers.breadth) /
-            929 /
-            10.764
-          : 0;
+        const mixedBoxRiserSquareMeter =
+          noOfBoxes && noOfRiser && sizeOfRiser.length && sizeOfRiser.breadth
+            ? (noOfBoxes * noOfRiser * sizeOfRiser.length * sizeOfRiser.breadth) /
+              929 /
+              10.764
+            : 0;
 
-      total =
-        mixedBoxStepSquareMeter +
-        mixedBoxRiserSquareMeter +
-        separateBoxStepSquareMeter +
-        separateBoxRiserSquareMeter;
+        // Separate Box Calculations
+        const {
+          noOfBoxOfSteps = 0,
+          noOfPiecesPerBoxOfSteps = 0,
+          sizeOfBoxOfSteps = { length: 0, breadth: 0 },
+          noOfBoxOfRisers = 0,
+          noOfPiecesPerBoxOfRisers = 0,
+          sizeOfBoxOfRisers = { length: 0, breadth: 0 },
+        } = stepRiserDetails?.seperateBox || {};
 
-      return total;
-    };
+        const separateBoxStepSquareMeter =
+          noOfBoxOfSteps &&
+          noOfPiecesPerBoxOfSteps &&
+          sizeOfBoxOfSteps.length &&
+          sizeOfBoxOfSteps.breadth
+            ? (noOfBoxOfSteps *
+                noOfPiecesPerBoxOfSteps *
+                sizeOfBoxOfSteps.length *
+                sizeOfBoxOfSteps.breadth) /
+              929 /
+              10.764
+            : 0;
 
-    // Calculate total square meters across all products
-    const totalSquareMeters = products.reduce((sum, product: any) => {
-      let sqm = 0;
+        const separateBoxRiserSquareMeter =
+          noOfBoxOfRisers &&
+          noOfPiecesPerBoxOfRisers &&
+          sizeOfBoxOfRisers.length &&
+          sizeOfBoxOfRisers.breadth
+            ? (noOfBoxOfRisers *
+                noOfPiecesPerBoxOfRisers *
+                sizeOfBoxOfRisers.length *
+                sizeOfBoxOfRisers.breadth) /
+              929 /
+              10.764
+            : 0;
 
-      if (product.productType === "Tiles") {
-        const { size = { length: 0, breadth: 0 }, piecesPerBox = 0, noOfBoxes = 0 } =
-          product.tileDetails || {};
-        sqm = calculateTileSquareMeter(size.length, size.breadth, piecesPerBox, noOfBoxes);
-      } else if (product.productType === "StepsAndRisers") {
-        sqm = calculateStepRiserSquareMeter(product.stepRiserDetails);
-      }
-      // For Slabs, square meter is not calculated in the form, so we skip it
-      return sum + sqm;
-    }, 0);
+        total =
+          mixedBoxStepSquareMeter +
+          mixedBoxRiserSquareMeter +
+          separateBoxStepSquareMeter +
+          separateBoxRiserSquareMeter;
 
-    return (
-      <div className="space-y-2">
-        {products.map((product: any, idx: number) => {
-          let stoneName = "";
-          let stonePhoto = "";
-          let sqm = 0;
+        return total;
+      };
 
-          if (product.productType === "Tiles") {
-            stoneName = product.tileDetails?.stoneName || "N/A";
-            stonePhoto = product.tileDetails?.stonePhoto || "N/A";
-            const { size = { length: 0, breadth: 0 }, piecesPerBox = 0, noOfBoxes = 0 } =
-              product.tileDetails || {};
-            sqm = calculateTileSquareMeter(size.length, size.breadth, piecesPerBox, noOfBoxes);
-          } else if (product.productType === "Slabs") {
-            stoneName = product.slabDetails?.stoneName || "N/A";
-            stonePhoto = product.slabDetails?.stonePhoto || "N/A";
-            // Slabs don't have a square meter calculation in the form
-            sqm = 0;
-          } else if (product.productType === "StepsAndRisers") {
-            stoneName = product.stepRiserDetails?.stoneName || "N/A";
-            stonePhoto = product.stepRiserDetails?.stonePhoto || "N/A";
-            sqm = calculateStepRiserSquareMeter(product.stepRiserDetails);
-          }
+      // Calculate total square meters across all products
+      const totalSquareMeters = products.reduce((sum, product: any) => {
+        let sqm = 0;
 
-          return (
-            <div key={idx} className="border-b pb-1">
-              <div>
-                <strong>Product Type:</strong> {product.productType}
-              </div>
-              <div>
-                <strong>Stone Name:</strong> {stoneName}
-              </div>
-              <div>
-                <strong>Stone Photo:</strong> {stonePhoto}
-              </div>
-              {product.productType !== "Slabs" && (
+        if (product.productType === "Tiles") {
+          const { size = { length: 0, breadth: 0 }, piecesPerBox = 0, noOfBoxes = 0 } =
+           product.tileDetails || {};
+          sqm = calculateTileSquareMeter(size.length, size.breadth, piecesPerBox, noOfBoxes);
+        } else if (product.productType === "StepsAndRisers") {
+          sqm = calculateStepRiserSquareMeter(product.stepRiserDetails);
+        }
+        // For Slabs, square meter is not calculated in the form, so we skip it
+        return sum + sqm;
+      }, 0);
+
+      return (
+        <div className="space-y-2">
+          {products.map((product: any, idx: number) => {
+            let stoneName = "";
+            let stonePhoto = "";
+            let sqm = 0;
+
+            if (product.productType === "Tiles") {
+              stoneName = product.tileDetails?.stoneName || "N/A";
+              stonePhoto = product.tileDetails?.stonePhoto || "N/A";
+              const { size = { length: 0, breadth: 0 }, piecesPerBox = 0, noOfBoxes = 0 } =
+               product.tileDetails || {};
+              sqm = calculateTileSquareMeter(size.length, size.breadth, piecesPerBox, noOfBoxes);
+            } else if (product.productType === "Slabs") {
+              stoneName = product.slabDetails?.stoneName || "N/A";
+              stonePhoto = product.slabDetails?.stonePhoto || "N/A";
+              // Slabs don't have a square meter calculation in the form
+              sqm = 0;
+            } else if (product.productType === "StepsAndRisers") {
+              stoneName = product.stepRiserDetails?.stoneName || "N/A";
+              stonePhoto = product.stepRiserDetails?.stonePhoto || "N/A";
+              sqm = calculateStepRiserSquareMeter(product.stepRiserDetails);
+            }
+
+            return (
+              <div key={idx} className="border-b pb-1">
                 <div>
-                  <strong>Total Square Meter:</strong> {sqm.toFixed(3)}
+                  <strong>ProductType:</strong> {product.productType}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    );
-  },
-  enableSorting: false,
-}
-
-
+                <div>
+                  <strong>StoneName:</strong> {stoneName}
+                </div>
+                <div className="flex items-center gap-2">
+                  <strong>StonePhoto:</strong>
+                  {stonePhoto ? (
+                    <a
+                      href={stonePhoto}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-500 hover:underline"
+                      title="View Image"
+                    >
+                      <Eye className="w-5 h-5 cursor-pointer" />
+                    </a>
+                  ) : (
+                    "N/A"
+                  )}
+                </div>
+                {product.productType !== "Slabs" && (
+                  <div>
+                    <strong>TotalSqMeter:</strong> {sqm.toFixed(3)}
+                  </div>
+                )}               
+              </div>
+            );
+          })}
+        </div>
+      );
+    },
+    enableSorting: false,
+  }
 ];
