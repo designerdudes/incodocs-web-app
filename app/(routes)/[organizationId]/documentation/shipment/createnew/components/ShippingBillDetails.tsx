@@ -15,7 +15,6 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
@@ -36,6 +35,10 @@ import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
 import { Path } from "react-hook-form";
 
+import CalendarComponent from "@/components/CalendarComponent";
+import { fetchData } from "@/axiosUtility/api";
+import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
+
 interface ShippingBill {
   shippingBillUrl: string;
   shippingBillNumber: string;
@@ -54,10 +57,6 @@ interface FormData {
     review: string;
   };
 }
-
-import CalendarComponent from "@/components/CalendarComponent";
-import { fetchData } from "@/axiosUtility/api";
-import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
 
 interface ShippingBillDetailsProps {
   saveProgress: (data: any) => void;
@@ -92,7 +91,7 @@ export function ShippingBillDetails({
   const organizationId = Array.isArray(params) ? params[0] : params;
   const shippingBillsFromForm = watch("shippingBillDetails.ShippingBills") || [];
   const selectedCustomBorker = watch("shippingBillDetails.cbName");
-  const [CustomBrokers, setCustomBrokers] = useState<{ _id: string; name: string; cbCode: string }[]>([]);
+  const [CustomBrokers, setCustomBrokers] = useState<{ _id: string; name: string; cbCode: string; portCode: string }[]>([]);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [pendingBillCount, setPendingBillCount] = useState<number | null>(null);
   const GlobalModal = useGlobalModal();
@@ -109,11 +108,12 @@ export function ShippingBillDetails({
         const CustomBrokerResponse = await fetchData(
           `/shipment/cbname/getbyorg/${organizationId}`
         );
-        const CustomBrokersData = await CustomBrokerResponse
+        const CustomBrokersData = await CustomBrokerResponse;
         const mappedCBNames = CustomBrokersData.map((cbData: any) => ({
           _id: cbData._id,
           name: cbData.cbName,
           cbCode: cbData.cbCode,
+          portCode: cbData.portCode,
         }));
         setCustomBrokers(mappedCBNames);
       } catch (error) {
@@ -130,12 +130,15 @@ export function ShippingBillDetails({
       const selectedCB = CustomBrokers.find((cb) => cb._id === selectedCustomBorker);
       if (selectedCB) {
         setValue("shippingBillDetails.cbCode", selectedCB.cbCode);
+        setValue("shippingBillDetails.portCode", selectedCB.portCode);
         saveProgressSilently(getValues());
       } else {
         setValue("shippingBillDetails.cbCode", "");
+        setValue("shippingBillDetails.portCode", "");
       }
     } else {
       setValue("shippingBillDetails.cbCode", "");
+      setValue("shippingBillDetails.portCode", "");
     }
   }, [selectedCustomBorker, CustomBrokers, setValue, getValues]);
 
@@ -205,11 +208,12 @@ export function ShippingBillDetails({
             const res = await fetchData(
               `/shipment/cbname/getbyorg/${organizationId}`
             );
-            const data = await res
+            const data = await res;
             const mappedCBNames = data.map((cbData: any) => ({
               _id: cbData._id,
               name: cbData.cbName,
               cbCode: cbData.cbCode,
+              portCode: cbData.portCode,
             }));
             setCustomBrokers(mappedCBNames);
             saveProgressSilently(getValues());
@@ -279,11 +283,10 @@ export function ShippingBillDetails({
             <FormLabel>Port Code</FormLabel>
             <FormControl>
               <Input
-                placeholder="e.g., SB101"
-                className="uppercase"
                 value={field.value || ""}
-                onChange={field.onChange}
-                onBlur={() => saveProgressSilently(getValues())}
+                readOnly
+                tabIndex={-1}
+                className="uppercase bg-gray-100 cursor-not-allowed caret-transparent"
               />
             </FormControl>
             <FormMessage />
@@ -349,7 +352,7 @@ export function ShippingBillDetails({
                             <Input
                               placeholder="e.g., 34583"
                               className="uppercase"
-                              value={field.value as any || ""}
+                              value={(field.value as any) || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
@@ -395,7 +398,7 @@ export function ShippingBillDetails({
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
                               <CalendarComponent
-                                selected={
+                                selected={ 
                                   field.value ? new Date(field.value as any) : undefined
                                 }
                                 onSelect={(date) => {
@@ -419,8 +422,9 @@ export function ShippingBillDetails({
                           <FormControl>
                             <Input
                               type="number"
+                              min={0}
                               placeholder="e.g., 2394"
-                              value={field.value as any || ""}
+                              value={(field.value as any) || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />
@@ -438,9 +442,10 @@ export function ShippingBillDetails({
                         <FormItem>
                           <FormControl>
                             <Input
-                            type="number"
+                              type="number"
+                              min={0}
                               placeholder="e.g., 8934"
-                              value={field.value as any || ""}
+                              value={(field.value as any) || ""}
                               onChange={field.onChange}
                               onBlur={() => saveProgressSilently(getValues())}
                             />

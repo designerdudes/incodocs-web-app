@@ -430,6 +430,7 @@ export function CommercialInvoiceDetails({
                         <FormControl>
                           <Input
                             type="number"
+                            min={0}
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -473,6 +474,7 @@ export function CommercialInvoiceDetails({
                         <FormControl>
                           <Input
                             type="number"
+                            min={0}
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -510,6 +512,7 @@ export function CommercialInvoiceDetails({
                         <FormControl>
                           <Input
                             type="number"
+                            min={0}
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"

@@ -443,6 +443,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <Input
                             type="number"
+                            min={0}
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -457,6 +458,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <Input
                             type="number"
+                            min={0}
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -619,6 +621,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <Input
                             type="number"
+                            min={0}
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
@@ -633,6 +636,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                         render={({ field }) => (
                           <Input
                             type="number"
+                            min={0}
                             placeholder="e.g., 11800"
                             {...field}
                             onBlur={() => saveProgressSilently(getValues())}
