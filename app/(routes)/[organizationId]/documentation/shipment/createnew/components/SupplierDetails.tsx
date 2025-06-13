@@ -99,6 +99,7 @@ export function SupplierDetails({
 }: SupplierDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const suppliersFromForm = watch("supplierDetails.clearance.suppliers") || [];
   const [uploading, setUploading] = useState(false);
   const [supplierNames, setSupplierNames] = useState<{ _id: string; name: string }[]>([]);
@@ -511,6 +512,7 @@ export function SupplierDetails({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      min={0}
                                       placeholder="e.g., 1000"
                                       value={field.value as any || ""}
                                       onChange={field.onChange}
@@ -534,6 +536,7 @@ export function SupplierDetails({
                                   <FormControl>
                                     <Input
                                       type="number"
+                                      min={0}
                                       placeholder="e.g., 900"
                                       value={field.value as any || ""}
                                       onChange={field.onChange}
@@ -625,6 +628,8 @@ export function SupplierDetails({
               <FormLabel>Actual Supplier Invoice Value</FormLabel>
               <FormControl>
                 <Input
+                  type="number"
+                  min={0}
                   placeholder="e.g., 1100"
                   value={field.value || ""}
                   onChange={field.onChange}
