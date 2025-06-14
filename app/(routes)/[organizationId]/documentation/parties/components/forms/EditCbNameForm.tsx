@@ -75,7 +75,7 @@ export default function EditCBNameForm({
   });
 
   if (!cbData) {
-    return <div className="text-center text-gray-500">Loading CB Data...</div>;
+    return <div className="text-center text-gray-500"> Loading Custom Broker Data... </div>;
   }
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
