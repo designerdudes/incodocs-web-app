@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,14 +14,13 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
-  ScissorsIcon,
   Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import EditTransporterForm from "./EditTransporterForm"; // Import the EditTransporterForm component
+import EditTransporterForm from "./EditTransporterForm";
 
 interface Transporter {
   _id: string;
@@ -38,6 +37,8 @@ interface Props {
 
 const TransporterCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const params = useParams();
+  const organizationId = params.organizationId as string;
   const GlobalModal = useGlobalModal();
 
   const deleteTransporter = async () => {
@@ -78,6 +79,14 @@ const TransporterCellActions: React.FC<Props> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Transporter
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(`/${organizationId}/documentation/parties/transporter/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Transporter
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {

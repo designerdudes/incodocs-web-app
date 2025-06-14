@@ -1,6 +1,5 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,11 +9,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useRouter, useParams } from "next/navigation";
 import {
   Edit,
   EyeIcon,
   MoreHorizontal,
-  ScissorsIcon,
   Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -22,7 +21,7 @@ import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { ShippingLine } from "./shippingLineColumn";
 import { Alert } from "@/components/forms/Alert";
-import EditShippingLineForm from "./EditShippingLine"; // Import the EditShippingLine component
+import EditShippingLineForm from "./EditShippingLine";
 
 interface Props {
   data: ShippingLine;
@@ -30,6 +29,8 @@ interface Props {
 
 const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const params = useParams(); // Get dynamic route parameters
+  const organizationId = params.organizationId as string; // Extract organizationId from the current URL
   const GlobalModal = useGlobalModal();
 
   const deleteShippingLine = async () => {
@@ -72,6 +73,15 @@ const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Shipping Line
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              // Navigate to the Shipping Line view page, including organizationId
+              router.push(`/${organizationId}/documentation/parties/shippingline/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Shipping Line
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
