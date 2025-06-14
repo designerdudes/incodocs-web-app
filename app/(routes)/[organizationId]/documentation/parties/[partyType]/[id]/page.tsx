@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import axios from "axios";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, EyeIcon } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -27,6 +27,14 @@ interface PartyData {
   mobileNo?: string;
   state?: string;
   factoryAddress?: string;
+}
+
+interface Document {
+  fileName: string;
+  fileUrl: string;
+  date: string;
+  review: string;
+  _id: string;
 }
 
 interface Shipment {
@@ -266,6 +274,7 @@ export default async function PartyViewPage({ params }: Props) {
   }
 
   let party: PartyData | null = null;
+  let documents: Document[] = [];
   let shipments: Shipment[] = [];
   let error = null;
 
@@ -278,9 +287,11 @@ export default async function PartyViewPage({ params }: Props) {
     console.log(`Raw API response for ${partyType}:`, response.data);
 
     const partyData = response.data[config.responseKey] || response.data;
+    documents = partyData.documents || [];
     shipments = response.data.shipment || [];
 
     console.log(`Parsed party data for ${partyType}:`, partyData);
+    console.log(`Documents for ${partyType}:`, documents);
     console.log(`Shipments for ${partyType}:`, shipments);
 
     if (!partyData) throw new Error("No party data found");
@@ -375,6 +386,53 @@ export default async function PartyViewPage({ params }: Props) {
                       ))}
                     </TableBody>
                   </Table>
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="flex flex-col md:flex-row gap-4">
+              <Card className="mt-4 w-full">
+                <CardHeader>
+                  <CardTitle>Documents</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {documents.length === 0 ? (
+                    <div>No documents available</div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>File Name</TableHead>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Review</TableHead>
+                          <TableHead>View</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {documents.map((doc) => (
+                          <TableRow key={doc._id}>
+                            <TableCell>{doc.fileName}</TableCell>
+                            <TableCell>{formatDate(doc.date)}</TableCell>
+                            <TableCell>{doc.review}</TableCell>
+                            <TableCell>
+                              {doc.fileUrl ? (
+                                <a
+                                  href={doc.fileUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:underline"
+                                >
+                                  <EyeIcon className="h-4 w-4 cursor-pointer" />
+                                </a>
+                              ) : (
+                                "N/A"
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             </div>
