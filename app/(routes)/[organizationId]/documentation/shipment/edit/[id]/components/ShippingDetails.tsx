@@ -205,8 +205,7 @@ export function ShippingDetails({
         }
 
         throw new Error(
-          `File upload failed: ${
-            errorData.message || response.statusText
+          `File upload failed: ${errorData.message || response.statusText
           } (Status: ${response.status})`
         );
       }
@@ -306,7 +305,7 @@ export function ShippingDetails({
           }
           throw new Error(
             errorData.message ||
-              `Failed to fetch forwarders: ${forwarderResponse.status}`
+            `Failed to fetch forwarders: ${forwarderResponse.status}`
           );
         }
 
@@ -332,17 +331,13 @@ export function ShippingDetails({
           }
           throw new Error(
             errorData.message ||
-              `Failed to fetch transporters: ${transporterResponse.status}`
+            `Failed to fetch transporters: ${transporterResponse.status}`
           );
         }
-
         const transporterData = await transporterResponse.json();
         setTransporters(Array.isArray(transporterData) ? transporterData : []);
       } catch (error: any) {
         console.error("Error fetching data:", error);
-        toast.error(
-          error.message || "Failed to fetch forwarders or transporters"
-        );
       }
     };
 
@@ -387,7 +382,6 @@ export function ShippingDetails({
             .then((data) => setForwarders(Array.isArray(data) ? data : []))
             .catch((error) => {
               console.error("Error refreshing forwarders:", error);
-              toast.error("Failed to refresh forwarders");
             });
         }}
       />
@@ -433,7 +427,6 @@ export function ShippingDetails({
             .then((data) => setTransporters(Array.isArray(data) ? data : []))
             .catch((error) => {
               console.error("Error refreshing transporters:", error);
-              toast.error("Failed to refresh transporters");
             });
         }}
       />

@@ -85,31 +85,6 @@ export function BillOfLadingDetails({
     }
   }, [formValues, setValue]);
 
-  // Handle File Upload
-  const handleFileUpload = async (file: File, fieldName: string) => {
-    if (!file) return;
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
-      setValue(fieldName, data.storageLink, { shouldDirty: true });
-      toast.success("File uploaded successfully!");
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload file");
-    } finally {
-      setUploading(false);
-    }
-  };
 
   // Fetch shipping lines on component mount
   useEffect(() => {
@@ -122,14 +97,13 @@ export function BillOfLadingDetails({
         setShippingLines(
           Array.isArray(shippingData)
             ? shippingData.map((line: any) => ({
-                _id: line._id,
-                shippingLineName: line.shippingLineName,
-              }))
+              _id: line._id,
+              shippingLineName: line.shippingLineName,
+            }))
             : []
         );
       } catch (error) {
         console.error("Error fetching shipping lines:", error);
-        toast.error("Failed to load shipping lines");
       }
     };
     fetchShippingLines();
@@ -150,14 +124,13 @@ export function BillOfLadingDetails({
             setShippingLines(
               Array.isArray(data)
                 ? data.map((line: any) => ({
-                    _id: line._id,
-                    shippingLineName: line.shippingLineName,
-                  }))
+                  _id: line._id,
+                  shippingLineName: line.shippingLineName,
+                }))
                 : []
             );
           } catch (error) {
             console.error("Error refreshing shipping lines:", error);
-            toast.error("Failed to refresh shipping lines");
           }
         }}
       />
@@ -165,18 +138,6 @@ export function BillOfLadingDetails({
     GlobalModal.onOpen();
   };
 
-  // Handle section submission
-  const handleSubmit = async () => {
-    setIsLoading(true);
-    try {
-      await onSectionSubmit();
-    } catch (error) {
-      console.error("Error submitting Bill of Lading Details:", error);
-      toast.error("Failed to submit Bill of Lading Details");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   function saveProgressSilently(arg0: FieldValues): void {
     saveProgress({ BillOfLadingDetails: getValues().BillOfLadingDetails });
