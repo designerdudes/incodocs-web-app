@@ -90,10 +90,10 @@ export function ShippingBillDetails({
       );
       const brokers = Array.isArray(data)
         ? data.map((broker: any) => ({
-            _id: broker._id,
-            name: broker.cbName,
-            cbCode: broker.cbCode || "",
-          }))
+          _id: broker._id,
+          name: broker.cbName,
+          cbCode: broker.cbCode || "",
+        }))
         : [];
       setCustomsBrokers(brokers);
       console.log("API response data:", data);
@@ -254,7 +254,6 @@ export function ShippingBillDetails({
             saveProgressSilently(getValues());
           } catch (error) {
             console.error("Error refreshing CB names:", error);
-            toast.error("Failed to refresh CB names");
           }
           GlobalModal.onClose();
         }}
@@ -423,7 +422,7 @@ export function ShippingBillDetails({
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value &&
-                                  !isNaN(new Date(field.value).getTime())
+                                    !isNaN(new Date(field.value).getTime())
                                     ? format(new Date(field.value), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
