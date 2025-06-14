@@ -118,9 +118,9 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       ) : uploadedUrl ? (
         <div
           className="text-xs text-green-600 max-w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis"
-          title={uploadedUrl.split("-").pop()}
+          title={uploadedUrl.split("-")[1]}
         >
-          Uploaded: {uploadedUrl.split("-").pop()}
+          Uploaded: {uploadedUrl.split("-")[1]}
         </div>
       ) : null}
       {!uploadedUrl && (
