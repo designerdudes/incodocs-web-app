@@ -236,6 +236,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     try {
       await postData("/factory-management/inventory/addlotandblocks", {
         ...values,
+        materialCost: values.materialCost || 0,
+        markerCost: values.markerCost || 0,
+        transportCost: values.transportCost || 0,
         factoryId,
         organizationId,
         status: "active",
@@ -329,9 +332,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : undefined);
+                        field.onChange(value ? parseFloat(value) : 0);
                       }}
-                      value={field.value ?? ""}
+                      value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -351,9 +354,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : undefined);
+                        field.onChange(value ? parseFloat(value) : 0);
                       }}
-                      value={field.value ?? ""}
+                      value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -373,9 +376,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : undefined);
+                        field.onChange(value ? parseFloat(value) : 0);
                       }}
-                      value={field.value ?? ""}
+                      value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>

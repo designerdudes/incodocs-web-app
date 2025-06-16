@@ -10,26 +10,77 @@ export interface ContainerType {
 // Define container types data
 export const containerTypes: ContainerType[] = [
   // Dry Containers
-  { value: "20-foot", label: "20-foot Dry Container (1 TEU)", category: "Dry Containers" },
-  { value: "40-foot", label: "40-foot Dry Container (1 FFE)", category: "Dry Containers" },
-  { value: "40HC", label: "40-foot High Cube Container (40HC)", category: "Dry Containers" },
+  {
+    value: "20-foot",
+    label: "20-foot Dry Container (1 TEU)",
+    category: "Dry Containers",
+  },
+  {
+    value: "40-foot",
+    label: "40-foot Dry Container (1 FFE)",
+    category: "Dry Containers",
+  },
+  {
+    value: "40HC",
+    label: "40-foot High Cube Container (40HC)",
+    category: "Dry Containers",
+  },
 
   // Refrigerated Containers
-  { value: "20-foot-reefer", label: "20-foot Refrigerated Container", category: "Refrigerated Containers" },
-  { value: "40-foot-reefer", label: "40-foot Refrigerated Container", category: "Refrigerated Containers" },
-  { value: "40HC-reefer", label: "40-foot High Cube Refrigerated Container", category: "Refrigerated Containers" },
-  { value: "45HC-reefer", label: "45-foot High Cube Refrigerated Container", category: "Refrigerated Containers" },
-  { value: "ca-container", label: "Controlled Atmosphere (CA) Container", category: "Refrigerated Containers" },
+  {
+    value: "20-foot-reefer",
+    label: "20-foot Refrigerated Container",
+    category: "Refrigerated Containers",
+  },
+  {
+    value: "40-foot-reefer",
+    label: "40-foot Refrigerated Container",
+    category: "Refrigerated Containers",
+  },
+  {
+    value: "40HC-reefer",
+    label: "40-foot High Cube Refrigerated Container",
+    category: "Refrigerated Containers",
+  },
+  {
+    value: "45HC-reefer",
+    label: "45-foot High Cube Refrigerated Container",
+    category: "Refrigerated Containers",
+  },
+  {
+    value: "ca-container",
+    label: "Controlled Atmosphere (CA) Container",
+    category: "Refrigerated Containers",
+  },
 
   // Special Dimensioned Containers
-  { value: "open-top", label: "Open Top Container", category: "Special Dimensioned Containers" },
-  { value: "flat-rack", label: "Flat Rack Container", category: "Special Dimensioned Containers" },
-  { value: "platform", label: "Platform Container", category: "Special Dimensioned Containers" },
-  { value: "transportable-tank", label: "Transportable Tank", category: "Special Dimensioned Containers" },
+  {
+    value: "open-top",
+    label: "Open Top Container",
+    category: "Special Dimensioned Containers",
+  },
+  {
+    value: "flat-rack",
+    label: "Flat Rack Container",
+    category: "Special Dimensioned Containers",
+  },
+  {
+    value: "platform",
+    label: "Platform Container",
+    category: "Special Dimensioned Containers",
+  },
+  {
+    value: "transportable-tank",
+    label: "Transportable Tank",
+    category: "Special Dimensioned Containers",
+  },
 ];
 
 // Extract string values for z.enum()
-const containerTypeValues = containerTypes.map((type) => type.value) as [string, ...string[]];
+const containerTypeValues = containerTypes.map((type) => type.value) as [
+  string,
+  ...string[]
+];
 
 export const formSchema = z.object({
   bookingDetails: z
@@ -60,30 +111,42 @@ export const formSchema = z.object({
         .optional(),
     })
     .optional(),
-    shippingDetails: z
+  shippingDetails: z
     .object({
       review: z.string().optional(),
       transporterName: z.string().optional(),
-      noOftransportinvoices: z.number().min(1, "At least one invoice required").optional(),
+      noOftransportinvoices: z
+        .number()
+        .min(1, "At least one invoice required")
+        .optional(),
       transporterInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            date: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
             valueWithGst: z.string().optional(),
             valueWithoutGst: z.string().optional(),
           })
         )
         .optional(),
       forwarderName: z.string().optional(),
-      noOfForwarderinvoices: z.number().min(1, "At least one invoice required").optional(),
+      noOfForwarderinvoices: z
+        .number()
+        .min(1, "At least one invoice required")
+        .optional(),
       forwarderInvoices: z
         .array(
           z.object({
             invoiceNumber: z.string().optional(),
             uploadInvoiceUrl: z.string().url("Invalid URL").optional(),
-            date: z.string().datetime({ message: "Invalid date format" }).optional(),
+            date: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
             valueWithGst: z.string().optional(),
             valueWithoutGst: z.string().optional(),
           })
@@ -91,7 +154,7 @@ export const formSchema = z.object({
         .optional(),
     })
     .optional(),
-    shippingBillDetails: z
+  shippingBillDetails: z
     .object({
       review: z.string().optional(),
       portCode: z.string().optional(),
@@ -108,6 +171,7 @@ export const formSchema = z.object({
               .optional(),
             drawbackValue: z.string().optional(),
             rodtepValue: z.string().optional(),
+            ConversionRateInDollars: z.number().optional(),
           })
         )
         .optional(),
@@ -118,31 +182,30 @@ export const formSchema = z.object({
       review: z.string().optional(),
       clearance: z
         .object({
-          noOfSuppliers:z.number().optional(),
-          suppliers: z
-          .array(
+          noOfSuppliers: z.number().optional(),
+          suppliers: z.array(
             z.object({
-            supplierName: z.string().optional(),
-            noOfInvoices: z.number().optional(),
-            invoices: z
-              .array(
-                z.object({
-                  supplierInvoiceNumber: z.string().optional(),
-                  supplierInvoiceDate: z
-                    .string()
-                    .datetime({ message: "Invalid date format" })
-                    .optional(),
-                  supplierInvoiceValueWithGST: z.string().optional(),
-                  supplierInvoiceValueWithOutGST: z.string().optional(),
-                  clearanceSupplierInvoiceUrl: z
-                    .string()
-                    .url("Invalid URL")
-                    .optional(),
-                })
-              )
-              .optional(),
-          }))
-          
+              supplierName: z.string().optional(),
+              noOfInvoices: z.number().optional(),
+              invoices: z
+                .array(
+                  z.object({
+                    supplierInvoiceNumber: z.string().optional(),
+                    supplierInvoiceDate: z
+                      .string()
+                      .datetime({ message: "Invalid date format" })
+                      .optional(),
+                    supplierInvoiceValueWithGST: z.string().optional(),
+                    supplierInvoiceValueWithOutGST: z.string().optional(),
+                    clearanceSupplierInvoiceUrl: z
+                      .string()
+                      .url("Invalid URL")
+                      .optional(),
+                  })
+                )
+                .optional(),
+            })
+          ),
         })
         .optional(),
       actual: z
@@ -164,10 +227,19 @@ export const formSchema = z.object({
         .array(
           z.object({
             clearanceCommercialInvoiceNumber: z.string().optional(),
-            clearanceCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
-            clearancecommercialInvoiceDate: z.string().datetime({ message: "Invalid date format" }).optional(),
+            clearanceCommercialInvoiceUrl: z
+              .string()
+              .url("Invalid URL")
+              .optional(),
+            clearancecommercialInvoiceDate: z
+              .string()
+              .datetime({ message: "Invalid date format" })
+              .optional(),
             clearanceCommercialInvoiceValue: z.string().optional(),
-            actualCommercialInvoiceUrl: z.string().url("Invalid URL").optional(),
+            actualCommercialInvoiceUrl: z
+              .string()
+              .url("Invalid URL")
+              .optional(),
             actualCommercialInvoiceValue: z.string().optional(),
             packingListUrl: z.string().url("Invalid URL").optional(),
             saberInvoiceUrl: z.string().url("Invalid URL").optional(),

@@ -25,6 +25,8 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Textarea } from "@/components/ui/textarea";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import EntityCombobox from "@/components/ui/EntityCombobox";
+import { useGlobalModal } from "@/hooks/GlobalModal";
 
 // Zod Schemas (unchanged)
 const tileSchema = z.object({
@@ -52,12 +54,8 @@ const tileSchema = z.object({
     .optional(),
   moulding: z
     .object({
-      mouldingSide: z
-        .enum(["one side", "two side", "three side", "four side"])
-        .optional(),
-      typeOfMoulding: z
-        .enum(["half bullnose", "full bullnose", "bevel"])
-        .optional(),
+      mouldingSide: z.string().optional(),
+      typeOfMoulding: z.string().optional(),
     })
     .optional(),
   noOfBoxes: z
@@ -202,16 +200,105 @@ interface EditProductFormProps {
   params: any;
 }
 
-export default function EditProductsForm({ onSuccess, initialProduct, params }: EditProductFormProps) {
+export default function EditProductsForm({
+  onSuccess,
+  initialProduct,
+  params,
+}: EditProductFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
+  const GlobalModal = useGlobalModal();
+  const [mouldingOptions, setMouldingOptions] = useState<any[]>([
+    { label: "One Side", value: "one side" },
+    { label: "Two Side", value: "two side" },
+    { label: "Three Side", value: "three side" },
+    { label: "Four Side", value: "four side" },
+    { label: "None", value: "none" },
+  ]);
+  const [mouldingTypeOptions, setMouldingTypeOptions] = useState<any[]>([
+    { label: "Half Bullnose", value: "Half Bullnose" },
+    { label: "Full Bullnose", value: "Full Bullnose" },
+    { label: "Bevel", value: "Bevel" },
+    { label: "None", value: "none" },
+  ]);
   // Debug useParams output
   console.log("This is product id:", params.products._id);
   console.log("This is data:", params.products);
   const organizationId = params.products.organizationId;
   const productId = params.products._id;
   const ProductData = params.products;
+  const openMouldingForm = () => {
+    let inputValue = "";
+
+    const handleAddMoulding = () => {
+      const trimmed = inputValue.trim().toLowerCase();
+      if (!trimmed) return;
+
+      const newOption = {
+        label: trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+        value: trimmed,
+      };
+
+      setMouldingOptions((prev) => {
+        const exists = prev.some((opt) => opt.value === newOption.value);
+        return exists ? prev : [...prev, newOption];
+      });
+
+      form.setValue("tileDetails.moulding.mouldingSide", newOption.value);
+
+      GlobalModal.onClose();
+    };
+    GlobalModal.title = "Add New Moulding Side";
+    GlobalModal.children = (
+      <div className="space-y-4">
+        <input
+          className="w-full px-3 py-2 rounded"
+          placeholder="Enter Moulding Side"
+          onChange={(e) => (inputValue = e.target.value)}
+        />
+        <Button type="submit" onClick={handleAddMoulding}>
+          Save
+        </Button>
+      </div>
+    );
+    GlobalModal.onOpen();
+  };
+  const openMouldingTypeForm = () => {
+    let inputValue = "";
+
+    const handleAddMouldingType = () => {
+      const trimmed = inputValue.trim().toLowerCase();
+      if (!trimmed) return;
+
+      const newOption = {
+        label: trimmed.charAt(0).toUpperCase() + trimmed.slice(1),
+        value: trimmed,
+      };
+
+      setMouldingTypeOptions((prev) => {
+        const exists = prev.some((opt) => opt.value === newOption.value);
+        return exists ? prev : [...prev, newOption];
+      });
+
+      form.setValue("tileDetails.moulding.typeOfMoulding", newOption.value);
+
+      GlobalModal.onClose();
+    };
+    GlobalModal.title = "Add New Moulding Type";
+    GlobalModal.children = (
+      <div className="space-y-4">
+        <input
+          className="w-full px-3 py-2 rounded"
+          placeholder="Enter Moulding Type"
+          onChange={(e) => (inputValue = e.target.value)}
+        />
+        <Button type="submit" onClick={handleAddMouldingType}>
+          Save
+        </Button>
+      </div>
+    );
+    GlobalModal.onOpen();
+  };
 
   // Initialize form with default values from ProductData
   const form = useForm<ProductFormValues>({
@@ -229,8 +316,11 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
           value: ProductData.tileDetails?.thickness?.value || 0,
         },
         moulding: {
-          mouldingSide: ProductData.tileDetails?.moulding?.mouldingSide || "one side",
-          typeOfMoulding: ProductData.tileDetails?.moulding?.typeOfMoulding || "half bullnose",
+          mouldingSide:
+            ProductData.tileDetails?.moulding?.mouldingSide || "one side",
+          typeOfMoulding:
+            ProductData.tileDetails?.moulding?.typeOfMoulding ||
+            "half bullnose",
         },
         noOfBoxes: ProductData.tileDetails?.noOfBoxes || 0,
         piecesPerBox: ProductData.tileDetails?.piecesPerBox || 0,
@@ -248,31 +338,57 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
           noOfBoxes: ProductData.stepRiserDetails?.mixedBox?.noOfBoxes || 0,
           noOfSteps: ProductData.stepRiserDetails?.mixedBox?.noOfSteps || 0,
           sizeOfStep: {
-            length: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.length || 0,
-            breadth: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.breadth || 0,
-            thickness: ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.thickness || 0,
+            length:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.length || 0,
+            breadth:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.breadth || 0,
+            thickness:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfStep?.thickness ||
+              0,
           },
           noOfRiser: ProductData.stepRiserDetails?.mixedBox?.noOfRiser || 0,
           sizeOfRiser: {
-            length: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.length || 0,
-            breadth: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.breadth || 0,
-            thickness: ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.thickness || 0,
+            length:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.length || 0,
+            breadth:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.breadth || 0,
+            thickness:
+              ProductData.stepRiserDetails?.mixedBox?.sizeOfRiser?.thickness ||
+              0,
           },
         },
         seperateBox: {
-          noOfBoxOfSteps: ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfSteps || 0,
-          noOfPiecesPerBoxOfSteps: ProductData.stepRiserDetails?.seperateBox?.noOfPiecesPerBoxOfSteps || 0,
+          noOfBoxOfSteps:
+            ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfSteps || 0,
+          noOfPiecesPerBoxOfSteps:
+            ProductData.stepRiserDetails?.seperateBox
+              ?.noOfPiecesPerBoxOfSteps || 0,
           sizeOfBoxOfSteps: {
-            length: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.length || 0,
-            breadth: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.breadth || 0,
-            thickness: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps?.thickness || 0,
+            length:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps
+                ?.length || 0,
+            breadth:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps
+                ?.breadth || 0,
+            thickness:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfSteps
+                ?.thickness || 0,
           },
-          noOfBoxOfRisers: ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfRisers || 0,
-          noOfPiecesPerBoxOfRisers: ProductData.stepRiserDetails?.seperateBox?.noOfPiecesPerBoxOfRisers || 0,
+          noOfBoxOfRisers:
+            ProductData.stepRiserDetails?.seperateBox?.noOfBoxOfRisers || 0,
+          noOfPiecesPerBoxOfRisers:
+            ProductData.stepRiserDetails?.seperateBox
+              ?.noOfPiecesPerBoxOfRisers || 0,
           sizeOfBoxOfRisers: {
-            length: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.length || 0,
-            breadth: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.breadth || 0,
-            thickness: ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers?.thickness || 0,
+            length:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers
+                ?.length || 0,
+            breadth:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers
+                ?.breadth || 0,
+            thickness:
+              ProductData.stepRiserDetails?.seperateBox?.sizeOfBoxOfRisers
+                ?.thickness || 0,
           },
         },
       },
@@ -285,59 +401,66 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
   const productType = form.watch("productType");
 
   const handleSubmit = async (values: ProductFormValues) => {
-  if (!productId) {
-    toast.error("Product ID is missing");
-    return;
-  }
-  setIsLoading(true);
-  try {
-    const payload: ProductFormValues = {
-      productType: values.productType,
-      organizationId: values.organizationId || ProductData.organizationId,
-      createdBy: values.createdBy || ProductData.createdBy,
-      _id: values._id || productId,
-      tileDetails: values.productType === "Tiles" ? values.tileDetails : undefined,
-      slabDetails: values.productType === "Slabs" ? values.slabDetails : undefined,
-      stepRiserDetails: values.productType === "StepsAndRisers" ? values.stepRiserDetails : undefined,
-    };
-
-    console.log("Update payload:", JSON.stringify(payload, null, 2));
-
-    // Validate payload against schema (optional, for debugging)
-    const validation = productSchema.safeParse(payload);
-    if (!validation.success) {
-      console.error("Payload validation failed:", validation.error);
-      toast.error("Invalid data provided");
+    if (!productId) {
+      toast.error("Product ID is missing");
       return;
     }
+    setIsLoading(true);
+    try {
+      const payload: ProductFormValues = {
+        productType: values.productType,
+        organizationId: values.organizationId || ProductData.organizationId,
+        createdBy: values.createdBy || ProductData.createdBy,
+        _id: values._id || productId,
+        tileDetails:
+          values.productType === "Tiles" ? values.tileDetails : undefined,
+        slabDetails:
+          values.productType === "Slabs" ? values.slabDetails : undefined,
+        stepRiserDetails:
+          values.productType === "StepsAndRisers"
+            ? values.stepRiserDetails
+            : undefined,
+      };
 
-    const response = await putData(`/shipment/productdetails/put/${productId}`, payload);
-    console.log("API response:", response);
-    toast.success("Product updated successfully");
-    if (onSuccess) onSuccess();
-    setTimeout(() => {
-      router.refresh();
-      router.push(`/${organizationId}/documentation/products`);
+      console.log("Update payload:", JSON.stringify(payload, null, 2));
 
-    }, 1500);
-  } catch (error: any) {
-    console.error("Error updating product:", error);
-    console.error("Server error response:", error.response?.data);
-    if (error.response) {
-      if (error.response.status === 400) {
-        toast.error(error.response.data.message || "Invalid data provided");
-      } else if (error.response.status === 500) {
-        toast.error(error.response.data.message || "Server error occurred");
-      } else {
-        toast.error("Error updating product");
+      // Validate payload against schema (optional, for debugging)
+      const validation = productSchema.safeParse(payload);
+      if (!validation.success) {
+        console.error("Payload validation failed:", validation.error);
+        toast.error("Invalid data provided");
+        return;
       }
-    } else {
-      toast.error("Network error or server is unreachable");
+
+      const response = await putData(
+        `/shipment/productdetails/put/${productId}`,
+        payload
+      );
+      console.log("API response:", response);
+      toast.success("Product updated successfully");
+      if (onSuccess) onSuccess();
+      setTimeout(() => {
+        router.refresh();
+        router.push(`/${organizationId}/documentation/products`);
+      }, 1500);
+    } catch (error: any) {
+      console.error("Error updating product:", error);
+      console.error("Server error response:", error.response?.data);
+      if (error.response) {
+        if (error.response.status === 400) {
+          toast.error(error.response.data.message || "Invalid data provided");
+        } else if (error.response.status === 500) {
+          toast.error(error.response.data.message || "Server error occurred");
+        } else {
+          toast.error("Error updating product");
+        }
+      } else {
+        toast.error("Network error or server is unreachable");
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   const length = form.watch("tileDetails.size.length") || 0;
   const breadth = form.watch("tileDetails.size.breadth") || 0;
@@ -347,19 +470,31 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
   const noOfMixedBoxes = form.watch("stepRiserDetails.mixedBox.noOfBoxes") || 0;
   const noOfSteps = form.watch("stepRiserDetails.mixedBox.noOfSteps") || 0;
   const noOfRiser = form.watch("stepRiserDetails.mixedBox.noOfRiser") || 0;
-  const mixedBoxStepLength = form.watch("stepRiserDetails.mixedBox.sizeOfStep.length") || 0;
-  const mixedBoxStepBreadth = form.watch("stepRiserDetails.mixedBox.sizeOfStep.breadth") || 0;
-  const mixedBoxRiserLength = form.watch("stepRiserDetails.mixedBox.sizeOfRiser.length") || 0;
-  const mixedBoxRiserBreadth = form.watch("stepRiserDetails.mixedBox.sizeOfRiser.breadth") || 0;
+  const mixedBoxStepLength =
+    form.watch("stepRiserDetails.mixedBox.sizeOfStep.length") || 0;
+  const mixedBoxStepBreadth =
+    form.watch("stepRiserDetails.mixedBox.sizeOfStep.breadth") || 0;
+  const mixedBoxRiserLength =
+    form.watch("stepRiserDetails.mixedBox.sizeOfRiser.length") || 0;
+  const mixedBoxRiserBreadth =
+    form.watch("stepRiserDetails.mixedBox.sizeOfRiser.breadth") || 0;
 
-  const noOfSeparateStepBoxes = form.watch("stepRiserDetails.seperateBox.noOfBoxOfSteps") || 0;
-  const noOfPiecesPerBoxOfSteps = form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps") || 0;
-  const separateBoxStepLength = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.length") || 0;
-  const separateBoxStepBreadth = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.breadth") || 0;
-  const noOfSeparateRiserBoxes = form.watch("stepRiserDetails.seperateBox.noOfBoxOfRisers") || 0;
-  const noOfPiecesPerBoxOfRisers = form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers") || 0;
-  const separateBoxRiserLength = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.length") || 0;
-  const separateBoxRiserBreadth = form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.breadth") || 0;
+  const noOfSeparateStepBoxes =
+    form.watch("stepRiserDetails.seperateBox.noOfBoxOfSteps") || 0;
+  const noOfPiecesPerBoxOfSteps =
+    form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfSteps") || 0;
+  const separateBoxStepLength =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.length") || 0;
+  const separateBoxStepBreadth =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfSteps.breadth") || 0;
+  const noOfSeparateRiserBoxes =
+    form.watch("stepRiserDetails.seperateBox.noOfBoxOfRisers") || 0;
+  const noOfPiecesPerBoxOfRisers =
+    form.watch("stepRiserDetails.seperateBox.noOfPiecesPerBoxOfRisers") || 0;
+  const separateBoxRiserLength =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.length") || 0;
+  const separateBoxRiserBreadth =
+    form.watch("stepRiserDetails.seperateBox.sizeOfBoxOfRisers.breadth") || 0;
 
   const totalSquareMeter =
     length && breadth && piecesPerBox && noOfBoxes
@@ -368,19 +503,45 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
 
   const totalMixedBoxSquareMeter =
     noOfMixedBoxes && noOfSteps && mixedBoxStepLength && mixedBoxStepBreadth
-      ? (noOfMixedBoxes * noOfSteps * mixedBoxStepLength * mixedBoxStepBreadth) / 929 / 10.764
+      ? (noOfMixedBoxes *
+          noOfSteps *
+          mixedBoxStepLength *
+          mixedBoxStepBreadth) /
+        929 /
+        10.764
       : 0;
   const totalMixedBoxRiserSquareMeter =
     noOfMixedBoxes && noOfRiser && mixedBoxRiserLength && mixedBoxRiserBreadth
-      ? (noOfMixedBoxes * noOfRiser * mixedBoxRiserLength * mixedBoxRiserBreadth) / 929 / 10.764
+      ? (noOfMixedBoxes *
+          noOfRiser *
+          mixedBoxRiserLength *
+          mixedBoxRiserBreadth) /
+        929 /
+        10.764
       : 0;
   const totalSeparateBoxStepSquareMeter =
-    noOfSeparateStepBoxes && noOfPiecesPerBoxOfSteps && separateBoxStepLength && separateBoxStepBreadth
-      ? (noOfSeparateStepBoxes * noOfPiecesPerBoxOfSteps * separateBoxStepLength * separateBoxStepBreadth) / 929 / 10.764
+    noOfSeparateStepBoxes &&
+    noOfPiecesPerBoxOfSteps &&
+    separateBoxStepLength &&
+    separateBoxStepBreadth
+      ? (noOfSeparateStepBoxes *
+          noOfPiecesPerBoxOfSteps *
+          separateBoxStepLength *
+          separateBoxStepBreadth) /
+        929 /
+        10.764
       : 0;
   const totalSeparateBoxRiserSquareMeter =
-    noOfSeparateRiserBoxes && noOfPiecesPerBoxOfRisers && separateBoxRiserLength && separateBoxRiserBreadth
-      ? (noOfSeparateRiserBoxes * noOfPiecesPerBoxOfRisers * separateBoxRiserLength * separateBoxRiserBreadth) / 929 / 10.764
+    noOfSeparateRiserBoxes &&
+    noOfPiecesPerBoxOfRisers &&
+    separateBoxRiserLength &&
+    separateBoxRiserBreadth
+      ? (noOfSeparateRiserBoxes *
+          noOfPiecesPerBoxOfRisers *
+          separateBoxRiserLength *
+          separateBoxRiserBreadth) /
+        929 /
+        10.764
       : 0;
 
   const total =
@@ -400,7 +561,10 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Product Type</FormLabel>
-                <Select onValueChange={field.onChange} value={ProductData.productType}>
+                <Select
+                  onValueChange={field.onChange}
+                  value={ProductData.productType}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select Product Type" />
@@ -409,7 +573,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                   <SelectContent>
                     <SelectItem value="Tiles">Tiles</SelectItem>
                     <SelectItem value="Slabs">Slabs</SelectItem>
-                    <SelectItem value="StepsAndRisers">Steps and Risers</SelectItem>
+                    <SelectItem value="StepsAndRisers">
+                      Steps and Risers
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -464,7 +630,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -472,25 +640,27 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                   )}
                 />
                 <FormField
-  control={form.control}
-  name="tileDetails.size.breadth"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Size Breadth (cm)</FormLabel>
-      <FormControl>
-        <Input
-          type="number"
-          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          onWheel={(e) => (e.target as HTMLInputElement).blur()}
-          min={0}
-          {...field}
-          onChange={(e) => field.onChange(Number(e.target.value))}
-        />
-      </FormControl>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
+                  control={form.control}
+                  name="tileDetails.size.breadth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Size Breadth (cm)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                          min={0}
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}
@@ -505,7 +675,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -521,22 +693,21 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Moulding Side</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={ProductData.tileDetails?.moulding?.mouldingSide || "one side"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Moulding Side" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="one side">One Side</SelectItem>
-                            <SelectItem value="two side">Two Side</SelectItem>
-                            <SelectItem value="three side">Three Side</SelectItem>
-                            <SelectItem value="four side">Four Side</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <EntityCombobox
+                            entities={mouldingOptions}
+                            value={field.value || ""}
+                            onChange={(value) => {
+                              field.onChange(value);
+                            }}
+                            displayProperty="label"
+                            valueProperty="value"
+                            placeholder="Moulding Side"
+                            onAddNew={openMouldingForm}
+                            multiple={false}
+                            addNewLabel="Add New"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -549,21 +720,21 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Type of Moulding</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          value={ProductData.tileDetails?.moulding?.typeOfMoulding || "half bullnose"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select Moulding Type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="half bullnose">Half Bullnose</SelectItem>
-                            <SelectItem value="full bullnose">Full Bullnose</SelectItem>
-                            <SelectItem value="bevel">Bevel</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormControl>
+                          <EntityCombobox
+                            entities={mouldingTypeOptions}
+                            value={field.value || ""}
+                            onChange={(value) => {
+                              field.onChange(value);
+                            }}
+                            displayProperty="label"
+                            valueProperty="value"
+                            placeholder="Type of Moulding"
+                            onAddNew={openMouldingTypeForm}
+                            multiple={false}
+                            addNewLabel="Add New"
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -584,7 +755,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -604,7 +777,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           min={0}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -612,7 +787,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                   )}
                 />
               </div>
-              <h1 className="mt-2">Total square meter - {totalSquareMeter.toFixed(3)}</h1>
+              <h1 className="mt-2">
+                Total square meter - {totalSquareMeter.toFixed(3)}
+              </h1>
             </div>
           )}
 
@@ -683,7 +860,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
 
           {productType === "StepsAndRisers" && (
             <div className="space-y-4 border p-4 rounded-md">
-              <h3 className="text-lg font-semibold">Steps and Risers Details</h3>
+              <h3 className="text-lg font-semibold">
+                Steps and Risers Details
+              </h3>
               <div className="grid grid-cols-3 gap-4">
                 <div className="flex flex-col gap-2 col-span-3">
                   <FormField
@@ -719,7 +898,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                 </div>
               </div>
               <div className="flex flex-col gap-4 border p-4 rounded-md">
-                <h4 className="text-md font-semibold col-span-3">Separate Box</h4>
+                <h4 className="text-md font-semibold col-span-3">
+                  Separate Box
+                </h4>
                 <FormField
                   control={form.control}
                   name="stepRiserDetails.seperateBox.noOfBoxOfSteps"
@@ -733,7 +914,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -753,7 +936,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -772,9 +957,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -792,9 +981,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -812,9 +1005,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -835,7 +1032,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -855,7 +1054,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -874,9 +1075,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -894,9 +1099,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -914,9 +1123,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -940,7 +1153,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -960,7 +1175,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -979,9 +1196,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -999,9 +1220,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -1019,9 +1244,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -1042,7 +1271,9 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                           min={0}
                           onWheel={(e) => (e.target as HTMLInputElement).blur()}
                           {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -1061,9 +1292,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -1081,9 +1316,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -1101,9 +1340,13 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                             type="number"
                             className="appearance-none [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                             min={0}
-                            onWheel={(e) => (e.target as HTMLInputElement).blur()}
+                            onWheel={(e) =>
+                              (e.target as HTMLInputElement).blur()
+                            }
                             {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
                           />
                         </FormControl>
                         <FormMessage />
@@ -1113,10 +1356,22 @@ export default function EditProductsForm({ onSuccess, initialProduct, params }: 
                 </div>
               </div>
 
-              <h1>Total square meter of separate box step - {totalSeparateBoxStepSquareMeter.toFixed(3)}</h1>
-              <h1>Total square meter of separate box risers - {totalSeparateBoxRiserSquareMeter.toFixed(3)}</h1>
-              <h1>Total square meter of mixed box step - {totalMixedBoxSquareMeter.toFixed(3)}</h1>
-              <h1>Total square meter of mixed box risers - {totalMixedBoxRiserSquareMeter.toFixed(3)}</h1>
+              <h1>
+                Total square meter of separate box step -{" "}
+                {totalSeparateBoxStepSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of separate box risers -{" "}
+                {totalSeparateBoxRiserSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of mixed box step -{" "}
+                {totalMixedBoxSquareMeter.toFixed(3)}
+              </h1>
+              <h1>
+                Total square meter of mixed box risers -{" "}
+                {totalMixedBoxRiserSquareMeter.toFixed(3)}
+              </h1>
               <h1>Total square meter - {total.toFixed(2)}</h1>
             </div>
           )}
