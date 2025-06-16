@@ -10,6 +10,7 @@ interface FileUploadFieldProps {
   name: string;
   storageKey: string; // unique key for localStorage
   accept?: string;
+  onFileChange?: (file: File) => void; // Example
 }
 
 export const FileUploadField: React.FC<FileUploadFieldProps> = ({
