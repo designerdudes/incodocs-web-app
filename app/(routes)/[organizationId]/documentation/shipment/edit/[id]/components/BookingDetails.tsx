@@ -444,44 +444,44 @@ export function BookingDetails({
     fetchDestPorts();
   }, []);
 
-  const openProductForm = () => {
-    GlobalModal.title = "Add New Product";
-    GlobalModal.description = "Fill in the details to create a new product.";
-    GlobalModal.children = (
-      <ProductFormPage
-        orgId={orgId}
-        onSuccess={async () => {
-          try {
-            const ProductsResponse = await fetchData(
-              `/shipment/productdetails/getbyorg/${orgId}`
-            );
-            const ProductsData = await ProductsResponse;
-            const mappedProduct = ProductsData.map((product: any) => {
-              const stoneName =
-                product?.tileDetails?.stoneName ||
-                product?.slabDetails?.stoneName ||
-                product?.stepRiserDetails?.stoneName;
+  // const openProductForm = () => {
+  //   GlobalModal.title = "Add New Product";
+  //   GlobalModal.description = "Fill in the details to create a new product.";
+  //   GlobalModal.children = (
+  //     <ProductFormPage
+  //       orgId={orgId}
+  //       onSuccess={async () => {
+  //         try {
+  //           const ProductsResponse = await fetchData(
+  //             `/shipment/productdetails/getbyorg/${orgId}`
+  //           );
+  //           const ProductsData = await ProductsResponse;
+  //           const mappedProduct = ProductsData.map((product: any) => {
+  //             const stoneName =
+  //               product?.tileDetails?.stoneName ||
+  //               product?.slabDetails?.stoneName ||
+  //               product?.stepRiserDetails?.stoneName;
 
-              return {
-                _id: product._id,
-                code: product.productType,
-                description: stoneName,
-                name: product.productType + ": " + stoneName,
-              };
-            });
-            setProducts(mappedProduct || []);
-            saveProgressSilently(getValues());
-            toast.success("Product created successfully");
-          } catch (error) {
-            console.error("Error refreshing products:", error);
-            toast.error("Failed to refresh product list");
-          }
-          GlobalModal.onClose();
-        }}
-      />
-    );
-    GlobalModal.onOpen();
-  };
+  //             return {
+  //               _id: product._id,
+  //               code: product.productType,
+  //               description: stoneName,
+  //               name: product.productType + ": " + stoneName,
+  //             };
+  //           });
+  //           setProducts(mappedProduct || []);
+  //           saveProgressSilently(getValues());
+  //           toast.success("Product created successfully");
+  //         } catch (error) {
+  //           console.error("Error refreshing products:", error);
+  //           toast.error("Failed to refresh product list");
+  //         }
+  //         GlobalModal.onClose();
+  //       }}
+  //     />
+  //   );
+  //   GlobalModal.onOpen();
+  // };
 
   // Handle Container Count Change
   const handleContainerCountChange = (value: number | undefined) => {
@@ -1144,7 +1144,12 @@ export function BookingDetails({
                                 displayProperty="name"
                                 valueProperty="_id"
                                 placeholder="Select Product"
-                                onAddNew={openProductForm}
+                                onAddNew={() => {
+                                  window.open(
+                                    `/${orgId}/documentation/products/createnew`,
+                                    "_blank"
+                                  );
+                                }}
                                 multiple={true}
                                 addNewLabel="Add New Product"
                               />
