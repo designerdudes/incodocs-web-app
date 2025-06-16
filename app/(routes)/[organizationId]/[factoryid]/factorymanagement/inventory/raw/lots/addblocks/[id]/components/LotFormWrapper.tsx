@@ -85,9 +85,9 @@ export default function LotFormWrapper({ lotData }: LotFormWrapperProps) {
   const methods = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      markerCost: lotData?.markerCost || undefined,
-      transportCost: lotData?.transportCost || undefined,
-      materialCost: lotData?.materialCost || undefined,
+      markerCost:  undefined,
+      transportCost:  undefined,
+      materialCost: undefined,
       noOfBlocks: lotData?.blocks?.length || 1,
       blocks:
         lotData?.blocks?.length > 0
