@@ -672,7 +672,7 @@ export default function EditShipmentPage({ params }: Props) {
         bookingDetails: values.bookingDetails
           ? {
               review: values.bookingDetails.review || undefined,
-              invoiceNumber: values.bookingDetails.invoiceNumber || undefined,
+              invoiceNumber: values?.bookingDetails?.invoiceNumber,
               bookingNumber: values.bookingDetails.bookingNumber || undefined,
               portOfLoading: values.bookingDetails.portOfLoading || undefined,
               destinationPort:
@@ -1051,7 +1051,7 @@ export default function EditShipmentPage({ params }: Props) {
             ? {
                 review: data.shipment.bookingDetails.review || undefined,
                 invoiceNumber:
-                  data.shipment.bookingDetails.invoiceNumber || undefined,
+                  data?.shipment?.bookingDetails?.invoiceNumber,
                 bookingNumber:
                   data.shipment.bookingDetails.bookingNumber || undefined,
                 portOfLoading:

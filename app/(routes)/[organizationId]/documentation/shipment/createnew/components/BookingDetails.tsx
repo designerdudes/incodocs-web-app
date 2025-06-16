@@ -364,8 +364,7 @@ export function BookingDetails({
             <FormControl>
               <Input
                 {...register("bookingDetails.invoiceNumber")}
-                placeholder="e.g., 99808541234"
-                className="uppercase"
+                placeholder="You can add the invoice number later."
                 {...field}
                 onBlur={() => saveProgressSilently(getValues())}
               />

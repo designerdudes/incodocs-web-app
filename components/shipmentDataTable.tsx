@@ -244,8 +244,8 @@ function ShipmentDataTable<T>({
   const handleBulkDelete = async () => {
     const selectedIds = table
       .getFilteredSelectedRowModel()
-      .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
-    console.log(bulkDeleteIdName);
+      .rows.map((row: any) => row.original[bulkDeleteIdName as string]); 
+      
     if (selectedIds.length === 0) {
       toast.error("No product selected for deletion.");
       return;
