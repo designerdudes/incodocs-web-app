@@ -108,6 +108,7 @@ type BackendShippingBill = {
   shippingBillDate?: string;
   drawbackValue?: string;
   rodtepValue?: string;
+  ConversionRateInDollars?: string;
   _id?: string;
 };
 
@@ -219,6 +220,7 @@ const formSchema = z.object({
             shippingBillDate: z.string().optional(),
             drawbackValue: z.number().optional(),
             rodtepValue: z.number().optional(),
+            ConversionRateInDollars: z.number().optional(),
           })
         )
         .optional()
@@ -764,6 +766,9 @@ export default function EditShipmentPage({ params }: Props) {
                   rodtepValue: bill.rodtepValue
                     ? String(bill.rodtepValue)
                     : undefined,
+                  ConversionRateInDollars: bill.ConversionRateInDollars
+                    ? String(bill.ConversionRateInDollars)
+                    : undefined,
                   _id: undefined,
                 })) || [],
               _id: values.shippingBillDetails._id || undefined,
@@ -1189,6 +1194,9 @@ export default function EditShipmentPage({ params }: Props) {
                           : undefined,
                         rodtepValue: bill.rodtepValue
                           ? Number(bill.rodtepValue)
+                          : undefined,
+                        ConversionRateInDollars: bill.ConversionRateInDollars
+                          ? Number(bill.ConversionRateInDollars)
                           : undefined,
                         _id: bill._id || undefined,
                       })

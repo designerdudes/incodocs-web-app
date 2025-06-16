@@ -90,10 +90,10 @@ export function ShippingBillDetails({
       );
       const brokers = Array.isArray(data)
         ? data.map((broker: any) => ({
-          _id: broker._id,
-          name: broker.cbName,
-          cbCode: broker.cbCode || "",
-        }))
+            _id: broker._id,
+            name: broker.cbName,
+            cbCode: broker.cbCode || "",
+          }))
         : [];
       setCustomsBrokers(brokers);
       console.log("API response data:", data);
@@ -158,6 +158,7 @@ export function ShippingBillDetails({
             shippingBillDate: undefined,
             drawbackValue: undefined,
             rodtepValue: undefined,
+            ConversionRateInDollars: undefined,
           }))
       );
     } else if (numberOfShippingBills < fields.length) {
@@ -200,6 +201,7 @@ export function ShippingBillDetails({
             shippingBillDate: undefined,
             drawbackValue: undefined,
             rodtepValue: undefined,
+            ConversionRateInDollars: undefined,
           }))
       );
     } else if (value < currentBills.length) {
@@ -369,6 +371,7 @@ export function ShippingBillDetails({
                 <TableHead>Shipping Bill Date</TableHead>
                 <TableHead>Drawback Value</TableHead>
                 <TableHead>Rodtep Value</TableHead>
+                <TableHead>Conversion Rate In Dollars</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -422,7 +425,7 @@ export function ShippingBillDetails({
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value &&
-                                    !isNaN(new Date(field.value).getTime())
+                                  !isNaN(new Date(field.value).getTime())
                                     ? format(new Date(field.value), "PPPP")
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
@@ -478,6 +481,32 @@ export function ShippingBillDetails({
                     <FormField
                       control={control}
                       name={`shippingBillDetails.bills[${index}].rodtepValue`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="e.g. 446656"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={(e) =>
+                                field.onChange(
+                                  e.target.value
+                                    ? parseFloat(e.target.value)
+                                    : undefined
+                                )
+                              }
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`shippingBillDetails.bills[${index}].ConversionRateInDollars`}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
