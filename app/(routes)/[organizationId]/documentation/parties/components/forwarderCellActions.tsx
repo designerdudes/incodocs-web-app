@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,14 +14,13 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
-  ScissorsIcon,
   Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import EditForwarderForm from "./EditForwarderForm"; // Import the EditForwarderForm component
+import EditForwarderForm from "./EditForwarderForm";
 import { Forwarder } from "./forwarderColumn";
 
 interface Props {
@@ -30,6 +29,8 @@ interface Props {
 
 const ForwarderCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const params = useParams();
+  const organizationId = params.organizationId as string;
   const GlobalModal = useGlobalModal();
 
   const deleteForwarder = async () => {
@@ -70,6 +71,14 @@ const ForwarderCellActions: React.FC<Props> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Forwarder
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(`/${organizationId}/documentation/parties/forwarder/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Forwarder
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {

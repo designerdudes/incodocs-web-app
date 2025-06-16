@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,7 +14,6 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
-  ScissorsIcon,
   Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -37,17 +36,16 @@ interface Props {
   data: CbName;
 }
 
-;
-
-
 const CbNameCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const params = useParams();
+  const organizationId = params.organizationId as string;
   const GlobalModal = useGlobalModal();
 
   const deleteCbName = async () => {
     try {
-      const result = await deleteData(
-        `https://incodocs-server.onrender.com/shipment/cbname/delete/${data._id}` // Placeholder endpoint
+      await deleteData(
+        `https://incodocs-server.onrender.com/shipment/cbname/delete/${data._id}`
       );
       toast.success("CbName Deleted Successfully");
       GlobalModal.onClose();
@@ -73,12 +71,11 @@ const CbNameCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Edit Cb Name - ${data.cbName}`;
-              GlobalModal.description =
-                "Update the details of the Cb Name below.";
+              GlobalModal.description = "Update the details of the Cb Name below.";
               GlobalModal.children = (
                 <EditCBNameForm
                   cbData={data}
-                  onSuccess={(updatedId) => {
+                  onSuccess={() => {
                     GlobalModal.onClose();
                   }}
                 />
@@ -91,9 +88,16 @@ const CbNameCellActions: React.FC<Props> = ({ data }) => {
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
+              router.push(`/${organizationId}/documentation/parties/cbname/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Cb Name
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
               GlobalModal.title = `Delete Cb Name - ${data.cbName}`;
-              GlobalModal.description =
-                "Are you sure you want to delete this Cb Name?";
+              GlobalModal.description = "Are you sure you want to delete this Cb Name?";
               GlobalModal.children = (
                 <Alert onConfirm={deleteCbName} actionType={"delete"} />
               );

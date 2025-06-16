@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,14 +14,13 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
-  ScissorsIcon,
   Trash,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import EditSupplierForm from "./EditSupplier"; // Import the EditSupplierForm component
+import EditSupplierForm from "./EditSupplier";
 
 interface Supplier {
   _id: string;
@@ -39,12 +38,14 @@ interface Props {
 
 const SupplierCellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
+  const params = useParams();
+  const organizationId = params.organizationId as string;
   const GlobalModal = useGlobalModal();
 
   const deleteSupplier = async () => {
     try {
       const result = await deleteData(
-        `https://incodocs-server.onrender.com/shipment/supplier/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/shipment/supplier/delete/${data._id}`
       );
       toast.success("Supplier Deleted Successfully");
       GlobalModal.onClose();
@@ -79,6 +80,14 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Supplier
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(`/${organizationId}/documentation/parties/supplier/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Supplier
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {

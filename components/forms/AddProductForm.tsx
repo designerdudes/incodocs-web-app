@@ -239,7 +239,6 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       GlobalModal.onClose();
     };
     GlobalModal.title = "Add New Moulding Side";
-    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
       <div className="space-y-4">
         <input
@@ -247,12 +246,12 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
           placeholder="Enter Moulding Side"
           onChange={(e) => (inputValue = e.target.value)}
         />
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+        <Button
+          type="submit"
           onClick={handleAddMoulding}
         >
           Save
-        </button>
+        </Button>
       </div>
     );
     GlobalModal.onOpen();
@@ -280,20 +279,19 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
       GlobalModal.onClose();
     };
     GlobalModal.title = "Add New Moulding Type";
-    GlobalModal.description = "Fill in the details to create a new product.";
     GlobalModal.children = (
       <div className="space-y-4">
         <input
           className="w-full px-3 py-2 rounded"
-          placeholder="Enter Moulding Side"
+          placeholder="Enter Moulding Type"
           onChange={(e) => (inputValue = e.target.value)}
         />
-        <button
-          className="bg-blue-600 text-white px-4 py-2 rounded"
+        <Button
+          type="submit"
           onClick={handleAddMouldingType}
         >
           Save
-        </button>
+        </Button>
       </div>
     );
     GlobalModal.onOpen();
@@ -421,44 +419,44 @@ export default function ProductFormPage({ onSuccess }: ProductFormProps) {
   const totalMixedBoxSquareMeter =
     noOfMixedBoxes && noOfSteps && mixedBoxStepLength && mixedBoxStepBreadth
       ? (noOfMixedBoxes *
-          noOfSteps *
-          mixedBoxStepLength *
-          mixedBoxStepBreadth) /
-        929 /
-        10.764
+        noOfSteps *
+        mixedBoxStepLength *
+        mixedBoxStepBreadth) /
+      929 /
+      10.764
       : 0;
   const totalMixedBoxRiserSquareMeter =
     noOfMixedBoxes && noOfRiser && mixedBoxRiserLength && mixedBoxRiserBreadth
       ? (noOfMixedBoxes *
-          noOfRiser *
-          mixedBoxRiserLength *
-          mixedBoxRiserBreadth) /
-        929 /
-        10.764
+        noOfRiser *
+        mixedBoxRiserLength *
+        mixedBoxRiserBreadth) /
+      929 /
+      10.764
       : 0;
   const totalSeparateBoxStepSquareMeter =
     noOfSeparateStepBoxes &&
-    noOfPiecesPerBoxOfSteps &&
-    separateBoxStepLength &&
-    separateBoxStepBreadth
+      noOfPiecesPerBoxOfSteps &&
+      separateBoxStepLength &&
+      separateBoxStepBreadth
       ? (noOfSeparateStepBoxes *
-          noOfPiecesPerBoxOfSteps *
-          separateBoxStepLength *
-          separateBoxStepBreadth) /
-        929 /
-        10.764
+        noOfPiecesPerBoxOfSteps *
+        separateBoxStepLength *
+        separateBoxStepBreadth) /
+      929 /
+      10.764
       : 0;
   const totalSeparateBoxRiserSquareMeter =
     noOfSeparateRisersBoxes &&
-    noOfPiecesPerBoxOfRisers &&
-    separateBoxRiserLength &&
-    separateBoxRiserBreadth
+      noOfPiecesPerBoxOfRisers &&
+      separateBoxRiserLength &&
+      separateBoxRiserBreadth
       ? (noOfSeparateRisersBoxes *
-          noOfPiecesPerBoxOfRisers *
-          separateBoxRiserLength *
-          separateBoxRiserBreadth) /
-        929 /
-        10.764
+        noOfPiecesPerBoxOfRisers *
+        separateBoxRiserLength *
+        separateBoxRiserBreadth) /
+      929 /
+      10.764
       : 0;
 
   const total =
