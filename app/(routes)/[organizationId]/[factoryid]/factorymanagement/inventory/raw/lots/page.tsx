@@ -80,6 +80,7 @@ export default async function LotManagement({ params }: Props) {
           searchKey="lotName"
           columns={columns}
           data={lotsData as any}
+          token={token}
         />
       </div>
     </div>
