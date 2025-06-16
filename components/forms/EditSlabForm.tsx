@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchData, putData } from "@/axiosUtility/api";
+import { deleteData, fetchData, putData } from "@/axiosUtility/api";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import {
@@ -27,7 +27,7 @@ interface Props {
 const formSchema = z.object({
   slabs: z.array(
     z.object({
-      slabNumber: z.number(),
+      slabNumber: z.string(),
       dimensions: z.object({
         length: z.object({
           value: z.number().min(0, "Value must be non-negative"),
@@ -68,8 +68,8 @@ export default function EditSlabForm({ id }: Props) {
 
   const handleDelete = async (slabId: string) => {
     try {
-      await axios.delete(
-        `https://incodocs-server.onrender.com/factory-management/inventory/finished/delete/${slabId}`
+      const slab = await deleteData(
+        `/factory-management/inventory/finished/delete/${slabId}`
       );
       setSlabs((prev) => prev.filter((slab) => slab._id !== slabId));
       toast.success("Slab Deleted Successfully");
@@ -80,7 +80,7 @@ export default function EditSlabForm({ id }: Props) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
+    console.log(" values", values);
     try {
       await putData(`/factory-management/inventory/updateMultipleSlabsValue`, {
         ...values,
@@ -103,60 +103,60 @@ export default function EditSlabForm({ id }: Props) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {slabs.map((slab, index) => (
-  <div
-    key={slab._id}
-    className="flex flex-wrap md:flex-nowrap items-end gap-4 border p-4 rounded-md"
-  >
-    <div className="min-w-[100px] font-semibold text-sm">
-      Slab {slab.slabNumber}
-    </div>
+          {slabs.map((slab, index) => (
+            <div
+              key={slab._id}
+              className="flex flex-wrap md:flex-nowrap items-end gap-4 border p-4 rounded-md"
+            >
+              <div className="min-w-[100px] font-semibold text-sm">
+                Slab {slab.slabNumber}
+              </div>
 
-    <FormField
-      control={form.control}
-      name={`slabs.${index}.dimensions.length.value`}
-      render={({ field }) => (
-        <FormItem className="w-full md:w-40">
-          <FormLabel>Length (inches)</FormLabel>
-          <FormControl>
-            <Input
-              type="number"
-              min={0}
-              {...field}
-              value={field.value || ""}
-              onChange={(e) =>
-                field.onChange(Math.max(0, Number(e.target.value)))
-              }
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+              <FormField
+                control={form.control}
+                name={`slabs.${index}.dimensions.length.value`}
+                render={({ field }) => (
+                  <FormItem className="w-full md:w-40">
+                    <FormLabel>Length (inches)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) =>
+                          field.onChange(Math.max(0, Number(e.target.value)))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-    <FormField
-      control={form.control}
-      name={`slabs.${index}.dimensions.height.value`}
-      render={({ field }) => (
-        <FormItem className="w-full md:w-40">
-          <FormLabel>Height (inches)</FormLabel>
-          <FormControl>
-            <Input
-              type="number"
-              min={0}
-              {...field}
-              value={field.value || ""}
-              onChange={(e) =>
-                field.onChange(Math.max(0, Number(e.target.value)))
-              }
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+              <FormField
+                control={form.control}
+                name={`slabs.${index}.dimensions.height.value`}
+                render={({ field }) => (
+                  <FormItem className="w-full md:w-40">
+                    <FormLabel>Height (inches)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        {...field}
+                        value={field.value || ""}
+                        onChange={(e) =>
+                          field.onChange(Math.max(0, Number(e.target.value)))
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-<Button
+              <Button
                 onClick={(e) => {
                   e.preventDefault();
                   handleDelete(slab._id);
@@ -165,8 +165,8 @@ export default function EditSlabForm({ id }: Props) {
               >
                 <Trash size={18} />
               </Button>
-  </div>
-))}
+            </div>
+          ))}
 
           <Button type="submit" disabled={isLoading}>
             Update Slabs

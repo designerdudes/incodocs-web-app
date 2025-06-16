@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
@@ -83,13 +83,11 @@ export default function EditLotForm({ params }: Props) {
     async function fetchLotData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`
+        const response = await fetchData(
+          `/factory-management/inventory/lot/getbyid/${lotId}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch lot data");
-        }
-        const data = await response.json();
+        
+        const data = response;
 
         // Reset form with fetched values
         form.reset({

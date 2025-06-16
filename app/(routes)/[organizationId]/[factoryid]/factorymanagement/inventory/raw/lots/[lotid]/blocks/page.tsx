@@ -239,6 +239,7 @@ export default async function BlocksPage({ params }: Props) {
             searchKey="blockNumber"
             columns={columns}
             data={BlocksData as any}
+            token={token}
           />
         </div>
       </div>

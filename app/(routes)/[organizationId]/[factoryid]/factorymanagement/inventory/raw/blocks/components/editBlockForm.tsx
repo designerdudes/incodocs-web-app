@@ -15,7 +15,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
@@ -78,13 +78,11 @@ export default function EditBlockForm({ params }: Props) {
     async function fetchBlockData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${blockId}`
+        const response = await fetchData(
+          `/factory-management/inventory/raw/get/${blockId}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch block data");
-        }
-        const data = await response.json();
+        
+        const data =  response;
 
         // Map backend data to form values
         form.reset({
@@ -231,7 +229,7 @@ export default function EditBlockForm({ params }: Props) {
             
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Length (inches)</FormLabel>
+                <FormLabel>breadth (inches)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
