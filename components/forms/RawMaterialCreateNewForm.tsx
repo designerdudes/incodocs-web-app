@@ -102,19 +102,19 @@ const formSchema = z.object({
           length: z.object({
             value: z
               .number()
-              .min(0.1, { message: "Length must be greater than zero" }),
+              .min(0, { message: "Length must be greater than zero" }),
             units: z.literal("cm").default("cm"),
           }),
           breadth: z.object({
             value: z
               .number()
-              .min(0.1, { message: "Breadth must be greater than zero" }),
+              .min(0, { message: "Breadth must be greater than zero" }),
             units: z.literal("cm").default("cm"),
           }),
           height: z.object({
             value: z
               .number()
-              .min(0.1, { message: "Height must be greater than zero" }),
+              .min(0, { message: "Height must be greater than zero" }),
             units: z.literal("cm").default("cm"),
           }),
         }),
