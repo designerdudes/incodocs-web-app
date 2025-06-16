@@ -113,6 +113,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             }}
             className="focus:bg-destructive focus:text-destructive-foreground"
           >
+            <Trash className="mr-2 h-4 w-4" />
             Delete Organization
           </DropdownMenuItem>
         </DropdownMenuContent>
