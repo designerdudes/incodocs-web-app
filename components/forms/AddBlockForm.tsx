@@ -31,18 +31,17 @@ import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
 
-
 // Define the Zod schema
 const formSchema = z.object({
-  newMarkerCost: z
+  markerCost: z
     .number()
     .min(1, { message: "Marker cost must be greater than or equal to zero" })
     .optional(),
-  newTransportCost: z
+  transportCost: z
     .number()
     .min(1, { message: "Transport cost must be greater than or equal to zero" })
     .optional(),
-  newMaterialCost: z
+  materialCost: z
     .number()
     .min(1, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
@@ -53,12 +52,12 @@ const formSchema = z.object({
     .array(
       z.object({
         dimensions: z.object({
-          weight: z.object({
-            value: z
-              .number()
-              .min(0.1, { message: "Weight must be greater than zero" }),
-            units: z.string().default("tons"),
-          }),
+          // weight: z.object({
+          //   value: z
+          //     .number()
+          //     .min(0.1, { message: "Weight must be greater than zero" }),
+          //   units: z.string().default("tons"),
+          // }),
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
@@ -116,7 +115,10 @@ function saveProgressSilently(data: FormData) {
   }
 }
 
-export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) {
+export function AddBlockForm(
+  { LotData }: AddBlockFormProps,
+  { params }: Props
+) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -130,16 +132,17 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
   const [applyHeightToAll, setApplyHeightToAll] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [blocks, setBlocks] = useState<any[]>([]);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<number | null>(null);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
+    number | null
+  >(null);
 
-  console.log(params, "params");
+  // console.log(params, "params");
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
-  console.log(organizationId, "organizationId");
-  console.log(factoryId, "factoryId");
+  // console.log(organizationId, "organizationId");
+  // console.log(factoryId, "factoryId");
   // const organizationId = "674b0a687d4f4b21c6c980ba";
   const lotId = LotData?._id;
-
 
   // const blocks = watch("blocks") || [];
   const prevMarkerCost = LotData?.markerCost || 0;
@@ -149,11 +152,14 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      markerCost: 0 || undefined,
+      transportCost: 0 || undefined,
+      materialCost: 0 || undefined,
       noOfBlocks: 1,
       blocks: [
         {
           dimensions: {
-            weight: { value: 0, units: "tons" },
+            // weight: { value: 0, units: "tons" },
             length: { value: 0, units: "inch" },
             breadth: { value: 0, units: "inch" },
             height: { value: 0, units: "inch" },
@@ -171,7 +177,6 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
     }
   }, [watch]);
 
-
   // Handle block count changes
   const handleBlockCountChange = (value: string) => {
     const newCount = Number(value);
@@ -188,7 +193,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
         fieldName: "blocks",
         createNewItem: () => ({
           dimensions: {
-            weight: { value: 0, units: "tons" },
+            // weight: { value: 0, units: "tons" },
             length: { value: 0, units: "inch" },
             breadth: { value: 0, units: "inch" },
             height: { value: 0, units: "inch" },
@@ -201,7 +206,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
           },
         },
         saveCallback: saveProgressSilently,
-      }) as any
+      }) as any;
     }
   };
 
@@ -237,9 +242,11 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
       organizationId,
       status: "active",
     };
-
     try {
-      await putData(`/factory-management/inventory/updatelotaddblocks/${lotId}`, submissionData);
+      await putData(
+        `/factory-management/inventory/updatelotaddblocks/${lotId}`,
+        submissionData
+      );
       toast.success("Block updated successfully");
       router.push("../");
     } catch (error) {
@@ -268,7 +275,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
         <form onSubmit={control.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
-              name="newMaterialCost"
+              name="materialCost"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -296,7 +303,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
               )}
             />
             <FormField
-              name="newMarkerCost"
+              name="markerCost"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -324,7 +331,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
               )}
             />
             <FormField
-              name="newTransportCost"
+              name="transportCost"
               control={control}
               render={({ field }) => (
                 <FormItem>
@@ -343,8 +350,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
                   </FormControl>
                   {field.value && (
                     <span className="text-gray-500 text-sm">
-                      Total Transport cost: {prevTransportCost} + {field.value} ={" "}
-                      {prevTransportCost + field.value}
+                      Total Transport cost: {prevTransportCost} + {field.value}{" "}
+                      = {prevTransportCost + field.value}
                     </span>
                   )}
                   <FormMessage />
@@ -384,7 +391,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
           </div>
 
           <div className="grid grid-cols-4 gap-3">
-            <div>
+            {/* <div>
               <Input
                 value={globalWeight}
                 onChange={(e) => setGlobalWeight(e.target.value)}
@@ -418,7 +425,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
                 />{" "}
                 Apply Weight to all rows
               </label>
-            </div>
+            </div> */}
             <div>
               <Input
                 value={globalLength}
@@ -530,10 +537,10 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Length (inch)</TableHead>
                 <TableHead>Breadth (inch)</TableHead>
                 <TableHead>Height (inch)</TableHead>
+                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
                 <TableHead>Action</TableHead>
@@ -543,35 +550,6 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.dimensions.weight.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              // type="number"
-                              min="0"
-                              step="1"
-                              value={block.dimensions.weight.value}
-                              placeholder="Enter weight"
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.weight.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.length.value`}
@@ -660,6 +638,44 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
                     />
                   </TableCell>
                   <TableCell>
+                    {/* <FormField
+                      name={`blocks.${index}.dimensions.weight.value`}
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              // type="number"
+                              min="0"
+                              step="1"
+                              value={block.dimensions.weight.value}
+                              placeholder="Enter weight"
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].dimensions.weight.value =
+                                  parseFloat(e.target.value) || 0.1;
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    /> */}
+                    {(
+                      (((block.dimensions.length.value *
+                        block.dimensions.breadth.value *
+                        block.dimensions.height.value) /
+                        1000000) *
+                        350 *
+                        10) /
+                      1000
+                    ).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
                     {(
                       (block.dimensions.length.value *
                         block.dimensions.breadth.value *
@@ -670,7 +686,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps, { params }: Props) 
                   <TableCell>
                     <Input
                       type="text"
-                      placeholder="BH 08 BH 0823"
+                      placeholder="Vehicle Number"
                       disabled={isLoading}
                       onBlur={() => saveProgressSilently(getValues())}
                     />

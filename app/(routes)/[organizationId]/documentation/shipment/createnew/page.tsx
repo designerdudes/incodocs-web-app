@@ -40,24 +40,21 @@ export default function CreateNewShipmentFormPage() {
   const router = useRouter();
   const orgid = useParams().organizationId;
   const [invoiceNumber, setInvoiceNumber] = useState<string | null>(null);
-const [currentUser, setCurrentUser] = useState<string>("");
-// console.log("this is organization id", orgid);
+  const [currentUser, setCurrentUser] = useState<string>("");
+  // console.log("this is organization id", orgid);
 
-
-   React.useEffect(() => {
-      const fetchCurrentUser = async () => {
-        try {
-          const GetCurrentUser = await fetchData(
-            `/user/currentUser`
-          );
-          const currentUserId = GetCurrentUser._id;
-          setCurrentUser(currentUserId);
-        } catch (error) {
-          console.error("Error fetching slab data:", error);
-        }
-      };
-      fetchCurrentUser();
-    }, []);
+  React.useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const GetCurrentUser = await fetchData(`/user/currentUser`);
+        const currentUserId = GetCurrentUser._id;
+        setCurrentUser(currentUserId);
+      } catch (error) {
+        console.error("Error fetching slab data:", error);
+      }
+    };
+    fetchCurrentUser();
+  }, []);
 
   const steps = [
     {
@@ -139,16 +136,15 @@ const [currentUser, setCurrentUser] = useState<string>("");
     },
   ];
 
-
   const loadDraft = (): Record<string, any> => {
-  try {
-    const draft = localStorage.getItem("shipmentDraft");
-    return draft ? JSON.parse(draft) : {};
-  } catch {
-    localStorage.removeItem("shipmentDraft");
-    return {};
-  }
-};
+    try {
+      const draft = localStorage.getItem("shipmentDraft");
+      return draft ? JSON.parse(draft) : {};
+    } catch {
+      localStorage.removeItem("shipmentDraft");
+      return {};
+    }
+  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -168,35 +164,37 @@ const [currentUser, setCurrentUser] = useState<string>("");
   };
 
   const submitDraft = async () => {
-  setIsLoading(true);
-  try {
-    const values = form.getValues();
-    const payload = {
+    setIsLoading(true);
+    try {
+      const values = form.getValues();
+      const payload = {
         shipmentId: values.shipmentId || undefined,
         bookingDetails: {
-          invoiceNumber: values?.bookingDetails?.invoiceNumber || "",
+          invoiceNumber: values?.bookingDetails?.invoiceNumber,
           bookingNumber: values?.bookingDetails?.bookingNumber || "",
           portOfLoading: values?.bookingDetails?.portOfLoading || "",
           destinationPort: values?.bookingDetails?.destinationPort || "",
           vesselSailingDate: values?.bookingDetails?.vesselSailingDate || "",
           vesselArrivingDate: values?.bookingDetails?.vesselArrivingDate || "",
           containers: values?.bookingDetails?.containers || undefined, // Includes containerType
-          review: values.bookingDetails?.review || ""
+          review: values.bookingDetails?.review || "",
         },
-        shippingDetails:
-        {
+        shippingDetails: {
           forwarderName: values.shippingDetails?.forwarderName || undefined,
           forwarderInvoices: values.shippingDetails?.forwarderInvoices ?? [],
           transporterName: values.shippingDetails?.transporterName || undefined,
-          transporterInvoices: values.shippingDetails?.transporterInvoices || undefined,
-          review: values.shippingDetails?.review || ""
+          transporterInvoices:
+            values.shippingDetails?.transporterInvoices || undefined,
+          review: values.shippingDetails?.review || "",
         },
         shippingBillDetails: values.shippingBillDetails || {},
         supplierDetails: {
           review: values.supplierDetails?.review || "",
           clearance: {
-            noOfSuppliers: values.supplierDetails?.clearance?.noOfSuppliers || undefined,
-            suppliers: values.supplierDetails?.clearance?.suppliers || undefined,
+            noOfSuppliers:
+              values.supplierDetails?.clearance?.noOfSuppliers || undefined,
+            suppliers:
+              values.supplierDetails?.clearance?.suppliers || undefined,
           },
           actual: values.supplierDetails?.actual || undefined,
         },
@@ -204,7 +202,8 @@ const [currentUser, setCurrentUser] = useState<string>("");
           review: values.saleInvoiceDetails?.review ?? "",
           consignee: values.saleInvoiceDetails?.consignee || undefined,
           actualBuyer: values.saleInvoiceDetails?.actualBuyer ?? "",
-          commercialInvoices: values.saleInvoiceDetails?.commercialInvoices ?? [],
+          commercialInvoices:
+            values.saleInvoiceDetails?.commercialInvoices ?? [],
         },
         blDetails: {
           shippingLineName: values.blDetails?.shippingLineName || undefined,
@@ -215,25 +214,28 @@ const [currentUser, setCurrentUser] = useState<string>("");
         otherDetails: values.otherDetails || [],
         organizationId: orgid,
       };
-    await postData("/shipment/add/", payload);
-    toast.success("Shipment created successfully!");
-    setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);;
-    form.reset();
-    // ✅ Navigate away
-    setTimeout(() => router.push("./"), 1000);
-  } catch (error: any) {
-    console.error("Error submitting draft:", error);
-    const serverMessage = error?.response?.data?.message;
+      // console.log("Payload being submitted:", payload);
+      await postData("/shipment/add/", payload);
+      toast.success("Shipment created successfully!");
+      setTimeout(() => localStorage.removeItem("shipmentDraft"), 3000);
+      form.reset();
+      // ✅ Navigate away
+      setTimeout(() => router.push("./"), 1000);
+    } catch (error: any) {
+      console.error("Error submitting draft:", error);
+      const serverMessage = error?.response?.data?.message;
 
-    if (serverMessage === "Booking detail invoice number already exist") {
-      toast.error("Invoice number already exists. Please use a unique one.");
-    } else {
-      toast.error("Error submitting shipment: " + (serverMessage || error.message));
+      if (serverMessage === "Booking detail invoice number already exist") {
+        toast.error("Invoice number already exists. Please use a unique one.");
+      } else {
+        toast.error(
+          "Error submitting shipment: " + (serverMessage || error.message)
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
   async function handleSectionSubmit() {
     setIsLoading(true);
@@ -259,14 +261,16 @@ const [currentUser, setCurrentUser] = useState<string>("");
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight"
-            title={`Create New Shipment${invoiceNumber ? ` — ${invoiceNumber}` : ""}`}
+          <Heading
+            className="leading-tight"
+            title={`Create New Shipment${
+              invoiceNumber ? ` — ${invoiceNumber}` : ""
+            }`}
           />
           <p className="text-muted-foreground text-sm">
             Complete the form below to add a new shipment.
           </p>
         </div>
-
       </div>
       <Separator orientation="horizontal" />
       <div className="w-full">
@@ -278,7 +282,9 @@ const [currentUser, setCurrentUser] = useState<string>("");
           <div className="flex justify-between mt-4">
             <Button
               type="button"
-              onClick={() => setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)}
+              onClick={() =>
+                setCurrentStep(currentStep > 0 ? currentStep - 1 : 0)
+              }
               disabled={currentStep === 0 || isLoading}
               className={`${currentStep === 0 ? "invisible" : ""}`}
             >
@@ -287,7 +293,10 @@ const [currentUser, setCurrentUser] = useState<string>("");
 
             <Button
               type="button"
-              onClick={currentStep < steps.length - 1 ? handleSectionSubmit : submitDraft
+              onClick={
+                currentStep < steps.length - 1
+                  ? handleSectionSubmit
+                  : submitDraft
               }
               disabled={isLoading}
             >
@@ -312,7 +321,6 @@ const [currentUser, setCurrentUser] = useState<string>("");
               onSectionSubmit={handleSectionSubmit}
               setInvoiceNumber={setInvoiceNumber}
               params={orgid}
-
             />
           )}
           {steps[currentStep].id === 2 && (
