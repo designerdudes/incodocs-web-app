@@ -44,7 +44,7 @@ const formSchema = z.object({
   contactPerson: z.string().min(1, { message: "Contact person is required" }),
   email: z.string().email({ message: "Invalid email format" }),
   mobileNumber: z.string().min(1, { message: "Enter phone number" }),
-  alternatePhone: z .string(), // .min(1, { message: "Enter alternate phone number" }).optional(),
+  alternateMobileNumber: z.string().optional(), // .min(1, { message: "Enter alternate phone number" }).optional(),
   password: z.string().min(6, { message: "Password is required" }),
   confirmPassword: z.string().min(6, { message: "Confirm Password is required" }),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -107,7 +107,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
       contactPerson: "",
       email: "",
       mobileNumber: "",
-      alternatePhone:"",   
+      alternateMobileNumber: "",
     },
   });
 
@@ -376,7 +376,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             {/* Alternate Phone Number */}
             <FormField
               control={form.control}
-              name="alternatePhone"
+              name="alternateMobileNumber"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Alternate Phone Number</FormLabel>
