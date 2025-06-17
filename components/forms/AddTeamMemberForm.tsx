@@ -32,7 +32,6 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Organization must be selected" }),
   employeeId: z.string().min(1, { message: "Employee ID is required" }),
-  role: z.string().min(1, { message: "Role is required" }),
   designation: z.string().optional(),
   // min(1, { message: "Position is required" }),
   address: z.object({
@@ -99,7 +98,6 @@ export default function TeamFormPage({ OrgData }: OrgData) {
       fullName: "",
       organizationId: "",
       employeeId: "",
-      role: "",
       designation: "",
       address: { location: "", pincode: "" },
       password: "",
@@ -201,26 +199,12 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 </FormItem>
               )}
             />
-            {/* Role */}
-            <FormField
-              control={form.control}
-              name="role"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Eg: Developer" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="designation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Position</FormLabel>
+                  <FormLabel>designation</FormLabel>
                   <FormControl>
                     <Input placeholder="Eg: Software Engineer" {...field} />
                   </FormControl>

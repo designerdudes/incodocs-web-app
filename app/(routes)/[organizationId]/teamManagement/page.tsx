@@ -55,10 +55,11 @@ export default async function TeamMemberPage({ params }: Props) {
           bulkDeleteTitle="Are you sure you want to delete the selected Team Members?"
           bulkDeleteDescription="This will delete all the selected Members, and they will not be recoverable."
           bulkDeleteToastMessage="Selected Members deleted successfully"
-          deleteRoute="/employers/deleteall"
+          deleteRoute="/employers/deletemultiple"
           searchKey="employeeId"
           columns={columns}
           data={teamData as any}
+          token={token}
         />
       </div>
     </div>
