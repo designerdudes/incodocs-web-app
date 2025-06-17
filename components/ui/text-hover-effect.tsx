@@ -32,7 +32,7 @@ export const TextHoverEffect = ({
 
   return (
     <>
-      <div className="flex items-end justify-end p-8">
+      <div className="absolute right-0 p-8">
         <Button onClick={() => router.push("/login")}>Login</Button>
       </div>
       <svg
