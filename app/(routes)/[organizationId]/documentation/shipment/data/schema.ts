@@ -313,4 +313,273 @@ export const shipmentSchema = z.object({
   __v: z.number().optional(),
 });
 
-export type Shipment = z.infer<typeof shipmentSchema>;
+
+export interface Shipment {
+  _id?: string;
+  shipmentId?: string;
+  status?: "Trucks Dispatched" | "Trucks Arrived" | "Trucks Halted" | "Stuffing" | "In Clearance" | "Loaded On Vessel" | "In Transit" | "Arrived At POD" | "Delivery Completed";
+  organizationId?: {
+    _id?: string;
+    organizationName?: string;
+    address?: string;
+    email?: string;
+    mobileNo?: number;
+    createdAt?: string;
+    updatedAt?: string;
+    __v?: number;
+  };
+  bookingDetails?: {
+    _id?: string;
+    invoiceNumber?: string;
+    bookingNumber?: string;
+    portOfLoading?: string;
+    destinationPort?: string;
+    vesselSailingDate?: string;
+    vesselArrivingDate?: string;
+    containers?: Array<{
+      containerNumber?: string;
+      truckNumber?: string;
+      truckDriverContactNumber?: string | number;
+      containerType?: string;
+       addProductDetails?: Array<{
+    productType: "Tiles" | "Slabs" | "StepsAndRisers";
+    tileDetails?: {
+      stoneName?: string;
+      stonePhoto?: string;
+      size?: {
+        length?: number;
+        breadth?: number;
+      };
+      thickness?: {
+        value?: number;
+      };
+      moulding?: {
+        mouldingSide?: "one side" | "two side" | "three side" | "four side";
+        typeOfMoulding?: "half bullnose" | "full bullnose" | "bevel";
+      };
+      noOfBoxes?: number;
+      piecesPerBox?: number;
+    };
+    slabDetails?: {
+      stoneName?: string;
+      stonePhoto?: string;
+      manualMeasurement?: string;
+      uploadMeasurement?: string;
+    };
+    stepRiserDetails?: {
+      stoneName?: string;
+      stonePhoto?: string;
+      mixedBox?: {
+        noOfBoxes?: number;
+        noOfSteps?: number;
+        sizeOfStep?: {
+          length?: number;
+          breadth?: number;
+          thickness?: number;
+        };
+        noOfRiser?: number;
+        sizeOfRiser?: {
+          length?: number;
+          breadth?: number;
+          thickness?: number;
+        };
+      };
+      seperateBox?: {
+        noOfBoxOfSteps?: number;
+        noOfPiecesPerBoxOfSteps?: number;
+        sizeOfBoxOfSteps?: {
+          length?: number;
+          breadth?: number;
+          thickness?: number;
+        };
+        noOfBoxOfRisers?: number;
+        noOfPiecesPerBoxOfRisers?: number;
+        sizeOfBoxOfRisers?: {
+          length?: number;
+          breadth?: number;
+          thickness?: number;
+        };
+      };
+    };
+    organizationId?: string;
+    createdBy?: string;
+  }>;
+    }>;
+    review?: string;
+  };
+  shippingDetails?: {
+    _id?: string;
+    review?: string;
+    noOfShipmentinvoices?: number;
+    shippingLineInvoices?: Array<{
+      invoiceNumber: string;
+      date: string;
+      valueWithGst: number;
+      valueWithoutGst: number;
+      _id?: string;
+      uploadInvoiceUrl?: string;
+    }>;
+    transporterName?: string | {
+      _id: string;
+      transporterName: string;
+      address?: string;
+      responsiblePerson?: string;
+      mobileNo?: number;
+      email?: string;
+      organizationId?: string;
+      createdAt?: string;
+      updatedAt?: string;
+      __v?: number;
+    };
+    forwarderName?: string | {
+      _id: string;
+      forwarderName: string;
+      address?: string;
+      responsiblePerson?: string;
+      mobileNo?: number;
+      email?: string;
+      organizationId?: string;
+      createdAt?: string;
+      updatedAt?: string;
+      __v?: number;
+    };
+    transporterInvoices?: Array<{
+      invoiceNumber: string;
+      date: string;
+      valueWithGst: number;
+      valueWithoutGst: number;
+      _id?: string;
+      uploadInvoiceUrl?: string;
+    }>;
+    forwarderInvoices?: Array<{
+      invoiceNumber: string;
+      date: string;
+      valueWithGst: number;
+      valueWithoutGst: number;
+      _id?: string;
+      uploadInvoiceUrl?: string;
+    }>;
+  };
+  shippingBillDetails?: {
+    _id?: string;
+    review?: string;
+    portCode?: string;
+    cbName?: string | { cbName: string };
+    cbCode?: string;
+    cdCode?: string;
+    noOfShippingBills?: number;
+    ShippingBills?: Array<{
+      shippingBillNumber?: string;
+      shippingBillDate?: string;
+      shippingBillUrl?: string;
+      drawbackValue?: string;
+      rodtepValue?: string;
+      _id?: string;
+    }>;
+  };
+  NumberOfContainer?: number;
+  supplierDetails?: {
+    _id?: string;
+    review?: string;
+    clearance?: {
+      _id?: string;
+      noOfSuppliers?: number;
+      suppliers?: Array<{
+        supplierName?: string | {
+          _id: string;
+          supplierName: string;
+          gstNo?: string;
+          mobileNumber?: number;
+          state?: string;
+          factoryAddress?: string;
+          createdAt?: string;
+          updatedAt?: string;
+          __v?: number;
+        };
+        noOfInvoices?: number;
+        invoices?: Array<{
+          supplierInvoiceNumber?: string;
+          supplierInvoiceDate?: string;
+          supplierInvoiceValueWithGST?: string;
+          supplierInvoiceValueWithOutGST?: string;
+          clearanceSupplierInvoiceUrl?: string;
+          _id?: string;
+        }>;
+      }>;
+    };
+    actual?: {
+      _id?: string;
+      actualSupplierName?: string;
+      actualSupplierInvoiceValue?: string;
+      actualSupplierInvoiceUrl?: string;
+      shippingBillUrl?: string;
+    };
+  };
+  saleInvoiceDetails?: {
+    _id?: string;
+    consignee?: string | {
+      _id: string;
+      name: string;
+      address?: string;
+      telephoneNo?: number;
+      email?: string;
+      organizationId?: string;
+      createdAt?: string;
+      updatedAt?: string;
+      __v?: number;
+    };
+    actualBuyer?: string;
+    numberOfSalesInvoices?: string;
+    review?: string;
+    commercialInvoices?: Array<{
+      clearanceCommercialInvoiceNumber?: string;
+      clearanceCommercialInvoiceUrl?: string;
+      actualCommercialInvoiceUrl?: string;
+      saberInvoiceUrl?: string;
+      _id?: string;
+    }>;
+  };
+  blDetails?: {
+    _id?: string;
+    shippingLineName?: string | {
+      _id: string;
+      shippingLineName: string;
+      address?: string;
+      responsiblePerson?: string;
+      mobileNo?: number;
+      email?: string;
+      organizationId?: string;
+      createdAt?: string;
+      updatedAt?: string;
+      __v?: number;
+    };
+    noOfBl?: number;
+    review?: string;
+    Bl?: Array<{
+      blNumber?: string;
+      blDate?: string;
+      telexDate?: string;
+      uploadBLUrl?: string;
+      _id?: string;
+    }>;
+  };
+  otherDetails?: Array<{
+    _id?: string;
+    date?: string;
+    review?: string;
+    certificateName?: string;
+    certificateNumber?: string;
+    issuerOfCertificate?: string;
+    uploadCopyOfCertificate?: string;
+  }>;
+  createdBy?: {
+    _id: string;
+    email: string;
+    fullName: string;
+    profileImg: string;
+  };
+  shipmentLogs?: any;
+  createdAt?: string;
+  updatedAt?: string;
+  __v?: number;
+}
