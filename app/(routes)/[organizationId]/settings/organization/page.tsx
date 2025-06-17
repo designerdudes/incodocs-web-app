@@ -105,14 +105,6 @@ export default async function OrganizationSettingsPage({
             View and manage your organization details.
           </p>
         </div>
-        {organization && (
-          <Link href={`?edit=true`}>
-            <Button variant="outline" size="icon">
-              <Edit className="h-4 w-4" />
-              <span className="sr-only">Edit</span>
-            </Button>
-          </Link>
-        )}
       </div>
       <Separator />
 

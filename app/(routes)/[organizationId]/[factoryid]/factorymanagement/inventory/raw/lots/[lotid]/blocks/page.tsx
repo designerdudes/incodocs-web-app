@@ -80,7 +80,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of ${BlocksData[0]?.lotName}'s Blocks`}
+            title={`Details of Lots : ${BlocksData[0]?.lotName}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for

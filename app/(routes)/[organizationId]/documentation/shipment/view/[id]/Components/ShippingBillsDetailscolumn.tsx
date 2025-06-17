@@ -98,6 +98,20 @@ export const ShippingBillsDetailscolumn: ColumnDef<ShipmentShippingBill>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
+        Conversion Rate
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.drawbackValue}</div>,
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "drawbackValue",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         Drawback Value
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
