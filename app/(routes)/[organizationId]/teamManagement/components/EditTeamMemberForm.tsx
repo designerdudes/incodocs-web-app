@@ -16,26 +16,24 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 // TeamMember Form Schema
 const formSchema = z.object({
   fullName: z.string().min(1, { message: "Name is required" }),
   organizationId: z
-    .string()
-    .min(1, { message: "Organization must be selected" }),
+    .string(),
   employeeId: z.string().min(1, { message: "Employee ID is required" }),
-  role: z.string().min(1, { message: "Role is required" }),
-  position: z.string().min(1, { message: "Position is required" }),
+  designation: z.string().optional(),
   address: z.object({
-    location: z.string().min(1, { message: "Location is required" }),
-    pincode: z.string().min(6, { message: "Pincode must be at least 6 characters" }),
+    location: z.string().optional(),
+    pincode: z.string().optional(),
   }),
-  contactPerson: z.string().min(1, { message: "Contact person is required" }),
+  contactPerson: z.string().optional(),
   email: z.string().email({ message: "Invalid email format" }),
-  mobileNumber: z.string().min(1, { message: "Enter phone number" }),
-  alternateMobileNumber: z.string().optional(),
+  mobileNumber: z.union([z.string(), z.number()]).default(""),
+  alternateMobileNumber: z.union([z.string(), z.number()]).default(""),
 });
 
 interface Props {
@@ -49,53 +47,51 @@ export default function EditTeamMemberForm({ params }: Props) {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
-
+  console.log("EditTeamMemberForm params:", params);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       fullName: "",
       organizationId: "",
       employeeId: "",
-      role: "",
-      position: "",
+      designation: "",
       address: { location: "", pincode: "" },
       contactPerson: "",
       email: "",
       mobileNumber: "",
-      alternateMobileNumber:"",
+      alternateMobileNumber: "",
     },
   });
 
   const EmployeeId = params._id;
-  
+
 
   useEffect(() => {
-    async function fetchData() {
+    async function fetchEmployeeData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/user/populate/${EmployeeId}`
+        const response = await fetchData(
+          `/user/populate/${EmployeeId}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch Employee data");
-        }
-        const data = await response.json();
+
+        const data = response;
+        console.log("Fetched Employee data:", data);
         // Reset form with fetched values
         form.reset({
-          fullName: data.fullName,
-          organizationId: data.organizationId,
-          employeeId: data.employeeId,
-          role: data.role,
-          position: data.position,
+          fullName: data?.fullName,
+          organizationId: data?.memberInOrganizations?.[0]?._id || "",
+          employeeId: data?.employeeId,
+          designation: data?.designation,
           address: {
-            location: data.address.location,
-            pincode: data.address.pincode || "",
+            location: data?.address.location,
+            pincode: data?.address.pincode || "",
           },
-           contactPerson: data.contactPerson,
-           email: data.email,
-           mobileNumber: data.mobileNumber,
-           alternateMobileNumber: data.alternateMobileNumber
+          contactPerson: data?.contactPerson,
+          email: data?.email,
+          mobileNumber: data?.mobileNumber,
+          alternateMobileNumber: data?.alternateMobileNumber
         });
+        console.log("Form reset with fetched data:", form.getValues());
       } catch (error) {
         console.error("Error fetching Employee data:", error);
         toast.error("Failed to fetch Employee data");
@@ -103,57 +99,27 @@ export default function EditTeamMemberForm({ params }: Props) {
         setIsFetching(false);
       }
     }
-
-
-    fetchData();
+    fetchEmployeeData();
   }, [EmployeeId, form]);
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
-  setIsLoading(true);
-  GlobalModal.title = "Confirm Employee Details";
-  GlobalModal.description =
-    "Are you sure you want to update this Employee's details?";
-  GlobalModal.children = (
-      <div className="space-y-4">
-        <p>Contact Person: {values.fullName}</p>
-        <p>Email ID: {values.email}</p>
-        <p>Employee ID: {values.employeeId}</p>
-    
-        <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-                GlobalModal.onClose();
-                setIsLoading(false);
-              }}
-            >
-              Cancel
-            </Button>
-      <Button
-        
-          onSubmit={async () => {
-            try {
-              await putData(`/employers/put/${EmployeeId}`, values);
-              setIsLoading(false);
-              GlobalModal.onClose();
-              toast.success("Employee details updated successfully");
-              window.location.reload();
-            } catch (error) {
-              console.error("Error updating employee details:", error);
-              setIsLoading(false);
-              GlobalModal.onClose();
-              toast.error("Error updating employee details");
-            }
-          }}
-        >
-          Confirm
-        </Button>
-      </div>
-     </div>
-  );
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    setIsLoading(true);
+    console.log("Submitting form with values:", values);
+    try {
+      await putData(`/employers/put/${EmployeeId}`, values);
+      toast.success("Team Member details updated successfully");
+      setTimeout(() => {
+        router.refresh();
+      }, 1000);
 
-  GlobalModal.onOpen();
-};
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("Failed to update Team Member details");
+    } finally {
+      setIsLoading(false);
+    }
+    GlobalModal.onClose();
+  };
 
   return (
     <Form {...form}>
@@ -164,9 +130,9 @@ export default function EditTeamMemberForm({ params }: Props) {
             name="fullName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Contact Person</FormLabel>
+                <FormLabel>Full Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: Lot ABC" type="text" {...field} />
+                  <Input placeholder="Eg: Naveen" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -196,7 +162,26 @@ export default function EditTeamMemberForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Phone Number</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 1234555678" type="text" {...field} />
+                  <Input placeholder="Eg: 1234555678" type="text"
+                    {...field}
+                  // value={field.value}
+                  // onChange={(e) =>
+                  //   field.onChange(e.target.valueAsNumber || 0)
+                  // }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="contactPerson"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contact Person</FormLabel>
+                <FormControl>
+                  <Input placeholder="Eg: Naveen" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -209,7 +194,12 @@ export default function EditTeamMemberForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Alternate Phone</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 1234567890" type="text" {...field} />
+                  <Input placeholder="Eg: 1234567890" type="text" {...field}
+                  // value={field.value}
+                  // onChange={(e) =>
+                  //   field.onChange(e.target.valueAsNumber || 0)
+                  // } 
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -222,7 +212,7 @@ export default function EditTeamMemberForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Emloyee Id</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 741852963"  type="text" {...field} />
+                  <Input placeholder="Eg: 741852963" type="text" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -230,13 +220,13 @@ export default function EditTeamMemberForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="role"
+            name="designation"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Role</FormLabel>
+                <FormLabel>Designation</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Eg: organuzation"
+                    placeholder="Eg: Developer"
                     type="text"
                     {...field}
                   />
@@ -265,7 +255,30 @@ export default function EditTeamMemberForm({ params }: Props) {
               <FormItem>
                 <FormLabel>Pincode</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 560001" type="text" {...field} />
+                  <Input placeholder="Eg: 560001" type="text" {...field}
+                  // value={field.value}
+                  // onChange={(e) =>
+                  //   field.onChange(e.target.valueAsNumber || 0)
+                  // }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="organizationId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Organization</FormLabel>
+                <FormControl>
+                  <Input placeholder="Eg: Organization" type="text" {...field}
+                  // value={field.value}
+                  // onChange={(e) =>
+                  //   field.onChange(e.target.valueAsNumber || 0)
+                  // }
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
