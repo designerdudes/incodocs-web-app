@@ -11,6 +11,7 @@ export interface ShipmentShippingBill {
   shippingBillDate: string;
   drawbackValue: string;
   rodtepValue: string;
+  ConversionRateInDollars: string;
 }
 
 export const ShippingBillsDetailscolumn: ColumnDef<ShipmentShippingBill>[] = [
@@ -92,17 +93,17 @@ export const ShippingBillsDetailscolumn: ColumnDef<ShipmentShippingBill>[] = [
     filterFn: "includesString",
   },
   {
-    accessorKey: "drawbackValue",
+    accessorKey: "ConversionRateInDollars",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Conversion Rate
+        Conversion Rate In Dollars
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.drawbackValue}</div>,
+    cell: ({ row }) => <div>{row.original.ConversionRateInDollars}</div>,
     filterFn: "includesString",
   },
   {
