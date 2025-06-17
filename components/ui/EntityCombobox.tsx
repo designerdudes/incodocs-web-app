@@ -33,10 +33,11 @@ interface EntityComboboxProps {
   addNewLabel: string;
   multiple?: boolean;
   disabled?: boolean;
+  className?: string;
 }
 
 export function EntityCombobox({
-  entities = [], // Default to empty array
+  entities = [],
   value,
   onChange,
   displayProperty,
@@ -46,6 +47,7 @@ export function EntityCombobox({
   addNewLabel,
   multiple = false,
   disabled = false,
+  className,
 }: EntityComboboxProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -93,10 +95,13 @@ export function EntityCombobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className={cn("w-full justify-between truncate", className)}
           disabled={disabled}
+          title={getSelectedDisplay()}
         >
-          {getSelectedDisplay()}
+          <span className="truncate max-w-[85%] text-left">
+            {getSelectedDisplay()}
+          </span>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -115,6 +120,7 @@ export function EntityCombobox({
                     key={entity[valueProperty]}
                     value={getDisplayValue(entity)}
                     onSelect={() => handleSelect(entity[valueProperty])}
+                    title={getDisplayValue(entity)}
                   >
                     {getDisplayValue(entity)}
                     <Check

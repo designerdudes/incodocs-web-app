@@ -72,7 +72,7 @@ function saveProgressSilently(data: any) {
 interface ShippingDetailsProps extends SaveDetailsProps {
   onSectionSubmit: () => void;
   params: string | string[];
-  currentUser : string
+  currentUser: string;
 }
 
 export function ShippingDetails({ saveProgress, onSectionSubmit, params, currentUser }: ShippingDetailsProps) {
@@ -109,9 +109,6 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
   const [transporterCountToBeDeleted, setTransporterCountToBeDeleted] = useState<number | null>(null);
 
   const GlobalModal = useGlobalModal();
-
-  // Fetch data on component mount
-
 
   const handleForwarderDelete = useCallback((index: number) => {
     const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
@@ -272,7 +269,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
     GlobalModal.title = "Add New Forwarder";
     GlobalModal.children = (
       <ForwarderForm
-        currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={organizationId}
         onSuccess={() => {
           fetch(
@@ -290,7 +287,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
     GlobalModal.title = "Add New Transporter";
     GlobalModal.children = (
       <TransporterForm
-        currentUser = {currentUser}
+        currentUser={currentUser}
         orgId={organizationId}
         onSuccess={() => {
           fetch(
@@ -316,17 +313,19 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
               <FormLabel>Select Forwarder</FormLabel>
               <FormControl>
                 <EntityCombobox
-                  entities={forwarders}
-                  value={field.value || ""}
-                  onChange={(value) => {
-                    field.onChange(value);
-                    saveProgressSilently(getValues());
-                  }}
-                  displayProperty="forwarderName"
-                  placeholder="Select a Forwarder"
-                  onAddNew={openForwarderForm}
-                  addNewLabel="Add New Forwarder"
-                />
+  entities={forwarders}
+  value={field.value || ""}
+  onChange={(value) => {
+    field.onChange(value);
+    saveProgressSilently(getValues());
+  }}
+  displayProperty="forwarderName"
+  placeholder="Select a Forwarder"
+  onAddNew={openForwarderForm}
+  addNewLabel="Add New Forwarder"
+  className="truncate w-full"
+/>
+
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -504,6 +503,7 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                   placeholder="Select a Transporter"
                   onAddNew={openTransporterForm}
                   addNewLabel="Add New Transporter"
+                  className="truncate w-full" // Added truncate to prevent overflow
                 />
               </FormControl>
               <FormMessage />
