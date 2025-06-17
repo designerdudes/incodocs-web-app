@@ -32,6 +32,9 @@ export const TextHoverEffect = ({
 
   return (
     <>
+      <div className="flex items-end justify-end p-8">
+        <Button onClick={() => router.push("/login")}>Login</Button>
+      </div>
       <svg
         ref={svgRef}
         width="100%"
@@ -134,9 +137,6 @@ export const TextHoverEffect = ({
           {text}
         </text>
       </svg>
-      <div className="flex items-center justify-center">
-        <Button onClick={() => router.push("/login")}>Login</Button>
-      </div>
     </>
   );
 };
