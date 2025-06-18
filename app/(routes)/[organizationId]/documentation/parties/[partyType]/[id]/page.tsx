@@ -400,8 +400,8 @@ export default async function PartyViewPage({ params }: Props) {
           </TabsList>
 
           <TabsContent value="Party Details">
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="mt-4 w-full">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="mt-4 col-span-1">
                 <CardHeader>
                   <CardTitle>Party Details</CardTitle>
                 </CardHeader>
@@ -426,10 +426,7 @@ export default async function PartyViewPage({ params }: Props) {
                   </Table>
                 </CardContent>
               </Card>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-4">
-              <Card className="mt-4 w-full">
+              <Card className="mt-4 col-span-1">
                 <CardHeader>
                   <CardTitle>Documents</CardTitle>
                 </CardHeader>
@@ -706,7 +703,7 @@ export default async function PartyViewPage({ params }: Props) {
                                   <TableCell>
                                     {partyType.toLowerCase() === "shippingline"
                                       ? bls.length
-                                      : partyType.toLowerCase() === "cbname"
+                                      : partyType.toLowerCase() ==="cbname"
                                       ? shippingBills.length
                                       : invoices.length}
                                   </TableCell>
