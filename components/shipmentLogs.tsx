@@ -17,7 +17,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronUp, Eye } from "lucide-react";
+import { ChevronDown, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -30,14 +30,16 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
-} from "@/components/ui/sheet"
+} from "@/components/ui/sheet";
 import { Button } from "./ui/button";
 import { ScrollArea } from "./ui/scroll-area";
 
 type ShipmentLog = {
     _id: string;
     shipmentId: string;
-    updatedBy: string;
+    updatedBy: {
+        fullName: string;
+    };
     changes: {
         field: string;
         oldValue?: any;
@@ -45,7 +47,6 @@ type ShipmentLog = {
         _id: string;
     }[];
     updatedAt: string;
-    __v: number;
 };
 
 interface ShipmentLogsProps {
@@ -53,6 +54,7 @@ interface ShipmentLogsProps {
     isView: boolean;
 }
 
+// Utility function to get nested changes
 const getNestedChanges = (oldValue: any, newValue: any, path: string = "") => {
     const changes: { path: string; oldValue: any; newValue: any }[] = [];
 
@@ -64,7 +66,7 @@ const getNestedChanges = (oldValue: any, newValue: any, path: string = "") => {
         }
 
         const keys = new Set([...Object.keys(oldObj), ...Object.keys(newObj)]);
-        for (const key of keys as any) {
+        for (const key of Array.from(keys)) {
             const newPath = currentPath ? `${currentPath}.${key}` : key;
             compare(oldObj[key], newObj[key], newPath);
         }
@@ -78,19 +80,22 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
     const items = logs.map((log) => ({
         id: log._id,
         date: format(new Date(log.updatedAt), "PPP p"),
-        title: log?.updatedBy,
+        title: log?.updatedBy?.fullName,
         action: "updated shipment",
         description: `Updated ${log.changes
             .map((change) => change.field.replace(/([A-Z])/g, " $1").trim())
             .join(", ")}`,
-        image: "/avatar-placeholder.jpg", // Replace with actual avatar if available
+        image: "/avatar-placeholder.jpg",
     }));
 
-    return (
+    const renderValue = (path: string, value: any) => {
+        return path.includes("CreatedBy") && value?.username ? value.username : JSON.stringify(value) || "N/A";
+    };
 
+    return (
         <Sheet>
             <SheetTrigger asChild>
-                <Button variant={isView ? "secondary" : "ghost"} className={`${isView === false && "m-0 p-2 "}text-sm font-normal align-left` }>
+                <Button variant={isView ? "secondary" : "ghost"} className={`${!isView && "m-0 p-2"} text-sm font-normal`}>
                     <Eye className="w-4 h-4" />
                     View Shipment Logs
                 </Button>
@@ -99,13 +104,11 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                 <SheetHeader className="h-[10%]">
                     <SheetTitle>Shipment Logs</SheetTitle>
                     <SheetDescription>
-                        <p className="text-sm text-muted-foreground">
-                            {items.length} logs
-                        </p>
+                        <p className="text-sm text-muted-foreground">{items.length} logs</p>
                     </SheetDescription>
                 </SheetHeader>
                 <div className="my-6 h-[80%]">
-                    <ScrollArea className=" h-full w-full ">
+                    <ScrollArea className="h-full w-full">
                         <Timeline className="p-2">
                             {items.map((item, index) => (
                                 <TimelineItem
@@ -122,16 +125,9 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                                             </span>
                                         </TimelineTitle>
                                         <TimelineIndicator className="bg-primary/10 group-data-completed/timeline-item:bg-primary group-data-completed/timeline-item:text-primary-foreground flex size-6 items-center justify-center border-none group-data-[orientation=vertical]/timeline:-left-7">
-                                            {/* <img
-                  src={item.image}
-                  alt={item.title}
-                  className="size-6 rounded-full"
-                /> */}
                                             <Avatar>
                                                 <AvatarImage src={item.image} alt={item?.title} />
-                                                {/* <AvatarFallback>{item?.title[0]}</AvatarFallback> */}
                                             </Avatar>
-
                                         </TimelineIndicator>
                                     </TimelineHeader>
                                     <TimelineContent className="text-foreground mt-2 rounded-lg border px-4 py-3">
@@ -151,22 +147,19 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                                                             <div className="space-y-2">
                                                                 {getNestedChanges(change.oldValue, change.newValue).map(
                                                                     (diff, idx) => (
-                                                                        <div
-                                                                            key={idx}
-                                                                            className="grid grid-cols-1 gap-1 text-sm"
-                                                                        >
+                                                                        <div key={idx} className="grid grid-cols-1 gap-1 text-sm">
                                                                             <div>
                                                                                 <span className="font-medium text-muted-foreground">
                                                                                     {diff.path}:
                                                                                 </span>
                                                                             </div>
                                                                             <div className="flex items-center space-x-2">
-                                                                                <span className="line-through text-red-500">
-                                                                                    {JSON.stringify(diff.oldValue) || "N/A"}
+                                                                                <span className="text-red-500">
+                                                                                    {renderValue(diff.path, diff.oldValue)}
                                                                                 </span>
                                                                                 <span>→</span>
                                                                                 <span className="text-green-500">
-                                                                                    {JSON.stringify(diff.newValue) || "N/A"}
+                                                                                    {renderValue(diff.path, diff.newValue)}
                                                                                 </span>
                                                                             </div>
                                                                         </div>
@@ -177,11 +170,11 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                                                             <div className="grid grid-cols-1 gap-1 text-sm">
                                                                 <div className="flex items-center space-x-2">
                                                                     <span className="line-through text-red-500">
-                                                                        {JSON.stringify(change.oldValue) || "N/A"}
+                                                                        {renderValue(change.field, change.oldValue)}
                                                                     </span>
                                                                     <span>→</span>
                                                                     <span className="text-green-500">
-                                                                        {JSON.stringify(change.newValue) || "N/A"}
+                                                                        {renderValue(change.field, change.newValue)}
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -199,12 +192,12 @@ export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
                 </div>
                 <SheetFooter className="h-[10%]">
                     <SheetClose asChild>
-                        <Button className="w-full" variant={"secondary"} >Done</Button>
+                        <Button className="w-full" variant={"secondary"}>
+                            Done
+                        </Button>
                     </SheetClose>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
-
-
     );
 };
