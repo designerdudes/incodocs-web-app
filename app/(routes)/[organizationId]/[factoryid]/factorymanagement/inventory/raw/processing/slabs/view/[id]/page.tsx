@@ -62,7 +62,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Slab ${SlabData.slabNumber} `}
+            title={` Details of Slab : ${SlabData.slabNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Slabs with detailed insights into its current
@@ -75,7 +75,7 @@ export default async function SlabsPage({ params }: Props) {
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Slab Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details of Slab : ${SlabData?.blockNumber}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -152,7 +152,7 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Created At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
+                      {moment(SlabData.createdAt).format("DD-MMM-YYYY")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -160,7 +160,7 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(SlabData.updatedAt).format("DD-MMM-YYYY")}
                     </TableCell>
                   </TableRow>
                 </TableBody>

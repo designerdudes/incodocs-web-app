@@ -80,7 +80,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of Lots : ${BlocksData[0]?.lotName}`}
+            title={`Details of Lot : ${BlocksData[0]?.lotName}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for
@@ -203,7 +203,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Block Created At
+                    Lot Created At
                   </TableCell>
                   <TableCell>
                     {moment(LotData.createdAt).format("DD MMM YYYY")}
@@ -213,7 +213,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Block Updated At
+                    Lot Updated At
                   </TableCell>
                   <TableCell>
                  {moment(LotData.updatedAt).format("DD MMM YYYY")}
