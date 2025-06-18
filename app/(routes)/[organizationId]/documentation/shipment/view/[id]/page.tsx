@@ -306,7 +306,7 @@ export default async function Page({ params }: Props) {
         >
           <TabsList className="gap-2 flex-nowrap overflow-hidden overflow-x-auto whitespace-nowrap text-sm px-2">
             <TabsTrigger value="Shipment Overview">
-              Shipment Overview
+              Overview
             </TabsTrigger>
             <TabsTrigger value="Booking details">Booking Details</TabsTrigger>
             <TabsTrigger value="Shipping Details">Shipping Details</TabsTrigger>
