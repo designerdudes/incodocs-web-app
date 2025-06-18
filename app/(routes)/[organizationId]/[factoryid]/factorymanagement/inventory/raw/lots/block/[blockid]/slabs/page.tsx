@@ -101,7 +101,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block ${BlockData.blockNumber} `}
+            title={` Details of Block : ${BlockData.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Blocks with detailed insights into its current
@@ -211,15 +211,15 @@ export default async function SlabsPage({ params }: Props) {
                       Block Created At
                     </TableCell>
                     <TableCell>
-                      {moment(BlockData.createdAt).format("YYYY-MM-DD")}
+                      {moment(BlockData.createdAt).format("DD-MMM-YYYY")}
                     </TableCell>
-                  </TableRow>
+                  </TableRow>       
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(BlockData.updatedAt).format("DD-MMM-YYYY")}
                     </TableCell>
                   </TableRow>
                 </TableBody>

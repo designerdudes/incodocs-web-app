@@ -60,7 +60,7 @@ function calculateDimensions(
 export default async function ViewFinishedPage({ params }: Props) {
   const FinishedMaterialID = params.id;
   // console.log(params.id);
-
+   
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -120,10 +120,10 @@ export default async function ViewFinishedPage({ params }: Props) {
             <div className="flex-1">
               <Heading
                 className="leading-tight "
-                title="View and Manage Finished Products Details"
+                title={` Details of Slab : ${FinishedMaterial.slabNumber} `}
               />
               <p className="text-muted-foreground text-sm mt-2">
-                View and manage finished product materials with detailed
+                View Finished product materials with detailed
                 insights into quantity, specifications, and status, ensuring
                 efficient tracking and streamlined operations.
               </p>
@@ -226,7 +226,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -236,7 +236,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -330,7 +330,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -340,7 +340,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -458,7 +458,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -468,7 +468,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -584,7 +584,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.createdAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>
@@ -594,7 +594,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         </TableCell>
                         <TableCell>
                           {moment(FinishedMaterial.updatedAt).format(
-                            "YYYY-MM-DD"
+                            "DD-MMM-YYYY"
                           )}
                         </TableCell>
                       </TableRow>

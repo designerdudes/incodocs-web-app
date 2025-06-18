@@ -164,28 +164,121 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
     size: 300,
   },
-  {
-    accessorKey: "descriptionOfGoods",
-    header: "Description of Goods",
+  { 
+    accessorKey: "addProductDetails",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Product Details" />
+    ),
     cell: ({ row }) => {
-      const addProductDetails =
-        row.original.bookingDetails?.containers?.[0]?.addProductDetails;
-      let displayText = "No product details added";
-      if (addProductDetails && addProductDetails.length > 0) {
-        const firstProduct = addProductDetails[0];
-        if (typeof firstProduct === "string") {
-          displayText = `Product ID: ${firstProduct}`;
-        } else if (firstProduct?.description) {
-          displayText = firstProduct.description;
-        }
+   const containers = row.original?.bookingDetails?.containers || [];
+
+   const calculateTileSquareMeter = (
+    length: number,
+    breadth: number,
+    piecesPerBox: number,
+    noOfBoxes: number
+   ) =>
+    length && breadth && piecesPerBox && noOfBoxes
+      ? (((length * breadth) / 929) * piecesPerBox * noOfBoxes) / 10.764
+      : 0;
+
+   const calculateStepRiserSquareMeter = (details: any) => {
+    const { mixedBox = {}, seperateBox = {} } = details || {};
+
+    const mixedStep =
+      (mixedBox.noOfBoxes || 0) *
+      (mixedBox.noOfSteps || 0) *
+      (mixedBox.sizeOfStep?.length || 0) *
+      (mixedBox.sizeOfStep?.breadth || 0);
+
+    const mixedRiser =
+      (mixedBox.noOfBoxes || 0) *
+      (mixedBox.noOfRiser || 0) *
+      (mixedBox.sizeOfRiser?.length || 0) *
+      (mixedBox.sizeOfRiser?.breadth || 0);
+
+    const separateStep =
+      (seperateBox.noOfBoxOfSteps || 0) *
+      (seperateBox.noOfPiecesPerBoxOfSteps || 0) *
+      (seperateBox.sizeOfBoxOfSteps?.length || 0) *
+      (seperateBox.sizeOfBoxOfSteps?.breadth || 0);
+
+    const separateRiser =
+      (seperateBox.noOfBoxOfRisers || 0) *
+      (seperateBox.noOfPiecesPerBoxOfRisers || 0) *
+      (seperateBox.sizeOfBoxOfRisers?.length || 0) *
+      (seperateBox.sizeOfBoxOfRisers?.breadth || 0);
+
+    const total = mixedStep + mixedRiser + separateStep + separateRiser;
+    return total ? total / 929 / 10.764 : 0;
+   };
+
+   const jsxData = containers.map((container: any, containerIdx: number) => {
+    const grouped: Record<string, string[]> = {};
+
+    const addProductDetails = container?.addProductDetails || [];
+
+    addProductDetails.forEach((product: any) => {
+      const productType = product.productType || "N/A";
+      const stoneName =
+        product.tileDetails?.stoneName ||
+        product.slabDetails?.stoneName ||
+        product.stepRiserDetails?.stoneName ||
+        "N/A";
+
+      let sqm = "N/A";
+      if (productType === "Tiles") {
+        const d = product.tileDetails || {};
+        sqm = calculateTileSquareMeter(
+          d.size?.length,
+          d.size?.breadth,
+          d.piecesPerBox,
+          d.noOfBoxes
+        ).toFixed(2);
+      } else if (productType === "StepsAndRisers") {
+        sqm = calculateStepRiserSquareMeter(product.stepRiserDetails).toFixed(
+          2
+        );
       }
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">{displayText}</span>
+
+      const line = `StoneName: ${stoneName}, SqM: ${sqm}`;
+      if (!grouped[productType]) grouped[productType] = [];
+      grouped[productType].push(line);
+    });
+
+    return (
+      <div key={containerIdx} className="mb-4 border-b pb-2">
+        <div className="font-bold text-blue-600 mb-2">
+          🚢 Container {container.containerNumber || containerIdx + 1} | 🚛 Truck: {container.truckNumber || "N/A"}
         </div>
-      );
-    },
-    size: 300,
+        {Object.entries(grouped).map(([type, lines], i) => (
+          <div key={i} className="mb-3 ml-3">
+            <div className="font-semibold text-gray-800 mb-1">
+              🟩 ProductType: {type}
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-gray-700">
+              {lines.map((line, idx) => (
+                <li key={idx}>{line}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    );
+   });
+
+   return (
+    <ViewAllComponent
+      title="Product Details"
+      params={{
+        organizationId: row.original.organizationId?._id || "unknown",
+      }}
+      data={jsxData}
+      setIsFetching={() => {}}
+      setIsLoading={() => {}}
+    />
+   );
+   },
   },
   {
     accessorKey: "blNumber",
@@ -210,7 +303,6 @@ export const columns: ColumnDef<Shipment>[] = [
           <span className="truncate font-medium">
             {containers && containers.length > 0 ? (
               <>
-                {containers[0]?.containerNumber || "N/A"}
                 <ViewAllComponent
                   title="Container Numbers"
                   params={{
@@ -246,7 +338,6 @@ export const columns: ColumnDef<Shipment>[] = [
           <span className="truncate font-medium">
             {containers && containers.length > 0 ? (
               <>
-                {containers[0]?.truckNumber || "N/A"}
                 <ViewAllComponent
                   title="Truck Numbers"
                   params={{
@@ -453,7 +544,9 @@ export const columns: ColumnDef<Shipment>[] = [
   },
   {
     accessorKey: "cbName",
-    header: ({ column }) => <ColumnHeader column={column} title="CustomBroker" />,
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="CustomBroker" />
+    ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
