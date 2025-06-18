@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { DocColumns } from "./Components/DocumentColumns";
 import { ShipmentLogs } from "@/components/shipmentLogs";
 import { logs } from "../../components1/cell-actions";
+import ViewShipment from "./Components/ViewShipment";
 
 interface Props {
   params: {
@@ -101,8 +102,12 @@ export default async function Page({ params }: Props) {
         },
       ]
     : [];
-  const supplierInvoice = shipmentData?.supplierDetails?.clearance?.suppliers?.invoices?.map(
-      (invoice: { supplierInvoiceNumber: any; clearanceSupplierInvoiceUrl: any }) => ({
+  const supplierInvoice =
+    shipmentData?.supplierDetails?.clearance?.suppliers?.invoices?.map(
+      (invoice: {
+        supplierInvoiceNumber: any;
+        clearanceSupplierInvoiceUrl: any;
+      }) => ({
         documentName: "Supplier Invoice",
         documentNumber: invoice.supplierInvoiceNumber,
         documentUrl: invoice.clearanceSupplierInvoiceUrl || "N/A",
@@ -195,7 +200,8 @@ export default async function Page({ params }: Props) {
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`Shipment: ${shipmentData?.bookingDetails?.invoiceNumber || "N/A"
+              title={`Shipment: ${
+                shipmentData?.bookingDetails?.invoiceNumber || "N/A"
               }`}
             />
             <p className="text-muted-foreground text-sm mt-2">
@@ -204,7 +210,7 @@ export default async function Page({ params }: Props) {
             </p>
           </div>
           <div className="flex gap-2">
-            <ShipmentLogs isView={true}  logs={logs} />
+            <ShipmentLogs isView={true} logs={logs} />
             <Link href={`../edit/${params.id}`}>
               <Button variant="outline">Edit</Button>
             </Link>
@@ -294,8 +300,14 @@ export default async function Page({ params }: Props) {
             </div>
           </div>
         </Card>
-        <Tabs defaultValue="Booking details" className="w-full">
-          <TabsList className="gap-3 flex-wrap">
+        <Tabs
+          defaultValue="Shipment Overview"
+          className="w-full overflow-hidden overflow-x-auto whitespace-nowrap"
+        >
+          <TabsList className="gap-2 flex-nowrap overflow-hidden overflow-x-auto whitespace-nowrap text-sm px-2">
+            <TabsTrigger value="Shipment Overview">
+              Overview
+            </TabsTrigger>
             <TabsTrigger value="Booking details">Booking Details</TabsTrigger>
             <TabsTrigger value="Shipping Details">Shipping Details</TabsTrigger>
             <TabsTrigger value="Shipping Bills Details">
@@ -313,7 +325,9 @@ export default async function Page({ params }: Props) {
             </TabsTrigger>
             <TabsTrigger value="Documents">Documents</TabsTrigger>
           </TabsList>
-
+          <TabsContent value="Shipment Overview">
+            <ViewShipment shipmentData={shipmentData} />
+          </TabsContent>
           {/* Booking Details */}
           <TabsContent value="Booking details">
             <div className="flex flex-col md:flex-row gap-4">
@@ -590,7 +604,9 @@ export default async function Page({ params }: Props) {
                   bulkDeleteToastMessage="Selected invoices deleted successfully"
                   deleteRoute="shipment/deleteall"
                   searchKey="supplierInvoiceNumber"
-                  data={shipmentData?.supplierDetails?.clearance?.suppliers || []}
+                  data={
+                    shipmentData?.supplierDetails?.clearance?.suppliers || []
+                  }
                   columns={SupplierDetailscolumn}
                 />
               </div>
@@ -771,8 +787,7 @@ export default async function Page({ params }: Props) {
                       <TableRow>
                         <TableCell>Number Of Bills</TableCell>
                         <TableCell>
-                          {shipmentData?.blDetails?.Bl
-                            ?.length || 0}
+                          {shipmentData?.blDetails?.Bl?.length || 0}
                         </TableCell>
                       </TableRow>
                       <TableRow>
