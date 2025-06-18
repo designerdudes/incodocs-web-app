@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -12,98 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// const dataArray = [.data[0]?
-//   {
-//     Message: "Success",
-//     Status: "Loaded",
-//     StatusId: 35,
-//     ReferenceNo: null,
-//     BLReferenceNo: "ONEYMAAF18394900",
-//     ShippingLine: "ONE LINE",
-//     ContainerNumber: "SEGU1346656",
-//     ContainerTEU: "20",
-//     ContainerType: "DC",
-//     FromCountry: "INDIA",
-//     Pol: "KATTUPALLI",
-//     LoadingDate: {
-//       Date: "2025-06-17",
-//       IsActual: true,
-//     },
-//     DepartureDate: {
-//       Date: "2025-06-17",
-//       IsActual: false,
-//     },
-//     TSPorts: [
-//       {
-//         Port: "SINGAPORE",
-//         ArrivalDate: {
-//           Date: "2025-06-23",
-//           IsActual: false,
-//         },
-//         DepartureDate: {
-//           Date: "2025-07-01",
-//           IsActual: false,
-//         },
-//         Vessel: "DAPHNE",
-//         VesselIMO: "9298648",
-//         VesselLatitude: "Not Supported",
-//         VesselLongitude: "Not Supported",
-//         VesselVoyage: "0876W",
-//       },
-//     ],
-//     ToCountry: "SAUDI ARABIA",
-//     Pod: "DAMMAM",
-//     ArrivalDate: {
-//       Date: "2025-07-10",
-//       IsActual: false,
-//     },
-//     DischargeDate: {
-//       Date: "2025-07-10",
-//       IsActual: false,
-//     },
-//     Vessel: "XIN YANG PU",
-//     VesselIMO: "9320477",
-//     VesselLatitude: "Not Supported",
-//     VesselLongitude: "Not Supported",
-//     VesselVoyage: "188E",
-//     EmptyToShipperDate: "2025-06-12",
-//     GateInDate: "2025-06-16",
-//     GateOutDate: null,
-//     EmptyReturnDate: null,
-//     FormatedTransitTime: "23 days",
-//     ETA: null,
-//     FirstETA: "2025-07-10",
-//     BLContainerCount: 3,
-//     BLContainers: [
-//       {
-//         ContainerCode: "NYKU9758454",
-//         ContainerTEU: "20",
-//         ContainerType: "DC",
-//         LiveMapUrl:
-//           "https://shipsgo.com/live-map-container-tracking?query=NYKU9758454",
-//         BLEmptyToShipperDate: null,
-//         BLGateInDate: null,
-//         BLGateOutDate: null,
-//         BLEmptyReturnDate: null,
-//       },
-//       {
-//         ContainerCode: "TEMU0677701",
-//         ContainerTEU: "20",
-//         ContainerType: "DC",
-//         LiveMapUrl:
-//           "https://shipsgo.com/live-map-container-tracking?query=TEMU0677701",
-//         BLEmptyToShipperDate: null,
-//         BLGateInDate: null,
-//         BLGateOutDate: null,
-//         BLEmptyReturnDate: null,
-//       },
-//     ],
-//     LiveMapUrl:
-//       "https://shipsgo.com/live-map-container-tracking?query=SEGU1346656",
-//     Tags: [],
-//     Co2Emission: "1.60",
-//   },
-// ];
+import { EyeIcon } from "lucide-react";
+import moment from "moment";
 
 function ViewShipment({ shipmentData }: { shipmentData: any }) {
   const [dataArray, setDataArray] = useState<any[]>([]);
@@ -118,31 +27,30 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
 
     const fetchVoyageData = async () => {
       const responses: any[] = [];
-
-      for (const container of containers) {
-        try {
-          const res = await fetch(
-            `https://shipsgo.com/api/v1.2/ContainerService/GetContainerInfo/?authCode=${process.env.NEXT_PUBLIC_SHIPSGO_AUTHCODE}&requestId=${container}`,
-            {
-              method: "GET",
-              redirect: "follow",
-            }
-          );
-          const data = await res.json();
-          responses.push({ container, data });
-        } catch (error) {
-          console.error(`Fetch error for ${container}:`, error);
-          responses.push({ container, error });
-        }
+      // for (const container of containers) {
+      try {
+        const res = await fetch(
+          `https://shipsgo.com/api/v1.2/ContainerService/GetContainerInfo/?authCode=${process.env.NEXT_PUBLIC_SHIPSGO_AUTHCODE}&requestId=${containers[0]}`,
+          {
+            method: "GET",
+            redirect: "follow",
+          }
+        );
+        const data = await res.json();
+        responses.push({ container: containers[0], data });
+      } catch (error) {
+        console.error(`Fetch error for ${containers[0]}:`, error);
+        responses.push({ container: containers[0], error });
       }
 
       setDataArray(responses);
       // console.log("All voyagessssssssssssssssssssssss data:", responses);
     };
+    // };
     if (containers.length > 0) {
-      // fetchVoyageData();
+      fetchVoyageData();
     }
-  }, []);
+  }, [shipmentData]);
 
   return (
     <div className="space-y-6">
@@ -182,11 +90,6 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
           </div>
         </CardContent>
       </Card>
-      <div className="text-right w-full max-w-4xl">
-        <Button onClick={() => window.open(dataArray[0]?.LiveMapUrl, "_blank")}>
-          View Live Position
-        </Button>
-      </div>
       <div className="flex w-full max-w-4xl flex-col gap-6">
         <Tabs defaultValue="movements" className="w-full">
           <TabsList>
@@ -206,11 +109,15 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
               <TableBody>
                 <TableRow>
                   <TableCell className="font-medium">
-                    {dataArray[0]?.data[0]?.Pol}
+                    {dataArray[0]?.data[0]?.Pol || "-"}
                   </TableCell>
                   <TableCell>Loaded on Board</TableCell>
                   <TableCell>
-                    {dataArray[0]?.data[0]?.LoadingDate?.Date}
+                    {dataArray[0]?.data[0]?.LoadingDate?.Date
+                      ? moment(dataArray[0]?.data[0]?.LoadingDate?.Date).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     {dataArray[0]?.data[0]?.Vessel}
@@ -222,7 +129,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                   </TableCell>
                   <TableCell>Departure</TableCell>
                   <TableCell>
-                    {dataArray[0]?.data[0]?.DepartureDate?.Date}
+                    {dataArray[0]?.data[0]?.DepartureDate?.Date
+                      ? moment(
+                          dataArray[0]?.data[0]?.DepartureDate?.Date
+                        ).format("DD MMM YYYY")
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     {dataArray[0]?.data[0]?.Vessel}
@@ -237,7 +148,13 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                             {port?.Port}
                           </TableCell>
                           <TableCell>Discharge in Transshipment</TableCell>
-                          <TableCell>{port?.ArrivalDate?.Date}</TableCell>
+                          <TableCell>
+                            {port?.ArrivalDate?.Date
+                              ? moment(port?.ArrivalDate?.Date).format(
+                                  "DD MMM YYYY"
+                                )
+                              : "-"}
+                          </TableCell>
                           <TableCell className="text-right">
                             {index === 0
                               ? dataArray[0]?.data[0]?.Vessel
@@ -250,10 +167,13 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                           </TableCell>
                           <TableCell>Load on Transshipment</TableCell>
                           <TableCell>
-                            {
-                              dataArray[0]?.data[0]?.TSPorts[0]?.DepartureDate
-                                ?.Date
-                            }
+                            {dataArray[0]?.data[0]?.TSPorts[0]?.DepartureDate
+                              ?.Date
+                              ? moment(
+                                  dataArray[0]?.data[0]?.TSPorts[0]
+                                    ?.DepartureDate?.Date
+                                ).format("DD MMM YYYY")
+                              : "-"}
                           </TableCell>
                           <TableCell className="text-right">
                             {port?.Vessel ?? dataArray[0]?.data[0]?.Vessel}
@@ -268,7 +188,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                   </TableCell>
                   <TableCell>Vessel Arrival</TableCell>
                   <TableCell>
-                    {dataArray[0]?.data[0]?.ArrivalDate?.Date}
+                    {dataArray[0]?.data[0]?.ArrivalDate?.Date
+                      ? moment(dataArray[0]?.data[0]?.ArrivalDate?.Date).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
@@ -280,7 +204,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                   </TableCell>
                   <TableCell>Discharge</TableCell>
                   <TableCell>
-                    {dataArray[0]?.data[0]?.ArrivalDate?.Date}
+                    {dataArray[0]?.data[0]?.ArrivalDate?.Date
+                      ? moment(dataArray[0]?.data[0]?.ArrivalDate?.Date).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
@@ -298,9 +226,51 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                   <TableHead>Gate In</TableHead>
                   <TableHead>Gate Out</TableHead>
                   <TableHead>Empty Return</TableHead>
+                  <TableHead>Live Position</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">
+                    {dataArray[0]?.data[0]?.ContainerNumber}
+                  </TableCell>
+                  <TableCell>
+                    {dataArray[0]?.data[0]?.EmptyToShipperDate
+                      ? moment(
+                          dataArray[0]?.data[0]?.EmptyToShipperDate
+                        ).format("DD MMM YYYY")
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {dataArray[0]?.data[0]?.GateInDate
+                      ? moment(dataArray[0]?.data[0]?.GateInDate).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {dataArray[0]?.data[0]?.GateOutDate
+                      ? moment(dataArray[0]?.data[0]?.GateOutDate).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {dataArray[0]?.data[0]?.EmptyReturnDate
+                      ? moment(dataArray[0]?.data[0]?.EmptyReturnDate).format(
+                          "DD MMM YYYY"
+                        )
+                      : "-"}
+                  </TableCell>
+                  <TableCell>
+                    <EyeIcon
+                      onClick={() =>
+                        window.open(dataArray[0]?.data[0]?.LiveMapUrl, "_blank")
+                      }
+                      className="cursor-pointer"
+                    />
+                  </TableCell>
+                </TableRow>
                 {dataArray[0]?.data[0]?.BLContainers?.map(
                   (container: any, index: number) => (
                     <TableRow key={index}>
@@ -308,16 +278,38 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                         {container?.ContainerCode}
                       </TableCell>
                       <TableCell>
-                        {dataArray[0]?.data[0]?.EmptyToShipperDate || "-"}
+                        {container?.BLEmptyToShipperDate
+                          ? moment(container?.BLEmptyToShipperDate).format(
+                              "DD MM YYYY"
+                            )
+                          : "-"}
                       </TableCell>
                       <TableCell>
-                        {dataArray[0]?.data[0]?.GateInDate || "-"}
+                        {container?.BLGateInDate
+                          ? moment(container?.BLGateInDate).format("DD MM YYYY")
+                          : "-"}
                       </TableCell>
                       <TableCell>
-                        {dataArray[0]?.data[0]?.GateOutDate || "-"}
+                        {container?.BLGateOutDate
+                          ? moment(container?.BLGateOutDate).format(
+                              "DD MM YYYY"
+                            )
+                          : "-"}
                       </TableCell>
                       <TableCell>
-                        {dataArray[0]?.data[0]?.EmptyReturnDate || "-"}
+                        {container?.BLEmptyReturnDate
+                          ? moment(container?.BLEmptyReturnDate).format(
+                              "DD MM YYYY"
+                            )
+                          : "-"}
+                      </TableCell>
+                      <TableCell>
+                        <EyeIcon
+                          onClick={() =>
+                            window.open(container?.LiveMapUrl, "_blank")
+                          }
+                          className="cursor-pointer"
+                        />
                       </TableCell>
                     </TableRow>
                   )
