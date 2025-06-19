@@ -77,7 +77,7 @@ const getNestedChanges = (oldValue: any, newValue: any, path: string = "") => {
 };
 
 export const ShipmentLogs: React.FC<ShipmentLogsProps> = ({ logs, isView }) => {
-    const items = logs.map((log) => ({
+    const items = (logs|| []).map((log) => ({
         id: log._id,
         date: format(new Date(log.updatedAt), "PPP p"),
         title: log?.updatedBy?.fullName,
