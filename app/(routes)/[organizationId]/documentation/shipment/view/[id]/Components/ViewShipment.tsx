@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/table";
 import { EyeIcon } from "lucide-react";
 import moment from "moment";
+import { FaEyeSlash } from "react-icons/fa";
 
 function ViewShipment({ shipmentData }: { shipmentData: any }) {
   const [dataArray, setDataArray] = useState<any[]>([]);
@@ -24,29 +25,43 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
         (e: any) => e.containerNumber
       ) || [];
     setContainerNumbers(containers);
-
+    // console.log("Container numbers:kkkkkkkkkkkkkkkkk", shipmentData);
     const fetchVoyageData = async () => {
       const responses: any[] = [];
-      // for (const container of containers) {
-      try {
-        const res = await fetch(
-          `https://shipsgo.com/api/v1.2/ContainerService/GetContainerInfo/?authCode=${process.env.NEXT_PUBLIC_SHIPSGO_AUTHCODE}&requestId=${containers[0]}`,
-          {
-            method: "GET",
-            redirect: "follow",
-          }
-        );
-        const data = await res.json();
-        responses.push({ container: containers[0], data });
-      } catch (error) {
-        console.error(`Fetch error for ${containers[0]}:`, error);
-        responses.push({ container: containers[0], error });
-      }
+      for (const container of containers) {
+        try {
+          const res = await fetch(
+            `https://shipsgo.com/api/v1.2/ContainerService/GetContainerInfo/?authCode=${process.env.NEXT_PUBLIC_SHIPSGO_AUTHCODE}&requestId=${container}`,
+            {
+              method: "GET",
+              redirect: "follow",
+            }
+          );
 
-      setDataArray(responses);
-      // console.log("All voyagessssssssssssssssssssssss data:", responses);
+          const data = await res.json();
+
+          if (data[0]?.Message === "Success") {
+            responses.push({ container: container, data });
+            setDataArray(responses);
+            // console.log(
+            //   "All voyages data:",
+            //   responses,
+            //   responses[0]?.data[0]?.Message === "Success"
+            // );
+            break;
+          } else {
+            // console.log(
+            //   "All voyages data:",
+            //   data,
+            //   data[0]?.Message === "Success"
+            // );
+            continue;
+          }
+        } catch (error) {
+          console.error(`Fetch error for ${containers[0]}:`, error);
+        }
+      }
     };
-    // };
     if (containers.length > 0) {
       fetchVoyageData();
     }
@@ -70,7 +85,7 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                 "-"}
             </div>
             <div className="font-medium text-right">Booking / MBL:</div>
-            <div>{dataArray[0]?.data[0]?.BLReferenceNo || "-"}</div>
+            <div>{shipmentData?.blDetails?.Bl[0]?.blNumber || "-"}</div>
             <div className="font-medium text-right">Creator:</div>
             <div>
               {shipmentData?.createdBy?.fullName || "-"}
@@ -82,11 +97,19 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
               </span>
             </div>
           </div>
-          <div className="grid grid-cols-[auto_1fr] gap-y-2 gap-x-4 text-sm">
+          <div className="grid grid-cols-[auto_1fr] gap-y-10 gap-x-4 text-sm">
             <div className="font-semibold text-right">Status:</div>
             <div>{shipmentData?.status || "-"}</div>
             <div className="font-medium text-right">Containers:</div>
-            <div>{containerNumbers?.join(", ") || "-"}</div>
+            <div className="grid grid-cols-2 gap-2 max-w-[200px]">
+              {containerNumbers?.length > 0 ? (
+                containerNumbers.map((number, index) => (
+                  <div key={index}>{number}</div>
+                ))
+              ) : (
+                <div className="col-span-2">-</div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -97,125 +120,147 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
             <TabsTrigger value="containers">Containers</TabsTrigger>
           </TabsList>
           <TabsContent value="movements" className="w-full min-h-[250px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Moves</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Vessel</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    {dataArray[0]?.data[0]?.Pol || "-"}
-                  </TableCell>
-                  <TableCell>Loaded on Board</TableCell>
-                  <TableCell>
-                    {dataArray[0]?.data[0]?.LoadingDate?.Date
-                      ? moment(dataArray[0]?.data[0]?.LoadingDate?.Date).format(
-                          "DD MMM YYYY"
-                        )
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {dataArray[0]?.data[0]?.Vessel}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    {dataArray[0]?.data[0]?.Pol}
-                  </TableCell>
-                  <TableCell>Departure</TableCell>
-                  <TableCell>
-                    {dataArray[0]?.data[0]?.DepartureDate?.Date
-                      ? moment(
-                          dataArray[0]?.data[0]?.DepartureDate?.Date
-                        ).format("DD MMM YYYY")
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {dataArray[0]?.data[0]?.Vessel}
-                  </TableCell>
-                </TableRow>
-                {dataArray[0]?.data[0]?.TSPorts &&
-                  dataArray[0]?.data[0]?.TSPorts?.map(
-                    (port: any, index: number) => (
-                      <React.Fragment key={index}>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            {port?.Port}
-                          </TableCell>
-                          <TableCell>Discharge in Transshipment</TableCell>
-                          <TableCell>
-                            {port?.ArrivalDate?.Date
-                              ? moment(port?.ArrivalDate?.Date).format(
-                                  "DD MMM YYYY"
-                                )
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {index === 0
-                              ? dataArray[0]?.data[0]?.Vessel
-                              : port.Vessel ?? dataArray[0]?.data[0]?.Vessel}
-                          </TableCell>
-                        </TableRow>
-                        <TableRow>
-                          <TableCell className="font-medium">
-                            {port?.Port}
-                          </TableCell>
-                          <TableCell>Load on Transshipment</TableCell>
-                          <TableCell>
-                            {dataArray[0]?.data[0]?.TSPorts[0]?.DepartureDate
-                              ?.Date
-                              ? moment(
-                                  dataArray[0]?.data[0]?.TSPorts[0]
-                                    ?.DepartureDate?.Date
-                                ).format("DD MMM YYYY")
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {port?.Vessel ?? dataArray[0]?.data[0]?.Vessel}
-                          </TableCell>
-                        </TableRow>
-                      </React.Fragment>
-                    )
-                  )}
-                <TableRow>
-                  <TableCell className="font-medium">
-                    {dataArray[0]?.data[0]?.Pod}
-                  </TableCell>
-                  <TableCell>Vessel Arrival</TableCell>
-                  <TableCell>
-                    {dataArray[0]?.data[0]?.ArrivalDate?.Date
-                      ? moment(dataArray[0]?.data[0]?.ArrivalDate?.Date).format(
-                          "DD MMM YYYY"
-                        )
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
-                  </TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="font-medium">
-                    {dataArray[0]?.data[0]?.Pod}
-                  </TableCell>
-                  <TableCell>Discharge</TableCell>
-                  <TableCell>
-                    {dataArray[0]?.data[0]?.ArrivalDate?.Date
-                      ? moment(dataArray[0]?.data[0]?.ArrivalDate?.Date).format(
-                          "DD MMM YYYY"
-                        )
-                      : "-"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+            {dataArray[0]?.data[0]?.Message === "Success" ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Moves</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Vessel</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      {dataArray[0]?.data[0]?.Pol || "-"}
+                    </TableCell>
+                    <TableCell>Loaded on Board</TableCell>
+                    <TableCell>
+                      {dataArray[0]?.data[0]?.LoadingDate?.Date
+                        ? moment(
+                            dataArray[0]?.data[0]?.LoadingDate?.Date
+                          ).format("DD MMM YYYY")
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {dataArray[0]?.data[0]?.Vessel}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      {dataArray[0]?.data[0]?.Pol}
+                    </TableCell>
+                    <TableCell>Departure</TableCell>
+                    <TableCell>
+                      {dataArray[0]?.data[0]?.DepartureDate?.Date
+                        ? moment(
+                            dataArray[0]?.data[0]?.DepartureDate?.Date
+                          ).format("DD MMM YYYY")
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {dataArray[0]?.data[0]?.Vessel}
+                    </TableCell>
+                  </TableRow>
+                  {dataArray[0]?.data[0]?.TSPorts &&
+                    dataArray[0]?.data[0]?.TSPorts?.map(
+                      (port: any, index: number) => (
+                        <React.Fragment key={index}>
+                          <TableRow>
+                            <TableCell className="font-medium">
+                              {port?.Port}
+                            </TableCell>
+                            <TableCell>Discharge in Transshipment</TableCell>
+                            <TableCell>
+                              {port?.ArrivalDate?.Date
+                                ? moment(port?.ArrivalDate?.Date).format(
+                                    "DD MMM YYYY"
+                                  )
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {index === 0
+                                ? dataArray[0]?.data[0]?.Vessel
+                                : port.Vessel ?? dataArray[0]?.data[0]?.Vessel}
+                            </TableCell>
+                          </TableRow>
+                          <TableRow>
+                            <TableCell className="font-medium">
+                              {port?.Port}
+                            </TableCell>
+                            <TableCell>Load on Transshipment</TableCell>
+                            <TableCell>
+                              {dataArray[0]?.data[0]?.TSPorts[0]?.DepartureDate
+                                ?.Date
+                                ? moment(
+                                    dataArray[0]?.data[0]?.TSPorts[0]
+                                      ?.DepartureDate?.Date
+                                  ).format("DD MMM YYYY")
+                                : "-"}
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {port?.Vessel ?? dataArray[0]?.data[0]?.Vessel}
+                            </TableCell>
+                          </TableRow>
+                        </React.Fragment>
+                      )
+                    )}
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      {dataArray[0]?.data[0]?.Pod}
+                    </TableCell>
+                    <TableCell>Vessel Arrival</TableCell>
+                    <TableCell>
+                      {dataArray[0]?.data[0]?.ArrivalDate?.Date
+                        ? moment(
+                            dataArray[0]?.data[0]?.ArrivalDate?.Date
+                          ).format("DD MMM YYYY")
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="font-medium">
+                      {dataArray[0]?.data[0]?.Pod}
+                    </TableCell>
+                    <TableCell>Discharge</TableCell>
+                    <TableCell>
+                      {dataArray[0]?.data[0]?.ArrivalDate?.Date
+                        ? moment(
+                            dataArray[0]?.data[0]?.ArrivalDate?.Date
+                          ).format("DD MMM YYYY")
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {dataArray[0]?.data[0]?.TSPorts[0]?.Vessel}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            ) : (
+              <Card>
+                <CardContent className="grid grid-cols-4 gap-x-4 gap-y-4 text-sm h-[200px]">
+                  <div className="flex justify-center items-center text-5xl col-span-1 h-full">
+                    <FaEyeSlash />
+                  </div>
+                  <div className="col-span-3 flex flex-col gap-2 justify-center">
+                    <p className="text-left break-words max-w-full whitespace-normal">
+                      Your shipment’s status is Untracked, which means ShipsGo
+                      system is not able to track this shipment. The reasons for
+                      Untracked shipment might be:
+                    </p>
+                    <p className="text-leftt break-words max-w-full whitespace-normal">
+                      The carrier might not be providing any public tracking
+                      service, or their system has been down since at least one
+                      month.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
           <TabsContent value="containers" className="min-h-[250px]">
             <Table>
@@ -263,12 +308,19 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                       : "-"}
                   </TableCell>
                   <TableCell>
-                    <EyeIcon
-                      onClick={() =>
-                        window.open(dataArray[0]?.data[0]?.LiveMapUrl, "_blank")
-                      }
-                      className="cursor-pointer"
-                    />
+                    {dataArray[0]?.data[0]?.LiveMapUrl ? (
+                      <EyeIcon
+                        onClick={() =>
+                          window.open(
+                            dataArray[0]?.data[0]?.LiveMapUrl,
+                            "_blank"
+                          )
+                        }
+                        className="cursor-pointer"
+                      />
+                    ) : (
+                      "-"
+                    )}
                   </TableCell>
                 </TableRow>
                 {dataArray[0]?.data[0]?.BLContainers?.map(
@@ -304,12 +356,16 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                           : "-"}
                       </TableCell>
                       <TableCell>
-                        <EyeIcon
-                          onClick={() =>
-                            window.open(container?.LiveMapUrl, "_blank")
-                          }
-                          className="cursor-pointer"
-                        />
+                        {container?.LiveMapUrl ? (
+                          <EyeIcon
+                            onClick={() =>
+                              window.open(container?.LiveMapUrl, "_blank")
+                            }
+                            className="cursor-pointer"
+                          />
+                        ) : (
+                          "-"
+                        )}
                       </TableCell>
                     </TableRow>
                   )
