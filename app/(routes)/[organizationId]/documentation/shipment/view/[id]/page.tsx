@@ -59,7 +59,8 @@ export default async function Page({ params }: Props) {
   }
   const responseData = await res.json();
   const shipmentData = responseData?.shipment || {};
-  // console.log("shipmentData", shipmentData);
+  const shipmentLogs = responseData?.shipmentLogs || {};
+  // console.log("shipmentData", shipmentLogs);
 
   // Extract documents from shipmentData
   const transporterInvoices =
@@ -209,7 +210,7 @@ export default async function Page({ params }: Props) {
             </p>
           </div>
           <div className="flex gap-2">
-            <ShipmentLogs isView={true} logs={shipmentData?.shipmentLogs} />
+            <ShipmentLogs isView={true} logs={shipmentLogs} />
             <Link href={`../edit/${params.id}`}>
               <Button variant="outline">Edit</Button>
             </Link>
