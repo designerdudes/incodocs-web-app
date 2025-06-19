@@ -167,7 +167,7 @@ export const columns: ColumnDef<Shipment>[] = [
   { 
     accessorKey: "addProductDetails",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Product Details" />
+      <ColumnHeader column={column} title="Container and Product Details" />
     ),
     cell: ({ row }) => {
    const containers = row.original?.bookingDetails?.containers || [];
@@ -291,76 +291,76 @@ export const columns: ColumnDef<Shipment>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: "containerNumbers",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Container Number" />
-    ),
-    cell: ({ row }) => {
-      const containers = row.original.bookingDetails?.containers;
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {containers && containers.length > 0 ? (
-              <>
-                <ViewAllComponent
-                  title="Container Numbers"
-                  params={{
-                    organizationId:
-                      row.original.organizationId?._id || "unknown",
-                  }}
-                  data={containers
-                    .map((container) => container.containerNumber || "N/A")
-                    .join(", ")}
-                  setIsFetching={() => {}}
-                  setIsLoading={() => {}}
-                />
-              </>
-            ) : (
-              "N/A"
-            )}
-          </span>
-        </div>
-      );
-    },
-    filterFn: multiColumnFilterFn,
-    size: 200,
-  },
-  {
-    accessorKey: "truckNumber",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Truck Number" />
-    ),
-    cell: ({ row }) => {
-      const containers = row.original.bookingDetails?.containers;
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {containers && containers.length > 0 ? (
-              <>
-                <ViewAllComponent
-                  title="Truck Numbers"
-                  params={{
-                    organizationId:
-                      row.original.organizationId?._id || "unknown",
-                  }}
-                  data={containers
-                    .map((container) => container.truckNumber || "N/A")
-                    .join(", ")}
-                  setIsFetching={() => {}}
-                  setIsLoading={() => {}}
-                />
-              </>
-            ) : (
-              "N/A"
-            )}
-          </span>
-        </div>
-      );
-    },
-    filterFn: multiColumnFilterFn,
-    size: 200,
-  },
+  // {
+  //   accessorKey: "containerNumbers",
+  //   header: ({ column }) => (
+  //     <ColumnHeader column={column} title="Container Number" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const containers = row.original.bookingDetails?.containers;
+  //     return (
+  //       <div className="flex space-x-2">
+  //         <span className="truncate font-medium">
+  //           {containers && containers.length > 0 ? (
+  //             <>
+  //               <ViewAllComponent
+  //                 title="Container Numbers"
+  //                 params={{
+  //                   organizationId:
+  //                     row.original.organizationId?._id || "unknown",
+  //                 }}
+  //                 data={containers
+  //                   .map((container) => container.containerNumber || "N/A")
+  //                   .join(", ")}
+  //                 setIsFetching={() => {}}
+  //                 setIsLoading={() => {}}
+  //               />
+  //             </>
+  //           ) : (
+  //             "N/A"
+  //           )}
+  //         </span>
+  //       </div>
+  //     );
+  //   },
+  //   filterFn: multiColumnFilterFn,
+  //   size: 200,
+  // },
+  // {
+  //   accessorKey: "truckNumber",
+  //   header: ({ column }) => (
+  //     <ColumnHeader column={column} title="Truck Number" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const containers = row.original.bookingDetails?.containers;
+  //     return (
+  //       <div className="flex space-x-2">
+  //         <span className="truncate font-medium">
+  //           {containers && containers.length > 0 ? (
+  //             <>
+  //               <ViewAllComponent
+  //                 title="Truck Numbers"
+  //                 params={{
+  //                   organizationId:
+  //                     row.original.organizationId?._id || "unknown",
+  //                 }}
+  //                 data={containers
+  //                   .map((container) => container.truckNumber || "N/A")
+  //                   .join(", ")}
+  //                 setIsFetching={() => {}}
+  //                 setIsLoading={() => {}}
+  //               />
+  //             </>
+  //           ) : (
+  //             "N/A"
+  //           )}
+  //         </span>
+  //       </div>
+  //     );
+  //   },
+  //   filterFn: multiColumnFilterFn,
+  //   size: 200,
+  // },
   {
     accessorKey: "portOfLoading",
     header: ({ column }) => (
