@@ -38,11 +38,15 @@ interface ShipmentApiResponse {
       actualBuyer?: string;
       numberOfSalesInvoices?: number;
       commercialInvoices?: {
-        commercialInvoiceNumber?: string;
+        clearanceCommercialInvoiceNumber?: string;
         clearanceCommercialInvoiceUrl?: string;
+        clearancecommercialInvoiceDate?: string;
+        clearanceCommercialInvoiceValue?: number;
         actualCommercialInvoiceUrl?: string;
+        actualCommercialInvoiceValue?:number;
+        packingListUrl?: string;
         saberInvoiceUrl?: string;
-        addProductDetails?: any[];
+        saberInvoiceValue?: number;
         _id?: string;
       }[];
       _id?: string;
@@ -315,14 +319,18 @@ const formSchema = z.object({
         .optional(),
       actualBuyer: z.string().optional(),
       numberOfSalesInvoices: z.number().optional(),
-      invoice: z
+      commercialInvoices: z
         .array(
           z.object({
-            commercialInvoiceNumber: z.string().optional(),
-            clearanceCommercialInvoice: z.string().optional(),
-            actualCommercialInvoice: z.string().optional(),
-            saberInvoice: z.string().optional(),
-            addProductDetails: z.array(z.any()).optional(),
+            clearanceCommercialInvoiceNumber: z.string().optional(),
+            clearanceCommercialInvoiceUrl: z.string().optional(),
+            clearancecommercialInvoiceDate: z.string().optional(),
+            clearanceCommercialInvoiceValue: z.string().optional(),
+            actualCommercialInvoiceUrl: z.string().optional(),
+            actualCommercialInvoiceValue: z.string().optional(),
+            packingListUrl: z.string().optional(),
+            saberInvoiceUrl: z.string().optional(),
+            saberInvoiceValue: z.string().optional(),
             _id: z.string().optional(),
           })
         )
@@ -440,7 +448,7 @@ const defaultFormValues: FormValues = {
     consignee: undefined,
     actualBuyer: undefined,
     numberOfSalesInvoices: undefined,
-    invoice: [],
+    commercialInvoices: [],
     _id: undefined,
   },
   blDetails: {
@@ -860,18 +868,19 @@ export default function EditShipmentPage({ params }: Props) {
               actualBuyer: values.saleInvoiceDetails.actualBuyer || undefined,
               numberOfSalesInvoices:
                 values.saleInvoiceDetails.numberOfSalesInvoices ||
-                values.saleInvoiceDetails.invoice?.length ||
+                values.saleInvoiceDetails.commercialInvoices?.length ||
                 undefined,
               commercialInvoices:
-                values.saleInvoiceDetails.invoice?.map((inv) => ({
-                  commercialInvoiceNumber:
-                    inv.commercialInvoiceNumber || undefined,
-                  clearanceCommercialInvoiceUrl:
-                    inv.clearanceCommercialInvoice || undefined,
-                  actualCommercialInvoiceUrl:
-                    inv.actualCommercialInvoice || undefined,
-                  saberInvoiceUrl: inv.saberInvoice || undefined,
-                  addProductDetails: inv.addProductDetails || undefined,
+                values.saleInvoiceDetails.commercialInvoices?.map((inv) => ({
+                  clearanceCommercialInvoiceNumber: inv.clearanceCommercialInvoiceNumber || undefined,
+                  clearancecommercialInvoiceDate:inv.clearancecommercialInvoiceDate || undefined,
+                  clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || undefined,
+                  clearanceCommercialInvoiceValue: inv.clearanceCommercialInvoiceValue || undefined,
+                  actualCommercialInvoiceUrl:inv.actualCommercialInvoiceUrl || undefined,
+                  actualCommercialInvoiceValue: inv.actualCommercialInvoiceValue || undefined,
+                  packingListUrl:inv.packingListUrl || undefined,
+                  saberInvoiceUrl: inv.saberInvoiceUrl || undefined,
+                  saberInvoiceValue: inv.saberInvoiceValue || undefined,
                   _id: inv._id || undefined,
                 })) || [],
               _id: values.saleInvoiceDetails._id || undefined,
@@ -1335,20 +1344,20 @@ export default function EditShipmentPage({ params }: Props) {
                   data.shipment.saleInvoiceDetails.numberOfSalesInvoices ||
                   data.shipment.saleInvoiceDetails.commercialInvoices?.length ||
                   undefined,
-                invoice: Array.isArray(
+                commercialInvoices: Array.isArray(
                   data.shipment.saleInvoiceDetails?.commercialInvoices
                 )
                   ? data.shipment.saleInvoiceDetails.commercialInvoices.map(
                       (inv: any) => ({
-                        commercialInvoiceNumber:
-                          inv.commercialInvoiceNumber || undefined,
-                        clearanceCommercialInvoice:
-                          inv.clearanceCommercialInvoiceUrl || undefined,
-                        actualCommercialInvoice:
-                          inv.actualCommercialInvoiceUrl || undefined,
-                        saberInvoice: inv.saberInvoiceUrl || undefined,
-                        addProductDetails: inv.addProductDetails || [],
-                        _id: inv._id || undefined,
+                        clearanceCommercialInvoiceNumber: inv.clearanceCommercialInvoiceNumber || undefined,
+                  clearancecommercialInvoiceDate:inv.clearancecommercialInvoiceDate || undefined,
+                  clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || undefined,
+                  clearanceCommercialInvoiceValue: inv.clearanceCommercialInvoiceValue || undefined,
+                  actualCommercialInvoiceUrl:inv.actualCommercialInvoiceUrl || undefined,
+                  actualCommercialInvoiceValue: inv.actualCommercialInvoiceValue || undefined,
+                  packingListUrl:inv.packingListUrl || undefined,
+                  saberInvoiceUrl: inv.saberInvoiceUrl || undefined,
+                  saberInvoiceValue: inv.saberInvoiceValue || undefined,
                       })
                     )
                   : [],
