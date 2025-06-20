@@ -211,9 +211,13 @@ export default async function Page({ params }: Props) {
           </div>
           <div className="flex gap-2">
             <ShipmentLogs isView={true} logs={shipmentLogs} />
-            <Link href={`../edit/${params.id}`}>
+            <a
+              href={`../edit/${params.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button variant="outline">Edit</Button>
-            </Link>
+            </a>
             <ExportCsvButton shipmentData={shipmentData} />
           </div>
         </div>

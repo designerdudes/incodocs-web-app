@@ -508,36 +508,16 @@ export const columns: ColumnDef<Shipment>[] = [
     ),
   },
   {
-    accessorKey: "shippingLineInvoices",
+    accessorKey: "shippingLineName",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Shipping Line Invoice" />
+      <ColumnHeader column={column} title="shippingLineName" />
     ),
-    cell: ({ row }) => {
-      const shippingLineInvoices =
-        row.original.shippingDetails?.shippingLineInvoices;
-      const fileUrl =
-        shippingLineInvoices && shippingLineInvoices.length > 0
-          ? shippingLineInvoices[0].uploadInvoiceUrl || "No Invoice"
-          : "No Invoice";
-      return (
-        <div className="flex items-center space-x-2">
-          <span className="truncate font-medium">{fileUrl}</span>
-          {fileUrl !== "No Invoice" && (
-            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-              <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
-            </a>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "portCode",
-    header: ({ column }) => <ColumnHeader column={column} title="Port Code" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {row.original.shippingBillDetails?.portCode || "N/A"}
+          {typeof row.original.blDetails?.shippingLineName === "string"
+            ? row.original.blDetails.shippingLineName
+            : row.original.blDetails?.shippingLineName?.shippingLineName || "N/A"}
         </span>
       </div>
     ),
@@ -556,24 +536,6 @@ export const columns: ColumnDef<Shipment>[] = [
         </span>
       </div>
     ),
-  },
-  {
-    accessorKey: "shippingBills",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Shipping Bill Number" />
-    ),
-    cell: ({ row }) => {
-      const shippingBills = row.original.shippingBillDetails?.ShippingBills;
-      return (
-        <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {shippingBills && shippingBills.length > 0
-              ? shippingBills.map((bill) => bill.shippingBillNumber).join(", ")
-              : "N/A"}
-          </span>
-        </div>
-      );
-    },
   },
   {
     accessorKey: "supplierName",
@@ -597,6 +559,61 @@ export const columns: ColumnDef<Shipment>[] = [
       );
     },
   },
+  // {
+  //   accessorKey: "shippingLineInvoices",
+  //   header: ({ column }) => (
+  //     <ColumnHeader column={column} title="Shipping Line Invoice" />
+  //   ),
+  //   cell: ({ row }) => {
+  //     const shippingLineInvoices =
+  //       row.original.shippingDetails?.shippingLineInvoices;
+  //     const fileUrl =
+  //       shippingLineInvoices && shippingLineInvoices.length > 0
+  //         ? shippingLineInvoices[0].uploadInvoiceUrl || "No Invoice"
+  //         : "No Invoice";
+  //     return (
+  //       <div className="flex items-center space-x-2">
+  //         <span className="truncate font-medium">{fileUrl}</span>
+  //         {fileUrl !== "No Invoice" && (
+  //           <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+  //             <Eye className="h-5 w-5 text-blue-500 cursor-pointer hover:text-blue-700" />
+  //           </a>
+  //         )}
+  //       </div>
+  //     );
+  //   },
+  // },
+  {
+    accessorKey: "portCode",
+    header: ({ column }) => <ColumnHeader column={column} title="Port Code" />,
+    cell: ({ row }) => (
+      <div className="flex space-x-2">
+        <span className="truncate font-medium">
+          {row.original.shippingBillDetails?.portCode || "N/A"}
+        </span>
+      </div>
+    ),
+  },
+  
+  {
+    accessorKey: "shippingBills",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Shipping Bill Number" />
+    ),
+    cell: ({ row }) => {
+      const shippingBills = row.original.shippingBillDetails?.ShippingBills;
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {shippingBills && shippingBills.length > 0
+              ? shippingBills.map((bill) => bill.shippingBillNumber).join(", ")
+              : "N/A"}
+          </span>
+        </div>
+      );
+    },
+  },
+  
   {
     accessorKey: "supplierInvoiceNumber",
     header: ({ column }) => (

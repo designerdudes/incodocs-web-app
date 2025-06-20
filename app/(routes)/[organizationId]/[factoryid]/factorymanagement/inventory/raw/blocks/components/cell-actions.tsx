@@ -23,6 +23,7 @@ import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import EditBlockForm from "./editBlockForm";
+import SendForCuttingForm from "@/components/forms/SendForCuttingForm";
 
 interface Props {
   data: any;
@@ -82,10 +83,11 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 GlobalModal.description =
                   "Are you sure you want to send this Block for cutting?";
                 GlobalModal.children = (
-                  <Alert
-                    onConfirm={sendForCutting}
-                    actionType="cut" // Pass the action type
-                  />
+                  // <Alert
+                  //   onConfirm={sendForCutting}
+                  //   actionType="cut" // Pass the action type
+                  // />
+                  <SendForCuttingForm params={{ _id: data._id }}/>
                 );
                 GlobalModal.onOpen();
               }}

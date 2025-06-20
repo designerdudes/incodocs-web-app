@@ -35,13 +35,13 @@ import { format } from "date-fns";
 
 
 
-interface CommercialInvoice {
-  clearancecommercialInvoiceNumber: string;
+interface CommercialInvoices {
+  clearanceCommercialInvoiceNumber: string;
   clearancecommercialInvoiceDate: string;
   clearanceCommercialInvoiceUrl: string;
-  clearancecommercialInvoiceValue: string;
+  clearanceCommercialInvoiceValue: string;
   actualCommercialInvoiceUrl: string;
-  actualcommercialInvoiceValue: string;
+  actualCommercialInvoiceValue: string;
   saberInvoiceUrl: string;
   saberInvoiceValue: string;
   packingListUrl: string;
@@ -62,7 +62,7 @@ function saveProgressSilently(data: any) {
   }
 }
 
-export function SaleInvoiceDetails({
+export function   SaleInvoiceDetails({
   shipmentId,
   orgId,
   currentUser,
@@ -79,7 +79,7 @@ export function SaleInvoiceDetails({
 
   const { fields, append, remove, replace } = useFieldArray({
     control,
-    name: "saleInvoiceDetails.invoice",
+    name: "saleInvoiceDetails.commercialInvoices",
   });
 
   // Watch form values
@@ -146,7 +146,7 @@ export function SaleInvoiceDetails({
     console.log("SaleInvoiceDetails fields:", fields);
 
     const numberOfInvoices = formValues.numberOfSalesInvoices ?? 0;
-    const currentInvoices = formValues.invoice ?? [];
+    const currentInvoices = formValues.commercialInvoices ?? [];
 
     if (
       currentInvoices.length > 0 &&
@@ -163,11 +163,15 @@ export function SaleInvoiceDetails({
         const newInvoices = Array(numberOfInvoices - fields.length)
           .fill(null)
           .map(() => ({
-            commercialInvoiceNumber: "",
-            clearanceCommercialInvoice: "",
-            actualCommercialInvoice: "",
-            saberInvoice: "",
-            addProductDetails: [],
+            clearanceCommercialInvoiceNumber: "",
+            clearancecommercialInvoiceDate: "",
+            clearanceCommercialInvoiceUrl: "",
+            clearanceCommercialInvoiceValue: "",
+            actualCommercialInvoiceUrl: "",
+            actualCommercialInvoiceValue: "",
+            saberInvoiceUrl: "",
+            saberInvoiceValue: "",
+            packingListUrl: "",         
           }));
         append(newInvoices, { shouldFocus: false });
       } else if (numberOfInvoices < fields.length) {
@@ -194,11 +198,15 @@ export function SaleInvoiceDetails({
     const currentInvoices = invoicesFromForm;
     const newInvoices = Array.from({ length: newCount }, (_, i) =>
       currentInvoices[i] || {
-        commercialInvoiceNumber: "",
-        packingListUrl: "",
-        clearanceCommercialInvoiceUrl: "",
-        actualCommercialInvoiceUrl: "",
-        saberInvoiceUrl: "",
+       clearanceCommercialInvoiceNumber: "",
+       clearancecommercialInvoiceDate: "",
+       clearanceCommercialInvoiceUrl: "",
+       clearanceCommercialInvoiceValue: "",
+       actualCommercialInvoiceUrl: "",
+       actualCommercialInvoiceValue: "",
+       saberInvoiceUrl: "",
+       saberInvoiceValue: "",
+       packingListUrl: "",   
       }
     );
     setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
@@ -226,7 +234,7 @@ export function SaleInvoiceDetails({
 
   const getFieldName = <T extends FormData>(
     index: number,
-    field: keyof CommercialInvoice
+    field: keyof CommercialInvoices
   ): Path<T> => `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
 
   const handleConfirmChange = () => {
@@ -351,7 +359,7 @@ export function SaleInvoiceDetails({
                       control={control}
                       name={getFieldName<FormData>(
                         index,
-                        "clearancecommercialInvoiceNumber"
+                        "clearanceCommercialInvoiceNumber"
                       )}
                       render={({ field }) => (
                         <FormItem>
@@ -443,7 +451,7 @@ export function SaleInvoiceDetails({
                       control={control}
                       name={getFieldName<FormData>(
                         index,
-                        "clearancecommercialInvoiceValue"
+                        "clearanceCommercialInvoiceValue"
                       )}
                       render={({ field }) => (
                         <FormControl>
@@ -485,7 +493,7 @@ export function SaleInvoiceDetails({
                       control={control}
                       name={getFieldName<FormData>(
                         index,
-                        "actualcommercialInvoiceValue"
+                        "actualCommercialInvoiceValue"
                       )}
                       render={({ field }) => (
                         <FormControl>
