@@ -42,7 +42,6 @@ function BreadCrumb() {
   // Split pathname
   const segments = pathname.split("/").filter((segment) => segment);
 
-  console.log("segs", segments);
   const organizationId = segments[0] || "";
   const potentialFactoryId = segments[1] || "";
   const remainingSegments = pathname.includes("factorymanagement")

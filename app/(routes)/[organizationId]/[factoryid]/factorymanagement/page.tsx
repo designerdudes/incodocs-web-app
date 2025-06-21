@@ -1,11 +1,8 @@
-"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
-import StatsCard from "@/components/statsCard";
-import { FactoryCards } from "@/lib/constants";
 import { useParams } from "next/navigation";
 import {
   Card,
@@ -14,13 +11,24 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
-import { FiBriefcase, FiFileText, FiGrid } from "react-icons/fi";
-import { MdAccountBalance } from "react-icons/md";
+import { FiGrid } from "react-icons/fi";
+import { MdAccountBalance, MdFactory } from "react-icons/md";
 
-function FactoryManagementPage() {
-  const params = useParams();
-  const organisationId = params.organizationId as string;
-  const factoryId = params.factoryid as string;
+interface Props {
+  params: {
+    factoryid: string;
+    organisationId: string;
+  };
+}
+
+function FactoryManagementPage({ params }: Props) {
+ 
+    const organisationId = params.organisationId
+    const factoryId = params.factoryid
+
+    
+
+  const machineCount = 12; // Replace with dynamic value if available
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -40,12 +48,14 @@ function FactoryManagementPage() {
         </div>
       </div>
 
+      {/* Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {/* Inventory Card */}
         <Link
           href={`/${organisationId}/${factoryId}/factorymanagement/inventory`}
           passHref
         >
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Inventory</CardTitle>
               <FiGrid className="w-6 h-6 text-muted-foreground" />
@@ -62,11 +72,13 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
+
+        {/* Accounting Card */}
         <Link
           href={`/${organisationId}/${factoryId}/factorymanagement/accounting`}
           passHref
         >
-          <Card className="bg-white dark:bg-card">
+          <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Accounting</CardTitle>
               <MdAccountBalance className="w-6 h-6 text-muted-foreground" />
@@ -83,21 +95,32 @@ function FactoryManagementPage() {
             </CardContent>
           </Card>
         </Link>
-      </div>
 
-      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {FactoryCards.map((card, index) => (
-          <StatsCard
-            key={index}
-            title={card.title}
-            stat={card.value}
-            icon={card.icon}
-            desc="Detailed insights and analytics"
-            href={card.buttonUrl}
-            factoryId={factoryId} // Pass dynamic factory ID
-          />
-        ))}
-      </div> */}
+        {/* Machines Card */}
+        <Link
+          href={`/${organisationId}/${factoryId}/factorymanagement/machines`}
+          passHref
+        >
+          <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Machines</CardTitle>
+              <MdFactory className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Monitor and manage factory machines in one place.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                Track machine performance, view specifications, and schedule
+                maintenance to ensure smooth and efficient production.
+              </p>
+              <p className="text-sm font-medium text-primary">
+                Total Machines: {machineCount}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
     </div>
   );
 }
