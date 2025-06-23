@@ -86,7 +86,7 @@ function FactorySwitcher({
     // If navigating to a page without a factory ID, redirect to the last used one
     if (pathname.includes("undefined") || pathname.includes("null")) {
       router.replace(
-        `/${FactoriesData[0].organizationId}/${storedFactoryId}/dashboard`
+        `/${FactoriesData[0]?.organizationId}/${storedFactoryId}/dashboard`
       );
     }
   }, [pathname, router, localStorage.getItem("activeFactoryId")]);

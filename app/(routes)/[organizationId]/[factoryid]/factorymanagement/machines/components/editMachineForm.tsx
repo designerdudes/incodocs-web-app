@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
@@ -20,17 +20,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, postData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Textarea } from "../ui/textarea";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
-import EntityCombobox from "../ui/EntityCombobox";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import CalendarComponent from "../CalendarComponent";
+import CalendarComponent from "@/components/CalendarComponent";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Machine } from "./columns";
+
 
 // Zod Schemas
 export const machineSchema = z.object({
@@ -51,6 +51,14 @@ interface MachineFormProps {
   params: {
         factoryid: string;
         organizationId: string;
+        _id:Machine;
+        machineName: string
+        typeCutting: string
+        typePolish: string
+        machinePhoto:string
+        lastMaintenance: string
+        installedDate: string
+        machineCost: number
     };
 }
 
@@ -60,6 +68,8 @@ export default function MachineFormPage({ params }: MachineFormProps) {
   const GlobalModal = useGlobalModal();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  
+  const data  = params
 
   const form = useForm<MachineFormValues>({
     resolver: zodResolver(machineSchema),
@@ -74,18 +84,33 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       installedDate: new Date().toISOString(),
       machineCost: 0,
     },
-  });
+});
+
+        
+   useEffect(() => {
+    form.reset({
+      factoryId: factoryId,
+      machineName: data?.machineName || "",
+      typeCutting: data?.typeCutting || "",
+      typePolish: data?.typePolish || "",
+      machinePhoto: data?.machinePhoto || "",
+      isActive: true,
+      lastMaintenance: data?.lastMaintenance || new Date().toISOString(),
+      installedDate: data?.installedDate || new Date().toISOString(),
+      machineCost: data?.machineCost || 0,
+    });
+  }, [data, factoryId, form]);
 
   const handleSubmit = async (values: MachineFormValues) => {
     setIsLoading(true);
     try {
-      await postData("/machine/add", {
+      await putData(`/machine/update/${data._id}`, {
         ...values,
        params
       });
       
       toast.success("Machine Added Successfully");
-      router.push("./");
+      router.push("../");
     } catch (error) {
       toast.error("Error creating/updating Machine ");
     } finally {
@@ -145,7 +170,6 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                     <SelectValue placeholder="Select Machine Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {/* Cutting Types */}
                     <SelectItem value="cutting:Single Cutter">
                       Cutting - Single Slab Cutter
                     </SelectItem>
@@ -156,7 +180,6 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                       Cutting - Rope Slab Cutter
                     </SelectItem>
 
-                    {/* Polishing Types */}
                     <SelectItem value="polish:Auto Polishing">
                       Polish - Auto Polishing
                     </SelectItem>
@@ -188,7 +211,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> 
           <FormField
             control={form.control}
             name="installedDate"
@@ -245,10 +268,12 @@ export default function MachineFormPage({ params }: MachineFormProps) {
           />
 
           <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : "Add Machine"}
+            {isLoading ? "Saving..." : "Submit"}
           </Button>
         </form>
       </Form>
     </div>
   );
 }
+
+

@@ -9,6 +9,7 @@ import { MachineColumns } from "./components/columns";
 
 
 export interface Machine {
+  _id: any;
   machineName: string;
   machineId: string;
   factoryId: string; // Assuming it's the ObjectId as a string
@@ -78,7 +79,7 @@ export default async function machines({ params }: Props) {
                     bulkDeleteTitle="Are you sure you want to delete the selected Machines?"
                     bulkDeleteDescription="This will delete the selected Machines, and they will not be recoverable."
                     bulkDeleteToastMessage="Selected Machines deleted successfully"
-                    deleteRoute="/shipment/Machinedetails/deletemany" // Verify this endpoint
+                    deleteRoute="machine/deletemany" // Verify this endpoint
                     searchKey="machineName"
                     columns={MachineColumns}
                     token={token} data={MachineData}/>
