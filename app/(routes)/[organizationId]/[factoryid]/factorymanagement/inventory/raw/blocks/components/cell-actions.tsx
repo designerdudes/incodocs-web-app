@@ -78,24 +78,28 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
-        onSelect={() => {
-          GlobalModal.title = `Split Block - ${data.blockNumber}`;
-          GlobalModal.description =
-            "This block appears larger than normal. Proceed to split?";
-          GlobalModal.children = (
-            // <SplitBlockForm  />
-            <Alert
-                onConfirm={SplitBlockForm}
-                actionType="cut" // Pass the action type
-             />
-          );
-          GlobalModal.onOpen();
-        }}
-        className="focus:bg-yellow-500 focus:text-destructive-foreground"
-      >
-        <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
-        Split Block
-      </DropdownMenuItem>
+            onSelect={() => {
+              GlobalModal.title = `Split Block - ${data.blockNumber}`;
+              GlobalModal.description =
+                "This block appears larger than normal. Proceed to split?";
+              GlobalModal.children = (
+                <SplitBlockForm
+                  parentBlockId={data.blockId}
+                  blockNumber={data.blockNumber}
+                  originalBlockVolume={data.length * data.width * data.height}
+                  onSubmit={(subBlocks) => {
+                    console.log("Split Data:", subBlocks);
+                    GlobalModal.onClose();
+                  }}
+                />
+              );
+              GlobalModal.onOpen();
+            }}
+          >
+            <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+            Split Block
+          </DropdownMenuItem>
+
           {data.status === "inStock" && (
             <DropdownMenuItem
               onSelect={() => {
@@ -103,7 +107,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 GlobalModal.description =
                   "Are you sure you want to send this Block for cutting?";
                 GlobalModal.children = (
-                  <SendForCuttingForm params={{ _id: data._id }}/>
+                  <SendForCuttingForm params={{ _id: data._id }} />
                 );
                 GlobalModal.onOpen();
               }}
