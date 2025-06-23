@@ -33,17 +33,15 @@ interface Props {
 const CellActions: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    // console.log("data", data);
-
     const deleteMachine = async () => {
         try {
             const result = await deleteData(
-                `https://incodocs-server.onrender.com/shipment/productdetails/delete/${data.machineId}` // Placeholder endpoint
+                `https://incodocs-server.onrender.com/machine/delete/${data._id}` // Placeholder endpoint
             );
             toast.success("Machine Deleted Successfully");
+            window.location.reload();
             GlobalModal.onClose();
         } catch (error) {
-            console.error("Error deleting Machine:", error);
             toast.error("Error deleting Machine");
         }
     };
@@ -62,14 +60,14 @@ const CellActions: React.FC<Props> = ({ data }) => {
                     <DropdownMenuSeparator />
 
                     <DropdownMenuItem
-                        onClick={() => router.push(`./machine/Edit/${data.machineId}`)}
+                        onClick={() => router.push(`./machines/Edit/${data._id}`)}
                         className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <Scissors className="mr-2 h-4 w-4" />
                         Edit Machine
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                        onClick={() => router.push(`./machine/View/${data.machineId}`)}
+                        onClick={() => router.push(`./machine/View/${data._id}`)}
                         className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
@@ -77,7 +75,7 @@ const CellActions: React.FC<Props> = ({ data }) => {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Machine - ${data.machineId}`;
+                            GlobalModal.title = `Delete Machine - ${data?.machineName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this machine?";
                             GlobalModal.children = (

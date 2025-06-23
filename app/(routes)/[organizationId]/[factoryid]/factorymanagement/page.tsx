@@ -12,18 +12,19 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { FiGrid } from "react-icons/fi";
-import { MdAccountBalance, MdFactory } from "react-icons/md";
+import { MdAccountBalance} from "react-icons/md";
+import { GiGears } from "react-icons/gi";
 
 interface Props {
   params: {
     factoryid: string;
-    organisationId: string;
+    organizationId: string;
   };
 }
 
 function FactoryManagementPage({ params }: Props) {
  
-    const organisationId = params.organisationId
+    const organizationId = params.organizationId
     const factoryId = params.factoryid
 
     
@@ -34,7 +35,7 @@ function FactoryManagementPage({ params }: Props) {
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <Link href={`/${organisationId}/dashboard`}>
+        <Link href={`/${organizationId}/dashboard`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -52,7 +53,7 @@ function FactoryManagementPage({ params }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {/* Inventory Card */}
         <Link
-          href={`/${organisationId}/${factoryId}/factorymanagement/inventory`}
+          href={`/${organizationId}/${factoryId}/factorymanagement/inventory`}
           passHref
         >
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
@@ -75,7 +76,7 @@ function FactoryManagementPage({ params }: Props) {
 
         {/* Accounting Card */}
         <Link
-          href={`/${organisationId}/${factoryId}/factorymanagement/accounting`}
+          href={`/${organizationId}/${factoryId}/factorymanagement/accounting`}
           passHref
         >
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
@@ -98,13 +99,13 @@ function FactoryManagementPage({ params }: Props) {
 
         {/* Machines Card */}
         <Link
-          href={`/${organisationId}/${factoryId}/factorymanagement/machines`}
+          href={`/${organizationId}/${factoryId}/factorymanagement/machines`}
           passHref
         >
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Machines</CardTitle>
-              <MdFactory className="w-6 h-6 text-muted-foreground" />
+              <GiGears  className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
               <CardDescription className="text-base text-gray-600">

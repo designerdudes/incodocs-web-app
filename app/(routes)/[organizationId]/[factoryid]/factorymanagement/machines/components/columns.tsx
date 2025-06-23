@@ -7,6 +7,7 @@ import CellActions from "./cell-actions";
 
 
 export interface Machine {
+  _id :string,
   machineName: string;
   machineId: string;
   factoryId: string; // Assuming it's the ObjectId as a string
@@ -47,6 +48,23 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+  {
+        accessorKey: "machineId",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                MachineID
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original.machineId}
+            </div>
+        ),
+    },
   {
     accessorKey: "machineName",
     header: ({ column }) => (
@@ -111,12 +129,23 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     },
   },
   {
-    accessorKey: "createdAt",
-    header: () => <div>Created At</div>,
+    accessorKey: "installedDate",
+    header: () => <div>Installed Date</div>,
     cell: ({ row }) => (
       <div>
-        {row.original.createdAt
-          ? new Date(row.original.createdAt).toLocaleDateString()
+        {row.original.installedDate
+          ? new Date(row.original.installedDate).toLocaleDateString()
+          : "N/A"}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "lastMaintenance",
+    header: () => <div>Last Maintenance</div>,
+    cell: ({ row }) => (
+      <div>
+        {row.original.lastMaintenance
+          ? new Date(row.original.lastMaintenance).toLocaleDateString()
           : "N/A"}
       </div>
     ),
@@ -124,6 +153,6 @@ export const MachineColumns: ColumnDef<Machine>[] = [
   {
     header: () => <div>Action</div>,
     id: "actions",
-    cell: ({ row }) => <CellActions data={row.original} />,
+    cell: ({ row }) => <CellActions data={row.original}  />,
   },
 ];
