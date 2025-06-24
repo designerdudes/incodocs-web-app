@@ -50,7 +50,8 @@ export default function NavMain({ orgId }: NavMainProps) {
       const needsFactoryAndOrg =
         item.url.includes("factorymanagement") ||
         item.url.includes("inventory") ||
-        item.url.includes("accounting");
+        item.url.includes("accounting") ||
+        item.url.includes("machines");
 
       const needsOnlyOrg =
         item.url.toLowerCase().includes("documentation") ||

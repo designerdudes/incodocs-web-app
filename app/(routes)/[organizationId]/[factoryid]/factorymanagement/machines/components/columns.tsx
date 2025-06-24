@@ -5,9 +5,8 @@ import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellActions from "./cell-actions";
 
-
 export interface Machine {
-  _id :string,
+  _id: string;
   machineName: string;
   machineId: string;
   factoryId: string; // Assuming it's the ObjectId as a string
@@ -49,22 +48,20 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     enableHiding: false,
   },
   {
-        accessorKey: "machineId",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                MachineID
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.machineId}
-            </div>
-        ),
-    },
+    accessorKey: "machineId",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        MachineID
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original.machineId}</div>
+    ),
+  },
   {
     accessorKey: "machineName",
     header: ({ column }) => (
@@ -76,35 +73,32 @@ export const MachineColumns: ColumnDef<Machine>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div>{row.original.machineName  || "N/A"}</div>
-    ),
+    cell: ({ row }) => <div>{row.original.machineName || "N/A"}</div>,
   },
   {
-  accessorKey: "machineType",
-  header: ({ column }) => (
-    <Button
-      variant="ghost"
-      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    >
-      Machine Type
-      <ArrowUpDown className="ml-2 h-4 w-4" />
-    </Button>
-  ),
-  cell: ({ row }) => {
-    const { typeCutting, typePolish } = row.original;
-    const types = [typeCutting, typePolish].filter(Boolean).join(" / ");
-    return <div>{types || "N/A"}</div>;
+    accessorKey: "machineType",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Machine Type
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const { typeCutting, typePolish } = row.original;
+      const types = [typeCutting, typePolish].filter(Boolean).join(" / ");
+      return <div>{types || "N/A"}</div>;
+    },
   },
-},
 
   {
     accessorKey: "machinePhoto",
     header: () => <div>Machine Photo</div>,
     cell: ({ row }) => {
-      const photo =
-        row.original.machinePhoto;
-      
+      const photo = row.original.machinePhoto;
+
       // Log the photo URL or "N/A" based on validity
       if (photo && photo !== "N/A" && !photo.startsWith("data:image")) {
         console.log("machine Photo URL:", photo);
@@ -119,12 +113,38 @@ export const MachineColumns: ColumnDef<Machine>[] = [
             onClick={() => {
               window.open(photo, "_blank");
             }}
-            aria-label={`View photo for ${row.original.machinePhoto ||
-              "machine"}`}
+            aria-label={`View photo for ${
+              row.original.machinePhoto || "machine"
+            }`}
           />
         </div>
       ) : (
         <div>N/A</div>
+      );
+    },
+  },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Machine Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const isActive = row.original?.isActive;
+
+      return (
+        <div className="capitalize">
+          {isActive === true
+            ? "Active"
+            : isActive === false
+            ? "Inactive"
+            : "N/A"}
+        </div>
       );
     },
   },
@@ -153,6 +173,6 @@ export const MachineColumns: ColumnDef<Machine>[] = [
   {
     header: () => <div>Action</div>,
     id: "actions",
-    cell: ({ row }) => <CellActions data={row.original}  />,
+    cell: ({ row }) => <CellActions data={row.original} />,
   },
 ];

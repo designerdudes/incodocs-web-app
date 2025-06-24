@@ -352,6 +352,10 @@ const sidebarTabs = {
             },
           ],
         },
+        {
+          title:"Machines",
+          url:"/factorymanagement/machines",
+        },
       ],
     },
     {

@@ -78,7 +78,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       machineName: "",
       typeCutting: "",
       typePolish: "",
-      machinePhoto: "",
+      machinePhoto: data?.machinePhoto || "",
       isActive: true,
       lastMaintenance: new Date().toISOString(),
       installedDate: new Date().toISOString(),
