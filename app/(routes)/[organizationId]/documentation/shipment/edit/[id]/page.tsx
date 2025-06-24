@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useState, useEffect, useRef } from "react";
-import ProgressBar from "./components/ProgressBar";
+import {ProgressBar} from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
 import { ShippingBillDetails } from "./components/ShippingBillDetails";

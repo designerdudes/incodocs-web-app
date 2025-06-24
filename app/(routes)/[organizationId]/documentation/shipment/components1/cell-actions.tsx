@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,115 +15,91 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
 import toast from "react-hot-toast";
-import { Row } from "@tanstack/react-table"; // Ensure this import exists
+import { Row } from "@tanstack/react-table";
 import { Shipment } from "../data/schema";
 import { ShipmentLogs } from "@/components/shipmentLogs";
 
-interface props {
+interface Props {
   row: Row<Shipment>;
 }
 
-export function DataTableCellActions({ row }: props) {
+export function DataTableCellActions({ row }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
   const GlobalModal = useGlobalModal();
 
-  const shipmentData = row.original; // Extract row data
-  const shipmentId = shipmentData._id; // Ensure ID is available
+  const isDraftPage = pathname.includes("/draft");
+  const data = row.original;
+  const id = data._id; // Use the same ID for draft or shipment
 
-  // Delete shipment function
-  const deleteShipment = async () => {
-    if (!shipmentId) {
-      console.error("Error: Shipment ID is undefined.");
-      toast.error("Error: Shipment ID is missing.");
-      return;
-    }
-
+  const deleteEntity = async () => {
+    if (!id) return toast.error("ID is missing");
     try {
-      console.log(`Deleting shipment with ID: ${shipmentId}`);
-      const result = await deleteData(`/shipment/delete/${shipmentId}`);
-      console.log("Delete response:", result);
-      toast.success("Shipment Deleted Successfully");
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      console.error("Error deleting shipment:", error);
-      toast.error("Failed to delete shipment");
+      const endpoint = isDraftPage
+        ? `/shipmentdrafts/delete/${id}`
+        : `/shipment/delete/${id}`;
+      await deleteData(endpoint);
+      toast.success(`${isDraftPage ? "Draft" : "Shipment"} deleted successfully`);
+      router.refresh();
+    } catch {
+      toast.error(`Failed to delete ${isDraftPage ? "draft" : "shipment"}`);
     }
   };
 
-  const [open, setOpen] = React.useState(false);
+  const viewPath = isDraftPage
+    ? `./drafts/view/${id}`
+    : `./shipment/view/${id}`;
+  const editPath = isDraftPage
+    ? `./drafts/edit/${id}`
+    : `./shipment/edit/${id}`;
+
   return (
-    <div>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            onClick={() => setOpen(!open)}
-            variant="ghost"
-            className="h-8 w-8 p-0"
-          >
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="gap-2" align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" className="h-8 w-8 p-0">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
 
-          {/* View Shipment */}
-          <DropdownMenuItem
-            onClick={() => router.push(`./shipment/view/${shipmentId}`)}
-          >
-            <EyeIcon className="mr-2 h-4 w-4" />
-            View Shipment
-          </DropdownMenuItem>
+      <DropdownMenuContent align="end" className="gap-2">
+        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-          {/* Edit Shipment */}
-          {/* <DropdownMenuItem
-            onClick={() => router.push(`./shipment/edit/${shipmentId}`)}
-          >
+        <DropdownMenuItem onClick={() => router.push(viewPath)}>
+          <EyeIcon className="mr-2 h-4 w-4" />
+          {isDraftPage ? "View Draft" : "View Shipment"}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <a href={editPath} target="_blank" rel="noopener noreferrer">
             <Pencil className="mr-2 h-4 w-4" />
-            Edit Shipment
-          </DropdownMenuItem> */}
-          <DropdownMenuItem asChild>
-            <a
-              href={`./shipment/edit/${shipmentId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Shipment
-            </a>
-          </DropdownMenuItem>
+            {isDraftPage ? "Edit Draft" : "Edit Shipment"}
+          </a>
+        </DropdownMenuItem>
 
-          {/* <DropdownMenuItem
+        {/* Only display logs for non-draft pages */}
+        {!isDraftPage && (
+          <ShipmentLogs
+            isView={false}
+            logs={(data as any).shipmentLogs}
+          />
+        )}
+
+        <DropdownMenuItem
           onSelect={() => {
-            setOpen(false)
+            GlobalModal.title = `Delete ${isDraftPage ? "Draft" : "Shipment"}`;
+            GlobalModal.description = `Are you sure you want to delete this ${
+              isDraftPage ? "draft" : "shipment"
+            }?`;
+            GlobalModal.children = <Alert onConfirm={deleteEntity} actionType="delete" />;
+            GlobalModal.onOpen();
           }}
-          > */}
-
-          <ShipmentLogs isView={false} logs={row.original.shipmentLogs} />
-          {/* </DropdownMenuItem> */}
-
-          {/* Delete Shipment */}
-          <DropdownMenuItem
-            onSelect={() => {
-              GlobalModal.title = "Delete shipment";
-              GlobalModal.description =
-                "Are you sure you want to delete this Shipment?";
-              GlobalModal.children = (
-                <Alert onConfirm={deleteShipment} actionType={"delete"} />
-              );
-              GlobalModal.onOpen();
-            }}
-            className="focus:bg-destructive focus:text-destructive-foreground"
-          >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Shipment
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          className="focus:bg-destructive focus:text-destructive-foreground"
+        >
+          <Trash className="mr-2 h-4 w-4" />
+          Delete {isDraftPage ? "Draft" : "Shipment"}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

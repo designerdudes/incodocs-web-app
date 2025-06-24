@@ -3,7 +3,7 @@ interface ProgressBarProps {
     totalSteps: number;
 }
 
-export default function ProgressBar({ currentStep, totalSteps }: ProgressBarProps) {
+export  function ProgressBar ({ currentStep, totalSteps }: ProgressBarProps) {
     return (
         <div className="w-full bg-gray-200 h-2 rounded">
             <div
