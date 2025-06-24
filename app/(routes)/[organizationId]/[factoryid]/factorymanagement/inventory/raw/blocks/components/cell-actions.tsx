@@ -65,6 +65,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     }
   };
 
+
   return (
     <div>
       {/* Dropdown Menu */}
@@ -107,7 +108,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 GlobalModal.description =
                   "Are you sure you want to send this Block for cutting?";
                 GlobalModal.children = (
-                  <SendForCuttingForm params={{ _id: data._id }} />
+                  <SendForCuttingForm params={{data}} />
                 );
                 GlobalModal.onOpen();
               }}
