@@ -67,7 +67,7 @@ const CellActions: React.FC<Props> = ({ data }) => {
                         Edit Machine
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                        onClick={() => router.push(`./machine/View/${data._id}`)}
+                        onClick={() => router.push(`./machines/View/${data._id}`)}
                         className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />

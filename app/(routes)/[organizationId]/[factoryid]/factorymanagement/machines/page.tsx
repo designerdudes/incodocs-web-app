@@ -60,7 +60,7 @@ export default async function machines({ params }: Props) {
                     </Button>
                 </Link>
                 <div className="flex-1">
-                    <Heading className="leading-tight" title="Machines" />
+                    <Heading className="leading-tight" title="Machines Management" />
                     <p className="text-muted-foreground text-sm mt-2">
                           View specifications, and schedule
                           maintenance to ensure smooth and efficient production.
