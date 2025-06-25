@@ -101,6 +101,7 @@ const statusFilterFn: FilterFn<Shipment> = (
 
 // Define available status options
 const statusOptions = [
+  "Booking Confirmed",
   "Trucks Booked",
   "Trucks Dispatched",
   "Trucks Arrived",
@@ -118,7 +119,7 @@ const StatusCell: React.FC<{
   row: any;
   table: any;
 }> = ({ row, table }) => {
-  const currentStatus = row.original.status || "Draft";
+  const currentStatus = row.original.status || "Booking Confirmed";
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
@@ -154,25 +155,27 @@ const StatusCell: React.FC<{
     <div className="flex items-center space-x-2">
       <Badge
         className={cn(
+          currentStatus === "Booking Confirmed" &&
+          "bg-amber-100 text-amber-800 hover:bg-amber-200/80",
           currentStatus === "Trucks Dispatched" &&
-          "bg-gray-200 text-gray-800 hover:bg-gray-200/70",
+          "bg-gray-200 text-gray-800 hover:bg-gray-300/70",
           currentStatus === "Trucks Arrived" &&
           "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
           currentStatus === "Trucks Halted" &&
-          "bg-yellow-200 text-yellow-800 hover:bg-yellow-200/80",
+          "bg-yellow-200 text-yellow-800 hover:bg-yellow-300/80",
           currentStatus === "Stuffing" &&
-          "bg-orange-200 text-orange-800 hover:bg-orange-400/80",
+          "bg-orange-200 text-orange-800 hover:bg-orange-300/80",
           currentStatus === "In Clearance" &&
-          "bg-purple-200 text-purple-800 hover:bg-purple-400/80",
+          "bg-purple-200 text-purple-800 hover:bg-purple-300/80",
           currentStatus === "Loaded On Vessel" &&
-          "bg-teal-200 text-teal-800 hover:bg-teal-400/80",
+          "bg-teal-200 text-teal-800 hover:bg-teal-300/80",
           currentStatus === "In Transit" &&
-          "bg-cyan-200 text-cyan-800 hover:bg-cyan-400/80",
+          "bg-cyan-200 text-cyan-800 hover:bg-cyan-300/80",
           currentStatus === "Arrived At POD" &&
-          "bg-green-200 text-green-800 hover:bg-green-300/80",
+          "bg-lime-200 text-lime-800 hover:bg-lime-300/80",
           currentStatus === "Delivery Completed" &&
-          "bg-green-200 text-green-800 hover:bg-green-500/80",
-          !currentStatus && "bg-muted-foreground/60 text-primary-foreground"
+          "bg-green-200 text-green-800 hover:bg-green-300/80",
+          !currentStatus && "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
         )}
       >
         {currentStatus}
@@ -192,7 +195,7 @@ const StatusCell: React.FC<{
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-48">
+        <PopoverContent className="w-48 max-h-60 overflow-y-auto">
           <div className="flex flex-col space-y-1">
             {statusOptions.map((status) => (
               <Button
