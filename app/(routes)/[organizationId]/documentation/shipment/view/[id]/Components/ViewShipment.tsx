@@ -43,11 +43,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
           if (data[0]?.Message === "Success") {
             responses.push({ container: container, data });
             setDataArray(responses);
-            // console.log(
-            //   "All voyages data:",
-            //   responses,
-            //   responses[0]?.data[0]?.Message === "Success"
-            // );
+            console.log(
+              "All voyages data:",
+              responses,
+              "aaaaaaaaaaaaaaaaaaaaaaaaaSuccess"
+            );
             break;
           } else {
             // console.log(
@@ -98,8 +98,9 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
             </div>
           </div>
           <div className="grid grid-cols-[auto_1fr] gap-y-10 gap-x-4 text-sm">
-            <div className="font-semibold text-right">Status:</div>
-            <div>{shipmentData?.status || "-"}</div>
+            <div className="font-semibold text-right">Container Status:</div>
+            {/* <div>{shipmentData?.status || "-"}</div> */}
+            <div>{dataArray[0]?.data[0]?.Status || "-"}</div>
             <div className="font-medium text-right">Containers:</div>
             <div className="grid grid-cols-2 gap-2 max-w-[200px]">
               {containerNumbers?.length > 0 ? (
