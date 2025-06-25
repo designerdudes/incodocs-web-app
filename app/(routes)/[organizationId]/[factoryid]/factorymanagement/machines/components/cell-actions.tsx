@@ -58,7 +58,13 @@ const CellActions: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-
+                    <DropdownMenuItem
+                        onClick={() => router.push(`./machines/AddLogMaintenance/${data._id}`)}
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
+                    >
+                        <EyeIcon className="mr-2 h-4 w-4" />
+                        Add Log Maintenance
+                    </DropdownMenuItem>
                     <DropdownMenuItem
                         onClick={() => router.push(`./machines/Edit/${data._id}`)}
                         className="focus:bg-green-500 focus:text-destructive-foreground"
