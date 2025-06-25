@@ -92,17 +92,26 @@ export default function SendForCuttingForm({ params }: Props) {
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
     const { date, time } = values.cuttingScheduledAt;
-    const formattedDate = new Date(
-      `${date}T${String(time.hours).padStart(2, "0")}
-      :${String(time.minutes).padStart(2, "0")}:00`
+    const hours = Number(time?.hours ?? 0);
+    const minutes = Number(time?.minutes ?? 0);
+    const isoDateTime = new Date(
+      `${date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+        2,
+        "0"
+      )}:00`
     ).toISOString();
 
     const payload = {
       status: values.status,
       cuttingMachineId: values.cuttingMachineId,
-      cuttingScheduledAt: formattedDate,
+      cuttingScheduledAt: {
+        date: new Date(date).toISOString(), // backend expects date in ISO format
+        time: {
+          hours,
+          minutes,
+        },
+      },
     };
     try {
       const res = putData(
