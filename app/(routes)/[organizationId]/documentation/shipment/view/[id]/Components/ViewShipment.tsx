@@ -43,11 +43,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
           if (data[0]?.Message === "Success") {
             responses.push({ container: container, data });
             setDataArray(responses);
-            console.log(
-              "All voyages data:",
-              responses,
-              "aaaaaaaaaaaaaaaaaaaaaaaaaSuccess"
-            );
+            // console.log(
+            //   "All voyages data:",
+            //   responses,
+            //   "aaaaaaaaaaaaaaaaaaaaaaaaaSuccess"
+            // );
             break;
           } else {
             // console.log(
@@ -67,6 +67,16 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
     }
   }, [shipmentData]);
 
+  const statusClassMap: Record<string, string> = {
+    Sailing: "bg-black text-white",
+    Untracked: "bg-grey-400 text-white",
+    Discharged: "bg-blue-300 text-white",
+    InProgress: "bg-pink-400 text-white",
+    Booked: "bg-black text-white",
+  };
+
+  const status = dataArray[0]?.data[0]?.Status || "-";
+  const statusClass = statusClassMap[status] || "text-black";
   return (
     <div className="space-y-6">
       <Card className="w-full max-w-4xl rounded-2xl shadow-md border">
@@ -100,7 +110,13 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
           <div className="grid grid-cols-[auto_1fr] gap-y-10 gap-x-4 text-sm">
             <div className="font-semibold text-right">Container Status:</div>
             {/* <div>{shipmentData?.status || "-"}</div> */}
-            <div>{dataArray[0]?.data[0]?.Status || "-"}</div>
+            <div>
+              <span
+                className={`px-2 py-1 rounded-sm text-sm ${statusClass}`}
+              >
+                {status}
+              </span>
+            </div>
             <div className="font-medium text-right">Containers:</div>
             <div className="grid grid-cols-2 gap-2 max-w-[200px]">
               {containerNumbers?.length > 0 ? (
