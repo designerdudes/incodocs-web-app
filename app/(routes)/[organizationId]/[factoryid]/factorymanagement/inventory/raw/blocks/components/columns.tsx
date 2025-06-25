@@ -5,10 +5,12 @@ import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
 
 
 export type Blocks = {
-    
+
     dimensions: {
         weight: {
             value: number;
@@ -33,7 +35,7 @@ export type Blocks = {
     lotId: string;
     blockNumber: number;
     materialType: string;
-    SlabsId:  { _id: string; slabNumber: number }[]
+    SlabsId: { _id: string; slabNumber: number }[]
     status: string;
     createdAt: string;
     updatedAt: string;
@@ -74,11 +76,11 @@ export const columns: ColumnDef<Blocks>[] = [
                 Block Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
-        ),        
+        ),
         cell: ({ row }) => <div>{row.original.blockNumber}</div>,
         filterFn: "includesString", // Use the built-in filtering logic for partial matches
     },
-    
+
     {
         accessorKey: "SlabsId",
         header: ({ column }) => (
@@ -107,12 +109,25 @@ export const columns: ColumnDef<Blocks>[] = [
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-             {row.original?.status === "cut" ? "Ready for Polish" : row.original?.status || "N/A"}
-
-            </div>
-        ),
+        cell: ({ row }) => {
+            const currentStatus = row.original?.status || "N/A";
+            return (
+                <Badge
+                    className={cn(
+                        currentStatus === "inStock" &&
+                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80",
+                        currentStatus === "inCutting" &&
+                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
+                        currentStatus === "cut" &&
+                        "bg-green-100 text-green-800 hover:bg-green-200/80",
+                        currentStatus === "N/A" &&
+                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
+                    )}
+                >
+                    {currentStatus === "cut" ? "Block Cut" : currentStatus}
+                </Badge>
+            );
+        },
     },
 
     {
