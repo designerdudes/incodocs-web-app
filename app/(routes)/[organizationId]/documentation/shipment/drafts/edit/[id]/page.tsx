@@ -17,7 +17,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import toast from "react-hot-toast";
-import { fetchData, putData, postData } from "@/axiosUtility/api";
+import { fetchData, putData, postData, deleteData } from "@/axiosUtility/api";
 import { useRouter, useParams } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
@@ -910,6 +910,7 @@ export default function EditDraftPage({ params }: Props) {
     }
   };
 
+  
   const submitDraft = async () => {
     setIsLoading(true);
     try {
@@ -1162,6 +1163,20 @@ export default function EditDraftPage({ params }: Props) {
       console.log("Cleaned Payload for /shipment/add:", JSON.stringify(payload, null, 2));
       await postData(`/shipment/add`, payload);
       toast.success("Shipment created successfully!");
+
+      // Delete draft from backend
+      try {
+        await deleteData(`/shipmentdrafts/delete/${params.id}`);
+        console.log(`Draft ${params.id} deleted successfully from backend`);
+      } catch (deleteError: any) {
+        console.error("Error deleting draft from backend:", deleteError);
+        toast.error(
+          `Shipment created, but failed to delete draft: ${
+            deleteError.response?.data?.message || deleteError.message || "Server error"
+          }`
+        );
+      }
+
       localStorage.removeItem(`draft_${params.id}`);
       router.push("../");
     } catch (error: any) {
@@ -1180,7 +1195,6 @@ export default function EditDraftPage({ params }: Props) {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     async function fetchDraftData() {
       try {
