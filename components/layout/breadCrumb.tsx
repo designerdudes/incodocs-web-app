@@ -47,7 +47,7 @@ function BreadCrumb() {
   const remainingSegments = pathname.includes("factorymanagement")
     ? segments.slice(2)
     : segments.slice(1);
-  console.log(remainingSegments);
+  // console.log(remainingSegments);
   const uniqueSegments = Array.from(new Set(remainingSegments));
 
   // Determine if the route expects a factoryId
@@ -60,14 +60,14 @@ function BreadCrumb() {
       remainingSegments[0]?.startsWith(route) || segments[1]?.startsWith(route)
   );
 
-  console.log(isFactoryRoute);
+  // console.log(isFactoryRoute);
   const factoryId = isFactoryRoute ? potentialFactoryId : "";
 
-  console.log("Pathname:", pathname);
-  console.log("Organization ID:", organizationId);
-  console.log("Factory ID:", factoryId);
-  console.log("Remaining Segments:", remainingSegments);
-  console.log("Is Factory Route:", isFactoryRoute);
+  // console.log("Pathname:", pathname);
+  // console.log("Organization ID:", organizationId);
+  // console.log("Factory ID:", factoryId);
+  // console.log("Remaining Segments:", remainingSegments);
+  // console.log("Is Factory Route:", isFactoryRoute);
 
   useEffect(() => {
     const getData = async () => {
@@ -86,7 +86,7 @@ function BreadCrumb() {
 
         // Fetch organizations
         const orgResponse = await fetchData("/organizations/token");
-        console.log("Organizations:", orgResponse);
+        // console.log("Organizations:", orgResponse);
         setOrganizations(orgResponse || []);
 
         // Fetch current organization
@@ -102,7 +102,7 @@ function BreadCrumb() {
           const factoryResponse = await fetchData(
             `/factory/getbyorg/${organizationId}`
           );
-          console.log("Factories data:", factoryResponse);
+          // console.log("Factories data:", factoryResponse);
           setFactories(factoryResponse || []);
           const currentFactory = factoryResponse?.find(
             (factory: Factory) => factory._id === factoryId
@@ -152,7 +152,7 @@ function BreadCrumb() {
 
   const handleFactoryChange = (newFactoryId: string) => {
     const storeFact = localStorage.setItem("activeFactoryId", newFactoryId);
-    console.log("Stored Factory ID:", storeFact);
+    // console.log("Stored Factory ID:", storeFact);
 
     const newRoute = `/${organizationId}/${newFactoryId}/${remainingSegments.join(
       "/"

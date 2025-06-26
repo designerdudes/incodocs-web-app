@@ -30,7 +30,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
   // organizationId,
 }) => {
   const router = useRouter();
-
   return (
     <Card className={`relative p-2 rounded-2xl bg-white ${className} `}>
       <div className="absolute top-5 right-5 text-gray-600">{icon}</div>

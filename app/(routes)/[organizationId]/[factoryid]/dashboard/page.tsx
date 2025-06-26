@@ -31,6 +31,10 @@ export default async function Home({ params }: Props) {
   );
   const currentFactoryData = await res.json();
 
+  console.log("Factory ID from Params:", params);
+
+  console.log("Current Factory Data:", currentFactoryData);
+
   return (
     <main className="flex h-full flex-col p-10 bg-gradient-to-r from-gray-100 to-white">
       <div className="text-center mb-10">
