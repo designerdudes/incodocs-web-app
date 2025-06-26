@@ -113,7 +113,7 @@ export default async function SlabsPage({ params }: Props) {
       <div className="flex flex-col flex-1 py-2">
         <div className="flex flex-1 gap-6">
           {/* Block Details Card */}
-          <Card className="w-2/5" >
+          <Card className="w-2/5">
             <CardHeader>
               <CardTitle>Block Details</CardTitle>
               <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
@@ -158,12 +158,12 @@ export default async function SlabsPage({ params }: Props) {
                       Weight (tons)
                     </TableCell>
                     <TableCell>
-                      {BlockData?.dimensions?.weight?.value}
+                      {BlockData?.dimensions?.weight?.value || "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Length (inch)
+                      Length (cm)
                     </TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.length?.value}
@@ -171,7 +171,7 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Breadth (inch)
+                      Breadth (cm)
                     </TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.breadth?.value}
@@ -179,22 +179,10 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Height (inch)
+                      Height (cm)
                     </TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.height?.value}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Volume (in³)
-                    </TableCell>
-                    <TableCell>
-                      {calculateVolume(
-                        BlockData?.dimensions?.length?.value,
-                        BlockData?.dimensions?.breadth?.value,
-                        BlockData?.dimensions?.height?.value
-                      )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -205,7 +193,6 @@ export default async function SlabsPage({ params }: Props) {
                       {convertInchCubeToCmCube(volumeinInchs)}
                     </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Created At
@@ -213,13 +200,49 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>
                       {moment(BlockData.createdAt).format("DD-MMM-YYYY")}
                     </TableCell>
-                  </TableRow>       
+                  </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Block Updated At
                     </TableCell>
                     <TableCell>
                       {moment(BlockData.updatedAt).format("DD-MMM-YYYY")}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+            {/* Cutting Details Section */}
+            <CardHeader>
+              <CardTitle>Cutting Details</CardTitle>
+              <CardDescription>Cutting information for this block</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Field</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Machine</TableCell>
+                    <TableCell>
+                      {BlockData?.cuttingMachineId?.machineName} -{" "}
+                      {BlockData?.cuttingMachineId?.typeCutting}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Cutting Date and Time
+                    </TableCell>
+                    <TableCell>
+                      {BlockData?.cuttingScheduledAt
+                        ? moment(BlockData.cuttingScheduledAt).format(
+                            "DD MMM YYYY, hh:mm A"
+                          )
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                 </TableBody>
