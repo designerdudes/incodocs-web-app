@@ -73,6 +73,10 @@ export default function EditBlockForm({ params }: Props) {
 
   const blockId = params._id;
 
+  const length = form.watch("dimensions.length.value") || 1;
+  const breadth = form.watch("dimensions.breadth.value") || 1;
+  const height = form.watch("dimensions.height.value") || 1;
+
   // Fetch block data and reset form with values
   useEffect(() => {
     async function fetchBlockData() {
@@ -81,8 +85,8 @@ export default function EditBlockForm({ params }: Props) {
         const response = await fetchData(
           `/factory-management/inventory/raw/get/${blockId}`
         );
-        
-        const data =  response;
+
+        const data = response;
 
         // Map backend data to form values
         form.reset({
@@ -123,10 +127,22 @@ export default function EditBlockForm({ params }: Props) {
     GlobalModal.description = "Are you sure you want to update this block?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>Length: {values.dimensions.length.value} {values.dimensions.length.units}</p>
-        <p>Height: {values.dimensions.height.value} {values.dimensions.height.units}</p>
-        <p>Breadth: {values.dimensions.breadth.value} {values.dimensions.breadth.units}</p>
-        <p>Weight: {values.dimensions.weight.value} {values.dimensions.weight.units}</p>
+        <p>
+          Length: {values.dimensions.length.value}{" "}
+          {values.dimensions.length.units}
+        </p>
+        <p>
+          Height: {values.dimensions.height.value}{" "}
+          {values.dimensions.height.units}
+        </p>
+        <p>
+          Breadth: {values.dimensions.breadth.value}{" "}
+          {values.dimensions.breadth.units}
+        </p>
+        <p>
+          Weight: {values.dimensions.weight.value}{" "}
+          {values.dimensions.weight.units}
+        </p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -147,7 +163,7 @@ export default function EditBlockForm({ params }: Props) {
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Block updated successfully");
-                window.location.reload()
+                window.location.reload();
               } catch (error) {
                 console.error("Error updating block:", error);
                 setIsLoading(false);
@@ -173,7 +189,6 @@ export default function EditBlockForm({ params }: Props) {
     );
   }
 
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
@@ -187,12 +202,10 @@ export default function EditBlockForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 15"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value))
-                    }
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -209,11 +222,9 @@ export default function EditBlockForm({ params }: Props) {
                   <Input
                     placeholder="Eg: 10"
                     type="number"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value))
-                    }
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
@@ -226,46 +237,31 @@ export default function EditBlockForm({ params }: Props) {
           <FormField
             control={form.control}
             name="dimensions.breadth.value"
-            
             render={({ field }) => (
               <FormItem>
-                <FormLabel>breadth (inches)</FormLabel>
+                <FormLabel>Breadth (inches)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
-              className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value))
-                    }
+                    onChange={(e) => field.onChange(parseFloat(e.target.value))}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="dimensions.weight.value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weight</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Eg: 10"
-                    type="number"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    value={field.value || ""}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value))
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div>
+            <div className="text-sm font-medium">Weight (inches)</div>
+            <div className="pt-5 text-sm">
+              {(
+                (((length * breadth * height) / 1000000) * 350 * 10) /
+                1000
+              ).toFixed(2)}
+            </div>
+          </div>
         </div>
 
         {/* <div>
