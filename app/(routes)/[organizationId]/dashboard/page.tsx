@@ -66,8 +66,6 @@ export default async function DashboardPage({ params }: { params: Params }) {
 
     const factories: Factory[] = await factoriesRes.json();
 
-    console.log("factories", factories);
-
     return (
       <main className="flex  flex-col p-10 gap-4 bg-gradient-to-r from-gray-100 to-white">
         <div className="gap-3">
