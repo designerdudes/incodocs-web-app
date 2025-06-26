@@ -156,7 +156,9 @@ const StatusCell: React.FC<{
       <Badge
         className={cn(
           currentStatus === "Booking Confirmed" &&
-          "bg-amber-100 text-amber-800 hover:bg-amber-200/80",
+          "bg-amber-200 text-amber-800 hover:bg-amber-300/80",
+          currentStatus === "Trucks Booked" &&
+          "bg-orange-200 text-yellow-800 hover:bg-orange-300/80",
           currentStatus === "Trucks Dispatched" &&
           "bg-gray-200 text-gray-800 hover:bg-gray-300/70",
           currentStatus === "Trucks Arrived" &&
