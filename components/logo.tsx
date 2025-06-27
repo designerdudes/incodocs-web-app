@@ -2,6 +2,7 @@ import { BrandName } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react';
+import StoneDocs from '../Public/StoneDocs.svg';
 
 interface LogoProps {
     className?: string;
@@ -13,7 +14,7 @@ const LogoComponent: React.FC<LogoProps> = ({ className, width, height }) => {
     return (
         <div className={`logo`}>
             <Image
-                src="/JabalEximCropped.png"
+                src={StoneDocs}
                 alt={BrandName}
 
                 width={width}
