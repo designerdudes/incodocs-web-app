@@ -3,18 +3,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { fetchData, postData } from "@/axiosUtility/api";
+import EntityCombobox from "../ui/EntityCombobox";
+import { useRouter } from "next/navigation";
 
 type SubBlock = {
-  length: number;
-  width: number;
-  height: number;
-  suffix: string;
+  dimensions: {
+    length: {
+      value: number;
+      units: string;
+    };
+    breadth: {
+      value: number;
+      units: string;
+    };
+    height: {
+      value: number;
+      units: string;
+    };
+  };
+  // suffix: string;
 };
 
 interface SplitBlockFormProps {
   parentBlockId: string;
   blockNumber: string;
-  originalBlockVolume: number; 
+  originalBlockVolume: number;
   onSubmit: (subBlocks: SubBlock[]) => void;
 }
 
@@ -24,16 +38,18 @@ export default function SplitBlockForm({
   originalBlockVolume,
   onSubmit,
 }: SplitBlockFormProps) {
-  const [count, setCount] = useState(2);
+  const [count, setCount] = useState(0);
   const [subBlocks, setSubBlocks] = useState<SubBlock[]>([]);
   const [volumeError, setVolumeError] = useState<string | null>(null);
   const [totalVolume, setTotalVolume] = useState(0);
-
+  const [machines, setMachines] = useState([]);
+  const [selectedMachineId, setSelectedMachineId] = useState<string>("");
+  const router = useRouter();
   useEffect(() => {
-    const calculatedVolume = subBlocks.reduce(
-      (sum, b) => sum + b.length * b.width * b.height,
-      0
-    );
+    const calculatedVolume = subBlocks.reduce((sum, b) => {
+      const { length, breadth, height } = b.dimensions;
+      return sum + length.value * breadth.value * height.value;
+    }, 0);
     setTotalVolume(calculatedVolume);
 
     if (calculatedVolume > originalBlockVolume) {
@@ -45,29 +61,72 @@ export default function SplitBlockForm({
     }
   }, [subBlocks, originalBlockVolume]);
 
+  useEffect(() => {
+    const fetchmachine = async () => {
+      const res = await fetchData("/machine/getall");
+      const response = res
+        .filter((e: any) => e.typeCutting === "Rope Cutter")
+        .map((e: any) => ({
+          label: e.machineName,
+          value: e._id,
+        }));
+      setMachines(response);
+    };
+    fetchmachine();
+  }, []);
+
   const handleCountChange = (value: number) => {
     setCount(value);
     const newBlocks: SubBlock[] = Array.from({ length: value }, (_, i) => ({
-      length: 0,
-      width: 0,
-      height: 0,
-      suffix: `${blockNumber}-${String.fromCharCode(65 + i)}`,
+      dimensions: {
+        length: {
+          value: 0,
+          units: "cm",
+        },
+        breadth: {
+          value: 0,
+          units: "cm",
+        },
+        height: {
+          value: 0,
+          units: "cm",
+        },
+      },
+
+      // suffix: `${blockNumber}-${String.fromCharCode(65 + i)}`,
     }));
     setSubBlocks(newBlocks);
   };
 
- const handleChange = (i: number, key: keyof SubBlock, value: any) => {
-  const updated = [...subBlocks];
-  updated[i] = {
-    ...updated[i],
-    [key]: value,
+  const handleDimensionChange = (
+    index: number,
+    dimension: "length" | "breadth" | "height",
+    value: number
+  ) => {
+    const updated = [...subBlocks];
+    updated[index].dimensions[dimension].value = value;
+    setSubBlocks(updated);
   };
-  setSubBlocks(updated);
-};
 
-  const handleSubmit = () => {
-    if (volumeError) return;
-    onSubmit(subBlocks);
+  const handleSubmit = async () => {
+    if (volumeError || !selectedMachineId) return;
+
+    try {
+      const body = {
+        newBlocks: subBlocks,
+        cuttingMachineId: selectedMachineId,
+      };
+
+      const response = await postData(
+        `/factory-management/inventory/raw/splitblock/${parentBlockId}`,
+        body
+      );
+
+      // console.log("Split block successful:", response);
+      onSubmit(subBlocks);
+    } catch (error) {
+      console.error("Error while splitting block:", error);
+    }
   };
 
   return (
@@ -75,44 +134,52 @@ export default function SplitBlockForm({
       <div>
         <Label>No. of Sub-Blocks</Label>
         <Input
-          type="number"
           min={2}
           value={count}
           onChange={(e) => handleCountChange(Number(e.target.value))}
         />
       </div>
 
+      <EntityCombobox
+        entities={machines}
+        multiple={false}
+        value={selectedMachineId}
+        onChange={(value) => setSelectedMachineId(value as string)}
+        displayProperty="label"
+        valueProperty="value"
+        placeholder="Select Machine"
+        onAddNew={() => router.push("/factorymanagement/machines/createnew")}
+        addNewLabel="Add New"
+      />
+
       {subBlocks.map((block, i) => (
         <div key={i} className="grid grid-cols-3 gap-4">
           <div>
-            <Label>Length(cm)</Label>
+            <Label>Length (cm)</Label>
             <Input
-              type="number"
-              value={block.length}
+              value={block.dimensions.length.value}
               onChange={(e) =>
-                handleChange(i, "length", Number(e.target.value))
+                handleDimensionChange(i, "length", Number(e.target.value))
               }
               required
             />
           </div>
           <div>
-            <Label>Width(cm)</Label>
+            <Label>Breadth (cm)</Label>
             <Input
-              type="number"
-              value={block.width}
+              value={block.dimensions.breadth.value}
               onChange={(e) =>
-                handleChange(i, "width", Number(e.target.value))
+                handleDimensionChange(i, "breadth", Number(e.target.value))
               }
               required
             />
           </div>
           <div>
-            <Label>Height(cm)</Label>
+            <Label>Height (cm)</Label>
             <Input
-              type="number"
-              value={block.height}
+              value={block.dimensions.height.value}
               onChange={(e) =>
-                handleChange(i, "height", Number(e.target.value))
+                handleDimensionChange(i, "height", Number(e.target.value))
               }
               required
             />
@@ -121,9 +188,9 @@ export default function SplitBlockForm({
       ))}
 
       <div className="text-sm text-muted-foreground">
-  Total Volume (m³): <b>{totalVolume.toFixed(2)}</b> / Max: <b>{originalBlockVolume.toFixed(2)}</b>
-</div>
-
+        Total Volume (m³): <b>{totalVolume.toFixed(2)}</b> / Max:{" "}
+        <b>{originalBlockVolume.toFixed(2)}</b>
+      </div>
 
       {volumeError && (
         <Alert variant="destructive">
@@ -131,11 +198,7 @@ export default function SplitBlockForm({
         </Alert>
       )}
 
-      <Button
-        className="mt-4"
-        onClick={handleSubmit}
-        disabled={!!volumeError}
-      >
+      <Button className="mt-4" onClick={handleSubmit} disabled={!!volumeError}>
         Split Block
       </Button>
     </div>

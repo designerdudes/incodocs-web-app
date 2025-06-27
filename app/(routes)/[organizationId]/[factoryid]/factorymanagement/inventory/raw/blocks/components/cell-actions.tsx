@@ -33,7 +33,6 @@ interface Props {
 export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
@@ -85,11 +84,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                   "This block appears larger than normal. Proceed to split?";
                 GlobalModal.children = (
                   <SplitBlockForm
-                    parentBlockId={data.blockId}
+                    parentBlockId={data._id}
                     blockNumber={data.blockNumber}
-                    originalBlockVolume={data.length * data.width * data.height}
+                    originalBlockVolume={
+                      data?.dimensions?.length?.value *
+                      data?.dimensions?.breadth?.value *
+                      data?.dimensions?.height?.value
+                    }
                     onSubmit={(subBlocks) => {
-                      console.log("Split Data:", subBlocks);
                       GlobalModal.onClose();
                     }}
                   />
