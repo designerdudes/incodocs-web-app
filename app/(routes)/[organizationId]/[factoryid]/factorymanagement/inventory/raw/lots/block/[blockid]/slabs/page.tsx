@@ -77,6 +77,7 @@ export default async function SlabsPage({ params }: Props) {
     }
     return "";
   }
+
   const volumeinInchs = calculateVolume(
     BlockData?.dimensions?.length?.value,
     BlockData?.dimensions?.breadth?.value,
@@ -87,6 +88,26 @@ export default async function SlabsPage({ params }: Props) {
     const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
     const inchToCm = volumeinInchs * conversionFactor;
     return inchToCm.toFixed(2);
+  }
+
+  // Helper function to construct a Date object from cuttingScheduledAt
+  function getCuttingDateTime(cuttingScheduledAt: any): Date | null {
+    if (
+      cuttingScheduledAt &&
+      cuttingScheduledAt.date &&
+      cuttingScheduledAt.time &&
+      typeof cuttingScheduledAt.time.hours === "number" &&
+      typeof cuttingScheduledAt.time.minutes === "number"
+    ) {
+      const { date, time } = cuttingScheduledAt;
+      const { hours, minutes } = time;
+      // Create a new Date object from the ISO date string
+      const dateObj = new Date(date);
+      // Set the hours and minutes explicitly
+      dateObj.setUTCHours(hours, minutes, 0, 0);
+      return dateObj;
+    }
+    return null;
   }
 
   return (
@@ -146,7 +167,9 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>{BlockData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Status</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Status
+                    </TableCell>
                     <TableCell>
                       {BlockData?.status === "cut"
                         ? "Ready for Polish"
@@ -239,7 +262,7 @@ export default async function SlabsPage({ params }: Props) {
                     </TableCell>
                     <TableCell>
                       {BlockData?.cuttingScheduledAt
-                        ? moment(BlockData.cuttingScheduledAt).format(
+                        ? moment(getCuttingDateTime(BlockData.cuttingScheduledAt)).format(
                             "DD MMM YYYY, hh:mm A"
                           )
                         : "N/A"}

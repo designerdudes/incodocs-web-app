@@ -30,7 +30,11 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import CalendarComponent from "@/components/CalendarComponent";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { fetchData, putData } from "@/axiosUtility/api";
@@ -47,15 +51,17 @@ const formSchema = z.object({
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
-  mobileNo: z
-    .union([z.string(), z.number()])
-    .refine((val) => {
+  mobileNo: z.union([z.string(), z.number()]).refine(
+    (val) => {
       const strVal = val.toString();
       return strVal.length >= 10 && /^\d+$/.test(strVal);
-    }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
-  email: z
-    .string()
-    .email({ message: "Please enter a valid email address" }),
+    },
+    {
+      message:
+        "Mobile number must be at least 10 digits and contain only numbers",
+    }
+  ),
+  email: z.string().email({ message: "Please enter a valid email address" }),
   documents: z.array(
     z.object({
       fileName: z
@@ -117,7 +123,9 @@ export default function EditConsigneeForm({ params }: Props) {
       try {
         setIsFetching(true);
         setFetchError(null);
-        const response = await fetchData(`/shipment/consignee/getone/${consigneeId}`);
+        const response = await fetchData(
+          `/shipment/consignee/getone/${consigneeId}`
+        );
         console.log("Fetched consignee data:", response);
 
         const consignee = response?.getConsignee;
@@ -131,12 +139,13 @@ export default function EditConsigneeForm({ params }: Props) {
           address: consignee?.address?.toString() || "",
           mobileNo: consignee?.mobileNo?.toString() || "",
           email: consignee?.email?.toString() || "",
-          documents: consignee?.documents?.map((doc: any) => ({
-            fileName: doc.fileName,
-            fileUrl: doc.fileUrl,
-            date: doc.date,
-            review: doc.review || "",
-          })) || [],
+          documents:
+            consignee?.documents?.map((doc: any) => ({
+              fileName: doc.fileName,
+              fileUrl: doc.fileUrl,
+              date: doc.date,
+              review: doc.review || "",
+            })) || [],
         };
 
         form.reset(formData);
@@ -170,7 +179,9 @@ export default function EditConsigneeForm({ params }: Props) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
+      setValue(`documents.${index}.fileUrl`, data.storageLink, {
+        shouldDirty: true,
+      });
       setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
       toast.success("File uploaded successfully!");
       saveProgress(getValues());
@@ -201,7 +212,9 @@ export default function EditConsigneeForm({ params }: Props) {
       setIsLoading(true);
       const fileUrl = await handleFileUpload(newFile, selectedDocIndex);
       if (fileUrl) {
-        toast.success("Document replaced successfully. Submit the form to save changes.");
+        toast.success(
+          "Document replaced successfully. Submit the form to save changes."
+        );
         setIsReplaceModalOpen(false);
         saveProgress(getValues());
       }
@@ -275,7 +288,10 @@ export default function EditConsigneeForm({ params }: Props) {
                     review: doc.review,
                   })),
                 };
-                await putData(`/shipment/consignee/update/${consigneeId}`, payload);
+                await putData(
+                  `/shipment/consignee/update/${consigneeId}`,
+                  payload
+                );
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Consignee updated successfully");
@@ -322,10 +338,13 @@ export default function EditConsigneeForm({ params }: Props) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full ">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="grid gap-4 w-full "
+        >
+          <div className="grid grid-cols-2 gap-4 w-full ">
             <FormField
               control={form.control}
               name="name"
@@ -388,149 +407,172 @@ export default function EditConsigneeForm({ params }: Props) {
               )}
             />
           </div>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+            {/* Documents Section */}
+            {fields.length > 0 && (
+              <div className="col-span-4 overflow-x-auto mt-4 ">
+                <Table className="table-fixed w-full">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-10">#</TableHead>
+                      <TableHead className="w-[280px]">
+                        Upload Document
+                      </TableHead>
+                      <TableHead className="w-[200px]">File Name</TableHead>
+                      <TableHead className="w-[180px]">Date</TableHead>
+                      <TableHead className="w-[180px]">Review</TableHead>
+                      <TableHead className="w-20 text-center">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {fields.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
 
-          {/* Documents Section */}
-          {fields.length > 0 && (
-            <div className="col-span-4 overflow-x-auto mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Upload Document</TableHead>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Review</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        <FormField
-                          control={control}
-                          name={`documents.${index}.fileUrl`}
-                          render={({ field }) => (
-                            <div className="flex items-center space-x-2">
-                              <FileUploadField
-                                name={`documents.${index}.fileUrl`}
-                                storageKey={`documents.${index}.fileUrl`}
-                                onFileChange={async (file: File) => {
-                                  if (file) {
-                                    await handleFileUpload(file, index);
-                                  }
-                                }}
-                              />
-                              {field.value && (
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  <Eye className="h-4 w-4 cursor-pointer" />
-                                </a>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                type="button"
-                                onClick={() => handleReplaceDocument(index)}
-                              >
-                                <UploadCloud className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.fileName`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Document.pdf"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button variant="outline">
-                                      {field.value &&
-                                      !isNaN(new Date(field.value).getTime())
-                                        ? format(new Date(field.value), "PPPP")
-                                        : "Pick a date"}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent align="start">
-                                  <CalendarComponent
-                                    selected={
-                                      field.value ? new Date(field.value) : undefined
-                                    }
-                                    onSelect={(date: any) => {
-                                      field.onChange(date?.toISOString());
-                                      saveProgress(getValues());
+                        {/* Upload Document Cell */}
+                        <TableCell className="overflow-hidden">
+                          <FormField
+                            control={control}
+                            name={`documents.${index}.fileUrl`}
+                            render={({ field }) => (
+                              <div className="flex items-center gap-2 overflow-hidden">
+                                <div className="flex-1 min-w-0">
+                                  <FileUploadField
+                                    name={`documents.${index}.fileUrl`}
+                                    storageKey={`documents.${index}.fileUrl`}
+                                    onFileChange={async (file: File) => {
+                                      if (file) {
+                                        await handleFileUpload(file, index);
+                                      }
                                     }}
                                   />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.review`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Reviewed"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="button"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                                </div>
+                                {field.value && (
+                                  <a
+                                    href={field.value}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    <Eye className="h-4 w-4 cursor-pointer" />
+                                  </a>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  type="button"
+                                  onClick={() => handleReplaceDocument(index)}
+                                >
+                                  <UploadCloud className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          />
+                        </TableCell>
+
+                        {/* File Name Cell */}
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+
+                        {/* Date Cell */}
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button
+                                        variant="outline"
+                                        className="w-full text-left"
+                                      >
+                                        {field.value &&
+                                        !isNaN(new Date(field.value).getTime())
+                                          ? format(
+                                              new Date(field.value),
+                                              "PPPP"
+                                            )
+                                          : "Pick a date"}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent align="start">
+                                    <CalendarComponent
+                                      selected={
+                                        field.value
+                                          ? new Date(field.value)
+                                          : undefined
+                                      }
+                                      onSelect={(date: any) => {
+                                        field.onChange(date?.toISOString());
+                                        saveProgress(getValues());
+                                      }}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+
+                        {/* Review Cell */}
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.review`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Reviewed"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+
+                        {/* Delete Action */}
+                        <TableCell className="text-center">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            type="button"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </div>
 
           <Button
             type="button"
@@ -549,7 +591,9 @@ export default function EditConsigneeForm({ params }: Props) {
           </Button>
 
           <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Submit
           </Button>
         </form>
@@ -563,7 +607,10 @@ export default function EditConsigneeForm({ params }: Props) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="file-upload" className="block text-sm font-medium">
+              <label
+                htmlFor="file-upload"
+                className="block text-sm font-medium"
+              >
                 Upload New File
               </label>
               <Input
@@ -577,7 +624,9 @@ export default function EditConsigneeForm({ params }: Props) {
                 className="mt-1"
               />
               {newFile && (
-                <p className="text-sm text-gray-500">Selected: {newFile.name}</p>
+                <p className="text-sm text-gray-500">
+                  Selected: {newFile.name}
+                </p>
               )}
             </div>
             <DialogFooter>
