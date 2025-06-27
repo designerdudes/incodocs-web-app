@@ -14,35 +14,40 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [defaultTheme, setDefaultTheme] = useState("light");
+  const [defaultTheme, setDefaultTheme] = useState("system"); // Default to "system" for SSR
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const getThemePreference = async () => {
-      if (typeof window !== "undefined") {
-        const theme = localStorage.getItem("theme");
-        // console.log(theme)
-        if (theme) {
-          setDefaultTheme(theme);
-        } else {
-          setDefaultTheme("system");
-        }
-      }
-    };
-
-    getThemePreference();
+    setIsClient(true);
+    const theme = localStorage.getItem("theme") || "system";
+    setDefaultTheme(theme);
   }, []);
 
   //get theme preference by resolving promise
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const theme = localStorage.getItem("theme");
-      setDefaultTheme(theme || "system");
-    }
-  }, []);
+  // Render nothing or a fallback during SSR to avoid mismatches
+  if (!isClient) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className={inter.className}>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem={true}
+            disableTransitionOnChange={false}
+          >
+            <ToastProvider />
+            <NetworkStatusToast />
+            <NewOrderModalProvider />
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+    );
+  }
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
