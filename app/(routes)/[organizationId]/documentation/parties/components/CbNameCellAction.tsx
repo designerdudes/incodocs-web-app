@@ -30,6 +30,7 @@ interface CbName {
   mobileNo: number;
   email: string;
   organizationId: string;
+  portCode: string; // Added missing property
 }
 
 interface Props {
