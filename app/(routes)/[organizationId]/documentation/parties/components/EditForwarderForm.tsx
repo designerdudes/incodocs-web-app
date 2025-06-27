@@ -402,6 +402,7 @@ export default function EditForwarderForm({ params }: Props) {
               )}
             />
           </div>
+                    <div className="grid grid-cols-4 gap-4 w-full ">
 
           {/* Documents Section */}
           {fields.length > 0 && (
@@ -566,6 +567,7 @@ export default function EditForwarderForm({ params }: Props) {
             {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
             Submit
           </Button>
+        </div>
         </form>
       </Form>
 
