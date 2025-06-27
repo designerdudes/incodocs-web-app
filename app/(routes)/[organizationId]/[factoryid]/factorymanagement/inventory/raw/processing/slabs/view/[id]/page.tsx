@@ -34,6 +34,7 @@ export default async function SlabsPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
+  // Fetch slab data
   const res = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/finished/get/${params?.id}`,
     {
@@ -43,12 +44,20 @@ export default async function SlabsPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
 
   SlabData = res;
-  // console.log("This is SlabData", SlabData);
+
+  // Format polishing date and time to match "DD MMM YYYY, hh:mm A"
+  const polishingDateTime = SlabData?.polishingScheduledAt
+    ? moment(
+        `${SlabData.polishingScheduledAt.date.split("T")[0]}T${String(
+          SlabData.polishingScheduledAt.time.hours
+        ).padStart(2, "0")}:${String(
+          SlabData.polishingScheduledAt.time.minutes
+        ).padStart(2, "0")}:00Z`
+      ).format("DD MMM YYYY, hh:mm A")
+    : "N/A";
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -62,7 +71,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Slab : ${SlabData.slabNumber} `}
+            title={`Details of Slab: ${SlabData.slabNumber}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Slabs with detailed insights into its current
@@ -75,7 +84,7 @@ export default async function SlabsPage({ params }: Props) {
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Slab Details</CardTitle>
-              <CardDescription>{`Details of Slab : ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details of Slab: ${SlabData?.slabNumber}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -86,7 +95,6 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow />
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Slab Number
@@ -99,60 +107,56 @@ export default async function SlabsPage({ params }: Props) {
                     </TableCell>
                     <TableCell>{SlabData?.blockNumber}</TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Material Type
                     </TableCell>
                     <TableCell>
-                      {SlabData?.blockId?.lotId?.materialType}
+                      {SlabData?.blockId?.lotId?.materialType ?? "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Status</TableCell>
-                    <TableCell>{SlabData.status}</TableCell>
+                    <TableCell>{SlabData?.status ?? "N/A"}</TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Before Trim Length (inch)
                     </TableCell>
                     <TableCell>
-                      {SlabData?.dimensions?.length?.value ??
-                        "Need to be polished"}
+                      {SlabData?.dimensions?.length?.value ?? "N/A"}
                     </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Before Trim Height (inch)
                     </TableCell>
                     <TableCell>
-                      {SlabData?.dimensions?.length?.value ??
-                        "Need to be polished"}
+                      {SlabData?.dimensions?.height?.value ?? "N/A"}
                     </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Trim Length (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.trim?.length?.value}</TableCell>
+                    <TableCell>
+                      {SlabData?.trim?.length?.value ?? "N/A"}
+                    </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Trim Height (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.trim?.height?.value}</TableCell>
+                    <TableCell>
+                      {SlabData?.trim?.height?.value ?? "N/A"}
+                    </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Slab Created At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("DD-MMM-YYYY")}
+                      {moment(SlabData?.createdAt).format("DD-MMM-YYYY") ?? "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -160,7 +164,48 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.updatedAt).format("DD-MMM-YYYY")}
+                      {moment(SlabData?.updatedAt).format("DD-MMM-YYYY") ?? "N/A"}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </CardContent>
+            {/* Polishing Details Section */}
+            <CardHeader>
+              <CardTitle>Polishing Details</CardTitle>
+              <CardDescription>Polishing information for this slab</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Field</TableHead>
+                    <TableHead>Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Machine</TableCell>
+                    <TableCell>
+                      {SlabData?.polishingMachineId?.machineName
+                        ? `${SlabData.polishingMachineId.machineName} - ${SlabData.polishingMachineId.typePolish}`
+                        : "N/A"}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Polishing Date and Time
+                    </TableCell>
+                    <TableCell>
+                      {SlabData?.polishingScheduledAt
+                        ? moment(
+                            `${SlabData.polishingScheduledAt.date.split("T")[0]}T${String(
+                              SlabData.polishingScheduledAt.time.hours
+                            ).padStart(2, "0")}:${String(
+                              SlabData.polishingScheduledAt.time.minutes
+                            ).padStart(2, "0")}:00Z`
+                          ).format("DD MMM YYYY, hh:mm A")
+                        : "N/A"}
                     </TableCell>
                   </TableRow>
                 </TableBody>

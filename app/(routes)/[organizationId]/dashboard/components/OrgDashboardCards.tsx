@@ -1,6 +1,6 @@
 "use client";
 import StatsCard from "@/components/statsCard";
-import { FactoryIcon, Ship } from "lucide-react";
+import { Factory, FactoryIcon, Ship } from "lucide-react";
 import React from "react";
 
 interface Params {
@@ -27,7 +27,7 @@ export function OrgDashboardCards({ organizationId }: Params) {
         href={`/${activeFactory}/factorymanagement`}
         factoryId={organizationId}
         desc="Total factories for your organization till date"
-        icon={<FactoryIcon className="h-6 w-6 text-muted-foreground" />}
+        icon={<Factory className="h-6 w-6 text-muted-foreground" />}
       />
       <StatsCard
         title="Total Consignees"

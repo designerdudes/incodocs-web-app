@@ -20,6 +20,7 @@ import { useParams } from "next/navigation";
 import { sidebarTabs } from "@/lib/constants";
 import { ItemIndicator } from "@radix-ui/react-select";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type NavItem = {
   title: string;
@@ -34,8 +35,18 @@ interface NavMainProps {
   factoryId?: string;
 }
 
-export default function NavMain({ orgId }: NavMainProps) {
-  const factoryId = localStorage.getItem("activeFactoryId") || "";
+export default function NavMain({ orgId, factoryId: propFactoryId }: NavMainProps) {
+  const [factoryId, setFactoryId] = useState("");
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (!propFactoryId) {
+      const id = localStorage.getItem("activeFactoryId") || "";
+      setFactoryId(id);
+    }
+  }, [propFactoryId]);
+
   const RenderNavTabs = (navItems: NavItem[], orgId: string) => {
     const organisationId = useParams().organizationId;
 
@@ -64,16 +75,14 @@ export default function NavMain({ orgId }: NavMainProps) {
 
       //  Prepend /orgId/factoryId for specific modules
       else if (needsFactoryAndOrg && organisationId && factoryId) {
-        itemUrl = `/${organisationId}/${factoryId}${
-          item.url.startsWith("/") ? item.url : "/" + item.url
-        }`;
+        itemUrl = `/${organisationId}/${factoryId}${item.url.startsWith("/") ? item.url : "/" + item.url
+          }`;
       }
 
       //  Prepend /orgId for others like documentation/settings/teammanagement
       else if ((needsOnlyOrg && organisationId) || needDashboard) {
-        itemUrl = `/${organisationId}${
-          item.url.startsWith("/") ? item.url : "/" + item.url
-        }`;
+        itemUrl = `/${organisationId}${item.url.startsWith("/") ? item.url : "/" + item.url
+          }`;
       }
 
       //  Use as-is if already starts with /
@@ -97,9 +106,9 @@ export default function NavMain({ orgId }: NavMainProps) {
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton tooltip={item.title}>
                   {item.icon && <item.icon />}
-                  <a href={itemUrl}>
+                  <Link href={itemUrl}>
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                   {item.items && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}

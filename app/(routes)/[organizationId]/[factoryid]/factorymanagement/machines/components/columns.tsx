@@ -99,13 +99,6 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     cell: ({ row }) => {
       const photo = row.original.machinePhoto;
 
-      // Log the photo URL or "N/A" based on validity
-      if (photo && photo !== "N/A" && !photo.startsWith("data:image")) {
-        console.log("machine Photo URL:", photo);
-      } else {
-        console.log("machine Photo URL: N/A");
-      }
-
       return photo && photo !== "N/A" && !photo.startsWith("data:image") ? (
         <div className="flex gap-2">
           <Eye
@@ -113,9 +106,8 @@ export const MachineColumns: ColumnDef<Machine>[] = [
             onClick={() => {
               window.open(photo, "_blank");
             }}
-            aria-label={`View photo for ${
-              row.original.machinePhoto || "machine"
-            }`}
+            aria-label={`View photo for ${row.original.machinePhoto || "machine"
+              }`}
           />
         </div>
       ) : (
@@ -142,8 +134,8 @@ export const MachineColumns: ColumnDef<Machine>[] = [
           {isActive === true
             ? "Active"
             : isActive === false
-            ? "Inactive"
-            : "N/A"}
+              ? "Inactive"
+              : "N/A"}
         </div>
       );
     },
