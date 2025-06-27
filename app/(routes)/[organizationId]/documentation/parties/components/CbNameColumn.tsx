@@ -13,6 +13,7 @@ export type CbName = {
   mobileNo: number;
   email: string;
   organizationId: string;
+  portCode: string;
 };
 
 export const cbNamecolumns: ColumnDef<CbName>[] = [
