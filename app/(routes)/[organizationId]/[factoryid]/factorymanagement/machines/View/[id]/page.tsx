@@ -12,10 +12,12 @@ import Link from "next/link";
 import Heading from "@/components/ui/heading";
 import { DataTable } from "@/components/ui/data-table";
 import { cookies } from "next/headers";
-import MachineLogColumns from "../../components/MachineLogColumns";
-import PolishSlabColumns from "../../components/PolishSlabColumns";
-import CuttingBlocksColumns from "../../components/CuttingBlocksColumns";
+import { MachineLogColumns } from "../../components/MachineLogColumns";
+import { PolishSlabColumns, Slab } from "../../components/PolishSlabColumns";
+import { Block, CuttingBlocksColumns,} from "../../components/CuttingBlocksColumns";
 import { MachineDetailsColumns } from "../../components/MachineDetailsColumns";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import moment from "moment";
 
 export default async function ViewMachinePage({
   params,
@@ -38,9 +40,39 @@ export default async function ViewMachinePage({
   );
 
   const MachineData = await res.json();
-  // console.log("logssssssssssss",MachineData)
+
+  const logsRes = await fetch(
+    `https://incodocs-server.onrender.com/machine/log/getbymachine/${_id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+
+  const machineLogs = await logsRes.json();
+
+  console.log("machineslogssssssssssssssssssssss", machineLogs)
+
   const isCutting = !!MachineData.typeCutting;
   const isPolishing = !!MachineData.typePolish;
+
+  const totalBlockSqft = (MachineData.blocks ?? []).reduce(
+    (total: number, block: Block) => {
+      const length = block.blockId?.dimensions?.length?.value ?? 0;
+      const breadth = block.blockId?.dimensions?.breadth?.value ?? 0;
+      return total + length * breadth/929.0304;
+    },
+    0
+  );
+
+  const totalSqft = (MachineData.slabs ?? []).reduce((acc: number, slab: Slab ) => {
+  const length = slab?.slabId.dimensions?.length?.value ?? 0;
+  const height = slab?.slabId.dimensions?.height?.value ?? 0;
+  return acc + length * height/144;
+}, 0);
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -78,12 +110,110 @@ export default async function ViewMachinePage({
 
         {/* Tab: Machine Details */}
         <TabsContent value="details">
-          <DataTable
-            searchKey="machineName"
-            columns={MachineDetailsColumns}
-            data={[MachineData]}
-            token={token}
-          />
+          <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
+          <div className="flex-1">
+            <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+              <Card x-chunk="dashboard-07-chunk-0">
+                <CardHeader>
+                  <CardTitle>Machine Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Field</TableHead>
+                        <TableHead>Details</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Machine Name
+                        </TableCell>
+                        <TableCell>{MachineData?.machineName}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Machine Id
+                        </TableCell>
+                        <TableCell>{MachineData.machineId}</TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Machine Type
+                        </TableCell>
+                        <TableCell>
+                          {MachineData.typeCutting
+                            ? `Cutting - ${MachineData.typeCutting}`
+                            : MachineData.typePolish
+                            ? `Polish - ${MachineData.typePolish}`
+                            : "N/A"}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell>Machine Photo</TableCell>
+                        <TableCell>
+                          {MachineData.machinePhoto ? (
+                            <a
+                              href={MachineData.machinePhoto}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:underline"
+                            >
+                              <EyeIcon className="h-4 w-4 cursor-pointer" />
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Status
+                        </TableCell>
+                        <TableCell>
+                          {MachineData?.isActive === true
+                            ? "Active"
+                            : MachineData?.isActive === false
+                            ? "Inactive"
+                            : "N/A"}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Machine Cost
+                        </TableCell>
+                        <TableCell>
+                          {MachineData?.machineCost}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Installed Date
+                        </TableCell>
+                        <TableCell>
+                          {moment(MachineData.installedDate).format(
+                            "DD-MMM-YYYY"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Last Maintenance
+                        </TableCell>
+                        <TableCell>
+                          {moment(MachineData.lastMaintenance).format(
+                            "DD-MMM-YYYY"
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
         </TabsContent>
 
         {/* Tab: Machine Logs */}
@@ -94,18 +224,12 @@ export default async function ViewMachinePage({
               <CardDescription>Maintenance and usage history</CardDescription>
             </CardHeader>
             <CardContent>
-              {/* <DataTable
-            bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
-            bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-            deleteRoute="/shipment/shippingline/deletemany"
-            searchKey="shippingLineName"
-            columns={MachineLogColumns}
-            data={MachineData}
-            organizationId={organisationID}
-            token={token}
-          /> */}
+              <DataTable
+                searchKey="componentType"
+                columns={MachineLogColumns}
+                data={machineLogs}
+                token={token}
+              />
             </CardContent>
           </Card>
         </TabsContent>
@@ -120,19 +244,19 @@ export default async function ViewMachinePage({
                   All blocks processed by this cutting machine
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {/* <DataTable
-                bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
-            bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-            deleteRoute="/shipment/shippingline/deletemany"
-            searchKey="shippingLineName"
-            columns={CuttingBlocksColumns}
-            data={MachineData}
-            organizationId={organisationID}
-            token={token}
-          /> */}
+              <CardContent className="space-y-4">
+                <DataTable
+                  columns={CuttingBlocksColumns}
+                  data={MachineData.blocks ?? []}
+                  token={token}
+                  searchKey="blockNumber"
+                />
+                {/* ✅ Show total block SQFT above table */}
+                <div className="flex justify-end pt-4 border-t mt-4">
+                  <div className="text-base font-semibold text-gray-800">
+                    Total Blocks SQFT: {totalBlockSqft.toFixed(2)} ft²
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -149,18 +273,17 @@ export default async function ViewMachinePage({
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* <DataTable
-                bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected shipping lines?"
-            bulkDeleteDescription="This will delete the selected shipping lines, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected shipping lines deleted successfully"
-            deleteRoute="/shipment/shippingline/deletemany"
-            searchKey="shippingLineName"
-            columns={PolishSlabColumns}
-            data={MachineData}
-            organizationId={organisationID}
-            token={token}
-          /> */}
+                <DataTable
+                  searchKey="shippingLineName"
+                  columns={PolishSlabColumns}
+                  data={MachineData.slabs ?? []}
+                  token={token}
+                />
+                <div className="flex justify-end pt-4 border-t mt-4">
+                  <div className="text-right font-bold p-4">
+                    Total SQFT Polished: {totalSqft.toFixed(2)} ft²
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
