@@ -108,7 +108,6 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
       email: cbData?.email || "",
       mobileNo: cbData?.mobileNo ? cbData.mobileNo.toString() : "",
       address: cbData?.address || "",
-      organizationId: cbData?.organizationId || "",
       documents: cbData?.documents || [],
     },
   });
@@ -138,7 +137,6 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
         email: cbData.email || "",
         mobileNo: cbData.mobileNo ? cbData.mobileNo.toString() : "",
         address: cbData.address || "",
-        organizationId: cbData.organizationId || "",
         documents: cbData.documents || [],
       });
     }
@@ -233,7 +231,6 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
         <p>Email: {values.email || "N/A"}</p>
         <p>Mobile No: {values.mobileNo || "N/A"}</p>
         <p>Address: {values.address || "N/A"}</p>
-        <p>Organization ID: {values.organizationId || "N/A"}</p>
         {fields.length > 0 && (
           <div>
             <p className="font-semibold">Documents:</p>
@@ -267,7 +264,6 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
                   email: values.email,
                   mobileNo: values.mobileNo,
                   address: values.address,
-                  organizationId: values.organizationId,
                   documents: values.documents.map((doc) => ({
                     fileName: doc.fileName,
                     fileUrl: doc.fileUrl,
@@ -390,19 +386,6 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
                   <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., 45 Shipping Lane" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="organizationId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Organization ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., ORG123" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
