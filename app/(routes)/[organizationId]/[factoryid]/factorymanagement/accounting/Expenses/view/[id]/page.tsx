@@ -29,17 +29,19 @@ interface Props {
 }
 
 export default async function ExpensePage({ params }: Props) {
-
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(`https://incodocs-server.onrender.com/expense/getbyid/${params.id}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    },
-  });
+  const res = await fetch(
+    `https://incodocs-server.onrender.com/expense/getbyid/${params.id}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
 
   const expenseData = await res.json();
 
@@ -67,7 +69,7 @@ export default async function ExpensePage({ params }: Props) {
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Expense Details</CardTitle>
-              <CardDescription>{`Details for Expense ID: ${expenseData._id}`}</CardDescription>
+              {/* <CardDescription>{`Details for Expense ID: ${expenseData._id}`}</CardDescription> */}
             </CardHeader>
             <CardContent>
               <Table>
@@ -79,15 +81,21 @@ export default async function ExpensePage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Expense Name</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Expense Name
+                    </TableCell>
                     <TableCell>{expenseData.expenseName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Expense Value</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Expense Value
+                    </TableCell>
                     <TableCell>{expenseData.expenseValue}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">GST Percentage</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      GST Percentage
+                    </TableCell>
                     <TableCell>{expenseData.gstPercentage}%</TableCell>
                   </TableRow>
                   <TableRow>
@@ -95,30 +103,50 @@ export default async function ExpensePage({ params }: Props) {
                     <TableCell>{expenseData.paidBy}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Purchased By</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Purchased By
+                    </TableCell>
                     <TableCell>{expenseData.purchasedBy}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Payment Proof</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Payment Proof
+                    </TableCell>
                     <TableCell>
-                      <a href={expenseData.paymentProof} target="_blank" rel="noopener noreferrer">
+                      <a
+                        href={expenseData.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         <Button variant="link" className="p-0 m-0">
-                        View Payment Proof
+                          View Payment Proof
                         </Button>
                       </a>
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Expense Date</TableCell>
-                    <TableCell>{moment(expenseData.expenseDate).format("YYYY-MM-DD")}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Expense Date
+                    </TableCell>
+                    <TableCell>
+                      {moment(expenseData.expenseDate).format("YYYY-MM-DD")}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Created At</TableCell>
-                    <TableCell>{moment(expenseData.createdAt).format("YYYY-MM-DD")}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Created At
+                    </TableCell>
+                    <TableCell>
+                      {moment(expenseData.createdAt).format("YYYY-MM-DD")}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Updated At</TableCell>
-                    <TableCell>{moment(expenseData.updatedAt).format("YYYY-MM-DD")}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Updated At
+                    </TableCell>
+                    <TableCell>
+                      {moment(expenseData.updatedAt).format("YYYY-MM-DD")}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
