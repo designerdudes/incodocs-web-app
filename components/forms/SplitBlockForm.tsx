@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { fetchData, postData } from "@/axiosUtility/api";
 import EntityCombobox from "../ui/EntityCombobox";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 type SubBlock = {
   dimensions: {
@@ -119,15 +120,16 @@ export default function SplitBlockForm({
         cuttingMachineId: selectedMachineId,
       };
 
-      const response = await postData(
+      await postData(
         `/factory-management/inventory/raw/splitblock/${parentBlockId}`,
         body
       );
-
+      toast.success("Block split successfully");
       // console.log("Split block successful:", response);
       onSubmit(subBlocks);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error while splitting block:", error);
+      toast.error(error?.response?.data?.message);
     }
   };
 
@@ -159,6 +161,7 @@ export default function SplitBlockForm({
           <div>
             <Label>Length (cm)</Label>
             <Input
+              type="number"
               value={block.dimensions.length.value}
               onChange={(e) =>
                 handleDimensionChange(i, "length", Number(e.target.value))
@@ -169,6 +172,7 @@ export default function SplitBlockForm({
           <div>
             <Label>Breadth (cm)</Label>
             <Input
+              type="number"
               value={block.dimensions.breadth.value}
               onChange={(e) =>
                 handleDimensionChange(i, "breadth", Number(e.target.value))
@@ -179,6 +183,7 @@ export default function SplitBlockForm({
           <div>
             <Label>Height (cm)</Label>
             <Input
+              type="number"
               value={block.dimensions.height.value}
               onChange={(e) =>
                 handleDimensionChange(i, "height", Number(e.target.value))
