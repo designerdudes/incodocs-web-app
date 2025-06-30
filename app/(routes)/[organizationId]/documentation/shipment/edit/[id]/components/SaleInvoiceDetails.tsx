@@ -29,11 +29,13 @@ import { fetchData } from "@/axiosUtility/api";
 import Cookies from "js-cookie";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { FileUploadField } from "../../../createnew/components/FileUploadField";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import CalendarComponent from "@/components/CalendarComponent";
 import { format } from "date-fns";
-
-
 
 interface CommercialInvoices {
   clearanceCommercialInvoiceNumber: string;
@@ -62,7 +64,7 @@ function saveProgressSilently(data: any) {
   }
 }
 
-export function   SaleInvoiceDetails({
+export function SaleInvoiceDetails({
   shipmentId,
   orgId,
   currentUser,
@@ -70,12 +72,16 @@ export function   SaleInvoiceDetails({
   onSectionSubmit,
 }: SaleInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext();
-  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>([]);
+  const [consignees, setConsignees] = useState<{ _id: string; name: string }[]>(
+    []
+  );
   const [isLoading, setIsLoading] = useState(false);
   const GlobalModal = useGlobalModal();
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(null);
+  const [pendingInvoiceCount, setPendingInvoiceCount] = useState<number | null>(
+    null
+  );
 
   const { fields, append, remove, replace } = useFieldArray({
     control,
@@ -99,13 +105,16 @@ export function   SaleInvoiceDetails({
     }
     setIsLoading(true);
     try {
-      const data = await fetchData(`/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`);
+      const data = await fetchData(
+        `/shipment/consignee/getbyorg/${orgId}?t=${Date.now()}`
+      );
       console.log("API Response (Consignees):", data);
       const mappedConsignees = Array.isArray(data)
         ? data.map((consignee: any) => ({
-          _id: consignee._id,
-          name: consignee.name || consignee.consigneeName || "Unknown Consignee",
-        }))
+            _id: consignee._id,
+            name:
+              consignee.name || consignee.consigneeName || "Unknown Consignee",
+          }))
         : [];
       console.log("Mapped Consignees:", mappedConsignees);
       setConsignees(mappedConsignees);
@@ -171,7 +180,7 @@ export function   SaleInvoiceDetails({
             actualCommercialInvoiceValue: "",
             saberInvoiceUrl: "",
             saberInvoiceValue: "",
-            packingListUrl: "",         
+            packingListUrl: "",
           }));
         append(newInvoices, { shouldFocus: false });
       } else if (numberOfInvoices < fields.length) {
@@ -189,25 +198,32 @@ export function   SaleInvoiceDetails({
     if (newCount < 1) return;
 
     if (newCount < invoicesFromForm.length) {
-      console.log("Reducing invoice count from", invoicesFromForm.length, "to", newCount);
+      console.log(
+        "Reducing invoice count from",
+        invoicesFromForm.length,
+        "to",
+        newCount
+      );
       setShowConfirmation(true);
       setPendingInvoiceCount(newCount);
       return;
     }
 
     const currentInvoices = invoicesFromForm;
-    const newInvoices = Array.from({ length: newCount }, (_, i) =>
-      currentInvoices[i] || {
-       clearanceCommercialInvoiceNumber: "",
-       clearancecommercialInvoiceDate: "",
-       clearanceCommercialInvoiceUrl: "",
-       clearanceCommercialInvoiceValue: "",
-       actualCommercialInvoiceUrl: "",
-       actualCommercialInvoiceValue: "",
-       saberInvoiceUrl: "",
-       saberInvoiceValue: "",
-       packingListUrl: "",   
-      }
+    const newInvoices = Array.from(
+      { length: newCount },
+      (_, i) =>
+        currentInvoices[i] || {
+          clearanceCommercialInvoiceNumber: "",
+          clearancecommercialInvoiceDate: "",
+          clearanceCommercialInvoiceUrl: "",
+          clearanceCommercialInvoiceValue: "",
+          actualCommercialInvoiceUrl: "",
+          actualCommercialInvoiceValue: "",
+          saberInvoiceUrl: "",
+          saberInvoiceValue: "",
+          packingListUrl: "",
+        }
     );
     setValue("saleInvoiceDetails.commercialInvoices", newInvoices);
     setValue("saleInvoiceDetails.numberOfSalesInvoices", newInvoices.length);
@@ -235,23 +251,35 @@ export function   SaleInvoiceDetails({
   const getFieldName = <T extends FormData>(
     index: number,
     field: keyof CommercialInvoices
-  ): Path<T> => `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
+  ): Path<T> =>
+    `saleInvoiceDetails.commercialInvoices[${index}].${field}` as Path<T>;
 
   const handleConfirmChange = () => {
-    console.log("handleConfirmChange called with pendingInvoiceCount:", pendingInvoiceCount);
+    console.log(
+      "handleConfirmChange called with pendingInvoiceCount:",
+      pendingInvoiceCount
+    );
     if (pendingInvoiceCount !== null) {
       const updatedInvoices = invoicesFromForm.slice(0, pendingInvoiceCount);
       setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
-      setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+      setValue(
+        "saleInvoiceDetails.numberOfSalesInvoices",
+        updatedInvoices.length
+      );
       saveProgressSilently(getValues());
       setPendingInvoiceCount(null);
     }
     setShowConfirmation(false);
   };
   const handleDelete = (index: number) => {
-    const updatedInvoices = invoicesFromForm.filter((_: any, i: number) => i !== index);
+    const updatedInvoices = invoicesFromForm.filter(
+      (_: any, i: number) => i !== index
+    );
     setValue("saleInvoiceDetails.commercialInvoices", updatedInvoices);
-    setValue("saleInvoiceDetails.numberOfSalesInvoices", updatedInvoices.length);
+    setValue(
+      "saleInvoiceDetails.numberOfSalesInvoices",
+      updatedInvoices.length
+    );
     saveProgressSilently(getValues());
   };
 
@@ -392,9 +420,9 @@ export function   SaleInvoiceDetails({
                                 <Button variant="outline">
                                   {field.value
                                     ? format(
-                                      new Date(field.value as any),
-                                      "PPPP"
-                                    )
+                                        new Date(field.value as any),
+                                        "PPPP"
+                                      )
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
@@ -456,6 +484,7 @@ export function   SaleInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -498,6 +527,7 @@ export function   SaleInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
@@ -534,6 +564,7 @@ export function   SaleInvoiceDetails({
                       render={({ field }) => (
                         <FormControl>
                           <Input
+                            type="number"
                             value={(field.value as any) || ""}
                             onChange={field.onChange}
                             placeholder="e.g., 1000"
