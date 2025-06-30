@@ -29,6 +29,7 @@ interface SplitBlockFormProps {
   parentBlockId: string;
   blockNumber: string;
   originalBlockVolume: number;
+  factoryId: string;
   onSubmit: (subBlocks: SubBlock[]) => void;
 }
 
@@ -36,6 +37,7 @@ export default function SplitBlockForm({
   parentBlockId,
   blockNumber,
   originalBlockVolume,
+  factoryId,
   onSubmit,
 }: SplitBlockFormProps) {
   const [count, setCount] = useState(0);
@@ -63,7 +65,7 @@ export default function SplitBlockForm({
 
   useEffect(() => {
     const fetchmachine = async () => {
-      const res = await fetchData("/machine/getall");
+      const res = await fetchData(`/machine/getbyfactory/${factoryId}`);
       const response = res
         .filter((e: any) => e.typeCutting === "Rope Cutter")
         .map((e: any) => ({
