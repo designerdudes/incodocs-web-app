@@ -76,7 +76,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                         onSelect={() => {
                             GlobalModal.title = `Delete expense details - ${data.expenseName}`;
                             GlobalModal.description =
-                                "Are you sure you want to delete this Lot?";
+                                "Are you sure you want to delete this Expense?";
                             GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;
                             GlobalModal.onOpen();
                         }}
