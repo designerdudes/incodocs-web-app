@@ -54,8 +54,6 @@ export default async function ViewMachinePage({
 
   const machineLogs = await logsRes.json();
 
-  console.log("machineslogssssssssssssssssssssss", machineLogs)
-
   const isCutting = !!MachineData.typeCutting;
   const isPolishing = !!MachineData.typePolish;
 
@@ -189,6 +187,22 @@ export default async function ViewMachinePage({
                       </TableRow>
                       <TableRow>
                         <TableCell className="whitespace-nowrap">
+                          Current Component
+                        </TableCell>
+                        <TableCell>
+                          {MachineData?.currentComponent?.Name}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Total Processed
+                        </TableCell>
+                        <TableCell>
+                          {MachineData?.totalProcessed}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
                           Installed Date
                         </TableCell>
                         <TableCell>
@@ -205,6 +219,14 @@ export default async function ViewMachinePage({
                           {moment(MachineData.lastMaintenance).format(
                             "DD-MMM-YYYY"
                           )}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="whitespace-nowrap">
+                          Review
+                        </TableCell>
+                        <TableCell>
+                        {MachineData?.review}
                         </TableCell>
                       </TableRow>
                     </TableBody>

@@ -43,15 +43,16 @@ export const machineSchema = z.object({
   lastMaintenance: z.string().optional(),
   installedDate: z.string().optional(),
   machineCost: z.number().optional(),
+  review: z.string().optional(),
 });
 
 type MachineFormValues = z.infer<typeof machineSchema>;
 
 interface MachineFormProps {
   params: {
-        factoryid: string;
-        organizationId: string;
-    };
+    factoryid: string;
+    organizationId: string;
+  };
 }
 
 export default function MachineFormPage({ params }: MachineFormProps) {
@@ -73,6 +74,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       lastMaintenance: new Date().toISOString(),
       installedDate: new Date().toISOString(),
       machineCost: 0,
+      review: "",
     },
   });
 
@@ -81,9 +83,9 @@ export default function MachineFormPage({ params }: MachineFormProps) {
     try {
       await postData("/machine/add", {
         ...values,
-       params
+        params,
       });
-      
+
       toast.success("Machine Added Successfully");
       router.push("./");
     } catch (error) {
@@ -237,6 +239,24 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
                     }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="review"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Review / Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Enter description or review of the machine..."
+                    className="resize-none"
+                    rows={3}
+                    {...field}
                   />
                 </FormControl>
                 <FormMessage />

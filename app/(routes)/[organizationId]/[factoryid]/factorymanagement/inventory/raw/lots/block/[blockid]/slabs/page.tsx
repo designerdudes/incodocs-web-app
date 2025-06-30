@@ -45,11 +45,10 @@ export default async function SlabsPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
 
   BlockData = res;
+  // console.log("ssssssssss",BlockData);
 
   const resp = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
@@ -60,11 +59,16 @@ export default async function SlabsPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
 
   SlabData = resp;
+
+  const slabs = Array.isArray(SlabData) ? SlabData : [];
+const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
+  const length = slab?.dimensions?.length?.value ?? 0;
+  const height = slab?.dimensions?.height?.value ?? 0;
+  return total + (length * height) / 144;
+}, 0);
 
   function calculateVolume(
     length: number,
@@ -90,7 +94,6 @@ export default async function SlabsPage({ params }: Props) {
     return inchToCm.toFixed(2);
   }
 
-  // Helper function to construct a Date object from cuttingScheduledAt
   function getCuttingDateTime(cuttingScheduledAt: any): Date | null {
     if (
       cuttingScheduledAt &&
@@ -101,9 +104,7 @@ export default async function SlabsPage({ params }: Props) {
     ) {
       const { date, time } = cuttingScheduledAt;
       const { hours, minutes } = time;
-      // Create a new Date object from the ISO date string
       const dateObj = new Date(date);
-      // Set the hours and minutes explicitly
       dateObj.setUTCHours(hours, minutes, 0, 0);
       return dateObj;
     }
@@ -130,7 +131,9 @@ export default async function SlabsPage({ params }: Props) {
           </p>
         </div>
       </div>
+
       <Separator />
+
       <div className="flex flex-col flex-1 py-2">
         <div className="flex flex-1 gap-6">
           {/* Block Details Card */}
@@ -149,27 +152,19 @@ export default async function SlabsPage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Block Number
-                    </TableCell>
+                    <TableCell>Block Number</TableCell>
                     <TableCell>{BlockData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Number of slabs
-                    </TableCell>
+                    <TableCell>Number of slabs</TableCell>
                     <TableCell>{BlockData?.SlabsId?.length}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Material Type
-                    </TableCell>
+                    <TableCell>Material Type</TableCell>
                     <TableCell>{BlockData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Status
-                    </TableCell>
+                    <TableCell>Status</TableCell>
                     <TableCell>
                       {BlockData?.status === "cut"
                         ? "Ready for Polish"
@@ -177,57 +172,43 @@ export default async function SlabsPage({ params }: Props) {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Weight (tons)
-                    </TableCell>
+                    <TableCell>Weight (tons)</TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.weight?.value || "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Length (cm)
-                    </TableCell>
+                    <TableCell>Length (cm)</TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.length?.value}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Breadth (cm)
-                    </TableCell>
+                    <TableCell>Breadth (cm)</TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.breadth?.value}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Height (cm)
-                    </TableCell>
+                    <TableCell>Height (cm)</TableCell>
                     <TableCell>
                       {BlockData?.dimensions?.height?.value}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Volume (cm³)
-                    </TableCell>
+                    <TableCell>Volume (cm³)</TableCell>
                     <TableCell>
                       {convertInchCubeToCmCube(volumeinInchs)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Block Created At
-                    </TableCell>
+                    <TableCell>Block Created At</TableCell>
                     <TableCell>
                       {moment(BlockData.createdAt).format("DD-MMM-YYYY")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Block Updated At
-                    </TableCell>
+                    <TableCell>Block Updated At</TableCell>
                     <TableCell>
                       {moment(BlockData.updatedAt).format("DD-MMM-YYYY")}
                     </TableCell>
@@ -235,10 +216,12 @@ export default async function SlabsPage({ params }: Props) {
                 </TableBody>
               </Table>
             </CardContent>
-            {/* Cutting Details Section */}
+
             <CardHeader>
               <CardTitle>Cutting Details</CardTitle>
-              <CardDescription>Cutting information for this block</CardDescription>
+              <CardDescription>
+                Cutting information for this block
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -250,21 +233,19 @@ export default async function SlabsPage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Machine</TableCell>
+                    <TableCell>Machine</TableCell>
                     <TableCell>
                       {BlockData?.cuttingMachineId?.machineName} -{" "}
                       {BlockData?.cuttingMachineId?.typeCutting}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Cutting Date and Time
-                    </TableCell>
+                    <TableCell>Cutting Date and Time</TableCell>
                     <TableCell>
                       {BlockData?.cuttingScheduledAt
-                        ? moment(getCuttingDateTime(BlockData.cuttingScheduledAt)).format(
-                            "DD MMM YYYY, hh:mm A"
-                          )
+                        ? moment(
+                            getCuttingDateTime(BlockData.cuttingScheduledAt)
+                          ).format("DD MMM YYYY, hh:mm A")
                         : "N/A"}
                     </TableCell>
                   </TableRow>
@@ -273,7 +254,7 @@ export default async function SlabsPage({ params }: Props) {
             </CardContent>
           </Card>
 
-          {/* Slabs DataTable */}
+          {/* Slabs DataTable + SQFT total */}
           <div className="w-3/5">
             <DataTable
               bulkDeleteIdName="_id"
@@ -285,6 +266,12 @@ export default async function SlabsPage({ params }: Props) {
               columns={columns}
               data={SlabData as any}
             />
+            {/* ✅ Total Slabs SQFT Display */}
+            <div className="flex justify-end pt-4 border-t mt-4">
+              <div className="text-right font-semibold p-2">
+                Total Slabs SQFT: {totalSlabSqft.toFixed(2)} ft²
+              </div>
+            </div>
           </div>
         </div>
       </div>
