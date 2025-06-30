@@ -2,7 +2,7 @@ import { BrandName } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import React from 'react';
-import StoneDocs from '../Public/StoneDocs.svg';
+import StoneDocs from '@/public/StoneDocs.svg';
 
 interface LogoProps {
     className?: string;
