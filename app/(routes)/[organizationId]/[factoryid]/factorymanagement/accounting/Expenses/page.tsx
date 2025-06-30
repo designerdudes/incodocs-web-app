@@ -64,10 +64,11 @@ export default async function Page() {
             <Separator orientation="horizontal" />
             <div className="w-250 container mx-auto py-10">
                 <DataTable
-                    bulkDeleteIdName="order_id"
-                    bulkDeleteTitle="Are you sure you want to delete the selected slabs?"
-                    bulkDeleteDescription="This will delete the selected slabs, and they will not be recoverable."
-                    bulkDeleteToastMessage="Selected slabs deleted successfully"
+                    bulkDeleteIdName="_id"
+                    bulkDeleteTitle="Are you sure you want to delete the selected Expenses?"
+                    bulkDeleteDescription="This will delete the selected expenses, and they will not be recoverable."
+                    bulkDeleteToastMessage="Selected Expenses deleted successfully"
+                    deleteRoute='/expense/delete-multiple'
                     searchKey="expenseName"
                     columns={expensecolumns}
                     data={expenseData}
