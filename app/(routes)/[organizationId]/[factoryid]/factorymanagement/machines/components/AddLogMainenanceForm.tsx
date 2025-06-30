@@ -21,9 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { fetchData, postData, putData } from "@/axiosUtility/api";
+import { postData, fetchData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
@@ -32,7 +32,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Machine } from "./columns";
 import { Textarea } from "@/components/ui/textarea";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import {
@@ -47,25 +46,22 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 
-// Schema
 export const machineLogSchema = z.object({
   machineId: z.string().optional(),
   componentType: z.string(),
-  componentCost: z
-    .number()
-    .min(0, "Component Cost must be at least 0"),
+  componentCost: z.number().min(0, "Component Cost must be at least 0"),
   workerName: z.string().optional(),
   replacedAt: z.string().refine((val) => !isNaN(Date.parse(val)), {
     message: "Invalid date-time format",
   }),
   sqfProcessed: z
-    .number({ invalid_type_error: "Expected SQF must be a number" }).optional(),
+    .number({ invalid_type_error: "Expected SQF must be a number" })
+    .optional(),
   otherExpenses: z
     .array(
       z.object({
         expenseName: z.string(),
-        expenseCost: z
-          .number()
+        expenseCost: z.number(),
       })
     )
     .optional(),
@@ -80,19 +76,25 @@ interface Expense {
 }
 
 interface Props {
- params : string
+  params: string;
 }
 
 export default function MachineFormPage({ params }: Props) {
   const GlobalModal = useGlobalModal();
   const router = useRouter();
   const [expenseBlockCount, setExpenseBlockCount] = useState(1);
-  const [otherExpenses, setOtherExpenses] = useState<Expense[]>([{ expenseName: "", expenseCost: 0 }]);
-  const [expenseCountToBeDeleted, setExpenseCountToBeDeleted] = useState<number | null>(null);
+  const [otherExpenses, setOtherExpenses] = useState<Expense[]>([
+    { expenseName: "", expenseCost: 0 },
+  ]);
+  const [expenseCountToBeDeleted, setExpenseCountToBeDeleted] = useState<
+    number | null
+  >(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const machineId = params
-
+  const [machineType, setMachineType] = useState<"Cutting" | "Polish">(
+    "Cutting"
+  );
+  const machineId = params;
 
   const form = useForm<MachineLogFormValues>({
     resolver: zodResolver(machineLogSchema),
@@ -109,6 +111,49 @@ export default function MachineFormPage({ params }: Props) {
   });
 
   const { control, setValue, watch, getValues } = form;
+
+  useEffect(() => {
+    async function fetchMachineType() {
+      try {
+        const data = await fetchData(`/machine/log/getbymachine/${params}`);
+
+        if (!Array.isArray(data) || data.length === 0) {
+          toast.error("No logs found for this machine");
+          return;
+        }
+
+        const firstLog = data[0]; // 👈 Get the first log entry
+        const machine = firstLog.machineId;
+
+        const isCutting = Boolean(machine?.typeCutting);
+        const isPolish = Boolean(machine?.typePolish);
+
+        let machineType: "Cutting" | "Polish" | null = null;
+
+        if (isCutting) {
+          machineType = "Cutting";
+        } else if (isPolish) {
+          machineType = "Polish";
+        }
+
+        if (!machineType) {
+          toast.error("Unknown machine type");
+          return;
+        }
+
+        setMachineType(machineType);
+        setValue(
+          "componentType",
+          machineType === "Cutting" ? "Segment" : "Bid"
+        );
+      } catch (err) {
+        console.error("Error fetching machine type:", err);
+        toast.error("Failed to fetch machine type");
+      }
+    }
+
+    fetchMachineType();
+  }, [params, setValue]);
 
   useEffect(() => {
     const current = getValues("otherExpenses") || [];
@@ -160,8 +205,7 @@ export default function MachineFormPage({ params }: Props) {
   };
 
   async function onSubmit(values: z.infer<typeof machineLogSchema>) {
-      setIsLoading(true);
-      console.log("valuessssssssss",values);
+    setIsLoading(true);
     try {
       await postData("/machine/log/add", {
         ...values,
@@ -175,12 +219,15 @@ export default function MachineFormPage({ params }: Props) {
       setIsLoading(false);
     }
     router.refresh();
-  };
+  }
 
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}className="grid grid-cols-3 gap-3">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="grid grid-cols-3 gap-3"
+        >
           {/* Component Type */}
           <FormField
             control={form.control}
@@ -188,17 +235,9 @@ export default function MachineFormPage({ params }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Component Type</FormLabel>
-                <Select onValueChange={field.onChange}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Component Type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Segment">Segment</SelectItem>
-                    <SelectItem value="Bid">Bid</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Input value={field.value} readOnly disabled />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -214,12 +253,12 @@ export default function MachineFormPage({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Enter Component Cost"
+                    type="number"
                     min={0}
-                    disabled={isLoading}
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
+                    // onChange={(e) =>
+                    //   field.onChange(parseFloat(e.target.value) || 0)
+                    // }
                   />
                 </FormControl>
                 <FormMessage />
@@ -289,11 +328,12 @@ export default function MachineFormPage({ params }: Props) {
                   <Input
                     placeholder="Enter Expected SQF Processed"
                     min={0}
-                    disabled={isLoading}
+                    type="number"
+                    // disabled={isLoading}
                     {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
+                    // onChange={(e) =>
+                    //   field.onChange(parseFloat(e.target.value) || 0)
+                    // }
                   />
                 </FormControl>
                 <FormMessage />
@@ -303,7 +343,7 @@ export default function MachineFormPage({ params }: Props) {
 
           {/* Other Expenses Count */}
           <FormItem>
-            <FormLabel>Number of Expense Blocks</FormLabel>
+            <FormLabel>Number of Expenses</FormLabel>
             <FormControl>
               <Input
                 type="number"
@@ -325,7 +365,7 @@ export default function MachineFormPage({ params }: Props) {
               <TableRow>
                 <TableHead>#</TableHead>
                 <TableHead>Expense Name</TableHead>
-                <TableHead>Expense Cost (₹)</TableHead>
+                <TableHead>Expense Cost</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -341,7 +381,7 @@ export default function MachineFormPage({ params }: Props) {
                         <FormItem>
                           <FormControl>
                             <Input
-                            placeholder="e.g Rajuu"
+                              placeholder="e.g Rajuu"
                               value={expense.expenseName}
                               onChange={(e) => {
                                 const updated = [...otherExpenses];
@@ -364,7 +404,10 @@ export default function MachineFormPage({ params }: Props) {
                         <FormItem>
                           <FormControl>
                             <Input
-                             placeholder="Enter The Cost"
+                              type="number"
+                              inputMode="decimal"
+                              step="0.01"
+                              placeholder="Enter The Cost"
                               min={0}
                               value={expense.expenseCost}
                               onChange={(e) => {
