@@ -29,6 +29,7 @@ import { postData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState } from "react";
+// import { Tooltip } from "react-tooltip";
 
 // Save progress to localStorage
 const saveProgressSilently = (data: any) => {
@@ -38,6 +39,13 @@ const saveProgressSilently = (data: any) => {
   } catch (error) {
     console.error("Failed to save progress to localStorage:", error);
   }
+};
+
+// Function to calculate weight based on dimensions
+const calculateWeight = (length: number, breadth: number, height: number) => {
+  const volume = (length * breadth * height) / 1000000; // Convert cm³ to m³
+  const densityFactor = 350 * 10 / 1000; // Your existing formula: 350 * 10 / 1000
+  return Number((volume * densityFactor).toFixed(2));
 };
 
 // Define the form schema
@@ -73,8 +81,8 @@ const formSchema = z.object({
   commissionCost: z
     .number()
     .min(1, {
-      message: "Commission cost must be greater than or equal to zero",
-    })
+       message: "Commission cost must be greater than or equal to zero", 
+      })
     .optional(),
   markerOperatorName: z
     .string()
@@ -93,12 +101,12 @@ const formSchema = z.object({
         status: z.string().min(1, { message: "Status is required" }).optional(),
         inStock: z.boolean().optional(),
         dimensions: z.object({
-          // weight: z.object({
-          //   value: z
-          //     .number()
-          //     .min(0.1, { message: "Weight must be greater than zero" }),
-          //   units: z.literal("tons").default("tons"),
-          // }),
+          weight: z.object({
+            value: z
+              .number()
+              .min(0.1, { message: "Weight must be greater than zero" }),
+            units: z.literal("tons").default("tons"),
+          }),
           length: z.object({
             value: z
               .number()
@@ -131,11 +139,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [blocks, setBlocks] = useState<any[]>([]);
-  // const [globalWeight, setGlobalWeight] = useState<string>("");
   const [globalLength, setGlobalLength] = useState<string>("");
   const [globalBreadth, setGlobalBreadth] = useState<string>("");
   const [globalHeight, setGlobalHeight] = useState<string>("");
-  // const [applyWeightToAll, setApplyWeightToAll] = useState<boolean>(false);
   const [applyLengthToAll, setApplyLengthToAll] = useState<boolean>(false);
   const [applyBreadthToAll, setApplyBreadthToAll] = useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] = useState<boolean>(false);
@@ -154,7 +160,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       blocks: [
         {
           dimensions: {
-            // weight: { value: 0, units: "tons" },
+            weight: { value: 0, units: "tons" },
             length: { value: 0, units: "cm" },
             breadth: { value: 0, units: "cm" },
             height: { value: 0, units: "cm" },
@@ -174,6 +180,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     }
   }, [watch]);
 
+  // Watch for changes in dimensions and update weight
+  useEffect(() => {
+    blocks.forEach((block, index) => {
+      const { length, breadth, height } = block.dimensions;
+      if (length.value && breadth.value && height.value) {
+        const calculatedWeight = calculateWeight(
+          length.value,
+          breadth.value,
+          height.value
+        );
+        setValue(`blocks.${index}.dimensions.weight.value`, calculatedWeight);
+      }
+    });
+    saveProgressSilently(getValues());
+  }, [blocks, setValue, getValues]);
+  
+
   // Handle block count changes
   const handleBlockCountChange = (value: string) => {
     const newCount = Number(value);
@@ -190,7 +213,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         fieldName: "blocks",
         createNewItem: () => ({
           dimensions: {
-            // weight: { value: 0, units: "tons" },
+            weight: { value: 0, units: "tons" },
             length: { value: 0, units: "cm" },
             breadth: { value: 0, units: "cm" },
             height: { value: 0, units: "cm" },
@@ -232,7 +255,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   // Form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    console.log("Form values:", values, factoryId, organizationId);
     try {
       await postData("/factory-management/inventory/addlotandblocks", {
         ...values,
@@ -267,39 +289,27 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     };
   }
 
-  // function calculateTotalWeight() {
-  //   const totalWeightInTons = blocks.reduce((total, block) => {
-  //     const { weight } = block.dimensions;
-  //     return total + (weight.value || 0);
-  //   }, 0);
-  //   return {
-  //     inTons: totalWeightInTons,
-  //   };
-  // }
+  // Calculate total weight
+  function calculateTotalWeight() {
+  const totalWeightInTons = blocks.reduce((total, block) => {
+    const { length, breadth, height } = block.dimensions;
+    const volume = (length.value * breadth.value * height.value) / 1000000; // m³
+    const density = 2.7; // Example density in tons/m³
+    const weight = volume * density;
+    return total + weight;
+  }, 0);
+
+  return {
+    inTons: totalWeightInTons,
+  };
+}
+
 
   return (
     <div className="space-y-6">
-      <Form {...form}>
+      <Form>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
-            {/* <FormField
-              name="lotName"
-              control={control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Lot Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Xyz"
-                      disabled={isLoading}
-                      {...field}
-                      onBlur={() => saveProgressSilently(getValues())}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            /> */}
             <FormField
               name="materialType"
               control={control}
@@ -309,7 +319,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Granite"
-                      // disabled={isLoading}
+                      disabled={isLoading}
                       {...field}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
@@ -326,8 +336,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <FormLabel>Material Cost</FormLabel>
                   <FormControl>
                     <Input
-                      // className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      // type="number"
                       placeholder="Enter material cost"
                       disabled={isLoading}
                       onChange={(e) => {
@@ -502,48 +510,12 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               )}
             />
           </div>
-          <div className="grid grid-cols-4 gap-3">
-            {/* <div>
-              <Input
-                value={globalWeight}
-                onChange={(e) => setGlobalWeight(e.target.value)}
-                placeholder="Weight (tons)"
-                // type="number"
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyWeightToAll}
-                  onChange={(e) => {
-                    setApplyWeightToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedBlocks = blocks.map((block) => ({
-                        ...block,
-                        dimensions: {
-                          ...block.dimensions,
-                          weight: {
-                            ...block.dimensions.weight,
-                            value: parseFloat(globalWeight) || 0.1,
-                          },
-                        },
-                      }));
-                      setBlocks(updatedBlocks);
-                      setValue("blocks", updatedBlocks);
-                      saveProgressSilently(getValues());
-                    }
-                  }}
-                />{" "}
-                Apply Weight to all rows
-              </label>
-            </div> */}
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <Input
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
                 placeholder="Length (cm)"
-                // type="number"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -560,7 +532,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           length: {
                             ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0.1,
+                            value: parseFloat(globalLength) || 0,
                           },
                         },
                       }));
@@ -578,7 +550,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 value={globalBreadth}
                 onChange={(e) => setGlobalBreadth(e.target.value)}
                 placeholder="Breadth (cm)"
-                // type="number"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -595,7 +566,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           breadth: {
                             ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0.1,
+                            value: parseFloat(globalBreadth) || 0,
                           },
                         },
                       }));
@@ -613,7 +584,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 placeholder="Height (cm)"
-                // type="number"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -630,7 +600,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           height: {
                             ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0.1,
+                            value: parseFloat(globalHeight) || 0,
                           },
                         },
                       }));
@@ -652,7 +622,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 <TableHead>Length (cm)</TableHead>
                 <TableHead>Breadth (cm)</TableHead>
                 <TableHead>Height (cm)</TableHead>
-                <TableHead>Weight (tons)</TableHead>
+                <TableHead data-tooltip-id="weight-tooltip">
+                  Weight (tons)
+                </TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
                 <TableHead>Action</TableHead>
@@ -662,7 +634,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
-
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.length.value`}
@@ -750,45 +721,30 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
-                    {/* <FormField
+                  {/* <TableCell data-tooltip-id="weight-tooltip">
+                    <FormField
                       name={`blocks.${index}.dimensions.weight.value`}
                       control={control}
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
+                              type="number"
                               min="0"
-                              step="1"
+                              step="0.01"
                               value={block.dimensions.weight.value}
-                              placeholder="Enter weight"
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.weight.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
+                              readOnly
                               disabled={isLoading}
                             />
-
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
-                    /> */}
-                    {(
-                      (((block.dimensions.length.value *
-                        block.dimensions.breadth.value *
-                        block.dimensions.height.value) /
-                        1000000) *
-                        350 *
-                        10) /
-                      1000
-                    ).toFixed(2)}
-                  </TableCell>
+                    />
+                    <Tooltip id="weight-tooltip" place="top">
+                      Weight is auto-calculated based on entered dimensions.
+                    </Tooltip>
+                  </TableCell> */}
                   <TableCell>
                     {(
                       (block.dimensions.length.value *
@@ -821,9 +777,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={8} className="text-right font-bold">
+                <TableCell colSpan={4} className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
+                <TableCell className="font-bold">
+                  Total Weight (tons): {calculateTotalWeight().inTons.toFixed(2)}
+                </TableCell>
+                <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>

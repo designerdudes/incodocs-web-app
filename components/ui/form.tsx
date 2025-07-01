@@ -42,13 +42,23 @@ const FormField = <
 const useFormField = () => {
   const fieldContext = React.useContext(FormFieldContext)
   const itemContext = React.useContext(FormItemContext)
-  const { getFieldState, formState } = useFormContext()
-
-  const fieldState = getFieldState(fieldContext.name, formState)
 
   if (!fieldContext) {
     throw new Error("useFormField should be used within <FormField>")
   }
+
+  const form = useFormContext();
+  const formState = form.formState ?? {}; // fallback to empty object if undefined
+  const getFieldState =
+    typeof form.getFieldState === "function"
+      ? form.getFieldState
+      : (name: string) => ({
+          invalid: !!formState.errors?.[name],
+          isTouched: !!formState.touchedFields?.[name],
+          error: formState.errors?.[name],
+        });
+
+  const fieldState = getFieldState(fieldContext.name, formState);
 
   const { id } = itemContext
 
