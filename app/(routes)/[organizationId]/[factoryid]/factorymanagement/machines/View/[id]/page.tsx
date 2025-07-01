@@ -57,20 +57,39 @@ export default async function ViewMachinePage({
   const isCutting = !!MachineData.typeCutting;
   const isPolishing = !!MachineData.typePolish;
 
-  const totalBlockSqft = (MachineData.blocks ?? []).reduce(
-    (total: number, block: Block) => {
-      const length = block.blockId?.dimensions?.length?.value ?? 0;
-      const breadth = block.blockId?.dimensions?.breadth?.value ?? 0;
-      return total + length * breadth/929.0304;
+  const totalSlabSqft = (MachineData.blocks ?? []).reduce(
+    (blockTotal: any, block: { blockId: { SlabsId: never[] } }) => {
+      const slabs = block.blockId?.SlabsId ?? [];
+
+      const blockSlabSqft = slabs.reduce(
+        (
+          slabTotal: number,
+          slab: {
+            dimensions: {
+              length: { value: number };
+              height: { value: number };
+            };
+          }
+        ) => {
+          const length = slab?.dimensions?.length?.value ?? 0;
+          const height = slab.dimensions?.height?.value ?? 0;
+          const sqft = (length * height) / 144;
+          return slabTotal + sqft;
+        },
+        0
+      );
+
+      return blockTotal + blockSlabSqft;
     },
     0
   );
 
-  const totalSqft = (MachineData.slabs ?? []).reduce((acc: number, slab: Slab ) => {
-  const length = slab?.slabId.dimensions?.length?.value ?? 0;
-  const height = slab?.slabId.dimensions?.height?.value ?? 0;
-  return acc + length * height/144;
-}, 0);
+  const totalSqft = (MachineData.slabs ?? []).reduce(
+    (acc: number, slab: Slab) => {
+      const length = slab?.slabId.dimensions?.length?.value ?? 0;
+      const height = slab?.slabId.dimensions?.height?.value ?? 0;
+      return acc + (length * height) / 144;
+    }, 0);
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -109,133 +128,133 @@ export default async function ViewMachinePage({
         {/* Tab: Machine Details */}
         <TabsContent value="details">
           <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
-          <div className="flex-1">
-            <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-              <Card x-chunk="dashboard-07-chunk-0">
-                <CardHeader>
-                  <CardTitle>Machine Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Field</TableHead>
-                        <TableHead>Details</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Machine Name
-                        </TableCell>
-                        <TableCell>{MachineData?.machineName}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Machine Id
-                        </TableCell>
-                        <TableCell>{MachineData.machineId}</TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Machine Type
-                        </TableCell>
-                        <TableCell>
-                          {MachineData.typeCutting
-                            ? `Cutting - ${MachineData.typeCutting}`
-                            : MachineData.typePolish
-                            ? `Polish - ${MachineData.typePolish}`
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>Machine Photo</TableCell>
-                        <TableCell>
-                          {MachineData.machinePhoto ? (
-                            <a
-                              href={MachineData.machinePhoto}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-500 hover:underline"
-                            >
-                              <EyeIcon className="h-4 w-4 cursor-pointer" />
-                            </a>
-                          ) : (
-                            "N/A"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Status
-                        </TableCell>
-                        <TableCell>
-                          {MachineData?.isActive === true
-                            ? "Active"
-                            : MachineData?.isActive === false
-                            ? "Inactive"
-                            : "N/A"}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Machine Cost
-                        </TableCell>
-                        <TableCell>
-                          {MachineData?.machineCost}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Current Component
-                        </TableCell>
-                        <TableCell>
-                          {MachineData?.currentComponent?.Name}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Total Processed
-                        </TableCell>
-                        <TableCell>
-                          {MachineData?.totalProcessed}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Installed Date
-                        </TableCell>
-                        <TableCell>
-                          {moment(MachineData.installedDate).format(
-                            "DD-MMM-YYYY"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Last Maintenance
-                        </TableCell>
-                        <TableCell>
-                          {moment(MachineData.lastMaintenance).format(
-                            "DD-MMM-YYYY"
-                          )}
-                        </TableCell>
-                      </TableRow>
-                      <TableRow>
-                        <TableCell className="whitespace-nowrap">
-                          Review
-                        </TableCell>
-                        <TableCell>
-                        {MachineData?.review}
-                        </TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
+            <div className="flex-1">
+              <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+                <Card x-chunk="dashboard-07-chunk-0">
+                  <CardHeader>
+                    <CardTitle>Machine Details</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Field</TableHead>
+                          <TableHead>Details</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Machine Name
+                          </TableCell>
+                          <TableCell>{MachineData?.machineName}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Machine Id
+                          </TableCell>
+                          <TableCell>{MachineData.machineId}</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Machine Type
+                          </TableCell>
+                          <TableCell>
+                            {MachineData.typeCutting
+                              ? `Cutting - ${MachineData.typeCutting}`
+                              : MachineData.typePolish
+                              ? `Polish - ${MachineData.typePolish}`
+                              : "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Machine Photo</TableCell>
+                          <TableCell>
+                            {MachineData.machinePhoto ? (
+                              <a
+                                href={MachineData.machinePhoto}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                              >
+                                <EyeIcon className="h-4 w-4 cursor-pointer" />
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Status
+                          </TableCell>
+                          <TableCell>
+                            {MachineData?.isActive === true
+                              ? "Active"
+                              : MachineData?.isActive === false
+                              ? "Inactive"
+                              : "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Machine Cost
+                          </TableCell>
+                          <TableCell>
+                            {MachineData?.machineCost}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Current Component
+                          </TableCell>
+                          <TableCell>
+                            {MachineData?.currentComponent?.Name}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Total Processed
+                          </TableCell>
+                          <TableCell>
+                            {MachineData?.totalProcessed}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Installed Date
+                          </TableCell>
+                          <TableCell>
+                            {moment(MachineData.installedDate).format(
+                              "DD-MMM-YYYY"
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Last Maintenance
+                          </TableCell>
+                          <TableCell>
+                            {moment(MachineData.lastMaintenance).format(
+                              "DD-MMM-YYYY"
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Review
+                          </TableCell>
+                          <TableCell>
+                            {MachineData?.review}
+                            </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
-        </div>
         </TabsContent>
 
         {/* Tab: Machine Logs */}
@@ -276,7 +295,7 @@ export default async function ViewMachinePage({
                 {/* ✅ Show total block SQFT above table */}
                 <div className="flex justify-end pt-4 border-t mt-4">
                   <div className="text-base font-semibold text-gray-800">
-                    Total Blocks SQFT: {totalBlockSqft.toFixed(2)} ft²
+                    Total Blocks(slabs) SQFT: {totalSlabSqft.toFixed(2)} ft²
                   </div>
                 </div>
               </CardContent>
