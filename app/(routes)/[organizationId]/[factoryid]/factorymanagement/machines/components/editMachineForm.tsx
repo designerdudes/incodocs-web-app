@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Machine } from "./columns";
+import { Textarea } from "@/components/ui/textarea";
 
 
 // Zod Schemas
@@ -43,6 +44,7 @@ export const machineSchema = z.object({
   lastMaintenance: z.string().optional(),
   installedDate: z.string().optional(),
   machineCost: z.number().optional(),
+  review: z.string().optional(),
 });
 
 type MachineFormValues = z.infer<typeof machineSchema>;
@@ -59,6 +61,7 @@ interface MachineFormProps {
         lastMaintenance: string
         installedDate: string
         machineCost: number
+        review:string
     };
 }
 
@@ -83,6 +86,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       lastMaintenance: new Date().toISOString(),
       installedDate: new Date().toISOString(),
       machineCost: 0,
+      review: "",
     },
 });
 
@@ -98,6 +102,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       lastMaintenance: data?.lastMaintenance || new Date().toISOString(),
       installedDate: data?.installedDate || new Date().toISOString(),
       machineCost: data?.machineCost || 0,
+      review: data?.review || "",
     });
   }, [data, factoryId, form]);
 
@@ -266,6 +271,24 @@ export default function MachineFormPage({ params }: MachineFormProps) {
               </FormItem>
             )}
           />
+          <FormField
+                      control={form.control}
+                      name="review"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Review / Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Enter description or review of the machine..."
+                              className="resize-none"
+                              rows={4}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Saving..." : "Submit"}
