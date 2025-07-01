@@ -16,11 +16,12 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import moment from "moment";
 
 const formSchema = z.object({
-    expenseName: z
+  expenseName: z
     .string()
     .min(3, { message: "expense Name must be reqired" })
     .optional(),
@@ -34,11 +35,8 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
-    expenseDate: z
-    .union([
-      z.string().min(1, { message: "select date" }),
-      z.number(),
-    ])
+  expenseDate: z
+    .union([z.string().min(1, { message: "select date" }), z.number()])
     .optional(),
 });
 
@@ -74,14 +72,12 @@ export default function EditExpenseForm({ params }: Props) {
     async function fetchSlabData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/expense/getbyid/${id}`
-        );
-        if (!response.ok) {
-          throw new Error("Failed to fetch slab data");
-        }
-        const data = await response.json();
-        console.log(data)
+        const response = await fetchData(`/expense/getbyid/${id}`);
+        // if (!response.ok) {
+        //   throw new Error("Failed to fetch expense data");
+        // }
+        // const data = await response.json();
+        const data = response;
 
         // Reset form with fetched values
         form.reset({
@@ -91,17 +87,14 @@ export default function EditExpenseForm({ params }: Props) {
           expenseDate: data.expenseDate || "",
         });
       } catch (error) {
-        console.error("Error fetching slab data:", error);
-        toast.error("Failed to fetch slab data");
+        console.error("Error fetching expense data:", error);
+        toast.error("Failed to fetch expense data");
       } finally {
         setIsFetching(false);
       }
     }
     fetchSlabData();
-  },[id]);
-   
-  
-  
+  }, [id]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -127,20 +120,17 @@ export default function EditExpenseForm({ params }: Props) {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/expense/put/${id}`,
-                  values
-                );
+                await putData(`/expense/put/${id}`, values);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("slab updated successfully");
+                toast.success("expense updated successfully");
 
                 window.location.reload();
               } catch (error) {
-                console.error("Error updating slab:", error);
+                console.error("Error updating expense:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error("Error updating slab");
+                toast.error("Error updating expense");
               }
             }}
           >
@@ -189,7 +179,9 @@ export default function EditExpenseForm({ params }: Props) {
                     placeholder="Eg: 1234"
                     type="number"
                     {...field}
-                    onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
                   />
                 </FormControl>
                 <FormMessage />
@@ -216,7 +208,6 @@ export default function EditExpenseForm({ params }: Props) {
             )}
           />
 
-          {/* expense Date Field */}
           <FormField
             control={form.control}
             name="expenseDate"
@@ -226,8 +217,12 @@ export default function EditExpenseForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 01/02/2000"
-                    type="number"
-                    {...field}
+                    value={
+                      field.value
+                        ? moment(field.value).format("YYYY-MM-DD") // Format to match <input type="date">
+                        : ""
+                    }
+                    type="date"
                     onChange={(e) => field.onChange(e.target.value)}
                   />
                 </FormControl>
@@ -235,7 +230,6 @@ export default function EditExpenseForm({ params }: Props) {
               </FormItem>
             )}
           />
-
         </div>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
@@ -245,5 +239,3 @@ export default function EditExpenseForm({ params }: Props) {
     </Form>
   );
 }
-
-

@@ -86,6 +86,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                   <SplitBlockForm
                     parentBlockId={data._id}
                     blockNumber={data.blockNumber}
+                    factoryId={data.factoryId}
                     originalBlockVolume={
                       data?.dimensions?.length?.value *
                       data?.dimensions?.breadth?.value *
