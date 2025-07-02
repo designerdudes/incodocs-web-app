@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";  
+import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
@@ -20,14 +20,9 @@ export default function AddShippingLinePage({
   currentUser: propCurrentUser,
 }: AddPartiesProps) {
   const searchParams = useSearchParams();
-//   console.log("dasaaaaaaaaaa",searchParams)
-  
   // Fallback to search params if props are undefined
   const organizationId = propOrganizationId || searchParams.get("organizationId") || "";
   const currentUser = propCurrentUser || searchParams.get("currentUser") || "";
-
-//   console.log("zzzzzzzzzzzzzzzzz", organizationId);
-//   console.log("zzzzzzzzssssszzzzzzzzz", currentUser);
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
