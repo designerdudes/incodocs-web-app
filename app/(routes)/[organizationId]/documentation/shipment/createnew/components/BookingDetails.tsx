@@ -102,6 +102,7 @@ export function BookingDetails({
   const destPageRef = useRef(1); // <-- this was missing
   const [searchTerm, setSearchTerm] = useState("");
   const [searchDestTerm, setSearchDestTerm] = useState("");
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
   const router = useRouter();
 
   useEffect(() => {
@@ -593,13 +594,39 @@ export function BookingDetails({
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
+              <PopoverContent
+                className="w-full p-0 text-sm flex flex-col relative"
+                align="start"
+              >
+                {/* <div className="absolute top-0 right-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      field.onChange(null);
+                      saveProgressSilently(getValues());
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </div> */}
+                <Calendar
+                  mode="single"
                   selected={field.value ? new Date(field.value) : undefined}
-                  onSelect={(date: any) => {
+                  startMonth={new Date(2010, 0)}
+                  endMonth={new Date(2025, 11)}
+                  onSelect={(date) => {
                     field.onChange(date?.toISOString());
                     saveProgressSilently(getValues());
                   }}
+                  captionLayout="dropdown"
+                  classNames={{
+                    caption: "flex justify-between items-center",
+                    caption_label: "text-sm font-medium hidden",
+                    dropdown: "border rounded p-0 text-xs",
+                    months: "flex flex-col",
+                  }}
+                  className="bg-white p-4 rounded-xl shadow-md"
                 />
               </PopoverContent>
             </Popover>
