@@ -13,8 +13,7 @@ interface PageProps {
     };
 }
 
-export default function AddConsigneePage({
-    params }: PageProps) {
+export default function AddConsigneePage({ params }: PageProps) {
     const searchParams = useSearchParams();
     const organizationId = params.organizationId || searchParams.get("organizationId") || "";
     const currentUser = searchParams.get("currentUser") || "";
