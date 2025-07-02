@@ -81,8 +81,8 @@ const formSchema = z.object({
   commissionCost: z
     .number()
     .min(1, {
-       message: "Commission cost must be greater than or equal to zero", 
-      })
+      message: "Commission cost must be greater than or equal to zero",
+    })
     .optional(),
   markerOperatorName: z
     .string()
@@ -135,7 +135,7 @@ interface RawMaterialCreateNewFormProps {
   gap: number;
 }
 
-export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [blocks, setBlocks] = useState<any[]>([]);
@@ -195,7 +195,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     });
     saveProgressSilently(getValues());
   }, [blocks, setValue, getValues]);
-  
+
 
   // Handle block count changes
   const handleBlockCountChange = (value: string) => {
@@ -291,23 +291,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
 
   // Calculate total weight
   function calculateTotalWeight() {
-  const totalWeightInTons = blocks.reduce((total, block) => {
-    const { length, breadth, height } = block.dimensions;
-    const volume = (length.value * breadth.value * height.value) / 1000000; // m³
-    const density = 2.7; // Example density in tons/m³
-    const weight = volume * density;
-    return total + weight;
-  }, 0);
+    const totalWeightInTons = blocks.reduce((total, block) => {
+      const { length, breadth, height } = block.dimensions;
+      const volume = (length.value * breadth.value * height.value) / 1000000; // m³
+      const density = 2.7; // Example density in tons/m³
+      const weight = volume * density;
+      return total + weight;
+    }, 0);
 
-  return {
-    inTons: totalWeightInTons,
-  };
-}
+    return {
+      inTons: totalWeightInTons,
+    };
+  }
 
 
   return (
     <div className="space-y-6">
-      <Form>
+      <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
