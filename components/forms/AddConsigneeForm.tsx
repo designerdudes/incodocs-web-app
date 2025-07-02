@@ -144,8 +144,10 @@ export default function ConsigneeForm({
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+    <div className="space-y-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)}  className="space-y-6">
+              <div className="grid grid-cols-3 gap-3">
         {/* Consignee Name */}
         <FormField
           control={form.control}
@@ -348,13 +350,15 @@ export default function ConsigneeForm({
             ))}
           </TableBody>
         </Table>
+        </div>
 
         {/* Submit Button */}
-        <Button type="submit" disabled={isLoading} className="w-full">
+        <Button type="submit" disabled={isLoading}>
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
         </Button>
       </form>
     </Form>
+    </div>
   );
 }

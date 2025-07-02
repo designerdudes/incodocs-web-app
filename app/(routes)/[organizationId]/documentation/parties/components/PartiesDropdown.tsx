@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +10,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { useRouter } from "next/navigation";
-import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
-import AddConsigneeForm from "@/components/forms/AddConsigneeForm";
-import Addshippinglineform from "@/components/forms/Addshippinglineform";
-import Forwarderdetailsform from "@/components/forms/Forwarderdetailsform";
-import Addtransporterform from "@/components/forms/Addtransporterform";
-import Addsupplierform from "@/components/forms/Addsupplierform";
 
 interface AddPartiesProps {
   organizationId: string;
@@ -29,18 +22,17 @@ export default function AddParties({
   onSuccess,
   currentUser,
 }: AddPartiesProps) {
-  const { onOpen, setTitle, setChildren } = useGlobalModal();
+  useGlobalModal();
   const router = useRouter();
-  const GlobalModal = useGlobalModal();
 
-  const handleSuccess = () => {
-    router.refresh(); // Refreshes the current page, re-fetching server data
-  };
-
-  const openSupplierForm = () => {
-    setTitle("Enter Supplier Details");
-    setChildren(<Addsupplierform onSuccess={handleSuccess} />);
-    onOpen();
+  const handleNavigation = (path: string) => {
+    // Encode query parameters to handle special characters
+    const queryParams = new URLSearchParams({
+      organizationId,
+      currentUser: currentUser || "",
+    }).toString();
+    
+    router.push(`./parties/add-parties/${path}?${queryParams}`);
   };
 
   return (
@@ -51,108 +43,33 @@ export default function AddParties({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="p-2 flex flex-col gap-2">
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter Shippingline Details`;
-            GlobalModal.children = (
-              <Addshippinglineform
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
+        <DropdownMenuItem onSelect={() => handleNavigation("shipping-line")}>
           Shipping Line
-          {/* <ShippingLineButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter Forwarder Details`;
-            GlobalModal.children = (
-              <Forwarderdetailsform
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
+
+        <DropdownMenuItem onSelect={() => handleNavigation("forwarder")}>
           Forwarder
-          {/* <ForwarderButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter Transporter Details`;
-            GlobalModal.children = (
-              <Addtransporterform
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
+
+        <DropdownMenuItem onSelect={() => handleNavigation("transporter")}>
           Transporter
-          {/* <TransporterButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter Supplier Details`;
-            GlobalModal.children = (
-              <Addsupplierform
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
+        <DropdownMenuItem onSelect={() => handleNavigation("supplier")}>
           Supplier
-          {/* <SupplierButton onSuccess={handleSuccess} /> */}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter Consignee Details`;
-            GlobalModal.children = (
-              <AddConsigneeForm
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
-          Consignee
-          {/* <ConsigneeButton onSuccess={handleSuccess} /> */}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem
-          onSelect={() => {
-            GlobalModal.title = `Enter CustomBroker Name Details`;
-            GlobalModal.children = (
-              <CustomBrokerForm
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
-            );
-            GlobalModal.onOpen();
-          }}
-        >
-          CustomBroker 
-          {/* <CbName onSuccess={handleSuccess} /> */}
+        <DropdownMenuItem onSelect={() => handleNavigation("consignee")}>
+          Consignee
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        <DropdownMenuItem onSelect={() => handleNavigation("custom-broker")}>
+          Custom Broker
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
