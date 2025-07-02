@@ -4,6 +4,44 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 
+export interface Dimension {
+  value: number;
+  units: "inch";
+}
+
+export interface Slab {
+  _id: string;
+  slabNumber: string;
+  blockId: string;
+  blockNumber: string;
+  factoryId: string;
+  status: string;
+  inStock: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+
+  dimensions: {
+    length: Dimension;
+    height: Dimension;
+  };
+
+  trim: {
+    length: Dimension;
+    height: Dimension;
+  };
+
+  cuttingPaymentStatus: {
+    status: string;
+    modeOfPayment?: string;
+  };
+
+  polishingPaymentStatus: {
+    status: string;
+    modeOfPayment?: string;
+  };
+}
+
 export type Block = {
   _id: string;
   blockId: {
@@ -28,63 +66,29 @@ export type Block = {
       };
     };
     cuttingScheduledAt:{
-    date: string;
-  };
+      date: string;
+    };
+    SlabsId: Slab[];
   };
   component?: {
     _id: string;
     ID: string;
     Name: string;
   };
-  
 };
 
 export const CuttingBlocksColumns: ColumnDef<Block>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value: any) =>
-          table.toggleAllPageRowsSelected(!!value)
-        }
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
   {
     accessorKey: "blockId.blockNumber",
     header: "Block Number",
     cell: ({ row }) => <div>{row.original.blockId?.blockNumber}</div>,
   },
   {
-    header: "Block Dimensions",
-    cell: ({ row }) => {
-      const dimensions = row.original.blockId?.dimensions;
-
-      const length = dimensions?.length?.value ?? 0;
-      const breadth = dimensions?.breadth?.value ?? 0;
-      const height = dimensions?.height?.value ?? 0;
-      const units = dimensions?.length?.units ?? "cm";
-
-      return (
-        <div>
-          {length} × {breadth} × {height} {units}
-        </div>
-      );
-    },
+    accessorKey: "slabId",
+    header: "Total Slabs",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.blockId?.SlabsId?.length}</div>
+    ),
   },
   {
     header: "Component ID / Name",
@@ -111,16 +115,18 @@ export const CuttingBlocksColumns: ColumnDef<Block>[] = [
       ),
   },
   {
-    header: "Block SQFT",
+    header: "Total Slabs SQFT",
     cell: ({ row }) => {
-      const dimensions = row.original.blockId?.dimensions;
+      const slabs: Slab[] = row.original.blockId?.SlabsId ?? [];
 
-      const length = dimensions?.length?.value ?? 0;
-      const breadth = dimensions?.breadth?.value ?? 0;
+      const totalSlabSqft = slabs.reduce((total, slab) => {
+        const length = slab.dimensions?.length?.value ?? 0;
+        const height = slab.dimensions?.height?.value ?? 0;
+        const sqft = (length * height) / 144; // Convert in² to ft²
+        return total + sqft;
+      }, 0);
 
-      const sqft = length * breadth / 929.0304;
-
-      return <div> {sqft.toFixed(2)} ft²</div>;
+      return <div>{totalSlabSqft.toFixed(2)} ft²</div>;
     },
   },
 ];
