@@ -52,6 +52,11 @@ const formSchema = z.object({
   gstNumber: z.string().optional(),
   panNumber: z.string().optional(),
   tanNumber: z.string().optional(),
+  addmsme:z.string().optional(),
+  panfile:z.string().optional(),
+  tanfile:z.string().optional(),
+  additional:z.string().optional(),
+  gstfile:z.string().optional(),
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
