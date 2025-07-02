@@ -1,27 +1,22 @@
- "use client";
+"use client";
 import { Button } from "@/components/ui/button";
-import Heading from "@/components/ui/heading";  
+import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import Addtransporterform from "@/components/forms/Addtransporterform";
 import { useSearchParams } from "next/navigation";
 
-interface AddPartiesProps {
-  organizationId: string;
-  onSuccess?: () => void;
-  currentUser?: string;
+interface PageProps {
+    params: {
+        organizationId: string;
+    };
 }
 
-
-export default function AddTransporterPage({
-  organizationId: propOrganizationId,
-  onSuccess,
-  currentUser: propCurrentUser,
-}: AddPartiesProps) {
+export default function AddTransporterPage({ params }: PageProps) {
     const searchParams = useSearchParams();
-const organizationId = propOrganizationId || searchParams.get("organizationId") || "";
-  const currentUser = propCurrentUser || searchParams.get("currentUser") || "";
+    const organizationId = params.organizationId || searchParams.get("organizationId") || "";
+    const currentUser = searchParams.get("currentUser") || "";
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
@@ -44,10 +39,9 @@ const organizationId = propOrganizationId || searchParams.get("organizationId") 
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
                 <Addtransporterform
-                onSuccess={onSuccess}
-                orgId={organizationId}
-                currentUser={currentUser}
-              />
+                    orgId={organizationId}
+                    currentUser={currentUser}
+                />
             </div>
         </div>
     );

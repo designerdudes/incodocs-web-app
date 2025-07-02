@@ -8,21 +8,16 @@ import { Separator } from "@/components/ui/separator";
 import Addshippinglineform from "@/components/forms/Addshippinglineform";
 import { useSearchParams } from "next/navigation";
 
-interface AddPartiesProps {
-  organizationId?: string;
-  onSuccess?: () => void;
-  currentUser?: string;
-}
 
-export default function AddShippingLinePage({
-  organizationId: propOrganizationId,
-  onSuccess,
-  currentUser: propCurrentUser,
-}: AddPartiesProps) {
+interface PageProps {
+  params: {
+    organizationId: string;
+  };
+}
+export default function AddShippingLinePage({ params }: PageProps) {
   const searchParams = useSearchParams();
-  // Fallback to search params if props are undefined
-  const organizationId = propOrganizationId || searchParams.get("organizationId") || "";
-  const currentUser = propCurrentUser || searchParams.get("currentUser") || "";
+  const organizationId = params.organizationId || searchParams.get("organizationId") || "";
+  const currentUser = searchParams.get("currentUser") || "";
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
@@ -46,7 +41,6 @@ export default function AddShippingLinePage({
       <Separator orientation="horizontal" />
       <div className="container mx-auto">
         <Addshippinglineform
-          onSuccess={onSuccess}
           orgId={organizationId}
           currentUser={currentUser}
         />
