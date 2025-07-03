@@ -70,12 +70,9 @@ const SupplierCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Supplier - ${data.supplierName}`;
-              GlobalModal.description = "Update the details of the supplier below.";
-              GlobalModal.children = (
-                <EditSupplierForm params={{ _id: data._id }} />
+              router.push(
+                `/${organizationId}/documentation/parties/edit-parties/supplier?supplierId=${data._id}`
               );
-              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />

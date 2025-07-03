@@ -69,12 +69,9 @@ const TransporterCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Transporter - ${data.transporterName}`;
-              GlobalModal.description = "Update the details of the transporter below.";
-              GlobalModal.children = (
-                <EditTransporterForm params={{ _id: data._id }} />
+              router.push(
+                `/${organizationId}/documentation/parties/edit-parties/transporter?transporterId=${data._id}`
               );
-              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />

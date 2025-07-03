@@ -68,12 +68,9 @@ const ConsigneeCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Consignee - ${data.name}`;
-              GlobalModal.description = "Update the details of the consignee below.";
-              GlobalModal.children = (
-                <EditConsigneeForm params={{ _id: data._id }} />
+              router.push(
+                `/${organizationId}/documentation/parties/edit-parties/consignee?consigneeId=${data._id}`
               );
-              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />

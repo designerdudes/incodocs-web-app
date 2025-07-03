@@ -291,7 +291,15 @@ export function ShippingBillDetails({
                 onChange={(value) => field.onChange(value)}
                 displayProperty="name"
                 placeholder="Select a Customs Broker"
-                onAddNew={openCustomsBrokerForm}
+                valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${orgId}/documentation/parties/add-parties/custom-broker`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                // onAddNew={openCustomsBrokerForm}
                 addNewLabel="Add New Customs Broker"
               />
             </FormControl>

@@ -71,21 +71,13 @@ const CbNameCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Edit Cb Name - ${data.cbName}`;
-              GlobalModal.description = "Update the details of the Cb Name below.";
-              GlobalModal.children = (
-                <EditCBNameForm
-                  cbData={data}
-                  onSuccess={() => {
-                    GlobalModal.onClose();
-                  }}
-                />
+              router.push(
+                `/${organizationId}/documentation/parties/edit-parties/custom-broker?custombrokerId=${data._id}`
               );
-              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Cb Name
+            Edit Custom Broker
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {

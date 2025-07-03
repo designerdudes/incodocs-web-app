@@ -62,17 +62,13 @@ const ShippingLineCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => {
-              // Open the EditShippingLine form in a modal
-              GlobalModal.title = `Edit Shipping Line - ${data.shippingLineName}`;
-              GlobalModal.description = "Update the details of the shipping line below.";
-              GlobalModal.children = (
-                <EditShippingLineForm params={{ _id: data._id }} />
+              router.push(
+                `/${organizationId}/documentation/parties/edit-parties/shipping-line?shippinglineId=${data._id}`
               );
-              GlobalModal.onOpen();
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
-            Edit Shipping Line
+            Edit Shipping-Line
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
