@@ -342,9 +342,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : "");
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? 0}
+                      value={field.value ?? undefined}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -368,9 +368,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : "");
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? 0}
+                      value={field.value ?? undefined}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -394,9 +394,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : "");
+                        field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? 0}
+                      value={field.value ?? undefined}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -463,7 +463,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? 0}
+                      value={field.value ?? undefined}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -489,7 +489,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? 0}
+                      value={field.value ?? undefined}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
