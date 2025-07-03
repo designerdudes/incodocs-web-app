@@ -245,9 +245,17 @@ export function CommercialInvoiceDetails({
                   field.onChange(value);
                   saveProgressSilently(getValues());
                 }}
+                valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/consignee`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
                 displayProperty="name"
                 placeholder="Select a Consignee"
-                onAddNew={openConsigneeForm}
+                // onAddNew={openConsigneeForm}
                 addNewLabel="Add New Consignee"
               />
             </FormControl>

@@ -359,9 +359,17 @@ export function SupplierDetails({
                             field.onChange(value);
                             saveProgressSilently(getValues());
                           }}
+                          valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/supplier`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
                           displayProperty="name"
                           placeholder="Select a Supplier"
-                          onAddNew={openSupplierForm}
+                          // onAddNew={openSupplierForm}
                           addNewLabel="Add New Supplier"
                         />
                       </FormControl>

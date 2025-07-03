@@ -273,9 +273,17 @@ export function ShippingBillDetails({
                   field.onChange(value);
                   saveProgressSilently(getValues());
                 }}
+                valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/custom-broker`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
                 displayProperty="name"
                 placeholder="Select a Custom Broker"
-                onAddNew={openCBNameForm}
+                // onAddNew={openCBNameForm}
                 addNewLabel="Add New Custom Broker"
               />
             </FormControl>

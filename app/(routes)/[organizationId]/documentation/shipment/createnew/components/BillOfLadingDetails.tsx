@@ -246,9 +246,17 @@ export function BillOfLadingDetails({
                     field.onChange(value);
                     saveProgressSilently(getValues());
                   }}
+                  valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/shipping-line`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
                   displayProperty="name"
                   placeholder="Select a Shipping Line"
-                  onAddNew={openShippingLineForm}
+                  // onAddNew={openShippingLineForm}
                   addNewLabel="Add New Shipping Line"
                 />
               </FormControl>

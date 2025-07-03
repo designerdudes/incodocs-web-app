@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ViewAllComponent from "./viewAllComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { putData } from "@/axiosUtility/api";
@@ -47,8 +51,8 @@ const multiColumnFilterFn: FilterFn<Shipment> = (
     ? typeof firstSupplier.supplierName === "string"
       ? firstSupplier.supplierName
       : firstSupplier.supplierName?.supplierName ||
-      row.original.supplierDetails?.actual?.actualSupplierName ||
-      ""
+        row.original.supplierDetails?.actual?.actualSupplierName ||
+        ""
     : row.original.supplierDetails?.actual?.actualSupplierName || "";
 
   const searchableRowContent = [
@@ -65,7 +69,7 @@ const multiColumnFilterFn: FilterFn<Shipment> = (
     row.original.bookingDetails?.vesselSailingDate || "",
     row.original.bookingDetails?.vesselArrivingDate || "",
     row.original.shippingDetails?.shippingLineInvoices?.[0]?.uploadInvoiceUrl ||
-    "",
+      "",
     row.original.bookingDetails?.portOfLoading || "",
     row.original.bookingDetails?.destinationPort || "",
     row.original.saleInvoiceDetails?.commercialInvoices
@@ -156,27 +160,27 @@ const StatusCell: React.FC<{
       <Badge
         className={cn(
           currentStatus === "Booking Confirmed" &&
-          "bg-amber-200 text-amber-800 hover:bg-amber-300/80",
+            "bg-amber-200 text-amber-800 hover:bg-amber-300/80",
           currentStatus === "Trucks Booked" &&
-          "bg-orange-200 text-yellow-800 hover:bg-orange-300/80",
+            "bg-orange-200 text-yellow-800 hover:bg-orange-300/80",
           currentStatus === "Trucks Dispatched" &&
-          "bg-gray-200 text-gray-800 hover:bg-gray-300/70",
+            "bg-gray-200 text-gray-800 hover:bg-gray-300/70",
           currentStatus === "Trucks Arrived" &&
-          "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
+            "bg-blue-200 text-blue-800 hover:bg-blue-300/80",
           currentStatus === "Trucks Halted" &&
-          "bg-yellow-200 text-yellow-800 hover:bg-yellow-300/80",
+            "bg-yellow-200 text-yellow-800 hover:bg-yellow-300/80",
           currentStatus === "Stuffing" &&
-          "bg-orange-200 text-orange-800 hover:bg-orange-300/80",
+            "bg-orange-200 text-orange-800 hover:bg-orange-300/80",
           currentStatus === "In Clearance" &&
-          "bg-purple-200 text-purple-800 hover:bg-purple-300/80",
+            "bg-purple-200 text-purple-800 hover:bg-purple-300/80",
           currentStatus === "Loaded On Vessel" &&
-          "bg-teal-200 text-teal-800 hover:bg-teal-300/80",
+            "bg-teal-200 text-teal-800 hover:bg-teal-300/80",
           currentStatus === "In Transit" &&
-          "bg-cyan-200 text-cyan-800 hover:bg-cyan-300/80",
+            "bg-cyan-200 text-cyan-800 hover:bg-cyan-300/80",
           currentStatus === "Arrived At POD" &&
-          "bg-lime-200 text-lime-800 hover:bg-lime-300/80",
+            "bg-lime-200 text-lime-800 hover:bg-lime-300/80",
           currentStatus === "Delivery Completed" &&
-          "bg-green-200 text-green-800 hover:bg-green-300/80",
+            "bg-green-200 text-green-800 hover:bg-green-300/80",
           !currentStatus && "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
         )}
       >
@@ -367,9 +371,9 @@ export const columns: ColumnDef<Shipment>[] = [
               d.noOfBoxes
             ).toFixed(2);
           } else if (productType === "StepsAndRisers") {
-            sqm = calculateStepRiserSquareMeter(product.stepRiserDetails).toFixed(
-              2
-            );
+            sqm = calculateStepRiserSquareMeter(
+              product.stepRiserDetails
+            ).toFixed(2);
           }
 
           const line = `StoneName: ${stoneName}, SqM: ${sqm}`;
@@ -380,7 +384,8 @@ export const columns: ColumnDef<Shipment>[] = [
         return (
           <div key={containerIdx} className="mb-4 border-b pb-2">
             <div className="font-bold text-blue-600 mb-2">
-              🚢 Container {container.containerNumber || containerIdx + 1} | 🚛 Truck: {container.truckNumber || "N/A"}
+              🚢 Container {container.containerNumber || containerIdx + 1} | 🚛
+              Truck: {container.truckNumber || "N/A"}
             </div>
             {Object.entries(grouped).map(([type, lines], i) => (
               <div key={i} className="mb-3 ml-3">
@@ -400,13 +405,14 @@ export const columns: ColumnDef<Shipment>[] = [
 
       return (
         <ViewAllComponent
-          title="Product Details"
+          title="Containers And Products Details"
           params={{
             organizationId: row.original.organizationId?._id || "unknown",
           }}
           data={jsxData}
-          setIsFetching={() => { }}
-          setIsLoading={() => { }}
+          setIsFetching={() => {}}
+          setIsLoading={() => {}}
+          containerCount={containers.length} // Pass container count
         />
       );
     },
@@ -474,13 +480,13 @@ export const columns: ColumnDef<Shipment>[] = [
         ? isNaN(parseFloat(value))
           ? "Invalid Value"
           : new Intl.NumberFormat("en-IN", {
-            style: "currency",
-            currency: "INR",
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-            notation: "compact",
-            compactDisplay: "short",
-          }).format(parseFloat(value))
+              style: "currency",
+              currency: "INR",
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+              notation: "compact",
+              compactDisplay: "short",
+            }).format(parseFloat(value))
         : "N/A";
       return (
         <div className="flex space-x-2">
@@ -512,8 +518,8 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {row.original.bookingDetails?.vesselSailingDate
             ? moment(row.original.bookingDetails.vesselSailingDate).format(
-              "MMM Do YY"
-            )
+                "MMM Do YY"
+              )
             : "N/A"}
         </span>
       </div>
@@ -529,8 +535,8 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {row.original.bookingDetails?.vesselArrivingDate
             ? moment(row.original.bookingDetails.vesselArrivingDate).format(
-              "MMM Do YY"
-            )
+                "MMM Do YY"
+              )
             : "N/A"}
         </span>
       </div>
@@ -547,7 +553,7 @@ export const columns: ColumnDef<Shipment>[] = [
           {typeof row.original.shippingDetails?.transporterName === "string"
             ? row.original.shippingDetails.transporterName
             : row.original.shippingDetails?.transporterName?.transporterName ||
-            "N/A"}
+              "N/A"}
         </span>
       </div>
     ),
@@ -563,7 +569,7 @@ export const columns: ColumnDef<Shipment>[] = [
           {typeof row.original.shippingDetails?.forwarderName === "string"
             ? row.original.shippingDetails.forwarderName
             : row.original.shippingDetails?.forwarderName?.forwarderName ||
-            "N/A"}
+              "N/A"}
         </span>
       </div>
     ),
@@ -578,7 +584,8 @@ export const columns: ColumnDef<Shipment>[] = [
         <span className="truncate font-medium">
           {typeof row.original.blDetails?.shippingLineName === "string"
             ? row.original.blDetails.shippingLineName
-            : row.original.blDetails?.shippingLineName?.shippingLineName || "N/A"}
+            : row.original.blDetails?.shippingLineName?.shippingLineName ||
+              "N/A"}
         </span>
       </div>
     ),
@@ -610,8 +617,8 @@ export const columns: ColumnDef<Shipment>[] = [
         ? typeof firstSupplier.supplierName === "string"
           ? firstSupplier.supplierName
           : firstSupplier.supplierName?.supplierName ||
-          row.original.supplierDetails?.actual?.actualSupplierName ||
-          "N/A"
+            row.original.supplierDetails?.actual?.actualSupplierName ||
+            "N/A"
         : row.original.supplierDetails?.actual?.actualSupplierName || "N/A";
       return (
         <div className="flex space-x-2">
@@ -706,8 +713,8 @@ export const columns: ColumnDef<Shipment>[] = [
         <div className="flex space-x-2">
           <span className="truncate font-medium">
             {otherDetails &&
-              otherDetails.length > 0 &&
-              otherDetails[0].certificateNumber
+            otherDetails.length > 0 &&
+            otherDetails[0].certificateNumber
               ? otherDetails[0].certificateNumber
               : "N/A"}
           </span>
