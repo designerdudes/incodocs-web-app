@@ -44,7 +44,7 @@ const saveProgressSilently = (data: any) => {
 // Function to calculate weight based on dimensions
 const calculateWeight = (length: number, breadth: number, height: number) => {
   const volume = (length * breadth * height) / 1000000; // Convert cm³ to m³
-  const densityFactor = 350 * 10 / 1000; // Your existing formula: 350 * 10 / 1000
+  const densityFactor = (350 * 10) / 1000; // Your existing formula: 350 * 10 / 1000
   return Number((volume * densityFactor).toFixed(2));
 };
 
@@ -135,7 +135,7 @@ interface RawMaterialCreateNewFormProps {
   gap: number;
 }
 
-export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [blocks, setBlocks] = useState<any[]>([]);
@@ -195,7 +195,6 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
     });
     saveProgressSilently(getValues());
   }, [blocks, setValue, getValues]);
-
 
   // Handle block count changes
   const handleBlockCountChange = (value: string) => {
@@ -304,7 +303,6 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
     };
   }
 
-
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -336,11 +334,15 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   <FormLabel>Material Cost</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Enter material cost"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : 0);
+                        field.onChange(value ? parseFloat(value) : "");
                       }}
                       value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
@@ -359,10 +361,14 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter marker cost"
+                      type="number"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : 0);
+                        field.onChange(value ? parseFloat(value) : "");
                       }}
                       value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
@@ -381,10 +387,14 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter transport cost"
+                      type="number"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value ? parseFloat(value) : 0);
+                        field.onChange(value ? parseFloat(value) : "");
                       }}
                       value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
@@ -443,13 +453,17 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   <FormLabel>Quarry Transport Cost</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Enter Quarry Transport Cost"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? ""}
+                      value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -465,13 +479,17 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   <FormLabel>Commission Cost</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Enter Commission Cost"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
                       }}
-                      value={field.value ?? ""}
+                      value={field.value ?? 0}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -491,6 +509,9 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                       type="number"
                       min="1"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "") {
@@ -514,6 +535,10 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
             <div>
               <Input
                 value={globalLength}
+                type="number"
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) => setGlobalLength(e.target.value)}
                 placeholder="Length (cm)"
                 disabled={isLoading}
@@ -548,6 +573,10 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
             <div>
               <Input
                 value={globalBreadth}
+                type="number"
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) => setGlobalBreadth(e.target.value)}
                 placeholder="Breadth (cm)"
                 disabled={isLoading}
@@ -581,7 +610,11 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
             </div>
             <div>
               <Input
+                type="number"
                 value={globalHeight}
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 placeholder="Height (cm)"
                 disabled={isLoading}
@@ -643,10 +676,15 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               // type="number"
+                              type="number"
                               min="0"
                               step="1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.length.value =
@@ -671,11 +709,15 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
+                              type="number"
                               min="0"
                               step="1"
                               value={block.dimensions.breadth.value}
                               placeholder="Enter breadth"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.breadth.value =
@@ -700,11 +742,15 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
+                              type="number"
                               min="0"
                               step="1"
                               value={block.dimensions.height.value}
                               placeholder="Enter height"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
@@ -781,7 +827,8 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
                 <TableCell className="font-bold">
-                  Total Weight (tons): {calculateTotalWeight().inTons.toFixed(2)}
+                  Total Weight (tons):{" "}
+                  {calculateTotalWeight().inTons.toFixed(2)}
                 </TableCell>
                 <TableCell colSpan={3}></TableCell>
               </TableRow>
