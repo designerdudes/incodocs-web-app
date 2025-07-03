@@ -66,7 +66,7 @@ interface FormData {
 
 function saveProgressSilently(data: any) {
   localStorage.setItem("shipmentFormData", JSON.stringify(data));
-  localStorage.setItem("lastSaved", new Date().toISOString()); 
+  localStorage.setItem("lastSaved", new Date().toISOString());
 }
 
 interface ShippingDetailsProps extends SaveDetailsProps {
@@ -75,7 +75,12 @@ interface ShippingDetailsProps extends SaveDetailsProps {
   currentUser: string;
 }
 
-export function ShippingDetails({ saveProgress, onSectionSubmit, params, currentUser }: ShippingDetailsProps) {
+export function ShippingDetails({
+  saveProgress,
+  onSectionSubmit,
+  params,
+  currentUser,
+}: ShippingDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
 
@@ -101,117 +106,174 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
   const [uploading, setUploading] = useState(false);
   const [forwarders, setForwarders] = useState<any[]>([]);
   const [transporters, setTransporters] = useState<any[]>([]);
-  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<(File | null)[]>(Array(initialCount).fill(null));
-  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<(File | null)[]>(Array(initialCount).fill(null));
-  const [showForwarderConfirmation, setShowForwarderConfirmation] = useState(false);
-  const [showTransporterConfirmation, setShowTransporterConfirmation] = useState(false);
-  const [forwarderCountToBeDeleted, setForwarderCountToBeDeleted] = useState<number | null>(null);
-  const [transporterCountToBeDeleted, setTransporterCountToBeDeleted] = useState<number | null>(null);
+  const [selectedForwarderFiles, setSelectedForwarderFiles] = useState<
+    (File | null)[]
+  >(Array(initialCount).fill(null));
+  const [selectedTransporterFiles, setSelectedTransporterFiles] = useState<
+    (File | null)[]
+  >(Array(initialCount).fill(null));
+  const [showForwarderConfirmation, setShowForwarderConfirmation] =
+    useState(false);
+  const [showTransporterConfirmation, setShowTransporterConfirmation] =
+    useState(false);
+  const [forwarderCountToBeDeleted, setForwarderCountToBeDeleted] = useState<
+    number | null
+  >(null);
+  const [transporterCountToBeDeleted, setTransporterCountToBeDeleted] =
+    useState<number | null>(null);
 
   const GlobalModal = useGlobalModal();
 
-  const handleForwarderDelete = useCallback((index: number) => {
-    const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
-    setForwarderInvoices(updatedInvoices);
-    setSelectedForwarderFiles(prev => prev.filter((_, i) => i !== index));
-    setValue("shippingDetails.forwarderInvoices", updatedInvoices, { shouldDirty: false });
-    setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length, { shouldDirty: false });
-    saveProgressSilently(getValues());
-  }, [forwarderInvoices, setValue, getValues]);
-
-  const handleForwarderCountChange = useCallback((value: string) => {
-    const newCount = Number(value) || 1;
-    if (newCount < forwarderInvoices.length) {
-      setShowForwarderConfirmation(true);
-      setForwarderCountToBeDeleted(newCount);
-    } else {
-      handleDynamicArrayCountChange<FormData, Invoice>({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "shippingDetails.forwarderInvoices",
-        countFieldName: "shippingDetails.noOfForwarderinvoices",
-        createNewItem: () => ({
-          invoiceNumber: "",
-          uploadInvoiceUrl: "",
-          date: null,
-          valueWithGst: 0,
-          valueWithoutGst:0 ,
-        }),
-        customFieldSetters: {
-          "shippingDetails.forwarderInvoices": (items: Invoice[], setValue) => {
-            setValue("shippingDetails.noOfForwarderinvoices", items.length);
-            setForwarderInvoices(items);
-            setSelectedForwarderFiles(Array(items.length).fill(null));
-          },
-        },
-        saveCallback: saveProgressSilently,
+  const handleForwarderDelete = useCallback(
+    (index: number) => {
+      const updatedInvoices = forwarderInvoices.filter((_, i) => i !== index);
+      setForwarderInvoices(updatedInvoices);
+      setSelectedForwarderFiles((prev) => prev.filter((_, i) => i !== index));
+      setValue("shippingDetails.forwarderInvoices", updatedInvoices, {
+        shouldDirty: false,
       });
-    }
-  }, [watch, setValue, getValues, forwarderInvoices]);
+      setValue(
+        "shippingDetails.noOfForwarderinvoices",
+        updatedInvoices.length,
+        { shouldDirty: false }
+      );
+      saveProgressSilently(getValues());
+    },
+    [forwarderInvoices, setValue, getValues]
+  );
+
+  const handleForwarderCountChange = useCallback(
+    (value: string) => {
+      const newCount = Number(value) || 1;
+      if (newCount < forwarderInvoices.length) {
+        setShowForwarderConfirmation(true);
+        setForwarderCountToBeDeleted(newCount);
+      } else {
+        handleDynamicArrayCountChange<FormData, Invoice>({
+          value,
+          watch,
+          setValue,
+          getValues,
+          fieldName: "shippingDetails.forwarderInvoices",
+          countFieldName: "shippingDetails.noOfForwarderinvoices",
+          createNewItem: () => ({
+            invoiceNumber: "",
+            uploadInvoiceUrl: "",
+            date: null,
+            valueWithGst: 0,
+            valueWithoutGst: 0,
+          }),
+          customFieldSetters: {
+            "shippingDetails.forwarderInvoices": (
+              items: Invoice[],
+              setValue
+            ) => {
+              setValue("shippingDetails.noOfForwarderinvoices", items.length);
+              setForwarderInvoices(items);
+              setSelectedForwarderFiles(Array(items.length).fill(null));
+            },
+          },
+          saveCallback: saveProgressSilently,
+        });
+      }
+    },
+    [watch, setValue, getValues, forwarderInvoices]
+  );
 
   const handleForwarderConfirmChange = useCallback(() => {
     if (forwarderCountToBeDeleted !== null) {
-      const updatedInvoices = forwarderInvoices.slice(0, forwarderCountToBeDeleted);
+      const updatedInvoices = forwarderInvoices.slice(
+        0,
+        forwarderCountToBeDeleted
+      );
       setForwarderInvoices(updatedInvoices);
       setSelectedForwarderFiles(Array(updatedInvoices.length).fill(null));
-      setValue("shippingDetails.forwarderInvoices", updatedInvoices, { shouldDirty: false });
-      setValue("shippingDetails.noOfForwarderinvoices", updatedInvoices.length, { shouldDirty: false });
+      setValue("shippingDetails.forwarderInvoices", updatedInvoices, {
+        shouldDirty: false,
+      });
+      setValue(
+        "shippingDetails.noOfForwarderinvoices",
+        updatedInvoices.length,
+        { shouldDirty: false }
+      );
       saveProgressSilently(getValues());
       setForwarderCountToBeDeleted(null);
       setShowForwarderConfirmation(false);
     }
   }, [forwarderInvoices, forwarderCountToBeDeleted, setValue, getValues]);
 
-  const handleTransporterDelete = useCallback((index: number) => {
-    const updatedInvoices = transporterInvoices.filter((_, i) => i !== index);
-    setTransporterInvoices(updatedInvoices);
-    setSelectedTransporterFiles(prev => prev.filter((_, i) => i !== index));
-    setValue("shippingDetails.transporterInvoices", updatedInvoices, { shouldDirty: false });
-    setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length, { shouldDirty: false });
-    saveProgressSilently(getValues());
-  }, [transporterInvoices, setValue, getValues]);
-
-  const handleTransporterCountChange = useCallback((value: string) => {
-    const newCount = Number(value) || 1;
-    if (newCount < transporterInvoices.length) {
-      setShowTransporterConfirmation(true);
-      setTransporterCountToBeDeleted(newCount);
-    } else {
-      handleDynamicArrayCountChange<FormData, Invoice>({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "shippingDetails.transporterInvoices",
-        countFieldName: "shippingDetails.noOftransportinvoices",
-        createNewItem: () => ({
-          invoiceNumber: "",
-          uploadInvoiceUrl: "",
-          date: null,
-          valueWithGst: 0,
-          valueWithoutGst: 0,
-        }),
-        customFieldSetters: {
-          "shippingDetails.transporterInvoices": (items: Invoice[], setValue) => {
-            setValue("shippingDetails.noOftransportinvoices", items.length);
-            setTransporterInvoices(items);
-            setSelectedTransporterFiles(Array(items.length).fill(null));
-          },
-        },
-        saveCallback: saveProgressSilently,
+  const handleTransporterDelete = useCallback(
+    (index: number) => {
+      const updatedInvoices = transporterInvoices.filter((_, i) => i !== index);
+      setTransporterInvoices(updatedInvoices);
+      setSelectedTransporterFiles((prev) => prev.filter((_, i) => i !== index));
+      setValue("shippingDetails.transporterInvoices", updatedInvoices, {
+        shouldDirty: false,
       });
-    }
-  }, [watch, setValue, getValues, transporterInvoices]);
+      setValue(
+        "shippingDetails.noOftransportinvoices",
+        updatedInvoices.length,
+        { shouldDirty: false }
+      );
+      saveProgressSilently(getValues());
+    },
+    [transporterInvoices, setValue, getValues]
+  );
+
+  const handleTransporterCountChange = useCallback(
+    (value: string) => {
+      const newCount = Number(value) || 1;
+      if (newCount < transporterInvoices.length) {
+        setShowTransporterConfirmation(true);
+        setTransporterCountToBeDeleted(newCount);
+      } else {
+        handleDynamicArrayCountChange<FormData, Invoice>({
+          value,
+          watch,
+          setValue,
+          getValues,
+          fieldName: "shippingDetails.transporterInvoices",
+          countFieldName: "shippingDetails.noOftransportinvoices",
+          createNewItem: () => ({
+            invoiceNumber: "",
+            uploadInvoiceUrl: "",
+            date: null,
+            valueWithGst: 0,
+            valueWithoutGst: 0,
+          }),
+          customFieldSetters: {
+            "shippingDetails.transporterInvoices": (
+              items: Invoice[],
+              setValue
+            ) => {
+              setValue("shippingDetails.noOftransportinvoices", items.length);
+              setTransporterInvoices(items);
+              setSelectedTransporterFiles(Array(items.length).fill(null));
+            },
+          },
+          saveCallback: saveProgressSilently,
+        });
+      }
+    },
+    [watch, setValue, getValues, transporterInvoices]
+  );
 
   const handleTransporterConfirmChange = useCallback(() => {
     if (transporterCountToBeDeleted !== null) {
-      const updatedInvoices = transporterInvoices.slice(0, transporterCountToBeDeleted);
+      const updatedInvoices = transporterInvoices.slice(
+        0,
+        transporterCountToBeDeleted
+      );
       setTransporterInvoices(updatedInvoices);
       setSelectedTransporterFiles(Array(updatedInvoices.length).fill(null));
-      setValue("shippingDetails.transporterInvoices", updatedInvoices, { shouldDirty: false });
-      setValue("shippingDetails.noOftransportinvoices", updatedInvoices.length, { shouldDirty: false });
+      setValue("shippingDetails.transporterInvoices", updatedInvoices, {
+        shouldDirty: false,
+      });
+      setValue(
+        "shippingDetails.noOftransportinvoices",
+        updatedInvoices.length,
+        { shouldDirty: false }
+      );
       saveProgressSilently(getValues());
       setTransporterCountToBeDeleted(null);
       setShowTransporterConfirmation(false);
@@ -224,13 +286,10 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetchData(
-        "/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetchData("/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
       const data = await response;
       const storageUrl = data.url;
       console.log("File uploaded successfully:", storageUrl);
@@ -313,19 +372,27 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
               <FormLabel>Select Forwarder</FormLabel>
               <FormControl>
                 <EntityCombobox
-  entities={forwarders}
-  value={field.value || ""}
-  onChange={(value) => {
-    field.onChange(value);
-    saveProgressSilently(getValues());
-  }}
-  displayProperty="forwarderName"
-  placeholder="Select a Forwarder"
-  onAddNew={openForwarderForm}
-  addNewLabel="Add New Forwarder"
-  className="truncate w-full"
-/>
-
+                  entities={forwarders}
+                  value={field.value || ""}
+                  onChange={(value) => {
+                    field.onChange(value);
+                    saveProgressSilently(getValues());
+                  }}
+                  displayProperty="forwarderName"
+                  valueProperty="_id"
+                  placeholder="Select a Forwarder"
+                  onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/forwarder`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                  // onAddNew={openForwarderForm}
+                  addNewLabel="Add New Forwarder"
+                  className="truncate w-full"
+                  
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -382,7 +449,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].invoiceNumber` as any}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].invoiceNumber` as any
+                        }
                         render={({ field }) => (
                           <FormControl>
                             <Input
@@ -397,10 +466,14 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
+                        }
                         render={({ field }) => (
                           <FileUploadField
-                            name={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any}
+                            name={
+                              `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
+                            }
                             storageKey={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
                           />
                         )}
@@ -409,22 +482,34 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].date` as any}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].date` as any
+                        }
                         render={({ field }) => (
                           <Popover>
                             <PopoverTrigger asChild>
                               <FormControl>
                                 <Button variant="outline">
                                   {field.value
-                                    ? format(new Date(field.value as any), "PPPP")
+                                    ? format(
+                                        new Date(field.value as any),
+                                        "PPPP"
+                                      )
                                     : "Pick a date"}
                                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <CalendarComponent
-                                selected={field.value ? new Date(field.value as any) : undefined}
+                                selected={
+                                  field.value
+                                    ? new Date(field.value as any)
+                                    : undefined
+                                }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -438,7 +523,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithGst` as any}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].valueWithGst` as any
+                        }
                         render={({ field }) => (
                           <Input
                             type="number"
@@ -453,7 +540,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.forwarderInvoices[${index}].valueWithoutGst` as any}
+                        name={
+                          `shippingDetails.forwarderInvoices[${index}].valueWithoutGst` as any
+                        }
                         render={({ field }) => (
                           <Input
                             type="number"
@@ -501,7 +590,15 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                   }}
                   displayProperty="transporterName"
                   placeholder="Select a Transporter"
-                  onAddNew={openTransporterForm}
+                  valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${organizationId}/documentation/parties/add-parties/transporter`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                  // onAddNew={openTransporterForm}
                   addNewLabel="Add New Transporter"
                   className="truncate w-full" // Added truncate to prevent overflow
                 />
@@ -561,7 +658,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].invoiceNumber` as any}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].invoiceNumber` as any
+                        }
                         render={({ field }) => (
                           <FormControl>
                             <Input
@@ -576,10 +675,14 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
+                        }
                         render={({ field }) => (
                           <FileUploadField
-                            name={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any}
+                            name={
+                              `shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl` as any
+                            }
                             storageKey={`shippingDetails.transporterInvoices[${index}].uploadInvoiceUrl`}
                           />
                         )}
@@ -588,7 +691,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].date` as any}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].date` as any
+                        }
                         render={({ field }: any) => (
                           <Popover>
                             <PopoverTrigger asChild>
@@ -601,9 +706,16 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                                 </Button>
                               </FormControl>
                             </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
+                            <PopoverContent
+                              className="w-auto p-0"
+                              align="start"
+                            >
                               <CalendarComponent
-                                selected={field.value ? new Date(field.value) : undefined}
+                                selected={
+                                  field.value
+                                    ? new Date(field.value)
+                                    : undefined
+                                }
                                 onSelect={(date) => {
                                   field.onChange(date?.toISOString());
                                   saveProgressSilently(getValues());
@@ -617,7 +729,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithGst` as any}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].valueWithGst` as any
+                        }
                         render={({ field }) => (
                           <Input
                             type="number"
@@ -632,7 +746,9 @@ export function ShippingDetails({ saveProgress, onSectionSubmit, params, current
                     <TableCell>
                       <FormField
                         control={control}
-                        name={`shippingDetails.transporterInvoices[${index}].valueWithoutGst` as any}
+                        name={
+                          `shippingDetails.transporterInvoices[${index}].valueWithoutGst` as any
+                        }
                         render={({ field }) => (
                           <Input
                             type="number"
