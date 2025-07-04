@@ -5,6 +5,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellActions from "./cell-actions";
+import moment from "moment";
 
 export interface Quarry {
   _id: any;
@@ -137,7 +138,7 @@ export const QuarryColumns: ColumnDef<Quarry>[] = [
     cell: ({ row }) => (
       <div>
         {row.original.createdAt
-          ? new Date(row.original.createdAt).toLocaleDateString()
+          ? moment(row.original.createdAt).format("YYYY-MM-DD")
           : "N/A"}
       </div>
     ),
@@ -149,7 +150,7 @@ export const QuarryColumns: ColumnDef<Quarry>[] = [
     cell: ({ row }) => (
       <div>
         {row.original.updatedAt
-          ? new Date(row.original.updatedAt).toLocaleDateString()
+          ? moment(row.original.updatedAt).format("YYYY-MM-DD")
           : "N/A"}
       </div>
     ),
