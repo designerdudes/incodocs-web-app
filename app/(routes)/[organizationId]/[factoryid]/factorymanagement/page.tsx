@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MountainSnow } from "lucide-react";
 import Heading from "@/components/ui/heading";
 import { useParams } from "next/navigation";
 import {
@@ -12,7 +12,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { FiGrid } from "react-icons/fi";
-import { MdAccountBalance} from "react-icons/md";
+import { MdAccountBalance } from "react-icons/md";
 import { GiGears } from "react-icons/gi";
 
 interface Props {
@@ -23,11 +23,8 @@ interface Props {
 }
 
 function FactoryManagementPage({ params }: Props) {
- 
-    const organizationId = params.organizationId
-    const factoryId = params.factoryid
-
-    
+  const organizationId = params.organizationId;
+  const factoryId = params.factoryid;
 
   const machineCount = 12; // Replace with dynamic value if available
 
@@ -105,7 +102,7 @@ function FactoryManagementPage({ params }: Props) {
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Machines</CardTitle>
-              <GiGears  className="w-6 h-6 text-muted-foreground" />
+              <GiGears className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
               <CardDescription className="text-base text-gray-600">
@@ -117,6 +114,30 @@ function FactoryManagementPage({ params }: Props) {
               </p>
               <p className="text-sm font-medium text-primary">
                 Total Machines: {machineCount}
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/*Quarry Card*/}
+        <Link
+          href={`/${organizationId}/${factoryId}/factorymanagement/quarry`}
+          passHref
+        >
+          <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Quarry</CardTitle>
+              <MountainSnow className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <CardDescription className="text-base text-gray-600">
+                Monitor marble sourcing at the origin manage extraction,
+                availability, and readiness
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                Track the origin of marble shipments from quarry to destination.
+                Monitor extraction status, inventory, and dispatch timelines in
+                real time
               </p>
             </CardContent>
           </Card>

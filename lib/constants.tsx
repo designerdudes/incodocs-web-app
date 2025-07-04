@@ -23,11 +23,6 @@ import { FaBookReader } from "react-icons/fa";
 import { title } from "process";
 import { url } from "inspector";
 
-
-
-
-
-
 const BrandName = "StoneDocs";
 
 // const sidebarTabs = [
@@ -131,7 +126,7 @@ const documentationCards = [
     icon: <HelpCircle className="w-4 mr-2" />,
     showButton: false,
     value: 50,
-  }
+  },
 ];
 
 const accountingSidebarTabs = [
@@ -211,7 +206,9 @@ const FactoryCards = [
   },
   {
     title: "Accounting",
-    icon: <MdAccountBalance className="w-6 h-6 text-4xl text-green-500 self-end" />,
+    icon: (
+      <MdAccountBalance className="w-6 h-6 text-4xl text-green-500 self-end" />
+    ),
     value: 40,
     color: "bg-primary",
     showButton: false,
@@ -278,7 +275,7 @@ const AccountingCard = [
     color: "bg-primary",
     showButton: false,
     buttonUrl: "/factorymanagement/accounting/Parties",
-  }
+  },
 ];
 
 const sidebarTabs = {
@@ -292,7 +289,7 @@ const sidebarTabs = {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: LayoutDashboard , // Component function
+      icon: LayoutDashboard, // Component function
       isActive: true,
     },
     {
@@ -308,16 +305,16 @@ const sidebarTabs = {
               title: "Raw Inventory",
               url: "/factorymanagement/inventory/raw",
               isActive: true,
-              items:[
+              items: [
                 {
-                  title:"Lots",
-                  url:"/factorymanagement/inventory/raw/lots"
+                  title: "Lots",
+                  url: "/factorymanagement/inventory/raw/lots",
                 },
                 {
-                  title:"Processing",
-                  url:"/factorymanagement/inventory/raw/processing"
+                  title: "Processing",
+                  url: "/factorymanagement/inventory/raw/processing",
                 },
-              ]
+              ],
             },
             {
               title: "Finished Goods",
@@ -353,9 +350,10 @@ const sidebarTabs = {
           ],
         },
         {
-          title:"Machines",
-          url:"/factorymanagement/machines",
+          title: "Machines",
+          url: "/factorymanagement/machines",
         },
+        { title: "Quarry", url: "/factorymanagement/quarry" },
       ],
     },
     {
@@ -406,11 +404,11 @@ const sidebarTabs = {
 };
 
 const blockedRegexes = [
-  /^\/[^\/]+\/dashboard$/,                            // e.g., /abc/dashboard
-  /^\/[^\/]+\/documentation(\/.*)?$/,              // e.g., /abc/documentation/shipment
-  /^\/[^\/]+\/documentation\/shipment(\/.*)?$/,              // e.g., /abc/documentation/shipment
-  /^\/[^\/]+\/settings(\/.*)?$/,                      // e.g., /abc/settings and /abc/settings/*
-  /^\/[^\/]+\/teamManagement(\/.*)?$/,           // e.g., /abc/factorymanagement and /abc/teamManagement/*
+  /^\/[^\/]+\/dashboard$/, // e.g., /abc/dashboard
+  /^\/[^\/]+\/documentation(\/.*)?$/, // e.g., /abc/documentation/shipment
+  /^\/[^\/]+\/documentation\/shipment(\/.*)?$/, // e.g., /abc/documentation/shipment
+  /^\/[^\/]+\/settings(\/.*)?$/, // e.g., /abc/settings and /abc/settings/*
+  /^\/[^\/]+\/teamManagement(\/.*)?$/, // e.g., /abc/factorymanagement and /abc/teamManagement/*
 ];
 
 export {
@@ -422,6 +420,6 @@ export {
   InventoryCards,
   FinishedPageCards,
   FactoryCards,
-  blockedRegexes
+  blockedRegexes,
 };
 export { BrandName, AccountingCard };
