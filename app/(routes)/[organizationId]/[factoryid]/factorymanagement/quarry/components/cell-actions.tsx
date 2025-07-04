@@ -31,16 +31,16 @@ interface Props {
 const CellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const deleteMachine = async () => {
+  const deleteQuarry = async () => {
     try {
       const result = await deleteData(
-        `https://incodocs-server.onrender.com/machine/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/quarry/delete/${data._id}` // Placeholder endpoint
       );
-      toast.success("Machine Deleted Successfully");
+      toast.success("Quarry Deleted Successfully");
       window.location.reload();
       GlobalModal.onClose();
     } catch (error) {
-      toast.error("Error deleting Machine");
+      toast.error("Error deleting Quarry");
     }
   };
 
@@ -56,36 +56,28 @@ const CellActions: React.FC<Props> = ({ data }) => {
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
-            onClick={() =>
-              router.push(`./machines/AddLogMaintenance/${data._id}`)
-            }
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <EyeIcon className="mr-2 h-4 w-4" />
-            Add Log Maintenance
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => router.push(`./machines/Edit/${data._id}`)}
+            onClick={() => router.push(`./quarry/Edit/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <Scissors className="mr-2 h-4 w-4" />
-            Edit Machine
+            Edit Quarry
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`./machines/View/${data._id}`)}
+            onClick={() => router.push(`./quarry/View/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <EyeIcon className="mr-2 h-4 w-4" />
-            View Machine
+            View Quarry
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Machine - ${data?.lesseeName}`;
+              GlobalModal.title = `Delete Quarry - ${data?.lesseeName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this machine?";
+                "Are you sure you want to delete this Quarry?";
               GlobalModal.children = (
-                <Alert onConfirm={deleteMachine} actionType={"delete"} />
+                <Alert onConfirm={deleteQuarry} actionType={"delete"} />
               );
               GlobalModal.onOpen();
             }}
