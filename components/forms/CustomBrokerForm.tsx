@@ -37,6 +37,14 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
+   gstNumber: z.string().optional(),
+    panNumber: z.string().optional(),
+    tanNumber: z.string().optional(),
+    addmsme: z.string().optional(),
+    panfile: z.string().optional(),
+    tanfile: z.string().optional(),
+    additional: z.string().optional(),
+    gstfile: z.string().optional(),
   cbCode: z.string().optional(),
   portCode: z.string().optional(),
   email: z
@@ -92,6 +100,14 @@ export default function CustomBrokerForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cbName: "",
+      gstNumber: "",
+      panNumber: "",
+      tanNumber: "",
+      addmsme: "",
+      panfile: "",
+      tanfile: "",
+      additional: "",
+      gstfile: "",
       cbCode: "",
       portCode: "",
       email: "",
@@ -160,6 +176,118 @@ export default function CustomBrokerForm({
                   <FormLabel>Custom Broker </FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., XYZ Clearing" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="addmsme"
+              render={() => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="additional"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Additional Documents</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="additional"
+                      storageKey="additional"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -259,6 +387,9 @@ export default function CustomBrokerForm({
                 </FormItem>
               )}
             />
+            </div>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+            <div className="col-span-4 overflow-x-auto mt-4">
 
             <Table>
               <TableHeader>
@@ -382,6 +513,7 @@ export default function CustomBrokerForm({
                 ))}
               </TableBody>
             </Table>
+          </div>
           </div>
 
           <Button type="submit" disabled={isLoading}>

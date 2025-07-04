@@ -40,6 +40,14 @@ import { FileUploadField } from "../../../shipment/createnew/components/FileUplo
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
+  gstNumber: z.string().optional(),
+    panNumber: z.string().optional(),
+    tanNumber: z.string().optional(),
+    addmsme: z.string().optional(),
+    panfile: z.string().optional(),
+    tanfile: z.string().optional(),
+    additional: z.string().optional(),
+    gstfile: z.string().optional(),
   cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
   portCode: z.string().min(1, { message: "Port Code is required" }),
   email: z.string().optional().refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
@@ -65,22 +73,22 @@ const formSchema = z.object({
   ),
 });
 
-interface CBData {
-  _id: string;
-  cbName: string;
-  cbCode: string;
-  portCode: string;
-  email?: string;
-  mobileNo?: string | number;
-  address?: string;
-  organizationId?: string;
-  documents?: Array<{
-    fileName: string;
-    fileUrl?: string;
-    date: string;
-    review?: string;
-  }>;
-}
+// interface CBData {
+//   _id: string;
+//   cbName: string;
+//   cbCode: string;
+//   portCode: string;
+//   email?: string;
+//   mobileNo?: string | number;
+//   address?: string;
+//   organizationId?: string;
+//   documents?: Array<{
+//     fileName: string;
+//     fileUrl?: string;
+//     date: string;
+//     review?: string;
+//   }>;
+// }
 
 interface EditCBNameFormProps {
   params: {
@@ -137,6 +145,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
 
         const formData = {
           cbName: data.cbName || "",
+          gstNumber: data?.gstNumber || "",
+          panNumber: data?.panNumber || "",
+          tanNumber: data?.tanNumber || "",
           cbCode: data.cbCode || "",
           portCode: data.portCode || "",
           email: data.email || "",
@@ -200,6 +211,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
               try {
                 const payload = {
                   cbName: values.cbName,
+                   gstNumber: values.gstNumber,
+                  panNumber: values.panNumber,
+                  tanNumber: values.tanNumber,
                   cbCode: values.cbCode,
                   portCode: values.portCode,
                   email: values.email,
@@ -323,7 +337,7 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
     <h2 className="text-lg font-semibold mb-4">Edit Customs Broker</h2>
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <Controller
             name="cbName"
             control={form.control}
@@ -337,6 +351,118 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
               </FormItem>
             )}
           />
+           <FormField
+                        control={form.control}
+                        name="gstNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>GST Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter GST Number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+          
+                      <FormField
+                        control={form.control}
+                        name="panNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>PAN Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter PAN Number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+          
+                      <FormField
+                        control={form.control}
+                        name="tanNumber"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>TAN Number</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Enter TAN Number" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="addmsme"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>MSME Certificate</FormLabel>
+                            <FormControl>
+                              <FileUploadField name="addmsme" storageKey="addmsme" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+          
+                      <FormField
+                        control={form.control}
+                        name="panfile"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>PAN File</FormLabel>
+                            <FormControl>
+                              <FileUploadField name="panfile" storageKey="panfile" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+          
+                      <FormField
+                        control={form.control}
+                        name="tanfile"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>TAN File</FormLabel>
+                            <FormControl>
+                              <FileUploadField name="panfile" storageKey="panfile" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="gstfile"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>GST File</FormLabel>
+                            <FormControl>
+                              <FileUploadField name="gstfile" storageKey="gstfile" />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+          
+                      <FormField
+                        control={form.control}
+                        name="additional"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Additional Documents</FormLabel>
+                            <FormControl>
+                              <FileUploadField
+                                name="additional"
+                                storageKey="additional"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
           <Controller
             name="cbCode"
             control={form.control}

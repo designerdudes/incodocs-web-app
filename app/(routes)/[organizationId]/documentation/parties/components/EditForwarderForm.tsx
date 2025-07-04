@@ -30,7 +30,11 @@ import {
 } from "@/components/ui/dialog";
 import { CalendarIcon, Eye, Trash, UploadCloud } from "lucide-react";
 import { format } from "date-fns";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
 import CalendarComponent from "@/components/CalendarComponent";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { fetchData, putData } from "@/axiosUtility/api";
@@ -44,19 +48,33 @@ const formSchema = z.object({
   forwarderName: z
     .string()
     .min(3, { message: "Forwarder name must be at least 3 characters long" }),
+  gstNumber: z.string().optional(),
+  panNumber: z.string().optional(),
+  tanNumber: z.string().optional(),
+  addmsme: z.string().optional(),
+  panfile: z.string().optional(),
+  tanfile: z.string().optional(),
+  additional: z.string().optional(),
+  gstfile: z.string().optional(),
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
   responsiblePerson: z
     .string()
-    .min(3, { message: "Responsible person must be at least 3 characters long" }),
+    .min(3, {
+      message: "Responsible person must be at least 3 characters long",
+    }),
   email: z.string().email({ message: "Please enter a valid email address" }),
-  mobileNo: z
-    .union([z.string(), z.number()])
-    .refine((val) => {
+  mobileNo: z.union([z.string(), z.number()]).refine(
+    (val) => {
       const strVal = val.toString();
       return strVal.length >= 10 && /^\d+$/.test(strVal);
-    }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
+    },
+    {
+      message:
+        "Mobile number must be at least 10 digits and contain only numbers",
+    }
+  ),
   documents: z.array(
     z.object({
       fileName: z
@@ -119,7 +137,9 @@ export default function EditForwarderForm({ params }: Props) {
       try {
         setIsFetching(true);
         setFetchError(null);
-        const data = await fetchData(`/shipment/forwarder/getone/${forwarderId}`);
+        const data = await fetchData(
+          `/shipment/forwarder/getone/${forwarderId}`
+        );
         console.log("Fetched forwarder data:", data);
 
         const forwarder = data?.findForwarder;
@@ -130,16 +150,20 @@ export default function EditForwarderForm({ params }: Props) {
 
         const formData = {
           forwarderName: forwarder?.forwarderName?.toString() || "",
+          gstNumber: forwarder?.gstNumber || "",
+          panNumber: forwarder?.panNumber || "",
+          tanNumber: forwarder?.tanNumber || "",
           address: forwarder?.address?.toString() || "",
           responsiblePerson: forwarder?.responsiblePerson?.toString() || "",
           email: forwarder?.email?.toString() || "",
           mobileNo: forwarder?.mobileNo?.toString() || "",
-          documents: forwarder?.documents?.map((doc: any) => ({
-            fileName: doc.fileName,
-            fileUrl: doc.fileUrl,
-            date: doc.date,
-            review: doc.review || "",
-          })) || [],
+          documents:
+            forwarder?.documents?.map((doc: any) => ({
+              fileName: doc.fileName,
+              fileUrl: doc.fileUrl,
+              date: doc.date,
+              review: doc.review || "",
+            })) || [],
         };
 
         form.reset(formData);
@@ -173,7 +197,9 @@ export default function EditForwarderForm({ params }: Props) {
       );
       if (!response.ok) throw new Error("File upload failed");
       const data = await response.json();
-      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
+      setValue(`documents.${index}.fileUrl`, data.storageLink, {
+        shouldDirty: true,
+      });
       setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
       toast.success("File uploaded successfully!");
       saveProgress(getValues());
@@ -204,7 +230,9 @@ export default function EditForwarderForm({ params }: Props) {
       setIsLoading(true);
       const fileUrl = await handleFileUpload(newFile, selectedDocIndex);
       if (fileUrl) {
-        toast.success("Document replaced successfully. Submit the form to save changes.");
+        toast.success(
+          "Document replaced successfully. Submit the form to save changes."
+        );
         setIsReplaceModalOpen(false);
         saveProgress(getValues());
       }
@@ -269,6 +297,9 @@ export default function EditForwarderForm({ params }: Props) {
               try {
                 const payload = {
                   forwarderName: values.forwarderName,
+                  gstNumber: values.gstNumber,
+                  panNumber: values.panNumber,
+                  tanNumber: values.tanNumber,
                   address: values.address,
                   responsiblePerson: values.responsiblePerson,
                   email: values.email,
@@ -280,7 +311,10 @@ export default function EditForwarderForm({ params }: Props) {
                     review: doc.review,
                   })),
                 };
-                await putData(`/shipment/forwarder/put/${forwarderId}`, payload);
+                await putData(
+                  `/shipment/forwarder/put/${forwarderId}`,
+                  payload
+                );
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Forwarder updated successfully");
@@ -330,7 +364,7 @@ export default function EditForwarderForm({ params }: Props) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="forwarderName"
@@ -346,12 +380,128 @@ export default function EditForwarderForm({ params }: Props) {
             />
             <FormField
               control={form.control}
+              name="gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="addmsme"
+              render={() => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="additional"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Additional Documents</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="additional"
+                      storageKey="additional"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="address"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Address</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 303, Ahmed khan manzil" type="text" {...field} />
+                    <Input
+                      placeholder="Eg: 303, Ahmed khan manzil"
+                      type="text"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -377,7 +527,11 @@ export default function EditForwarderForm({ params }: Props) {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: someone@email.com" type="email" {...field} />
+                    <Input
+                      placeholder="Eg: someone@email.com"
+                      type="email"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -402,172 +556,178 @@ export default function EditForwarderForm({ params }: Props) {
               )}
             />
           </div>
-                    <div className="grid grid-cols-4 gap-4 w-full ">
-
-          {/* Documents Section */}
-          {fields.length > 0 && (
-            <div className="col-span-4 overflow-x-auto mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>Upload Document</TableHead>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Review</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        <FormField
-                          control={control}
-                          name={`documents.${index}.fileUrl`}
-                          render={({ field }) => (
-                            <div className="flex items-center space-x-2">
-                              <FileUploadField
-                                name={`documents.${index}.fileUrl`}
-                                storageKey={`documents.${index}.fileUrl`}
-                                onFileChange={async (file: File) => {
-                                  if (file) {
-                                    await handleFileUpload(file, index);
-                                  }
-                                }}
-                              />
-                              {field.value && (
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  <Eye className="h-4 w-4 cursor-pointer" />
-                                </a>
-                              )}
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                type="button"
-                                onClick={() => handleReplaceDocument(index)}
-                              >
-                                <UploadCloud className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.fileName`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Document.pdf"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button variant="outline">
-                                      {field.value &&
-                                      !isNaN(new Date(field.value).getTime())
-                                        ? format(new Date(field.value), "PPPP")
-                                        : "Pick a date"}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent align="start">
-                                  <CalendarComponent
-                                    selected={
-                                      field.value ? new Date(field.value) : undefined
-                                    }
-                                    onSelect={(date: any) => {
-                                      field.onChange(date?.toISOString());
-                                      saveProgress(getValues());
-                                    }}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`documents.${index}.review`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Reviewed"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="button"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+            {/* Documents Section */}
+            {fields.length > 0 && (
+              <div className="col-span-4 overflow-x-auto mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>Upload Document</TableHead>
+                      <TableHead>File Name</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Review</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {fields.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          <FormField
+                            control={control}
+                            name={`documents.${index}.fileUrl`}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <FileUploadField
+                                  name={`documents.${index}.fileUrl`}
+                                  storageKey={`documents.${index}.fileUrl`}
+                                  onFileChange={async (file: File) => {
+                                    if (file) {
+                                      await handleFileUpload(file, index);
+                                    }
+                                  }}
+                                />
+                                {field.value && (
+                                  <a
+                                    href={field.value}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    <Eye className="h-4 w-4 cursor-pointer" />
+                                  </a>
+                                )}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  type="button"
+                                  onClick={() => handleReplaceDocument(index)}
+                                >
+                                  <UploadCloud className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button variant="outline">
+                                        {field.value &&
+                                        !isNaN(new Date(field.value).getTime())
+                                          ? format(
+                                              new Date(field.value),
+                                              "PPPP"
+                                            )
+                                          : "Pick a date"}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent align="start">
+                                    <CalendarComponent
+                                      selected={
+                                        field.value
+                                          ? new Date(field.value)
+                                          : undefined
+                                      }
+                                      onSelect={(date: any) => {
+                                        field.onChange(date?.toISOString());
+                                        saveProgress(getValues());
+                                      }}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.review`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Reviewed"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            type="button"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              append({
-                fileName: "",
-                fileUrl: "",
-                date: new Date().toISOString(),
-                review: "",
-              })
-            }
-            className="mt-4"
-          >
-            Add Document
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                append({
+                  fileName: "",
+                  fileUrl: "",
+                  date: new Date().toISOString(),
+                  review: "",
+                })
+              }
+              className="mt-4"
+            >
+              Add Document
+            </Button>
 
-          <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            Submit
-          </Button>
-        </div>
+            <Button type="submit" disabled={isLoading} className="w-full mt-4">
+              {isLoading && (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Submit
+            </Button>
+          </div>
         </form>
       </Form>
 
@@ -579,7 +739,10 @@ export default function EditForwarderForm({ params }: Props) {
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="file-upload" className="block text-sm font-medium">
+              <label
+                htmlFor="file-upload"
+                className="block text-sm font-medium"
+              >
                 Upload New File
               </label>
               <Input
@@ -593,7 +756,9 @@ export default function EditForwarderForm({ params }: Props) {
                 className="mt-1"
               />
               {newFile && (
-                <p className="text-sm text-gray-500">Selected: {newFile.name}</p>
+                <p className="text-sm text-gray-500">
+                  Selected: {newFile.name}
+                </p>
               )}
             </div>
             <DialogFooter>

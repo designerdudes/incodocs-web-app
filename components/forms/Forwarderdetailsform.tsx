@@ -39,6 +39,14 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 
 const formSchema = z.object({
   forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
+   gstNumber: z.string().optional(),
+    panNumber: z.string().optional(),
+    tanNumber: z.string().optional(),
+    addmsme: z.string().optional(),
+    panfile: z.string().optional(),
+    tanfile: z.string().optional(),
+    additional: z.string().optional(),
+    gstfile: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
   mobileNo: z
@@ -86,6 +94,14 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       forwarderName: "",
+       gstNumber: "",
+      panNumber: "",
+      tanNumber: "",
+      addmsme: "",
+      panfile: "",
+      tanfile: "",
+      additional: "",
+      gstfile: "",
       address: "",
       responsiblePerson: "",
       mobileNo: "",
@@ -152,6 +168,118 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 </FormItem>
               )}
             />
+             <FormField
+                          control={form.control}
+                          name="gstNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>GST Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter GST Number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+            
+                        <FormField
+                          control={form.control}
+                          name="panNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>PAN Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter PAN Number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+            
+                        <FormField
+                          control={form.control}
+                          name="tanNumber"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>TAN Number</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Enter TAN Number" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="addmsme"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>MSME Certificate</FormLabel>
+                              <FormControl>
+                                <FileUploadField name="addmsme" storageKey="addmsme" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+            
+                        <FormField
+                          control={form.control}
+                          name="panfile"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>PAN File</FormLabel>
+                              <FormControl>
+                                <FileUploadField name="panfile" storageKey="panfile" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+            
+                        <FormField
+                          control={form.control}
+                          name="tanfile"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>TAN File</FormLabel>
+                              <FormControl>
+                                <FileUploadField name="panfile" storageKey="panfile" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="gstfile"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>GST File</FormLabel>
+                              <FormControl>
+                                <FileUploadField name="gstfile" storageKey="gstfile" />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+            
+                        <FormField
+                          control={form.control}
+                          name="additional"
+                          render={() => (
+                            <FormItem>
+                              <FormLabel>Additional Documents</FormLabel>
+                              <FormControl>
+                                <FileUploadField
+                                  name="additional"
+                                  storageKey="additional"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
             {/* Address (Optional) */}
             <FormField
               control={form.control}
@@ -247,6 +375,9 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 </FormItem>
               )}
             />
+            </div>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+            <div className="col-span-4 overflow-x-auto mt-4">
 
             <Table>
               <TableHeader>
@@ -370,6 +501,7 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 ))}
               </TableBody>
             </Table>
+          </div>
           </div>
 
           {/* Submit */}
