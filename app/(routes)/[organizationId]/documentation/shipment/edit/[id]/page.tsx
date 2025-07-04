@@ -5,7 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { useState, useEffect, useRef } from "react";
-import {ProgressBar} from "./components/ProgressBar";
+import { ProgressBar } from "./components/ProgressBar";
 import { BookingDetails } from "./components/BookingDetails";
 import { ShippingDetails } from "./components/ShippingDetails";
 import { ShippingBillDetails } from "./components/ShippingBillDetails";
@@ -43,7 +43,7 @@ interface ShipmentApiResponse {
         clearancecommercialInvoiceDate?: string;
         clearanceCommercialInvoiceValue?: number;
         actualCommercialInvoiceUrl?: string;
-        actualCommercialInvoiceValue?:number;
+        actualCommercialInvoiceValue?: number;
         packingListUrl?: string;
         saberInvoiceUrl?: string;
         saberInvoiceValue?: number;
@@ -728,8 +728,8 @@ export default function EditShipmentPage({ params }: Props) {
                   invoiceNumber: invoice.invoiceNumber || undefined,
                   uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
                   date: invoice.date || undefined,
-                  valueWithGst: invoice.valueWithGst || undefined,
-                  valueWithoutGst: invoice.valueWithoutGst || undefined,
+                  valueWithGst: invoice.valueWithGst || 0,
+                  valueWithoutGst: invoice.valueWithoutGst || 0,
                   _id: invoice._id || undefined,
                 })) || [],
               forwarderName:
@@ -746,8 +746,8 @@ export default function EditShipmentPage({ params }: Props) {
                   invoiceNumber: invoice.invoiceNumber || undefined,
                   uploadInvoiceUrl: invoice.uploadInvoiceUrl || undefined,
                   date: invoice.date || undefined,
-                  valueWithGst: invoice.valueWithGst || undefined,
-                  valueWithoutGst: invoice.valueWithoutGst || undefined,
+                  valueWithGst: invoice.valueWithGst || 0,
+                  valueWithoutGst: invoice.valueWithoutGst || 0,
                   _id: invoice._id || undefined,
                 })) || [],
               _id: values.shippingDetails._id || undefined,
@@ -766,17 +766,15 @@ export default function EditShipmentPage({ params }: Props) {
               ShippingBills:
                 values.shippingBillDetails.bills?.map((bill) => ({
                   shippingBillUrl: bill.uploadShippingBill || undefined,
-                  shippingBillNumber: bill.shippingBillNumber || undefined,
+                  shippingBillNumber: bill.shippingBillNumber || 0,
                   shippingBillDate: bill.shippingBillDate || undefined,
                   drawbackValue: bill.drawbackValue
                     ? String(bill.drawbackValue)
-                    : undefined,
-                  rodtepValue: bill.rodtepValue
-                    ? String(bill.rodtepValue)
-                    : undefined,
+                    : 0,
+                  rodtepValue: bill.rodtepValue ? String(bill.rodtepValue) : 0,
                   ConversionRateInDollars: bill.ConversionRateInDollars
                     ? String(bill.ConversionRateInDollars)
-                    : undefined,
+                    : 0,
                   _id: undefined,
                 })) || [],
               _id: values.shippingBillDetails._id || undefined,
@@ -815,13 +813,13 @@ export default function EditShipmentPage({ params }: Props) {
                               supplierInvoiceValueWithGST:
                                 invoice.supplierInvoiceValueWithGST
                                   ? String(invoice.supplierInvoiceValueWithGST)
-                                  : undefined,
+                                  : 0,
                               supplierInvoiceValueWithOutGST:
                                 invoice.supplierInvoiceValueWithOutGST
                                   ? String(
                                       invoice.supplierInvoiceValueWithOutGST
                                     )
-                                  : undefined,
+                                  : 0,
                               clearanceSupplierInvoiceUrl:
                                 invoice.clearanceSupplierInvoiceUrl ||
                                 undefined,
@@ -847,7 +845,7 @@ export default function EditShipmentPage({ params }: Props) {
                           values.supplierDetails.actual
                             .actualSupplierInvoiceValue
                         )
-                      : undefined,
+                      : 0,
                     shippingBillUrl:
                       values.supplierDetails.actual.shippingBillUrl ||
                       undefined,
@@ -872,13 +870,19 @@ export default function EditShipmentPage({ params }: Props) {
                 undefined,
               commercialInvoices:
                 values.saleInvoiceDetails.commercialInvoices?.map((inv) => ({
-                  clearanceCommercialInvoiceNumber: inv.clearanceCommercialInvoiceNumber || undefined,
-                  clearancecommercialInvoiceDate:inv.clearancecommercialInvoiceDate || undefined,
-                  clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || undefined,
-                  clearanceCommercialInvoiceValue: inv.clearanceCommercialInvoiceValue || undefined,
-                  actualCommercialInvoiceUrl:inv.actualCommercialInvoiceUrl || undefined,
-                  actualCommercialInvoiceValue: inv.actualCommercialInvoiceValue || undefined,
-                  packingListUrl:inv.packingListUrl || undefined,
+                  clearanceCommercialInvoiceNumber:
+                    inv.clearanceCommercialInvoiceNumber || undefined,
+                  clearancecommercialInvoiceDate:
+                    inv.clearancecommercialInvoiceDate || undefined,
+                  clearanceCommercialInvoiceUrl:
+                    inv.clearanceCommercialInvoiceUrl || undefined,
+                  clearanceCommercialInvoiceValue:
+                    inv.clearanceCommercialInvoiceValue || undefined,
+                  actualCommercialInvoiceUrl:
+                    inv.actualCommercialInvoiceUrl || undefined,
+                  actualCommercialInvoiceValue:
+                    inv.actualCommercialInvoiceValue || undefined,
+                  packingListUrl: inv.packingListUrl || undefined,
                   saberInvoiceUrl: inv.saberInvoiceUrl || undefined,
                   saberInvoiceValue: inv.saberInvoiceValue || undefined,
                   _id: inv._id || undefined,
@@ -1064,8 +1068,7 @@ export default function EditShipmentPage({ params }: Props) {
           bookingDetails: data.shipment.bookingDetails
             ? {
                 review: data.shipment.bookingDetails.review || undefined,
-                invoiceNumber:
-                  data?.shipment?.bookingDetails?.invoiceNumber,
+                invoiceNumber: data?.shipment?.bookingDetails?.invoiceNumber,
                 bookingNumber:
                   data.shipment.bookingDetails.bookingNumber || undefined,
                 portOfLoading:
@@ -1349,15 +1352,21 @@ export default function EditShipmentPage({ params }: Props) {
                 )
                   ? data.shipment.saleInvoiceDetails.commercialInvoices.map(
                       (inv: any) => ({
-                        clearanceCommercialInvoiceNumber: inv.clearanceCommercialInvoiceNumber || undefined,
-                  clearancecommercialInvoiceDate:inv.clearancecommercialInvoiceDate || undefined,
-                  clearanceCommercialInvoiceUrl: inv.clearanceCommercialInvoiceUrl || undefined,
-                  clearanceCommercialInvoiceValue: inv.clearanceCommercialInvoiceValue || undefined,
-                  actualCommercialInvoiceUrl:inv.actualCommercialInvoiceUrl || undefined,
-                  actualCommercialInvoiceValue: inv.actualCommercialInvoiceValue || undefined,
-                  packingListUrl:inv.packingListUrl || undefined,
-                  saberInvoiceUrl: inv.saberInvoiceUrl || undefined,
-                  saberInvoiceValue: inv.saberInvoiceValue || undefined,
+                        clearanceCommercialInvoiceNumber:
+                          inv.clearanceCommercialInvoiceNumber || undefined,
+                        clearancecommercialInvoiceDate:
+                          inv.clearancecommercialInvoiceDate || undefined,
+                        clearanceCommercialInvoiceUrl:
+                          inv.clearanceCommercialInvoiceUrl || undefined,
+                        clearanceCommercialInvoiceValue:
+                          inv.clearanceCommercialInvoiceValue || undefined,
+                        actualCommercialInvoiceUrl:
+                          inv.actualCommercialInvoiceUrl || undefined,
+                        actualCommercialInvoiceValue:
+                          inv.actualCommercialInvoiceValue || undefined,
+                        packingListUrl: inv.packingListUrl || undefined,
+                        saberInvoiceUrl: inv.saberInvoiceUrl || undefined,
+                        saberInvoiceValue: inv.saberInvoiceValue || undefined,
                       })
                     )
                   : [],
