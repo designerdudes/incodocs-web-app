@@ -1,16 +1,9 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ChevronLeft, EyeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Heading from "@/components/ui/heading";
-import { DataTable } from "@/components/ui/data-table";
 import { cookies } from "next/headers";
 import {
   Table,
@@ -160,7 +153,7 @@ export default async function ViewQuarryPage({
                                 </TableCell>
                                 <TableCell>
                                   {doc.date
-                                    ? new Date(doc.date).toLocaleDateString()
+                                    ? moment(doc.date).format("YYYY-MM-DD")
                                     : "N/A"}
                                 </TableCell>
                                 <TableCell>
