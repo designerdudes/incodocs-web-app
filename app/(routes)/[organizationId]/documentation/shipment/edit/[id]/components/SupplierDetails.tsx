@@ -468,11 +468,15 @@ export function SupplierDetails({
                                     placeholder="eg. 5000"
                                     {...field}
                                     value={field.value ?? ""}
+                                    onWheel={(e) =>
+                                      e.target instanceof HTMLElement &&
+                                      e.target.blur()
+                                    } // disable scroll change
                                     onChange={(e) =>
                                       field.onChange(
                                         e.target.value
                                           ? parseFloat(e.target.value)
-                                          : undefined
+                                          : ""
                                       )
                                     }
                                   />
@@ -491,11 +495,15 @@ export function SupplierDetails({
                                     placeholder="eg. 4500"
                                     {...field}
                                     value={field.value ?? ""}
+                                    onWheel={(e) =>
+                                      e.target instanceof HTMLElement &&
+                                      e.target.blur()
+                                    } // disable scroll change
                                     onChange={(e) =>
                                       field.onChange(
                                         e.target.value
                                           ? parseFloat(e.target.value)
-                                          : undefined
+                                          : ""
                                       )
                                     }
                                   />
@@ -611,9 +619,12 @@ export function SupplierDetails({
                 placeholder="eg. 6000"
                 {...field}
                 value={field.value ?? ""}
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) =>
                   field.onChange(
-                    e.target.value ? parseFloat(e.target.value) : undefined
+                    e.target.value ? parseFloat(e.target.value) : ""
                   )
                 }
               />

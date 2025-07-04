@@ -205,7 +205,8 @@ export function ShippingDetails({
         }
 
         throw new Error(
-          `File upload failed: ${errorData.message || response.statusText
+          `File upload failed: ${
+            errorData.message || response.statusText
           } (Status: ${response.status})`
         );
       }
@@ -305,7 +306,7 @@ export function ShippingDetails({
           }
           throw new Error(
             errorData.message ||
-            `Failed to fetch forwarders: ${forwarderResponse.status}`
+              `Failed to fetch forwarders: ${forwarderResponse.status}`
           );
         }
 
@@ -331,7 +332,7 @@ export function ShippingDetails({
           }
           throw new Error(
             errorData.message ||
-            `Failed to fetch transporters: ${transporterResponse.status}`
+              `Failed to fetch transporters: ${transporterResponse.status}`
           );
         }
         const transporterData = await transporterResponse.json();
@@ -609,11 +610,15 @@ export function ShippingDetails({
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) =>
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />
@@ -632,11 +637,15 @@ export function ShippingDetails({
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) =>
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />
@@ -819,11 +828,15 @@ export function ShippingDetails({
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) =>
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />
@@ -842,11 +855,15 @@ export function ShippingDetails({
                               placeholder="eg. 11800"
                               {...field}
                               value={field.value ?? ""}
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              } // disable scroll change
                               onChange={(e) =>
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />

@@ -283,7 +283,11 @@ export function AddBlockForm(
                   <FormControl>
                     <Input
                       placeholder="Enter material cost"
+                      type="number"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -310,8 +314,12 @@ export function AddBlockForm(
                   <FormLabel>Marker Cost</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Enter marker cost"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -338,8 +346,12 @@ export function AddBlockForm(
                   <FormLabel>Transport Cost</FormLabel>
                   <FormControl>
                     <Input
+                      type="number"
                       placeholder="Enter transport cost"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -370,6 +382,9 @@ export function AddBlockForm(
                       type="number"
                       min="1"
                       disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      } // disable scroll change
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "" || Number(value) < 1) {
@@ -429,6 +444,10 @@ export function AddBlockForm(
             <div>
               <Input
                 value={globalLength}
+                type="number"
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) => setGlobalLength(e.target.value)}
                 placeholder="Length (inches)"
                 // type="number"
@@ -464,7 +483,11 @@ export function AddBlockForm(
             <div>
               <Input
                 value={globalBreadth}
+                type="number"
                 onChange={(e) => setGlobalBreadth(e.target.value)}
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 placeholder="Breadth (inches)"
                 // type="number"
                 disabled={isLoading}
@@ -498,7 +521,11 @@ export function AddBlockForm(
             </div>
             <div>
               <Input
+                type="number"
                 value={globalHeight}
+                onWheel={(e) =>
+                  e.target instanceof HTMLElement && e.target.blur()
+                } // disable scroll change
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 placeholder="Height (inch)"
                 // type="number"

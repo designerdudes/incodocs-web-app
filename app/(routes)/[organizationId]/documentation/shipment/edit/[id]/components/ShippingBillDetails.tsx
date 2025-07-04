@@ -475,7 +475,7 @@ export function ShippingBillDetails({
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />
@@ -501,8 +501,7 @@ export function ShippingBillDetails({
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
-                                )
+                                    : ""                                )
                               }
                             />
                           </FormControl>
@@ -527,7 +526,7 @@ export function ShippingBillDetails({
                                 field.onChange(
                                   e.target.value
                                     ? parseFloat(e.target.value)
-                                    : undefined
+                                    : ""
                                 )
                               }
                             />
