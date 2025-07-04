@@ -43,11 +43,11 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
           if (data[0]?.Message === "Success") {
             responses.push({ container: container, data });
             setDataArray(responses);
-            // console.log(
-            //   "All voyages data:",
-            //   responses,
-            //   "aaaaaaaaaaaaaaaaaaaaaaaaaSuccess"
-            // );
+            console.log(
+              "All voyages data:",
+              responses,
+              "aaaaaaaaaaaaaaaaaaaaaaaaaSuccess"
+            );
             break;
           } else {
             // console.log(
@@ -208,10 +208,10 @@ function ViewShipment({ shipmentData }: { shipmentData: any }) {
                             </TableCell>
                             <TableCell>Load on Transshipment</TableCell>
                             <TableCell>
-                              {dataArray[0]?.data[0]?.TSPorts[0]?.DepartureDate
+                              {dataArray[0]?.data[0]?.TSPorts[index]?.DepartureDate
                                 ?.Date
                                 ? moment(
-                                    dataArray[0]?.data[0]?.TSPorts[0]
+                                    dataArray[0]?.data[0]?.TSPorts[index]
                                       ?.DepartureDate?.Date
                                   ).format("DD MMM YYYY")
                                 : "-"}
