@@ -48,6 +48,14 @@ const formSchema = z.object({
   name: z
     .string()
     .min(3, { message: "Consignee name must be at least 3 characters long" }),
+  gstNumber: z.string().optional(),
+  panNumber: z.string().optional(),
+  tanNumber: z.string().optional(),
+  addmsme: z.string().optional(),
+  panfile: z.string().optional(),
+  tanfile: z.string().optional(),
+  additional: z.string().optional(),
+  gstfile: z.string().optional(),
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
@@ -136,6 +144,9 @@ export default function EditConsigneeForm({ params }: Props) {
 
         const formData = {
           name: consignee?.name?.toString() || "",
+          gstNumber: consignee?.gstNumber || "",
+          panNumber: consignee?.panNumber || "",
+          tanNumber: consignee?.tanNumber || "",
           address: consignee?.address?.toString() || "",
           mobileNo: consignee?.mobileNo?.toString() || "",
           email: consignee?.email?.toString() || "",
@@ -278,6 +289,9 @@ export default function EditConsigneeForm({ params }: Props) {
               try {
                 const payload = {
                   name: values.name,
+                  gstNumber: values.gstNumber,
+                  panNumber: values.panNumber,
+                  tanNumber: values.tanNumber,
                   address: values.address,
                   mobileNo: values.mobileNo,
                   email: values.email,
@@ -344,7 +358,7 @@ export default function EditConsigneeForm({ params }: Props) {
           onSubmit={form.handleSubmit(handleSubmit)}
           className="grid gap-4 w-full "
         >
-          <div className="grid grid-cols-2 gap-4 w-full ">
+          <div className="grid grid-cols-3 gap-4 w-full ">
             <FormField
               control={form.control}
               name="name"
@@ -353,6 +367,118 @@ export default function EditConsigneeForm({ params }: Props) {
                   <FormLabel>Consignee Name</FormLabel>
                   <FormControl>
                     <Input placeholder="Eg: Ahmed" type="text" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="addmsme"
+              render={() => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="additional"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Additional Documents</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="additional"
+                      storageKey="additional"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

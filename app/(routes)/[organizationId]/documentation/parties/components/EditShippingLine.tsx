@@ -370,7 +370,7 @@ export default function EditShippingLineForm({ params }: Props) {
     <div className="sp  ace-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="shippingLineName"

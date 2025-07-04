@@ -39,6 +39,14 @@ const formSchema = z.object({
   shippingLineName: z
     .string()
     .min(1, { message: "Shipping Line Name is required" }),
+  gstNumber: z.string().optional(),
+  panNumber: z.string().optional(),
+  tanNumber: z.string().optional(),
+  addmsme: z.string().optional(),
+  panfile: z.string().optional(),
+  tanfile: z.string().optional(),
+  additional: z.string().optional(),
+  gstfile: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
   mobileNo: z
@@ -89,6 +97,14 @@ function ShippingLineForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       shippingLineName: "",
+      gstNumber: "",
+      panNumber: "",
+      tanNumber: "",
+      addmsme: "",
+      panfile: "",
+      tanfile: "",
+      additional: "",
+      gstfile: "",
       address: "",
       responsiblePerson: "",
       mobileNo: "",
@@ -140,7 +156,7 @@ function ShippingLineForm({
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}  className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
               control={form.control}
@@ -150,6 +166,118 @@ function ShippingLineForm({
                   <FormLabel>Shipping Line Name</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g., Name1" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="addmsme"
+              render={() => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="additional"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Additional Documents</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="additional"
+                      storageKey="additional"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -246,136 +374,141 @@ function ShippingLineForm({
                 </FormItem>
               )}
             />
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>File Name</TableHead>
-                  <TableHead>File URL</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Review</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {form.watch("documents")?.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.fileName`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., coo"
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                onBlur={() => {
-                                  field.onBlur();
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        name={`documents.${index}.fileUrl`}
-                        render={() => (
-                          <FormItem>
-                            <FormControl>
-                              <FileUploadField
-                                name={`documents.${index}.fileUrl`}
-                                storageKey="documents_fileUrl"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                        control={form.control}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.date`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col gap-2">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button variant="outline" className="w-full">
-                                    {field.value
-                                      ? format(
-                                          new Date(field.value as any),
-                                          "PPPP"
-                                        )
-                                      : "Pick a date"}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <CalendarComponent
-                                  selected={
-                                    field.value
-                                      ? new Date(field.value)
-                                      : undefined
-                                  }
-                                  onSelect={(date: any) => {
-                                    field.onChange(date?.toISOString());
+          </div>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+            <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>File URL</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Review</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {form.watch("documents")?.map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.fileName`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., coo"
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                  onBlur={() => {
+                                    field.onBlur();
                                     saveProgressSilently(form.getValues());
                                   }}
                                 />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.review`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="review your docs"
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                onBlur={() => {
-                                  field.onBlur();
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-
-            
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          name={`documents.${index}.fileUrl`}
+                          render={() => (
+                            <FormItem>
+                              <FormControl>
+                                <FileUploadField
+                                  name={`documents.${index}.fileUrl`}
+                                  storageKey="documents_fileUrl"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                          control={form.control}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      className="w-full"
+                                    >
+                                      {field.value
+                                        ? format(
+                                            new Date(field.value as any),
+                                            "PPPP"
+                                          )
+                                        : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                >
+                                  <CalendarComponent
+                                    selected={
+                                      field.value
+                                        ? new Date(field.value)
+                                        : undefined
+                                    }
+                                    onSelect={(date: any) => {
+                                      field.onChange(date?.toISOString());
+                                      saveProgressSilently(form.getValues());
+                                    }}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.review`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="review your docs"
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                  onBlur={() => {
+                                    field.onBlur();
+                                    saveProgressSilently(form.getValues());
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
-          <Button type="submit" disabled={isLoading} >
-              {isLoading && (
-                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-              )}
-              Submit
-            </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Submit
+          </Button>
         </form>
       </Form>
     </div>
