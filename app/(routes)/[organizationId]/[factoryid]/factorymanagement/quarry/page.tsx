@@ -68,7 +68,6 @@ export default async function quarry({ params }: Props) {
           <Button className="bg-primary text-white">Add Quarry</Button>
         </Link>
       </div>
-      {/* Moved PartiesDropdown here */}
 
       <Separator className="my-2" />
       <div>
@@ -77,7 +76,7 @@ export default async function quarry({ params }: Props) {
           bulkDeleteTitle="Are you sure you want to delete the selected Quarries?"
           bulkDeleteDescription="This will delete the selected Quarries, and they will not be recoverable."
           bulkDeleteToastMessage="Selected Quarries deleted successfully"
-          deleteRoute="quarry/deletemany" // Verify this endpoint
+          deleteRoute="quarry/deletemany" 
           searchKey="quarryName"
           columns={QuarryColumns}
           token={token}
