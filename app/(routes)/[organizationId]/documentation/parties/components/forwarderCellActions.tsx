@@ -60,18 +60,15 @@ const ForwarderCellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            onSelect={() => {
-              GlobalModal.title = `Edit Forwarder - ${data.forwarderName}`;
-              GlobalModal.description = "Update the details of the forwarder below.";
-              GlobalModal.children = (
-                <EditForwarderForm params={{ _id: data._id }} />
-              );
-              GlobalModal.onOpen();
-            }}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Forwarder
-          </DropdownMenuItem>
+  onSelect={() => {
+    router.push(
+      `/${organizationId}/documentation/parties/edit-parties/forwarder?forwarderId=${data._id}`
+    );
+  }}
+>
+  <Edit className="mr-2 h-4 w-4" />
+  Edit Forwarder
+</DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
               router.push(`/${organizationId}/documentation/parties/forwarder/${data._id}`);

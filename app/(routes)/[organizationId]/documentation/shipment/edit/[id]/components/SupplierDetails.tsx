@@ -303,7 +303,15 @@ export function SupplierDetails({
                             }}
                             displayProperty="name"
                             placeholder="Select a Supplier"
-                            onAddNew={openSupplierForm}
+                            valueProperty="_id"
+                            onAddNew={() => {
+                              window.open(
+                                `/${orgId}/documentation/parties/add-parties/supplier`,
+                                "_blank"
+                              );
+                            }}
+                            multiple={true}
+                            // onAddNew={openSupplierForm}
                             addNewLabel="Add New Supplier"
                             disabled={isLoadingSuppliers || !!fetchError}
                           />

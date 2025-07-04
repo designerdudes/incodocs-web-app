@@ -302,7 +302,15 @@ export function SaleInvoiceDetails({
                 }}
                 displayProperty="name"
                 placeholder="Select a Consignee"
-                onAddNew={openConsigneeForm}
+                valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${orgId}/documentation/parties/add-parties/consignee`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                // onAddNew={openConsigneeForm}
                 addNewLabel="Add New Consignee"
               />
             </FormControl>

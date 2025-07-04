@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -35,19 +35,16 @@ import CalendarComponent from "@/components/CalendarComponent";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import { FileUploadField } from "../../../shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
   cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
   portCode: z.string().min(1, { message: "Port Code is required" }),
-  email: z
-    .string()
-    .optional()
-    .refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
-      message: "Enter a valid email",
-    }),
+  email: z.string().optional().refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
+    message: "Enter a valid email",
+  }),
   mobileNo: z
     .union([z.string(), z.number()])
     .optional()
@@ -60,9 +57,7 @@ const formSchema = z.object({
   organizationId: z.string().optional(),
   documents: z.array(
     z.object({
-      fileName: z
-        .string()
-        .min(1, { message: "File name must be at least 1 character long" }),
+      fileName: z.string().min(1, { message: "File name is required" }),
       fileUrl: z.string().optional(),
       date: z.string().min(1, { message: "Date is required" }),
       review: z.string().optional(),
@@ -88,27 +83,33 @@ interface CBData {
 }
 
 interface EditCBNameFormProps {
-  cbData?: CBData;
-  onSuccess: (updatedBrokerId: string) => void;
+  params: {
+    cbData?: string;
+    onSuccess: (updatedBrokerId: string) => void;
+  };
 }
 
-export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProps) {
+export default function EditCBNameForm({ params }: EditCBNameFormProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [isReplaceModalOpen, setIsReplaceModalOpen] = useState(false);
   const [selectedDocIndex, setSelectedDocIndex] = useState<number | null>(null);
   const [newFile, setNewFile] = useState<File | null>(null);
+
   const GlobalModal = useGlobalModal();
+  const CustomBrokerId = params.cbData;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cbName: cbData?.cbName || "",
-      cbCode: cbData?.cbCode || "",
-      portCode: cbData?.portCode || "",
-      email: cbData?.email || "",
-      mobileNo: cbData?.mobileNo ? cbData.mobileNo.toString() : "",
-      address: cbData?.address || "",
-      documents: cbData?.documents || [],
+      cbName: "",
+      cbCode: "",
+      portCode: "",
+      email: "",
+      mobileNo: "",
+      address: "",
+      documents: [],
     },
   });
 
@@ -120,105 +121,45 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
 
   const formValues = watch();
 
-  // Autosave form data
+  // Autosave form values
   useEffect(() => {
-    if (formValues) {
-      saveProgress(formValues);
-    }
+    if (formValues) saveProgress(formValues);
   }, [formValues]);
 
-  // Reset form when cbData changes
+  // ✅ Fetch & Reset Form
   useEffect(() => {
-    if (cbData) {
-      reset({
-        cbName: cbData.cbName || "",
-        cbCode: cbData.cbCode || "",
-        portCode: cbData.portCode || "",
-        email: cbData.email || "",
-        mobileNo: cbData.mobileNo ? cbData.mobileNo.toString() : "",
-        address: cbData.address || "",
-        documents: cbData.documents || [],
-      });
-    }
-  }, [cbData, reset]);
+    const fetchcbnameData = async () => {
+      try {
+        setIsFetching(true);
+        setFetchError(null);
+        const data = await fetchData(`/shipment/cbname/get/${CustomBrokerId}`);
+        console.log("Fetched cbname data:", data);
 
-  // Handle File Upload
-  const handleFileUpload = async (file: File, index: number) => {
-    if (!file) return null;
-    setIsLoading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
-      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
-      setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
-      toast.success("File uploaded successfully!");
-      saveProgress(getValues());
-      return data.storageLink;
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload file");
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        const formData = {
+          cbName: data.cbName || "",
+          cbCode: data.cbCode || "",
+          portCode: data.portCode || "",
+          email: data.email || "",
+          mobileNo: data.mobileNo ? data.mobileNo.toString() : "",
+          address: data.address || "",
+          documents: data.documents || [],
+        };
 
-  // Handle File Replacement
-  const handleReplaceDocument = (index: number) => {
-    setSelectedDocIndex(index);
-    setNewFile(null);
-    setIsReplaceModalOpen(true);
-  };
-
-  const handleReplaceSubmit = async () => {
-    if (selectedDocIndex === null || !newFile) {
-      toast.error("Please select a file to upload.");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const fileUrl = await handleFileUpload(newFile, selectedDocIndex);
-      if (fileUrl) {
-        toast.success("Document replaced successfully. Submit the form to save changes.");
-        setIsReplaceModalOpen(false);
-        saveProgress(getValues());
+        reset(formData);
+        console.log("Form reset with:", formData);
+      } catch (error) {
+        console.error("Error fetching broker:", error);
+        setFetchError("Failed to load custom broker details. Please try again.");
+        toast.error("Failed to fetch custom broker data");
+      } finally {
+        setIsFetching(false);
       }
-    } catch (error) {
-      console.error("Error replacing document:", error);
-      toast.error("Failed to replace document");
-    } finally {
-      setIsLoading(false);
-      setNewFile(null);
-      setSelectedDocIndex(null);
-    }
-  };
+    };
 
-  // Autosave to localStorage
-  const saveProgress = (data: any) => {
-    try {
-      localStorage.setItem("cbFormData", JSON.stringify(data));
-      localStorage.setItem("lastSaved", new Date().toISOString());
-    } catch (error) {
-      console.error("Failed to save progress to localStorage:", error);
-    }
-  };
+    if (CustomBrokerId) fetchcbnameData();
+  }, [CustomBrokerId, reset]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    if (!cbData?._id) {
-      toast.error("No Customs Broker ID provided");
-      return;
-    }
-
     setIsLoading(true);
 
     GlobalModal.title = "Confirm Customs Broker Update";
@@ -264,26 +205,20 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
                   email: values.email,
                   mobileNo: values.mobileNo,
                   address: values.address,
-                  documents: values.documents.map((doc) => ({
-                    fileName: doc.fileName,
-                    fileUrl: doc.fileUrl,
-                    date: doc.date,
-                    review: doc.review,
-                  })),
+                  documents: values.documents,
                 };
 
-                await putData(`/shipment/cbname/put/${cbData._id}`, payload);
+                await putData(`/shipment/cbname/put/${CustomBrokerId}`, payload);
 
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Customs Broker updated successfully");
-                reset();
-                onSuccess(cbData._id);
+                reset(); // optional clear/reset
               } catch (error: any) {
-                console.error("Error updating customs broker:", error);
+                console.error("Update error:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error(error.message || "Failed to update customs broker");
+                toast.error(error.message || "Update failed");
               }
             }}
           >
@@ -295,6 +230,74 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
     GlobalModal.onOpen();
   };
 
+  const handleFileUpload = async (file: File, index: number) => {
+    if (!file) return null;
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await fetch(
+        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      if (!response.ok) throw new Error("Upload failed");
+      const data = await response.json();
+      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
+      setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
+      toast.success("File uploaded successfully!");
+      saveProgress(getValues());
+      return data.storageLink;
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Upload failed");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleReplaceDocument = (index: number) => {
+    setSelectedDocIndex(index);
+    setNewFile(null);
+    setIsReplaceModalOpen(true);
+  };
+
+  const handleReplaceSubmit = async () => {
+    if (selectedDocIndex === null || !newFile) {
+      toast.error("Select a file to upload.");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const fileUrl = await handleFileUpload(newFile, selectedDocIndex);
+      if (fileUrl) {
+        toast.success("Document replaced. Submit to save.");
+        setIsReplaceModalOpen(false);
+        saveProgress(getValues());
+      }
+    } catch (error) {
+      console.error("Replace error:", error);
+      toast.error("Failed to replace document");
+    } finally {
+      setIsLoading(false);
+      setNewFile(null);
+      setSelectedDocIndex(null);
+    }
+  };
+
+  const saveProgress = (data: any) => {
+    try {
+      localStorage.setItem("cbFormData", JSON.stringify(data));
+      localStorage.setItem("lastSaved", new Date().toISOString());
+    } catch (error) {
+      console.error("Failed to save progress:", error);
+    }
+  };
+
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -303,95 +306,103 @@ export default function EditCBNameForm({ cbData, onSuccess }: EditCBNameFormProp
     });
   };
 
-  if (!cbData) {
+  // ✅ Fixed loader logic
+  if (isFetching) {
     return <div className="text-center text-gray-500">Loading Customs Broker Data...</div>;
   }
 
+  if (fetchError) {
+    return (
+      <div className="flex items-center justify-center h-60">
+        <p className="text-red-500">{fetchError}</p>
+      </div>
+    );
+  }
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold mb-4">Edit Customs Broker</h2>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-          <div className="grid grid-cols-2 gap-4">
-            <FormField
-              control={form.control}
-              name="cbName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CB Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., XYZ Clearing" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="cbCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>CB Code</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., CB123" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="portCode"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Port Code</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., ABCD123" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., cbxyz@gmail.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="mobileNo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mobile Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 9876543210" type="tel" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Address</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 45 Shipping Lane" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+  <div className="space-y-6">
+    <h2 className="text-lg font-semibold mb-4">Edit Customs Broker</h2>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+        <div className="grid grid-cols-2 gap-4">
+          <Controller
+            name="cbName"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CB Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., XYZ Clearing" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Controller
+            name="cbCode"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CB Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., CB123" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Controller
+            name="portCode"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Port Code</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., ABCD123" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Controller
+            name="email"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., cbxyz@gmail.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Controller
+            name="mobileNo"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Mobile Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., 9876543210" type="tel" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Controller
+            name="address"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Address</FormLabel>
+                <FormControl>
+                  <Input placeholder="e.g., 45 Shipping Lane" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
           <div className="grid grid-cols-4 gap-4 w-full">
             {/* Documents Section */}
             {fields.length > 0 && (

@@ -472,7 +472,15 @@ export function ShippingDetails({
                   onChange={(value) => field.onChange(value)}
                   displayProperty="forwarderName"
                   placeholder="Select a Forwarder"
-                  onAddNew={openForwarderForm}
+                  valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${orgId}/documentation/parties/add-parties/forwarder`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                  // onAddNew={openForwarderForm}
                   addNewLabel="Add New Forwarder"
                 />
               </FormControl>
@@ -682,7 +690,15 @@ export function ShippingDetails({
                   onChange={(value) => field.onChange(value)}
                   displayProperty="transporterName"
                   placeholder="Select a Transporter"
-                  onAddNew={openTransporterForm}
+                  valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${orgId}/documentation/parties/add-parties/transporter`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                  // onAddNew={openTransporterForm}
                   addNewLabel="Add New Transporter"
                 />
               </FormControl>

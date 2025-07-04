@@ -159,7 +159,15 @@ export function BillOfLadingDetails({
                 onChange={(value) => field.onChange(value)}
                 displayProperty="shippingLineName"
                 placeholder="Select a Shipping Line"
-                onAddNew={openShippingLineForm}
+                valueProperty="_id"
+                   onAddNew={() => {
+                    window.open(
+                      `/${orgId}/documentation/parties/add-parties/shipping-line`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={true}
+                // onAddNew={openShippingLineForm}
                 addNewLabel="Add New Shipping Line"
               />
             </FormControl>
