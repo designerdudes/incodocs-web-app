@@ -59,11 +59,9 @@ const formSchema = z.object({
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
-  responsiblePerson: z
-    .string()
-    .min(3, {
-      message: "Responsible person must be at least 3 characters long",
-    }),
+  responsiblePerson: z.string().min(3, {
+    message: "Responsible person must be at least 3 characters long",
+  }),
   email: z.string().email({ message: "Please enter a valid email address" }),
   mobileNo: z.union([z.string(), z.number()]).refine(
     (val) => {
@@ -108,6 +106,14 @@ export default function EditForwarderForm({ params }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       forwarderName: "",
+      gstNumber: "",
+      panNumber: "",
+      tanNumber: "",
+      addmsme: "",
+      panfile: "",
+      tanfile: "",
+      additional: "",
+      gstfile: "",
       address: "",
       responsiblePerson: "",
       email: "",
@@ -140,8 +146,6 @@ export default function EditForwarderForm({ params }: Props) {
         const data = await fetchData(
           `/shipment/forwarder/getone/${forwarderId}`
         );
-        console.log("Fetched forwarder data:", data);
-
         const forwarder = data?.findForwarder;
 
         if (!forwarder) {
@@ -153,6 +157,11 @@ export default function EditForwarderForm({ params }: Props) {
           gstNumber: forwarder?.gstNumber || "",
           panNumber: forwarder?.panNumber || "",
           tanNumber: forwarder?.tanNumber || "",
+          addmsme: forwarder?.addmsme || "",
+          panfile: forwarder?.panfile || "",
+          tanfile: forwarder?.tanfile || "",
+          additional: forwarder?.additional || "",
+          gstfile: forwarder?.gstfile || "",
           address: forwarder?.address?.toString() || "",
           responsiblePerson: forwarder?.responsiblePerson?.toString() || "",
           email: forwarder?.email?.toString() || "",
@@ -300,6 +309,11 @@ export default function EditForwarderForm({ params }: Props) {
                   gstNumber: values.gstNumber,
                   panNumber: values.panNumber,
                   tanNumber: values.tanNumber,
+                  addmsme: values?.addmsme,
+                  panfile: values?.panfile,
+                  tanfile: values?.tanfile,
+                  additional: values?.additional,
+                  gstfile: values?.gstfile,
                   address: values.address,
                   responsiblePerson: values.responsiblePerson,
                   email: values.email,

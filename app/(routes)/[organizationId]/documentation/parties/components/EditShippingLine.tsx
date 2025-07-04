@@ -104,6 +104,14 @@ export default function EditShippingLineForm({ params }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       shippingLineName: "",
+       gstNumber: "",
+      panNumber: "",
+      tanNumber: "",
+      addmsme: "",
+      panfile: "",
+      tanfile: "",
+      additional: "",
+      gstfile: "",
       address: "",
       responsiblePerson: "",
       email: "",
@@ -154,6 +162,11 @@ export default function EditShippingLineForm({ params }: Props) {
           gstNumber: shippingLine?.gstNumber || "",
           panNumber: shippingLine?.panNumber || "",
           tanNumber: shippingLine?.tanNumber || "",
+          addmsme: shippingLine?.addmsme || "",
+          panfile: shippingLine?.panfile || "",
+          tanfile: shippingLine?.tanfile || "",
+          additional: shippingLine?.additional || "",
+          gstfile: shippingLine?.gstfile || "",
 
           documents:
             shippingLine?.documents?.map((doc: any) => ({
@@ -304,11 +317,14 @@ export default function EditShippingLineForm({ params }: Props) {
                   responsiblePerson: values.responsiblePerson,
                   email: values.email,
                   mobileNo: values.mobileNo,
-
                   gstNumber: values.gstNumber,
                   panNumber: values.panNumber,
                   tanNumber: values.tanNumber,
-
+                  addmsme: values?.addmsme,
+                  panfile: values?.panfile,
+                  tanfile: values?.tanfile,
+                  additional: values?.additional,
+                  gstfile: values?.gstfile,
                   documents: values.documents.map((doc: any) => ({
                     fileName: doc.fileName,
                     fileUrl: doc.fileUrl,

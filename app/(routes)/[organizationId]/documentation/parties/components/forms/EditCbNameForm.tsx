@@ -38,9 +38,11 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { fetchData, putData } from "@/axiosUtility/api";
 import { FileUploadField } from "../../../shipment/createnew/components/FileUploadField";
 
-const formSchema = z.object({
-  cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
-  gstNumber: z.string().optional(),
+
+export const formSchema = z.object({
+  cbname: z.object({
+    cbName: z.string().min(1, { message: "Customs Broker Name is required" }),
+    gstNumber: z.string().optional(),
     panNumber: z.string().optional(),
     tanNumber: z.string().optional(),
     addmsme: z.string().optional(),
@@ -48,47 +50,55 @@ const formSchema = z.object({
     tanfile: z.string().optional(),
     additional: z.string().optional(),
     gstfile: z.string().optional(),
-  cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
-  portCode: z.string().min(1, { message: "Port Code is required" }),
-  email: z.string().optional().refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
-    message: "Enter a valid email",
-  }),
-  mobileNo: z
-    .union([z.string(), z.number()])
-    .optional()
-    .refine((val) => {
-      if (!val) return true;
-      const strVal = val.toString();
-      return strVal.length >= 10 && /^\d+$/.test(strVal);
-    }, { message: "Mobile number must be at least 10 digits and contain only numbers" }),
-  address: z.string().optional(),
-  organizationId: z.string().optional(),
-  documents: z.array(
-    z.object({
-      fileName: z.string().min(1, { message: "File name is required" }),
-      fileUrl: z.string().optional(),
-      date: z.string().min(1, { message: "Date is required" }),
-      review: z.string().optional(),
-    })
-  ),
-});
+    cbCode: z.string().min(1, { message: "Customs Broker Code is required" }),
+    portCode: z.string().min(1, { message: "Port Code is required" }),
+    email: z
+      .string()
+      .optional()
+      .refine((val) => !val || /\S+@\S+\.\S+/.test(val), {
+        message: "Enter a valid email",
+      }),
+    mobileNo: z
+      .union([z.string(), z.number()])
+      .optional()
+      .refine(
+        (val) => {
+          if (!val) return true;
+          const strVal = val.toString();
+          return strVal.length >= 10 && /^\d+$/.test(strVal);
+        },
+        {
+          message:
+            "Mobile number must be at least 10 digits and contain only numbers",
+        }
+      ),
+    address: z.string().optional(),
+    organizationId: z.string().optional(),
 
-// interface CBData {
-//   _id: string;
-//   cbName: string;
-//   cbCode: string;
-//   portCode: string;
-//   email?: string;
-//   mobileNo?: string | number;
-//   address?: string;
-//   organizationId?: string;
-//   documents?: Array<{
-//     fileName: string;
-//     fileUrl?: string;
-//     date: string;
-//     review?: string;
-//   }>;
-// }
+    documents: z
+      .array(
+        z.object({
+          fileName: z.string().min(1, { message: "File name is required" }),
+          fileUrl: z.string().optional(),
+          date: z.string().min(1, { message: "Date is required" }),
+          review: z.string().optional(),
+        })
+      )
+      .optional(),
+
+    // Optional: add if used in form for display or update
+    createdBy: z
+      .object({
+        fullName: z.string().optional(),
+        employeeId: z.string().optional(),
+        email: z.string().optional(),
+        mobileNumber: z.number().optional(),
+        designation: z.string().optional(),
+        contactPerson: z.string().optional(),
+      })
+      .optional(),
+  }),
+});
 
 interface EditCBNameFormProps {
   params: {
@@ -111,53 +121,82 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cbName: "",
-      cbCode: "",
-      portCode: "",
-      email: "",
-      mobileNo: "",
-      address: "",
-      documents: [],
-    },
+      cbname: {
+        cbName: "",
+        gstNumber: "",
+        panNumber: "",
+        tanNumber: "",
+        addmsme: "",
+        panfile: "",
+        tanfile: "",
+        additional: "",
+        gstfile: "",
+        cbCode: "",
+        portCode: "",
+        email: "",
+        mobileNo: "",
+        address: "",
+        organizationId: "",
+        documents: []
+      }
+    }
   });
 
   const { control, watch, setValue, getValues, reset } = form;
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
-    name: "documents",
+    name: "cbname.documents"
   });
 
   const formValues = watch();
 
-  // Autosave form values
   useEffect(() => {
     if (formValues) saveProgress(formValues);
   }, [formValues]);
 
-  // ✅ Fetch & Reset Form
   useEffect(() => {
     const fetchcbnameData = async () => {
+      if (!CustomBrokerId) {
+        setFetchError("No Customs Broker ID provided.");
+        setIsFetching(false);
+        return;
+      }
+
       try {
         setIsFetching(true);
         setFetchError(null);
         const data = await fetchData(`/shipment/cbname/get/${CustomBrokerId}`);
-        console.log("Fetched cbname data:", data);
 
         const formData = {
-          cbName: data.cbName || "",
-          gstNumber: data?.gstNumber || "",
-          panNumber: data?.panNumber || "",
-          tanNumber: data?.tanNumber || "",
-          cbCode: data.cbCode || "",
-          portCode: data.portCode || "",
-          email: data.email || "",
-          mobileNo: data.mobileNo ? data.mobileNo.toString() : "",
-          address: data.address || "",
-          documents: data.documents || [],
+          cbname: {
+            cbName: data?.cbname?.cbName || "",
+            gstNumber: data?.cbname?.gstNumber || "",
+            panNumber: data?.cbname?.panNumber || "",
+            tanNumber: data?.cbname?.tanNumber || "",
+            addmsme: data?.cbname?.addmsme || "",
+            panfile: data?.cbname?.panfile || "",
+            tanfile: data?.cbname?.tanfile || "",
+            additional: data?.cbname?.additional || "",
+            gstfile: data?.cbname?.gstfile || "",
+            cbCode: data?.cbname?.cbCode || "",
+            portCode: data?.cbname?.portCode || "",
+            email: data?.cbname?.email || "",
+            mobileNo: data?.cbname?.mobileNo ? String(data.cbname.mobileNo) : "",
+            address: data?.cbname?.address || "",
+            organizationId: data?.cbname?.organizationId || "",
+            documents: Array.isArray(data?.cbname?.documents)
+              ? data.cbname.documents.map((doc: any) => ({
+                  fileName: doc.fileName || "",
+                  fileUrl: doc.fileUrl || "",
+                  date: doc.date || new Date().toISOString(),
+                  review: doc.review || ""
+                }))
+              : []
+          }
         };
 
         reset(formData);
-        console.log("Form reset with:", formData);
+        replace(formData.cbname.documents);
       } catch (error) {
         console.error("Error fetching broker:", error);
         setFetchError("Failed to load custom broker details. Please try again.");
@@ -167,8 +206,8 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
       }
     };
 
-    if (CustomBrokerId) fetchcbnameData();
-  }, [CustomBrokerId, reset]);
+    fetchcbnameData();
+  }, [CustomBrokerId, reset, replace]);
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -177,12 +216,12 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
     GlobalModal.description = "Are you sure you want to update this customs broker?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>CB Name: {values.cbName}</p>
-        <p>CB Code: {values.cbCode}</p>
-        <p>Port Code: {values.portCode}</p>
-        <p>Email: {values.email || "N/A"}</p>
-        <p>Mobile No: {values.mobileNo || "N/A"}</p>
-        <p>Address: {values.address || "N/A"}</p>
+        <p>CB Name: {values.cbname.cbName}</p>
+        <p>CB Code: {values.cbname.cbCode}</p>
+        <p>Port Code: {values.cbname.portCode}</p>
+        <p>Email: {values.cbname.email || "N/A"}</p>
+        <p>Mobile No: {values.cbname.mobileNo || "N/A"}</p>
+        <p>Address: {values.cbname.address || "N/A"}</p>
         {fields.length > 0 && (
           <div>
             <p className="font-semibold">Documents:</p>
@@ -197,44 +236,25 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
           </div>
         )}
         <div className="flex justify-end space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              GlobalModal.onClose();
-              setIsLoading(false);
-            }}
-          >
+          <Button variant="outline" onClick={() => GlobalModal.onClose()} disabled={isLoading}>
             Cancel
           </Button>
           <Button
             onClick={async () => {
               try {
-                const payload = {
-                  cbName: values.cbName,
-                   gstNumber: values.gstNumber,
-                  panNumber: values.panNumber,
-                  tanNumber: values.tanNumber,
-                  cbCode: values.cbCode,
-                  portCode: values.portCode,
-                  email: values.email,
-                  mobileNo: values.mobileNo,
-                  address: values.address,
-                  documents: values.documents,
-                };
-
-                await putData(`/shipment/cbname/put/${CustomBrokerId}`, payload);
-
-                setIsLoading(false);
-                GlobalModal.onClose();
+                await putData(`/shipment/cbname/put/${CustomBrokerId}`, values.cbname);
                 toast.success("Customs Broker updated successfully");
-                reset(); // optional clear/reset
+                GlobalModal.onClose();
+                params.onSuccess(CustomBrokerId!);
+                reset();
               } catch (error: any) {
                 console.error("Update error:", error);
-                setIsLoading(false);
-                GlobalModal.onClose();
                 toast.error(error.message || "Update failed");
+              } finally {
+                setIsLoading(false);
               }
             }}
+            disabled={isLoading}
           >
             Confirm
           </Button>
@@ -254,13 +274,13 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
         "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
         {
           method: "POST",
-          body: formData,
+          body: formData
         }
       );
       if (!response.ok) throw new Error("Upload failed");
       const data = await response.json();
-      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
-      setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
+      setValue(`cbname.documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
+      setValue(`cbname.documents.${index}.fileName`, file.name, { shouldDirty: true });
       toast.success("File uploaded successfully!");
       saveProgress(getValues());
       return data.storageLink;
@@ -284,7 +304,6 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
       toast.error("Select a file to upload.");
       return;
     }
-
     try {
       setIsLoading(true);
       const fileUrl = await handleFileUpload(newFile, selectedDocIndex);
@@ -316,11 +335,10 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
   };
 
-  // ✅ Fixed loader logic
   if (isFetching) {
     return <div className="text-center text-gray-500">Loading Customs Broker Data...</div>;
   }
@@ -332,367 +350,402 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
       </div>
     );
   }
+
   return (
-  <div className="space-y-6">
-    <h2 className="text-lg font-semibold mb-4">Edit Customs Broker</h2>
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-3 gap-4">
-          <Controller
-            name="cbName"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CB Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., XYZ Clearing" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-           <FormField
-                        control={form.control}
-                        name="gstNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>GST Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter GST Number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          
-                      <FormField
-                        control={form.control}
-                        name="panNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>PAN Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter PAN Number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          
-                      <FormField
-                        control={form.control}
-                        name="tanNumber"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>TAN Number</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Enter TAN Number" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="addmsme"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>MSME Certificate</FormLabel>
-                            <FormControl>
-                              <FileUploadField name="addmsme" storageKey="addmsme" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          
-                      <FormField
-                        control={form.control}
-                        name="panfile"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>PAN File</FormLabel>
-                            <FormControl>
-                              <FileUploadField name="panfile" storageKey="panfile" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          
-                      <FormField
-                        control={form.control}
-                        name="tanfile"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>TAN File</FormLabel>
-                            <FormControl>
-                              <FileUploadField name="panfile" storageKey="panfile" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="gstfile"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>GST File</FormLabel>
-                            <FormControl>
-                              <FileUploadField name="gstfile" storageKey="gstfile" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          
-                      <FormField
-                        control={form.control}
-                        name="additional"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>Additional Documents</FormLabel>
-                            <FormControl>
+    <div className="space-y-6">
+      <h2 className="text-lg font-semibold mb-4">Edit Customs Broker</h2>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
+          <div className="grid grid-cols-3 gap-4">
+            <Controller
+              name="cbname.cbName"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CB Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., XYZ Clearing" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} value={field.value ?? ""} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.addmsme"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="addmsme"
+                      storageKey="addmsme"
+                      onFileChange={(file: File) => {
+                        if (file) {
+                          setValue("cbname.addmsme", file.name, { shouldDirty: true });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.panfile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="panfile"
+                      storageKey="panfile"
+                      onFileChange={(file: File) => {
+                        if (file) {
+                          setValue("cbname.panfile", file.name, { shouldDirty: true });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.tanfile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="tanfile"
+                      storageKey="tanfile"
+                      onFileChange={(file: File) => {
+                        if (file) {
+                          setValue("cbname.tanfile", file.name, { shouldDirty: true });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.gstfile"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="gstfile"
+                      storageKey="gstfile"
+                      onFileChange={(file: File) => {
+                        if (file) {
+                          setValue("cbname.gstfile", file.name, { shouldDirty: true });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cbname.additional"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Additional Documents</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="additional"
+                      storageKey="additional"
+                      onFileChange={(file: File) => {
+                        if (file) {
+                          setValue("cbname.additional", file.name, { shouldDirty: true });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="cbname.cbCode"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>CB Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., CB123" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="cbname.portCode"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Port Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., ABCD123" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="cbname.email"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., cbxyz@gmail.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="cbname.mobileNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mobile Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., 9876543210" type="tel" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Controller
+              name="cbname.address"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g., 45 Shipping Lane" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="grid grid-cols-4 gap-4 w-full ">
+
+          {/* Documents Section */}
+          {fields.length > 0 && (
+            <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>Upload Document</TableHead>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Review</TableHead>
+                    <TableHead>Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {fields.map((item, index) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`cbname.documents.${index}.fileUrl`}
+                          render={({ field }) => (
+                            <div className="flex items-center space-x-2">
                               <FileUploadField
-                                name="additional"
-                                storageKey="additional"
+                                name={`documents.${index}.fileUrl`}
+                                storageKey={`documents.${index}.fileUrl`}
+                                onFileChange={async (file: File) => {
+                                  if (file) {
+                                    await handleFileUpload(file, index);
+                                  }
+                                }}
                               />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-          <Controller
-            name="cbCode"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>CB Code</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., CB123" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Controller
-            name="portCode"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Port Code</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., ABCD123" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Controller
-            name="email"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., cbxyz@gmail.com" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Controller
-            name="mobileNo"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mobile Number</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., 9876543210" type="tel" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Controller
-            name="address"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Address</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., 45 Shipping Lane" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-          <div className="grid grid-cols-4 gap-4 w-full">
-            {/* Documents Section */}
-            {fields.length > 0 && (
-              <div className="col-span-4 overflow-x-auto mt-4">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>#</TableHead>
-                      <TableHead>Upload Document</TableHead>
-                      <TableHead>File Name</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Review</TableHead>
-                      <TableHead>Action</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {fields.map((item, index) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>
-                          <FormField
-                            control={control}
-                            name={`documents.${index}.fileUrl`}
-                            render={({ field }) => (
-                              <div className="flex items-center space-x-2">
-                                <FileUploadField
-                                  name={`documents.${index}.fileUrl`}
-                                  storageKey={`documents.${index}.fileUrl`}
-                                  onFileChange={async (file: File) => {
-                                    if (file) {
-                                      await handleFileUpload(file, index);
-                                    }
-                                  }}
-                                />
-                                {field.value && (
-                                  <a
-                                    href={field.value}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-500 hover:underline"
-                                  >
-                                    <Eye className="h-4 w-4 cursor-pointer" />
-                                  </a>
-                                )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  type="button"
-                                  onClick={() => handleReplaceDocument(index)}
+                              {field.value && (
+                                <a
+                                  href={field.value}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-500 hover:underline"
                                 >
-                                  <UploadCloud className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.fileName`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Document.pdf"
-                                    {...field}
-                                    value={field.value ?? ""}
+                                  <Eye className="h-4 w-4 cursor-pointer" />
+                                </a>
+                              )}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                type="button"
+                                onClick={() => handleReplaceDocument(index)}
+                              >
+                                <UploadCloud className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`cbname.documents.${index}.fileName`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. Document.pdf"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`cbname.documents.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button variant="outline">
+                                      {field.value &&
+                                      !isNaN(new Date(field.value).getTime())
+                                        ? format(new Date(field.value), "PPPP")
+                                        : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent align="start">
+                                  <CalendarComponent
+                                    selected={
+                                      field.value ? new Date(field.value) : undefined
+                                    }
+                                    onSelect={(date: any) => {
+                                      field.onChange(date?.toISOString());
+                                      saveProgress(getValues());
+                                    }}
                                   />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.date`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <Popover>
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button variant="outline">
-                                        {field.value &&
-                                        !isNaN(new Date(field.value).getTime())
-                                          ? format(new Date(field.value), "PPPP")
-                                          : "Pick a date"}
-                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent align="start">
-                                    <CalendarComponent
-                                      selected={
-                                        field.value ? new Date(field.value) : undefined
-                                      }
-                                      onSelect={(date: any) => {
-                                        field.onChange(date?.toISOString());
-                                        saveProgress(getValues());
-                                      }}
-                                    />
-                                  </PopoverContent>
-                                </Popover>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.review`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Reviewed"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            type="button"
-                            onClick={() => remove(index)}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`cbname.documents.${index}.review`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. Reviewed"
+                                  {...field}
+                                  value={field.value ?? ""}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            
+          )}
 
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() =>
-                append({
-                  fileName: "",
-                  fileUrl: "",
-                  date: new Date().toISOString(),
-                  review: "",
-                })
-              }
-              className="mt-4"
-            >
-              Add Document
-            </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              append({
+                fileName: "",
+                fileUrl: "",
+                date: new Date().toISOString(),
+                review: "",
+              })
+            }
+            className="mt-4"
+          >
+            Add Document
+          </Button>
 
-            <Button type="submit" disabled={isLoading} className="w-full mt-4">
-              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-              Update
-            </Button>
+          <Button type="submit" disabled={isLoading} className="w-full mt-4">
+            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+            Submit
+          </Button>
           </div>
         </form>
       </Form>
