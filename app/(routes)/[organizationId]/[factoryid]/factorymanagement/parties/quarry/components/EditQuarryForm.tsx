@@ -1,6 +1,5 @@
 "use client";
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -13,20 +12,30 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, postData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
-import { Textarea } from "@/components/ui/textarea";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import { useGlobalModal } from "@/hooks/GlobalModal";
+import { CalendarIcon, Trash } from "lucide-react";
+import { format } from "date-fns";
+import CalendarComponent from "@/components/CalendarComponent";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon, Trash } from "lucide-react";
-import { format } from "date-fns";
-import CalendarComponent from "@/components/CalendarComponent";
+import { Quarry } from "./columns";
+import { Textarea } from "@/components/ui/textarea";
+import { quarrySchema } from "@/components/forms/QuarryFormPage";
 import {
   Table,
   TableBody,
@@ -34,10 +43,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "../ui/table";
+} from "@/components/ui/table";
 
-// 🧾 Zod Schema
-export const quarrySchema = z.object({
+// Zod Schemas
+export const QuarrySchema = z.object({
   lesseeId: z.string().optional(),
   lesseeName: z.string().optional(),
   mineralName: z.string().optional(),
@@ -55,20 +64,36 @@ export const quarrySchema = z.object({
     .optional(),
 });
 
-type QuarryFormValues = z.infer<typeof quarrySchema>;
+type QuarryFormValues = z.infer<typeof QuarrySchema>;
 
-interface QuarryFormProps {
+interface QuarrryFormProps {
   params: {
     factoryid: string;
     organizationId: string;
+    _id: Quarry;
+    lesseeId?: string;
+    lesseeName?: string;
+    mineralName?: string;
+    businessLocationNames?: string[];
+    documents?: {
+      fileName?: string;
+      fileUrl?: string;
+      date?: Date;
+      review?: string;
+    }[];
+    createdAt?: Date;
+    updatedAt?: Date;
   };
 }
 
-export default function QuarryFormPage({ params }: QuarryFormProps) {
+export default function QuarryFormPage({ params }: QuarrryFormProps) {
   const orgId = params.organizationId;
   const factoryId = params.factoryid;
+  const GlobalModal = useGlobalModal();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+
+  const data = params;
 
   const form = useForm<QuarryFormValues>({
     resolver: zodResolver(quarrySchema),
@@ -89,41 +114,57 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
     },
   });
 
-  const { control, ...formMethods } = form;
-
   const {
     fields: documentFields,
     append,
     remove,
   } = useFieldArray({
-    control,
+    control: form.control,
     name: "documents",
   });
+
+  useEffect(() => {
+    form.reset({
+      factoryId: factoryId,
+      lesseeId: data?.lesseeId || "",
+      lesseeName: data?.lesseeName || "",
+      mineralName: data?.mineralName || "",
+      businessLocationNames: data?.businessLocationNames?.join(", ") || "",
+      documents: (data?.documents || []).map((doc: any) => ({
+        fileName: doc.fileName || "",
+        fileUrl: doc.fileUrl || "",
+        date: doc.date || "",
+        review: doc.review || "",
+      })),
+    });
+  }, [data, factoryId, form]);
 
   const handleSubmit = async (values: QuarryFormValues) => {
     setIsLoading(true);
     try {
-      await postData("/quarry/create", {
+      await putData(`/quarry/update/${data._id}`, {
         ...values,
         params,
       });
-      toast.success("Quarry added successfully!");
-      router.push("./");
+
+      toast.success("Quarry Added Successfully");
+      router.push("../");
     } catch (error) {
-      toast.error("Error creating/updating quarry");
+      toast.error("Error creating/updating quarry ");
     } finally {
       setIsLoading(false);
     }
   };
-
   return (
     <div className="space-y-6 mt-4">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
-          className="flex flex-col space-y-6 w-full"
+          className="grid space-y-6 w-full"
         >
+          {" "}
           <div className="grid grid-flow-col gap-4">
+            {/* lesseeId */}
             <FormField
               control={form.control}
               name="lesseeId"
@@ -142,6 +183,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
               )}
             />
 
+            {/* lesseeName */}
             <FormField
               control={form.control}
               name="lesseeName"
@@ -160,6 +202,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
               )}
             />
 
+            {/* mineralName */}
             <FormField
               control={form.control}
               name="mineralName"
@@ -178,6 +221,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
               )}
             />
 
+            {/* businessLocationNames */}
             <FormField
               control={form.control}
               name="businessLocationNames"
@@ -206,11 +250,11 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
                     <TableHead>Document Upload</TableHead>
                     <TableHead>Document Date</TableHead>
                     <TableHead>Review / Description</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {documentFields.map((doc: any, index: number) => (
+                  {documentFields.map((doc, index) => (
                     <TableRow key={doc.id}>
                       {/* File Name */}
                       <TableCell>
@@ -251,7 +295,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
                         />
                       </TableCell>
 
-                      {/* Document Date */}
+                      {/* Date Picker */}
                       <TableCell>
                         <FormField
                           control={form.control}
@@ -283,7 +327,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
                                         : undefined
                                     }
                                     onSelect={(date) =>
-                                      field.onChange(date?.toISOString())
+                                      field.onChange(date?.toISOString() || "")
                                     }
                                   />
                                 </PopoverContent>
@@ -294,7 +338,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
                         />
                       </TableCell>
 
-                      {/* Review / Description */}
+                      {/* Review */}
                       <TableCell>
                         <FormField
                           control={form.control}
@@ -305,7 +349,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
                                 <Textarea
                                   placeholder="Enter review"
                                   className="resize-none"
-                                  rows={2}
+                                  rows={3}
                                   {...field}
                                 />
                               </FormControl>
@@ -332,25 +376,21 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
               </Table>
             )}
           </div>
+          {/* Add Button + Submit */}
           <div className="flex items-center justify-center w-1/2 gap-4">
             <Button
-              className="w-1/2 "
+              className="w-1/2"
               type="button"
               variant="outline"
               onClick={() =>
-                append({
-                  fileName: "",
-                  fileUrl: "",
-                  date: "",
-                  review: "",
-                })
+                append({ fileName: "", fileUrl: "", date: "", review: "" })
               }
             >
               + Add Document
             </Button>
 
             <Button type="submit" disabled={isLoading} className="w-1/2">
-              {isLoading ? "Saving..." : "Add Quarry"}
+              {isLoading ? "Saving..." : "Update Quarry"}
             </Button>
           </div>
         </form>

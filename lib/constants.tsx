@@ -353,7 +353,16 @@ const sidebarTabs = {
           title: "Machines",
           url: "/factorymanagement/machines",
         },
-        { title: "Quarry", url: "/factorymanagement/quarry" },
+        {
+          title: "Parties",
+          url: "/factorymanagement/parties",
+          items: [
+            {
+              title: "Quarry",
+              url: "/factorymanagement/parties/quarry",
+            },
+          ],
+        },
       ],
     },
     {
