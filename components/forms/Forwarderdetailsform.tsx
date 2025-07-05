@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm, useFormContext } from "react-hook-form";
+import { useFieldArray, useForm, useFormContext } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -36,17 +36,17 @@ import {
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 const formSchema = z.object({
   forwarderName: z.string().min(1, { message: "Forwarder Name is required" }),
-   gstNumber: z.string().optional(),
-    panNumber: z.string().optional(),
-    tanNumber: z.string().optional(),
-    addmsme: z.string().optional(),
-    panfile: z.string().optional(),
-    tanfile: z.string().optional(),
-    additional: z.string().optional(),
-    gstfile: z.string().optional(),
+  gstNumber: z.string().optional(),
+  panNumber: z.string().optional(),
+  tanNumber: z.string().optional(),
+  addmsme: z.string().optional(),
+  panfile: z.string().optional(),
+  tanfile: z.string().optional(),
+  gstfile: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
   mobileNo: z
@@ -89,18 +89,18 @@ interface ForwarderFormProps {
 function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = orgId;
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       forwarderName: "",
-       gstNumber: "",
+      gstNumber: "",
       panNumber: "",
       tanNumber: "",
       addmsme: "",
       panfile: "",
       tanfile: "",
-      additional: "",
       gstfile: "",
       address: "",
       responsiblePerson: "",
@@ -110,6 +110,11 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
       documents: [],
       createdBy: currentUser || "",
     },
+  });
+  const { control } = form;
+  useFieldArray({
+    control,
+    name: "documents",
   });
 
   const GlobalModal = useGlobalModal();
@@ -124,8 +129,9 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Forwarder created successfully");
-      window.location.reload();
+      // window.location.reload();
       if (onSuccess) onSuccess();
+      router.push(`/${orgId}/documentation/parties`);
     } catch (error) {
       console.error("Error creating Forwarder:", error);
       setIsLoading(false);
@@ -133,20 +139,87 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
     }
   };
 
+  // States (add these if not already present)
+  const [documents, setDocuments] = useState<
+    { fileName: string; fileUrl: string; date: string; review: string }[]
+  >([]);
+  const [showDocConfirmation, setShowDocConfirmation] = useState(false);
+  const [docCountToBeDeleted, setDocCountToBeDeleted] = useState<number | null>(
+    null
+  );
+
+  // Handle certificate/document count change
   const handleCertificateCountChange = (count: string) => {
     const numericCount = parseInt(count, 10);
-    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-      fileName: "",
-      fileUrl: "",
-      date: "",
-      review: "",
-    }));
-    form.setValue("documents", newDocuments);
+
+    if (numericCount < documents.length) {
+      setShowDocConfirmation(true);
+      setDocCountToBeDeleted(numericCount);
+    } else {
+      const currentCount = documents.length;
+      const additionalDocs = Array.from(
+        { length: numericCount - currentCount },
+        () => ({
+          fileName: "",
+          fileUrl: "",
+          date: "",
+          review: "",
+        })
+      );
+
+      const updatedDocuments = [...documents, ...additionalDocs];
+      setDocuments(updatedDocuments);
+      form.setValue("documents", updatedDocuments);
+      form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+    }
   };
 
-  function saveProgressSilently(data: any) {
-    localStorage.setItem("shipmentFormData", JSON.stringify(data));
-    localStorage.setItem("lastSaved", new Date().toISOString());
+  // Confirm document count reduction
+  const handleConfirmDocumentChange = () => {
+    if (docCountToBeDeleted !== null) {
+      const updatedDocuments = documents.slice(0, docCountToBeDeleted);
+      setDocuments(updatedDocuments);
+      form.setValue("documents", updatedDocuments);
+      form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+      setDocCountToBeDeleted(null);
+    }
+    setShowDocConfirmation(false);
+  };
+
+  // Handle individual document deletion
+  const handleDeleteDocument = (index: number) => {
+    const updatedDocuments = documents.filter((_, i) => i !== index);
+    setDocuments(updatedDocuments);
+    form.setValue("documents", updatedDocuments);
+    form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+  };
+
+  function saveProgressSilently(arg0: {
+    forwarderName: string;
+    gstNumber?: string | undefined;
+    panNumber?: string | undefined;
+    tanNumber?: string | undefined;
+    addmsme?: string | undefined;
+    panfile?: string | undefined;
+    tanfile?: string | undefined;
+    gstfile?: string | undefined;
+    address?: string | undefined;
+    responsiblePerson?: string | undefined;
+    mobileNo?: string | undefined;
+    email?: string | undefined;
+    documents?:
+      | {
+          date?: string | undefined;
+          fileName?: string | undefined;
+          fileUrl?: string | undefined;
+          review?: string | undefined;
+        }[]
+      | undefined;
+    numberOfDocuments?: number | undefined;
+    organizationId?: string | undefined;
+    createdBy?: string | undefined;
+  }) {
+    throw new Error("Function not implemented.");
   }
 
   return (
@@ -168,118 +241,101 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 </FormItem>
               )}
             />
-             <FormField
-                          control={form.control}
-                          name="gstNumber"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>GST Number</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter GST Number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-            
-                        <FormField
-                          control={form.control}
-                          name="panNumber"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>PAN Number</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter PAN Number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-            
-                        <FormField
-                          control={form.control}
-                          name="tanNumber"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>TAN Number</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Enter TAN Number" {...field} />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="addmsme"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>MSME Certificate</FormLabel>
-                              <FormControl>
-                                <FileUploadField name="addmsme" storageKey="addmsme" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-            
-                        <FormField
-                          control={form.control}
-                          name="panfile"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>PAN File</FormLabel>
-                              <FormControl>
-                                <FileUploadField name="panfile" storageKey="panfile" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-            
-                        <FormField
-                          control={form.control}
-                          name="tanfile"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>TAN File</FormLabel>
-                              <FormControl>
-                                <FileUploadField name="panfile" storageKey="panfile" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name="gstfile"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>GST File</FormLabel>
-                              <FormControl>
-                                <FileUploadField name="gstfile" storageKey="gstfile" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-            
-                        <FormField
-                          control={form.control}
-                          name="additional"
-                          render={() => (
-                            <FormItem>
-                              <FormLabel>Additional Documents</FormLabel>
-                              <FormControl>
-                                <FileUploadField
-                                  name="additional"
-                                  storageKey="additional"
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+            <FormField
+              control={form.control}
+              name="gstNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>GST Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter GST Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>PAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter PAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>TAN Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter TAN Number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="addmsme"
+              render={() => (
+                <FormItem>
+                  <FormLabel>MSME Certificate</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="panfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>PAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tanfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>TAN File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="panfile" storageKey="panfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="gstfile"
+              render={() => (
+                <FormItem>
+                  <FormLabel>GST File</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {/* Address (Optional) */}
             <FormField
               control={form.control}
@@ -375,133 +431,145 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
                 </FormItem>
               )}
             />
-            </div>
+          </div>
           <div className="grid grid-cols-4 gap-4 w-full ">
             <div className="col-span-4 overflow-x-auto mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>#</TableHead>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>Upload Document</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Review</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {form.watch("documents")?.map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
 
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>File Name</TableHead>
-                  <TableHead>File URL</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Review</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {form.watch("documents")?.map((_, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.fileName`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="e.g., coo"
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                onBlur={() => {
-                                  field.onBlur();
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        name={`documents.${index}.fileUrl`}
-                        render={() => (
-                          <FormItem>
-                            <FormControl>
-                              <FileUploadField
-                                name={`documents.${index}.fileUrl`}
-                                storageKey="documents_fileUrl"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                        control={form.control}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.date`}
-                        render={({ field }) => (
-                          <FormItem className="flex flex-col gap-2">
-                            <Popover>
-                              <PopoverTrigger asChild>
-                                <FormControl>
-                                  <Button variant="outline" className="w-full">
-                                    {field.value
-                                      ? format(
-                                          new Date(field.value as any),
-                                          "PPPP"
-                                        )
-                                      : "Pick a date"}
-                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                  </Button>
-                                </FormControl>
-                              </PopoverTrigger>
-                              <PopoverContent
-                                className="w-auto p-0"
-                                align="start"
-                              >
-                                <CalendarComponent
-                                  selected={
-                                    field.value
-                                      ? new Date(field.value as any)
-                                      : undefined
-                                  }
-                                  onSelect={(date: Date | undefined) => {
-                                    field.onChange(date?.toISOString());
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.fileName`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g., coo"
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                  onBlur={() => {
+                                    field.onBlur();
                                     saveProgressSilently(form.getValues());
                                   }}
                                 />
-                              </PopoverContent>
-                            </Popover>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        control={form.control}
-                        name={`documents.${index}.review`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                placeholder="review your docs"
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                                onBlur={() => {
-                                  field.onBlur();
-                                  saveProgressSilently(form.getValues());
-                                }}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          name={`documents.${index}.fileUrl`}
+                          render={() => (
+                            <FormItem>
+                              <FormControl>
+                                <FileUploadField
+                                  name={`documents.${index}.fileUrl`}
+                                  storageKey="documents_fileUrl"
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                          control={form.control}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.date`}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <FormControl>
+                                    <Button
+                                      variant="outline"
+                                      className="w-full"
+                                    >
+                                      {field.value
+                                        ? format(
+                                            new Date(field.value as any),
+                                            "PPPP"
+                                          )
+                                        : "Pick a date"}
+                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                  </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  className="w-auto p-0"
+                                  align="start"
+                                >
+                                  <CalendarComponent
+                                    selected={
+                                      field.value
+                                        ? new Date(field.value as any)
+                                        : undefined
+                                    }
+                                    onSelect={(date: Date | undefined) => {
+                                      field.onChange(date?.toISOString());
+                                      saveProgressSilently(form.getValues());
+                                    }}
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={form.control}
+                          name={`documents.${index}.review`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <Input
+                                  placeholder="review your docs"
+                                  value={field.value || ""}
+                                  onChange={field.onChange}
+                                  onBlur={() => {
+                                    field.onBlur();
+                                    saveProgressSilently(form.getValues());
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => handleDeleteDocument(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           {/* Submit */}
@@ -511,6 +579,15 @@ function Forwarderform({ onSuccess, orgId, currentUser }: ForwarderFormProps) {
             )}
             Submit
           </Button>
+          {showDocConfirmation && (
+            <ConfirmationDialog
+              isOpen={showDocConfirmation}
+              onClose={() => setShowDocConfirmation(false)}
+              onConfirm={handleConfirmDocumentChange}
+              title="Are you sure?"
+              description="You are reducing the number of documents. This action cannot be undone."
+            />
+          )}
         </form>
       </Form>
     </div>

@@ -59,11 +59,9 @@ const formSchema = z.object({
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
-  responsiblePerson: z
-    .string()
-    .min(3, {
-      message: "Responsible person must be at least 3 characters long",
-    }),
+  responsiblePerson: z.string().min(3, {
+    message: "Responsible person must be at least 3 characters long",
+  }),
   mobileNumber: z.union([z.string(), z.number()]).refine(
     (val) => {
       const strVal = val.toString();
@@ -167,7 +165,7 @@ export default function EditSupplierForm({ params }: Props) {
           gstNumber: supplier?.gstNumber || "",
           panNumber: supplier?.panNumber || "",
           tanNumber: supplier?.tanNumber || "",
-           addmsme: supplier?.addmsme || "",
+          addmsme: supplier?.addmsme || "",
           panfile: supplier?.panfile || "",
           tanfile: supplier?.tanfile || "",
           additional: supplier?.additional || "",
@@ -321,7 +319,7 @@ export default function EditSupplierForm({ params }: Props) {
                   gstNumber: values.gstNumber,
                   panNumber: values.panNumber,
                   tanNumber: values.tanNumber,
-                   addmsme: values?.addmsme,
+                  addmsme: values?.addmsme,
                   panfile: values?.panfile,
                   tanfile: values?.tanfile,
                   additional: values?.additional,
@@ -604,8 +602,8 @@ export default function EditSupplierForm({ params }: Props) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
-                      <TableHead>Upload Document</TableHead>
                       <TableHead>File Name</TableHead>
+                      <TableHead>Upload Document</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Review</TableHead>
                       <TableHead>Action</TableHead>
@@ -615,6 +613,24 @@ export default function EditSupplierForm({ params }: Props) {
                     {fields.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
                         <TableCell>
                           <FormField
                             control={control}
@@ -640,33 +656,7 @@ export default function EditSupplierForm({ params }: Props) {
                                     <Eye className="h-4 w-4 cursor-pointer" />
                                   </a>
                                 )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  type="button"
-                                  onClick={() => handleReplaceDocument(index)}
-                                >
-                                  <UploadCloud className="h-4 w-4" />
-                                </Button>
                               </div>
-                            )}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.fileName`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Document.pdf"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
                             )}
                           />
                         </TableCell>
@@ -770,58 +760,6 @@ export default function EditSupplierForm({ params }: Props) {
           </div>
         </form>
       </Form>
-
-      {/* Replace Document Modal */}
-      <Dialog open={isReplaceModalOpen} onOpenChange={setIsReplaceModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Replace Document</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="file-upload"
-                className="block text-sm font-medium"
-              >
-                Upload New File
-              </label>
-              <Input
-                id="file-upload"
-                type="file"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    setNewFile(e.target.files[0]);
-                  }
-                }}
-                className="mt-1"
-              />
-              {newFile && (
-                <p className="text-sm text-gray-500">
-                  Selected: {newFile.name}
-                </p>
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsReplaceModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleReplaceSubmit}
-                disabled={isLoading || !newFile}
-              >
-                {isLoading && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Upload
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

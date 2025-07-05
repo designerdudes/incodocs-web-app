@@ -68,8 +68,7 @@ export default async function ExpensePage({ params }: Props) {
         <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
-              <CardTitle>Expense Details</CardTitle>
-              {/* <CardDescription>{`Details for Expense ID: ${expenseData._id}`}</CardDescription> */}
+              <CardDescription>{`Details for Expense Name: ${expenseData.expenseName}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -98,6 +97,45 @@ export default async function ExpensePage({ params }: Props) {
                     </TableCell>
                     <TableCell>{expenseData.gstPercentage}%</TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Purpose</TableCell>
+                    <TableCell>{expenseData.purpose}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Bill Number
+                    </TableCell>
+                    <TableCell>{expenseData.billNumber}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Item Name
+                    </TableCell>
+                    <TableCell>{expenseData.itemName}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Taxable Value
+                    </TableCell>
+                    <TableCell>{expenseData.taxableValue}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">IGST</TableCell>
+                    <TableCell>{expenseData.igst}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">CGST</TableCell>
+                    <TableCell>{expenseData.cgst}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">SGST</TableCell>
+                    <TableCell>{expenseData.sgst}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">Invoice Value</TableCell>
+                    <TableCell>{expenseData.invoiceValue}</TableCell>
+                  </TableRow>
+
                   <TableRow>
                     <TableCell className="whitespace-nowrap">Paid By</TableCell>
                     <TableCell>{expenseData.paidBy}</TableCell>

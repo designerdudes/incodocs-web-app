@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import moment from "moment";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   expenseName: z
@@ -38,15 +39,21 @@ const formSchema = z.object({
   expenseDate: z
     .union([z.string().min(1, { message: "select date" }), z.number()])
     .optional(),
+  paymentProof: z.string().optional(),
+  purpose: z.string().optional(),
+  billNumber: z.string().optional(),
+  itemName: z.string().optional(),
+  taxableValue: z.number().optional(),
+  igst: z.number().optional(),
+  cgst: z.number().optional(),
+  sgst: z.number().optional(),
+  invoiceValue: z.number().optional(),
 });
 
 interface Props {
   params: {
     _id: string; // slab  ID
   };
-}
-function fetchslabData() {
-  throw new Error("Function not implemented.");
 }
 
 export default function EditExpenseForm({ params }: Props) {
@@ -62,6 +69,15 @@ export default function EditExpenseForm({ params }: Props) {
       expenseValue: 0,
       gstPercentage: "",
       expenseDate: "",
+      paymentProof: "",
+      purpose: "",
+      billNumber: "",
+      itemName: "",
+      taxableValue: 0,
+      igst: 0,
+      cgst: 0,
+      sgst: 0,
+      invoiceValue: 0,
     },
   });
 
@@ -85,6 +101,15 @@ export default function EditExpenseForm({ params }: Props) {
           expenseValue: data.expenseValue || "",
           gstPercentage: data.gstPercentage || "",
           expenseDate: data.expenseDate || "",
+          paymentProof: data.paymentProof || "",
+          purpose: data.purpose || "",
+          billNumber: data.billNumber || "",
+          itemName: data.itemName || "",
+          taxableValue: data.taxableValue || "",
+          igst: data.igst || "",
+          cgst: data.cgst || "",
+          sgst: data.sgst || "",
+          invoiceValue: data.invoiceValue || "",
         });
       } catch (error) {
         console.error("Error fetching expense data:", error);
@@ -207,6 +232,22 @@ export default function EditExpenseForm({ params }: Props) {
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="paymentProof"
+            render={() => (
+              <FormItem>
+                <FormLabel>Payment Proof</FormLabel>
+                <FormControl>
+                  <FileUploadField
+                    name="paymentProof"
+                    storageKey="paymentProof"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -224,6 +265,162 @@ export default function EditExpenseForm({ params }: Props) {
                     }
                     type="date"
                     onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="purpose"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Purpose</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Purpose"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="billNumber"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bill Number</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Bill Number"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="itemName"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Item Name</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Item Name"
+                    disabled={isLoading}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="taxableValue"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Taxable Value</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Taxable Value"
+                    type="number"
+                    disabled={isLoading}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="igst"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>IGST</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Igst"
+                    type="number"
+                    disabled={isLoading}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="cgst"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>CGST</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Cgst"
+                    type="number"
+                    disabled={isLoading}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="sgst"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>SGST</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Sgst"
+                    type="number"
+                    disabled={isLoading}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            name="invoiceValue"
+            control={form.control}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Invoice Value</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Enter Invoice Value"
+                    type="number"
+                    disabled={isLoading}
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
                   />
                 </FormControl>
                 <FormMessage />

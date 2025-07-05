@@ -157,7 +157,7 @@ export default function EditShippingLineForm({ params }: Props) {
           address: shippingLine?.address || "",
           responsiblePerson: shippingLine?.responsiblePerson || "",
           email: shippingLine?.email || "",
-          mobileNo: shippingLine?.mobileNo || "",
+          mobileNo: shippingLine?.mobileNo?.toString() || "",
 
           gstNumber: shippingLine?.gstNumber || "",
           panNumber: shippingLine?.panNumber || "",
@@ -585,8 +585,8 @@ export default function EditShippingLineForm({ params }: Props) {
                   <TableHeader>
                     <TableRow>
                       <TableHead>#</TableHead>
-                      <TableHead>Upload Document</TableHead>
                       <TableHead>File Name</TableHead>
+                      <TableHead>Upload Document</TableHead>
                       <TableHead>Date</TableHead>
                       <TableHead>Review</TableHead>
                       <TableHead>Action</TableHead>
@@ -596,6 +596,24 @@ export default function EditShippingLineForm({ params }: Props) {
                     {fields.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
                         <TableCell>
                           <FormField
                             control={control}
@@ -621,36 +639,11 @@ export default function EditShippingLineForm({ params }: Props) {
                                     <Eye className="h-4 w-4 cursor-pointer" />
                                   </a>
                                 )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  type="button"
-                                  onClick={() => handleReplaceDocument(index)}
-                                >
-                                  <UploadCloud className="h-4 w-4" />
-                                </Button>
                               </div>
                             )}
                           />
                         </TableCell>
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.fileName`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Document.pdf"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </TableCell>
+                        
                         <TableCell>
                           <FormField
                             control={form.control}

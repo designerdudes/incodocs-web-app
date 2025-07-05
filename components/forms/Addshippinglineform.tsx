@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -34,6 +34,8 @@ import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { postData } from "@/axiosUtility/api";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import { useRouter } from "next/navigation";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 const formSchema = z.object({
   shippingLineName: z
@@ -45,7 +47,6 @@ const formSchema = z.object({
   addmsme: z.string().optional(),
   panfile: z.string().optional(),
   tanfile: z.string().optional(),
-  additional: z.string().optional(),
   gstfile: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
@@ -92,6 +93,7 @@ function ShippingLineForm({
 }: ShippinglineFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = orgId;
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,7 +105,6 @@ function ShippingLineForm({
       addmsme: "",
       panfile: "",
       tanfile: "",
-      additional: "",
       gstfile: "",
       address: "",
       responsiblePerson: "",
@@ -113,6 +114,12 @@ function ShippingLineForm({
       documents: [],
       createdBy: currentUser || "",
     },
+  });
+
+  const { control } = form;
+  const { remove } = useFieldArray({
+    control,
+    name: "documents",
   });
 
   const GlobalModal = useGlobalModal();
@@ -128,8 +135,9 @@ function ShippingLineForm({
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Shipping line created successfully");
-      window.location.reload();
+      // window.location.reload();
       if (onSuccess) onSuccess();
+       router.push(`/${orgId}/documentation/parties`)
     } catch (error) {
       console.error("Error creating shipping line:", error);
       setIsLoading(false);
@@ -137,16 +145,60 @@ function ShippingLineForm({
     }
   };
 
-  const handleCertificateCountChange = (count: string) => {
-    const numericCount = parseInt(count, 10);
-    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-      fileName: "",
-      fileUrl: "",
-      date: "",
-      review: "",
-    }));
-    form.setValue("documents", newDocuments);
-  };
+ // States (add these if not already present)
+   const [documents, setDocuments] = useState<
+     { fileName: string; fileUrl: string; date: string; review: string }[]
+   >([]);
+   const [showDocConfirmation, setShowDocConfirmation] = useState(false);
+   const [docCountToBeDeleted, setDocCountToBeDeleted] = useState<number | null>(
+     null
+   );
+ 
+   // Handle certificate/document count change
+   const handleCertificateCountChange = (count: string) => {
+     const numericCount = parseInt(count, 10);
+ 
+     if (numericCount < documents.length) {
+       setShowDocConfirmation(true);
+       setDocCountToBeDeleted(numericCount);
+     } else {
+       const currentCount = documents.length;
+       const additionalDocs = Array.from(
+         { length: numericCount - currentCount },
+         () => ({
+           fileName: "",
+           fileUrl: "",
+           date: "",
+           review: "",
+         })
+       );
+ 
+       const updatedDocuments = [...documents, ...additionalDocs];
+       setDocuments(updatedDocuments);
+       form.setValue("documents", updatedDocuments);
+       form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+     }
+   };
+ 
+   // Confirm document count reduction
+   const handleConfirmDocumentChange = () => {
+     if (docCountToBeDeleted !== null) {
+       const updatedDocuments = documents.slice(0, docCountToBeDeleted);
+       setDocuments(updatedDocuments);
+       form.setValue("documents", updatedDocuments);
+       form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+       setDocCountToBeDeleted(null);
+     }
+     setShowDocConfirmation(false);
+   };
+ 
+   // Handle individual document deletion
+   const handleDeleteDocument = (index: number) => {
+     const updatedDocuments = documents.filter((_, i) => i !== index);
+     setDocuments(updatedDocuments);
+     form.setValue("documents", updatedDocuments);
+     form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+   };
 
   function saveProgressSilently(data: any) {
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -266,23 +318,6 @@ function ShippingLineForm({
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="additional"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Additional Documents</FormLabel>
-                  <FormControl>
-                    <FileUploadField
-                      name="additional"
-                      storageKey="additional"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="address"
@@ -382,7 +417,7 @@ function ShippingLineForm({
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead>File Name</TableHead>
-                    <TableHead>File URL</TableHead>
+                    <TableHead>Upload Document</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Review</TableHead>
                   </TableRow>
@@ -496,6 +531,25 @@ function ShippingLineForm({
                             </FormItem>
                           )}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => handleDeleteDocument(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        {showDocConfirmation && (
+                                    <ConfirmationDialog
+                                      isOpen={showDocConfirmation}
+                                      onClose={() => setShowDocConfirmation(false)}
+                                      onConfirm={handleConfirmDocumentChange}
+                                      title="Are you sure?"
+                                      description="You are reducing the number of documents. This action cannot be undone."
+                                    />
+                                  )}
                       </TableCell>
                     </TableRow>
                   ))}

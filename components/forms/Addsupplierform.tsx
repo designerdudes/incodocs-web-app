@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -35,6 +35,7 @@ import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
 import { postData } from "@/axiosUtility/api";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 const formSchema = z.object({
   supplierName: z.string().min(1, { message: "Supplier Name is required" }),
@@ -44,7 +45,6 @@ const formSchema = z.object({
   addmsme: z.string().optional(),
   panfile: z.string().optional(),
   tanfile: z.string().optional(),
-  additional: z.string().optional(),
   gstfile: z.string().optional(),
   gstNo: z.string().optional(),
   address: z.string().optional(),
@@ -84,6 +84,7 @@ export default function Supplierform({
 }: SupplierFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = orgId;
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -95,7 +96,6 @@ export default function Supplierform({
       addmsme: "",
       panfile: "",
       tanfile: "",
-      additional: "",
       gstfile: "",
       gstNo: "",
       address: "",
@@ -107,6 +107,12 @@ export default function Supplierform({
       documents: [],
       createdBy: currentUser || "",
     },
+  });
+
+  const { control } = form;
+  const { remove } = useFieldArray({
+    control,
+    name: "documents",
   });
 
   const GlobalModal = useGlobalModal();
@@ -121,8 +127,9 @@ export default function Supplierform({
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Supplier created successfully");
-      window.location.reload();
+      // window.location.reload();
       if (onSuccess) onSuccess();
+      router.push(`/${orgId}/documentation/parties`)
     } catch (error) {
       console.error("Error creating Supplier:", error);
       setIsLoading(false);
@@ -135,17 +142,60 @@ export default function Supplierform({
     localStorage.setItem("lastSaved", new Date().toISOString());
   }
 
-  const handleCertificateCountChange = (count: string) => {
-    const numericCount = parseInt(count, 10);
-    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-      fileName: "",
-      fileUrl: "",
-      date: "",
-      review: "",
-    }));
-    form.setValue("documents", newDocuments);
-  };
-
+   const [documents, setDocuments] = useState<
+      { fileName: string; fileUrl: string; date: string; review: string }[]
+    >([]);
+    const [showDocConfirmation, setShowDocConfirmation] = useState(false);
+    const [docCountToBeDeleted, setDocCountToBeDeleted] = useState<number | null>(
+      null
+    );
+  
+    // Handle certificate/document count change
+    const handleCertificateCountChange = (count: string) => {
+      const numericCount = parseInt(count, 10);
+  
+      if (numericCount < documents.length) {
+        setShowDocConfirmation(true);
+        setDocCountToBeDeleted(numericCount);
+      } else {
+        const currentCount = documents.length;
+        const additionalDocs = Array.from(
+          { length: numericCount - currentCount },
+          () => ({
+            fileName: "",
+            fileUrl: "",
+            date: "",
+            review: "",
+          })
+        );
+  
+        const updatedDocuments = [...documents, ...additionalDocs];
+        setDocuments(updatedDocuments);
+        form.setValue("documents", updatedDocuments);
+        form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+      }
+    };
+  
+    // Confirm document count reduction
+    const handleConfirmDocumentChange = () => {
+      if (docCountToBeDeleted !== null) {
+        const updatedDocuments = documents.slice(0, docCountToBeDeleted);
+        setDocuments(updatedDocuments);
+        form.setValue("documents", updatedDocuments);
+        form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+        setDocCountToBeDeleted(null);
+      }
+      setShowDocConfirmation(false);
+    };
+  
+    // Handle individual document deletion
+    const handleDeleteDocument = (index: number) => {
+      const updatedDocuments = documents.filter((_, i) => i !== index);
+      setDocuments(updatedDocuments);
+      form.setValue("documents", updatedDocuments);
+      form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+    };
+  
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -259,24 +309,6 @@ export default function Supplierform({
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="additional"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Additional Documents</FormLabel>
-                  <FormControl>
-                    <FileUploadField
-                      name="additional"
-                      storageKey="additional"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="gstNo"
@@ -399,7 +431,7 @@ export default function Supplierform({
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead>File Name</TableHead>
-                    <TableHead>File URL</TableHead>
+                    <TableHead>Upload Document</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Review</TableHead>
                   </TableRow>
@@ -514,6 +546,25 @@ export default function Supplierform({
                             </FormItem>
                           )}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => handleDeleteDocument(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        {showDocConfirmation && (
+                                    <ConfirmationDialog
+                                      isOpen={showDocConfirmation}
+                                      onClose={() => setShowDocConfirmation(false)}
+                                      onConfirm={handleConfirmDocumentChange}
+                                      title="Are you sure?"
+                                      description="You are reducing the number of documents. This action cannot be undone."
+                                    />
+                                  )}
                       </TableCell>
                     </TableRow>
                   ))}
