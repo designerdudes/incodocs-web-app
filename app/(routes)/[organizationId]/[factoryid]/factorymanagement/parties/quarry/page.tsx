@@ -8,6 +8,7 @@ import { QuarryColumns } from "./components/columns";
 
 import Link from "next/link";
 import React from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface Quarry {
   _id: any;
@@ -70,19 +71,29 @@ export default async function quarry({ params }: Props) {
       </div>
 
       <Separator className="my-2" />
-      <div>
-        <DataTable
-          bulkDeleteIdName="_id"
-          bulkDeleteTitle="Are you sure you want to delete the selected Quarries?"
-          bulkDeleteDescription="This will delete the selected Quarries, and they will not be recoverable."
-          bulkDeleteToastMessage="Selected Quarries deleted successfully"
-          deleteRoute="quarry/deletemany" 
-          searchKey="quarryName"
-          columns={QuarryColumns}
-          token={token}
-          data={quarryData}
-        />
-      </div>
+      <Tabs defaultValue="quarry details" className="w-full mt-4">
+        <TabsList className="gap-4 w-full flex justify-start items-start">
+          <TabsTrigger value="quarry details">Quarry Details</TabsTrigger>
+          <TabsTrigger value="other">Other Details</TabsTrigger>
+        </TabsList>
+
+        {/* Tab: Quarry Details */}
+        <div>
+          <TabsContent value="quarry details">
+            <DataTable
+              bulkDeleteIdName="_id"
+              bulkDeleteTitle="Are you sure you want to delete the selected Quarries?"
+              bulkDeleteDescription="This will delete the selected Quarries, and they will not be recoverable."
+              bulkDeleteToastMessage="Selected Quarries deleted successfully"
+              deleteRoute="quarry/deletemany"
+              searchKey="quarryName"
+              columns={QuarryColumns}
+              token={token}
+              data={quarryData}
+            />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

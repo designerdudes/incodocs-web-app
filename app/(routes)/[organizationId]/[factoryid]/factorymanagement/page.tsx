@@ -1,7 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { ChevronLeft, MountainSnow } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import Heading from "@/components/ui/heading";
 import { useParams } from "next/navigation";
 import {
@@ -14,6 +14,7 @@ import {
 import { FiGrid } from "react-icons/fi";
 import { MdAccountBalance } from "react-icons/md";
 import { GiGears } from "react-icons/gi";
+import { HiOutlineUserGroup } from "react-icons/hi2";
 
 interface Props {
   params: {
@@ -121,23 +122,23 @@ function FactoryManagementPage({ params }: Props) {
 
         {/*Quarry Card*/}
         <Link
-          href={`/${organizationId}/${factoryId}/factorymanagement/quarry`}
+          href={`/${organizationId}/${factoryId}/factorymanagement/parties`}
           passHref
         >
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-lg font-medium">Quarry</CardTitle>
-              <MountainSnow className="w-6 h-6 text-muted-foreground" />
+              <CardTitle className="text-lg font-medium">Parties</CardTitle>
+              <HiOutlineUserGroup className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3">
               <CardDescription className="text-base text-gray-600">
-                Monitor marble sourcing at the origin manage extraction,
-                availability, and readiness
+                Easily track and modify details of Parties, ensuring efficient
+                coordination and up-to-date records.
               </CardDescription>
               <p className="text-sm text-gray-700">
-                Track the origin of marble shipments from quarry to destination.
-                Monitor extraction status, inventory, and dispatch timelines in
-                real time
+                A streamlined system for parties within an organization and
+                factory. Users can add, update details, ensuring accurate and
+                flexible tracking.
               </p>
             </CardContent>
           </Card>
