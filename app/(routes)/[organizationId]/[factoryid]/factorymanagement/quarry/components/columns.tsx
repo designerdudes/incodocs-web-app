@@ -119,7 +119,7 @@ export const QuarryColumns: ColumnDef<Quarry>[] = [
               <span className="text-sm">{doc.fileName}</span>
               {doc.fileUrl && (
                 <Eye
-                  className="h-4 w-4 cursor-pointer"
+                  className="h-4 w-4 cursor-pointer text-blue-700"
                   onClick={() => window.open(doc.fileUrl, "_blank")}
                 />
               )}
