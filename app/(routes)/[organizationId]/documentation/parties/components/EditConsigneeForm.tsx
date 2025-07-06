@@ -370,13 +370,10 @@ export default function EditConsigneeForm({ params }: Props) {
   }
 
   return (
-    <div className="space-y-6 w-full ">
+    <div className="space-y-6 ">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="grid gap-4 w-full "
-        >
-          <div className="grid grid-cols-3 gap-4 w-full ">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4 " >
+          <div className="grid grid-cols-3 gap-4  ">
             <FormField
               control={form.control}
               name="name"
@@ -554,24 +551,40 @@ export default function EditConsigneeForm({ params }: Props) {
           <div className="grid grid-cols-4 gap-4 w-full ">
             {/* Documents Section */}
             {fields.length > 0 && (
-              <div className="col-span-4 overflow-x-auto mt-4 ">
-                <Table className="table-fixed w-full">
+              <div className="col-span-4 overflow-x-auto mt-4">
+                <Table >
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-10">#</TableHead>
-                      <TableHead className="w-[280px]">
-                        Upload Document
-                      </TableHead>
-                      <TableHead className="w-[200px]">File Name</TableHead>
-                      <TableHead className="w-[180px]">Date</TableHead>
-                      <TableHead className="w-[180px]">Review</TableHead>
-                      <TableHead className="w-20 text-center">Action</TableHead>
+                      <TableHead >#</TableHead>
+                      <TableHead >File Name</TableHead>
+                      <TableHead >Upload Document</TableHead>
+                      <TableHead >Date</TableHead>
+                      <TableHead >Review</TableHead>
+                      <TableHead >Action</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fields.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
 
                         {/* Upload Document Cell */}
                         <TableCell className="overflow-hidden">
@@ -601,35 +614,7 @@ export default function EditConsigneeForm({ params }: Props) {
                                     <Eye className="h-4 w-4 cursor-pointer" />
                                   </a>
                                 )}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  type="button"
-                                  onClick={() => handleReplaceDocument(index)}
-                                >
-                                  <UploadCloud className="h-4 w-4" />
-                                </Button>
                               </div>
-                            )}
-                          />
-                        </TableCell>
-
-                        {/* File Name Cell */}
-                        <TableCell>
-                          <FormField
-                            control={form.control}
-                            name={`documents.${index}.fileName`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormControl>
-                                  <Input
-                                    placeholder="e.g. Document.pdf"
-                                    {...field}
-                                    value={field.value ?? ""}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
                             )}
                           />
                         </TableCell>
@@ -717,7 +702,7 @@ export default function EditConsigneeForm({ params }: Props) {
               </div>
             )}
           </div>
-
+         <div className="grid grid-cols-4 gap-4">
           <Button
             type="button"
             variant="outline"
@@ -740,60 +725,9 @@ export default function EditConsigneeForm({ params }: Props) {
             )}
             Submit
           </Button>
+          </div>
         </form>
       </Form>
-
-      {/* Replace Document Modal */}
-      <Dialog open={isReplaceModalOpen} onOpenChange={setIsReplaceModalOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Replace Document</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label
-                htmlFor="file-upload"
-                className="block text-sm font-medium"
-              >
-                Upload New File
-              </label>
-              <Input
-                id="file-upload"
-                type="file"
-                onChange={(e) => {
-                  if (e.target.files && e.target.files.length > 0) {
-                    setNewFile(e.target.files[0]);
-                  }
-                }}
-                className="mt-1"
-              />
-              {newFile && (
-                <p className="text-sm text-gray-500">
-                  Selected: {newFile.name}
-                </p>
-              )}
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsReplaceModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleReplaceSubmit}
-                disabled={isLoading || !newFile}
-              >
-                {isLoading && (
-                  <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Upload
-              </Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

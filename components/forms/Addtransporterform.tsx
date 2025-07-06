@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useFieldArray, useForm } from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import CalendarComponent from "@/components/CalendarComponent";
 import {
   Popover,
@@ -35,6 +35,7 @@ import { format } from "date-fns";
 import { CalendarIcon, Trash } from "lucide-react";
 import { postData } from "@/axiosUtility/api";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import ConfirmationDialog from "../ConfirmationDialog";
 
 const formSchema = z.object({
   transporterName: z.string().min(1, { message: "Forwarder Name is required" }),
@@ -44,7 +45,6 @@ const formSchema = z.object({
   addmsme: z.string().optional(),
   panfile: z.string().optional(),
   tanfile: z.string().optional(),
-  additional: z.string().optional(),
   gstfile: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
@@ -87,6 +87,7 @@ function Transporterform({
 }: TransporterFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const orgid = orgId;
+  const router = useRouter();
   console.log("THi sis Org id", orgId);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -99,7 +100,6 @@ function Transporterform({
       addmsme: "",
       panfile: "",
       tanfile: "",
-      additional: "",
       gstfile: "",
       address: "",
       responsiblePerson: "",
@@ -109,6 +109,12 @@ function Transporterform({
       documents: [],
       createdBy: currentUser || "",
     },
+  });
+
+  const { control } = form;
+  const { remove } = useFieldArray({
+    control,
+    name: "documents",
   });
   const GlobalModal = useGlobalModal();
 
@@ -123,8 +129,9 @@ function Transporterform({
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Transporter created successfully");
-      window.location.reload();
+      // window.location.reload();
       if (onSuccess) onSuccess();
+      router.push(`/${orgid}/documentation/parties`);
     } catch (error) {
       console.error("Error creating Transporter:", error);
       setIsLoading(false);
@@ -132,16 +139,60 @@ function Transporterform({
     }
   };
 
-  const handleCertificateCountChange = (count: string) => {
-    const numericCount = parseInt(count, 10);
-    const newDocuments = Array.from({ length: numericCount }, (_, index) => ({
-      fileName: "",
-      fileUrl: "",
-      date: "",
-      review: "",
-    }));
-    form.setValue("documents", newDocuments);
-  };
+ // States (add these if not already present)
+   const [documents, setDocuments] = useState<
+     { fileName: string; fileUrl: string; date: string; review: string }[]
+   >([]);
+   const [showDocConfirmation, setShowDocConfirmation] = useState(false);
+   const [docCountToBeDeleted, setDocCountToBeDeleted] = useState<number | null>(
+     null
+   );
+ 
+   // Handle certificate/document count change
+   const handleCertificateCountChange = (count: string) => {
+     const numericCount = parseInt(count, 10);
+ 
+     if (numericCount < documents.length) {
+       setShowDocConfirmation(true);
+       setDocCountToBeDeleted(numericCount);
+     } else {
+       const currentCount = documents.length;
+       const additionalDocs = Array.from(
+         { length: numericCount - currentCount },
+         () => ({
+           fileName: "",
+           fileUrl: "",
+           date: "",
+           review: "",
+         })
+       );
+ 
+       const updatedDocuments = [...documents, ...additionalDocs];
+       setDocuments(updatedDocuments);
+       form.setValue("documents", updatedDocuments);
+       form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+     }
+   };
+ 
+   // Confirm document count reduction
+   const handleConfirmDocumentChange = () => {
+     if (docCountToBeDeleted !== null) {
+       const updatedDocuments = documents.slice(0, docCountToBeDeleted);
+       setDocuments(updatedDocuments);
+       form.setValue("documents", updatedDocuments);
+       form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+       setDocCountToBeDeleted(null);
+     }
+     setShowDocConfirmation(false);
+   };
+ 
+   // Handle individual document deletion
+   const handleDeleteDocument = (index: number) => {
+     const updatedDocuments = documents.filter((_, i) => i !== index);
+     setDocuments(updatedDocuments);
+     form.setValue("documents", updatedDocuments);
+     form.setValue("numberOfDocuments", updatedDocuments.length); // optional
+   };
 
   function saveProgressSilently(data: any) {
     localStorage.setItem("shipmentFormData", JSON.stringify(data));
@@ -262,23 +313,6 @@ function Transporterform({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="additional"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Additional Documents</FormLabel>
-                  <FormControl>
-                    <FileUploadField
-                      name="additional"
-                      storageKey="additional"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             {/* Address */}
             <FormField
               control={form.control}
@@ -379,7 +413,7 @@ function Transporterform({
                   <TableRow>
                     <TableHead>#</TableHead>
                     <TableHead>File Name</TableHead>
-                    <TableHead>File URL</TableHead>
+                    <TableHead>Upload Document</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Review</TableHead>
                   </TableRow>
@@ -494,6 +528,25 @@ function Transporterform({
                             </FormItem>
                           )}
                         />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          type="button"
+                          onClick={() => handleDeleteDocument(index)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                        {showDocConfirmation && (
+                                    <ConfirmationDialog
+                                      isOpen={showDocConfirmation}
+                                      onClose={() => setShowDocConfirmation(false)}
+                                      onConfirm={handleConfirmDocumentChange}
+                                      title="Are you sure?"
+                                      description="You are reducing the number of documents. This action cannot be undone."
+                                    />
+                                  )}
                       </TableCell>
                     </TableRow>
                   ))}
