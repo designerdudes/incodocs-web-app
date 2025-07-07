@@ -90,6 +90,7 @@ export function ShippingBillDetails({
 }: ShippingBillDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const shippingBillsFromForm =
     watch("shippingBillDetails.ShippingBills") || [];
   const selectedCustomBorker = watch("shippingBillDetails.cbName");
@@ -130,7 +131,7 @@ export function ShippingBillDetails({
       }
     };
     fetchCustomBroker();
-  }, [organizationId]);
+  }, [CustomBrokers, organizationId]);
 
   // Update cbCode when cbName changes
   useEffect(() => {

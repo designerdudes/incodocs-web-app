@@ -88,6 +88,7 @@ export function CommercialInvoiceDetails({
 }: CommercialInvoiceDetailsProps) {
   const { control, setValue, watch, getValues } = useFormContext<FormData>();
   const organizationId = Array.isArray(params) ? params[0] : params;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const invoicesFromForm = watch("saleInvoiceDetails.commercialInvoices") || [];
   const [uploading, setUploading] = useState(false);
   const [consignees, setConsignees] = useState<any[]>([]);
@@ -111,7 +112,7 @@ export function CommercialInvoiceDetails({
       }
     };
     fetchConsignees();
-  }, [organizationId]);
+  }, [consignees, organizationId]);
 
   // Debug confirmation state changes
   useEffect(() => {
