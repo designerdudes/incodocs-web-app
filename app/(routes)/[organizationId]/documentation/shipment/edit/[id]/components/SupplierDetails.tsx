@@ -310,8 +310,8 @@ export function SupplierDetails({
                                 "_blank"
                               );
                             }}
-                            multiple={true}
-                            // onAddNew={openSupplierForm}
+                            multiple={false}
+
                             addNewLabel="Add New Supplier"
                             disabled={isLoadingSuppliers || !!fetchError}
                           />
