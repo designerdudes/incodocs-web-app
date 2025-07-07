@@ -306,7 +306,7 @@ export function SupplierDetails({
                                 "_blank"
                               );
                             }}
-                            multiple={false} // ✅ important!
+                            multiple={false}
                             addNewLabel="Add New Supplier"
                             disabled={isLoadingSuppliers || !!fetchError}
                           />
