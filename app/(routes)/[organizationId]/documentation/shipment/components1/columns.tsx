@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
 
 // Extend TableMeta to include updateData
 interface CustomTableMeta<TData> {
@@ -126,6 +127,8 @@ const StatusCell: React.FC<{
   const currentStatus = row.original.status || "Booking Confirmed";
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (newStatus === currentStatus) {
@@ -153,6 +156,18 @@ const StatusCell: React.FC<{
     } finally {
       setIsLoading(false);
     }
+  };
+  const onStatusClick = (status: string) => {
+    setSelectedStatus(status);
+    setIsConfirmDialogOpen(true);
+  };
+
+  const onConfirmStatusChange = () => {
+    if (selectedStatus) {
+      handleStatusUpdate(selectedStatus);
+    }
+    setIsConfirmDialogOpen(false);
+    setSelectedStatus(null);
   };
 
   return (
@@ -211,7 +226,7 @@ const StatusCell: React.FC<{
                   "justify-start",
                   status === currentStatus && "bg-gray-100"
                 )}
-                onClick={() => handleStatusUpdate(status)}
+                onClick={() => onStatusClick(status)}
                 disabled={isLoading}
               >
                 {status}
@@ -220,6 +235,18 @@ const StatusCell: React.FC<{
           </div>
         </PopoverContent>
       </Popover>
+
+      {/* Confirmation Dialog */}
+      <ConfirmationDialog
+        isOpen={isConfirmDialogOpen}
+        onClose={() => {
+          setIsConfirmDialogOpen(false);
+          setSelectedStatus(null);
+        }}
+        onConfirm={onConfirmStatusChange}
+        title="Are you sure?"
+        description={`You are about to change the status to "${selectedStatus}". This action cannot be undone.`}
+      />
     </div>
   );
 };

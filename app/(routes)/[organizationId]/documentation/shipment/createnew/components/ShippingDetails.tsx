@@ -322,7 +322,7 @@ export function ShippingDetails({
       }
     };
     fetchingData();
-  }, []);
+  }, [forwarders, organizationId, transporters]);
 
   const openForwarderForm = () => {
     GlobalModal.title = "Add New Forwarder";

@@ -139,7 +139,7 @@ export function SupplierDetails({
       }
     };
     fetchingData();
-  }, [organizationId]);
+  }, [organizationId, supplierNames]);
 
   const handleSupplierCountChange = (value: string) => {
     console.log("handleSupplierCountChange called with value:", value);
