@@ -273,6 +273,12 @@ export function SupplierDetails({
                               const selected = supplierNames.find(
                                 (s) => s._id === value
                               );
+                              console.log(
+                                `Supplier ${supplierIndex + 1} selected:`,
+                                value,
+                                "Selected supplier object:",
+                                JSON.stringify(selected, null, 2)
+                              );
                               field.onChange(
                                 selected
                                   ? {
@@ -281,11 +287,9 @@ export function SupplierDetails({
                                     }
                                   : { _id: "", supplierName: "" }
                               );
-
                               trigger(
                                 `supplierDetails.clearance.suppliers.${supplierIndex}.supplierName`
                               );
-
                               console.log(
                                 "Form state after selection:",
                                 JSON.stringify(
@@ -307,6 +311,7 @@ export function SupplierDetails({
                               );
                             }}
                             multiple={false}
+
                             addNewLabel="Add New Supplier"
                             disabled={isLoadingSuppliers || !!fetchError}
                           />
