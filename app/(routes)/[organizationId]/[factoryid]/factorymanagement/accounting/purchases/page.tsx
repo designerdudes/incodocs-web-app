@@ -13,6 +13,7 @@ import { rawPurchaseWithGstColumn } from "./components/rawPurchaseWithGstColumn"
 import { rawPurchaseColumns } from "./components/rawPurchaseColumns";
 import { FinishedPurchaseWithGstColumns } from "./components/finishedPurchaseWithGstColumn";
 import { FinishedPurchaseColumns } from "./components/finishedPurchaseColumns";
+import AddPurchases from "./components/purchasesDropdown";
 
 export type RawPurchaseWithGST = {
   _id: string;
@@ -75,6 +76,7 @@ interface Props {
 
 export default async function Purchases({ params }: Props) {
   const token = cookies().get("AccessToken")?.value || "";
+  
 
   const [rawWithGst, actualRaw, slabWithGst, actualSlab] = await Promise.all([
     fetch(`https://incodocs-server.onrender.com/transaction/purchase/getgstrawbyfactory/${params.factoryid}`, {
@@ -109,9 +111,7 @@ export default async function Purchases({ params }: Props) {
             Seamlessly manage and monitor raw material and finished goods purchases.
           </p>
         </div>
-        <Link href="./purchases/create-new">
-          <Button> Create New Purchase</Button>
-        </Link>
+        <AddPurchases factoryId={params.factoryid} />
       </div>
 
       <Separator orientation="horizontal" />
