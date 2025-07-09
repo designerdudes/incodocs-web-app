@@ -16,7 +16,7 @@ export default function CreateNewQuarryPage({ params }: Props) {
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex items-center justify-between">
-        <Link href="./">
+        <Link href="../">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>

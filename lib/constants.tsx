@@ -356,12 +356,6 @@ const sidebarTabs = {
         {
           title: "Parties",
           url: "/factorymanagement/parties",
-          items: [
-            {
-              title: "Quarry",
-              url: "/factorymanagement/parties/quarry",
-            },
-          ],
         },
       ],
     },

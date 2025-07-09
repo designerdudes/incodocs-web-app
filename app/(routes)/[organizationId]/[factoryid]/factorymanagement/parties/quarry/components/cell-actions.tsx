@@ -22,7 +22,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Quarry } from "../page";
+import { Quarry } from "../../page";
 
 interface Props {
   data: Quarry;
@@ -58,14 +58,14 @@ const CellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => router.push(`./quarry/Edit/${data._id}`)}
+            onClick={() => router.push(`./parties/quarry/Edit/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <Scissors className="mr-2 h-4 w-4" />
             Edit Quarry
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`./quarry/View/${data._id}`)}
+            onClick={() => router.push(`./parties/quarry/View/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <EyeIcon className="mr-2 h-4 w-4" />

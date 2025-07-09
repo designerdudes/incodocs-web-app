@@ -122,7 +122,7 @@ function FactoryManagementPage({ params }: Props) {
 
         {/*Quarry Card*/}
         <Link
-          href={`/${organizationId}/${factoryId}/factorymanagement/parties`}
+          href={`/${organizationId}/${factoryId}/factorymanagement/parties?party=quarry`}
           passHref
         >
           <Card className="bg-white dark:bg-card hover:shadow-md transition cursor-pointer">
