@@ -2,21 +2,30 @@
 import { DataTable } from "@/components/ui/data-table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import React, { useState } from "react";
-import { QuarryColumns } from "./columns";
-import { Quarry } from "../../page";
+import { QuarryColumns } from "../quarry/components/columns";
+import { Customer, Quarry, Supplier } from "../page";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@radix-ui/react-separator";
 import Link from "next/link";
 import Heading from "@/components/ui/heading";
+import { CustomerColumns } from "../customer/components/customerColumns";
+import { SupplierColumns } from "../supplier/components/supplierColumns";
 
 interface params {
   token: string;
   quarryData: Quarry[];
+  customerData: Customer[];
+  supplierData: Supplier[];
 }
 
-function PartiesDataTable({ token, quarryData }: params) {
+function PartiesDataTable({
+  token,
+  quarryData,
+  customerData,
+  supplierData,
+}: params) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const party = searchParams.get("party") || "quarry";
@@ -47,7 +56,7 @@ function PartiesDataTable({ token, quarryData }: params) {
             monitoring, and seamless integration into production.
           </p>
         </div>
-        <Link href={`./parties/quarry/createnew`}>
+        <Link href={`./parties/${party}/createnew`}>
           <Button className="bg-primary text-white capitalize">
             Add {party}
           </Button>
@@ -61,7 +70,7 @@ function PartiesDataTable({ token, quarryData }: params) {
         className="w-full mt-4"
       >
         <TabsList className="gap-4 w-full flex justify-start items-start">
-          <TabsTrigger value="quarry">Quarry Details</TabsTrigger>
+          <TabsTrigger value="quarry">Quarry</TabsTrigger>
           <TabsTrigger value="supplier">Supplier</TabsTrigger>
           <TabsTrigger value="customer">Customer</TabsTrigger>
         </TabsList>
@@ -82,17 +91,17 @@ function PartiesDataTable({ token, quarryData }: params) {
             </TabsContent>
           )}
           {party === "supplier" && (
-            <TabsContent value="customer">
+            <TabsContent value="supplier">
               <DataTable
                 bulkDeleteIdName="_id"
-                bulkDeleteTitle="Are you sure you want to delete the selected Quarries?"
-                bulkDeleteDescription="This will delete the selected Quarries, and they will not be recoverable."
-                bulkDeleteToastMessage="Selected Quarries deleted successfully"
-                deleteRoute="quarry/deletemany"
-                searchKey="lesseeName"
-                columns={QuarryColumns}
+                bulkDeleteTitle="Are you sure you want to delete the selected Suppliers?"
+                bulkDeleteDescription="This will delete the selected Suppliers, and they will not be recoverable."
+                bulkDeleteToastMessage="Selected Suppliers deleted successfully"
+                deleteRoute="accounting/suplier/deletemany"
+                searchKey="supplierName"
+                columns={SupplierColumns}
                 token={token}
-                data={quarryData}
+                data={supplierData}
               />
             </TabsContent>
           )}
@@ -100,14 +109,14 @@ function PartiesDataTable({ token, quarryData }: params) {
             <TabsContent value="customer">
               <DataTable
                 bulkDeleteIdName="_id"
-                bulkDeleteTitle="Are you sure you want to delete the selected Quarries?"
-                bulkDeleteDescription="This will delete the selected Quarries, and they will not be recoverable."
-                bulkDeleteToastMessage="Selected Quarries deleted successfully"
-                deleteRoute="quarry/deletemany"
-                searchKey="lesseeName"
-                columns={QuarryColumns}
+                bulkDeleteTitle="Are you sure you want to delete the selected Customer?"
+                bulkDeleteDescription="This will delete the selected Customer, and they will not be recoverable."
+                bulkDeleteToastMessage="Selected Customer deleted successfully"
+                deleteRoute="accounting/customer/deletemany"
+                searchKey="customerName"
+                columns={CustomerColumns}
                 token={token}
-                data={quarryData}
+                data={customerData}
               />
             </TabsContent>
           )}

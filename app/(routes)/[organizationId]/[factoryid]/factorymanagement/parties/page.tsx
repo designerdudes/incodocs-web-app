@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import React from "react";
-import PartiesDataTable from "./quarry/components/partiesDataTable";
+import PartiesDataTable from "./components/partiesDataTable";
 
 export interface Quarry {
   _id: any;
@@ -9,6 +9,46 @@ export interface Quarry {
   mineralName?: string;
   businessLocationNames?: string[];
   factoryId?: any;
+  documents?: {
+    fileName?: string;
+    fileUrl?: string;
+    date?: Date;
+    review?: string;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Supplier {
+  _id?: any;
+  supplierName?: string;
+  gstNo?: string;
+  address?: string;
+  responsiblePerson?: string;
+  mobileNumber?: number;
+  state?: string;
+  factoryAddress?: string;
+  factoryId?: any;
+  createdBy?: any;
+  documents?: {
+    fileName?: string;
+    fileUrl?: string;
+    date?: Date;
+    review?: string;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface Customer {
+  _id?: any;
+  customerName?: string;
+  gstNo?: string;
+  mobileNumber?: number;
+  state?: string;
+  address?: string;
+  factoryId?: any;
+  createdBy?: any;
   documents?: {
     fileName?: string;
     fileUrl?: string;
@@ -30,7 +70,7 @@ export default async function quarry({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
   const factoryId = params.factoryid;
-  const res = await fetch(
+  const quarry = await fetch(
     `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}`,
     {
       method: "GET",
@@ -40,10 +80,39 @@ export default async function quarry({ params }: Props) {
       },
     }
   );
-  const quarryData = await res.json();
+  const quarryData = await quarry.json();
+
+  const supplier = await fetch(
+    `https://incodocs-server.onrender.com/accounting/supplier/getbyfactory/${factoryId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+  const supplierData = await supplier.json();
+
+  const customer = await fetch(
+    `https://incodocs-server.onrender.com/accounting/customer/getbyfactory/${factoryId}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  );
+  const customerData = await customer.json();
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
-      <PartiesDataTable token={token} quarryData={quarryData} />
+      <PartiesDataTable
+        token={token}
+        quarryData={quarryData}
+        supplierData={supplierData}
+        customerData={customerData}
+      />
     </div>
   );
 }
