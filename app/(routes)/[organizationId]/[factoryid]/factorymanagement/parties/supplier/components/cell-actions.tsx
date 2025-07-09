@@ -58,7 +58,7 @@ const CellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => router.push(`./parties/supplier/update/${data._id}`)}
+            onClick={() => router.push(`./parties/supplier/Edit/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <Scissors className="mr-2 h-4 w-4" />
