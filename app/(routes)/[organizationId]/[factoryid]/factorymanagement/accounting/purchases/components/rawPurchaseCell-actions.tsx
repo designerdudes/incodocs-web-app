@@ -28,7 +28,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
     const deleteLot = async () => {
         try {
-            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
+            const result = await deleteData(`/transaction/purchase/deleteraw/${data._id}`);
             toast.success('Purchase Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
@@ -36,7 +36,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     };
-
+    // console.log("dereseweddd",data)
     return (
         <div>
             <DropdownMenu>
@@ -74,7 +74,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Purchase Details - ${data.supplierName}`;
+                            GlobalModal.title = `Delete Purchase Details - ${data?.supplierId?.supplierName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this Lot?";
                             GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;

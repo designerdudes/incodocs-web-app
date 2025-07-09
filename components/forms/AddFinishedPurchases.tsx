@@ -44,10 +44,9 @@ interface FinishedPurchaseCreateNewFormProps {
 }
 
 const formSchema = z.object({
-  SupplierName: z.string().optional(),
-  SupplierId: z.string().nonempty({ message: "Supplier ID is required" }),
-  factoryId: z.string().nonempty({ message: "Factory ID is required" }),
-  invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
+  SupplierId: z.string(),
+  factoryId: z.string(),
+  invoiceNo: z.string(),
   invoiceValue: z.number().optional(),
   supplierGSTN: z.string().optional(),
   purchaseDate: z.string().optional(),
@@ -56,51 +55,48 @@ const formSchema = z.object({
   slabs: z
     .array(
       z.object({
-        slabNumber: z.number().optional(),
-        productName: z.string().optional(),
-        quantity: z.number().optional(),
-        status: z.string().optional(),
-        inStock: z.boolean().optional(),
-        dimensions: z
-          .object({
-            length: z
-              .object({
-                value: z.number().optional(),
-                units: z.literal("inch").optional(),
-              })
-              .optional(),
-            height: z
-              .object({
-                value: z.number().optional(),
-                units: z.literal("inch").optional(),
-              })
-              .optional(),
-          })
-          .optional(),
+        slabNumber: z.number(),
+        productName: z.string(),
+        quantity: z.number(),
+        status: z.string(),
+        inStock: z.boolean(),
+        dimensions: z.object({
+          length: z.object({
+            value: z.number(),
+            units: z.literal("inch"),
+          }),
+          height: z.object({
+            value: z.number(),
+            units: z.literal("inch"),
+          }),
+        }),
       })
     )
     .optional(),
   noOfSlabs: z.number().optional(),
 });
 
-export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchaseCreateNewFormProps) {
+export default function FinishedPurchaseCreateNewForm({
+  gap,
+}: FinishedPurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [supplierLoading, setSupplierLoading] = React.useState(false);
   const [slabs, setSlabs] = React.useState<any[]>([]);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
-  const [supplierNames, setSupplierNames] = React.useState<{ _id: string; name: string }[]>([]);
+  const [applyLengthToAll, setApplyLengthToAll] =
+    React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =
+    React.useState<boolean>(false);
+  const [supplierNames, setSupplierNames] = React.useState<
+    { _id: string; name: string }[]
+  >([]);
 
   const factoryId = useParams().factoryid as string;
-  const organizationId = "674b0a687d4f4b21c6c980ba";
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      SupplierName: "",
       SupplierId: "",
       factoryId,
       invoiceNo: "",
@@ -118,7 +114,9 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
     const fetchingData = async () => {
       try {
         setSupplierLoading(true);
-        const supplierResponse = await fetchData(`/accounting/supplier/getall`);
+        const supplierResponse = await fetchData(
+          `/accounting/supplier/getbyfactory/${factoryId}`
+        );
         const supplierData = await supplierResponse;
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
@@ -133,7 +131,7 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
       }
     };
     fetchingData();
-  }, [organizationId]);
+  }, []);
 
   const handleAddNewSupplier = () => {
     toast("Add new supplier functionality to be implemented");
@@ -166,8 +164,15 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const gstValue = values.gstPercentage ? parseFloat(values.gstPercentage) : 0;
-      const apiUrl = gstValue > 0 ? "/transaction/purchase/addslabgst" : "/transaction/purchase/addslab";
+      const gstValue = values.gstPercentage
+        ? parseFloat(values.gstPercentage.toString())
+        : 0;
+
+      const apiUrl =
+        gstValue > 0
+          ? "/transaction/purchase/addslabgst"
+          : "/transaction/purchase/addslab";
+
       const payload: any = {
         factoryId: values.factoryId,
         supplierId: values.SupplierId,
@@ -178,23 +183,35 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
         height: values.slabs?.[0]?.dimensions?.height?.value || 0,
         ratePerSqft: values.ratePerSqft || 0,
       };
+      // console.log("ssssssssssssssssssss", payload);
 
       if (gstValue > 0) {
+        // GST-based purchase
         payload.invoiceValue = values.invoiceValue || 0;
         payload.gstPercentage = gstValue;
       } else {
+        // Actual (non-GST) purchase
         payload.actualInvoiceValue = values.invoiceValue || 0;
-        payload.slabs = values.slabs?.map((slab, index) => ({
-          slabNumber: slab.slabNumber || index + 1,
-          productName: slab.productName || "steps",
-          quantity: slab.quantity || 1,
-          dimensions: slab.dimensions || {
-            length: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-          },
-          status: slab.status || "readyForPolish",
-          inStock: slab.inStock ?? true,
-        }));
+
+        payload.slabs =
+          values.slabs?.map((slab, index) => ({
+            factoryId: values.factoryId,
+            slabNumber: slab.slabNumber || `S${index + 1}`,
+            productName: slab.productName || "steps",
+            quantity: slab.quantity || 1,
+            dimensions: {
+              length: {
+                value: slab.dimensions?.length?.value || 0,
+                units: slab.dimensions?.length?.units || "inch",
+              },
+              height: {
+                value: slab.dimensions?.height?.value || 0,
+                units: slab.dimensions?.height?.units || "inch",
+              },
+            },
+            status: slab.status || "readyForPolish",
+            inStock: slab.inStock ?? true,
+          })) || [];
       }
 
       await postData(apiUrl, payload);
@@ -207,6 +224,7 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
       setIsLoading(false);
     }
   }
+  // console.log("Watched SupplierIdsssssssss:", form.watch("SupplierId"));
 
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
@@ -232,7 +250,7 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
           <div className="grid grid-cols-3 gap-3">
             {/* Supplier Name */}
             <FormField
-              name="SupplierName"
+              name="SupplierId"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -242,55 +260,34 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
                       entities={supplierNames}
                       value={field.value || ""}
                       onChange={(value) => {
-                        field.onChange(value);
+                        field.onChange(value); // updates SupplierName
+
                         const selectedSupplier = supplierNames.find(
                           (s) => s.name === value
                         );
-                        form.setValue("SupplierId", selectedSupplier?._id || "");
+
+                        if (selectedSupplier) {
+                          form.setValue("SupplierId", selectedSupplier._id, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        } else {
+                          form.setValue("SupplierId", "", {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        }
+
+                        // console.log(
+                        //   "Selected Supplierrrrrr ID:",
+                        //   selectedSupplier?._id
+                        // );
                       }}
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
                       onAddNew={handleAddNewSupplier}
                       addNewLabel="Add New Supplier"
                       disabled={isLoading || supplierLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Supplier ID */}
-            <FormField
-              name="SupplierId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supplier ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Supplier ID"
-                      disabled={true}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Factory ID */}
-            <FormField
-              name="factoryId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Factory ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Factory ID"
-                      disabled={true}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -557,7 +554,8 @@ export  default function FinishedPurchaseCreateNewForm({ gap }: FinishedPurchase
                       placeholder="Enter product name"
                       onChange={(e) => {
                         const updatedSlabs = [...slabs];
-                        updatedSlabs[index].productName = e.target.value || "steps";
+                        updatedSlabs[index].productName =
+                          e.target.value || "steps";
                         setSlabs(updatedSlabs);
                         form.setValue("slabs", updatedSlabs);
                       }}

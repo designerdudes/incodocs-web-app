@@ -97,7 +97,9 @@ const formSchema = z.object({
   noOfBlocks: z.number().optional(),
 });
 
-export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewFormProps) {
+export default function RawPurchaseCreateNewForm({
+  gap,
+}: RawPurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
   const [supplierLoading, setSupplierLoading] = React.useState(false);
@@ -106,11 +108,17 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyWeightToAll, setApplyWeightToAll] = React.useState<boolean>(false);
-  const [applyLengthToAll, setApplyLengthToAll] = React.useState<boolean>(false);
-  const [applyBreadthToAll, setApplyBreadthToAll] = React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] = React.useState<boolean>(false);
-  const [supplierNames, setSupplierNames] = React.useState<{ _id: string; name: string }[]>([]);
+  const [applyWeightToAll, setApplyWeightToAll] =
+    React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] =
+    React.useState<boolean>(false);
+  const [applyBreadthToAll, setApplyBreadthToAll] =
+    React.useState<boolean>(false);
+  const [applyHeightToAll, setApplyHeightToAll] =
+    React.useState<boolean>(false);
+  const [supplierNames, setSupplierNames] = React.useState<
+    { _id: string; name: string }[]
+  >([]);
 
   const factoryId = useParams().factoryid as string;
 
@@ -138,7 +146,9 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
     const fetchingData = async () => {
       try {
         setSupplierLoading(true);
-        const supplierResponse = await fetchData(`/accounting/supplier/getall`);
+        const supplierResponse = await fetchData(
+          `/accounting/supplier/getbyfactory/${factoryId}`
+        );
         const supplierData = await supplierResponse;
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
@@ -153,7 +163,7 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
       }
     };
     fetchingData();
-  }, [supplierNames]);
+  }, []);
 
   const handleAddNewSupplier = () => {
     toast("Add new supplier functionality to be implemented");
@@ -163,17 +173,17 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
       const newBlocks = Array.from({ length: count }, (_, index) => ({
-  blockNumber: index + 1,
-  materialType: form.getValues("materialType") || "type1",
-  status: "inStock",
-  inStock: true,
-  dimensions: {
-    length: { value: parseFloat(globalLength) || 0, units: "inch" },
-    weight: { value: parseFloat(globalWeight) || 0, units: "tons" },
-    breadth: { value: parseFloat(globalBreadth) || 0, units: "inch" },
-    height: { value: parseFloat(globalHeight) || 0, units: "inch" },
-  },
-}));
+        blockNumber: index + 1,
+        materialType: form.getValues("materialType") || "type1",
+        status: "inStock",
+        inStock: true,
+        dimensions: {
+          length: { value: parseFloat(globalLength) || 0, units: "inch" },
+          weight: { value: parseFloat(globalWeight) || 0, units: "tons" },
+          breadth: { value: parseFloat(globalBreadth) || 0, units: "inch" },
+          height: { value: parseFloat(globalHeight) || 0, units: "inch" },
+        },
+      }));
       setBlocks(newBlocks);
       // form.setValue("blocks", newBlocks);
       form.setValue("noOfBlocks", count);
@@ -187,8 +197,13 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const gstValue = values.gstPercentage ? parseFloat(values.gstPercentage) : 0;
-      const apiUrl = gstValue > 0 ? "/transaction/purchase/addrawgst" : "/transaction/purchase/addraw";
+      const gstValue = values.gstPercentage
+        ? parseFloat(values.gstPercentage)
+        : 0;
+      const apiUrl =
+        gstValue > 0
+          ? "/transaction/purchase/addrawgst"
+          : "/transaction/purchase/addraw";
       const payload: any = {
         factoryId: values.factoryId,
         supplierId: values.SupplierId,
@@ -237,7 +252,9 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions || {};
-      const volume = ((length?.value || 0) * (breadth?.value || 0) * (height?.value || 0)) / 1000000;
+      const volume =
+        ((length?.value || 0) * (breadth?.value || 0) * (height?.value || 0)) /
+        1000000;
       return total + (volume || 0);
     }, 0);
     return {
@@ -262,55 +279,34 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
                       entities={supplierNames}
                       value={field.value || ""}
                       onChange={(value) => {
-                        field.onChange(value);
+                        field.onChange(value); // updates SupplierName
+
                         const selectedSupplier = supplierNames.find(
                           (s) => s.name === value
                         );
-                        form.setValue("SupplierId", selectedSupplier?._id || "");
+
+                        if (selectedSupplier) {
+                          form.setValue("SupplierId", selectedSupplier._id, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        } else {
+                          form.setValue("SupplierId", "", {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+                        }
+
+                        // console.log(
+                        //   "Selected Supplierrrrrr ID:",
+                        //   selectedSupplier?._id
+                        // );
                       }}
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
                       onAddNew={handleAddNewSupplier}
                       addNewLabel="Add New Supplier"
                       disabled={isLoading || supplierLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Supplier ID */}
-            <FormField
-              name="SupplierId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Supplier ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Supplier ID"
-                      disabled={true}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Factory ID */}
-            <FormField
-              name="factoryId"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Factory ID</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Factory ID"
-                      disabled={true}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -659,7 +655,8 @@ export  default function RawPurchaseCreateNewForm({ gap }: RawPurchaseCreateNewF
                       placeholder="Enter material type"
                       onChange={(e) => {
                         const updatedBlocks = [...blocks];
-                        updatedBlocks[index].materialType = e.target.value || "type1";
+                        updatedBlocks[index].materialType =
+                          e.target.value || "type1";
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
