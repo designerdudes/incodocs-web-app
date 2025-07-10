@@ -69,7 +69,7 @@ interface Props {
 export default async function quarry({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const factoryId = params.factoryid;
+  const factoryId = params?.factoryid;
   const quarry = await fetch(
     `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}`,
     {
