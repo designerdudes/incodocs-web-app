@@ -6,200 +6,111 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { rawPurchaseColumns } from "./components/rawPurchaseColumns";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { FinishedPurchaseColumns } from "./components/finishedPurchaseColumns";
 import { Badge } from "@/components/ui/badge";
-import { rawPurchaseWithGstColumn } from "./components/rawPurchaseWithGstColumn";
-import { FinishedPurchaseWithGstColumns } from "./components/finishedPurchaseWithGstColumn";
 
-export type RawPurchased = {
+import { rawPurchaseWithGstColumn } from "./components/rawPurchaseWithGstColumn";
+import { rawPurchaseColumns } from "./components/rawPurchaseColumns";
+import { FinishedPurchaseWithGstColumns } from "./components/finishedPurchaseWithGstColumn";
+import { FinishedPurchaseColumns } from "./components/finishedPurchaseColumns";
+import AddPurchases from "./components/purchasesDropdown";
+
+export type RawPurchaseWithGST = {
   _id: string;
-  supplierName: string;
+  supplierId: { supplierName: string };
+
   supplierGSTN: string;
-  purchaseType: string;
+  purchaseType: "Raw";
   noOfBlocks: number;
   length: string;
-  height: string;
   breadth: string;
+  height: string;
   purchaseDate: string;
-  GstPercentage: number;
-  ratePerCubicMeter: string;
+  gstPercentage: number;
+  ratePerCubicVolume: string;
 };
 
-export type FinishedPurchased = {
+export type ActualRawPurchase = {
   _id: string;
-  supplierName: string;
+  supplierId: { supplierName: string };
   supplierGSTN: string;
-  purchaseType: string;
+  purchaseType: "Raw";
+  noOfBlocks: number;
+  length: string;
+  breadth: string;
+  height: string;
+  purchaseDate: string;
+  ratePerCubicVolume: string;
+};
+
+export type FinishedPurchaseWithGST = {
+  _id: string;
+ supplierId: { supplierName: string };
+  supplierGSTN: string;
+  purchaseType: "Finished";
   noOfSlabs: number;
   length: string;
   height: string;
-  GstPercentage: number;
+  purchaseDate: string;
+  gstPercentage: number;
+  ratePerSqft: string;
+};
+
+export type ActualFinishedPurchase = {
+  _id: string;
+  supplierId: { supplierName: string };
+  supplierGSTN: string;
+  purchaseType: "Finished";
+  noOfSlabs: number;
+  length: string;
+  height: string;
   purchaseDate: string;
   ratePerSqft: string;
 };
 
+export type RawPurchased = RawPurchaseWithGST | ActualRawPurchase;
+
+export type FinishedPurchased = | FinishedPurchaseWithGST | ActualFinishedPurchase;
+
 interface Props {
   params: {
     factoryid: string;
+    organizationid: string;
   };
 }
 
 export default async function Purchases({ params }: Props) {
-  //   const cookieStore = cookies();
-  //   const token = cookieStore.get('AccessToken')?.value || ""
+  const token = cookies().get("AccessToken")?.value || "";
 
-  //   const res = await fetch(`https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params?.factoryid}`, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'Authorization': 'Bearer ' + token
-  //     }
-  //   }).then(response => {
-  //     return response.json()
-  //   })
+  const [rawWithGst, actualRaw, slabWithGst, actualSlab] = await Promise.all([
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getgstrawbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-  //   let PurchasesData
-  //   PurchasesData = res
-  const rawPurchasesData = [
-    {
-      _id: "1",
-      supplierName: "Ramesh Traders",
-      supplierGSTN: "18AABCT2341Q2ZX",
-      purchaseType: "Raw",
-      noOfBlocks: 15,
-      length: "120",
-      height: "80",
-      breadth: "50",
-      purchaseDate: "02/12/2024",
-      ratePerCubicMeter: "150",
-      GstPercentage: 18,
-    },
-    {
-      _id: "3",
-      supplierName: "Kamlesh Suppliers",
-      supplierGSTN: "10AACFT1234K1Z5",
-      purchaseType: "Raw",
-      noOfBlocks: 12,
-      length: "110",
-      height: "85",
-      breadth: "55",
-      purchaseDate: "29/11/2024",
-      ratePerCubicMeter: "145",
-      GstPercentage: 18,
-    },
-    {
-      _id: "5",
-      supplierName: "Ganesh Granite",
-      supplierGSTN: "06AADBG4517H1ZX",
-      purchaseType: "Raw",
-      noOfBlocks: 20,
-      length: "120",
-      height: "90",
-      breadth: "60",
-      purchaseDate: "03/12/2024",
-      ratePerCubicMeter: "155",
-      GstPercentage: 18,
-    },
-    {
-      _id: "6",
-      supplierName: "Om Marble Suppliers",
-      supplierGSTN: "33AABCX2345N1Z2",
-      purchaseType: "Raw",
-      noOfBlocks: 18,
-      length: "115",
-      height: "88",
-      breadth: "52",
-      purchaseDate: "30/11/2024",
-      ratePerCubicMeter: "147",
-      GstPercentage: 18,
-    },
-    {
-      _id: "8",
-      supplierName: "Nandi Marble Mart",
-      supplierGSTN: "29AAACD2567Q1ZY",
-      purchaseType: "Raw",
-      noOfBlocks: 22,
-      length: "118",
-      height: "92",
-      breadth: "58",
-      purchaseDate: "02/12/2024",
-      ratePerCubicMeter: "160",
-      GstPercentage: 18,
-    },
-    {
-      _id: "10",
-      supplierName: "Global Stones",
-      supplierGSTN: "04AACDF4536T1ZX",
-      purchaseType: "Raw",
-      noOfBlocks: 16,
-      length: "110",
-      height: "85",
-      breadth: "53",
-      purchaseDate: "29/11/2024",
-      ratePerCubicMeter: "148",
-      GstPercentage: 18,
-    },
-  ];
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getrawbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-  const finishedPurchasesData = [
-    {
-      _id: "2",
-      supplierName: "Suresh Stones",
-      supplierGSTN: "27AAGFG6789P1ZY",
-      purchaseType: "Finished",
-      noOfSlabs: 25,
-      length: "95",
-      height: "75",
-      purchaseDate: "01/12/2024",
-      ratePerSqft: "22",
-      GstPercentage: 18,
-    },
-    {
-      _id: "4",
-      supplierName: "StoneCrafts Ltd",
-      supplierGSTN: "09AADCF5698L1ZM",
-      purchaseType: "Finished",
-      noOfSlabs: 8,
-      length: "100",
-      height: "70",
-      purchaseDate: "28/11/2024",
-      ratePerSqft: "25",
-      GstPercentage: 18,
-    },
-    {
-      _id: "7",
-      supplierName: "Shree Stones",
-      supplierGSTN: "24AACDF1256R1Z9",
-      purchaseType: "Finished",
-      noOfSlabs: 10,
-      length: "105",
-      height: "80",
-      purchaseDate: "27/11/2024",
-      ratePerSqft: "20",
-      GstPercentage: 18,
-    },
-    {
-      _id: "9",
-      supplierName: "Galaxy Granites",
-      supplierGSTN: "07AADFG6732P1ZY",
-      purchaseType: "Finished",
-      noOfSlabs: 14,
-      length: "98",
-      height: "75",
-      purchaseDate: "03/12/2024",
-      ratePerSqft: "24",
-      GstPercentage: 18,
-    },
-  ];
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getgstslabbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-  const RawPurchased = rawPurchasesData.filter(
-    (data: any) => data.purchaseType === "Raw"
-  );
-  const FinishedPurchased = finishedPurchasesData.filter(
-    (data: any) => data.purchaseType === "Finished"
-  );
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getslabbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
+  ]);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -214,95 +125,104 @@ export default async function Purchases({ params }: Props) {
           <Heading className="leading-tight" title="Purchases" />
           <p className="text-muted-foreground text-sm mt-2">
             Seamlessly manage and monitor raw material and finished goods
-            purchases with comprehensive details, ensuring efficient tracking
-            and streamlined progress through the production workflow.
+            purchases.
           </p>
         </div>
-        <Link href="./purchases/create-new">
-          <Button> Create New Purchase</Button>
-        </Link>
+        <AddPurchases factoryId={params.factoryid} />
       </div>
+
       <Separator orientation="horizontal" />
+
       <div className="w-250 container mx-auto py-10">
         <Tabs defaultValue="Raw" className="w-full">
           <TabsList className="gap-3">
             <TabsTrigger className="gap-2" value="Raw">
-              Raw Material Purchased
-              <Badge className="text-bg-primary-foreground " variant="outline">
-                {rawPurchasesData?.length}
+              Raw Materials
+              <Badge variant="outline">
+                {(rawWithGst?.length || 0) + (actualRaw?.length || 0)}
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="Finished">
-              Finished Material Purchased
-              <Badge className="text-bg-primary-foreground" variant="outline">
-                {finishedPurchasesData?.length}
+              Finished Materials
+              <Badge variant="outline">
+                {(slabWithGst?.length || 0) + (actualSlab?.length || 0)}
               </Badge>
             </TabsTrigger>
           </TabsList>
+
+          {/* Raw Material Tabs */}
           <TabsContent value="Raw">
             <Tabs defaultValue="RawWithGST" className="w-full">
-              <TabsList className="gap-3">
-                <TabsTrigger className="gap-2" value="RawWithGST">
+              <TabsList className="gap-3 mt-4">
+                <TabsTrigger value="RawWithGST">
                   Raw Purchase with GST
                 </TabsTrigger>
-                <TabsTrigger className="gap-2" value="ActualRaw">
-                  Actual Raw Purchase
-                </TabsTrigger>
+                <TabsTrigger value="ActualRaw">Actual Raw Purchase</TabsTrigger>
               </TabsList>
+
               <TabsContent value="RawWithGST">
                 <DataTable
-                  bulkDeleteIdName="order_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected purchases?"
-                  bulkDeleteDescription="This will delete the purchases, and they will not be recoverable."
-                  bulkDeleteToastMessage="Selected purchases deleted successfully"
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure?"
+                  bulkDeleteDescription="This will delete raw purchases permanently."
+                  bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseWithGstColumn}
-                  data={RawPurchased}
+                  data={rawWithGst}
                 />
               </TabsContent>
+
               <TabsContent value="ActualRaw">
                 <DataTable
-                  bulkDeleteIdName="order_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected purchases?"
-                  bulkDeleteDescription="This will delete the purchases, and they will not be recoverable."
-                  bulkDeleteToastMessage="Selected purchases deleted successfully"
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure?"
+                  bulkDeleteDescription="This will delete raw purchases permanently."
+                  bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseColumns}
-                  data={RawPurchased}
+                  data={actualRaw}
                 />
               </TabsContent>
             </Tabs>
           </TabsContent>
+
+          {/* Finished Material Tabs */}
           <TabsContent value="Finished">
             <Tabs defaultValue="FinishedWithGST" className="w-full">
-              <TabsList className="gap-3">
-                <TabsTrigger className="gap-2" value="FinishedWithGST">
+              <TabsList className="gap-3 mt-4">
+                <TabsTrigger value="FinishedWithGST">
                   Finished Purchase with GST
                 </TabsTrigger>
-                <TabsTrigger className="gap-2" value="ActualFinished">
+                <TabsTrigger value="ActualFinished">
                   Actual Finished Purchase
                 </TabsTrigger>
               </TabsList>
+
               <TabsContent value="FinishedWithGST">
                 <DataTable
-                  bulkDeleteIdName="order_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected purchases?"
-                  bulkDeleteDescription="This will delete the selected purchases, and they will not be recoverable."
-                  bulkDeleteToastMessage="Selected purchases deleted successfully"
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure?"
+                  bulkDeleteDescription="This will delete finished purchases permanently."
+                  bulkDeleteToastMessage="Finished purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultiple"
                   columns={FinishedPurchaseWithGstColumns}
-                  data={FinishedPurchased}
+                  data={slabWithGst}
                 />
               </TabsContent>
+
               <TabsContent value="ActualFinished">
                 <DataTable
-                  bulkDeleteIdName="order_id"
-                  bulkDeleteTitle="Are you sure you want to delete the selected purchases?"
-                  bulkDeleteDescription="This will delete the selected purchases, and they will not be recoverable."
-                  bulkDeleteToastMessage="Selected purchases deleted successfully"
+                  bulkDeleteIdName="_id"
+                  bulkDeleteTitle="Are you sure?"
+                  bulkDeleteDescription="This will delete finished purchases permanently."
+                  bulkDeleteToastMessage="Finished purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultiple"
                   columns={FinishedPurchaseColumns}
-                  data={FinishedPurchased}
+                  data={actualSlab}
                 />
               </TabsContent>
             </Tabs>

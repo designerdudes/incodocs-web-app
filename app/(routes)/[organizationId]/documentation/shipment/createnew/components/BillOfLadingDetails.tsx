@@ -116,7 +116,7 @@ export function BillOfLadingDetails({
       }
     };
     fetchShippingLines();
-  }, [organizationId]);
+  }, [shippingLines]);
 
   // Debug confirmation state changes
   useEffect(() => {

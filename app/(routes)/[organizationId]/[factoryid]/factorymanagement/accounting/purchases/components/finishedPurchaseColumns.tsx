@@ -43,24 +43,7 @@ export const FinishedPurchaseColumns: ColumnDef<FinishedPurchased>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.supplierName}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "supplierGSTN",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                GSTN. No
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.supplierGSTN}
+                {row.original?.supplierId?.supplierName}
             </div>
         ),
     },

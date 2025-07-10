@@ -43,29 +43,12 @@ export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.supplierName}
+                {row.original?.supplierId?.supplierName}
             </div>
         ),
     },
     {
-        accessorKey: "supplierGSTN",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                GSTN. No
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.supplierGSTN}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "ratePerSqft",
+        accessorKey: "ratePerCubicVolume",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -77,7 +60,7 @@ export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.ratePerCubicMeter}
+                {row.original.ratePerCubicVolume}
             </div>
         ),
     },

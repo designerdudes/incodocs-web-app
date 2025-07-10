@@ -12,63 +12,54 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  TableHeader,
-  TableRow,
-  TableHead,
+  Table,
   TableBody,
   TableCell,
-  Table,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
 
 interface Props {
   params: {
-    blockid: string;
+    id: string;
   };
 }
 
 export default async function SlabsPage({ params }: Props) {
-  let SlabData = null;
+  const BlockDataId = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
+    `https://incodocs-server.onrender.com/transaction/purchase/rawgetbyid/${BlockDataId}`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${token}`,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  );
 
-  SlabData = res;
-  // console.log("SlabData",SlabData)
+  const { getPurchase: BlockData } = await res.json();
 
-  function calculateVolume(
+  const calculateVolumeInCm = (
     length: number,
     breadth: number,
     height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
-  }
-  const volumeinInchs = calculateVolume(
-    SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value
-  );
+  ) => {
+    const volumeInCubicInches = length * breadth * height;
+    const conversionFactor = 16.387064;
+    return (volumeInCubicInches * conversionFactor).toFixed(2);
+  };
 
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
-  }
+  const volumeCm = calculateVolumeInCm(
+    BlockData.length,
+    BlockData.breadth,
+    BlockData.height
+  );
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -82,22 +73,21 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Raw Purchase ${SlabData.blockid} `}
+            title={`Details of Raw Purchase ${BlockData.invoiceNo}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
-            A comprehensive view of all customer transactions involving the
-            purchase of raw materials. It serves as a centralized hub to track,
-            manage, and review details such as customer names, purchase
-            quantities, dates, and other relevant information.
+            A comprehensive view of all transactions involving the purchase of
+            raw materials.
           </p>
         </div>
       </div>
+
       <div className="flex-1">
         <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card x-chunk="dashboard-07-chunk-0">
+          <Card>
             <CardHeader>
               <CardTitle>Raw Purchase Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details of invoice ${BlockData.invoiceNo}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -109,105 +99,73 @@ export default async function SlabsPage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Supplier Name
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>Factory</TableCell>
+                    <TableCell>{BlockData.factoryId?.factoryName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Number of blocks
-                    </TableCell>
-                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
+                    <TableCell>Supplier Name</TableCell>
+                    <TableCell>{BlockData.supplierId?.supplierName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Invoice No.
-                    </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>Number of Blocks</TableCell>
+                    <TableCell>{BlockData.noOfBlocks}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Invoice Value
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>Invoice No.</TableCell>
+                    <TableCell>{BlockData.invoiceNo}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Volume Quantity
-                    </TableCell>
-                    <TableCell>{SlabData.status}</TableCell>
+                    <TableCell>Invoice Value</TableCell>
+                    <TableCell>{BlockData.invoiceValue}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Weight (tons)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.weight?.value}</TableCell>
+                    <TableCell>Volume Quantity</TableCell>
+                    <TableCell>{BlockData.volumeQuantity}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Length (inch)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
+                    <TableCell>Weight (tons)</TableCell>
+                    <TableCell>{BlockData.weight}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Breadth (inch)
-                    </TableCell>
+                    <TableCell>Length (inch)</TableCell>
+                    <TableCell>{BlockData.length}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Breadth (inch)</TableCell>
+                    <TableCell>{BlockData.breadth}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Height (inch)</TableCell>
+                    <TableCell>{BlockData.height}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Rate per Cubic Volume</TableCell>
+                    <TableCell>{BlockData.ratePerCubicVolume}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Volume (cm³)</TableCell>
+                    <TableCell>{volumeCm}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>GST Percentage</TableCell>
+                    <TableCell>{BlockData.gstPercentage}%</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Purchase Date</TableCell>
                     <TableCell>
-                      {SlabData?.dimensions?.breadth?.value}
+                      {moment(BlockData.purchaseDate).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Height (inch)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Rate per Cubic Volume
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
-                  </TableRow>
-
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Volume (cm³)
-                    </TableCell>
+                    <TableCell>Created At</TableCell>
                     <TableCell>
-                      {convertInchCubeToCmCube(volumeinInchs)}
+                      {moment(BlockData.createdAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      GST Percentage
-                    </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Purchase Date
-                    </TableCell>
+                    <TableCell>Updated At</TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Block Created At
-                    </TableCell>
-                    <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Block Updated At
-                    </TableCell>
-                    <TableCell>
-                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                 </TableBody>
