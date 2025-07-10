@@ -13,10 +13,12 @@ import { rawPurchaseWithGstColumn } from "./components/rawPurchaseWithGstColumn"
 import { rawPurchaseColumns } from "./components/rawPurchaseColumns";
 import { FinishedPurchaseWithGstColumns } from "./components/finishedPurchaseWithGstColumn";
 import { FinishedPurchaseColumns } from "./components/finishedPurchaseColumns";
+import AddPurchases from "./components/purchasesDropdown";
 
 export type RawPurchaseWithGST = {
   _id: string;
-  supplierName: string;
+  supplierId: { supplierName: string };
+
   supplierGSTN: string;
   purchaseType: "Raw";
   noOfBlocks: number;
@@ -24,13 +26,13 @@ export type RawPurchaseWithGST = {
   breadth: string;
   height: string;
   purchaseDate: string;
-  GstPercentage: number;
-  ratePerCubicMeter: string;
+  gstPercentage: number;
+  ratePerCubicVolume: string;
 };
 
 export type ActualRawPurchase = {
   _id: string;
-  supplierName: string;
+  supplierId: { supplierName: string };
   supplierGSTN: string;
   purchaseType: "Raw";
   noOfBlocks: number;
@@ -38,25 +40,25 @@ export type ActualRawPurchase = {
   breadth: string;
   height: string;
   purchaseDate: string;
-  ratePerCubicMeter: string;
+  ratePerCubicVolume: string;
 };
 
 export type FinishedPurchaseWithGST = {
   _id: string;
-  supplierName: string;
+ supplierId: { supplierName: string };
   supplierGSTN: string;
   purchaseType: "Finished";
   noOfSlabs: number;
   length: string;
   height: string;
   purchaseDate: string;
-  GstPercentage: number;
+  gstPercentage: number;
   ratePerSqft: string;
 };
 
 export type ActualFinishedPurchase = {
   _id: string;
-  supplierName: string;
+  supplierId: { supplierName: string };
   supplierGSTN: string;
   purchaseType: "Finished";
   noOfSlabs: number;
@@ -65,6 +67,10 @@ export type ActualFinishedPurchase = {
   purchaseDate: string;
   ratePerSqft: string;
 };
+
+export type RawPurchased = RawPurchaseWithGST | ActualRawPurchase;
+
+export type FinishedPurchased = | FinishedPurchaseWithGST | ActualFinishedPurchase;
 
 interface Props {
   params: {
@@ -77,21 +83,33 @@ export default async function Purchases({ params }: Props) {
   const token = cookies().get("AccessToken")?.value || "";
 
   const [rawWithGst, actualRaw, slabWithGst, actualSlab] = await Promise.all([
-    fetch(`https://incodocs-server.onrender.com/transaction/purchase/getgstrawbyfactory/${params.factoryid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => res.json()),
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getgstrawbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-    fetch(`https://incodocs-server.onrender.com/transaction/purchase/getrawbyfactory/${params.factoryid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => res.json()),
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getrawbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-    fetch(`https://incodocs-server.onrender.com/transaction/purchase/getgstslabbyfactory/${params.factoryid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => res.json()),
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getgstslabbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
 
-    fetch(`https://incodocs-server.onrender.com/transaction/purchase/getslabbyfactory/${params.factoryid}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }).then((res) => res.json()),
+    fetch(
+      `https://incodocs-server.onrender.com/transaction/purchase/getslabbyfactory/${params.factoryid}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    ).then((res) => res.json()),
   ]);
 
   return (
@@ -106,12 +124,11 @@ export default async function Purchases({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Purchases" />
           <p className="text-muted-foreground text-sm mt-2">
-            Seamlessly manage and monitor raw material and finished goods purchases.
+            Seamlessly manage and monitor raw material and finished goods
+            purchases.
           </p>
         </div>
-        <Link href="./purchases/create-new">
-          <Button> Create New Purchase</Button>
-        </Link>
+        <AddPurchases factoryId={params.factoryid} />
       </div>
 
       <Separator orientation="horizontal" />
@@ -137,7 +154,9 @@ export default async function Purchases({ params }: Props) {
           <TabsContent value="Raw">
             <Tabs defaultValue="RawWithGST" className="w-full">
               <TabsList className="gap-3 mt-4">
-                <TabsTrigger value="RawWithGST">Raw Purchase with GST</TabsTrigger>
+                <TabsTrigger value="RawWithGST">
+                  Raw Purchase with GST
+                </TabsTrigger>
                 <TabsTrigger value="ActualRaw">Actual Raw Purchase</TabsTrigger>
               </TabsList>
 
@@ -148,6 +167,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete raw purchases permanently."
                   bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseWithGstColumn}
                   data={rawWithGst}
                 />
@@ -160,6 +180,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete raw purchases permanently."
                   bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseColumns}
                   data={actualRaw}
                 />
@@ -171,8 +192,12 @@ export default async function Purchases({ params }: Props) {
           <TabsContent value="Finished">
             <Tabs defaultValue="FinishedWithGST" className="w-full">
               <TabsList className="gap-3 mt-4">
-                <TabsTrigger value="FinishedWithGST">Finished Purchase with GST</TabsTrigger>
-                <TabsTrigger value="ActualFinished">Actual Finished Purchase</TabsTrigger>
+                <TabsTrigger value="FinishedWithGST">
+                  Finished Purchase with GST
+                </TabsTrigger>
+                <TabsTrigger value="ActualFinished">
+                  Actual Finished Purchase
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="FinishedWithGST">
@@ -182,6 +207,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete finished purchases permanently."
                   bulkDeleteToastMessage="Finished purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultiple"
                   columns={FinishedPurchaseWithGstColumns}
                   data={slabWithGst}
                 />
@@ -194,6 +220,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete finished purchases permanently."
                   bulkDeleteToastMessage="Finished purchases deleted."
                   searchKey="supplierName"
+                  deleteRoute="transaction/purchase/deletemultiple"
                   columns={FinishedPurchaseColumns}
                   data={actualSlab}
                 />

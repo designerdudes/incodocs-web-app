@@ -23,17 +23,17 @@ import moment from "moment";
 
 interface Props {
   params: {
-    blockid: string;
+    id: string;
   };
 }
 
 export default async function SlabsPage({ params }: Props) {
-  let SlabData = null;
+  const SlabDataId = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
+    `https://incodocs-server.onrender.com/transaction/purchase/slabgetbyid/${SlabDataId}`,
     {
       method: "GET",
       headers: {
@@ -41,34 +41,10 @@ export default async function SlabsPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
-
-  SlabData = res;
-
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
-  }
-  const volumeinInchs = calculateVolume(
-    SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value
   );
 
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
-  }
-
+  const SlabData = await res.json();
+  const purchase = SlabData?.getPurchase;
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -81,7 +57,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Finished Purchase ${SlabData.blockNumber} `}
+            title={`Details of Finished Purchase - ${purchase?.invoiceNo}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             A detailed overview of all customer transactions related to the
@@ -92,12 +68,15 @@ export default async function SlabsPage({ params }: Props) {
           </p>
         </div>
       </div>
+
       <div className="flex-1">
         <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card x-chunk="dashboard-07-chunk-0">
+          <Card>
             <CardHeader>
               <CardTitle>Finished Purchase Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>
+                Details of invoice number: {purchase?.invoiceNo}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -109,76 +88,53 @@ export default async function SlabsPage({ params }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Supplier Name
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>Supplier Name</TableCell>
+                    <TableCell>{purchase?.supplierId?.supplierName}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Invoice No.
-                    </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>Invoice No.</TableCell>
+                    <TableCell>{purchase?.invoiceNo}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Invoice Value
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>Invoice Value</TableCell>
+                    <TableCell>{purchase?.invoiceValue}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      No of Slabs
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>No of Slabs</TableCell>
+                    <TableCell>{purchase?.noOfSlabs}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Length (inch)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
+                    <TableCell>Length (inch)</TableCell>
+                    <TableCell>{purchase?.length}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Height (inch)
-                    </TableCell>
-                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
+                    <TableCell>Height (inch)</TableCell>
+                    <TableCell>{purchase?.height}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Rate per Sqft
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>Rate per Sqft</TableCell>
+                    <TableCell>{purchase?.ratePerSqft}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      GST Percentage
-                    </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>GST Percentage</TableCell>
+                    <TableCell>{purchase?.gstPercentage}%</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Purchase Date
-                    </TableCell>
+                    <TableCell>Purchase Date</TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Slab Created At
-                    </TableCell>
-                    <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
+                      {purchase?.purchaseDate ? moment(purchase.purchaseDate).format("YYYY-MM-DD") : "-"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Slab Updated At
-                    </TableCell>
+                    <TableCell>Created At</TableCell>
                     <TableCell>
-                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
+                      {purchase?.createdAt ? moment(purchase.createdAt).format("YYYY-MM-DD") : "-"}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Updated At</TableCell>
+                    <TableCell>
+                      {purchase?.updatedAt ? moment(purchase.updatedAt).format("YYYY-MM-DD") : "-"}
                     </TableCell>
                   </TableRow>
                 </TableBody>
