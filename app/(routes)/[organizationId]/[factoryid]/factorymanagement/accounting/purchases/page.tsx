@@ -167,7 +167,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete raw purchases permanently."
                   bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
-                  deleteRoute="transaction/purchase/deletemultiple"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseWithGstColumn}
                   data={rawWithGst}
                 />
@@ -180,7 +180,7 @@ export default async function Purchases({ params }: Props) {
                   bulkDeleteDescription="This will delete raw purchases permanently."
                   bulkDeleteToastMessage="Raw purchases deleted."
                   searchKey="supplierName"
-                  deleteRoute="transaction/purchase/deletemultiple"
+                  deleteRoute="transaction/purchase/deletemultipleraw"
                   columns={rawPurchaseColumns}
                   data={actualRaw}
                 />

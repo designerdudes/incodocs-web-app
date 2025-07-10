@@ -183,7 +183,6 @@ export default function FinishedPurchaseCreateNewForm({
         height: values.slabs?.[0]?.dimensions?.height?.value || 0,
         ratePerSqft: values.ratePerSqft || 0,
       };
-      // console.log("ssssssssssssssssssss", payload);
 
       if (gstValue > 0) {
         // GST-based purchase
@@ -216,7 +215,7 @@ export default function FinishedPurchaseCreateNewForm({
 
       await postData(apiUrl, payload);
       toast.success("Finished Purchase Added Successfully");
-      router.push("./factorymanagement/inventory/accounting/purchases");
+      router.push("../");
     } catch (error) {
       console.error("Error creating finished purchase:", error);
       toast.error("Error creating finished purchase");
@@ -224,8 +223,6 @@ export default function FinishedPurchaseCreateNewForm({
       setIsLoading(false);
     }
   }
-  // console.log("Watched SupplierIdsssssssss:", form.watch("SupplierId"));
-
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
@@ -260,34 +257,14 @@ export default function FinishedPurchaseCreateNewForm({
                       entities={supplierNames}
                       value={field.value || ""}
                       onChange={(value) => {
-                        field.onChange(value); // updates SupplierName
-
-                        const selectedSupplier = supplierNames.find(
-                          (s) => s.name === value
-                        );
-
-                        if (selectedSupplier) {
-                          form.setValue("SupplierId", selectedSupplier._id, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-                        } else {
-                          form.setValue("SupplierId", "", {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-                        }
-
-                        // console.log(
-                        //   "Selected Supplierrrrrr ID:",
-                        //   selectedSupplier?._id
-                        // );
+                        field.onChange(value);
                       }}
+                      valueProperty="_id" // ✅ Ensure supplier ID is passed
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
                       onAddNew={handleAddNewSupplier}
                       addNewLabel="Add New Supplier"
-                      disabled={isLoading || supplierLoading}
+                      // disabled={isLoading || supplierLoading}
                     />
                   </FormControl>
                   <FormMessage />

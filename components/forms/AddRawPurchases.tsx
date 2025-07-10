@@ -44,7 +44,6 @@ interface RawPurchaseCreateNewFormProps {
 }
 
 const formSchema = z.object({
-  SupplierName: z.string().optional(),
   SupplierId: z.string().nonempty({ message: "Supplier ID is required" }),
   factoryId: z.string().nonempty({ message: "Factory ID is required" }),
   invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
@@ -125,7 +124,6 @@ export default function RawPurchaseCreateNewForm({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      SupplierName: "",
       SupplierId: "",
       factoryId,
       invoiceNo: "",
@@ -240,7 +238,7 @@ export default function RawPurchaseCreateNewForm({
 
       await postData(apiUrl, payload);
       toast.success("Raw Purchase Added Successfully");
-      router.push("./factorymanagement/inventory/accounting/purchases");
+      router.push(`../`);
     } catch (error) {
       console.error("Error creating raw purchase:", error);
       toast.error("Error creating raw purchase");
@@ -269,7 +267,7 @@ export default function RawPurchaseCreateNewForm({
           <div className="grid grid-cols-3 gap-3">
             {/* Supplier Name */}
             <FormField
-              name="SupplierName"
+              name="SupplierId"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -279,34 +277,14 @@ export default function RawPurchaseCreateNewForm({
                       entities={supplierNames}
                       value={field.value || ""}
                       onChange={(value) => {
-                        field.onChange(value); // updates SupplierName
-
-                        const selectedSupplier = supplierNames.find(
-                          (s) => s.name === value
-                        );
-
-                        if (selectedSupplier) {
-                          form.setValue("SupplierId", selectedSupplier._id, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-                        } else {
-                          form.setValue("SupplierId", "", {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-                        }
-
-                        // console.log(
-                        //   "Selected Supplierrrrrr ID:",
-                        //   selectedSupplier?._id
-                        // );
+                        field.onChange(value);
                       }}
+                      valueProperty="_id" // ✅ Ensure supplier ID is passed
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
                       onAddNew={handleAddNewSupplier}
                       addNewLabel="Add New Supplier"
-                      disabled={isLoading || supplierLoading}
+                      // disabled={isLoading || supplierLoading}
                     />
                   </FormControl>
                   <FormMessage />

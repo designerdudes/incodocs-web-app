@@ -44,7 +44,6 @@ export default function AddPurchases({factoryId}: AddpurchasesProps) {
         <DropdownMenuItem onSelect={() => handleNavigation("finishedPurchases")}>
           Finished Purchases
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
       </DropdownMenuContent>
     </DropdownMenu>
   );
