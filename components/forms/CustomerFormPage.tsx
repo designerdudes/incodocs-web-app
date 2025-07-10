@@ -37,14 +37,12 @@ import {
 } from "../ui/table";
 
 // 🧾 Zod Schema
-export const supplierSchema = z.object({
-  supplierName: z.string().min(1, "supplier name is required"),
+export const CustomerSchema = z.object({
+  customerName: z.string().min(1, "Customer name is required"),
   gstNo: z.string().min(1, "gst number is required"),
-  mobileNumber: z.number().min(1, "mobile number is required"),
+  mobileNumber: z.number().min(1, "Mobile number required"),
   state: z.string().optional(),
   address: z.string().optional(),
-  responsiblePerson: z.string().optional(),
-  factoryAddress: z.string().optional(),
   factoryId: z.string().optional(),
   createdBy: z.any().optional(),
   documents: z
@@ -59,31 +57,29 @@ export const supplierSchema = z.object({
     .optional(),
 });
 
-type SupplierFormValues = z.infer<typeof supplierSchema>;
+type CustomerFormValues = z.infer<typeof CustomerSchema>;
 
-interface SupplierFormProps {
+interface CustomerFormProps {
   params: {
     factoryid: string;
     organizationId: string;
   };
 }
 
-export default function SupplierFormPage({ params }: SupplierFormProps) {
+export default function CustomerFormPage({ params }: CustomerFormProps) {
   const orgId = params.organizationId;
   const factoryId = params.factoryid;
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<SupplierFormValues>({
-    resolver: zodResolver(supplierSchema),
+  const form = useForm<CustomerFormValues>({
+    resolver: zodResolver(CustomerSchema),
     defaultValues: {
-      supplierName: "",
+      customerName: "",
       gstNo: "",
       mobileNumber: undefined,
       state: "",
       address: "",
-      responsiblePerson: "",
-      factoryAddress: "",
       factoryId: factoryId,
       documents: [
         {
@@ -107,17 +103,17 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
     name: "documents",
   });
 
-  const handleSubmit = async (values: SupplierFormValues) => {
+  const handleSubmit = async (values: CustomerFormValues) => {
     setIsLoading(true);
     try {
-      await postData("/accounting/suplier/create", {
+      await postData("/accounting/customer/create", {
         ...values,
         params,
       });
-      toast.success("Supplier added successfully!");
+      toast.success("Customer added successfully!");
       router.push("../");
     } catch (error) {
-      toast.error("Error creating supplier");
+      toast.error("Error creating Customer");
     } finally {
       setIsLoading(false);
     }
@@ -133,10 +129,10 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
           <div className="grid grid-flow-col gap-4">
             <FormField
               control={form.control}
-              name="supplierName"
+              name="customerName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>supplier Name</FormLabel>
+                  <FormLabel>Customer Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Salman"
@@ -221,41 +217,6 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
                   <FormControl>
                     <Input
                       placeholder="address"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="responsiblePerson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Responsible Person</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="responsible person"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="factoryAddress"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Factory Address</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="factory address"
                       disabled={isLoading}
                       {...field}
                     />
