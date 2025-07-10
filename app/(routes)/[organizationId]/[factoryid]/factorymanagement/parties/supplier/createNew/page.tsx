@@ -3,7 +3,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import QuarryFormPage from "@/components/forms/QuarryFormPage";
+import SupplierFormPage from "@/components/forms/SupplierFormPage";
 
 interface Props {
   params: {
@@ -12,7 +12,7 @@ interface Props {
   };
 }
 
-export default function CreateNewQuarryPage({ params }: Props) {
+export default function CreateNewSupplierPage({ params }: Props) {
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex items-center justify-between">
@@ -23,15 +23,15 @@ export default function CreateNewQuarryPage({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading className="leading-tight" title="Add Quarry" />
+          <Heading className="leading-tight" title="Add Supplier" />
           <p className="text-muted-foreground text-sm">
-            Complete the form below to add a new Quarry.
+            Complete the form below to add a new Supplier.
           </p>
         </div>
       </div>
       <Separator orientation="horizontal" />
       <div className="container mx-auto">
-        <QuarryFormPage params={params} />
+        <SupplierFormPage params={params} />
       </div>
     </div>
   );

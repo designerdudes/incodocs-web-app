@@ -22,25 +22,25 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Alert } from "@/components/forms/Alert";
-import { Quarry } from "../../page";
+import { Customer } from "../../page";
 
 interface Props {
-  data: Quarry;
+  data: Customer;
 }
 
 const CellActions: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const deleteQuarry = async () => {
+  const deleteCustomer = async () => {
     try {
       const result = await deleteData(
-        `https://incodocs-server.onrender.com/quarry/delete/${data._id}` // Placeholder endpoint
+        `https://incodocs-server.onrender.com/accounting/customer/delete/${data._id}` // Placeholder endpoint
       );
-      toast.success("Quarry Deleted Successfully");
+      toast.success("Customer Deleted Successfully");
       window.location.reload();
       GlobalModal.onClose();
     } catch (error) {
-      toast.error("Error deleting Quarry");
+      toast.error("Error deleting Customer");
     }
   };
 
@@ -58,26 +58,26 @@ const CellActions: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-            onClick={() => router.push(`./parties/quarry/Edit/${data._id}`)}
+            onClick={() => router.push(`./parties/customer/Edit/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <Scissors className="mr-2 h-4 w-4" />
-            Edit Quarry
+            Edit Customer
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() => router.push(`./parties/quarry/View/${data._id}`)}
+            onClick={() => router.push(`./parties/customer/View/${data._id}`)}
             className="focus:bg-green-500 focus:text-destructive-foreground"
           >
             <EyeIcon className="mr-2 h-4 w-4" />
-            View Quarry
+            View Customer
           </DropdownMenuItem>
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Quarry - ${data?.lesseeName}`;
+              GlobalModal.title = `Delete Customer - ${data?.customerName}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Quarry?";
+                "Are you sure you want to delete this Customer?";
               GlobalModal.children = (
-                <Alert onConfirm={deleteQuarry} actionType={"delete"} />
+                <Alert onConfirm={deleteCustomer} actionType={"delete"} />
               );
               GlobalModal.onOpen();
             }}
