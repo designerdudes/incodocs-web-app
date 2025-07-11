@@ -196,7 +196,7 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>States</FormLabel>
+                  <FormLabel>State</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Telangana, Andhra Pradesh"
@@ -213,7 +213,7 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>address</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="address"

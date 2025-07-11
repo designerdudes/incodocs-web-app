@@ -136,7 +136,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="supplierName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>supplier Name</FormLabel>
+                  <FormLabel>Supplier Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Salman"
@@ -200,7 +200,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>States</FormLabel>
+                  <FormLabel>State</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Telangana, Andhra Pradesh"
@@ -217,7 +217,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>address</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="address"
