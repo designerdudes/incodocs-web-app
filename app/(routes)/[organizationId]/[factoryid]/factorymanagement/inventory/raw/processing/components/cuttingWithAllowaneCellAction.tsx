@@ -22,9 +22,10 @@ import { MarkPaidForm } from "@/components/forms/MarkPaidForm";
 
 interface Props {
   data: FinishedMaterial;
+  polish?: boolean;
 }
 
-export const CellAction: React.FC<Props> = ({ data }) => {
+export const CellAction: React.FC<Props> = ({ data, polish }) => {
   const GlobalModal = useGlobalModal();
   const deleteSlab = async () => {
     try {
@@ -64,10 +65,13 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               GlobalModal.title = "Do you want to mark this slabs as paid?";
               GlobalModal.description =
                 "Are you sure you want to mark this slab as paid?";
-                GlobalModal.children = (
-                    <MarkPaidForm selectedSlabs={[{ slabId: data._id }]} />
-                  );
-                  
+              GlobalModal.children = (
+                <MarkPaidForm
+                  selectedSlabs={[{ slabId: data._id }]}
+                  polish={polish}
+                />
+              );
+
               GlobalModal.onOpen();
             }}
           >

@@ -66,7 +66,7 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                         
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Edit Trim Values
+                        Edit Polish Values
                     </DropdownMenuItem>
 
                     {/* View Lot Details */}

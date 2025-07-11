@@ -38,10 +38,12 @@ function calculateAdjustedDimensions(
   const lengthInCm = (adjustedLength * 2.54).toFixed(2); // Convert to cm
   const heightInCm = (adjustedHeight * 2.54).toFixed(2); // Convert to cm
   const squareFt = ((adjustedLength * adjustedHeight) / 144).toFixed(2); // Calculate square feet
-  const amount = (((adjustedLength * adjustedHeight) / 144) * workersPolishingPay).toFixed(2); // Calculate amount
+  const amount = (
+    ((adjustedLength * adjustedHeight) / 144) *
+    workersPolishingPay
+  ).toFixed(2); // Calculate amount
 
   return {
-    
     adjustedLength: adjustedLength.toFixed(2),
     adjustedHeight: adjustedHeight.toFixed(2),
     lengthInCm,
@@ -112,12 +114,22 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
     {
       accessorKey: "trimLength",
       header: "Trim Length (inch)",
-      cell: ({ row }) => <div>{row.original?.trim?.length?.value}</div>,
+      cell: ({ row }) => (
+        <div>
+          {row.original?.dimensions?.length?.value -
+            row.original?.trim?.length?.value || ""}
+        </div>
+      ),
     },
     {
       accessorKey: "trimHeight",
       header: "Trim Height (inch)",
-      cell: ({ row }) => <div>{row.original?.trim?.height?.value}</div>,
+      cell: ({ row }) => (
+        <div>
+          {row.original?.dimensions?.height?.value -
+            row.original?.trim?.height?.value || ""}
+        </div>
+      ),
     },
     {
       accessorKey: "length",
@@ -201,7 +213,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
         }, 0);
         return (
           <span className="font-medium text-gray-600">
-            Total SQF: {totalSQF.toFixed(2)} 
+            Total SQF: {totalSQF.toFixed(2)}
           </span>
         );
       },
@@ -244,19 +256,27 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
       header: "Payment Status",
       cell: ({ row }) => {
         // Log polishingPaymentStatus for this slab
-        console.log(`Polishing Payment Status for slab ${row.original?.slabNumber}:`, row.original?.polishingPaymentStatus?.status);
+        console.log(
+          `Polishing Payment Status for slab ${row.original?.slabNumber}:`,
+          row.original?.polishingPaymentStatus?.status
+        );
         return (
-          <div className="capitalize">
+          <div
+            className={`capitalize ${
+              row.original?.polishingPaymentStatus?.status === "pending"
+                ? "bg-red-200 text-red-900 rounded text-center"
+                : "bg-green-200 text-green-900 rounded text-center"
+            }`}
+          >
             {row.original?.polishingPaymentStatus?.status || "Pending"}
           </div>
         );
       },
     },
 
-
     {
       id: "actions",
       header: "Actions",
-      cell: ({ row }) => <CellAction data={row.original} />,
+      cell: ({ row }) => <CellAction data={row.original} polish={true} />,
     },
   ];
