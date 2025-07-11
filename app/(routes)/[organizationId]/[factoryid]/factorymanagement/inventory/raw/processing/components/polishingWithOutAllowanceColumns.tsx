@@ -98,7 +98,7 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
           6,
           2
         );
-        return <div>{adjustedLength || ""}</div>;
+        return <div>{row.original?.trim?.length?.value + 6 || ""}</div>;
       },
     },
     {
@@ -113,7 +113,7 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
           6,
           2
         );
-        return <div>{adjustedHeight || ""}</div>;
+        return <div>{row.original?.trim?.height?.value + 2 || ""}</div>;
       },
     },
     {
@@ -128,7 +128,13 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
           6,
           2
         );
-        return <div>{lengthInCm || ""}</div>;
+        return (
+          <div>
+            {row.original?.trim?.length?.value
+              ? `${((row.original.trim.length.value + 6) * 2.54).toFixed(2)}`
+              : ""}
+          </div>
+        );
       },
     },
     {
@@ -143,7 +149,13 @@ export const polishingInchesWithOutAllowanceColumns: ColumnDef<FinishedMaterial>
           6,
           2
         );
-        return <div>{heightInCm || ""}</div>;
+        return (
+          <div>
+            {row.original?.trim?.height?.value
+              ? `${((row.original.trim.height.value + 2) * 2.54).toFixed(2)}`
+              : ""}
+          </div>
+        );
       },
     },
     {

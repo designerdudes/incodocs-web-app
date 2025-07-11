@@ -142,7 +142,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
-        return <div>{adjustedLength}</div>;
+        return <div>{row.original?.trim?.length?.value}</div>;
       },
     },
     {
@@ -156,7 +156,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
-        return <div>{adjustedHeight}</div>;
+        return <div>{row.original?.trim?.height?.value}</div>;
       },
     },
     {
@@ -170,7 +170,13 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
-        return <div>{lengthInCm}</div>;
+        return (
+          <div>
+            {row.original?.trim?.length?.value
+              ? `${(row.original.trim.length.value * 2.54).toFixed(2)}`
+              : ""}
+          </div>
+        );
       },
     },
     {
@@ -184,7 +190,14 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.trim?.length?.value,
           row.original?.trim?.height?.value
         );
-        return <div>{heightInCm}</div>;
+        return (
+          <div>
+            {" "}
+            {row.original?.trim?.height?.value
+              ? `${(row.original.trim.height.value * 2.54).toFixed(2)}`
+              : ""}
+          </div>
+        );
       },
     },
     {
