@@ -41,6 +41,7 @@ import CalendarComponent from "../CalendarComponent";
 
 interface RawPurchaseCreateNewFormProps {
   gap: number;
+  orgId: string;
 }
 
 const formSchema = z.object({
@@ -98,6 +99,7 @@ const formSchema = z.object({
 
 export default function RawPurchaseCreateNewForm({
   gap,
+  orgId,
 }: RawPurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -161,7 +163,7 @@ export default function RawPurchaseCreateNewForm({
       }
     };
     fetchingData();
-  }, []);
+  }, [supplierNames]);
 
   const handleAddNewSupplier = () => {
     toast("Add new supplier functionality to be implemented");
@@ -282,7 +284,13 @@ export default function RawPurchaseCreateNewForm({
                       valueProperty="_id" // ✅ Ensure supplier ID is passed
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
-                      onAddNew={handleAddNewSupplier}
+                      onAddNew={() => {
+                    window.open(
+                      `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                      "_blank"
+                    );
+                  }}
+                  multiple={false}
                       addNewLabel="Add New Supplier"
                       // disabled={isLoading || supplierLoading}
                     />
@@ -634,7 +642,7 @@ export default function RawPurchaseCreateNewForm({
                       onChange={(e) => {
                         const updatedBlocks = [...blocks];
                         updatedBlocks[index].materialType =
-                          e.target.value || "type1";
+                          e.target.value || "";
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
