@@ -40,7 +40,7 @@ import {
 export const CustomerSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
   gstNo: z.string().min(1, "gst number is required"),
-  mobileNumber: z.number().min(1, "Mobile number required"),
+  mobileNumber: z.number().optional(),
   state: z.string().optional(),
   address: z.string().optional(),
   factoryId: z.string().optional(),

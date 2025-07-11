@@ -40,7 +40,7 @@ import {
 export const supplierSchema = z.object({
   supplierName: z.string().min(1, "supplier name is required"),
   gstNo: z.string().min(1, "gst number is required"),
-  mobileNumber: z.number().min(1, "mobile number is required"),
+  mobileNumber: z.number().optional(),
   state: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),

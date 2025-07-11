@@ -39,7 +39,7 @@ import {
 // 🧾 Zod Schema
 export const quarrySchema = z.object({
   lesseeId: z.string().optional(),
-  lesseeName: z.string().optional(),
+  lesseeName: z.string().min(1,"Lesses Name is required"),
   mineralName: z.string().optional(),
   businessLocationNames: z.string().optional(),
   factoryId: z.string().optional(),
@@ -108,9 +108,9 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
         params,
       });
       toast.success("Quarry added successfully!");
-      router.push("./");
+      router.push("../");
     } catch (error) {
-      toast.error("Error creating/updating quarry");
+      toast.error("Error creating quarry");
     } finally {
       setIsLoading(false);
     }
@@ -350,7 +350,7 @@ export default function QuarryFormPage({ params }: QuarryFormProps) {
             </Button>
 
             <Button type="submit" disabled={isLoading} className="w-1/2">
-              {isLoading ? "Saving..." : "Add Quarry"}
+              {isLoading ? "Saving..." : "Submit"}
             </Button>
           </div>
         </form>
