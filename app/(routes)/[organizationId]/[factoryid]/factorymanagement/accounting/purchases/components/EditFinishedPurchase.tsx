@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import * as z from "zod";
@@ -15,10 +16,9 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useParams, useRouter } from "next/navigation";
+import { useSearchParams, useParams } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-import moment from "moment";
 import {
   Popover,
   PopoverContent,
@@ -37,23 +37,22 @@ const formSchema = z.object({
   purchaseDate: z.string().optional(),
 });
 
-interface Props {
-  params: {
-    _id: string; // Slab ID
-  };
-}
-
-export default function EditLotForm({ params }: Props) {
+export default function EditFinishedPurchase() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const GlobalModal = useGlobalModal();
-  const router = useRouter();
-  const [supplierNames, setSupplierNames] = React.useState<
+  const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
   >([]);
-  const [supplierLoading, setSupplierLoading] = React.useState(false);
 
-  const factoryId = useParams().factoryid as string;
+  const GlobalModal = useGlobalModal();
+  const searchParams = useSearchParams();
+  const router = useParams();
+
+  const factoryId = router.factoryid as string;
+  const organisationId = router.organizationId as string;
+ const SlabId = searchParams.get("FinishedPurchaseId");
+
+  const [, setSupplierLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -65,56 +64,53 @@ export default function EditLotForm({ params }: Props) {
     },
   });
 
-  const SlabId = params._id;
-useEffect(() => {
-      const fetchingData = async () => {
-        try {
-          setSupplierLoading(true);
-          const supplierResponse = await fetchData(
-            `/accounting/supplier/getbyfactory/${factoryId}`
-          );
-          const supplierData = await supplierResponse;
-          const mappedSuppliers = supplierData.map((supplier: any) => ({
-            _id: supplier._id,
-            name: supplier.supplierName,
-          }));
-          setSupplierNames(mappedSuppliers);
-        } catch (error) {
-          console.error("Error fetching supplier data:", error);
-          toast.error("Failed to fetch suppliers");
-        } finally {
-          setSupplierLoading(false);
-        }
-      };
-      fetchingData();
-    }, [])
-
-  const handleAddNewSupplier = () => {
-    toast("Add new supplier functionality to be implemented");
-  };
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        setSupplierLoading(true);
+        const res = await fetchData(
+          `/accounting/supplier/getbyfactory/${factoryId}`
+        );
+        const supplierData = res || [];
+        const mappedSuppliers = supplierData.map((supplier: any) => ({
+          _id: supplier._id,
+          name: supplier.supplierName,
+        }));
+        setSupplierNames(mappedSuppliers);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+        toast.error("Failed to fetch suppliers");
+      } finally {
+        setSupplierLoading(false);
+      }
+    };
+    fetchSuppliers();
+  }, [factoryId]);
 
   useEffect(() => {
     async function fetchSlabData() {
+      if (!SlabId) {
+        console.warn("Missing FinishedPurchaseId in URL");
+        return;
+      }
+
       try {
         setIsFetching(true);
-        const res = await fetchData(
-          `https://incodocs-server.onrender.com/transaction/purchase/slabgetbyid/${SlabId}`
-        );
-        const result = res;
+        const res = await fetchData(`/transaction/purchase/slabgetbyid/${SlabId}`);
+        console.log("Fetched slab data:", res);
+        const data = res.getPurchase;
 
-        const data = result.getPurchase;
+        if (!data) throw new Error("Slab not found");
 
         form.reset({
-          supplierId: data?.supplierId || "",
+          supplierId: data?.supplierId?._id || "",
           ratePerSqft: String(data?.ratePerSqft || ""),
           numberofSlabs: String(data?.noOfSlabs || ""),
-          purchaseDate: data?.purchaseDate
-            ? moment(data.purchaseDate).format("YYYY-MM-DD")
-            : "",
+          purchaseDate: data?.purchaseDate || "",
         });
       } catch (error) {
-        console.error("Error fetching Slab data:", error);
-        toast.error("Failed to fetch Slab data");
+        console.error("Error fetching slab data:", error);
+        toast.error("Failed to fetch slab data");
       } finally {
         setIsFetching(false);
       }
@@ -125,7 +121,7 @@ useEffect(() => {
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    // console.log("Payload valuesssssss:", values);
+
     GlobalModal.title = "Confirm Slab Update";
     GlobalModal.description = "Are you sure you want to update this Slab?";
     GlobalModal.children = (
@@ -147,19 +143,15 @@ useEffect(() => {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/transaction/purchase/updateslab/${SlabId}`,
-                  values
-                );
-                setIsLoading(false);
-                GlobalModal.onClose();
+                await putData(`/transaction/purchase/updateslab/${SlabId}`, values);
                 toast.success("Slab updated successfully");
+                GlobalModal.onClose();
                 window.location.reload();
               } catch (error) {
-                console.error("Error updating Slab:", error);
+                console.error("Error updating slab:", error);
+                toast.error("Error updating slab");
+              } finally {
                 setIsLoading(false);
-                GlobalModal.onClose();
-                toast.error("Error updating Slab");
               }
             }}
           >
@@ -176,125 +168,132 @@ useEffect(() => {
     return (
       <div className="flex items-center justify-center h-60">
         <Icons.spinner className="h-6 w-6 animate-spin" />
-        <p className="ml-2 text-gray-500">Loading Slab details...</p>
+        <p className="ml-2 text-gray-500">Loading Finished details...</p>
       </div>
     );
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            name="supplierId"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Select Supplier</FormLabel>
-                <FormControl>
-                  <EntityCombobox
-                    entities={supplierNames}
-                    value={field.value || ""}
-                    onChange={(value) => {
-                      field.onChange(value);
-                    }}
-                    valueProperty="_id" // ✅ Ensure supplier ID is passed
-                    displayProperty="name"
-                    placeholder="Select a Supplier Name"
-                    onAddNew={handleAddNewSupplier}
-                    addNewLabel="Add New Supplier"
-                    disabled={isLoading || supplierLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="ratePerSqft"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Rate per Sqft</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Eg: 1000"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="space-y-6">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className="grid grid-cols-3 gap-3">
+            <FormField
+              name="supplierId"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Select Supplier</FormLabel>
+                  <FormControl>
+                    <EntityCombobox
+                      entities={supplierNames}
+                      value={field.value || ""}
+                      onChange={(value) => field.onChange(value)}
+                      valueProperty="_id"
+                      displayProperty="name"
+                      placeholder="Select a Supplier Name"
+                      onAddNew={() => {
+                        window.open(
+                          `/${organisationId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                          "_blank"
+                        );
+                      }}
+                      multiple={false}
+                      addNewLabel="Add New Supplier"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="numberofSlabs"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>No. of Slabs</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="Eg: 10"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="ratePerSqft"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rate per Sqft</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Eg: 1000"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            name="purchaseDate"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Purchase Date</FormLabel>
-                <FormControl>
-                  <div className="flex items-center gap-2">
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-[100%] justify-start text-left font-normal",
-                            !field.value && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value
-                            ? format(new Date(field.value), "PPP")
-                            : "Purchase date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <CalendarComponent
-                          selected={
-                            field.value ? new Date(field.value) : undefined
-                          }
-                          onSelect={(date) =>
-                            field.onChange(date ? date.toISOString() : "")
-                          }
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+            <FormField
+              control={form.control}
+              name="numberofSlabs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>No. of Slabs</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Eg: 10"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        <Button type="submit" disabled={isLoading} className="w-full">
-          {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-          Submit
-        </Button>
-      </form>
-    </Form>
+            <FormField
+              name="purchaseDate"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Purchase Date</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full justify-start text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {field.value
+                              ? format(new Date(field.value), "PPP")
+                              : "Purchase date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <CalendarComponent
+                            selected={
+                              field.value ? new Date(field.value) : undefined
+                            }
+                            onSelect={(date) =>
+                              field.onChange(date ? date.toISOString() : "")
+                            }
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Submit
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }

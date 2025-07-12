@@ -12,6 +12,7 @@ import AddFinishedPurchases from "@/components/forms/AddFinishedPurchases";
 interface PageProps {
   params: {
     factoryId: string;
+    organizationId:string;
   };
 }
 export default function AddFinishedPurchasespage({ params }: PageProps) {
@@ -39,7 +40,7 @@ export default function AddFinishedPurchasespage({ params }: PageProps) {
       </div>
       <Separator orientation="horizontal" />
       <div className="container mx-auto">
-        <AddFinishedPurchases gap={0} />
+        <AddFinishedPurchases gap={0} orgId={params.organizationId} />
       </div>
     </div>
   );

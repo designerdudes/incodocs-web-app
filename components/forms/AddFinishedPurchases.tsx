@@ -41,6 +41,7 @@ import CalendarComponent from "../CalendarComponent";
 
 interface FinishedPurchaseCreateNewFormProps {
   gap: number;
+  orgId: string;
 }
 
 const formSchema = z.object({
@@ -78,6 +79,7 @@ const formSchema = z.object({
 
 export default function FinishedPurchaseCreateNewForm({
   gap,
+  orgId,
 }: FinishedPurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -131,7 +133,7 @@ export default function FinishedPurchaseCreateNewForm({
       }
     };
     fetchingData();
-  }, []);
+  }, [supplierNames]);
 
   const handleAddNewSupplier = () => {
     toast("Add new supplier functionality to be implemented");
@@ -262,7 +264,13 @@ export default function FinishedPurchaseCreateNewForm({
                       valueProperty="_id" // ✅ Ensure supplier ID is passed
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
-                      onAddNew={handleAddNewSupplier}
+                      onAddNew={() => {
+                        window.open(
+                          `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                          "_blank"
+                        );
+                      }}
+                      multiple={false}
                       addNewLabel="Add New Supplier"
                       // disabled={isLoading || supplierLoading}
                     />
@@ -531,8 +539,7 @@ export default function FinishedPurchaseCreateNewForm({
                       placeholder="Enter product name"
                       onChange={(e) => {
                         const updatedSlabs = [...slabs];
-                        updatedSlabs[index].productName =
-                          e.target.value || "steps";
+                        updatedSlabs[index].productName = e.target.value || "";
                         setSlabs(updatedSlabs);
                         form.setValue("slabs", updatedSlabs);
                       }}

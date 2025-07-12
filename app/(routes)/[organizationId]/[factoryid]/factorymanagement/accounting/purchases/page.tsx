@@ -41,6 +41,7 @@ export type ActualRawPurchase = {
   height: string;
   purchaseDate: string;
   ratePerCubicVolume: string;
+  factoryId:string;
 };
 
 export type FinishedPurchaseWithGST = {
@@ -128,7 +129,7 @@ export default async function Purchases({ params }: Props) {
             purchases.
           </p>
         </div>
-        <AddPurchases factoryId={params.factoryid} />
+        <AddPurchases factoryId={params.factoryid}  organizationId={params.organizationid}/>
       </div>
 
       <Separator orientation="horizontal" />
