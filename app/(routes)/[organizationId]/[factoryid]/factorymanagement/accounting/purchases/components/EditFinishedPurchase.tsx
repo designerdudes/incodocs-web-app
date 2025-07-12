@@ -29,12 +29,22 @@ import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
 import { cn } from "@/lib/utils";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   supplierId: z.string().min(3).optional(),
   ratePerSqft: z.union([z.string(), z.number()]).optional(),
   numberofSlabs: z.union([z.string(), z.number()]).optional(),
+  invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
+  invoiceValue: z.number().optional(),
+  gstPercentage: z
+    .union([
+      z.string().min(1, { message: " enter the gst Percentage number " }),
+      z.number(),
+    ])
+    .optional(),
   purchaseDate: z.string().optional(),
+  paymentProof: z.string().optional(),
 });
 
 export default function EditFinishedPurchase() {
@@ -50,7 +60,7 @@ export default function EditFinishedPurchase() {
 
   const factoryId = router.factoryid as string;
   const organisationId = router.organizationId as string;
- const SlabId = searchParams.get("FinishedPurchaseId");
+  const SlabId = searchParams.get("FinishedPurchaseId");
 
   const [, setSupplierLoading] = useState(false);
 
@@ -61,6 +71,10 @@ export default function EditFinishedPurchase() {
       ratePerSqft: "",
       numberofSlabs: "",
       purchaseDate: "",
+      paymentProof: "",
+      invoiceNo: "",
+      invoiceValue: undefined,
+      gstPercentage: "",
     },
   });
 
@@ -96,7 +110,9 @@ export default function EditFinishedPurchase() {
 
       try {
         setIsFetching(true);
-        const res = await fetchData(`/transaction/purchase/slabgetbyid/${SlabId}`);
+        const res = await fetchData(
+          `/transaction/purchase/slabgetbyid/${SlabId}`
+        );
         console.log("Fetched slab data:", res);
         const data = res.getPurchase;
 
@@ -106,6 +122,10 @@ export default function EditFinishedPurchase() {
           supplierId: data?.supplierId?._id || "",
           ratePerSqft: String(data?.ratePerSqft || ""),
           numberofSlabs: String(data?.noOfSlabs || ""),
+          invoiceNo: data?.invoiceNo || "",
+          invoiceValue: data?.invoiceValue || "",
+          gstPercentage: data?.gstPercentage || "",
+          paymentProof: data.paymentProof || "",
           purchaseDate: data?.purchaseDate || "",
         });
       } catch (error) {
@@ -143,7 +163,10 @@ export default function EditFinishedPurchase() {
           <Button
             onClick={async () => {
               try {
-                await putData(`/transaction/purchase/updateslab/${SlabId}`, values);
+                await putData(
+                  `/transaction/purchase/updateslab/${SlabId}`,
+                  values
+                );
                 toast.success("Slab updated successfully");
                 GlobalModal.onClose();
                 window.location.reload();
@@ -225,7 +248,22 @@ export default function EditFinishedPurchase() {
                 </FormItem>
               )}
             />
-
+            <FormField
+              control={form.control}
+              name="paymentProof"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="numberofSlabs"
@@ -280,6 +318,67 @@ export default function EditFinishedPurchase() {
                         </PopoverContent>
                       </Popover>
                     </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Invoice No */}
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Invoice Value */}
+            <FormField
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      disabled={isLoading}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || undefined)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* GST Percentage */}
+            <FormField
+              control={form.control}
+              name="gstPercentage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>gst Percentage</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Eg: 10%"
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -14,10 +14,9 @@ import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
-import { useRouter } from "next/navigation";
-import { postData } from "@/axiosUtility/api";
+import { useParams, useRouter } from "next/navigation";
+import { fetchData, postData } from "@/axiosUtility/api";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { cn } from "@/lib/utils";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
@@ -35,60 +34,52 @@ import CalendarComponent from "../CalendarComponent";
 
 interface SalesCreateNewFormProps {
   gap: number;
+  orgId: string;
 }
 
 const formSchema = z.object({
-  customerName: z
-    .string()
-    .min(3, { message: "Customer name must be at least 3 characters long" }),
-  customerId: z.string().min(3, { message: "Customer ID is required" }),
-  customerAddress: z
-    .string()
-    .min(5, { message: "Customer address must be at least 5 characters long" }),
-  gstNumber: z
-    .string()
-    .min(3, { message: "GST Number must be at least 3 characters long" }),
-  noOfSlabs: z
-    .number()
-    .min(1, { message: "No of Slabs must be greater than 0" }),
+  customerName: z.string().min(3, "Customer name is required"),
+  customerAddress: z.string().optional(),
+  customerId: z.string().min(3),
+  gstNumber: z.string().min(3),
+  noOfSlabs: z.number().min(1),
   slabs: z
     .array(
       z.object({
         dimensions: z.object({
           length: z.object({
-            value: z
-              .number()
-              .min(0.1, { message: "Length must be greater than zero" }),
+            value: z.number().min(0.1),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
-            value: z
-              .number()
-              .min(0.1, { message: "Height must be greater than zero" }),
+            value: z.number().min(0.1),
             units: z.literal("inch").default("inch"),
           }),
         }),
       })
     )
-    .min(1, { message: "At least one slab is required" }),
-  salesDate: z.string().nonempty({ message: "Sales Date is required" }),
-  gstPercentage: z.enum(["0", "1", "5", "12", "18"], {
-    errorMap: () => ({ message: "Invalid GST percentage selected" }),
-  }),
-  invoiceValue: z
-    .number({ invalid_type_error: "Invoice value must be a number" })
-    .min(1, { message: "Invoice value must be greater than 0" }),
+    .min(1),
+  salesDate: z.string().nonempty(),
+  gstPercentage: z.enum(["0", "1", "5", "12", "18"]),
+  invoiceValue: z.number().min(1),
 });
 
-export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
+export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
   const [globalLength, setGlobalLength] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] =React.useState<boolean>(false);
-  const [applyHeightToAll, setApplyHeightToAll] =React.useState<boolean>(false);
+  const [applyLengthToAll, setApplyLengthToAll] = React.useState(false);
+  const [applyHeightToAll, setApplyHeightToAll] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [customerLoading, setCustomerLoading] = React.useState(false);
-  const [customers, setCustomers] = React.useState<{ _id: string; name: string }[]>([]);
+  const [customers, setCustomers] = React.useState<
+    {
+      address: string;
+      _id: string;
+      name: string;
+    }[]
+  >([]);
+  const factoryId = useParams().factoryid as string;
 
   const router = useRouter();
 
@@ -108,109 +99,125 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
   });
 
   React.useEffect(() => {
-    const fetchCustomers = async () => {
-      setCustomerLoading(true);
+    const fetchingCustomers = async () => {
       try {
-        const response = await fetch(
-          "https://incodocs-server.onrender.com/accounting/customer/getall"
+        setCustomerLoading(true);
+        const customerResponse = await fetchData(
+          `/accounting/customer/getbyfactory/${factoryId}`
         );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const customerData = await response.json();
+        const customerData = await customerResponse;
 
-        // Validate response before mapping
-        if (Array.isArray(customerData)) {
-          const mappedCustomers = customerData.map((customer: any) => ({
-            _id: customer._id,
-            name: customer.customerName, // Make sure this key exists in the response
-          }));
-          setCustomers(mappedCustomers);
-          console.log(customers); // ✅ Check if customer data is available here
-        } else {
-          console.error("Invalid response format:", customerData);
-          toast.error("Unexpected response format");
-        }
+        const mappedCustomers = customerData.map((customer: any) => ({
+          _id: customer._id,
+          name: customer.customerName,
+          address: customer.customerAddress, // <- include this
+        }));
+        setCustomers(mappedCustomers);
       } catch (error) {
-        console.error("Error fetching customers:", error);
-        toast.error("Failed to load customers");
+        console.error("Error fetching customer data:", error);
       } finally {
         setCustomerLoading(false);
       }
     };
-    fetchCustomers();
-  }, []);
 
-  const handleAddNewCustomer = () => {
-    toast("Add new customer functionality to be implemented");
-    // For full implementation, you could add a modal here similar to your supplier form
-  };
+    fetchingCustomers();
+  }, [customers]);
 
-  function handleSlabsInputChange(value: string) {
+  const handleSlabsInputChange = (value: string) => {
     const count = parseInt(value, 10);
+    console.log("Form Values:", form.getValues());
     if (!isNaN(count) && count > 0) {
       const newSlabs = Array.from({ length: count }, (_, index) => ({
         dimensions: {
           slabNumber: index + 1,
-          length: { value: 0, units: "inch" as "inch" },
-          height: { value: 0, units: "inch" as "inch" },
+          length: { value: 0, units: "inch" },
+          height: { value: 0, units: "inch" },
         },
       }));
       setSlabs(newSlabs);
-      form.setValue("slabs", newSlabs);
+      // form.setValue("slabs", newSlabs);
       form.setValue("noOfSlabs", count);
     } else {
       setSlabs([]);
       form.setValue("slabs", []);
       form.setValue("noOfSlabs", 0);
     }
-  }
+  };
 
   React.useEffect(() => {
     form.setValue("noOfSlabs", slabs.length);
   }, [slabs, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true);
-    try {
-      await postData("/factory-management/sales/addsale", {
-        ...values,
-        status: "active",
-      });
-      toast.success("Sales Record Added Successfully");
-      router.push("./factorymanagement/sales/records");
-    } catch (error) {
-      toast.error("Error creating/updating Sale Record");
-    } finally {
-      setIsLoading(false);
+  const calculateSqft = (length?: number, height?: number) => {
+    const sqft = ((length || 0) / 12) * ((height || 0) / 12);
+    return sqft > 0 ? sqft.toFixed(2) : "0.00";
+  };
+
+  const calculateTotalSqft = () => {
+    return slabs
+      .reduce((sum, slab) => {
+        const l = slab.dimensions.length.value;
+        const h = slab.dimensions.height.value;
+        return sum + (l / 12) * (h / 12);
+      }, 0)
+      .toFixed(2);
+  };
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  setIsLoading(true);
+  try {
+    const endpoint =
+      values.gstPercentage === "0"
+        ? "/transaction/sale/add"
+        : "/transaction/sale/addgst";
+
+    // prepare data
+    const transformedData: any = {
+      factoryId: factoryId,
+      customerId: values.customerId,
+      noOfSlabs: values.noOfSlabs,
+      length: slabs[0]?.dimensions.length.value,
+      height: slabs[0]?.dimensions.height.value,
+      saleDate:
+        values.gstPercentage === "0"
+          ? new Date(values.salesDate).toISOString() // Without GST
+          : values.salesDate.split("T")[0], // With GST (only YYYY-MM-DD)
+    };
+
+    if (values.gstPercentage === "0") {
+      transformedData.actualInvoiceValue = values.invoiceValue;
+      transformedData.slabIds = []; // populate with real slab IDs if available
+    } else {
+      transformedData.invoiceValue = values.invoiceValue;
+      transformedData.gstPercentage = parseFloat(values.gstPercentage);
     }
-  }
 
-  function calculateSqft(length?: number, height?: number): string {
-    const lengthInFeet = (length || 0) / 12;
-    const heightInFeet = (height || 0) / 12;
-    const area = lengthInFeet * heightInFeet;
-    return area > 0 ? area.toFixed(2) : "0.00";
-  }
+    await postData(endpoint, transformedData);
 
-  function calculateTotalSqft(): string {
-    const slabs = form.getValues("slabs") || [];
-    const totalSqft = slabs.reduce((sum, slab) => {
-      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
-      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
-      return sum + lengthInFeet * heightInFeet;
-    }, 0);
-    return totalSqft.toFixed(2);
+    toast.success("Sale record added successfully");
+    router.push("./");
+  } catch (err) {
+    console.error(err);
+    toast.error("Error adding sale record");
+  } finally {
+    setIsLoading(false);
   }
+};
+
 
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            console.log("Validation Errors:", errors);
+          })}
+          className="space-y-6"
+        >
           {/* Row 1: Customer Name, Customer ID, Customer Address */}
           <div className={`grid grid-cols-3 gap-3`}>
             <FormField
-              name="customerName"
+              name="customerId"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
@@ -221,33 +228,29 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       value={field.value || ""}
                       onChange={(value) => {
                         field.onChange(value);
+                        const selectedCustomer = customers.find(
+                          (c) => c._id === value
+                        );
+                        if (selectedCustomer) {
+                          form.setValue("customerName", selectedCustomer.name);
+                          form.setValue(
+                            "customerAddress",
+                            selectedCustomer.address || ""
+                          ); // optional: check for `address`
+                        }
                       }}
                       displayProperty="name"
-                      placeholder="Select a Customer"
-                      onAddNew={handleAddNewCustomer}
+                      valueProperty="_id"
+                      placeholder="Select Customer"
+                      onAddNew={() => {
+                        window.open(
+                          `/${orgId}/${factoryId}/factorymanagement/parties/customer/createNew`,
+                          "_blank"
+                        );
+                      }}
+                      multiple={false}
                       addNewLabel="Add New Customer"
-                      disabled={isLoading || customerLoading}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          {/* Row 2: GST Number, No of Slabs */}
-          <div className={`grid grid-cols-3 gap-3`}>
-            <FormField
-              name="gstNumber"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>GST Number</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter GST Number"
-                      disabled={isLoading}
-                      {...field}
+                      // disabled={isLoading || customerLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -277,10 +280,6 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-          </div>
-
-          {/* Row 3: GST Percentage, Invoice Value, Sales Date */}
-          <div className={`grid grid-cols-3 gap-3`}>
             <FormField
               name="gstPercentage"
               control={form.control}
@@ -317,7 +316,9 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                       type="number"
                       disabled={isLoading}
                       value={field.value === 0 ? "" : field.value}
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0) }
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,7 +351,7 @@ export function SalesCreateNewForm({ gap }: SalesCreateNewFormProps) {
                           field.value ? new Date(field.value) : undefined
                         }
                         onSelect={(date: any) => {
-                          field.onChange(date ? date.toISOString() :"")
+                          field.onChange(date ? date.toISOString() : "");
                         }}
                       />
                     </PopoverContent>

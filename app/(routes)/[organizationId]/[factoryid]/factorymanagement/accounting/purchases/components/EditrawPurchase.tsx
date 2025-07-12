@@ -30,6 +30,7 @@ import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
 import { cn } from "@/lib/utils";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   supplierId: z.string().min(3).optional(),
@@ -39,12 +40,21 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
+  invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
+  invoiceValue: z.number().optional(),
+  gstPercentage: z
+    .union([
+      z.string().min(1, { message: " enter the gst Percentage number " }),
+      z.number(),
+    ])
+    .optional(),
   noOfBlocks: z
     .union([
       z.string().min(1, { message: "Enter number of blocks" }),
       z.number(),
     ])
     .optional(),
+  paymentProof: z.string().optional(),
   purchaseDate: z.string().min(1, { message: "Enter Date" }).optional(),
 });
 
@@ -70,6 +80,10 @@ export default function EditRawForm() {
       ratePerCubicVolume: "",
       noOfBlocks: "",
       purchaseDate: "",
+      paymentProof: "",
+      invoiceNo: "",
+      invoiceValue: undefined,
+      gstPercentage: "",
     },
   });
 
@@ -111,6 +125,10 @@ export default function EditRawForm() {
           supplierId: data?.supplierId?._id || "",
           ratePerCubicVolume: String(data?.ratePerCubicVolume || ""),
           noOfBlocks: String(data?.noOfBlocks || ""),
+          invoiceNo: data?.invoiceNo || "",
+          invoiceValue: data?.invoiceValue || "",
+          gstPercentage: data?.gstPercentage || "",
+          paymentProof: data.paymentProof || "",
           purchaseDate: data?.purchaseDate
             ? moment(data.purchaseDate).format("YYYY-MM-DD")
             : "",
@@ -187,7 +205,7 @@ export default function EditRawForm() {
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}  className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
               name="supplierId"
@@ -232,6 +250,22 @@ export default function EditRawForm() {
                       placeholder="Eg: 1000"
                       {...field}
                       onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="paymentProof"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
                     />
                   </FormControl>
                   <FormMessage />
@@ -291,6 +325,90 @@ export default function EditRawForm() {
                         </PopoverContent>
                       </Popover>
                     </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {/* Invoice No */}
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Invoice Value */}
+            <FormField
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      disabled={isLoading}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || undefined)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* GST Percentage */}
+            <FormField
+              control={form.control}
+              name="gstPercentage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>gst Percentage</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Eg: 10%"
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Rate per Cubic Volume */}
+            <FormField
+              name="ratePerCubicVolume"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Rate per Cubic Meter</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter rate per cubic meter"
+                      type="number"
+                      disabled={isLoading}
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || undefined)
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

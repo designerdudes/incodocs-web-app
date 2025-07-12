@@ -38,6 +38,7 @@ import {
   TableRow,
 } from "../ui/table";
 import CalendarComponent from "../CalendarComponent";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface RawPurchaseCreateNewFormProps {
   gap: number;
@@ -49,7 +50,6 @@ const formSchema = z.object({
   factoryId: z.string().nonempty({ message: "Factory ID is required" }),
   invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
   invoiceValue: z.number().optional(),
-  supplierGSTN: z.string().optional(),
   purchaseDate: z.string().optional(),
   gstPercentage: z.enum(["0%", "1%", "5%", "12%", "18%"]).optional(),
   ratePerCubicVolume: z.number().optional(),
@@ -95,6 +95,7 @@ const formSchema = z.object({
     )
     .optional(),
   noOfBlocks: z.number().optional(),
+   paymentProof:z.string().optional(),
 });
 
 export default function RawPurchaseCreateNewForm({
@@ -130,7 +131,6 @@ export default function RawPurchaseCreateNewForm({
       factoryId,
       invoiceNo: "",
       invoiceValue: undefined,
-      supplierGSTN: "",
       purchaseDate: "",
       ratePerCubicVolume: undefined,
       gstPercentage: "0%",
@@ -138,6 +138,7 @@ export default function RawPurchaseCreateNewForm({
       volumeQuantity: undefined,
       weight: undefined,
       blocks: [],
+      paymentProof: "",
       noOfBlocks: undefined,
     },
   });
@@ -209,6 +210,7 @@ export default function RawPurchaseCreateNewForm({
         supplierId: values.SupplierId,
         invoiceNo: values.invoiceNo,
         purchaseDate: values.purchaseDate || new Date().toISOString(),
+        paymentProof: values.paymentProof || "",
         noOfBlocks: values.noOfBlocks || 0,
         materialType: values.materialType || "steps",
         volumeQuantity: values.volumeQuantity || 0,
@@ -341,6 +343,22 @@ export default function RawPurchaseCreateNewForm({
                 </FormItem>
               )}
             />
+            <FormField
+                        control={form.control}
+                        name="paymentProof"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Payment Proof</FormLabel>
+                            <FormControl>
+                              <FileUploadField
+                                name="paymentProof"
+                                storageKey="paymentProof"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
             {/* Invoice No */}
             <FormField

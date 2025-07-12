@@ -1,13 +1,13 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, Eye } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import CellAction from "./rawPurchaseCell-actions"
 import moment from "moment"
-import { RawPurchased } from "../page"
+import { Sales } from "../page"
+import CellAction from "./cell-actions"
 
-export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
+export const GstColumns: ColumnDef<Sales>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -31,93 +31,74 @@ export const rawPurchaseColumns: ColumnDef<RawPurchased>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "supplierName", // Corrected key
+        accessorKey: "customerName", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Supplier Name
+                Customer Name
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.supplierId?.supplierName}
+                {row.original.customerId?.customerName}
             </div>
         ),
     },
     {
-        accessorKey: "ratePerCubicVolume",
+        accessorKey: "gstPercentage", // Corrected key
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Rate per Cubic Meter
+                GST Percentage
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.ratePerCubicVolume}
+                {row.original.gstPercentage}
             </div>
         ),
     },
     {
-        accessorKey: "numberofBlocks",
+        accessorKey: "noOfSlabs",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Number of Blocks
+                Number of Slabs
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.noOfBlocks}
+                {row.original.noOfSlabs}
             </div>
         ),
     },
     {
-        accessorKey: "purchaseDate",
+        accessorKey: "saleDate",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Purchase Date
+                Sale Date
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div>
-                {moment(row.original.purchaseDate).format("DD MMM YYYY")}
+                {moment(row.original.saleDate).format("DD MMM YYYY")}
             </div>
         ),
     },
-    {
-        accessorKey: "paymentProof", // ✅ Correct key
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Payment Proof
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize flex items-center justify-center gap-2 ">
-            {row.original.paymentProof &&    <Button size={"icon"} variant="outline"
-            onClick={() => window.open(row.original.paymentProof, "_blank")}
-            ><Eye className="h-4 w-4" /></Button>}
-            </div>
 
-        ),
-    },
     {
 
         header: ({ column }) => (
