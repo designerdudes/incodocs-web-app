@@ -16,36 +16,66 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
-import { putData } from "@/axiosUtility/api";
+import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-
+import moment from "moment";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
+import CalendarComponent from "@/components/CalendarComponent";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
-  customerName: z
-    .string()
-    .min(3, { message: " name must be at least 3 characters long" })
+  customerId: z
+    .object({
+      _id: z.string(),
+      customerName: z.string(),
+    })
     .optional(),
-  customerGSTN: z
-    .string()
-    .min(3, { message: "Enter GSTNumber " })
-    .optional(),
-  NumberOfSlabs: z
+
+  noOfSlabs: z
     .union([
-      z.string().min(1, { message: " Enter NumberOfSlabs" }),
+      z.string().min(1, { message: "Enter number of slabs" }),
       z.number(),
     ])
     .optional(),
+
   saleDate: z
-    .union([
-      z.string().min(1, { message: "Enter date" }),
-      z.number(),
-    ])
+    .union([z.string().min(1, { message: "Enter date" }), z.date()])
+    .optional(),
+
+  factoryId: z
+    .object({
+      _id: z.string(),
+      factoryName: z.string(),
+    })
+    .optional(),
+
+  slabIds: z.array(z.any()).optional(),
+
+  length: z
+    .union([z.string().min(1, { message: "Enter length" }), z.number()])
+    .optional(),
+
+  height: z
+    .union([z.string().min(1, { message: "Enter height" }), z.number()])
+    .optional(),
+
+  invoiceValue: z
+    .union([z.string().min(1, { message: "Enter invoice value" }), z.number()])
+    .optional(),
+
+  gstPercentage: z
+    .union([z.string().min(1, { message: "Enter GST percentage" }), z.number()])
     .optional(),
 });
-
 interface Props {
   params: {
-    _id: string; // Lot ID
+    _id: string;
   };
 }
 
@@ -54,37 +84,50 @@ export default function EditLotForm({ params }: Props) {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
+  // console.log("rrrrrrrrrrrrrr",params)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      customerName: "",
-      customerGSTN: "",
-      NumberOfSlabs: "",
+      customerId: {
+        _id: "",
+        customerName: "",
+      },
+      noOfSlabs: "",
       saleDate: "",
+      factoryId: {
+        _id: "",
+        factoryName: "",
+      },
+      slabIds: [],
+      length: "",
+      height: "",
+      invoiceValue: "",
+      gstPercentage: "",
     },
   });
 
-  const lotId = params._id;
+  const SlabId = params._id;
 
   // Fetch existing lot data and reset form values
   useEffect(() => {
     async function fetchLotData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`
+        const response = await fetchData(
+          `https://incodocs-server.onrender.com/transaction/sale/getbyid/${SlabId}`
         );
-        if (!response.ok) {
-          throw new Error("Failed to fetch lot data");
-        }
-        const data = await response.json();
+
+        const data = response;
+        // console.log("rrrrrrrrrrrrrr", data);
 
         // Reset form with fetched values
         form.reset({
-          customerName: data.customerName || "",
-          customerGSTN: data.customerGSTN || "",
-          NumberOfSlabs: data.NumberOfSlabs || "",
+          customerId: {
+            _id: data.customerId?._id || "",
+            customerName: data.customerId?.customerName || "",
+          },
+          noOfSlabs: data.noOfSlabs || "",
           saleDate: data.saleDate || "",
         });
       } catch (error) {
@@ -95,19 +138,23 @@ export default function EditLotForm({ params }: Props) {
       }
     }
     fetchLotData();
-  }, [lotId, form]);
+  }, [SlabId]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
 
-    GlobalModal.title = "Confirm Lot Update";
-    GlobalModal.description = "Are you sure you want to update this lot?";
+    GlobalModal.title = "Confirm Slab Update";
+    GlobalModal.description = "Are you sure you want to update this Slab?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>customerName: {values.customerName}</p>
-        <p>customerGSTN: {values.customerGSTN}</p>
-        <p>NumberofSlabs: {values.NumberOfSlabs}</p>
-        <p>saleDate: {values.saleDate}</p>
+        <p>customerName: {values.customerId?.customerName}</p>
+        <p>NumberofSlabs: {values.noOfSlabs}</p>
+        <p>
+          saleDate:{" "}
+          {values.saleDate
+            ? new Date(values.saleDate).toLocaleDateString()
+            : "N/A"}
+        </p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -121,20 +168,17 @@ export default function EditLotForm({ params }: Props) {
           <Button
             onClick={async () => {
               try {
-                await putData(
-                  `/factory-management/inventory/lot/update/${lotId}`,
-                  values
-                );
+                await putData(`/transaction/sale/updatesale/${SlabId}`, values);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("Lot updated successfully");
+                toast.success("Slab updated successfully");
 
                 window.location.reload();
               } catch (error) {
-                console.error("Error updating lot:", error);
+                console.error("Error updating Slab:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error("Error updating lot");
+                toast.error("Error updating Slab");
               }
             }}
           >
@@ -161,45 +205,38 @@ export default function EditLotForm({ params }: Props) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="customerName"
+            name="customerId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>customerName</FormLabel>
-                <FormControl>
-                  <Input placeholder="Eg:  ABC" type="text" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="customerGSTN"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>customerGSTN</FormLabel>
+                <FormLabel>Customer Name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Eg:123456789"
-                    type="text"
-                    {...field}
+                    placeholder="Eg: ABC"
+                    value={field.value?.customerName || ""}
+                    onChange={(e) =>
+                      field.onChange({
+                        ...field.value,
+                        customerName: e.target.value,
+                      })
+                    }
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
           {/*  GST Percentage Field */}
           <FormField
             control={form.control}
-            name="NumberOfSlabs"
+            name="noOfSlabs"
             render={({ field }) => (
               <FormItem>
-                <FormLabel> NumberOfSlabs</FormLabel>
+                <FormLabel>No. of Slabs</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="eg: 100"
                     type="number"
+                    placeholder="eg: 100"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
                   />
@@ -211,18 +248,40 @@ export default function EditLotForm({ params }: Props) {
 
           {/*  Expense Date Field */}
           <FormField
-            control={form.control}
             name="saleDate"
+            control={form.control}
             render={({ field }) => (
               <FormItem>
-                <FormLabel> saleDate</FormLabel>
+                <FormLabel>Purchase Date</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Eg:10/02/2025"
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(e.target.value)}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-[100%] justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value
+                            ? format(new Date(field.value), "PPP")
+                            : "Purchase date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0">
+                        <CalendarComponent
+                          selected={
+                            field.value ? new Date(field.value) : undefined
+                          }
+                          onSelect={(date) =>
+                            field.onChange(date ? date.toISOString() : "")
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>

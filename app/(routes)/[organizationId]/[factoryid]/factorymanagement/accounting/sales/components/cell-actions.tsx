@@ -23,13 +23,14 @@ interface Props {
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
+    // console.log("dddddddddddd",data)
     const router = useRouter();
     const GlobalModal = useGlobalModal();
 
-    const deleteLot = async () => {
+    const deleteSale = async () => {
         try {
-            const result = await deleteData(`/factory-management/inventory/lot/delete/${data._id}`);
-            toast.success('Lot Deleted Successfully');
+            const result = await deleteData(`https://incodocs-server.onrender.com/transaction/sale/deletesale/${data._id}`);
+            toast.success('Slab Deleted Successfully');
             GlobalModal.onClose();
             window.location.reload();
         } catch (error) {
@@ -74,10 +75,10 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     {/* Delete Lot */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Delete Sale Details - ${data.customerName}`;
+                            GlobalModal.title = `Delete Sale Details - ${data?.customerId?.customerName}`;
                             GlobalModal.description =
                                 "Are you sure you want to delete this Lot?";
-                            GlobalModal.children = <Alert onConfirm={deleteLot} actionType={"delete"} />;
+                            GlobalModal.children = <Alert onConfirm={deleteSale} actionType={"delete"} />;
                             GlobalModal.onOpen();
                         }}
                         className="focus:bg-destructive focus:text-destructive-foreground"

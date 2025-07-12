@@ -41,7 +41,7 @@ const formSchema = z.object({
   customerName: z.string().min(3, "Customer name is required"),
   customerAddress: z.string().optional(),
   customerId: z.string().min(3),
-  gstNumber: z.string().min(3),
+  gstNumber: z.string().optional(),
   noOfSlabs: z.number().min(1),
   slabs: z
     .array(
