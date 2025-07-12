@@ -151,6 +151,22 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>{BlockData.gstPercentage}%</TableCell>
                   </TableRow>
                   <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Payment Proof
+                    </TableCell>
+                    <TableCell>
+                      <a
+                        href={BlockData.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="link" className="p-0 m-0">
+                          View Payment Proof
+                        </Button>
+                      </a>
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
                     <TableCell>Purchase Date</TableCell>
                     <TableCell>
                       {moment(BlockData.purchaseDate).format("YYYY-MM-DD")}

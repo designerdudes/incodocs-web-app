@@ -28,6 +28,7 @@ export type RawPurchaseWithGST = {
   purchaseDate: string;
   gstPercentage: number;
   ratePerCubicVolume: string;
+  paymentProof:string;
 };
 
 export type ActualRawPurchase = {
@@ -42,6 +43,7 @@ export type ActualRawPurchase = {
   purchaseDate: string;
   ratePerCubicVolume: string;
   factoryId:string;
+  paymentProof:string;
 };
 
 export type FinishedPurchaseWithGST = {
@@ -55,6 +57,7 @@ export type FinishedPurchaseWithGST = {
   purchaseDate: string;
   gstPercentage: number;
   ratePerSqft: string;
+  paymentProof:string;
 };
 
 export type ActualFinishedPurchase = {
@@ -67,6 +70,7 @@ export type ActualFinishedPurchase = {
   height: string;
   purchaseDate: string;
   ratePerSqft: string;
+  paymentProof:string;
 };
 
 export type RawPurchased = RawPurchaseWithGST | ActualRawPurchase;

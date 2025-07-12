@@ -38,6 +38,7 @@ import {
   TableRow,
 } from "../ui/table";
 import CalendarComponent from "../CalendarComponent";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface FinishedPurchaseCreateNewFormProps {
   gap: number;
@@ -75,6 +76,7 @@ const formSchema = z.object({
     )
     .optional(),
   noOfSlabs: z.number().optional(),
+   paymentProof:z.string().optional(),
 });
 
 export default function FinishedPurchaseCreateNewForm({
@@ -109,6 +111,8 @@ export default function FinishedPurchaseCreateNewForm({
       gstPercentage: "0%",
       slabs: [],
       noOfSlabs: undefined,
+      paymentProof:"",
+
     },
   });
 
@@ -180,6 +184,7 @@ export default function FinishedPurchaseCreateNewForm({
         supplierId: values.SupplierId,
         invoiceNo: values.invoiceNo,
         purchaseDate: values.purchaseDate || new Date().toISOString(),
+        paymentProof: values.paymentProof || "",
         noOfSlabs: values.noOfSlabs || 0,
         length: values.slabs?.[0]?.dimensions?.length?.value || 0,
         height: values.slabs?.[0]?.dimensions?.height?.value || 0,
@@ -363,6 +368,22 @@ export default function FinishedPurchaseCreateNewForm({
                 </FormItem>
               )}
             />
+            <FormField
+                        control={form.control}
+                        name="paymentProof"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Payment Proof</FormLabel>
+                            <FormControl>
+                              <FileUploadField
+                                name="paymentProof"
+                                storageKey="paymentProof"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
             {/* GST Percentage */}
             <FormField
