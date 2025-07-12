@@ -107,6 +107,7 @@ export default async function SalesPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected sales?"
               bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
               bulkDeleteToastMessage="Selected sales deleted successfully"
+              deleteRoute='/transaction/sale/deletemany'
               searchKey="customerName"
               columns={GstColumns}
               data={withGstSales}
@@ -120,6 +121,7 @@ export default async function SalesPage({ params }: Props) {
               bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
               bulkDeleteToastMessage="Selected sales deleted successfully"
               searchKey="customerName"
+              deleteRoute='/transaction/sale/deletemany'
               columns={Columns}
               data={withoutGstSales}
             />
