@@ -143,10 +143,10 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
         params,
       });
 
-      toast.success("Supplier Added Successfully");
-      router.push("../");
+      toast.success("Supplier Updated Successfully");
+      router.push("../../");
     } catch (error) {
-      toast.error("Error creating/updating supplier ");
+      toast.error("Error updating supplier ");
     } finally {
       setIsLoading(false);
     }

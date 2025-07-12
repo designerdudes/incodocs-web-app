@@ -40,7 +40,7 @@ import {
 export const supplierSchema = z.object({
   supplierName: z.string().min(1, "supplier name is required"),
   gstNo: z.string().min(1, "gst number is required"),
-  mobileNumber: z.number().min(1, "mobile number is required"),
+  mobileNumber: z.number().optional(),
   state: z.string().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
@@ -136,7 +136,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="supplierName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>supplier Name</FormLabel>
+                  <FormLabel>Supplier Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Salman"
@@ -200,7 +200,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="state"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>States</FormLabel>
+                  <FormLabel>State</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Eg: Telangana, Andhra Pradesh"
@@ -217,7 +217,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>address</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="address"

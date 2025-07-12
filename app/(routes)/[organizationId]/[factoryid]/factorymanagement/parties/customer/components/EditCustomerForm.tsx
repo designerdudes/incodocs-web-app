@@ -144,10 +144,10 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
         params,
       });
 
-      toast.success("Customer Added Successfully");
-      router.push("../");
+      toast.success("Customer Updated Successfully");
+      router.push("../../");
     } catch (error) {
-      toast.error("Error creating/updating customer ");
+      toast.error("Error updating customer ");
     } finally {
       setIsLoading(false);
     }

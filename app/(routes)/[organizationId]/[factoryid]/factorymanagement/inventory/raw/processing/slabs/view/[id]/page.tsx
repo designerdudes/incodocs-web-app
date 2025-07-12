@@ -137,7 +137,7 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Trim Length (inch)
+                      Polish Length (inch)
                     </TableCell>
                     <TableCell>
                       {SlabData?.trim?.length?.value ?? "N/A"}
@@ -145,7 +145,7 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Trim Height (inch)
+                      Polish Height (inch)
                     </TableCell>
                     <TableCell>
                       {SlabData?.trim?.height?.value ?? "N/A"}
@@ -156,7 +156,8 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Created At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData?.createdAt).format("DD-MMM-YYYY") ?? "N/A"}
+                      {moment(SlabData?.createdAt).format("DD-MMM-YYYY") ??
+                        "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -164,7 +165,8 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData?.updatedAt).format("DD-MMM-YYYY") ?? "N/A"}
+                      {moment(SlabData?.updatedAt).format("DD-MMM-YYYY") ??
+                        "N/A"}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -173,7 +175,9 @@ export default async function SlabsPage({ params }: Props) {
             {/* Polishing Details Section */}
             <CardHeader>
               <CardTitle>Polishing Details</CardTitle>
-              <CardDescription>Polishing information for this slab</CardDescription>
+              <CardDescription>
+                Polishing information for this slab
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -199,7 +203,9 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>
                       {SlabData?.polishingScheduledAt
                         ? moment(
-                            `${SlabData.polishingScheduledAt.date.split("T")[0]}T${String(
+                            `${
+                              SlabData.polishingScheduledAt.date.split("T")[0]
+                            }T${String(
                               SlabData.polishingScheduledAt.time.hours
                             ).padStart(2, "0")}:${String(
                               SlabData.polishingScheduledAt.time.minutes

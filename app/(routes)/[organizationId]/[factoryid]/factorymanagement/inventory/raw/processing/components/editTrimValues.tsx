@@ -72,7 +72,7 @@ function CardWithForm(params: Props) {
       }
     };
     fetchSlabData();
-  },);
+  }, []);
 
   const GlobalModal = useGlobalModal();
 
@@ -116,7 +116,7 @@ function CardWithForm(params: Props) {
                 );
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("Slab Trim Values updated successfully");
+                toast.success("Slab Polish Values updated successfully");
               } catch (error) {
                 console.error("Error updating Slab:", error);
                 setIsLoading(false);
@@ -153,7 +153,7 @@ function CardWithForm(params: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 15"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     step="any" // Allows decimal values
                     {...field}
@@ -164,7 +164,7 @@ function CardWithForm(params: Props) {
                         field.onChange(value);
                       }
                     }}
-                    min="0"
+                    min={0}
                   />
                 </FormControl>
                 <FormMessage />
@@ -181,7 +181,7 @@ function CardWithForm(params: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     step="any" // Allows decimal values
                     {...field}
@@ -192,7 +192,7 @@ function CardWithForm(params: Props) {
                         field.onChange(value);
                       }
                     }}
-                    min="0"
+                    min={0}
                   />
                 </FormControl>
                 <FormMessage />

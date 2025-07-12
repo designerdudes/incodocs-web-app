@@ -23,13 +23,18 @@ import axios from "axios"; // ✅ Import axios for isAxiosError
 // Props
 interface MarkPaidForm extends React.HTMLAttributes<HTMLDivElement> {
   selectedSlabs?: { slabId: string }[];
+  polish?: boolean;
 }
 
 const formSchema = z.object({
   paymentMethod: z.enum(["cash", "online"]),
 });
 
-export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
+export function MarkPaidForm({
+  selectedSlabs,
+  polish,
+  ...props
+}: MarkPaidForm) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,64 +48,79 @@ export function MarkPaidForm({ selectedSlabs, ...props }: MarkPaidForm) {
   const modal = useGlobalModal();
 
   useEffect(() => {
-  const fetchSlabData = async () => {
-    if (!selectedSlabs || selectedSlabs.length === 0) return;
+    const fetchSlabData = async () => {
+      if (!selectedSlabs || selectedSlabs.length === 0) return;
 
+      setIsLoading(true);
+
+      try {
+        const slabDataPromises = selectedSlabs.map(async (item) => {
+          const slabId = typeof item === "string" ? item : item?.slabId;
+          const response = await fetchData(
+            `factory-management/inventory/finished/get/${slabId}`
+          );
+          return response;
+        });
+
+        const allSlabData = await Promise.all(slabDataPromises);
+        setSlabData(allSlabData);
+      } catch (error: unknown) {
+        console.error("Error fetching slab data:", error);
+        if (axios.isAxiosError(error)) {
+          toast.error(
+            error.response?.data?.message || "Failed to fetch slab data"
+          );
+        } else {
+          toast.error("Something went wrong while fetching slab data");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSlabData();
+  }, [selectedSlabs]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
     try {
-      const slabDataPromises = selectedSlabs.map(async (item) => {
-        const slabId = typeof item === "string" ? item : item?.slabId;
-        const response = await fetchData(
-          `factory-management/inventory/finished/get/${slabId}`
-        );
-        return response;
-      });
-
-      const allSlabData = await Promise.all(slabDataPromises);
-      setSlabData(allSlabData);
-    } catch (error: unknown) {
-      console.error("Error fetching slab data:", error);
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || "Failed to fetch slab data");
+      let payload;
+      if (polish) {
+        payload = {
+          ids: selectedSlabs?.map((s) => s.slabId),
+          polishingPaymentStatus: {
+            status: "paid",
+            modeOfPayment: values.paymentMethod,
+          },
+        };
       } else {
-        toast.error("Something went wrong while fetching slab data");
+        payload = {
+          ids: selectedSlabs?.map((s) => s.slabId),
+          cuttingPaymentStatus: {
+            status: "paid",
+            modeOfPayment: values.paymentMethod,
+          },
+        };
+      }
+      await putData(
+        `/factory-management/inventory/finished/updatepaymentstatus`,
+        payload
+      );
+      toast.success("Payment status updated successfully");
+      modal.onClose();
+    } catch (error: unknown) {
+      console.error("Error updating payment status:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message || "Failed to update payment status"
+        );
+      } else {
+        toast.error("An unexpected error occurred");
       }
     } finally {
       setIsLoading(false);
     }
-  };
-
-  fetchSlabData();
-}, [selectedSlabs]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-  setIsLoading(true);
-  try {
-    const payload = {
-      ids: selectedSlabs?.map((s) => s.slabId),
-      cuttingPaymentStatus: {
-        status: "paid",
-        modeOfPayment: values.paymentMethod,
-      },
-    };
-    await putData(
-      `/factory-management/inventory/finished/updatepaymentstatus`,
-      payload
-    );
-    toast.success("Payment status updated successfully");
-    modal.onClose();
-  } catch (error: unknown) {
-    console.error("Error updating payment status:", error);
-    if (axios.isAxiosError(error)) {
-      toast.error(error.response?.data?.message || "Failed to update payment status");
-    } else {
-      toast.error("An unexpected error occurred");
-    }
-  } finally {
-    setIsLoading(false);
   }
-}
 
   return (
     <div className="space-y-6">
