@@ -1,4 +1,4 @@
-// "use client";
+"use client";
 
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -6,11 +6,17 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { SalesCreateNewForm } from "@/components/forms/salesForm";
+import { useSearchParams } from "next/navigation";
 
- 
-console.log(Button, Heading, SalesCreateNewForm); // Debug undefined components
-
-export default function CreateNewFormPage() {
+ interface PageProps {
+   params: {
+    factoryId: string;
+    organizationId:string;
+  };
+}
+export default function CreateNewFormPage({ params }: PageProps) {
+      const searchParams = useSearchParams();
+     const factoryid = params.factoryId || searchParams.get("factoryId") || "";
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">
@@ -32,7 +38,7 @@ export default function CreateNewFormPage() {
             </div>
             <Separator orientation="horizontal" />
             <div className="container mx-auto">
-                <SalesCreateNewForm gap={3} />
+                <SalesCreateNewForm gap={3} orgId={params.organizationId} />
             </div>
         </div>
     );

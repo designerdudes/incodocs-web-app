@@ -43,36 +43,10 @@ export const Columns: ColumnDef<Sales>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.customerName}
+                {row.original.customerId?.customerName}
             </div>
         ),
     },
-    {
-        accessorKey: "customerGSTN", // Corrected key
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                GST Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.customerGSTN}
-            </div>
-        ),
-    },
-    // {
-    //     accessorKey: "supplierGSTN",
-    //     header: "GST Number",
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.customerGSTN}
-    //         </div>
-    //     ),
-    // },
     {
         accessorKey: "noOfSlabs",
         header: ({ column }) => (

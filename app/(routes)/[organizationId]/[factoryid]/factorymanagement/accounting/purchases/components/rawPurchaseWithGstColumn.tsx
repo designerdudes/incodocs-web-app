@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./rawPurchaseCell-actions";
 import moment from "moment";
@@ -114,7 +114,26 @@ export const rawPurchaseWithGstColumn: ColumnDef<RawPurchased>[] = [
       <div>{moment(row.original.purchaseDate).format("DD MMM YYYY")}</div>
     ),
   },
+   {
+        accessorKey: "paymentProof", // ✅ Correct key
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Payment Proof
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize flex items-center justify-center gap-2 ">
+            {row.original.paymentProof &&    <Button size={"icon"} variant="outline"
+            onClick={() => window.open(row.original.paymentProof, "_blank")}
+            ><Eye className="h-4 w-4" /></Button>}
+            </div>
 
+        ),
+    },
   {
     header: ({ column }) => <Button variant="ghost">Action</Button>,
 

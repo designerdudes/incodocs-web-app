@@ -38,9 +38,11 @@ import {
   TableRow,
 } from "../ui/table";
 import CalendarComponent from "../CalendarComponent";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface FinishedPurchaseCreateNewFormProps {
   gap: number;
+  orgId: string;
 }
 
 const formSchema = z.object({
@@ -74,10 +76,12 @@ const formSchema = z.object({
     )
     .optional(),
   noOfSlabs: z.number().optional(),
+   paymentProof:z.string().optional(),
 });
 
 export default function FinishedPurchaseCreateNewForm({
   gap,
+  orgId,
 }: FinishedPurchaseCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -107,6 +111,8 @@ export default function FinishedPurchaseCreateNewForm({
       gstPercentage: "0%",
       slabs: [],
       noOfSlabs: undefined,
+      paymentProof:"",
+
     },
   });
 
@@ -131,7 +137,7 @@ export default function FinishedPurchaseCreateNewForm({
       }
     };
     fetchingData();
-  }, []);
+  }, [supplierNames]);
 
   const handleAddNewSupplier = () => {
     toast("Add new supplier functionality to be implemented");
@@ -178,6 +184,7 @@ export default function FinishedPurchaseCreateNewForm({
         supplierId: values.SupplierId,
         invoiceNo: values.invoiceNo,
         purchaseDate: values.purchaseDate || new Date().toISOString(),
+        paymentProof: values.paymentProof || "",
         noOfSlabs: values.noOfSlabs || 0,
         length: values.slabs?.[0]?.dimensions?.length?.value || 0,
         height: values.slabs?.[0]?.dimensions?.height?.value || 0,
@@ -262,7 +269,13 @@ export default function FinishedPurchaseCreateNewForm({
                       valueProperty="_id" // ✅ Ensure supplier ID is passed
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
-                      onAddNew={handleAddNewSupplier}
+                      onAddNew={() => {
+                        window.open(
+                          `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                          "_blank"
+                        );
+                      }}
+                      multiple={false}
                       addNewLabel="Add New Supplier"
                       // disabled={isLoading || supplierLoading}
                     />
@@ -355,6 +368,22 @@ export default function FinishedPurchaseCreateNewForm({
                 </FormItem>
               )}
             />
+            <FormField
+                        control={form.control}
+                        name="paymentProof"
+                        render={() => (
+                          <FormItem>
+                            <FormLabel>Payment Proof</FormLabel>
+                            <FormControl>
+                              <FileUploadField
+                                name="paymentProof"
+                                storageKey="paymentProof"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
             {/* GST Percentage */}
             <FormField
@@ -531,8 +560,7 @@ export default function FinishedPurchaseCreateNewForm({
                       placeholder="Enter product name"
                       onChange={(e) => {
                         const updatedSlabs = [...slabs];
-                        updatedSlabs[index].productName =
-                          e.target.value || "steps";
+                        updatedSlabs[index].productName = e.target.value || "";
                         setSlabs(updatedSlabs);
                         form.setValue("slabs", updatedSlabs);
                       }}

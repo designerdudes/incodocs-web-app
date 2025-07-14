@@ -28,6 +28,7 @@ export type RawPurchaseWithGST = {
   purchaseDate: string;
   gstPercentage: number;
   ratePerCubicVolume: string;
+  paymentProof:string;
 };
 
 export type ActualRawPurchase = {
@@ -41,6 +42,8 @@ export type ActualRawPurchase = {
   height: string;
   purchaseDate: string;
   ratePerCubicVolume: string;
+  factoryId:string;
+  paymentProof:string;
 };
 
 export type FinishedPurchaseWithGST = {
@@ -54,6 +57,7 @@ export type FinishedPurchaseWithGST = {
   purchaseDate: string;
   gstPercentage: number;
   ratePerSqft: string;
+  paymentProof:string;
 };
 
 export type ActualFinishedPurchase = {
@@ -66,6 +70,7 @@ export type ActualFinishedPurchase = {
   height: string;
   purchaseDate: string;
   ratePerSqft: string;
+  paymentProof:string;
 };
 
 export type RawPurchased = RawPurchaseWithGST | ActualRawPurchase;
@@ -128,7 +133,7 @@ export default async function Purchases({ params }: Props) {
             purchases.
           </p>
         </div>
-        <AddPurchases factoryId={params.factoryid} />
+        <AddPurchases factoryId={params.factoryid}  organizationId={params.organizationid}/>
       </div>
 
       <Separator orientation="horizontal" />

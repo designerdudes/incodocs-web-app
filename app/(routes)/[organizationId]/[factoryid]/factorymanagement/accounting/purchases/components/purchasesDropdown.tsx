@@ -13,9 +13,10 @@ import { useRouter } from "next/navigation";
 
 interface AddpurchasesProps {
   factoryId: string
+  organizationId: string
 }
 
-export default function AddPurchases({factoryId}: AddpurchasesProps) {
+export default function AddPurchases({factoryId,organizationId}: AddpurchasesProps) {
   useGlobalModal();
   const router = useRouter();
 
@@ -23,6 +24,7 @@ export default function AddPurchases({factoryId}: AddpurchasesProps) {
     // Encode query parameters to handle special characters
     const queryParams = new URLSearchParams({
       factoryId,
+      organizationId,
     }).toString();
     
     router.push(`./purchases/create-new/${path}?${queryParams}`);
