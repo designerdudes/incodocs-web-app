@@ -1,39 +1,41 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useFormContext, useController } from "react-hook-form";
 import toast from "react-hot-toast";
-import { Eye, EyeIcon, Trash } from "lucide-react";
+import { EyeIcon, Trash } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { postData } from "@/axiosUtility/api";
 
 interface FileUploadFieldProps {
   name: string;
-  storageKey: string; // unique key for localStorage
+  storageKey: string;
   accept?: string;
-  onFileChange?: (file: File) => void; // Example
+  value?: string | null; // ✅ added
+  onChange?: (value: string | null) => void; // ✅ added
 }
 
 export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   name,
   storageKey,
   accept = ".pdf,.jpg,.jpeg,.png",
+  value,
+  onChange,
 }) => {
   const { control, setValue } = useFormContext();
   const { field } = useController({ name, control });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(
-    field.value || null
-  );
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(value || null);
   const [uploading, setUploading] = useState(false);
 
+  // ✅ Sync with external form state when reset or changed
   useEffect(() => {
-    const storedUrl = localStorage.getItem(storageKey);
-    if (storedUrl) {
-      setUploadedUrl(storedUrl);
-      setValue(name, storedUrl);
+    if (value !== uploadedUrl) {
+      setUploadedUrl(value || null);
     }
-  }, [name, setValue, storageKey]);
+  }, [value]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -52,12 +54,11 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       formData.append("file", selectedFile);
 
       const response = await postData("/shipmentdocsfile/upload", formData);
+      const url = response?.url;
 
-      const data = response;
-      const url = data.url;
       setUploadedUrl(url);
       setValue(name, url);
-      // localStorage.setItem(storageKey, url);
+      onChange?.(url); // ✅ notify react-hook-form
       setSelectedFile(null);
 
       toast.success("File uploaded!");
@@ -72,12 +73,13 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   const handleDelete = () => {
     setUploadedUrl(null);
     setValue(name, null);
+    onChange?.(null); // ✅ notify react-hook-form
     localStorage.removeItem(storageKey);
     toast.success("File deleted.");
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-2">
         <Input
           type="file"
@@ -111,14 +113,14 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
       </div>
       {selectedFile ? (
         <div
-          className="text-xs text-gray-500 max-w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis"
+          className="text-xs text-gray-500 max-w-[150px] truncate"
           title={selectedFile.name}
         >
           Selected: {selectedFile.name}
         </div>
       ) : uploadedUrl ? (
         <div
-          className="text-xs text-green-600 max-w-[150px] truncate whitespace-nowrap overflow-hidden text-ellipsis"
+          className="text-xs text-green-600 max-w-[150px] truncate"
           title={uploadedUrl.split("-")[1]}
         >
           Uploaded: {uploadedUrl.split("-")[1]}

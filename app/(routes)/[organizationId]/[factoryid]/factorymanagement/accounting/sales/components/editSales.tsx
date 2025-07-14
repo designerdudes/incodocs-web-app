@@ -28,6 +28,7 @@ import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
 import { cn } from "@/lib/utils";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   customerId: z
@@ -72,6 +73,7 @@ const formSchema = z.object({
   gstPercentage: z
     .union([z.string().min(1, { message: "Enter GST percentage" }), z.number()])
     .optional(),
+  paymentProof: z.string().optional(),
 });
 interface Props {
   params: {
@@ -84,7 +86,6 @@ export default function EditLotForm({ params }: Props) {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const router = useRouter();
-  // console.log("rrrrrrrrrrrrrr",params)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -104,6 +105,7 @@ export default function EditLotForm({ params }: Props) {
       height: "",
       invoiceValue: "",
       gstPercentage: "",
+      paymentProof: "",
     },
   });
 
@@ -111,7 +113,7 @@ export default function EditLotForm({ params }: Props) {
 
   // Fetch existing lot data and reset form values
   useEffect(() => {
-    async function fetchLotData() {
+    async function fetchSlabData() {
       try {
         setIsFetching(true);
         const response = await fetchData(
@@ -119,8 +121,6 @@ export default function EditLotForm({ params }: Props) {
         );
 
         const data = response;
-        // console.log("rrrrrrrrrrrrrr", data);
-
         // Reset form with fetched values
         form.reset({
           customerId: {
@@ -128,6 +128,7 @@ export default function EditLotForm({ params }: Props) {
             customerName: data.customerId?.customerName || "",
           },
           noOfSlabs: data.noOfSlabs || "",
+          paymentProof: data?.paymentProof || "",
           saleDate: data.saleDate || "",
         });
       } catch (error) {
@@ -137,7 +138,7 @@ export default function EditLotForm({ params }: Props) {
         setIsFetching(false);
       }
     }
-    fetchLotData();
+    fetchSlabData();
   }, [SlabId]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
@@ -190,15 +191,6 @@ export default function EditLotForm({ params }: Props) {
     GlobalModal.onOpen();
   };
 
-  // if (isFetching) {
-  //   return (
-  //     <div className="flex items-center justify-center h-60">
-  //       <Icons.spinner className="h-6 w-6 animate-spin" />
-  //       <p className="ml-2 text-gray-500">Loading lot details...</p>
-  //     </div>
-  //   );
-  // }
-
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
@@ -239,6 +231,24 @@ export default function EditLotForm({ params }: Props) {
                     placeholder="eg: 100"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="paymentProof"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Payment Proof</FormLabel>
+                <FormControl>
+                  <FileUploadField
+                    name="paymentProof"
+                    storageKey="paymentProof"
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />

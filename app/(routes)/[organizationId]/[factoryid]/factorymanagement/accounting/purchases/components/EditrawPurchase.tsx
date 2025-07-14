@@ -42,11 +42,7 @@ const formSchema = z.object({
     .optional(),
   invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
   invoiceValue: z.number().optional(),
-  gstPercentage: z
-    .union([
-      z.string().min(1, { message: " enter the gst Percentage number " }),
-      z.number(),
-    ])
+  gstPercentage: z.number()
     .optional(),
   noOfBlocks: z
     .union([
@@ -83,7 +79,7 @@ export default function EditRawForm() {
       paymentProof: "",
       invoiceNo: "",
       invoiceValue: undefined,
-      gstPercentage: "",
+      gstPercentage: 0,
     },
   });
 
