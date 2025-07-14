@@ -19,16 +19,17 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, postData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState } from "react";
+import { debounce } from "lodash";
 // import { Tooltip } from "react-tooltip";
 
 // Save progress to localStorage
@@ -135,6 +136,23 @@ interface RawMaterialCreateNewFormProps {
   gap: number;
 }
 
+export interface Quarry {
+  _id: any;
+  lesseeId?: string;
+  lesseeName?: string;
+  mineralName?: string;
+  businessLocationNames?: string[];
+  factoryId?: any;
+  documents?: {
+    fileName?: string;
+    fileUrl?: string;
+    date?: Date;
+    review?: string;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -149,6 +167,15 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
     number | null
   >(null);
+
+  const [search, setSearch] = useState("");
+  const [quarries, setQuarries] = useState<Quarry[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
@@ -303,6 +330,52 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     };
   }
 
+  const fetchQuarries = React.useCallback(
+    debounce(async (query, pageNo = 1) => {
+      try {
+        setLoading(true);
+        const res = await fetchData(
+          `/quarry/getbyfactory/${factoryId}?search=${query}&page=${pageNo}&limit=20`
+        );
+        const data = res;
+
+        if (pageNo === 1) {
+          setQuarries(data.data || data);
+        } else {
+          setQuarries((prev) => [...prev, ...(data.data || data)]);
+        }
+
+        setHasMore((data?.data?.length || data.length) === 20);
+      } catch (err) {
+        console.error("Failed to fetch:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 1000), // Reduced from 500ms to 300ms
+    [factoryId]
+  );
+
+  useEffect(() => {
+    if (dropdownOpen && factoryId) fetchQuarries(search, page);
+  }, [search, page, dropdownOpen]);
+
+  // Optional: Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+        saveProgressSilently(getValues()); // Save progress when dropdown closes
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [getValues]);
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -427,24 +500,70 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               name="quarryName"
               control={control}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <FormLabel>Quarry Name</FormLabel>
                   <FormControl>
                     <Input
+                      ref={inputRef}
                       placeholder="Enter Quarry Name"
-                      disabled={isLoading}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value);
+                      disabled={isLoading || loading}
+                      value={search}
+                      onFocus={() => {
+                        console.log("Input focused");
+                        setDropdownOpen(true);
                       }}
-                      value={field.value ?? ""}
-                      onBlur={() => saveProgressSilently(getValues())}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSearch(val);
+                        field.onChange(val);
+                        fetchQuarries(val);
+                        setDropdownOpen(true);
+                        saveProgressSilently(getValues());
+                      }}
+                      onBlur={() => console.log("Input blurred")}
                     />
                   </FormControl>
+
+                  {/* Dropdown */}
+                  {dropdownOpen && quarries.length > 0 && (
+                    <div
+                      ref={dropdownRef}
+                      className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow max-h-60 overflow-y-auto"
+                    >
+                      {quarries.map((item) => (
+                        <div
+                          key={item._id}
+                          className="p-2 hover:bg-gray-100 cursor-pointer"
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // Prevent blur before click
+                            field.onChange(item.lesseeName ?? "");
+                            setSearch(item.lesseeName ?? "");
+                            setDropdownOpen(false);
+                            inputRef.current?.focus(); // Retain focus after selection
+                          }}
+                        >
+                          {item.lesseeName}
+                        </div>
+                      ))}
+
+                      {hasMore && (
+                        <div
+                          className="p-2 text-center text-blue-500 cursor-pointer"
+                          onMouseDown={(e) => {
+                            e.preventDefault(); // Prevent blur
+                            setPage((prev) => prev + 1);
+                          }}
+                        >
+                          Load more...
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               name="quarryCost"
               control={control}
