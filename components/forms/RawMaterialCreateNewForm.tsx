@@ -336,14 +336,14 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     };
   }
 
-  // Optimized fetchQuarries with leading option for rapid typing
+  // Optimized fetchQuarries
   const fetchQuarries = React.useCallback(
     debounce(
       async (query: string, pageNo = 1) => {
         try {
           setLoading(true);
           const res = await fetchData(
-            `/quarry/getbyfactory/${factoryId}?search=${query}&page=${pageNo}&limit=20`
+            `/quarry/getbyfactory/${factoryId}?search=${query}&page=${pageNo}&limit=50`
           );
           const data = res;
 
@@ -360,18 +360,27 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
           setLoading(false);
         }
       },
-      1000,
+      500, // Reduced from 1000ms to 500ms for better responsiveness
       { leading: false, trailing: true } // Only trigger after typing stops
     ),
     [factoryId]
   );
 
-  // Trigger fetchQuarries when search or page changes
+  // Trigger fetchQuarries and reset page on search change
   useEffect(() => {
     if (dropdownOpen && factoryId) {
+      setPage(1); // Reset page to 1 on search change
+      setQuarries([]); // Clear previous results
+      fetchQuarries(search, 1);
+    }
+  }, [search, dropdownOpen, fetchQuarries]);
+
+  // Handle page increment separately
+  useEffect(() => {
+    if (page > 1 && dropdownOpen && factoryId) {
       fetchQuarries(search, page);
     }
-  }, [search, page, dropdownOpen, fetchQuarries]);
+  }, [page, dropdownOpen, fetchQuarries, search]);
 
   // Handle outside clicks to close dropdown
   useEffect(() => {
@@ -535,6 +544,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const val = e.target.value;
                         setSearch(val);
                         field.onChange(val);
+                        setPage(1); // Reset page on search change
+                        setQuarries([]); // Clear previous results
                         fetchQuarries(val);
                         setDropdownOpen(true);
                       }}
