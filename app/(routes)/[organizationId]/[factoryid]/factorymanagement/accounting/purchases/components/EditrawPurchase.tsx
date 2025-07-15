@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useSearchParams, useParams } from "next/navigation";
+import { useSearchParams, useParams,useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -33,43 +40,33 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
-  supplierId: z.string().min(3).optional(),
-  ratePerCubicVolume: z
-    .union([
-      z.string().min(1, { message: "Cost must be a valid number" }),
-      z.number(),
-    ])
-    .optional(),
+  supplierId: z.string().optional(),
+  ratePerCubicVolume: z.union([z.string().min(1), z.number()]).optional(),
   invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
   invoiceValue: z.number().optional(),
-  gstPercentage: z.number()
-    .optional(),
-  noOfBlocks: z
-    .union([
-      z.string().min(1, { message: "Enter number of blocks" }),
-      z.number(),
-    ])
-    .optional(),
+  gstPercentage: z.string().optional(),
+  noOfBlocks: z.union([z.string().min(1), z.number()]).optional(),
   paymentProof: z.string().optional(),
-  purchaseDate: z.string().min(1, { message: "Enter Date" }).optional(),
+  purchaseDate: z.string().min(1).optional(),
 });
 
 export default function EditRawForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const GlobalModal = useGlobalModal();
-  const router = useParams();
+  const params = useParams();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const factoryId = router.factoryid as string;
-  const organisationId = router.organizationId as string;
+  const factoryId = params.factoryid as string;
+  const organisationId = params.organizationId as string;
   const BlockId = searchParams.get("RawPurchasesId");
+  const type = searchParams.get("type");
+  const [isWithGst, setIsGst] = useState(false);
 
-  const [supplierNames, setSupplierNames] = useState<
-    { _id: string; name: string }[]
-  >([]);
+  const [supplierNames, setSupplierNames] = useState([]);
   const [, setSupplierLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       supplierId: "",
@@ -78,8 +75,8 @@ export default function EditRawForm() {
       purchaseDate: "",
       paymentProof: "",
       invoiceNo: "",
-      invoiceValue: undefined,
-      gstPercentage: 0,
+      invoiceValue: 0,
+      gstPercentage: "",
     },
   });
 
@@ -90,14 +87,12 @@ export default function EditRawForm() {
         const supplierResponse = await fetchData(
           `/accounting/supplier/getbyfactory/${factoryId}`
         );
-        const supplierData = await supplierResponse;
-        const mappedSuppliers = supplierData.map((supplier: any) => ({
+        const mappedSuppliers = supplierResponse.map((supplier: any) => ({
           _id: supplier._id,
           name: supplier.supplierName,
         }));
         setSupplierNames(mappedSuppliers);
       } catch (error) {
-        console.error("Error fetching supplier data:", error);
         toast.error("Failed to fetch suppliers");
       } finally {
         setSupplierLoading(false);
@@ -107,42 +102,42 @@ export default function EditRawForm() {
   }, [factoryId]);
 
   useEffect(() => {
-    async function fetchLotData() {
+    async function fetchBlockData() {
       if (!BlockId) return;
       try {
         setIsFetching(true);
         const response = await fetchData(
           `/transaction/purchase/rawgetbyid/${BlockId}`
         );
-        const result = response;
-        const data = result.getPurchase;
+        const data = response.getPurchase;
+        if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
+          setIsGst(true);
+        }
 
         form.reset({
           supplierId: data?.supplierId?._id || "",
           ratePerCubicVolume: String(data?.ratePerCubicVolume || ""),
           noOfBlocks: String(data?.noOfBlocks || ""),
           invoiceNo: data?.invoiceNo || "",
-          invoiceValue: data?.invoiceValue || "",
-          gstPercentage: data?.gstPercentage || "",
+          invoiceValue: data?.invoiceValue || 0,
+          gstPercentage:
+            data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "",
           paymentProof: data.paymentProof || "",
           purchaseDate: data?.purchaseDate
             ? moment(data.purchaseDate).format("YYYY-MM-DD")
             : "",
         });
       } catch (error) {
-        console.error("Error fetching Block data:", error);
         toast.error("Failed to fetch Block data");
       } finally {
         setIsFetching(false);
       }
     }
-
-    fetchLotData();
+    fetchBlockData();
   }, [BlockId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
     GlobalModal.title = "Confirm Lot Update";
     GlobalModal.description = "Are you sure you want to update this lot?";
     GlobalModal.children = (
@@ -151,7 +146,7 @@ export default function EditRawForm() {
         <p>Rate per Sqft: {values.ratePerCubicVolume}</p>
         <p>No. of Blocks: {values.noOfBlocks}</p>
         <p>Purchase Date: {values.purchaseDate}</p>
-
+        {isWithGst && <p>GST Percentage: {values.gstPercentage}%</p>}
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -172,9 +167,8 @@ export default function EditRawForm() {
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Block  updated successfully");
-                window.location.reload();
+                router.push(`../`)
               } catch (error) {
-                console.error("Error updating Block:", error);
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.error("Error updating Block");
@@ -188,15 +182,6 @@ export default function EditRawForm() {
     );
     GlobalModal.onOpen();
   };
-
-  if (isFetching) {
-    return (
-      <div className="flex items-center justify-center h-60">
-        <Icons.spinner className="h-6 w-6 animate-spin" />
-        <p className="ml-2 text-gray-500">Loading Raw details...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -213,9 +198,7 @@ export default function EditRawForm() {
                     <EntityCombobox
                       entities={supplierNames}
                       value={field.value || ""}
-                      onChange={(value) => {
-                        field.onChange(value);
-                      }}
+                      onChange={field.onChange}
                       valueProperty="_id"
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
@@ -239,7 +222,7 @@ export default function EditRawForm() {
               name="ratePerCubicVolume"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Rate per Sqft</FormLabel>
+                  <FormLabel>Rate per Cubic Meter</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -326,7 +309,6 @@ export default function EditRawForm() {
                 </FormItem>
               )}
             />
-            {/* Invoice No */}
             <FormField
               name="invoiceNo"
               control={form.control}
@@ -334,18 +316,13 @@ export default function EditRawForm() {
                 <FormItem>
                   <FormLabel>Invoice No.</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter Invoice No."
-                      disabled={isLoading}
-                      {...field}
-                    />
+                    <Input placeholder="Enter Invoice No." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Invoice Value */}
             <FormField
               name="invoiceValue"
               control={form.control}
@@ -356,10 +333,9 @@ export default function EditRawForm() {
                     <Input
                       placeholder="Enter Invoice Value"
                       type="number"
-                      disabled={isLoading}
                       {...field}
                       onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || undefined)
+                        field.onChange(parseFloat(e.target.value) || 0)
                       }
                     />
                   </FormControl>
@@ -368,52 +344,37 @@ export default function EditRawForm() {
               )}
             />
 
-            {/* GST Percentage */}
-            <FormField
-              control={form.control}
-              name="gstPercentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>gst Percentage</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Eg: 10%"
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Rate per Cubic Volume */}
-            <FormField
-              name="ratePerCubicVolume"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Rate per Cubic Meter</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter rate per cubic meter"
-                      type="number"
-                      disabled={isLoading}
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || undefined)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            {isWithGst && (
+              <FormField
+                name="gstPercentage"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GST Percentage</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select GST Percentage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">0%</SelectItem>
+                          <SelectItem value="1">1%</SelectItem>
+                          <SelectItem value="5">5%</SelectItem>
+                          <SelectItem value="12">12%</SelectItem>
+                          <SelectItem value="18">18%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
-          <Button type="submit" disabled={isLoading}>
-            Submit
-          </Button>
+          <Button type="submit">Submit</Button>
         </form>
       </Form>
     </div>

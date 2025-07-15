@@ -5,6 +5,13 @@ import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Form,
   FormControl,
   FormField,
@@ -16,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useSearchParams, useParams } from "next/navigation";
+import { useSearchParams, useParams,useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -32,17 +39,12 @@ import EntityCombobox from "@/components/ui/EntityCombobox";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
-  supplierId: z.string().min(3).optional(),
+  supplierId: z.string().optional(),
   ratePerSqft: z.union([z.string(), z.number()]).optional(),
   numberofSlabs: z.union([z.string(), z.number()]).optional(),
   invoiceNo: z.string().min(1, { message: "Invoice number is required" }),
   invoiceValue: z.number().optional(),
-  gstPercentage: z
-    .union([
-      z.string().min(1, { message: " enter the gst Percentage number " }),
-      z.number(),
-    ])
-    .optional(),
+  gstPercentage: z.string().optional(),
   purchaseDate: z.string().optional(),
   paymentProof: z.string().optional(),
 });
@@ -53,14 +55,15 @@ export default function EditFinishedPurchase() {
   const [supplierNames, setSupplierNames] = useState<
     { _id: string; name: string }[]
   >([]);
-
   const GlobalModal = useGlobalModal();
   const searchParams = useSearchParams();
-  const router = useParams();
-
-  const factoryId = router.factoryid as string;
-  const organisationId = router.organizationId as string;
+  const params = useParams();
+  const router = useRouter();
+  const factoryId = params.factoryid as string;
+  const organisationId = params.organizationId as string;
   const SlabId = searchParams.get("FinishedPurchaseId");
+  const type = searchParams.get("type");
+  const [isWithGst, setIsGst] = useState(false);
 
   const [, setSupplierLoading] = useState(false);
 
@@ -73,7 +76,7 @@ export default function EditFinishedPurchase() {
       purchaseDate: "",
       paymentProof: "",
       invoiceNo: "",
-      invoiceValue: undefined,
+      invoiceValue: 0,
       gstPercentage: "",
     },
   });
@@ -103,28 +106,25 @@ export default function EditFinishedPurchase() {
 
   useEffect(() => {
     async function fetchSlabData() {
-      if (!SlabId) {
-        console.warn("Missing FinishedPurchaseId in URL");
-        return;
-      }
-
+      if (!SlabId)  return;
       try {
         setIsFetching(true);
         const res = await fetchData(
           `/transaction/purchase/slabgetbyid/${SlabId}`
         );
-        console.log("Fetched slab data:", res);
         const data = res.getPurchase;
-
-        if (!data) throw new Error("Slab not found");
+        if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
+          setIsGst(true);
+        }
 
         form.reset({
           supplierId: data?.supplierId?._id || "",
           ratePerSqft: String(data?.ratePerSqft || ""),
           numberofSlabs: String(data?.noOfSlabs || ""),
           invoiceNo: data?.invoiceNo || "",
-          invoiceValue: data?.invoiceValue || "",
-          gstPercentage: data?.gstPercentage || "",
+          invoiceValue: data?.invoiceValue || 0,
+          gstPercentage:
+            data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "",
           paymentProof: data.paymentProof || "",
           purchaseDate: data?.purchaseDate || "",
         });
@@ -141,7 +141,6 @@ export default function EditFinishedPurchase() {
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-
     GlobalModal.title = "Confirm Slab Update";
     GlobalModal.description = "Are you sure you want to update this Slab?";
     GlobalModal.children = (
@@ -150,6 +149,7 @@ export default function EditFinishedPurchase() {
         <p>Rate per Sqft: {values.ratePerSqft}</p>
         <p>No. of Slabs: {values.numberofSlabs}</p>
         <p>Purchase Date: {values.purchaseDate}</p>
+        {isWithGst && <p>GST Percentage: {values.gstPercentage}%</p>}
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -169,7 +169,7 @@ export default function EditFinishedPurchase() {
                 );
                 toast.success("Slab updated successfully");
                 GlobalModal.onClose();
-                window.location.reload();
+                router.push(`../`)
               } catch (error) {
                 console.error("Error updating slab:", error);
                 toast.error("Error updating slab");
@@ -333,7 +333,6 @@ export default function EditFinishedPurchase() {
                   <FormControl>
                     <Input
                       placeholder="Enter Invoice No."
-                      disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
@@ -353,10 +352,9 @@ export default function EditFinishedPurchase() {
                     <Input
                       placeholder="Enter Invoice Value"
                       type="number"
-                      disabled={isLoading}
                       {...field}
                       onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || undefined)
+                        field.onChange(parseFloat(e.target.value) || 0)
                       }
                     />
                   </FormControl>
@@ -366,29 +364,37 @@ export default function EditFinishedPurchase() {
             />
 
             {/* GST Percentage */}
-            <FormField
-              control={form.control}
-              name="gstPercentage"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>gst Percentage</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Eg: 10%"
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            {isWithGst && (
+              <FormField
+                name="gstPercentage"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GST Percentage</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select GST Percentage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">0%</SelectItem>
+                          <SelectItem value="1">1%</SelectItem>
+                          <SelectItem value="5">5%</SelectItem>
+                          <SelectItem value="12">12%</SelectItem>
+                          <SelectItem value="18">18%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
+          </div>
+          <Button type="submit">
             Submit
           </Button>
         </form>
