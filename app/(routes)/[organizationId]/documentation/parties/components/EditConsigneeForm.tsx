@@ -597,9 +597,11 @@ export default function EditConsigneeForm({ params }: Props) {
                                   <FileUploadField
                                     name={`documents.${index}.fileUrl`}
                                     storageKey={`documents.${index}.fileUrl`}
-                                    onFileChange={async (file: File) => {
-                                      if (file) {
-                                        await handleFileUpload(file, index);
+                                    onChange={async (value: string | null) => {
+                                      // If value is a string (URL), set it directly; otherwise, do nothing
+                                      if (value) {
+                                        setValue(`documents.${index}.fileUrl`, value, { shouldDirty: true });
+                                        saveProgress(getValues());
                                       }
                                     }}
                                   />
@@ -634,11 +636,11 @@ export default function EditConsigneeForm({ params }: Props) {
                                         className="w-full text-left"
                                       >
                                         {field.value &&
-                                        !isNaN(new Date(field.value).getTime())
+                                          !isNaN(new Date(field.value).getTime())
                                           ? format(
-                                              new Date(field.value),
-                                              "PPPP"
-                                            )
+                                            new Date(field.value),
+                                            "PPPP"
+                                          )
                                           : "Pick a date"}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                       </Button>
@@ -702,29 +704,29 @@ export default function EditConsigneeForm({ params }: Props) {
               </div>
             )}
           </div>
-         <div className="grid grid-cols-4 gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              append({
-                fileName: "",
-                fileUrl: "",
-                date: new Date().toISOString(),
-                review: "",
-              })
-            }
-            className="mt-4"
-          >
-            Add Document
-          </Button>
+          <div className="grid grid-cols-4 gap-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                append({
+                  fileName: "",
+                  fileUrl: "",
+                  date: new Date().toISOString(),
+                  review: "",
+                })
+              }
+              className="mt-4"
+            >
+              Add Document
+            </Button>
 
-          <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading && (
-              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
-            )}
-            Submit
-          </Button>
+            <Button type="submit" disabled={isLoading} className="w-full mt-4">
+              {isLoading && (
+                <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Submit
+            </Button>
           </div>
         </form>
       </Form>
