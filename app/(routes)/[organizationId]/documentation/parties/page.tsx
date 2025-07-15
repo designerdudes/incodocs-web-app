@@ -26,91 +26,131 @@ export default async function PartiesPage({ params }: Props) {
   const organisationID = params.organizationId; // Could use params.organizationId
   const token = cookieStore.get("AccessToken")?.value || "";
   // Fetch data (unchanged)
-  const GetCurrentUser = await fetch(
-    `https://incodocs-server.onrender.com/user/currentUser`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const currentUser = GetCurrentUser._id;
+  let GetCurrentUser;
+  let currentUser;
+  try {
+    GetCurrentUser = await fetch(
+      `https://incodocs-server.onrender.com/user/currentUser`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    currentUser = GetCurrentUser._id;
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+  }
 
-  const shippingLineRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const shippingLine = shippingLineRes;
+  let shippingLineRes;
+  let shippingLine;
+  try {
+    shippingLineRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    shippingLine = shippingLineRes;
+  } catch (error) {
+    console.error("Error fetching shipping lines:", error);
+  }
 
-  const ForwarderRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const forwarder = ForwarderRes;
+  let ForwarderRes;
+  let forwarder;
+  try {
+    ForwarderRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    forwarder = ForwarderRes;
+  } catch (error) {
+    console.error("Error fetching forwarders:", error);
+  }
 
-  const transporterRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const transporter = transporterRes;
+  let transporterRes;
+  let transporter;
+  try {
+    transporterRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    transporter = transporterRes;
+  } catch (error) {
+    console.error("Error fetching transporters:", error);
+  }
 
-  const supplierRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const supplier = supplierRes;
+  let supplierRes;
+  let supplier;
+  try {
+    supplierRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    supplier = supplierRes;
+  } catch (error) {
+    console.error("Error fetching suppliers:", error);
+  }
 
-  const consigneeRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const consignee = consigneeRes;
-  
+  let consigneeRes;
+  let consignee;
+  try {
+    consigneeRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    consignee = consigneeRes;
+  } catch (error) {
+    console.error("Error fetching consignees:", error);
+  }
 
-
-  const cbNameRes = await fetch(
-    `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organisationID}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
-  const cbName = cbNameRes;
+  let cbNameRes;
+  let cbName;
+  try {
+    cbNameRes = await fetch(
+      `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organisationID}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    ).then((response) => response.json());
+    cbName = cbNameRes;
+  } catch (error) {
+    console.error("Error fetching Cb Names:", error);
+  }
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -129,10 +169,13 @@ export default async function PartiesPage({ params }: Props) {
           </p>
         </div>
         <div className="flex justify-end mb-4">
-          <AddParties organizationId={organisationID} currentUser={currentUser} />
+          <AddParties
+            organizationId={organisationID}
+            currentUser={currentUser}
+          />
         </div>
       </div>
-      
+
       {/* Moved AddParties here */}
 
       <Separator className="my-2" />
@@ -171,7 +214,7 @@ export default async function PartiesPage({ params }: Props) {
               </Badge>
             </TabsTrigger>
             <TabsTrigger className="gap-2" value="cbName">
-              CustomBroker 
+              CustomBroker
               <Badge className="text-bg-primary-foreground" variant="outline">
                 {cbName?.length ?? 0}
               </Badge>
