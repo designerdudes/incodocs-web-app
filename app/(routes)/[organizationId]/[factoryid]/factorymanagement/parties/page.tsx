@@ -70,41 +70,61 @@ export default async function quarry({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
   const factoryId = params?.factoryid;
-  const quarry = await fetch(
-    `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
-  const quarryData = await quarry.json();
 
-  const supplier = await fetch(
-    `https://incodocs-server.onrender.com/accounting/supplier/getbyfactory/${factoryId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
-  const supplierData = await supplier.json();
+  let quarry;
+  let quarryData = [];
+  try {
+    quarry = await fetch(
+      `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    quarryData = await quarry.json();
+  } catch (error) {
+    console.error("Error fetching quarry data:", error);
+  }
 
-  const customer = await fetch(
-    `https://incodocs-server.onrender.com/accounting/customer/getbyfactory/${factoryId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
-  const customerData = await customer.json();
+  let supplier;
+  let supplierData = [];
+  try {
+    supplier = await fetch(
+      `https://incodocs-server.onrender.com/accounting/supplier/getbyfactory/${factoryId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    supplierData = await supplier.json();
+  } catch (error) {
+    console.error("Error fetching supplier data:", error);
+  }
+
+  let customer;
+  let customerData = [];
+  try {
+    customer = await fetch(
+      `https://incodocs-server.onrender.com/accounting/customer/getbyfactory/${factoryId}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+    customerData = await customer.json();
+  } catch (error) {
+    console.error("Error fetching customer data:", error);
+  }
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <PartiesDataTable
