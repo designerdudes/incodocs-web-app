@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Eye } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import moment from "moment"
 import { Sales } from "../page"
@@ -81,6 +81,26 @@ export const Columns: ColumnDef<Sales>[] = [
             </div>
         ),
     },
+    {
+            accessorKey: "paymentProof", // ✅ Correct key
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Payment Proof
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            ),
+            cell: ({ row }) => (
+                <div className="capitalize flex items-center justify-center gap-2 ">
+                {row.original.paymentProof &&    <Button size={"icon"} variant="outline"
+                onClick={() => window.open(row.original.paymentProof, "_blank")}
+                ><Eye className="h-4 w-4" /></Button>}
+                </div>
+    
+            ),
+        },
 
     {
 

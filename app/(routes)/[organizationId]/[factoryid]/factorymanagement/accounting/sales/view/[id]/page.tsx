@@ -24,51 +24,27 @@ import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: {
-    blockid: string;
+    _id: string;
   };
 }
 
-export default async function SlabsPage({ params }: Props) {
-  let SlabData = null;
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+export default async function SlabsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const SlabData = params.id;
 
   const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
+    `https://incodocs-server.onrender.com/transaction/sale/getbyid/${SlabData}`,
     {
-      method: "GET",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
+        Authorization: `Bearer ${cookies().get("AccessToken")?.value}`,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
-
-  SlabData = res;
-
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
-  }
-  const volumeinInchs = calculateVolume(
-    SlabData?.dimensions?.length?.value,
-    SlabData?.dimensions?.breadth?.value,
-    SlabData?.dimensions?.height?.value
   );
 
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    return volumeinInchs * conversionFactor;
-  }
+  const customerData = await res.json();
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -82,7 +58,7 @@ export default async function SlabsPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Sales ${SlabData.blockNumber} `}
+            title={` Details of Sales ${customerData?.customerId?.customerName} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Comprehensive insights into slab sales, including quantity,
@@ -97,7 +73,7 @@ export default async function SlabsPage({ params }: Props) {
           <Card x-chunk="dashboard-07-chunk-0">
             <CardHeader>
               <CardTitle>Sales Details</CardTitle>
-              <CardDescription>{`Details of ${SlabData?.blockNumber}`}</CardDescription>
+              <CardDescription>{`Details of ${customerData?.customerId?.customerName}`}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -112,62 +88,68 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Customer Name
                     </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      GST Number
+                    <TableCell>
+                      {customerData?.customerId?.customerName}
                     </TableCell>
-                    <TableCell>{SlabData?.SlabsId?.length}</TableCell>
                   </TableRow>
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Invoice No.
                     </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
-                  </TableRow>
+                    <TableCell>{customerData.invoiceValue}</TableCell>
+                  </TableRow> */}
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Invoice Value
                     </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>{customerData?.invoiceValue}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Number of Slabs
                     </TableCell>
-                    <TableCell>{SlabData.status}</TableCell>
+                    <TableCell>{customerData.noOfSlabs}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Length (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.length?.value}</TableCell>
+                    <TableCell>{customerData?.length}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Height (inch)
                     </TableCell>
-                    <TableCell>{SlabData?.dimensions?.height?.value}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Area of Sqft
-                    </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>{customerData?.height}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       GST Percentage
                     </TableCell>
-                    <TableCell>{SlabData.materialType}</TableCell>
+                    <TableCell>{customerData?.gstPercentage}%</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Payment Proof
+                    </TableCell>
+                    <TableCell>
+                      <a
+                        href={customerData.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="link" className="p-0 m-0">
+                          View Payment Proof
+                        </Button>
+                      </a>
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Sales Date
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
+                      {moment(customerData.saleDate).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
 
@@ -176,7 +158,7 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Created At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.createdAt).format("YYYY-MM-DD")}
+                      {moment(customerData.createdAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -184,7 +166,7 @@ export default async function SlabsPage({ params }: Props) {
                       Slab Updated At
                     </TableCell>
                     <TableCell>
-                      {moment(SlabData.updatedAt).format("YYYY-MM-DD")}
+                      {moment(customerData.updatedAt).format("YYYY-MM-DD")}
                     </TableCell>
                   </TableRow>
                 </TableBody>

@@ -12,6 +12,8 @@ import { GstColumns } from "./components/GstColumns";
 import { cookies } from "next/headers";
 
 export type Sales = {
+  organizationId: string;
+  factoryId: any;
   _id: string;
   customerId: {
     customerName: string;
@@ -22,11 +24,13 @@ export type Sales = {
   height: string;
   saleDate: string;
   gstPercentage: number;
+  paymentProof: string;
 };
 
 interface Props {
   params: {
     factoryid: string;
+    organizationId: string;
   };
 }
 

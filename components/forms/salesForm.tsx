@@ -31,6 +31,7 @@ import {
 } from "../ui/table";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import CalendarComponent from "../CalendarComponent";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -62,6 +63,7 @@ const formSchema = z.object({
   salesDate: z.string().nonempty(),
   gstPercentage: z.enum(["0", "1", "5", "12", "18"]),
   invoiceValue: z.number().min(1),
+  paymentProof: z.string().optional(),
 });
 
 export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
@@ -94,6 +96,7 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       salesDate: "",
       gstPercentage: "0",
       invoiceValue: 0,
+      paymentProof: "",
       slabs: [],
     },
   });
@@ -164,47 +167,48 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-  setIsLoading(true);
-  try {
-    const endpoint =
-      values.gstPercentage === "0"
-        ? "/transaction/sale/add"
-        : "/transaction/sale/addgst";
-
-    // prepare data
-    const transformedData: any = {
-      factoryId: factoryId,
-      customerId: values.customerId,
-      noOfSlabs: values.noOfSlabs,
-      length: slabs[0]?.dimensions.length.value,
-      height: slabs[0]?.dimensions.height.value,
-      saleDate:
+    setIsLoading(true);
+    try {
+      const endpoint =
         values.gstPercentage === "0"
-          ? new Date(values.salesDate).toISOString() // Without GST
-          : values.salesDate.split("T")[0], // With GST (only YYYY-MM-DD)
-    };
+          ? "/transaction/sale/add"
+          : "/transaction/sale/addgst";
 
-    if (values.gstPercentage === "0") {
-      transformedData.actualInvoiceValue = values.invoiceValue;
-      transformedData.slabIds = []; // populate with real slab IDs if available
-    } else {
-      transformedData.invoiceValue = values.invoiceValue;
-      transformedData.gstPercentage = parseFloat(values.gstPercentage);
+      // prepare data
+      const transformedData: any = {
+        factoryId: factoryId,
+        customerId: values.customerId,
+        noOfSlabs: values.noOfSlabs,
+        length: slabs[0]?.dimensions.length.value,
+        paymentProof: values.paymentProof || "",
+        height: slabs[0]?.dimensions.height.value,
+        saleDate:
+          values.gstPercentage === "0"
+            ? new Date(values.salesDate).toISOString() // Without GST
+            : values.salesDate.split("T")[0], // With GST (only YYYY-MM-DD)
+      };
+
+      if (values.gstPercentage === "0") {
+        transformedData.actualInvoiceValue = values.invoiceValue;
+        transformedData.slabIds = []; // populate with real slab IDs if available
+      } else {
+        transformedData.invoiceValue = values.invoiceValue;
+        transformedData.gstPercentage = parseFloat(values.gstPercentage);
+      }
+
+      await postData(endpoint, transformedData);
+
+      toast.success("Sale record added successfully");
+      router.push("./");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error adding sale record");
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    await postData(endpoint, transformedData);
-
-    toast.success("Sale record added successfully");
-    router.push("./");
-  } catch (err) {
-    console.error(err);
-    toast.error("Error adding sale record");
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-
+  
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -274,6 +278,22 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                         handleSlabsInputChange(e.target.value);
                       }}
                       value={field.value === 0 ? "" : field.value}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="paymentProof"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
                     />
                   </FormControl>
                   <FormMessage />
