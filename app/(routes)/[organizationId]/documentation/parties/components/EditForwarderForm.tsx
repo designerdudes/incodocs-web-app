@@ -589,7 +589,7 @@ export default function EditForwarderForm({ params }: Props) {
                     {fields.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell>{index + 1}</TableCell>
-                         <TableCell>
+                        <TableCell>
                           <FormField
                             control={form.control}
                             name={`documents.${index}.fileName`}
@@ -616,9 +616,10 @@ export default function EditForwarderForm({ params }: Props) {
                                 <FileUploadField
                                   name={`documents.${index}.fileUrl`}
                                   storageKey={`documents.${index}.fileUrl`}
-                                  onFileChange={async (file: File) => {
-                                    if (file) {
-                                      await handleFileUpload(file, index);
+                                  onChange={async (value: string | null) => {
+                                    if (value && typeof value === "string") {
+                                      setValue(`documents.${index}.fileUrl`, value, { shouldDirty: true });
+                                      saveProgress(getValues());
                                     }
                                   }}
                                 />
@@ -636,7 +637,7 @@ export default function EditForwarderForm({ params }: Props) {
                             )}
                           />
                         </TableCell>
-                       
+
                         <TableCell>
                           <FormField
                             control={form.control}
@@ -648,11 +649,11 @@ export default function EditForwarderForm({ params }: Props) {
                                     <FormControl>
                                       <Button variant="outline">
                                         {field.value &&
-                                        !isNaN(new Date(field.value).getTime())
+                                          !isNaN(new Date(field.value).getTime())
                                           ? format(
-                                              new Date(field.value),
-                                              "PPPP"
-                                            )
+                                            new Date(field.value),
+                                            "PPPP"
+                                          )
                                           : "Pick a date"}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                       </Button>
