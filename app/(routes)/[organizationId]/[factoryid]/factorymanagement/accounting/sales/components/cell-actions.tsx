@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -19,14 +19,15 @@ import EditSalesForm from "./editSales"
 
 
 interface Props {
-    data: Sales;
+  data: Sales;
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
-    // console.log("dddddddddddd",data)
     const router = useRouter();
+     const params = useParams();
+     const organizationId = params.organizationId as string;
+    const factoryId = useParams().factoryid as string;
     const GlobalModal = useGlobalModal();
-
     const deleteSale = async () => {
         try {
             const result = await deleteData(`https://incodocs-server.onrender.com/transaction/sale/deletesale/${data._id}`);
@@ -62,12 +63,12 @@ export const CellAction: React.FC<Props> = ({ data }) => {
 
                     {/* Edit Lot Details */}
                     <DropdownMenuItem
-                        onSelect={() => {
-                            GlobalModal.title = "Edit Lot Details"; // Set modal title
-                            GlobalModal.children = <EditSalesForm params={{ _id: data._id }} />; // Render Edit Form
-                            GlobalModal.onOpen();
-                        }}
-                    >
+                                onSelect={() => {
+                                  router.push(
+                                    `/${organizationId}/${factoryId}/factorymanagement/accounting/sales/EditSales?EditSalesId=${data._id}`
+                                  );
+                                }}
+                              >
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Sale Details
                     </DropdownMenuItem>

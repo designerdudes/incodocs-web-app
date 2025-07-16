@@ -166,10 +166,6 @@ export default function RawPurchaseCreateNewForm({
     fetchingData();
   }, [supplierNames]);
 
-  const handleAddNewSupplier = () => {
-    toast("Add new supplier functionality to be implemented");
-  };
-
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
