@@ -1,18 +1,17 @@
+"use server";
 
-'use server';
-
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import Link from "next/link";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import Heading from '@/components/ui/heading';
-import { Factory } from 'lucide-react';
+} from "@/components/ui/card";
+import Heading from "@/components/ui/heading";
+import { Factory } from "lucide-react";
 
 interface Address {
   coordinates: {
@@ -41,26 +40,25 @@ interface Params {
 export default async function DashboardPage({ params }: { params: Params }) {
   const { factoryId } = params;
   const cookieStore = cookies();
-  const token = cookieStore.get('AccessToken')?.value;
+  const token = cookieStore.get("AccessToken")?.value;
 
   // Redirect to login if no token
-
 
   try {
     // Fetch the factory to get its orgId
     const factoryRes = await fetch(
       `https://incodocs-server.onrender.com/factory/${factoryId}`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       }
     );
 
     if (!factoryRes.ok) {
-      throw new Error('Failed to fetch factory details');
+      throw new Error("Failed to fetch factory details");
     }
 
     const factory: Factory = await factoryRes.json();
@@ -70,16 +68,16 @@ export default async function DashboardPage({ params }: { params: Params }) {
     const factoriesRes = await fetch(
       `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       }
     );
 
     if (!factoriesRes.ok) {
-      throw new Error('Failed to fetch factories');
+      throw new Error("Failed to fetch factories");
     }
 
     const factories: Factory[] = await factoriesRes.json();
@@ -114,12 +112,12 @@ export default async function DashboardPage({ params }: { params: Params }) {
                     Factory ID: {factory._id}
                   </CardDescription>
                   <p className="text-sm text-gray-700">
-                    Address: {factory.address.location},{' '}
+                    Address: {factory.address.location},{" "}
                     {factory.address.pincode}
                   </p>
                   <p className="text-sm text-gray-700">
-                    Coordinates:{' '}
-                    {factory.address.coordinates.coordinates.join(', ')}
+                    Coordinates:{" "}
+                    {factory.address.coordinates.coordinates.join(", ")}
                   </p>
                   <Link
                     href={`/factory/${factory._id}`}
@@ -141,7 +139,7 @@ export default async function DashboardPage({ params }: { params: Params }) {
       </main>
     );
   } catch (error) {
-    console.error('Error fetching dashboard data:', error);
+    console.error("Error fetching dashboard data:", error);
     // redirect('/login'); // Redirect on error (e.g., invalid token, factory not found)
   }
 }
