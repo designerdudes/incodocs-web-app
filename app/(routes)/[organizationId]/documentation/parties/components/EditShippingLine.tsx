@@ -614,6 +614,7 @@ export default function EditShippingLineForm({ params }: Props) {
                             )}
                           />
                         </TableCell>
+
                         <TableCell>
                           <FormField
                             control={control}

@@ -627,6 +627,7 @@ export default function EditTransporterForm({ params }: Props) {
                               </div>
                             )}
                           />
+
                         </TableCell>
 
                         <TableCell>
