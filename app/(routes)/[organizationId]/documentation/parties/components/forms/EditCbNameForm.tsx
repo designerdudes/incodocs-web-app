@@ -648,6 +648,7 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                             )}
                           />
                         </TableCell>
+
                         <TableCell>
                           <FormField
                             control={form.control}

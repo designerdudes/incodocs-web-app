@@ -630,6 +630,7 @@ export default function EditSupplierForm({ params }: Props) {
                               </FormItem>
                             )}
                           />
+
                         </TableCell>
                         <TableCell>
                           <FormField
