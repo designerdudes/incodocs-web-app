@@ -1,21 +1,25 @@
-import type { Metadata } from 'next'
-import '../../../app/globals.css'
-import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
-import AppSidebar from '@/components/layout/app-sidebar'
-import { Separator } from '@/components/ui/separator'
-import BreadCrumb from '@/components/layout/breadCrumb'
+import type { Metadata } from "next";
+import "../../../app/globals.css";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import AppSidebar from "@/components/layout/app-sidebar";
+import { Separator } from "@/components/ui/separator";
+import BreadCrumb from "@/components/layout/breadCrumb";
 
 export const metadata: Metadata = {
-  title: 'Admin Dashboard | IncoDocs',
-  description: 'Admin dashboard for IncoDocs',
-}
+  title: "Admin Dashboard | IncoDocs",
+  description: "Admin dashboard for IncoDocs",
+};
 
 interface DashboardLayoutProps {
-  children: React.ReactNode
+  children: React.ReactNode;
   params: {
-      organizationId: string;
-      factoryid: string;
-    };
+    organizationId: string;
+    factoryid: string;
+  };
 }
 
 export default function DashboardLayout({
@@ -25,10 +29,10 @@ export default function DashboardLayout({
   // console.log("Params::::::::::::::::::::::::::::::::::::::::::::::", params); // Debug params
   return (
     <>
-      <div className='flex flex-row h-screen'>
+      <div className="flex flex-row h-screen">
         <SidebarProvider>
           <AppSidebar params={params} />
-          <SidebarInset className='w-[70vw]'>
+          <SidebarInset className="w-[70vw]">
             <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
               <div className="flex items-center gap-2 px-4">
                 <SidebarTrigger className="-ml-1" />
@@ -44,5 +48,5 @@ export default function DashboardLayout({
         {/* </div> */}
       </div>
     </>
-  )
+  );
 }
