@@ -284,7 +284,7 @@ export default function RawPurchaseCreateNewForm({
                       placeholder="Select a Supplier Name"
                       onAddNew={() => {
                     window.open(
-                      `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                      `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createnew`,
                       "_blank"
                     );
                   }}
