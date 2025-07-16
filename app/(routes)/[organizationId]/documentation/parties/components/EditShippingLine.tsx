@@ -52,11 +52,11 @@ const formSchema = z.object({
   gstNumber: z.string().optional(),
   panNumber: z.string().optional(),
   tanNumber: z.string().optional(),
-  addmsme:z.string().optional(),
-  panfile:z.string().optional(),
-  tanfile:z.string().optional(),
-  additional:z.string().optional(),
-  gstfile:z.string().optional(),
+  addmsme: z.string().optional(),
+  panfile: z.string().optional(),
+  tanfile: z.string().optional(),
+  additional: z.string().optional(),
+  gstfile: z.string().optional(),
   address: z
     .string()
     .min(5, { message: "Address must be at least 5 characters long" }),
@@ -104,7 +104,7 @@ export default function EditShippingLineForm({ params }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       shippingLineName: "",
-       gstNumber: "",
+      gstNumber: "",
       panNumber: "",
       tanNumber: "",
       addmsme: "",
@@ -623,10 +623,10 @@ export default function EditShippingLineForm({ params }: Props) {
                                 <FileUploadField
                                   name={`documents.${index}.fileUrl`}
                                   storageKey={`documents.${index}.fileUrl`}
-                                  onFileChange={async (file: File) => {
-                                    if (file) {
-                                      await handleFileUpload(file, index);
-                                    }
+                                  onChange={async (value: string | null) => {
+                                    // If value is a string (URL), set it directly; if null, clear the field
+                                    setValue(`documents.${index}.fileUrl`, value ?? undefined, { shouldDirty: true });
+                                    saveProgress(getValues());
                                   }}
                                 />
                                 {field.value && (
@@ -643,7 +643,7 @@ export default function EditShippingLineForm({ params }: Props) {
                             )}
                           />
                         </TableCell>
-                        
+
                         <TableCell>
                           <FormField
                             control={form.control}
@@ -655,11 +655,11 @@ export default function EditShippingLineForm({ params }: Props) {
                                     <FormControl>
                                       <Button variant="outline">
                                         {field.value &&
-                                        !isNaN(new Date(field.value).getTime())
+                                          !isNaN(new Date(field.value).getTime())
                                           ? format(
-                                              new Date(field.value),
-                                              "PPPP"
-                                            )
+                                            new Date(field.value),
+                                            "PPPP"
+                                          )
                                           : "Pick a date"}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                       </Button>
