@@ -25,11 +25,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
-import { postData } from "@/axiosUtility/api";
+import { fetchData, postData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
-import { useEffect, useState } from "react";
-// import { Tooltip } from "react-tooltip";
+import { useEffect, useState, useRef } from "react";
+import { debounce } from "lodash";
 
 // Save progress to localStorage
 const saveProgressSilently = (data: any) => {
@@ -135,6 +135,23 @@ interface RawMaterialCreateNewFormProps {
   gap: number;
 }
 
+export interface Quarry {
+  _id: any;
+  lesseeId?: string;
+  lesseeName?: string;
+  mineralName?: string;
+  businessLocationNames?: string[];
+  factoryId?: any;
+  documents?: {
+    fileName?: string;
+    fileUrl?: string;
+    date?: Date;
+    review?: string;
+  }[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -149,6 +166,15 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
     number | null
   >(null);
+
+  const [search, setSearch] = useState("");
+  const [quarries, setQuarries] = useState<Quarry[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
+  const inputRef = React.useRef<HTMLInputElement>(null);
 
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
@@ -195,6 +221,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     });
     saveProgressSilently(getValues());
   }, [blocks, setValue, getValues]);
+
+  // Restore focus after state updates
+  useEffect(() => {
+    if (dropdownOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [search, quarries, dropdownOpen]);
 
   // Handle block count changes
   const handleBlockCountChange = (value: string) => {
@@ -303,6 +336,78 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     };
   }
 
+  // Optimized fetchQuarries
+  const fetchQuarries = React.useCallback(
+    debounce(
+      async (query: string, pageNo = 1) => {
+        try {
+          setLoading(true);
+          const res = await fetchData(
+            `/quarry/getbyfactory/${factoryId}?search=${query}&page=${pageNo}&limit=50`
+          );
+          const data = res;
+
+          if (pageNo === 1) {
+            setQuarries(data.data || data);
+          } else {
+            setQuarries((prev) => [...prev, ...(data.data || data)]);
+          }
+
+          setHasMore((data?.data?.length || data.length) === 20);
+        } catch (err) {
+          console.error("Failed to fetch:", err);
+        } finally {
+          setLoading(false);
+        }
+      },
+      500, // Reduced from 1000ms to 500ms for better responsiveness
+      { leading: false, trailing: true } // Only trigger after typing stops
+    ),
+    [factoryId]
+  );
+
+  // Trigger fetchQuarries and reset page on search change
+  useEffect(() => {
+    if (dropdownOpen && factoryId) {
+      setPage(1); // Reset page to 1 on search change
+      setQuarries([]); // Clear previous results
+      fetchQuarries(search, 1);
+    }
+  }, [search, dropdownOpen, fetchQuarries]);
+
+  // Handle page increment separately
+  useEffect(() => {
+    if (page > 1 && dropdownOpen && factoryId) {
+      fetchQuarries(search, page);
+    }
+  }, [page, dropdownOpen, fetchQuarries, search]);
+
+  // Handle outside clicks to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        inputRef.current &&
+        !inputRef.current.contains(e.target as Node)
+      ) {
+        setDropdownOpen(false);
+        saveProgressSilently(getValues());
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [getValues]);
+
+  // Handle quarry selection
+  const handleQuarrySelect = (lesseeName: string) => {
+    setSearch(lesseeName);
+    setValue("quarryName", lesseeName);
+    setDropdownOpen(false);
+    setTimeout(() => inputRef.current?.focus(), 0); // Restore focus
+    saveProgressSilently(getValues());
+  };
+
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -339,7 +444,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -365,7 +470,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -391,7 +496,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -422,25 +527,66 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 </FormItem>
               )}
             />
-
             <FormField
               name="quarryName"
               control={control}
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <FormLabel>Quarry Name</FormLabel>
                   <FormControl>
                     <Input
+                      ref={inputRef}
                       placeholder="Enter Quarry Name"
-                      disabled={isLoading}
+                      disabled={isLoading || loading}
+                      value={search}
+                      onFocus={() => setDropdownOpen(true)}
                       onChange={(e) => {
-                        const value = e.target.value;
-                        field.onChange(value);
+                        const val = e.target.value;
+                        setSearch(val);
+                        field.onChange(val);
+                        setPage(1); // Reset page on search change
+                        setQuarries([]); // Clear previous results
+                        fetchQuarries(val);
+                        setDropdownOpen(true);
                       }}
-                      value={field.value ?? ""}
-                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
+                  {dropdownOpen && (
+                    <div
+                      ref={dropdownRef}
+                      className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow max-h-60 overflow-y-auto"
+                    >
+                      {quarries.length > 0 ? (
+                        quarries.map((item) => (
+                          <div
+                            key={item._id}
+                            className="p-2 hover:bg-gray-100 cursor-pointer"
+                            onMouseDown={(e) => {
+                              e.preventDefault();
+                              handleQuarrySelect(item.lesseeName ?? "");
+                            }}
+                          >
+                            {item.lesseeName}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="p-2 text-gray-500">
+                          {loading ? "Loading..." : "No results found"}
+                        </div>
+                      )}
+                      {hasMore && (
+                        <div
+                          className="p-2 text-center text-blue-500 cursor-pointer"
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            setPage((prev) => prev + 1);
+                          }}
+                        >
+                          Load more...
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -458,7 +604,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -484,7 +630,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -511,7 +657,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "") {
@@ -538,7 +684,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 type="number"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
+                }
                 onChange={(e) => setGlobalLength(e.target.value)}
                 placeholder="Length (cm)"
                 disabled={isLoading}
@@ -576,7 +722,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 type="number"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
+                }
                 onChange={(e) => setGlobalBreadth(e.target.value)}
                 placeholder="Breadth (cm)"
                 disabled={isLoading}
@@ -614,7 +760,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 value={globalHeight}
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
+                }
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 placeholder="Height (cm)"
                 disabled={isLoading}
@@ -655,9 +801,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 <TableHead>Length (cm)</TableHead>
                 <TableHead>Breadth (cm)</TableHead>
                 <TableHead>Height (cm)</TableHead>
-                <TableHead data-tooltip-id="weight-tooltip">
-                  Weight (tons)
-                </TableHead>
+                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
                 <TableHead>Action</TableHead>
@@ -675,7 +819,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
                               type="number"
                               min="0"
                               step="1"
@@ -684,7 +827,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
-                              } // disable scroll change
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.length.value =
@@ -717,7 +860,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
-                              } // disable scroll change
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.breadth.value =
@@ -750,7 +893,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
-                              } // disable scroll change
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
@@ -767,30 +910,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-                  {/* <TableCell data-tooltip-id="weight-tooltip">
-                    <FormField
-                      name={`blocks.${index}.dimensions.weight.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={block.dimensions.weight.value}
-                              readOnly
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Tooltip id="weight-tooltip" place="top">
-                      Weight is auto-calculated based on entered dimensions.
-                    </Tooltip>
-                  </TableCell> */}
+                  <TableCell>
+                    {block.dimensions.weight.value.toFixed(2)}
+                  </TableCell>
                   <TableCell>
                     {(
                       (block.dimensions.length.value *
@@ -804,7 +926,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       type="string"
                       placeholder="Vehicle Number"
                       disabled={isLoading}
-                      onBlur={() => saveProgressSilently(getValues())}
+                      onChange={(e) => {
+                        const updatedBlocks = [...blocks];
+                        updatedBlocks[index].vehicleNumber = e.target.value;
+                        setBlocks(updatedBlocks);
+                        setValue("blocks", updatedBlocks);
+                        saveProgressSilently(getValues());
+                      }}
                     />
                   </TableCell>
                   <TableCell>
