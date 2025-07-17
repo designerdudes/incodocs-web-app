@@ -111,7 +111,9 @@ export default async function ViewSupplierPage({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="whitespace-nowrap">Pincode</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        Pincode
+                      </TableCell>
                       <TableCell>{SupplierData?.pincode || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow>
@@ -120,6 +122,26 @@ export default async function ViewSupplierPage({
                       </TableCell>
                       <TableCell>
                         {SupplierData?.factoryAddress || "N/A"}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(SupplierData?.createdAt).format(
+                          "DD MMM YYYY"
+                        ) || "N/A"}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(SupplierData?.updatedAt).format(
+                          "DD MMM YYYY"
+                        ) || "N/A"}
                       </TableCell>
                     </TableRow>
                   </TableBody>
