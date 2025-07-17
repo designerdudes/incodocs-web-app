@@ -56,7 +56,7 @@ function PartiesDataTable({
             monitoring, and seamless integration into production.
           </p>
         </div>
-        <Link href={`./parties/${party}/createnew`}>
+        <Link href={`./parties/${party}/createNew`}>
           <Button className="bg-primary text-white capitalize">
             Add {party}
           </Button>

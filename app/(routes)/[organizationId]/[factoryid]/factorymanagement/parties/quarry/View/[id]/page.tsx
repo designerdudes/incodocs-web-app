@@ -91,7 +91,7 @@ export default async function ViewQuarryPage({
                       <TableBody>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
-                            Quarry Name
+                            Lessee Name
                           </TableCell>
                           <TableCell>
                             {QuarryData?.lesseeName || "N/A"}
@@ -99,13 +99,13 @@ export default async function ViewQuarryPage({
                         </TableRow>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
-                            Quarry Id
+                            Lessee ID
                           </TableCell>
                           <TableCell>{QuarryData?.lesseeId || "N/A"}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
-                            mineral Name
+                            Mineral Name
                           </TableCell>
                           <TableCell>
                             {QuarryData?.mineralName ?? "N/A"}{" "}
@@ -113,10 +113,30 @@ export default async function ViewQuarryPage({
                         </TableRow>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
-                            business Location Names
+                            Business Location Names
                           </TableCell>
                           <TableCell>
                             {QuarryData?.businessLocationNames || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Created At
+                          </TableCell>
+                          <TableCell>
+                            {moment(QuarryData?.createdAt).format(
+                              "DD MMM YYYY"
+                            ) || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Updated At
+                          </TableCell>
+                          <TableCell>
+                            {moment(QuarryData?.updatedAt).format(
+                              "DD MMM YYYY"
+                            ) || "N/A"}
                           </TableCell>
                         </TableRow>
                       </TableBody>
