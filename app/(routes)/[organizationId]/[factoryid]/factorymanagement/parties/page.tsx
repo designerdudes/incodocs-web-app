@@ -75,7 +75,7 @@ export default async function quarry({ params }: Props) {
   let quarryData = [];
   try {
     quarry = await fetch(
-      `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}`,
+      `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}?limit=0`,
       {
         method: "GET",
         headers: {

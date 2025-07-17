@@ -339,11 +339,11 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   // Optimized fetchQuarries
   const fetchQuarries = React.useCallback(
     debounce(
-      async (query: string, pageNo = 1) => {
+      async (search: string, pageNo = 1) => {
         try {
           setLoading(true);
           const res = await fetchData(
-            `/quarry/getbyfactory/${factoryId}?search=${query}&page=${pageNo}&limit=50`
+            `/quarry/getbyfactory/${factoryId}?search=${search}&page=${pageNo}&limit=50`
           );
           const data = res;
 
@@ -353,7 +353,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             setQuarries((prev) => [...prev, ...(data.data || data)]);
           }
 
-          setHasMore((data?.data?.length || data.length) === 20);
+          setHasMore((data?.data?.length || data.length) === 50);
         } catch (err) {
           console.error("Failed to fetch:", err);
         } finally {
