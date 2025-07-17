@@ -103,16 +103,16 @@ export default async function ViewSupplierPage({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="whitespace-nowrap">State</TableCell>
-                      <TableCell>{SupplierData?.state || "N/A"}</TableCell>
-                    </TableRow>
-                    <TableRow>
                       <TableCell className="whitespace-nowrap">
                         Responsible Person
                       </TableCell>
                       <TableCell>
                         {SupplierData?.responsiblePerson || "N/A"}
                       </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">Pincode</TableCell>
+                      <TableCell>{SupplierData?.pincode || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
