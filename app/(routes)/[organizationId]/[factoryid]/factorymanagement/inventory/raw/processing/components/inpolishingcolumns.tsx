@@ -119,7 +119,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Block Number
+        Length
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
@@ -137,7 +137,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Block Number
+        Height
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
