@@ -186,11 +186,11 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
             organizationId: data?.cbname?.organizationId || "",
             documents: Array.isArray(data?.cbname?.documents)
               ? data.cbname.documents.map((doc: any) => ({
-                  fileName: doc.fileName || "",
-                  fileUrl: doc.fileUrl || "",
-                  date: doc.date || new Date().toISOString(),
-                  review: doc.review || ""
-                }))
+                fileName: doc.fileName || "",
+                fileUrl: doc.fileUrl || "",
+                date: doc.date || new Date().toISOString(),
+                review: doc.review || ""
+              }))
               : []
           }
         };
@@ -419,9 +419,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                     <FileUploadField
                       name="addmsme"
                       storageKey="addmsme"
-                      onFileChange={(file: File) => {
-                        if (file) {
-                          setValue("cbname.addmsme", file.name, { shouldDirty: true });
+                      onChange={(value: string | null) => {
+                        if (value) {
+                          setValue("cbname.addmsme", value, { shouldDirty: true });
                         }
                       }}
                     />
@@ -440,9 +440,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                     <FileUploadField
                       name="panfile"
                       storageKey="panfile"
-                      onFileChange={(file: File) => {
-                        if (file) {
-                          setValue("cbname.panfile", file.name, { shouldDirty: true });
+                      onChange={(value: string | null) => {
+                        if (value) {
+                          setValue("cbname.panfile", value, { shouldDirty: true });
                         }
                       }}
                     />
@@ -461,9 +461,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                     <FileUploadField
                       name="tanfile"
                       storageKey="tanfile"
-                      onFileChange={(file: File) => {
-                        if (file) {
-                          setValue("cbname.tanfile", file.name, { shouldDirty: true });
+                      onChange={(value: string | null) => {
+                        if (value) {
+                          setValue("cbname.tanfile", value, { shouldDirty: true });
                         }
                       }}
                     />
@@ -482,9 +482,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                     <FileUploadField
                       name="gstfile"
                       storageKey="gstfile"
-                      onFileChange={(file: File) => {
-                        if (file) {
-                          setValue("cbname.gstfile", file.name, { shouldDirty: true });
+                      onChange={(value: string | null) => {
+                        if (value) {
+                          setValue("cbname.gstfile", value, { shouldDirty: true });
                         }
                       }}
                     />
@@ -503,9 +503,9 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
                     <FileUploadField
                       name="additional"
                       storageKey="additional"
-                      onFileChange={(file: File) => {
-                        if (file) {
-                          setValue("cbname.additional", file.name, { shouldDirty: true });
+                      onChange={(value: string | null) => {
+                        if (value) {
+                          setValue("cbname.additional", value, { shouldDirty: true });
                         }
                       }}
                     />
@@ -582,162 +582,164 @@ export default function EditCBNameForm({ params }: EditCBNameFormProps) {
           </div>
           <div className="grid grid-cols-4 gap-4 w-full ">
 
-          {/* Documents Section */}
-          {fields.length > 0 && (
-            <div className="col-span-4 overflow-x-auto mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>#</TableHead>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Upload Document</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Review</TableHead>
-                    <TableHead>Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {fields.map((item, index) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{index + 1}</TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`cbname.documents.${index}.fileName`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Document.pdf"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={control}
-                          name={`cbname.documents.${index}.fileUrl`}
-                          render={({ field }) => (
-                            <div className="flex items-center space-x-2">
-                              <FileUploadField
-                                name={`documents.${index}.fileUrl`}
-                                storageKey={`documents.${index}.fileUrl`}
-                                onFileChange={async (file: File) => {
-                                  if (file) {
-                                    await handleFileUpload(file, index);
-                                  }
-                                }}
-                              />
-                              {field.value && (
-                                <a
-                                  href={field.value}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-500 hover:underline"
-                                >
-                                  <Eye className="h-4 w-4 cursor-pointer" />
-                                </a>
-                              )}
-                            </div>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`cbname.documents.${index}.date`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <FormControl>
-                                    <Button variant="outline">
-                                      {field.value &&
-                                      !isNaN(new Date(field.value).getTime())
-                                        ? format(new Date(field.value), "PPPP")
-                                        : "Pick a date"}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
-                                  </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent align="start">
-                                  <CalendarComponent
-                                    selected={
-                                      field.value ? new Date(field.value) : undefined
-                                    }
-                                    onSelect={(date: any) => {
-                                      field.onChange(date?.toISOString());
-                                      saveProgress(getValues());
-                                    }}
-                                  />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <FormField
-                          control={form.control}
-                          name={`cbname.documents.${index}.review`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormControl>
-                                <Input
-                                  placeholder="e.g. Reviewed"
-                                  {...field}
-                                  value={field.value ?? ""}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          type="button"
-                          onClick={() => remove(index)}
-                        >
-                          <Trash className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
+            {/* Documents Section */}
+            {fields.length > 0 && (
+              <div className="col-span-4 overflow-x-auto mt-4">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>#</TableHead>
+                      <TableHead>File Name</TableHead>
+                      <TableHead>Upload Document</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Review</TableHead>
+                      <TableHead>Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-          )}
+                  </TableHeader>
+                  <TableBody>
+                    {fields.map((item, index) => (
+                      <TableRow key={item.id}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`cbname.documents.${index}.fileName`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Document.pdf"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormField
+                            control={control}
+                            name={`cbname.documents.${index}.fileUrl`}
+                            render={({ field }) => (
+                              <div className="flex items-center space-x-2">
+                                <FileUploadField
+                                  name={`documents.${index}.fileUrl`}
+                                  storageKey={`documents.${index}.fileUrl`}
+                                  onChange={async (value: string | null) => {
+                                    if (value) {
+                                      setValue(`cbname.documents.${index}.fileUrl`, value, { shouldDirty: true });
+                                      saveProgress(getValues());
+                                    }
+                                  }}
+                                />
+                                {field.value && (
+                                  <a
+                                    href={field.value}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-500 hover:underline"
+                                  >
+                                    <Eye className="h-4 w-4 cursor-pointer" />
+                                  </a>
+                                )}
+                              </div>
+                            )}
+                          />
+                        </TableCell>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() =>
-              append({
-                fileName: "",
-                fileUrl: "",
-                date: new Date().toISOString(),
-                review: "",
-              })
-            }
-            className="mt-4"
-          >
-            Add Document
-          </Button>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`cbname.documents.${index}.date`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <Popover>
+                                  <PopoverTrigger asChild>
+                                    <FormControl>
+                                      <Button variant="outline">
+                                        {field.value &&
+                                          !isNaN(new Date(field.value).getTime())
+                                          ? format(new Date(field.value), "PPPP")
+                                          : "Pick a date"}
+                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                      </Button>
+                                    </FormControl>
+                                  </PopoverTrigger>
+                                  <PopoverContent align="start">
+                                    <CalendarComponent
+                                      selected={
+                                        field.value ? new Date(field.value) : undefined
+                                      }
+                                      onSelect={(date: any) => {
+                                        field.onChange(date?.toISOString());
+                                        saveProgress(getValues());
+                                      }}
+                                    />
+                                  </PopoverContent>
+                                </Popover>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <FormField
+                            control={form.control}
+                            name={`cbname.documents.${index}.review`}
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormControl>
+                                  <Input
+                                    placeholder="e.g. Reviewed"
+                                    {...field}
+                                    value={field.value ?? ""}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            type="button"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
 
-          <Button type="submit" disabled={isLoading} className="w-full mt-4">
-            {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
-            Submit
-          </Button>
+            )}
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                append({
+                  fileName: "",
+                  fileUrl: "",
+                  date: new Date().toISOString(),
+                  review: "",
+                })
+              }
+              className="mt-4"
+            >
+              Add Document
+            </Button>
+
+            <Button type="submit" disabled={isLoading} className="w-full mt-4">
+              {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
+              Submit
+            </Button>
           </div>
         </form>
       </Form>

@@ -630,6 +630,7 @@ export default function EditSupplierForm({ params }: Props) {
                               </FormItem>
                             )}
                           />
+
                         </TableCell>
                         <TableCell>
                           <FormField
@@ -640,9 +641,16 @@ export default function EditSupplierForm({ params }: Props) {
                                 <FileUploadField
                                   name={`documents.${index}.fileUrl`}
                                   storageKey={`documents.${index}.fileUrl`}
-                                  onFileChange={async (file: File) => {
-                                    if (file) {
-                                      await handleFileUpload(file, index);
+                                  onChange={async (value: string | null) => {
+                                    // If value is a string (URL), set it directly
+                                    if (typeof value === "string" && value) {
+                                      setValue(`documents.${index}.fileUrl`, value, { shouldDirty: true });
+                                      saveProgress(getValues());
+                                    }
+                                    // If value is null, clear the field
+                                    if (value === null) {
+                                      setValue(`documents.${index}.fileUrl`, "", { shouldDirty: true });
+                                      saveProgress(getValues());
                                     }
                                   }}
                                 />
@@ -671,11 +679,11 @@ export default function EditSupplierForm({ params }: Props) {
                                     <FormControl>
                                       <Button variant="outline">
                                         {field.value &&
-                                        !isNaN(new Date(field.value).getTime())
+                                          !isNaN(new Date(field.value).getTime())
                                           ? format(
-                                              new Date(field.value),
-                                              "PPPP"
-                                            )
+                                            new Date(field.value),
+                                            "PPPP"
+                                          )
                                           : "Pick a date"}
                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                       </Button>
