@@ -69,7 +69,7 @@ function PartiesDataTable({
         onValueChange={handleTabChange}
         className="w-full mt-4"
       >
-        <TabsList className="gap-4 w-full flex justify-start items-start">
+        <TabsList className="gap-4 w-fit flex justify-start items-start">
           <TabsTrigger value="quarry">Quarry</TabsTrigger>
           <TabsTrigger value="supplier">Supplier</TabsTrigger>
           <TabsTrigger value="customer">Customer</TabsTrigger>

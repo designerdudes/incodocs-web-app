@@ -103,8 +103,8 @@ export default async function ViewCustomerPage({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="whitespace-nowrap">State</TableCell>
-                      <TableCell>{CustomerData?.state || "N/A"}</TableCell>
+                      <TableCell className="whitespace-nowrap">Pincode</TableCell>
+                      <TableCell>{CustomerData?.pincode || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">

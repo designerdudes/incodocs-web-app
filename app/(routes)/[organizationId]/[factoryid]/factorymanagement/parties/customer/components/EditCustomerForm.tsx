@@ -43,7 +43,7 @@ export const customerSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
   gstNo: z.string().min(1, "gst number is required"),
   mobileNumber: z.number().min(1, "Mobile number required"),
-  state: z.string().optional(),
+  pincode: z.number().optional(),
   address: z.string().optional(),
   factoryId: z.string().optional(),
   createdBy: z.any().optional(),
@@ -67,7 +67,7 @@ interface CustomerFormProps {
     customerName?: string;
     gstNo?: string;
     mobileNumber?: number;
-    state?: string;
+    pincode?: number;
     address?: string;
     factoryid: string;
     createdBy?: any;
@@ -96,7 +96,7 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
       customerName: "",
       gstNo: "",
       mobileNumber: undefined,
-      state: "",
+      pincode: undefined,
       address: "",
       factoryId: factoryId,
       documents: [
@@ -125,7 +125,7 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
       customerName: data?.customerName || "",
       mobileNumber: data?.mobileNumber || undefined,
       gstNo: data?.gstNo || "",
-      state: data?.state || "",
+      pincode: data?.pincode || undefined,
       address: data?.address || "",
       documents: (data?.documents || []).map((doc: any) => ({
         fileName: doc.fileName || "",
@@ -226,24 +226,6 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
               )}
             />
 
-            {/* businessLocationNames */}
-            <FormField
-              control={form.control}
-              name="state"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>State</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Eg: Rajasthan, Andhra Pradesh"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="address"
@@ -255,6 +237,34 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
                       placeholder="Address"
                       disabled={isLoading}
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="pincode"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Pincode</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Eg: 500008"
+                      value={field.value ?? ""}
+                      onBlur={field.onBlur}
+                      min={0}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      disabled={isLoading}
                     />
                   </FormControl>
                   <FormMessage />
