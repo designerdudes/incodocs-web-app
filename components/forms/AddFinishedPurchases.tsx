@@ -157,7 +157,7 @@ export default function FinishedPurchaseCreateNewForm({
         watch,
         setValue,
         getValues,
-        fieldName: "blocks",
+        fieldName: "slabs",
         createNewItem: () => ({
           dimensions: {
             weight: { value: 0, units: "tons" },
@@ -166,7 +166,7 @@ export default function FinishedPurchaseCreateNewForm({
           },
         }),
         customFieldSetters: {
-          blocks: (items, setValue) => {
+          slabs: (items, setValue) => {
             setValue("noOfSlabs", items.length);
             setSlabs(items);
           },
@@ -362,18 +362,6 @@ export default function FinishedPurchaseCreateNewForm({
                           className="w-full p-0 text-sm flex flex-col relative"
                           align="start"
                         >
-                          {/* <div className="absolute top-0 right-0">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      field.onChange(null);
-                      saveProgressSilently(getValues());
-                    }}
-                  >
-                    Clear
-                  </Button>
-                </div> */}
                           <Calendar
                             mode="single"
                             selected={
