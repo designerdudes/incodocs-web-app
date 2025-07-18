@@ -126,7 +126,7 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>Weight (tons)</TableCell>
                     <TableCell>{BlockData.weight}</TableCell>
                   </TableRow>
-                  <TableRow>
+                  {/* <TableRow>
                     <TableCell>Length (inch)</TableCell>
                     <TableCell>{BlockData.length}</TableCell>
                   </TableRow>
@@ -137,7 +137,7 @@ export default async function SlabsPage({ params }: Props) {
                   <TableRow>
                     <TableCell>Height (inch)</TableCell>
                     <TableCell>{BlockData.height}</TableCell>
-                  </TableRow>
+                  </TableRow> */}
                   <TableRow>
                     <TableCell>Rate per Cubic Volume</TableCell>
                     <TableCell>{BlockData.ratePerCubicVolume}</TableCell>
@@ -155,17 +155,22 @@ export default async function SlabsPage({ params }: Props) {
                       Payment Proof
                     </TableCell>
                     <TableCell>
-                      <a
-                        href={BlockData.paymentProof}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="link" className="p-0 m-0">
-                          View Payment Proof
-                        </Button>
-                      </a>
+                      {BlockData.paymentProof ? (
+                        <a
+                          href={BlockData.paymentProof}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="link" className="p-0 m-0">
+                            View Payment Proof
+                          </Button>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )}
                     </TableCell>
                   </TableRow>
+
                   <TableRow>
                     <TableCell>Purchase Date</TableCell>
                     <TableCell>

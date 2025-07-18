@@ -34,7 +34,7 @@ const formSchema = z.object({
   customerAddress: z.string().optional(),
   customerId: z.string().min(3),
   gstNumber: z.string().optional(),
-  noOfSlabs: z.number().min(1),
+  noOfSlabs: z.number().optional(),
   slabs: z
     .array(
       z.object({
@@ -50,9 +50,10 @@ const formSchema = z.object({
         }),
       })
     )
-    .min(1),
+    .optional(),
   salesDate: z.string().nonempty(),
   gstPercentage: z.enum(["0", "1", "5", "12", "18"]),
+  invoiceNo: z.string().optional(),
   invoiceValue: z.number().min(1),
   paymentProof: z.string().optional(),
 });
@@ -82,9 +83,10 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       customerId: "",
       customerAddress: "",
       gstNumber: "",
-      noOfSlabs: 1,
+      noOfSlabs: undefined,
       salesDate: "",
       gstPercentage: "0",
+      invoiceNo: "",
       invoiceValue: undefined,
       paymentProof: "",
       slabs: [],
@@ -243,6 +245,24 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                       <option value="12">12%</option>
                       <option value="18">18%</option>
                     </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="string"
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

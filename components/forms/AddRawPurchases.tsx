@@ -498,8 +498,7 @@ export default function RawPurchaseCreateNewForm({
                   <FormLabel>Invoice No.</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
-                      min={0}
+                      type="string"
                       placeholder="Enter Invoice No."
                       disabled={isLoading}
                       {...field}
