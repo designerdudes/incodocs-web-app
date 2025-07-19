@@ -104,14 +104,6 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>{purchase?.noOfSlabs}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Length (inch)</TableCell>
-                    <TableCell>{purchase?.length}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Height (inch)</TableCell>
-                    <TableCell>{purchase?.height}</TableCell>
-                  </TableRow>
-                  <TableRow>
                     <TableCell>Rate per Sqft</TableCell>
                     <TableCell>{purchase?.ratePerSqft}</TableCell>
                   </TableRow>
@@ -120,37 +112,48 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>{purchase?.gstPercentage}%</TableCell>
                   </TableRow>
                   <TableRow>
-                                                        <TableCell className="whitespace-nowrap">
-                                                          Payment Proof
-                                                        </TableCell>
-                                                        <TableCell>
-                                                          <a
-                                                            href={purchase.paymentProof}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                          >
-                                                            <Button variant="link" className="p-0 m-0">
-                                                              View Payment Proof
-                                                            </Button>
-                                                          </a>
-                                                        </TableCell>
-                                                      </TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Payment Proof
+                    </TableCell>
+                    <TableCell>
+                      {purchase.paymentProof ? (
+                        <a
+                          href={purchase.paymentProof}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="link" className="p-0 m-0">
+                            View Payment Proof
+                          </Button>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+
                   <TableRow>
                     <TableCell>Purchase Date</TableCell>
                     <TableCell>
-                      {purchase?.purchaseDate ? moment(purchase.purchaseDate).format("YYYY-MM-DD") : "-"}
+                      {purchase?.purchaseDate
+                        ? moment(purchase.purchaseDate).format("YYYY-MM-DD")
+                        : "-"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Created At</TableCell>
                     <TableCell>
-                      {purchase?.createdAt ? moment(purchase.createdAt).format("YYYY-MM-DD") : "-"}
+                      {purchase?.createdAt
+                        ? moment(purchase.createdAt).format("YYYY-MM-DD")
+                        : "-"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Updated At</TableCell>
                     <TableCell>
-                      {purchase?.updatedAt ? moment(purchase.updatedAt).format("YYYY-MM-DD") : "-"}
+                      {purchase?.updatedAt
+                        ? moment(purchase.updatedAt).format("YYYY-MM-DD")
+                        : "-"}
                     </TableCell>
                   </TableRow>
                 </TableBody>

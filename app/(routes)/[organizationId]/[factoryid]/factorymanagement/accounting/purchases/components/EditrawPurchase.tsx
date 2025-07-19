@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useSearchParams, useParams,useRouter } from "next/navigation";
+import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -122,7 +122,7 @@ export default function EditRawForm() {
           invoiceValue: data?.invoiceValue || 0,
           gstPercentage:
             data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "",
-          paymentProof: data.paymentProof || "",
+          paymentProof: data?.paymentProof || "",
           purchaseDate: data?.purchaseDate
             ? moment(data.purchaseDate).format("YYYY-MM-DD")
             : "",
@@ -167,7 +167,7 @@ export default function EditRawForm() {
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Block  updated successfully");
-                router.push(`../`)
+                router.push(`../`);
               } catch (error) {
                 setIsLoading(false);
                 GlobalModal.onClose();
@@ -238,13 +238,15 @@ export default function EditRawForm() {
             <FormField
               control={form.control}
               name="paymentProof"
-              render={() => (
+              render={({ field }) => (
                 <FormItem>
                   <FormLabel>Payment Proof</FormLabel>
                   <FormControl>
                     <FileUploadField
                       name="paymentProof"
                       storageKey="paymentProof"
+                      value={field.value}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

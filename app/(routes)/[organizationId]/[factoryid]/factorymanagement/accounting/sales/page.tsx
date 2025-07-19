@@ -19,6 +19,7 @@ export type Sales = {
     customerName: string;
   };
   customerGSTN: string;
+  invoiceNo:string;
   noOfSlabs: number;
   length: string;
   height: string;

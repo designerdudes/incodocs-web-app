@@ -92,12 +92,12 @@ export default async function SlabsPage({
                       {customerData?.customerId?.customerName}
                     </TableCell>
                   </TableRow>
-                  {/* <TableRow>
+                  <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Invoice No.
                     </TableCell>
-                    <TableCell>{customerData.invoiceValue}</TableCell>
-                  </TableRow> */}
+                    <TableCell>{customerData.invoiceNo}</TableCell>
+                  </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
                       Invoice Value
@@ -112,18 +112,6 @@ export default async function SlabsPage({
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Length (inch)
-                    </TableCell>
-                    <TableCell>{customerData?.length}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Height (inch)
-                    </TableCell>
-                    <TableCell>{customerData?.height}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
                       GST Percentage
                     </TableCell>
                     <TableCell>{customerData?.gstPercentage}%</TableCell>
@@ -133,15 +121,19 @@ export default async function SlabsPage({
                       Payment Proof
                     </TableCell>
                     <TableCell>
-                      <a
-                        href={customerData.paymentProof}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="link" className="p-0 m-0">
-                          View Payment Proof
-                        </Button>
-                      </a>
+                      {customerData.paymentProof ? (
+                        <a
+                          href={customerData.paymentProof}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Button variant="link" className="p-0 m-0">
+                            View Payment Proof
+                          </Button>
+                        </a>
+                      ) : (
+                        <span className="text-muted-foreground">N/A</span>
+                      )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
