@@ -14,7 +14,7 @@ export interface Supplier {
   address?: string;
   responsiblePerson?: string;
   mobileNumber?: number;
-  state?: string;
+  pincode?: number;
   factoryAddress?: string;
   factoryId?: any;
   createdBy?: any;
@@ -87,9 +87,9 @@ export const SupplierColumns: ColumnDef<Supplier>[] = [
   },
 
   {
-    accessorKey: "state",
-    header: "State",
-    cell: ({ row }) => <div>{row.original.state || "N/A"}</div>,
+    accessorKey: "pincode",
+    header: "Pincode",
+    cell: ({ row }) => <div>{row.original.pincode || "N/A"}</div>,
   },
 
   // {

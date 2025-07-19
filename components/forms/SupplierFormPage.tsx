@@ -39,9 +39,9 @@ import {
 // 🧾 Zod Schema
 export const supplierSchema = z.object({
   supplierName: z.string().min(1, "supplier name is required"),
-  gstNo: z.string().min(1, "gst number is required"),
+  gstNo: z.string().optional(),
   mobileNumber: z.number().optional(),
-  state: z.string().optional(),
+  pincode: z.number().optional(),
   address: z.string().optional(),
   responsiblePerson: z.string().optional(),
   factoryAddress: z.string().optional(),
@@ -80,7 +80,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
       supplierName: "",
       gstNo: "",
       mobileNumber: undefined,
-      state: "",
+      pincode: undefined,
       address: "",
       responsiblePerson: "",
       factoryAddress: "",
@@ -197,15 +197,25 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
 
             <FormField
               control={form.control}
-              name="state"
+              name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State</FormLabel>
+                  <FormLabel>Pincode</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Eg: Telangana, Andhra Pradesh"
+                      type="number"
+                      placeholder="Eg: 500008"
+                      value={field.value ?? ""}
+                      onBlur={field.onBlur}
+                      min={0}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
                       disabled={isLoading}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

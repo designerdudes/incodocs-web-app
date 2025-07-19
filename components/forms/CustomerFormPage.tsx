@@ -39,9 +39,9 @@ import {
 // 🧾 Zod Schema
 export const CustomerSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
-  gstNo: z.string().min(1, "gst number is required"),
+  gstNo: z.string().optional(),
   mobileNumber: z.number().optional(),
-  state: z.string().optional(),
+  pincode: z.number().optional(),
   address: z.string().optional(),
   factoryId: z.string().optional(),
   createdBy: z.any().optional(),
@@ -78,7 +78,7 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
       customerName: "",
       gstNo: "",
       mobileNumber: undefined,
-      state: "",
+      pincode: undefined,
       address: "",
       factoryId: factoryId,
       documents: [
@@ -193,13 +193,13 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
 
             <FormField
               control={form.control}
-              name="state"
+              name="address"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State</FormLabel>
+                  <FormLabel>Address</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Eg: Telangana, Andhra Pradesh"
+                      placeholder="Address"
                       disabled={isLoading}
                       {...field}
                     />
@@ -210,15 +210,25 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
             />
             <FormField
               control={form.control}
-              name="address"
+              name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Address</FormLabel>
+                  <FormLabel>Pincode</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="address"
+                      type="number"
+                      placeholder="Eg: 500008"
+                      value={field.value ?? ""}
+                      onBlur={field.onBlur}
+                      min={0}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
                       disabled={isLoading}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
@@ -232,8 +242,8 @@ export default function CustomerFormPage({ params }: CustomerFormProps) {
               <Table>
                 <TableHeader className="bg-gray-50">
                   <TableRow>
-                    <TableHead>File Name</TableHead>
-                    <TableHead>Document Upload</TableHead>
+                    <TableHead>Document Name</TableHead>
+                    <TableHead>Upload Document</TableHead>
                     <TableHead>Document Date</TableHead>
                     <TableHead>Review / Description</TableHead>
                     <TableHead className="text-right">Actions</TableHead>

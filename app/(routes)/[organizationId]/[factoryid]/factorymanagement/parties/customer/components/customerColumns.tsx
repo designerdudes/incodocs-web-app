@@ -12,7 +12,7 @@ export interface Customer {
   customerName?: string;
   gstNo?: string;
   mobileNumber?: number;
-  state?: string;
+  pincode?: number;
   address?: string;
   factoryId?: any;
   createdBy?: any;
@@ -79,15 +79,15 @@ export const CustomerColumns: ColumnDef<Customer>[] = [
   },
 
   {
-    accessorKey: "state",
-    header: "State",
-    cell: ({ row }) => <div>{row.original.state || "N/A"}</div>,
-  },
-
-  {
     accessorKey: "address",
     header: "Address",
     cell: ({ row }) => <div>{row.original.address || "N/A"}</div>,
+  },
+  
+  {
+    accessorKey: "pincode",
+    header: "Pincode",
+    cell: ({ row }) => <div>{row.original.pincode || "N/A"}</div>,
   },
 
   {

@@ -103,14 +103,34 @@ export default async function ViewCustomerPage({
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell className="whitespace-nowrap">State</TableCell>
-                      <TableCell>{CustomerData?.state || "N/A"}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        Pincode
+                      </TableCell>
+                      <TableCell>{CustomerData?.pincode || "N/A"}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
                         Address
                       </TableCell>
                       <TableCell>{CustomerData?.address || "N/A"}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Created At
+                      </TableCell>
+                      <TableCell>
+                        {moment(CustomerData?.createdAt).format("DD MMM YYYY") ||
+                          "N/A"}
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell className="whitespace-nowrap">
+                        Updated At
+                      </TableCell>
+                      <TableCell>
+                        {moment(CustomerData?.updatedAt).format("DD MMM YYYY") ||
+                          "N/A"}
+                      </TableCell>
                     </TableRow>
                   </TableBody>
                 </Table>

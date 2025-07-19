@@ -42,7 +42,7 @@ export const SupplierSchema = z.object({
   supplierName: z.string().min(1, "Supplier name is required"),
   gstNo: z.string().min(1, "gst number is required"),
   mobileNumber: z.number().min(1, "Mobile number required"),
-  state: z.string().optional(),
+  pincode: z.number().optional(),
   address: z.string().optional(),
   factoryId: z.string().optional(),
   createdBy: z.any().optional(),
@@ -66,7 +66,7 @@ interface SupplierFormProps {
     supplierName?: string;
     gstNo?: string;
     mobileNumber?: number;
-    state?: string;
+    pincode?: number;
     address?: string;
     factoryid: string;
     createdBy?: any;
@@ -95,7 +95,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
       supplierName: "",
       gstNo: "",
       mobileNumber: undefined,
-      state: "",
+      pincode: undefined,
       address: "",
       factoryId: factoryId,
       documents: [
@@ -124,7 +124,7 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
       supplierName: data?.supplierName || "",
       mobileNumber: data?.mobileNumber || undefined,
       gstNo: data?.gstNo || "",
-      state: data?.state || "",
+      pincode: data?.pincode || undefined,
       address: data?.address || "",
       documents: (data?.documents || []).map((doc: any) => ({
         fileName: doc.fileName || "",
@@ -225,18 +225,27 @@ export default function SupplierFormPage({ params }: SupplierFormProps) {
               )}
             />
 
-            {/* businessLocationNames */}
             <FormField
               control={form.control}
-              name="state"
+              name="pincode"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>State</FormLabel>
+                  <FormLabel>Pincode</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Eg: Rajasthan, Andhra Pradesh"
+                      type="number"
+                      placeholder="Eg: 500008"
+                      value={field.value ?? ""}
+                      onBlur={field.onBlur}
+                      min={0}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
                       disabled={isLoading}
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
