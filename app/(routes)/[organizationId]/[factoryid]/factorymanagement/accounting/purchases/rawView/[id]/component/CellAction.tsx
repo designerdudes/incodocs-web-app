@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,40 +10,40 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, Plus, Trash } from "lucide-react";
+import {
+  Edit,
+  EyeIcon,
+  MoreHorizontal,
+  ScissorsIcon,
+  TrashIcon,
+} from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
-import { RawPurchased } from "../page";
+import EditBlockForm from "./EditRawBlock";
 
 interface Props {
-  data: RawPurchased;
+  data: any;
 }
 
 export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const params = useParams();
-
-  const organizationId = params.organizationId as string;
-  
-  // ✅ Fallback: If factoryId not in URL, try from data
-  const factoryId = useParams().factoryid as string;
-
+//   console.log("ssssaaa",data)
   const deleteBlock = async () => {
     try {
-      await deleteData(`/transaction/purchase/deleteraw/${data._id}`);
-      toast.success("Purchase Deleted Successfully");
+      await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
+      toast.success("Block Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
     } catch (error) {
       console.error("Error deleting data:", error);
     }
   };
-
   return (
     <div>
+      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -53,54 +53,46 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            // onClick={() => {
-            //   router.push(`./lots/addblocks/${data._id}`);
-            // }}
-            className="focus:bg-green-500 focus:text-destructive-foreground"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Add Blocks
-          </DropdownMenuItem>
-
           {/* View Lot Details */}
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onSelect={() => {
-              router.push(`./purchases/rawView/${data._id}`);
+              router.push(`..//block/${data._id}/slabs`);
             }}
           >
             <EyeIcon className="mr-2 h-4 w-4" />
-            View Purchase Details
-          </DropdownMenuItem>
-
+            View Block Details
+          </DropdownMenuItem> */}
           {/* Edit Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(
-                `/${organizationId}/${factoryId}/factorymanagement/accounting/purchases/EditPurchases/RawPurchases?RawPurchasesId=${data._id}`
-              );
-            }}
-          >
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Purchase Details
-          </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => {
+                GlobalModal.title = "Edit Block Details"; // Set modal title
+                GlobalModal.children = (
+                  <EditBlockForm params={{ _id: data._id }} />
+                ); // Render Edit Form
+                GlobalModal.onOpen();
+              }}
+            >
+              <Edit className="mr-2 h-4 w-4" />
+              Edit Block Details
+            </DropdownMenuItem>
 
-          {/* Delete Lot */}
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Purchase Details - ${data?.supplierId?.supplierName}`;
+              GlobalModal.title = `Delete Block - ${data.blockNumber}`;
               GlobalModal.description =
-                "Are you sure you want to delete this Supplier?";
+                "Are you sure you want to delete this Block?";
               GlobalModal.children = (
-                <Alert onConfirm={deleteBlock} actionType={"delete"} />
+                <Alert
+                  onConfirm={deleteBlock}
+                  actionType="delete" // Pass the action type
+                />
               );
               GlobalModal.onOpen();
             }}
             className="focus:bg-destructive focus:text-destructive-foreground"
           >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Purchase Details
+            <TrashIcon className="mr-2 h-4 w-4" />
+            Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
