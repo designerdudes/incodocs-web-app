@@ -20,15 +20,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { CalendarIcon, Trash } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import CalendarComponent from "../CalendarComponent";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
@@ -43,7 +34,7 @@ const formSchema = z.object({
   customerAddress: z.string().optional(),
   customerId: z.string().min(3),
   gstNumber: z.string().optional(),
-  noOfSlabs: z.number().min(1),
+  noOfSlabs: z.number().optional(),
   slabs: z
     .array(
       z.object({
@@ -59,19 +50,16 @@ const formSchema = z.object({
         }),
       })
     )
-    .min(1),
+    .optional(),
   salesDate: z.string().nonempty(),
   gstPercentage: z.enum(["0", "1", "5", "12", "18"]),
+  invoiceNo: z.string().optional(),
   invoiceValue: z.number().min(1),
   paymentProof: z.string().optional(),
 });
 
 export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
-  const [globalLength, setGlobalLength] = React.useState<string>("");
-  const [globalHeight, setGlobalHeight] = React.useState<string>("");
-  const [applyLengthToAll, setApplyLengthToAll] = React.useState(false);
-  const [applyHeightToAll, setApplyHeightToAll] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [customerLoading, setCustomerLoading] = React.useState(false);
   const [customers, setCustomers] = React.useState<
@@ -81,6 +69,9 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       name: string;
     }[]
   >([]);
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<Date | undefined>(undefined);
+
   const factoryId = useParams().factoryid as string;
 
   const router = useRouter();
@@ -92,10 +83,11 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       customerId: "",
       customerAddress: "",
       gstNumber: "",
-      noOfSlabs: 0,
+      noOfSlabs: undefined,
       salesDate: "",
       gstPercentage: "0",
-      invoiceValue: 0,
+      invoiceNo: "",
+      invoiceValue: undefined,
       paymentProof: "",
       slabs: [],
     },
@@ -125,47 +117,6 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
 
     fetchingCustomers();
   }, [customers]);
-
-  const handleSlabsInputChange = (value: string) => {
-    const count = parseInt(value, 10);
-    console.log("Form Values:", form.getValues());
-    if (!isNaN(count) && count > 0) {
-      const newSlabs = Array.from({ length: count }, (_, index) => ({
-        dimensions: {
-          slabNumber: index + 1,
-          length: { value: 0, units: "inch" },
-          height: { value: 0, units: "inch" },
-        },
-      }));
-      setSlabs(newSlabs);
-      // form.setValue("slabs", newSlabs);
-      form.setValue("noOfSlabs", count);
-    } else {
-      setSlabs([]);
-      form.setValue("slabs", []);
-      form.setValue("noOfSlabs", 0);
-    }
-  };
-
-  React.useEffect(() => {
-    form.setValue("noOfSlabs", slabs.length);
-  }, [slabs, form]);
-
-  const calculateSqft = (length?: number, height?: number) => {
-    const sqft = ((length || 0) / 12) * ((height || 0) / 12);
-    return sqft > 0 ? sqft.toFixed(2) : "0.00";
-  };
-
-  const calculateTotalSqft = () => {
-    return slabs
-      .reduce((sum, slab) => {
-        const l = slab.dimensions.length.value;
-        const h = slab.dimensions.height.value;
-        return sum + (l / 12) * (h / 12);
-      }, 0)
-      .toFixed(2);
-  };
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
@@ -208,7 +159,6 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
     }
   };
 
-  
   return (
     <div className="space-y-6">
       <Form {...form}>
@@ -261,29 +211,6 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              name="noOfSlabs"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>No of Slabs</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter number of Slabs"
-                      type="number"
-                      disabled={isLoading}
-                      onChange={(e) => {
-                        field.onChange(parseInt(e.target.value) || 0);
-                        handleSlabsInputChange(e.target.value);
-                      }}
-                      value={field.value === 0 ? "" : field.value}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="paymentProof"
@@ -323,6 +250,24 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="string"
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               name="invoiceValue"
@@ -334,10 +279,11 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                     <Input
                       placeholder="Enter Invoice Value"
                       type="number"
+                      min={0}
                       disabled={isLoading}
-                      value={field.value === 0 ? "" : field.value}
+                      {...field}
                       onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || 0)
+                        field.onChange(parseFloat(e.target.value) || undefined)
                       }
                     />
                   </FormControl>
@@ -365,14 +311,28 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                         </Button>
                       </FormControl>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
+                    <PopoverContent
+                      className="w-full p-0 text-sm flex flex-col relative"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
                         selected={
                           field.value ? new Date(field.value) : undefined
                         }
-                        onSelect={(date: any) => {
-                          field.onChange(date ? date.toISOString() : "");
+                        startMonth={new Date(2010, 0)}
+                        endMonth={new Date(2025, 11)}
+                        onSelect={(date) => {
+                          field.onChange(date?.toISOString());
                         }}
+                        captionLayout="dropdown"
+                        classNames={{
+                          caption: "flex justify-between items-center",
+                          caption_label: "text-sm font-medium hidden",
+                          dropdown: "border rounded p-0 text-xs",
+                          months: "flex flex-col",
+                        }}
+                        className="bg-white p-4 rounded-xl shadow-md"
                       />
                     </PopoverContent>
                   </Popover>
@@ -381,177 +341,6 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
               )}
             />
           </div>
-
-          {/* Dimensions Inputs */}
-          <div className="grid grid-cols-4 gap-3 mt-3">
-            <div>
-              <Input
-                value={globalLength}
-                onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
-                type="number"
-                disabled={isLoading}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyLengthToAll}
-                  onChange={(e) => {
-                    setApplyLengthToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedSlabs = slabs.map((slab) => ({
-                        ...slab,
-                        dimensions: {
-                          ...slab.dimensions,
-                          length: {
-                            ...slab.dimensions.length,
-                            value: parseFloat(globalLength) || 0,
-                          },
-                        },
-                      }));
-                      setSlabs(updatedSlabs);
-                      form.setValue("slabs", updatedSlabs);
-                    }
-                  }}
-                />{" "}
-                Apply Length to all rows
-              </label>
-            </div>
-
-            <div>
-              <Input
-                value={globalHeight}
-                onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
-                type="number"
-                disabled={isLoading}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyHeightToAll}
-                  onChange={(e) => {
-                    setApplyHeightToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedSlabs = slabs.map((slab) => ({
-                        ...slab,
-                        dimensions: {
-                          ...slab.dimensions,
-                          height: {
-                            ...slab.dimensions.height,
-                            value: parseFloat(globalHeight) || 0,
-                          },
-                        },
-                      }));
-                      setSlabs(updatedSlabs);
-                      form.setValue("slabs", updatedSlabs);
-                    }
-                  }}
-                />{" "}
-                Apply Height to all rows
-              </label>
-            </div>
-          </div>
-
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>#</TableHead>
-                <TableHead>Length (inch)</TableHead>
-                <TableHead>Height (inch)</TableHead>
-                <TableHead>Area (sqft)</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {slabs.map((slab, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`slabs.${index}.dimensions.length.value`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={slab.dimensions.length.value}
-                              placeholder="Enter length"
-                              onChange={(e) => {
-                                const updatedBlocks = [...slabs];
-                                updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || 0;
-                                setSlabs(updatedBlocks);
-                                form.setValue("slabs", updatedBlocks);
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`slabs.${index}.dimensions.height.value`}
-                      control={form.control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              value={slab.dimensions.height.value}
-                              placeholder="Enter height"
-                              onChange={(e) => {
-                                const updatedBlocks = [...slabs];
-                                updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0;
-                                setSlabs(updatedBlocks);
-                                form.setValue("slabs", updatedBlocks);
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {calculateSqft(
-                      slab?.dimensions?.length?.value,
-                      slab?.dimensions?.height?.value
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => {
-                        const updatedBlocks = slabs.filter(
-                          (_, i) => i !== index
-                        );
-                        setSlabs(updatedBlocks);
-                        form.setValue("slabs", updatedBlocks);
-                      }}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={5} className="text-right font-bold">
-                  Total Area (sqft): {calculateTotalSqft()}
-                </TableCell>
-              </TableRow>
-            </TableFooter>
-          </Table>
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}

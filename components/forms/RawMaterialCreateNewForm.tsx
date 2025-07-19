@@ -43,9 +43,11 @@ const saveProgressSilently = (data: any) => {
 
 // Function to calculate weight based on dimensions
 const calculateWeight = (length: number, breadth: number, height: number) => {
-  const volume = (length * breadth * height) / 1000000; // Convert cm³ to m³
-  const densityFactor = (350 * 10) / 1000; // Your existing formula: 350 * 10 / 1000
-  return Number((volume * densityFactor).toFixed(2));
+  const volumeInCubicInches = length * breadth * height;
+  const volumeInCubicMeters = volumeInCubicInches * 0.000016387064;
+  const density = 3.5; // tons per m³
+  const weight = volumeInCubicMeters * density;
+  return Number(weight.toFixed(2));
 };
 
 // Define the form schema
@@ -313,7 +315,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume = (length.value * breadth.value * height.value) / 1000000;
+      const volume =
+        length.value * breadth.value * height.value * 0.000016387064;
       return total + (volume || 0);
     }, 0);
     return {
@@ -325,8 +328,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalWeight() {
     const totalWeightInTons = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume = (length.value * breadth.value * height.value) / 1000000; // m³
-      const density = 2.7; // Example density in tons/m³
+      const volume =
+        length.value * breadth.value * height.value * 0.000016387064; // m³
+      const density = 3.5; // Example density in tons/m³
       const weight = volume * density;
       return total + weight;
     }, 0);
@@ -801,8 +805,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 <TableHead>Length (cm)</TableHead>
                 <TableHead>Breadth (cm)</TableHead>
                 <TableHead>Height (cm)</TableHead>
-                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
+                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
@@ -910,16 +914,21 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-                  <TableCell>
-                    {block.dimensions.weight.value.toFixed(2)}
-                  </TableCell>
+                  
                   <TableCell>
                     {(
-                      (block.dimensions.length.value *
-                        block.dimensions.breadth.value *
-                        block.dimensions.height.value) /
-                      1000000
+                      block.dimensions.length.value *
+                      block.dimensions.breadth.value *
+                      block.dimensions.height.value *
+                      0.000016387064
                     ).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    {calculateWeight(
+                      block.dimensions.length.value,
+                      block.dimensions.breadth.value,
+                      block.dimensions.height.value
+                    )}
                   </TableCell>
                   <TableCell>
                     <Input

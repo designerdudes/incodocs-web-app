@@ -161,8 +161,11 @@ export default async function Purchases({ params }: Props) {
               <TabsList className="gap-3 mt-4">
                 <TabsTrigger value="RawWithGST">
                   Raw Purchase with GST
+                  <Badge variant="outline">
+                    {(rawWithGst?.length || 0)}
+                  </Badge>
                 </TabsTrigger>
-                <TabsTrigger value="ActualRaw">Actual Raw Purchase</TabsTrigger>
+                <TabsTrigger value="ActualRaw">Actual Raw Purchase<Badge variant="outline">{(actualRaw?.length || 0)}</Badge></TabsTrigger>
               </TabsList>
 
               <TabsContent value="RawWithGST">
@@ -199,9 +202,11 @@ export default async function Purchases({ params }: Props) {
               <TabsList className="gap-3 mt-4">
                 <TabsTrigger value="FinishedWithGST">
                   Finished Purchase with GST
+                  <Badge variant="outline">{(slabWithGst?.length || 0)}</Badge>
                 </TabsTrigger>
                 <TabsTrigger value="ActualFinished">
                   Actual Finished Purchase
+                  <Badge variant="outline">{(actualSlab?.length || 0)}</Badge>
                 </TabsTrigger>
               </TabsList>
 

@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useSearchParams, useParams,useRouter } from "next/navigation";
+import { useSearchParams, useParams, useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -96,7 +96,6 @@ export default function EditFinishedPurchase() {
         setSupplierNames(mappedSuppliers);
       } catch (error) {
         console.error("Error fetching suppliers:", error);
-        toast.error("Failed to fetch suppliers");
       } finally {
         setSupplierLoading(false);
       }
@@ -106,7 +105,7 @@ export default function EditFinishedPurchase() {
 
   useEffect(() => {
     async function fetchSlabData() {
-      if (!SlabId)  return;
+      if (!SlabId) return;
       try {
         setIsFetching(true);
         const res = await fetchData(
@@ -125,7 +124,7 @@ export default function EditFinishedPurchase() {
           invoiceValue: data?.invoiceValue || 0,
           gstPercentage:
             data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "",
-          paymentProof: data.paymentProof || "",
+          paymentProof: data?.paymentProof || "",
           purchaseDate: data?.purchaseDate || "",
         });
       } catch (error) {
@@ -169,7 +168,7 @@ export default function EditFinishedPurchase() {
                 );
                 toast.success("Slab updated successfully");
                 GlobalModal.onClose();
-                router.push(`../`)
+                router.push(`../`);
               } catch (error) {
                 console.error("Error updating slab:", error);
                 toast.error("Error updating slab");
@@ -248,22 +247,7 @@ export default function EditFinishedPurchase() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="paymentProof"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Payment Proof</FormLabel>
-                  <FormControl>
-                    <FileUploadField
-                      name="paymentProof"
-                      storageKey="paymentProof"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <FormField
               control={form.control}
               name="numberofSlabs"
@@ -331,10 +315,7 @@ export default function EditFinishedPurchase() {
                 <FormItem>
                   <FormLabel>Invoice No.</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter Invoice No."
-                      {...field}
-                    />
+                    <Input placeholder="Enter Invoice No." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -393,10 +374,26 @@ export default function EditFinishedPurchase() {
                 )}
               />
             )}
+            <FormField
+              control={form.control}
+              name="paymentProof"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <Button type="submit">
-            Submit
-          </Button>
+          <Button type="submit">Submit</Button>
         </form>
       </Form>
     </div>

@@ -31,7 +31,8 @@ export const FinishedPurchaseColumns: ColumnDef<FinishedPurchased>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "supplierName", // Corrected key
+       accessorFn: (row) => row.supplierId?.supplierName || "",
+  id: "supplierName", // required when using accessorFn
         header: ({ column }) => (
             <Button
                 variant="ghost"
