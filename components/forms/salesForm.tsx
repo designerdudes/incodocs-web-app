@@ -22,6 +22,7 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronUp,
+  Search,
   Trash,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -41,6 +42,7 @@ import {
   TableRow,
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
+import { MdSearch } from "react-icons/md";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -451,16 +453,21 @@ export function SalesCreateNewForm({
 
           {show && (
             <div>
-              <div className="mb-4 w-1/3 flex justify-between items-center">
+              <div className=" relative mb-4 w-1/3 flex justify-between items-center">
                 <Input
                   type="text"
                   placeholder="Search by Slab, Block, or Material Type"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
+                <Search size={14} className="absolute right-2 opacity-50" />
               </div>
               <Table>
-                {/* <TableCaption>A list of your Slabs</TableCaption> */}
+                {filteredSlabs.length < 1 ? (
+                  <TableCaption>No Slabs Available For Sale</TableCaption>
+                ) : (
+                  <TableCaption>List Of Your Slabs For Sale</TableCaption>
+                )}
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[50px]">Select</TableHead>
