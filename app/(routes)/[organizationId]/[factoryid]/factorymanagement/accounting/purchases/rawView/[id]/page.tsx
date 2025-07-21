@@ -20,6 +20,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { DataTable } from "@/components/ui/data-table";
+import { rawblockcolumns } from "./component/rawblockcolumn";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: {
@@ -31,6 +34,7 @@ export default async function SlabsPage({ params }: Props) {
   const BlockDataId = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
+  // console.log("this us dddddddd",BlockDataId)
 
   const res = await fetch(
     `https://incodocs-server.onrender.com/transaction/purchase/rawgetbyid/${BlockDataId}`,
@@ -44,7 +48,7 @@ export default async function SlabsPage({ params }: Props) {
   );
 
   const { getPurchase: BlockData } = await res.json();
-
+  // console.log("ffffffffffffffdd",BlockData)
   const calculateVolumeInCm = (
     length: number,
     breadth: number,
@@ -81,10 +85,10 @@ export default async function SlabsPage({ params }: Props) {
           </p>
         </div>
       </div>
+      <Separator orientation="horizontal" />
 
-      <div className="flex-1">
-        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card>
+      <div className="flex flex-5 gap-6">
+          <Card className="w-2/5">
             <CardHeader>
               <CardTitle>Raw Purchase Details</CardTitle>
               <CardDescription>{`Details of invoice ${BlockData.invoiceNo}`}</CardDescription>
@@ -126,18 +130,6 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell>Weight (tons)</TableCell>
                     <TableCell>{BlockData.weight}</TableCell>
                   </TableRow>
-                  {/* <TableRow>
-                    <TableCell>Length (inch)</TableCell>
-                    <TableCell>{BlockData.length}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Breadth (inch)</TableCell>
-                    <TableCell>{BlockData.breadth}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Height (inch)</TableCell>
-                    <TableCell>{BlockData.height}</TableCell>
-                  </TableRow> */}
                   <TableRow>
                     <TableCell>Rate per Cubic Volume</TableCell>
                     <TableCell>{BlockData.ratePerCubicVolume}</TableCell>
@@ -193,7 +185,19 @@ export default async function SlabsPage({ params }: Props) {
               </Table>
             </CardContent>
           </Card>
-        </div>
+          <div className="w-3/5">
+                    <DataTable
+                      // bulkDeleteIdName="_id"
+                      // bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+                      // bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+                      // bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+                      // deleteRoute="/factory-management/inventory/deletemultipleblocks"
+                      searchKey="blockNumber"
+                      columns={rawblockcolumns}
+                      data={BlockData.blockIds}
+                      token={token}
+                    />
+                  </div>
       </div>
     </div>
   );
