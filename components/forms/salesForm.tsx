@@ -17,16 +17,37 @@ import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { fetchData, postData } from "@/axiosUtility/api";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { CalendarIcon, Trash } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
+  Search,
+  Trash,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "../ui/calendar";
 import EntityCombobox from "@/components/ui/EntityCombobox";
 import CalendarComponent from "../CalendarComponent";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import { Polishedcolumns } from "@/app/(routes)/[organizationId]/[factoryid]/factorymanagement/inventory/finished/components/polishedColumns";
+import { DataTable } from "../ui/data-table";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
+import { Checkbox } from "../ui/checkbox";
+import { MdSearch } from "react-icons/md";
 
 interface SalesCreateNewFormProps {
   gap: number;
   orgId: string;
+  polishedSlabs: any[];
 }
 
 const formSchema = z.object({
@@ -58,10 +79,15 @@ const formSchema = z.object({
   paymentProof: z.string().optional(),
 });
 
-export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
+export function SalesCreateNewForm({
+  gap,
+  orgId,
+  polishedSlabs,
+}: SalesCreateNewFormProps) {
   const [slabs, setSlabs] = React.useState<any[]>([]);
   const [isLoading, setIsLoading] = React.useState(false);
   const [customerLoading, setCustomerLoading] = React.useState(false);
+  const [show, setShow] = React.useState(false);
   const [customers, setCustomers] = React.useState<
     {
       address: string;
@@ -71,6 +97,27 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
   >([]);
   const [open, setOpen] = React.useState(false);
   const [date, setDate] = React.useState<Date | undefined>(undefined);
+  const [search, setSearch] = React.useState("");
+  const [selectedSlabs, setSelectedSlabs] = React.useState<string[]>([]);
+  const filteredSlabs = polishedSlabs.filter((slab) => {
+    const slabNumber = slab?.slabNumber?.toString().toLowerCase() || "";
+    const blockNumber = slab?.blockNumber?.toString().toLowerCase() || "";
+    const materialType =
+      slab?.blockId?.lotId?.materialType?.toLowerCase() || "";
+    const query = search.toLowerCase();
+
+    return (
+      slabNumber.includes(query) ||
+      blockNumber.includes(query) ||
+      materialType.includes(query)
+    );
+  });
+
+  const toggleSlab = (id: string) => {
+    setSelectedSlabs((prev) =>
+      prev.includes(id) ? prev.filter((slabId) => slabId !== id) : [...prev, id]
+    );
+  };
 
   const factoryId = useParams().factoryid as string;
 
@@ -120,19 +167,25 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
+      if (selectedSlabs.length < 1 && values.gstPercentage !== "0") {
+        toast.error("Please select at least one slab.");
+        setIsLoading(false);
+        return;
+      }
       const endpoint =
         values.gstPercentage === "0"
-          ? "/transaction/sale/add"
-          : "/transaction/sale/addgst";
+          ? "/transaction/sale/addgst"
+          : "/transaction/sale/add";
 
       // prepare data
       const transformedData: any = {
         factoryId: factoryId,
         customerId: values.customerId,
         noOfSlabs: values.noOfSlabs,
-        length: slabs[0]?.dimensions.length.value,
+        slabIds: selectedSlabs,
+        // length: slabs[0]?.dimensions.length.value,
+        // height: slabs[0]?.dimensions.height.value,
         paymentProof: values.paymentProof || "",
-        height: slabs[0]?.dimensions.height.value,
         saleDate:
           values.gstPercentage === "0"
             ? new Date(values.salesDate).toISOString() // Without GST
@@ -140,13 +193,14 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       };
 
       if (values.gstPercentage === "0") {
-        transformedData.actualInvoiceValue = values.invoiceValue;
-        transformedData.slabIds = []; // populate with real slab IDs if available
-      } else {
         transformedData.invoiceValue = values.invoiceValue;
         transformedData.gstPercentage = parseFloat(values.gstPercentage);
+        transformedData.slabIds = []; // populate with real slab IDs if available
+      } else {
+        transformedData.actualInvoiceValue = values.invoiceValue;
+        transformedData.noOfSlabs = selectedSlabs?.length;
       }
-
+      // console.log("Transformed Data:", transformedData);
       await postData(endpoint, transformedData);
 
       toast.success("Sale record added successfully");
@@ -158,6 +212,8 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
       setIsLoading(false);
     }
   };
+
+  const gstPercentage = form.watch("gstPercentage");
 
   return (
     <div className="space-y-6">
@@ -250,6 +306,37 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                 </FormItem>
               )}
             />
+
+            {gstPercentage === "0" && (
+              <FormField
+                name="noOfSlabs"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number Of Slabs</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Number of slabs"
+                        disabled={isLoading}
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(
+                            parseFloat(e.target.value) || undefined
+                          )
+                        }
+                        min={0}
+                        onWheel={(e) =>
+                          e.target instanceof HTMLElement && e.target.blur()
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
             <FormField
               name="invoiceNo"
               control={form.control}
@@ -284,6 +371,9 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
                       {...field}
                       onChange={(e) =>
                         field.onChange(parseFloat(e.target.value) || undefined)
+                      }
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
                       }
                     />
                   </FormControl>
@@ -341,6 +431,79 @@ export function SalesCreateNewForm({ gap, orgId }: SalesCreateNewFormProps) {
               )}
             />
           </div>
+
+          <div className="text-right">
+            <Button
+              type="button"
+              variant="outline"
+              className="text-sm"
+              onClick={() => setShow(!show)}
+            >
+              {show ? (
+                <>
+                  Hide Slabs <ChevronUp />
+                </>
+              ) : (
+                <>
+                  Show Slabs <ChevronDown />
+                </>
+              )}
+            </Button>
+          </div>
+
+          {show && (
+            <div>
+              <div className=" relative mb-4 w-1/3 flex justify-between items-center">
+                <Input
+                  type="text"
+                  placeholder="Search by Slab, Block, or Material Type"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <Search size={14} className="absolute right-2 opacity-50" />
+              </div>
+              <Table>
+                {filteredSlabs.length < 1 ? (
+                  <TableCaption>No Slabs Available For Sale</TableCaption>
+                ) : (
+                  <TableCaption>List Of Your Slabs For Sale</TableCaption>
+                )}
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">Select</TableHead>
+                    <TableHead>Slab Number</TableHead>
+                    <TableHead>Block Number</TableHead>
+                    <TableHead>Material Type</TableHead>
+                    <TableHead className="text-right">Length</TableHead>
+                    <TableHead className="text-right">Height</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredSlabs.map((slab) => (
+                    <TableRow>
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedSlabs.includes(slab._id)}
+                          onCheckedChange={() => toggleSlab(slab._id)}
+                        />
+                      </TableCell>
+                      <TableCell>{slab?.slabNumber || "N/A"}</TableCell>
+                      <TableCell>{slab?.blockNumber || "N/A"}</TableCell>
+                      <TableCell>
+                        {slab?.blockId?.lotId?.materialType || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {slab?.dimensions?.length?.value || "N/A"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        {slab?.dimensions?.height?.value || "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}
