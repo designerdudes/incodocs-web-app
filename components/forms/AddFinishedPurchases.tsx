@@ -100,7 +100,7 @@ export default function FinishedPurchaseCreateNewForm({
     { _id: string; name: string }[]
   >([]);
   const [showConfirmation, setShowConfirmation] = React.useState(false);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = React.useState<
+  const [slabCountToBeDeleted, setSlabCountToBeDeleted] = React.useState<
     number | null
   >(null);
   const factoryId = useParams().factoryid as string;
@@ -150,7 +150,7 @@ export default function FinishedPurchaseCreateNewForm({
 
     if (newCount < slabs.length) {
       setShowConfirmation(true);
-      setBlockCountToBeDeleted(newCount);
+      setSlabCountToBeDeleted(newCount);
     } else {
       handleDynamicArrayCountChange({
         value,
@@ -176,12 +176,12 @@ export default function FinishedPurchaseCreateNewForm({
   };
 
   const handleConfirmChange = () => {
-    if (blockCountToBeDeleted !== null) {
-      const updatedSlabs = slabs.slice(0, blockCountToBeDeleted);
+    if (slabCountToBeDeleted !== null) {
+      const updatedSlabs = slabs.slice(0, slabCountToBeDeleted);
       setSlabs(updatedSlabs);
       setValue("slabs", updatedSlabs);
       setValue("noOfSlabs", updatedSlabs.length);
-      setBlockCountToBeDeleted(null);
+      setSlabCountToBeDeleted(null);
     }
     setShowConfirmation(false);
   };
@@ -194,18 +194,30 @@ export default function FinishedPurchaseCreateNewForm({
 
   function handleSlabsInputChange(value: string) {
     const count = parseInt(value, 10);
+
     if (!isNaN(count) && count > 0) {
-      const newSlabs = Array.from({ length: count }, (_, index) => ({
-        slabNumber: index + 1,
-        productName: "steps",
-        quantity: 1,
-        status: "readyForPolish",
-        inStock: true,
-        dimensions: {
-          length: { value: parseFloat(globalLength) || 0, units: "inch" },
-          height: { value: parseFloat(globalHeight) || 0, units: "inch" },
-        },
-      }));
+      const length = parseFloat(globalLength) || 0;
+      const height = parseFloat(globalHeight) || 0;
+
+      const newSlabs = Array.from({ length: count }, (_, index) => {
+        const lengthInFeet = length / 12;
+        const heightInFeet = height / 12;
+        const area = +(lengthInFeet * heightInFeet).toFixed(2); // in sqft
+
+        return {
+          slabNumber: index + 1,
+          productName: "steps",
+          quantity: 1,
+          status: "readyForPolish",
+          inStock: true,
+          dimensions: {
+            length: { value: length, units: "inch" },
+            height: { value: height, units: "inch" },
+            area: { value: area, units: "sqft" }, // optional, for display only
+          },
+        };
+      });
+
       setSlabs(newSlabs);
       // form.setValue("slabs", newSlabs);
       form.setValue("noOfSlabs", count);
@@ -521,13 +533,8 @@ export default function FinishedPurchaseCreateNewForm({
                       min="1"
                       onChange={(e) => {
                         const value = e.target.value;
-                        if (value === "") {
-                          field.onChange(1);
-                          handleSlabsCountChange("1");
-                          return;
-                        }
-                        field.onChange(Number(value));
-                        handleSlabsCountChange(value);
+                        field.onChange(value);
+                        handleSlabsInputChange(value);
                       }}
                       value={field.value || ""}
                     />

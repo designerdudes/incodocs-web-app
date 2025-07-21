@@ -168,7 +168,6 @@ export default function EditBlockForm({ params }: Props) {
                   `/factory-management/inventory/raw/put/${blockId}`,
                   values
                 );
-                console.log("poppopopssss", values);
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Block updated successfully");
