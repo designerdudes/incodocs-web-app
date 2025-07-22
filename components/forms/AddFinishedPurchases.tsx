@@ -145,35 +145,40 @@ export default function FinishedPurchaseCreateNewForm({
     fetchingData();
   }, [supplierNames]);
 
-  const handleSlabsCountChange = (value: string) => {
-    const newCount = Number(value);
+ const handleSlabsCountChange = (value: string) => {
+  const newCount = Number(value);
 
-    if (newCount < slabs.length) {
-      setShowConfirmation(true);
-      setSlabCountToBeDeleted(newCount);
-    } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "slabs",
-        createNewItem: () => ({
-          dimensions: {
-            weight: { value: 0, units: "tons" },
-            length: { value: 0, units: "cm" },
-            height: { value: 0, units: "cm" },
-          },
-        }),
-        customFieldSetters: {
-          slabs: (items, setValue) => {
-            setValue("noOfSlabs", items.length);
-            setSlabs(items);
-          },
+  if (newCount < slabs.length) {
+    setShowConfirmation(true);
+    setSlabCountToBeDeleted(newCount);
+  } else {
+    const length = parseFloat(globalLength) || 0;
+    const height = parseFloat(globalHeight) || 0;
+
+    const newSlabs = Array.from({ length: newCount }, (_, index) => {
+      const lengthInFeet = length / 12;
+      const heightInFeet = height / 12;
+      const area = +(lengthInFeet * heightInFeet).toFixed(2);
+
+      return {
+        slabNumber: index + 1,
+        productName: "steps",
+        quantity: 1,
+        status: "readyForPolish",
+        inStock: true,
+        dimensions: {
+          length: { value: length, units: "inch" },
+          height: { value: height, units: "inch" },
+          area: { value: area, units: "sqft" },
         },
-      }) as any;
-    }
-  };
+      };
+    });
+
+    setSlabs(newSlabs);
+    form.setValue("slabs", []); // ✅ IMPORTANT
+    form.setValue("noOfSlabs", newCount);
+  }
+};
 
   const handleConfirmChange = () => {
     if (slabCountToBeDeleted !== null) {
@@ -533,8 +538,13 @@ export default function FinishedPurchaseCreateNewForm({
                       min="1"
                       onChange={(e) => {
                         const value = e.target.value;
-                        field.onChange(value);
-                        handleSlabsInputChange(value);
+                        if (value === "") {
+                          field.onChange(1);
+                          handleSlabsCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleSlabsCountChange(value);
                       }}
                       value={field.value || ""}
                     />

@@ -94,7 +94,7 @@ export const rawblockcolumns: ColumnDef<Block>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "blockId",
+    accessorKey: "blockNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
