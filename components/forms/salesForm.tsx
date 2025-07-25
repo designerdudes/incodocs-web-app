@@ -74,7 +74,7 @@ const formSchema = z.object({
     .optional(),
   salesDate: z.string().nonempty(),
   gstPercentage: z.enum(["0", "1", "5", "12", "18"]),
-  invoiceNo: z.string().optional(),
+  invoiceNo: z.string().min(3, "Invoice number is required"),
   invoiceValue: z.number().min(1),
   paymentProof: z.string().optional(),
 });
@@ -164,16 +164,17 @@ export function SalesCreateNewForm({
 
     fetchingCustomers();
   }, [customers]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     try {
-      if (selectedSlabs.length < 1 && values.gstPercentage !== "0") {
+      if (selectedSlabs.length < 1 && values.gstPercentage === "0") {
         toast.error("Please select at least one slab.");
         setIsLoading(false);
         return;
       }
       const endpoint =
-        values.gstPercentage === "0"
+        values.gstPercentage !== "0"
           ? "/transaction/sale/addgst"
           : "/transaction/sale/add";
 
@@ -185,6 +186,7 @@ export function SalesCreateNewForm({
         slabIds: selectedSlabs,
         // length: slabs[0]?.dimensions.length.value,
         // height: slabs[0]?.dimensions.height.value,
+        invoiceNo: values.invoiceNo,
         paymentProof: values.paymentProof || "",
         saleDate:
           values.gstPercentage === "0"
@@ -192,7 +194,7 @@ export function SalesCreateNewForm({
             : values.salesDate.split("T")[0], // With GST (only YYYY-MM-DD)
       };
 
-      if (values.gstPercentage === "0") {
+      if (values.gstPercentage !== "0") {
         transformedData.invoiceValue = values.invoiceValue;
         transformedData.gstPercentage = parseFloat(values.gstPercentage);
         transformedData.slabIds = []; // populate with real slab IDs if available
@@ -200,9 +202,10 @@ export function SalesCreateNewForm({
         transformedData.actualInvoiceValue = values.invoiceValue;
         transformedData.noOfSlabs = selectedSlabs?.length;
       }
+      // console.log(transformedData);
       // console.log("Transformed Data:", transformedData);
       await postData(endpoint, transformedData);
-
+      // console.log("Sale record added successfully:", transformedData);
       toast.success("Sale record added successfully");
       router.push("./");
     } catch (err) {
@@ -307,7 +310,7 @@ export function SalesCreateNewForm({
               )}
             />
 
-            {gstPercentage === "0" && (
+            {gstPercentage !== "0" && (
               <FormField
                 name="noOfSlabs"
                 control={form.control}
@@ -432,24 +435,26 @@ export function SalesCreateNewForm({
             />
           </div>
 
-          <div className="text-right">
-            <Button
-              type="button"
-              variant="outline"
-              className="text-sm"
-              onClick={() => setShow(!show)}
-            >
-              {show ? (
-                <>
-                  Hide Slabs <ChevronUp />
-                </>
-              ) : (
-                <>
-                  Show Slabs <ChevronDown />
-                </>
-              )}
-            </Button>
-          </div>
+          {gstPercentage === "0" && (
+            <div className="text-right">
+              <Button
+                type="button"
+                variant="outline"
+                className="text-sm"
+                onClick={() => setShow(!show)}
+              >
+                {show ? (
+                  <>
+                    Hide Slabs <ChevronUp />
+                  </>
+                ) : (
+                  <>
+                    Show Slabs <ChevronDown />
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
 
           {show && (
             <div>

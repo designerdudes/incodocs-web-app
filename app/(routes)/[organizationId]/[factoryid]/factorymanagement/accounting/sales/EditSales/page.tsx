@@ -1,13 +1,43 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import EditSaleForm from "../components/editSales";
+import { cookies } from "next/headers";
 
-export default function EditSalePage() {
+interface PageProps {
+  params: {
+    factoryid: string;
+    organizationId: string;
+  };
+}
+
+export default async function EditSalePage({ params }: PageProps) {
+  const factoryid = params?.factoryid;
+  const cookieStore = cookies();
+
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const res = await fetch(
+    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${factoryid}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    }
+  ).then((response) => {
+    return response.json();
+  });
+
+  const slabsData = res;
+  const Polished = Array.isArray(slabsData)
+    ? slabsData.filter(
+        (data: any) => data.inStock === true && data.status === "polished"
+      )
+    : [];
+
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex items-center justify-between">
@@ -18,10 +48,7 @@ export default function EditSalePage() {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading
-            className="leading-tight"
-            title="Edit Sale Details"
-          />
+          <Heading className="leading-tight" title="Edit Sale Details" />
           <p className="text-muted-foreground text-sm">
             Update the form below to edit this Sale.
           </p>
@@ -29,7 +56,7 @@ export default function EditSalePage() {
       </div>
       <Separator orientation="horizontal" />
       <div className="container mx-auto">
-        <EditSaleForm  />
+        <EditSaleForm polishedSlabs={Polished} />
       </div>
     </div>
   );
