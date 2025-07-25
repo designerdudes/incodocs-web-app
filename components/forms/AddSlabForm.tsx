@@ -28,6 +28,7 @@ import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface AddSlabsFormProps {
   gap: number;
@@ -39,6 +40,7 @@ const formSchema = z.object({
   numberofSlabs: z
     .number()
     .min(1, { message: "Number of slabs must be a positive number" }),
+  slabphoto: z.string().optional(),
   slabs: z
     .array(
       z.object({
@@ -79,6 +81,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       _id: BlockData?._id || "",
+      slabphoto: BlockData?.slabphoto || "",
       numberofSlabs: BlockData?.numberofSlabs || 1,
       slabs: BlockData?.slabs || [
         {
@@ -185,7 +188,13 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
       setValue("slabs", updatedSlabs, { shouldValidate: true });
       saveProgressSilently(getValues());
     }
-  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, setValue]);
+  }, [
+    globalLength,
+    globalHeight,
+    applyLengthToAll,
+    applyHeightToAll,
+    setValue,
+  ]);
 
   // Calculate square footage
   function calculateSqft(length?: number, height?: number): string {
@@ -263,13 +272,26 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="slabphoto"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Slab Photo</FormLabel>
+                  <FormControl>
+                    <FileUploadField name="slabphoto" storageKey="slabphoto" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
                 placeholder="Length (inches)"
                 type="number"
-                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
                 disabled={isLoading}
@@ -289,7 +311,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
               <Input
                 placeholder="Height (inches)"
                 type="number"
-                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 disabled={isLoading}
@@ -333,12 +355,12 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                                 // min="0.1"
                                 // step="0.1"
                                 placeholder="Enter length"
-                                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.length.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.length.value =
-                                    parseFloat(e.target.value) ;
+                                    parseFloat(e.target.value);
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
@@ -365,12 +387,12 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                                 // min="0.1"
                                 // step="0.1"
                                 placeholder="Enter height"
-                                  className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.height.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.height.value =
-                                    parseFloat(e.target.value) ;
+                                    parseFloat(e.target.value);
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,

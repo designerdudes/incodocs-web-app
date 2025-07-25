@@ -30,6 +30,7 @@ import { postData, putData } from "@/axiosUtility/api";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 // Define the Zod schema
 const formSchema = z.object({
@@ -45,6 +46,7 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
+  blockphoto: z.string().optional(),
   noOfBlocks: z
     .number()
     .min(1, { message: "Number of blocks must be greater than zero" }),
@@ -366,6 +368,22 @@ export function AddBlockForm(
                       = {prevTransportCost + field.value}
                     </span>
                   )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="blockphoto"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Block Photo</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="blockphoto"
+                      storageKey="blockphoto"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

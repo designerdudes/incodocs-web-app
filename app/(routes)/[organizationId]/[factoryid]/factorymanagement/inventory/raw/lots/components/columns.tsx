@@ -1,127 +1,146 @@
-"use client"
-import { Button } from "@/components/ui/button"
-import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
-import { Checkbox } from "@/components/ui/checkbox"
-import CellAction from "./cell-actions"
-import moment from "moment"
-
+"use client";
+import { Button } from "@/components/ui/button";
+import { ColumnDef } from "@tanstack/react-table";
+import { ArrowUpDown, Eye } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import CellAction from "./cell-actions";
+import moment from "moment";
 
 export type LotManagement = {
-    _id: string;
-    lotName: string;
-    factoryId: string;
-    organizationId: string;
-    materialType: string;
-    noOfBlocks: number;
-    blocksId: string[];
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
-}
+  _id: string;
+  lotName: string;
+  factoryId: string;
+  organizationId: string;
+  materialType: string;
+  noOfBlocks: number;
+  blockphoto: string;
+  blocksId: string[];
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+} 
 
 
 export const columns: ColumnDef<LotManagement>[] = [
-    {
-        id: "select",
-        header: ({ table }) => (
-            <Checkbox
-                checked={
-                    table.getIsAllPageRowsSelected() ||
-                    (table.getIsSomePageRowsSelected() && "indeterminate")
-                }
-                onCheckedChange={(value: any) => table.toggleAllPageRowsSelected(!!value)}
-                aria-label="Select all"
-            />
-        ),
-        cell: ({ row }) => (
-            <Checkbox
-                checked={row.getIsSelected()}
-                onCheckedChange={(value: any) => row.toggleSelected(!!value)}
-                aria-label="Select row"
-            />
-        ),
-        enableSorting: false,
-        enableHiding: false,
-    },
-    {
-        accessorKey: "lotName", // Corrected key
-        header: ({ column }) => (
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value: any) =>
+          table.toggleAllPageRowsSelected(!!value)
+        }
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value: any) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
+  {
+    accessorKey: "lotName", // Corrected key
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Lot Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.lotName}</div>
+    ),
+  },
+  {
+    accessorKey: "materialType",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Material Type
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.materialType}</div>
+    ),
+  },
+  {
+    accessorKey: "blocksId",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Total Blocks
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.blocksId?.length}</div>
+    ),
+  },
+  {
+    accessorKey: "blockphoto", // ✅ Correct key
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Block Photo
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const photo = row.original.blockphoto;
+      return (
+        <div className="capitalize flex items-center justify-center gap-2">
+          {photo ? (
             <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+              size="icon"
+              variant="outline"
+              onClick={() => window.open(photo, "_blank")}
             >
-                Lot Name
-                <ArrowUpDown className="ml-2 h-4 w-4" />
+              <Eye className="h-4 w-4" />
             </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.lotName}
-            </div>
-        ),
+          ) : (
+            <span className="text-muted-foreground">N/A</span>
+          )}
+        </div>
+      );
     },
-    {
-        accessorKey: "materialType",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Material Type
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.materialType}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "blocksId",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Total Blocks
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.blocksId?.length}
-            </div>
-        ),
-    },
-    {
-        accessorKey: "createdAt",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Lot Created Date
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div>
-                {moment(row.original?.createdAt).format("DD MMM YYYY")}
-            </div>
-        ),
-    },
-    {
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-            >
-                Action
-            </Button>
-        ),
+  },
 
-        id: "actions",
-        cell: ({ row }) => <CellAction data={row.original} />
-    },
-]
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Lot Created Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original?.createdAt).format("DD MMM YYYY")}</div>
+    ),
+  },
+  {
+    header: ({ column }) => <Button variant="ghost">Action</Button>,
+
+    id: "actions",
+    cell: ({ row }) => <CellAction data={row.original} />,
+  },
+];

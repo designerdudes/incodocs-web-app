@@ -30,6 +30,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState, useRef } from "react";
 import { debounce } from "lodash";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 // Save progress to localStorage
 const saveProgressSilently = (data: any) => {
@@ -90,9 +91,10 @@ const formSchema = z.object({
     .string()
     .min(1, { message: "Marker name is required" })
     .optional(),
+  blockphoto: z.string().optional(),
   noOfBlocks: z
     .number()
-    .min(1, { message: "Number of blocks must be greater than zero" }),
+    .min(1, { message: "Number of blocks must be greater than zero" }).optional(),
   blocks: z
     .array(
       z.object({
@@ -130,7 +132,7 @@ const formSchema = z.object({
         }),
       })
     )
-    .min(1, { message: "At least one block is required" }),
+    .min(1, { message: "At least one block is required" }).optional(),
 });
 
 interface RawMaterialCreateNewFormProps {
@@ -184,6 +186,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      blockphoto:"",
       noOfBlocks: 1,
       blocks: [
         {
@@ -648,6 +651,22 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               )}
             />
             <FormField
+              control={form.control}
+              name="blockphoto"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Block Photo</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="blockphoto"
+                      storageKey="blockphoto"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
               name="noOfBlocks"
               control={control}
               render={({ field }) => (
@@ -914,7 +933,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-                  
+
                   <TableCell>
                     {(
                       block.dimensions.length.value *
