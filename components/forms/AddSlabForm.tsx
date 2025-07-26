@@ -40,21 +40,23 @@ const formSchema = z.object({
   numberofSlabs: z
     .number()
     .min(1, { message: "Number of slabs must be a positive number" }),
-  slabphoto: z.string().optional(),
   slabs: z
     .array(
       z.object({
+        slabphoto: z.string().optional(),
+        productName: z.string().optional(),
+        inStock: z.boolean().default(true),
         dimensions: z.object({
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
-              .min(0, { message: "Length must be greater than zero" }),
+              .min(0.1, { message: "Length must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
-              .min(0, { message: "Height must be greater than zero" }),
+              .min(0.1, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           status: z.literal("readyForPolish").default("readyForPolish"),
@@ -81,13 +83,15 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       _id: BlockData?._id || "",
-      slabphoto: BlockData?.slabphoto || "",
       numberofSlabs: BlockData?.numberofSlabs || 1,
       slabs: BlockData?.slabs || [
         {
+          slabphoto: "",
+          productName: "",
+          inStock: true,
           dimensions: {
-            length: { value: "", units: "inch" },
-            height: { value: "", units: "inch" },
+            length: { value: 0.1, units: "inch" },
+            height: { value: 0.1, units: "inch" },
             status: "readyForPolish",
           },
         },
@@ -95,7 +99,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
     },
   });
 
-  const { control, setValue, watch, getValues } = form;
+  const { control, setValue, watch, getValues, trigger } = form;
 
   // Sync slabs state with form on mount
   React.useEffect(() => {
@@ -116,34 +120,34 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
   };
 
   // Handle slab count changes
-  const handleSlabCountChange = (value: string) => {
-    const newCount = Number(value);
-
+  const handleSlabCountChange = async (value: string) => {
+    const newCount = Number(value) || 1;
     if (newCount < slabs.length) {
       setShowConfirmation(true);
       setSlabCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "slabs",
-        createNewItem: () => ({
-          dimensions: {
-            length: { value: "", units: "inch" },
-            height: { value: "", units: "inch" },
-            status: "readyForPolish",
-          },
-        }),
-        customFieldSetters: {
-          slabs: (items, setValue) => {
-            setValue("numberofSlabs", items.length);
-            setSlabs(items);
-          },
-        },
-        saveCallback: saveProgressSilently,
-      });
+      const currentSlabs = getValues("slabs") || [];
+      const newSlabs = Array.from({ length: newCount }, (_, index) =>
+        index < currentSlabs.length
+          ? currentSlabs[index]
+          : {
+              slabphoto: "",
+              productName: "",
+              inStock: true,
+              dimensions: {
+                length: { value: 0.1, units: "inch" },
+                height: { value: 0.1, units: "inch" },
+                status: "readyForPolish",
+              },
+            }
+      );
+      setSlabs(newSlabs);
+      setValue("numberofSlabs", newSlabs.length);
+      saveProgressSilently(getValues());
+      const isValid = await trigger("slabs");
+      if (!isValid) {
+        console.error("Slab validation failed:", form.formState.errors);
+      }
     }
   };
 
@@ -173,13 +177,14 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
   React.useEffect(() => {
     if (applyLengthToAll || applyHeightToAll) {
       const updatedSlabs = slabs.map((slab) => ({
+        ...slab,
         dimensions: {
           ...slab.dimensions,
           length: applyLengthToAll
-            ? { value: parseFloat(globalLength) || 0, units: "inch" }
+            ? { value: parseFloat(globalLength) || 0.1, units: "inch" }
             : slab.dimensions.length,
           height: applyHeightToAll
-            ? { value: parseFloat(globalHeight) || 0, units: "inch" }
+            ? { value: parseFloat(globalHeight) || 0.1, units: "inch" }
             : slab.dimensions.height,
           status: slab.dimensions.status,
         },
@@ -188,13 +193,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
       setValue("slabs", updatedSlabs, { shouldValidate: true });
       saveProgressSilently(getValues());
     }
-  }, [
-    globalLength,
-    globalHeight,
-    applyLengthToAll,
-    applyHeightToAll,
-    setValue,
-  ]);
+  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, setValue]);
 
   // Calculate square footage
   function calculateSqft(length?: number, height?: number): string {
@@ -217,13 +216,31 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
   // Form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    const isValid = await trigger();
+    if (!isValid) {
+      console.error("Form validation failed:", form.formState.errors);
+      toast.error("Please fill all required fields correctly");
+      setIsLoading(false);
+      return;
+    }
     try {
+      const submissionData = {
+        ...values,
+        status: "cut",
+        slabs: values.slabs.map((slab) => ({
+          slabphoto: slab.slabphoto || "",
+          productName: slab.productName || "",
+          inStock: slab.inStock ?? true,
+          dimensions: {
+            length: { value: slab.dimensions.length.value, units: "inch" },
+            height: { value: slab.dimensions.height.value, units: "inch" },
+            status: slab.dimensions.status,
+          },
+        })),
+      };
       await putData(
         `/factory-management/inventory/updateblockaddslab/${BlockData._id}`,
-        {
-          ...values,
-          status: "cut",
-        }
+        submissionData
       );
       toast.success("Slab Added successfully");
       router.back();
@@ -231,6 +248,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
         window.location.reload();
       }, 500);
     } catch (error) {
+      console.error("Error updating slab:", error);
       toast.error("An error occurred while updating data");
     } finally {
       setIsLoading(false);
@@ -272,24 +290,11 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="slabphoto"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Slab Photo</FormLabel>
-                  <FormControl>
-                    <FileUploadField name="slabphoto" storageKey="slabphoto" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
-                placeholder="Length (inches)"
+                placeholder="Length (inch)"
                 type="number"
                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalLength}
@@ -304,12 +309,12 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                   checked={applyLengthToAll}
                   onChange={(e) => setApplyLengthToAll(e.target.checked)}
                 />{" "}
-                Apply Length (inches) to all rows
+                Apply Length (inch) to all rows
               </label>
             </div>
             <div>
               <Input
-                placeholder="Height (inches)"
+                placeholder="Height (inch)"
                 type="number"
                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                 value={globalHeight}
@@ -324,7 +329,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                   checked={applyHeightToAll}
                   onChange={(e) => setApplyHeightToAll(e.target.checked)}
                 />{" "}
-                Apply Height (inches) to all rows
+                Apply Height (inch) to all rows
               </label>
             </div>
           </div>
@@ -333,9 +338,12 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
               <TableHeader>
                 <TableRow>
                   <TableHead>#</TableHead>
-                  <TableHead>Length (inches)</TableHead>
-                  <TableHead>Height (inches)</TableHead>
+                  <TableHead>Product Name</TableHead>
+                  <TableHead>Length (inch)</TableHead>
+                  <TableHead>Height (inch)</TableHead>
                   <TableHead>Area (sqft)</TableHead>
+                  <TableHead>In Stock</TableHead>
+                  <TableHead>Slab Photo</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -345,6 +353,34 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                     <TableCell>{index + 1}</TableCell>
                     <TableCell>
                       <FormField
+                        name={`slabs.${index}.productName`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                placeholder="Enter product name"
+                                value={slab.productName || ""}
+                                onChange={(e) => {
+                                  const updatedSlabs = [...slabs];
+                                  updatedSlabs[index].productName = e.target.value;
+                                  setSlabs(updatedSlabs);
+                                  setValue("slabs", updatedSlabs, {
+                                    shouldValidate: true,
+                                  });
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
                         name={`slabs.${index}.dimensions.length.value`}
                         control={control}
                         render={({ field }) => (
@@ -352,15 +388,15 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                             <FormControl>
                               <Input
                                 type="number"
-                                // min="0.1"
-                                // step="0.1"
+                                min="0.1"
+                                step="0.1"
                                 placeholder="Enter length"
                                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.length.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.length.value =
-                                    parseFloat(e.target.value);
+                                    parseFloat(e.target.value) || 0.1;
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
@@ -384,15 +420,15 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                             <FormControl>
                               <Input
                                 type="number"
-                                // min="0.1"
-                                // step="0.1"
+                                min="0.1"
+                                step="0.1"
                                 placeholder="Enter height"
                                 className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                 value={slab.dimensions.height.value}
                                 onChange={(e) => {
                                   const updatedSlabs = [...slabs];
                                   updatedSlabs[index].dimensions.height.value =
-                                    parseFloat(e.target.value);
+                                    parseFloat(e.target.value) || 0.1;
                                   setSlabs(updatedSlabs);
                                   setValue("slabs", updatedSlabs, {
                                     shouldValidate: true,
@@ -414,6 +450,60 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
                       )}
                     </TableCell>
                     <TableCell>
+                      <FormField
+                        name={`slabs.${index}.inStock`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <input
+                                type="checkbox"
+                                checked={slab.inStock}
+                                onChange={(e) => {
+                                  const updatedSlabs = [...slabs];
+                                  updatedSlabs[index].inStock = e.target.checked;
+                                  setSlabs(updatedSlabs);
+                                  setValue("slabs", updatedSlabs, {
+                                    shouldValidate: true,
+                                  });
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`slabs.${index}.slabphoto`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <FileUploadField
+                                name={field.name}
+                                value={field.value || ""}
+                                onChange={(value) => {
+                                  const updatedSlabs = [...slabs];
+                                  updatedSlabs[index].slabphoto = value || "";
+                                  setSlabs(updatedSlabs);
+                                  setValue("slabs", updatedSlabs, {
+                                    shouldValidate: true,
+                                  });
+                                  saveProgressSilently(getValues());
+                                }}
+                                storageKey="slabphoto"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
                       <Button
                         variant="destructive"
                         type="button"
@@ -428,7 +518,7 @@ export function AddSlabForm({ BlockData, gap }: AddSlabsFormProps) {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={7}>
                     Total Area (sqft): {calculateTotalSqft()}
                   </TableCell>
                 </TableRow>

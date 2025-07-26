@@ -13,7 +13,6 @@ export type LotManagement = {
   organizationId: string;
   materialType: string;
   noOfBlocks: number;
-  blockphoto: string;
   blocksId: string[];
   createdAt: string;
   updatedAt: string;
@@ -90,36 +89,6 @@ export const columns: ColumnDef<LotManagement>[] = [
     cell: ({ row }) => (
       <div className="capitalize">{row.original?.blocksId?.length}</div>
     ),
-  },
-  {
-    accessorKey: "blockphoto", // ✅ Correct key
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Block Photo
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => {
-      const photo = row.original.blockphoto;
-      return (
-        <div className="capitalize flex items-center justify-center gap-2">
-          {photo ? (
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={() => window.open(photo, "_blank")}
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          ) : (
-            <span className="text-muted-foreground">N/A</span>
-          )}
-        </div>
-      );
-    },
   },
 
   {
