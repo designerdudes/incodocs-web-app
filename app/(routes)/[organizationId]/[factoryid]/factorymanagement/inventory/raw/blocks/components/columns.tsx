@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Eye } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import CellAction from "./cell-actions"
 import moment from "moment"
@@ -34,6 +34,7 @@ export type Blocks = {
     _id: string;
     lotId: string;
     blockNumber: number;
+    blockphoto: string;
     materialType: string;
     SlabsId: { _id: string; slabNumber: number }[]
     status: string;
@@ -129,6 +130,36 @@ export const columns: ColumnDef<Blocks>[] = [
             );
         },
     },
+    {
+        accessorKey: "blockphoto", // ✅ Correct key
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Block Photo
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => {
+          const photo = row.original.blockphoto;
+          return (
+            <div className="capitalize flex items-center justify-center gap-2">
+              {photo ? (
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => window.open(photo, "_blank")}
+                >
+                  <Eye className="h-4 w-4" />
+                </Button>
+              ) : (
+                <span className="text-muted-foreground">N/A</span>
+              )}
+            </div>
+          );
+        },
+      },
 
     {
         accessorKey: "createdAt",

@@ -113,7 +113,7 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
-                  <TableRow>
+                <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Type
                   </TableCell>
@@ -129,40 +129,60 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Transport Cost:
                   </TableCell>
-                  <TableCell>{
-                   new Intl.NumberFormat("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  }).format( LotData?.transportCost)
-                 }</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(LotData?.transportCost)}
+                  </TableCell>
                 </TableRow>
+                {/* <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Block Photo
+                  </TableCell>
+                  <TableCell>
+                    {LotData.blockphoto ? (
+                      <a
+                        href={LotData.blockphoto}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="link" className="p-0 m-0">
+                          View Block Photo
+                        </Button>
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
+                  </TableCell>
+                </TableRow> */}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Cost:
                   </TableCell>
                   <TableCell>{
-                        new Intl.NumberFormat("en-IN", {
-                          style: "currency",
-                          currency: "INR",
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        }).format(LotData?.materialCost)
-                 }</TableCell>
+                  new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0
+                    }).format(LotData?.materialCost)
+                    }</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Cost:
                   </TableCell>
-                  <TableCell>{
-                  new Intl.NumberFormat("en-IN", {
-                    style: "currency",
-                    currency: "INR",
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                  }).format(LotData?.markerCost)
-                 }</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(LotData?.markerCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -170,36 +190,39 @@ export default async function BlocksPage({ params }: Props) {
                   </TableCell>
                   <TableCell>{LotData?.markerOperatorName}</TableCell>
                 </TableRow>
-              {LotData?.quarryName &&  <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                 Qarry Name
-                  </TableCell>
-                  <TableCell>{LotData?.quarryName}</TableCell>
-                </TableRow>}
+                {LotData?.quarryName && (
+                  <TableRow>
+                    <TableCell className="whitespace-nowrap">
+                      Qarry Name
+                    </TableCell>
+                    <TableCell>{LotData?.quarryName}</TableCell>
+                  </TableRow>
+                )}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                 Qarry Transport cost
+                    Qarry Transport cost
                   </TableCell>
-                  <TableCell>{
-                     new Intl.NumberFormat("en-IN", {
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
                       minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    }).format(LotData?.quarryCost || 0)
-                }</TableCell>
+                      maximumFractionDigits: 0,
+                    }).format(LotData?.quarryCost || 0)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                Comission cost
+                    Comission cost
                   </TableCell>
-                  <TableCell>{   new Intl.NumberFormat("en-IN", {
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
                       minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    }).format( LotData?.commissionCost || 0)
-                   }</TableCell>
+                      maximumFractionDigits: 0,
+                    }).format(LotData?.commissionCost || 0)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -207,8 +230,6 @@ export default async function BlocksPage({ params }: Props) {
                   </TableCell>
                   <TableCell>
                     {moment(LotData.createdAt).format("DD MMM YYYY")}
-
-
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -216,18 +237,15 @@ export default async function BlocksPage({ params }: Props) {
                     Lot Updated At
                   </TableCell>
                   <TableCell>
-                 {moment(LotData.updatedAt).format("DD MMM YYYY")}
-                    
+                    {moment(LotData.updatedAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
-        
 
         {/* Block's DataTable */}
-
 
         <div className="w-3.5/5">
           <DataTable
