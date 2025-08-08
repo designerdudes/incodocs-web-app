@@ -86,15 +86,15 @@ export default function EditSaleForm() {
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const [customerLoading, setCustomerLoading] = React.useState(false);
-  const [customers, setCustomers] = React.useState<{address: string;_id: string;name: string;}[]>([]);
+  const [customers, setCustomers] = React.useState<{ address: string; _id: string; name: string; }[]>([]);
   const params = useParams();
-  const router =useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const factoryId = params.factoryid as string;
   const organisationId = params.organizationId as string;
   const SlabId = searchParams.get("EditSalesId");
   const type = searchParams.get("type");
-    const [isWithGst, setIsGst] = useState(false);
+  const [isWithGst, setIsGst] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -118,30 +118,29 @@ export default function EditSaleForm() {
     },
   });
   React.useEffect(() => {
-      const fetchingCustomers = async () => {
-        try {
-          setCustomerLoading(true);
-          const customerResponse = await fetchData(
-            `/accounting/customer/getbyfactory/${factoryId}`
-          );
-          const customerData = await customerResponse;
-  
-          const mappedCustomers = customerData.map((customer: any) => ({
-            _id: customer._id,
-            name: customer.customerName,
-            address: customer.customerAddress, // <- include this
-          }));
-          setCustomers(mappedCustomers);
-        } catch (error) {
-          console.error("Error fetching customer data:", error);
-        } finally {
-          setCustomerLoading(false);
-        }
-      };
-  
-      fetchingCustomers();
-    }, [customers]);
-  
+    const fetchingCustomers = async () => {
+      try {
+        setCustomerLoading(true);
+        const customerResponse = await fetchData(
+          `/accounting/customer/getbyfactory/${factoryId}`
+        );
+        const customerData = await customerResponse;
+
+        const mappedCustomers = customerData.map((customer: any) => ({
+          _id: customer._id,
+          name: customer.customerName,
+          address: customer.customerAddress,
+        }));
+        setCustomers(mappedCustomers);
+      } catch (error) {
+        console.error("Error fetching customer data:", error);
+      } finally {
+        setCustomerLoading(false);
+      }
+    };
+
+    fetchingCustomers();
+  }, [factoryId]); // Add factoryId as a dependency
 
   // Fetch existing lot data and reset form values
   useEffect(() => {
@@ -153,7 +152,7 @@ export default function EditSaleForm() {
         );
 
         const data = response;
-         if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
+        if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
           setIsGst(true);
         }
         // Reset form with fetched values
@@ -177,7 +176,7 @@ export default function EditSaleForm() {
       }
     }
     fetchSlabData();
-  }, [SlabId]);
+  }, [SlabId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -262,7 +261,7 @@ export default function EditSaleForm() {
                       }}
                       multiple={false}
                       addNewLabel="Add New Customer"
-                      // disabled={isLoading || customerLoading}
+                    // disabled={isLoading || customerLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -350,54 +349,54 @@ export default function EditSaleForm() {
               )}
             />
             <FormField
-                          name="invoiceValue"
-                          control={form.control}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Invoice Value</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Enter Invoice Value"
-                                  type="number"
-                                  {...field}
-                                  onChange={(e) =>
-                                    field.onChange(parseFloat(e.target.value) || 0)
-                                  }
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             {isWithGst && (
-                          <FormField
-                            name="gstPercentage"
-                            control={form.control}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>GST Percentage</FormLabel>
-                                <FormControl>
-                                  <Select
-                                    value={field.value || ""}
-                                    onValueChange={field.onChange}
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select GST Percentage" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      <SelectItem value="0">0%</SelectItem>
-                                      <SelectItem value="1">1%</SelectItem>
-                                      <SelectItem value="5">5%</SelectItem>
-                                      <SelectItem value="12">12%</SelectItem>
-                                      <SelectItem value="18">18%</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        )}
+              <FormField
+                name="gstPercentage"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GST Percentage</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select GST Percentage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="0" value="0">0%</SelectItem>
+                          <SelectItem key="1" value="1">1%</SelectItem>
+                          <SelectItem key="5" value="5">5%</SelectItem>
+                          <SelectItem key="12" value="12">12%</SelectItem>
+                          <SelectItem key="18" value="18">18%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
           <Button type="submit" disabled={isLoading}>
             {isLoading && (
