@@ -4,13 +4,6 @@ import { Button } from "@/components/ui/button";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Form,
   FormControl,
   FormField,
@@ -31,12 +24,27 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CalendarIcon } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronDown,
+  ChevronUp,
+  Search,
+  Trash,
+} from "lucide-react";
 import { format } from "date-fns";
-import CalendarComponent from "@/components/CalendarComponent";
-import { cn } from "@/lib/utils";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 import EntityCombobox from "@/components/ui/EntityCombobox";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   customerName: z.string().optional(),
@@ -75,26 +83,56 @@ const formSchema = z.object({
   height: z
     .union([z.string().min(1, { message: "Enter height" }), z.number()])
     .optional(),
-
+  invoiceNo: z.string().optional(),
+  actualInvoiceValue: z.number().optional(),
   invoiceValue: z.number().optional(),
   gstPercentage: z.string().optional(),
   paymentProof: z.string().optional(),
 });
 
-export default function EditSaleForm() {
+export default function EditSaleForm({
+  polishedSlabs,
+}: {
+  polishedSlabs: any[];
+}) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const [customerLoading, setCustomerLoading] = React.useState(false);
   const [customers, setCustomers] = React.useState<{ address: string; _id: string; name: string; }[]>([]);
+
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const factoryId = params.factoryid as string;
   const organisationId = params.organizationId as string;
   const SlabId = searchParams.get("EditSalesId");
+  const [slabsData, setSlabsData] = useState<any[]>([]);
+  const [show, setShow] = React.useState(false);
   const type = searchParams.get("type");
   const [isWithGst, setIsGst] = useState(false);
+
+  const [actual, setactual] = useState(false);
+  const [search, setSearch] = React.useState("");
+  const [selectedSlabs, setSelectedSlabs] = React.useState<string[]>([]);
+  const toggleSlab = (id: string) => {
+    setSelectedSlabs((prev) =>
+      prev.includes(id) ? prev.filter((slabId) => slabId !== id) : [...prev, id]
+    );
+  };
+  const filteredSlabs = polishedSlabs.filter((slab) => {
+    const slabNumber = slab?.slabNumber?.toString().toLowerCase() || "";
+    const blockNumber = slab?.blockNumber?.toString().toLowerCase() || "";
+    const materialType =
+      slab?.blockId?.lotId?.materialType?.toLowerCase() || "";
+    const query = search.toLowerCase();
+
+    return (
+      slabNumber.includes(query) ||
+      blockNumber.includes(query) ||
+      materialType.includes(query)
+    );
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -112,8 +150,10 @@ export default function EditSaleForm() {
       slabIds: [],
       length: "",
       height: "",
-      invoiceValue: 0,
-      gstPercentage: "",
+      invoiceNo: "",
+      actualInvoiceValue: undefined,
+      invoiceValue: undefined,
+      gstPercentage: "0",
       paymentProof: "",
     },
   });
@@ -130,6 +170,7 @@ export default function EditSaleForm() {
           _id: customer._id,
           name: customer.customerName,
           address: customer.customerAddress,
+
         }));
         setCustomers(mappedCustomers);
       } catch (error) {
@@ -150,7 +191,6 @@ export default function EditSaleForm() {
         const response = await fetchData(
           `https://incodocs-server.onrender.com/transaction/sale/getbyid/${SlabId}`
         );
-
         const data = response;
         if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
           setIsGst(true);
@@ -164,13 +204,19 @@ export default function EditSaleForm() {
           noOfSlabs: data.noOfSlabs || "",
           paymentProof: data?.paymentProof || "",
           saleDate: data.saleDate || "",
-          invoiceValue: data?.invoiceValue || 0,
+          invoiceNo: data.invoiceNo || "",
+          invoiceValue: data?.invoiceValue || undefined,
+          actualInvoiceValue: data.actualInvoiceValue || undefined,
+          factoryId: {
+            _id: data.factoryId?._id || "",
+            factoryName: data.factoryId?.factoryName || "",
+          },
           gstPercentage:
-            data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "",
+            data?.gstPercentage !== undefined ? `${data.gstPercentage}` : "0",
         });
       } catch (error) {
-        console.error("Error fetching lot data:", error);
-        toast.error("Failed to fetch lot data");
+        console.error("Error fetching sale data:", error);
+        toast.error("Failed to fetch sale data");
       } finally {
         setIsFetching(false);
       }
@@ -178,28 +224,75 @@ export default function EditSaleForm() {
     fetchSlabData();
   }, [SlabId, form]);
 
+  const handleDeleteSlab = (slabId: string) => {
+    setIsLoading(true);
+    if (slabsData.length <= 1) {
+      toast.error("At least one slab must be present in the sale.");
+      setIsLoading(false);
+      return;
+    }
+    GlobalModal.title = "Confirm Slab Deletion";
+    GlobalModal.description =
+      "Are you sure you want to remove this Slab? This action cannot be undone.";
+    GlobalModal.children = (
+      <div className="space-y-4 space-x-2">
+        <Button
+          variant="outline"
+          onClick={() => {
+            GlobalModal.onClose();
+            setIsLoading(false);
+          }}
+        >
+          Cancel
+        </Button>
+        <Button
+          onClick={() => {
+            setSlabsData((prev) => prev.filter((slab) => slab._id !== slabId));
+            GlobalModal.onClose();
+            setIsLoading(false);
+          }}
+        >
+          Confirm
+        </Button>
+      </div>
+    );
+    GlobalModal.onOpen();
+  };
+
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+
+    const slabIdsFromSlabsData = slabsData.map((slab) => slab._id);
+    const mergedSlabIds = Array.from(
+      new Set([...slabIdsFromSlabsData, ...selectedSlabs])
+    );
+    const updatedValues = {
+      ...values,
+      noOfSlabs: mergedSlabIds.length || values.noOfSlabs,
+      slabIds: mergedSlabIds,
+    };
 
     GlobalModal.title = "Confirm Slab Update";
     GlobalModal.description = "Are you sure you want to update this Slab?";
     GlobalModal.children = (
       <div className="space-y-4">
-        <p>customerName: {values.customerId?.name}</p>
-        <p>NumberofSlabs: {values.noOfSlabs}</p>
-        {isWithGst && <p>GST Percentage: {values.gstPercentage}%</p>}
+        <p>customer Name: {updatedValues.customerId?.name}</p>
+        <p>Number of Slabs: {updatedValues.noOfSlabs}</p>
+        {isWithGst && <p>GST Percentage: {updatedValues.gstPercentage}%</p>}
         <p>
-          saleDate:{" "}
-          {values.saleDate
-            ? new Date(values.saleDate).toLocaleDateString()
+          Sale Date:{" "}
+          {updatedValues.saleDate
+            ? moment(
+                new Date(updatedValues.saleDate).toLocaleDateString()
+              ).format("DD MMM YYYY")
             : "N/A"}
         </p>
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
             onClick={() => {
-              GlobalModal.onClose();
               setIsLoading(false);
+              GlobalModal.onClose();
             }}
           >
             Cancel
@@ -207,11 +300,14 @@ export default function EditSaleForm() {
           <Button
             onClick={async () => {
               try {
-                await putData(`/transaction/sale/updatesale/${SlabId}`, values);
+                await putData(
+                  `/transaction/sale/updateactualsale/${SlabId}`,
+                  updatedValues
+                );
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Slab updated successfully");
-                router.push(`./`)
+                router.push(`./`);
               } catch (error) {
                 console.error("Error updating Slab:", error);
                 setIsLoading(false);
@@ -226,7 +322,10 @@ export default function EditSaleForm() {
       </div>
     );
     GlobalModal.onOpen();
+    setIsLoading(false);
   };
+
+  const gstPercentage = form.watch("gstPercentage");
 
   return (
     <div className="space-y-6">
@@ -268,26 +367,6 @@ export default function EditSaleForm() {
                 </FormItem>
               )}
             />
-
-            {/*  GST Percentage Field */}
-            <FormField
-              control={form.control}
-              name="noOfSlabs"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>No. of Slabs</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="eg: 100"
-                      {...field}
-                      onChange={(e) => field.onChange(e.target.value)}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
             <FormField
               control={form.control}
               name="paymentProof"
@@ -307,43 +386,146 @@ export default function EditSaleForm() {
               )}
             />
 
-            {/*  Expense Date Field */}
+            {!actual && (
+              <FormField
+                name="gstPercentage"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GST Percentage</FormLabel>
+                    <FormControl>
+                      <select
+                        disabled={isLoading}
+                        {...field}
+                        className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                      >
+                        <option value="0">0%</option>
+                        <option value="1">1%</option>
+                        <option value="5">5%</option>
+                        <option value="12">12%</option>
+                        <option value="18">18%</option>
+                      </select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            {gstPercentage !== "0" && (
+              <FormField
+                name="noOfSlabs"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Number Of Slabs</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        placeholder="Number of slabs"
+                        disabled={isLoading}
+                        {...field}
+                        onChange={(e) =>
+                          field.onChange(
+                            parseFloat(e.target.value) || undefined
+                          )
+                        }
+                        min={0}
+                        onWheel={(e) =>
+                          e.target instanceof HTMLElement && e.target.blur()
+                        }
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            <FormField
+              name="invoiceNo"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice No.</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text  "
+                      placeholder="Enter Invoice No."
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name={actual ? "actualInvoiceValue" : "invoiceValue"}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="number"
+                      min={0}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || undefined)
+                      }
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               name="saleDate"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Sales  Date</FormLabel>
-                  <FormControl>
-                    <div className="flex items-center gap-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              "w-[100%] justify-start text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
-                            {field.value
-                              ? format(new Date(field.value), "PPP")
-                              : "Purchase date"}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
-                            selected={
-                              field.value ? new Date(field.value) : undefined
-                            }
-                            onSelect={(date) =>
-                              field.onChange(date ? date.toISOString() : "")
-                            }
-                          />
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </FormControl>
+                  <FormLabel>Sales Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" className="w-full">
+                          {field.value ? (
+                            format(new Date(field.value), "PPPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-full p-0 text-sm flex flex-col relative"
+                      align="start"
+                    >
+                      <Calendar
+                        mode="single"
+                        selected={
+                          field.value ? new Date(field.value) : undefined
+                        }
+                        startMonth={new Date(2010, 0)}
+                        endMonth={new Date(2025, 11)}
+                        onSelect={(date) => {
+                          field.onChange(date?.toISOString());
+                        }}
+                        captionLayout="dropdown"
+                        classNames={{
+                          caption: "flex justify-between items-center",
+                          caption_label: "text-sm font-medium hidden",
+                          dropdown: "border rounded p-0 text-xs",
+                          months: "flex flex-col",
+                        }}
+                        className="bg-white p-4 rounded-xl shadow-md"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
@@ -397,7 +579,8 @@ export default function EditSaleForm() {
                 )}
               />
             )}
-          </div>
+            </div>
+          )}
           <Button type="submit" disabled={isLoading}>
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />

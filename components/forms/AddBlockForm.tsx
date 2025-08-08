@@ -30,6 +30,7 @@ import { postData, putData } from "@/axiosUtility/api";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState } from "react";
 import ConfirmationDialog from "../ConfirmationDialog";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 // Define the Zod schema
 const formSchema = z.object({
@@ -45,19 +46,16 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
+  blockphoto: z.string().optional(),
   noOfBlocks: z
     .number()
     .min(1, { message: "Number of blocks must be greater than zero" }),
   blocks: z
     .array(
       z.object({
+        blockphoto: z.string().optional(),
+        vehicleNumber: z.string().optional(),
         dimensions: z.object({
-          // weight: z.object({
-          //   value: z
-          //     .number()
-          //     .min(0.1, { message: "Weight must be greater than zero" }),
-          //   units: z.string().default("tons"),
-          // }),
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
@@ -115,51 +113,39 @@ function saveProgressSilently(data: FormData) {
   }
 }
 
-export function AddBlockForm(
-  { LotData }: AddBlockFormProps,
-  { params }: Props
-) {
-  const { control, setValue, watch, getValues } = useFormContext<FormData>();
+export function AddBlockForm({ LotData }: AddBlockFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [globalWeight, setGlobalWeight] = useState<string>("");
   const [globalLength, setGlobalLength] = useState<string>("");
   const [globalBreadth, setGlobalBreadth] = useState<string>("");
   const [globalHeight, setGlobalHeight] = useState<string>("");
-  const [applyWeightToAll, setApplyWeightToAll] = useState<boolean>(false);
   const [applyLengthToAll, setApplyLengthToAll] = useState<boolean>(false);
   const [applyBreadthToAll, setApplyBreadthToAll] = useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [blocks, setBlocks] = useState<any[]>([]);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
-    number | null
-  >(null);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<number | null>(null);
 
-  // console.log(params, "params");
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
-  // console.log(organizationId, "organizationId");
-  // console.log(factoryId, "factoryId");
-  // const organizationId = "674b0a687d4f4b21c6c980ba";
   const lotId = LotData?._id;
 
-  // const blocks = watch("blocks") || [];
   const prevMarkerCost = LotData?.markerCost || 0;
   const prevTransportCost = LotData?.transportCost || 0;
   const prevMaterialCost = LotData?.materialCost || 0;
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      markerCost: 0 || undefined,
+       markerCost: 0 || undefined,
       transportCost: 0 || undefined,
       materialCost: 0 || undefined,
       noOfBlocks: 1,
       blocks: [
         {
+          blockphoto: "",
+          vehicleNumber: "",
           dimensions: {
-            // weight: { value: 0, units: "tons" },
             length: { value: 0, units: "inch" },
             breadth: { value: 0, units: "inch" },
             height: { value: 0, units: "inch" },
@@ -168,6 +154,8 @@ export function AddBlockForm(
       ],
     },
   });
+
+  const { control, setValue, watch, getValues, trigger } = form;
 
   // Sync blocks state with form on mount
   useEffect(() => {
@@ -178,35 +166,34 @@ export function AddBlockForm(
   }, [watch]);
 
   // Handle block count changes
-  const handleBlockCountChange = (value: string) => {
-    const newCount = Number(value);
-
+  const handleBlockCountChange = async (value: string) => {
+    const newCount = Number(value) || 1;
     if (newCount < blocks.length) {
       setShowConfirmation(true);
       setBlockCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "blocks",
-        createNewItem: () => ({
-          dimensions: {
-            // weight: { value: 0, units: "tons" },
-            length: { value: 0, units: "inch" },
-            breadth: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-          },
-        }),
-        customFieldSetters: {
-          blocks: (items, setValue) => {
-            setValue("noOfBlocks", items.length);
-            setBlocks(items);
-          },
-        },
-        saveCallback: saveProgressSilently,
-      }) as any;
+      const currentBlocks = getValues("blocks") || [];
+      const newBlocks = Array.from({ length: newCount }, (_, index) =>
+        index < currentBlocks.length
+          ? currentBlocks[index]
+          : {
+              blockphoto: "",
+              vehicleNumber: "",
+              dimensions: {
+                length: { value: 0, units: "inch" },
+                breadth: { value: 0, units: "inch" },
+                height: { value: 0, units: "inch" },
+              },
+            }
+      );
+      setBlocks(newBlocks);
+      setValue("blocks", newBlocks);
+      setValue("noOfBlocks", newBlocks.length);
+      saveProgressSilently(getValues());
+      const isValid = await trigger("blocks");
+      if (!isValid) {
+        console.error("Block validation failed:", form.formState.errors);
+      }
     }
   };
 
@@ -234,13 +221,27 @@ export function AddBlockForm(
 
   async function onSubmit(values: FormData) {
     setIsLoading(true);
+    const isValid = await trigger();
+    if (!isValid) {
+      console.error("Form validation failed:", form.formState.errors);
+      toast.error("Please fill all required fields correctly");
+      setIsLoading(false);
+      return;
+    }
     const submissionData = {
       ...values,
       lotId,
-      blocks,
       factoryId,
       organizationId,
-      status: "active",
+      blocks: values.blocks.map((block) => ({
+        blockphoto: block.blockphoto || "",
+        vehicleNumber: block.vehicleNumber || "",
+        dimensions: {
+          length: { value: block.dimensions.length.value, units: "inch" },
+          breadth: { value: block.dimensions.breadth.value, units: "inch" },
+          height: { value: block.dimensions.height.value, units: "inch" },
+        },
+      })),
     };
     try {
       await putData(
@@ -249,6 +250,7 @@ export function AddBlockForm(
       );
       toast.success("Block updated successfully");
       router.push("../");
+      setTimeout(() => localStorage.removeItem("shipmentFormData"), 3000);
     } catch (error) {
       console.error("Error updating Block:", error);
       toast.error("Error updating Block");
@@ -261,7 +263,8 @@ export function AddBlockForm(
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume = (length.value * breadth.value * height.value) / 1_000_000;
+      const volume =
+        (length.value * breadth.value * height.value) / 1_000_000;
       return total + (volume || 0);
     }, 0);
     return {
@@ -269,10 +272,16 @@ export function AddBlockForm(
     };
   }
 
+  function calculateWeight(length: number, breadth: number, height: number) {
+    const volumeInM3 = (length * breadth * height) / 1_000_000;
+    const density = 3.5; // tons per m³
+    return (volumeInM3 * density).toFixed(2);
+  }
+
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={control.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
             <FormField
               name="materialCost"
@@ -287,7 +296,7 @@ export function AddBlockForm(
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -319,7 +328,7 @@ export function AddBlockForm(
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -351,7 +360,7 @@ export function AddBlockForm(
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         field.onChange(value ? parseFloat(value) : undefined);
@@ -384,7 +393,7 @@ export function AddBlockForm(
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
-                      } // disable scroll change
+                      }
                       onChange={(e) => {
                         const value = e.target.value;
                         if (value === "" || Number(value) < 1) {
@@ -405,52 +414,16 @@ export function AddBlockForm(
             />
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
-            {/* <div>
-              <Input
-                value={globalWeight}
-                onChange={(e) => setGlobalWeight(e.target.value)}
-                placeholder="Weight (tons)"
-                // type="number"
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
-              />
-              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                <input
-                  type="checkbox"
-                  checked={applyWeightToAll}
-                  onChange={(e) => {
-                    setApplyWeightToAll(e.target.checked);
-                    if (e.target.checked) {
-                      const updatedBlocks = blocks.map((block) => ({
-                        ...block,
-                        dimensions: {
-                          ...block.dimensions,
-                          weight: {
-                            ...block.dimensions.weight,
-                            value: parseFloat(globalWeight) || 0.1,
-                          },
-                        },
-                      }));
-                      setBlocks(updatedBlocks);
-                      setValue("blocks", updatedBlocks);
-                      saveProgressSilently(getValues());
-                    }
-                  }}
-                />{" "}
-                Apply Weight to all rows
-              </label>
-            </div> */}
+          <div className="grid grid-cols-3 gap-3">
             <div>
               <Input
                 value={globalLength}
                 type="number"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
+                }
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inches)"
-                // type="number"
+                placeholder="Length (inch)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -484,12 +457,11 @@ export function AddBlockForm(
               <Input
                 value={globalBreadth}
                 type="number"
-                onChange={(e) => setGlobalBreadth(e.target.value)}
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
-                placeholder="Breadth (inches)"
-                // type="number"
+                }
+                onChange={(e) => setGlobalBreadth(e.target.value)}
+                placeholder="Breadth (inch)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -525,10 +497,9 @@ export function AddBlockForm(
                 value={globalHeight}
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
-                } // disable scroll change
+                }
                 onChange={(e) => setGlobalHeight(e.target.value)}
                 placeholder="Height (inch)"
-                // type="number"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -555,7 +526,7 @@ export function AddBlockForm(
                     }
                   }}
                 />{" "}
-                Apply height to all rows
+                Apply Height to all rows
               </label>
             </div>
           </div>
@@ -570,6 +541,7 @@ export function AddBlockForm(
                 <TableHead>Weight (tons)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
+                <TableHead>Block Photo</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -590,6 +562,10 @@ export function AddBlockForm(
                               step="1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.length.value =
@@ -619,6 +595,10 @@ export function AddBlockForm(
                               step="1"
                               value={block.dimensions.breadth.value}
                               placeholder="Enter breadth"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.breadth.value =
@@ -643,11 +623,15 @@ export function AddBlockForm(
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
+                              type="number"
                               min="0"
                               step="1"
                               value={block.dimensions.height.value}
                               placeholder="Enter height"
+                              onWheel={(e) =>
+                                e.target instanceof HTMLElement &&
+                                e.target.blur()
+                              }
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
@@ -665,42 +649,11 @@ export function AddBlockForm(
                     />
                   </TableCell>
                   <TableCell>
-                    {/* <FormField
-                      name={`blocks.${index}.dimensions.weight.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              // type="number"
-                              min="0"
-                              step="1"
-                              value={block.dimensions.weight.value}
-                              placeholder="Enter weight"
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.weight.value =
-                                  parseFloat(e.target.value) || 0.1;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    /> */}
-                    {(
-                      (((block.dimensions.length.value *
-                        block.dimensions.breadth.value *
-                        block.dimensions.height.value) /
-                        1000000) *
-                        350 *
-                        10) /
-                      1000
-                    ).toFixed(2)}
+                    {calculateWeight(
+                      block.dimensions.length.value,
+                      block.dimensions.breadth.value,
+                      block.dimensions.height.value
+                    )}
                   </TableCell>
                   <TableCell>
                     {(
@@ -711,11 +664,54 @@ export function AddBlockForm(
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
-                    <Input
-                      type="text"
-                      placeholder="Vehicle Number"
-                      disabled={isLoading}
-                      onBlur={() => saveProgressSilently(getValues())}
+                    <FormField
+                      name={`blocks.${index}.vehicleNumber`}
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Vehicle Number"
+                              value={block.vehicleNumber || ""}
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].vehicleNumber = e.target.value;
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      name={`blocks.${index}.blockphoto`}
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={field.name}
+                              value={field.value || ""}
+                              onChange={(value) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].blockphoto = value || "";
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              storageKey="blockphoto"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
@@ -737,6 +733,7 @@ export function AddBlockForm(
                 <TableCell colSpan={8} className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
+                <TableCell colSpan={2}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>

@@ -39,6 +39,9 @@ import {
 } from "../ui/table";
 import CalendarComponent from "../CalendarComponent";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import ConfirmationDialog from "../ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import { Calendar } from "../ui/calendar";
 
 interface FinishedPurchaseCreateNewFormProps {
   gap: number;
@@ -76,7 +79,7 @@ const formSchema = z.object({
     )
     .optional(),
   noOfSlabs: z.number().optional(),
-   paymentProof:z.string().optional(),
+  paymentProof: z.string().optional(),
 });
 
 export default function FinishedPurchaseCreateNewForm({
@@ -96,7 +99,10 @@ export default function FinishedPurchaseCreateNewForm({
   const [supplierNames, setSupplierNames] = React.useState<
     { _id: string; name: string }[]
   >([]);
-
+  const [showConfirmation, setShowConfirmation] = React.useState(false);
+  const [slabCountToBeDeleted, setSlabCountToBeDeleted] = React.useState<
+    number | null
+  >(null);
   const factoryId = useParams().factoryid as string;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -111,10 +117,10 @@ export default function FinishedPurchaseCreateNewForm({
       gstPercentage: "0%",
       slabs: [],
       noOfSlabs: undefined,
-      paymentProof:"",
-
+      paymentProof: "",
     },
   });
+  const { control, setValue, watch, getValues } = form;
 
   React.useEffect(() => {
     const fetchingData = async () => {
@@ -139,24 +145,84 @@ export default function FinishedPurchaseCreateNewForm({
     fetchingData();
   }, [supplierNames]);
 
-  const handleAddNewSupplier = () => {
-    toast("Add new supplier functionality to be implemented");
-  };
+ const handleSlabsCountChange = (value: string) => {
+  const newCount = Number(value);
 
-  function handleSlabsInputChange(value: string) {
-    const count = parseInt(value, 10);
-    if (!isNaN(count) && count > 0) {
-      const newSlabs = Array.from({ length: count }, (_, index) => ({
+  if (newCount < slabs.length) {
+    setShowConfirmation(true);
+    setSlabCountToBeDeleted(newCount);
+  } else {
+    const length = parseFloat(globalLength) || 0;
+    const height = parseFloat(globalHeight) || 0;
+
+    const newSlabs = Array.from({ length: newCount }, (_, index) => {
+      const lengthInFeet = length / 12;
+      const heightInFeet = height / 12;
+      const area = +(lengthInFeet * heightInFeet).toFixed(2);
+
+      return {
         slabNumber: index + 1,
         productName: "steps",
         quantity: 1,
         status: "readyForPolish",
         inStock: true,
         dimensions: {
-          length: { value: parseFloat(globalLength) || 0, units: "inch" },
-          height: { value: parseFloat(globalHeight) || 0, units: "inch" },
+          length: { value: length, units: "inch" },
+          height: { value: height, units: "inch" },
+          area: { value: area, units: "sqft" },
         },
-      }));
+      };
+    });
+
+    setSlabs(newSlabs);
+    form.setValue("slabs", []); // ✅ IMPORTANT
+    form.setValue("noOfSlabs", newCount);
+  }
+};
+
+  const handleConfirmChange = () => {
+    if (slabCountToBeDeleted !== null) {
+      const updatedSlabs = slabs.slice(0, slabCountToBeDeleted);
+      setSlabs(updatedSlabs);
+      setValue("slabs", updatedSlabs);
+      setValue("noOfSlabs", updatedSlabs.length);
+      setSlabCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
+  };
+  const handleDeleteBlock = (index: number) => {
+    const updatedSlabs = slabs.filter((_, i) => i !== index);
+    setSlabs(updatedSlabs);
+    setValue("slabs", updatedSlabs);
+    setValue("noOfSlabs", updatedSlabs.length);
+  };
+
+  function handleSlabsInputChange(value: string) {
+    const count = parseInt(value, 10);
+
+    if (!isNaN(count) && count > 0) {
+      const length = parseFloat(globalLength) || 0;
+      const height = parseFloat(globalHeight) || 0;
+
+      const newSlabs = Array.from({ length: count }, (_, index) => {
+        const lengthInFeet = length / 12;
+        const heightInFeet = height / 12;
+        const area = +(lengthInFeet * heightInFeet).toFixed(2); // in sqft
+
+        return {
+          slabNumber: index + 1,
+          productName: "steps",
+          quantity: 1,
+          status: "readyForPolish",
+          inStock: true,
+          dimensions: {
+            length: { value: length, units: "inch" },
+            height: { value: height, units: "inch" },
+            area: { value: area, units: "sqft" }, // optional, for display only
+          },
+        };
+      });
+
       setSlabs(newSlabs);
       // form.setValue("slabs", newSlabs);
       form.setValue("noOfSlabs", count);
@@ -309,14 +375,28 @@ export default function FinishedPurchaseCreateNewForm({
                               : "Purchase date"}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
+                        <PopoverContent
+                          className="w-full p-0 text-sm flex flex-col relative"
+                          align="start"
+                        >
+                          <Calendar
+                            mode="single"
                             selected={
                               field.value ? new Date(field.value) : undefined
                             }
-                            onSelect={(date) =>
-                              field.onChange(date ? date.toISOString() : "")
-                            }
+                            startMonth={new Date(2010, 0)}
+                            endMonth={new Date(2025, 11)}
+                            onSelect={(date) => {
+                              field.onChange(date?.toISOString());
+                            }}
+                            captionLayout="dropdown"
+                            classNames={{
+                              caption: "flex justify-between items-center",
+                              caption_label: "text-sm font-medium hidden",
+                              dropdown: "border rounded p-0 text-xs",
+                              months: "flex flex-col",
+                            }}
+                            className="bg-white p-4 rounded-xl shadow-md"
                           />
                         </PopoverContent>
                       </Popover>
@@ -336,6 +416,7 @@ export default function FinishedPurchaseCreateNewForm({
                   <FormLabel>Invoice No.</FormLabel>
                   <FormControl>
                     <Input
+                      type="string"
                       placeholder="Enter Invoice No."
                       disabled={isLoading}
                       {...field}
@@ -357,6 +438,7 @@ export default function FinishedPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter Invoice Value"
                       type="number"
+                      min={0}
                       disabled={isLoading}
                       {...field}
                       onChange={(e) =>
@@ -369,21 +451,21 @@ export default function FinishedPurchaseCreateNewForm({
               )}
             />
             <FormField
-                        control={form.control}
-                        name="paymentProof"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>Payment Proof</FormLabel>
-                            <FormControl>
-                              <FileUploadField
-                                name="paymentProof"
-                                storageKey="paymentProof"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+              control={form.control}
+              name="paymentProof"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* GST Percentage */}
             <FormField
@@ -426,6 +508,7 @@ export default function FinishedPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter rate per sqft"
                       type="number"
+                      min={0}
                       disabled={isLoading}
                       {...field}
                       onChange={(e) =>
@@ -452,9 +535,16 @@ export default function FinishedPurchaseCreateNewForm({
                       placeholder="Enter number of slabs"
                       type="number"
                       disabled={isLoading}
+                      min="1"
                       onChange={(e) => {
-                        field.onChange(parseInt(e.target.value) || undefined);
-                        handleSlabsInputChange(e.target.value);
+                        const value = e.target.value;
+                        if (value === "") {
+                          field.onChange(1);
+                          handleSlabsCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleSlabsCountChange(value);
                       }}
                       value={field.value || ""}
                     />
@@ -653,6 +743,13 @@ export default function FinishedPurchaseCreateNewForm({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit Finished Purchase"}
           </Button>
+          <ConfirmationDialog
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmChange}
+            title="Are you sure?"
+            description="You are reducing the number of blocks. This action cannot be undone."
+          />
         </form>
       </Form>
     </div>

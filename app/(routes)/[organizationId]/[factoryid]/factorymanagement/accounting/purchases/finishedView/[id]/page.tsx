@@ -20,6 +20,9 @@ import {
   Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { DataTable } from "@/components/ui/data-table";
+import { finishedblockcolumn } from "./component/finishedblockcolumn";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   params: {
@@ -68,97 +71,112 @@ export default async function SlabsPage({ params }: Props) {
           </p>
         </div>
       </div>
+      <Separator orientation="horizontal" />
 
-      <div className="flex-1">
-        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Finished Purchase Details</CardTitle>
-              <CardDescription>
-                Details of invoice number: {purchase?.invoiceNo}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Field</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Supplier Name</TableCell>
-                    <TableCell>{purchase?.supplierId?.supplierName}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Invoice No.</TableCell>
-                    <TableCell>{purchase?.invoiceNo}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Invoice Value</TableCell>
-                    <TableCell>{purchase?.invoiceValue}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>No of Slabs</TableCell>
-                    <TableCell>{purchase?.noOfSlabs}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Length (inch)</TableCell>
-                    <TableCell>{purchase?.length}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Height (inch)</TableCell>
-                    <TableCell>{purchase?.height}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Rate per Sqft</TableCell>
-                    <TableCell>{purchase?.ratePerSqft}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>GST Percentage</TableCell>
-                    <TableCell>{purchase?.gstPercentage}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                                                        <TableCell className="whitespace-nowrap">
-                                                          Payment Proof
-                                                        </TableCell>
-                                                        <TableCell>
-                                                          <a
-                                                            href={purchase.paymentProof}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                          >
-                                                            <Button variant="link" className="p-0 m-0">
-                                                              View Payment Proof
-                                                            </Button>
-                                                          </a>
-                                                        </TableCell>
-                                                      </TableRow>
-                  <TableRow>
-                    <TableCell>Purchase Date</TableCell>
-                    <TableCell>
-                      {purchase?.purchaseDate ? moment(purchase.purchaseDate).format("YYYY-MM-DD") : "-"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Created At</TableCell>
-                    <TableCell>
-                      {purchase?.createdAt ? moment(purchase.createdAt).format("YYYY-MM-DD") : "-"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Updated At</TableCell>
-                    <TableCell>
-                      {purchase?.updatedAt ? moment(purchase.updatedAt).format("YYYY-MM-DD") : "-"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+      <div className="flex flex-5 gap-6">
+        <Card className="w-2/5">
+          <CardHeader>
+            <CardTitle>Finished Purchase Details</CardTitle>
+            <CardDescription>
+              Details of invoice number: {purchase?.invoiceNo}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Details</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Supplier Name</TableCell>
+                  <TableCell>{purchase?.supplierId?.supplierName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Invoice No.</TableCell>
+                  <TableCell>{purchase?.invoiceNo}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Invoice Value</TableCell>
+                  <TableCell>{purchase?.invoiceValue}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>No of Slabs</TableCell>
+                  <TableCell>{purchase?.noOfSlabs}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Rate per Sqft</TableCell>
+                  <TableCell>{purchase?.ratePerSqft}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>GST Percentage</TableCell>
+                  <TableCell>{purchase?.gstPercentage}%</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Payment Proof
+                  </TableCell>
+                  <TableCell>
+                    {purchase.paymentProof ? (
+                      <a
+                        href={purchase.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="link" className="p-0 m-0">
+                          View Payment Proof
+                        </Button>
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>Purchase Date</TableCell>
+                  <TableCell>
+                    {purchase?.purchaseDate
+                      ? moment(purchase.purchaseDate).format("YYYY-MM-DD")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Created At</TableCell>
+                  <TableCell>
+                    {purchase?.createdAt
+                      ? moment(purchase.createdAt).format("YYYY-MM-DD")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Updated At</TableCell>
+                  <TableCell>
+                    {purchase?.updatedAt
+                      ? moment(purchase.updatedAt).format("YYYY-MM-DD")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <div className="w-3/5">
+          <DataTable
+            // bulkDeleteIdName="_id"
+            // bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+            // bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+            // bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+            // deleteRoute="/factory-management/inventory/deletemultipleblocks"
+            searchKey="slabNumber"
+            columns={finishedblockcolumn}
+            data={purchase.slabIds}
+            token={token}
+          />
         </div>
       </div>
     </div>
-  );
+  )
 }

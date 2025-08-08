@@ -3,23 +3,25 @@ import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import InPolishingCellAction from "./inpolishingcell-actions";
+import CellAction from "./CellAction";
+import moment from "moment";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
-export type Slab = {
+export type Block = {
   _id: string;
-  slabNumber: number;
-  blockId: {
-    lotId: any;
-    id: string;
-    materialType: string;
-  };
-  blockNumber: number;
-  blockLotName?: string;
   factoryId: string;
-  productName: string;
-  quantity: number;
+  blockNumber: string;
+  materialType: string;
+  SlabsId: any[]; // Can be improved if you know structure
+  status: string;
+  inStock: boolean;
+  childBlocks: any[]; // Can also be refined later
+  __v: number;
+  createdAt: string;
+  updatedAt: string;
   dimensions: {
-    thickness: {
+    weight: {
       value: number;
       units: string;
     };
@@ -36,27 +38,37 @@ export type Slab = {
       units: string;
     };
   };
-  trim: {
-    length: {
-      units: string;
-    };
-    height: {
-      units: string;
-    };
-  };
-  isActive?: boolean;
-  weight?: string;
-  height?: string;
-  breadth?: string;
-  length?: string;
-  volume?: string;
-  status: string;
-  inStock: boolean;
-  createdAt: string;
-  updatedAt: string;
 };
 
-export const inPolishingolumns: ColumnDef<Slab>[] = [
+export type Purchase = {
+  _id: string;
+  factoryId: {
+    _id: string;
+    factoryName: string;
+  };
+  supplierId: {
+    _id: string;
+    supplierName: string;
+  };
+  noOfBlocks: number;
+  blockIds: Block[];
+  blockNo: string[];
+  invoiceNo: string;
+  actualInvoiceValue: number;
+  volumeQuantity: number;
+  length: number;
+  height: number;
+  breadth: number;
+  weight: number;
+  ratePerCubicVolume: number;
+  purchaseDate: string; // ISO string
+  paymentProof: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+export const rawblockcolumns: ColumnDef<Block>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -82,22 +94,6 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "slabNumber",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Slab Number
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original.slabNumber}</div>
-    ),
-    filterFn: "includesString",
-  },
-  {
     accessorKey: "blockNumber",
     header: ({ column }) => (
       <Button
@@ -108,58 +104,9 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original.blockNumber}</div>
-    ),
-  },
-  {
-    accessorKey: "Length",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Length
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original?.dimensions?.length?.value}{" "}
-        {row.original?.dimensions?.length?.units}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "Height",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Height
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original?.dimensions?.height?.value}{" "}
-        {row.original?.dimensions?.height?.units}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Slab Status
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="capitalize">{row.original.status}</div>,
+    cell: ({ row }) => <div>{row.original?.blockNumber}</div>,
+
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
   },
   {
     accessorKey: "materialType",
@@ -172,16 +119,75 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
+    cell: ({ row }) => <div>{row.original.materialType}</div>,
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
+  {
+    accessorKey: "length",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Length (inch)
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original?.blockId?.lotId?.materialType}
-      </div>
+      <div>{row.original?.dimensions?.length?.value || ""}</div>
     ),
   },
+  {
+    accessorKey: "breadth",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Breadth (inch)
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{row.original?.dimensions?.breadth?.value || ""}</div>
+    ),
+  },
+  {
+    accessorKey: "height",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Height (inch)
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{row.original?.dimensions?.height?.value || ""}</div>
+    ),
+  },
+
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Created Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original?.createdAt).format("DD MMM YYYY")}</div>
+    ),
+  },
+
   {
     header: ({ column }) => <Button variant="ghost">Action</Button>,
 
     id: "actions",
-    cell: ({ row }) => <InPolishingCellAction data={row.original} />,
+    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

@@ -71,12 +71,15 @@ export default async function FinishedMaterialPage({ params }: Props) {
 
   const slabsData = res;
   const Polished = Array.isArray(slabsData)
-    ? slabsData.filter((data: any) => data.status === "polished")
+    ? slabsData.filter(
+        (data: any) => data.inStock === true && data.status === "polished"
+      )
     : [];
   const Sold = Array.isArray(slabsData)
-    ? slabsData.filter((data: any) => data.inStock === false) // Updated filter for sold slabs
+    ? slabsData.filter(
+        (data: any) => data.inStock === false && data.status === "polished"
+      ) // Updated filter for sold slabs
     : [];
-
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">

@@ -39,6 +39,10 @@ import {
 } from "../ui/table";
 import CalendarComponent from "../CalendarComponent";
 import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import ConfirmationDialog from "../ConfirmationDialog";
+import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+import { Calendar } from "../ui/calendar";
+import { setGlobal } from "next/dist/trace";
 
 interface RawPurchaseCreateNewFormProps {
   gap: number;
@@ -95,7 +99,7 @@ const formSchema = z.object({
     )
     .optional(),
   noOfBlocks: z.number().optional(),
-   paymentProof:z.string().optional(),
+  paymentProof: z.string().optional(),
 });
 
 export default function RawPurchaseCreateNewForm({
@@ -108,8 +112,10 @@ export default function RawPurchaseCreateNewForm({
   const [blocks, setBlocks] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
+  const [globaltype, setGlobaltype] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
+  const [applyTypeToAll, setApplyTypeToAll] = React.useState<boolean>(false);
   const [applyWeightToAll, setApplyWeightToAll] =
     React.useState<boolean>(false);
   const [applyLengthToAll, setApplyLengthToAll] =
@@ -121,6 +127,10 @@ export default function RawPurchaseCreateNewForm({
   const [supplierNames, setSupplierNames] = React.useState<
     { _id: string; name: string }[]
   >([]);
+  const [showConfirmation, setShowConfirmation] = React.useState(false);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = React.useState<
+    number | null
+  >(null);
 
   const factoryId = useParams().factoryid as string;
 
@@ -142,6 +152,7 @@ export default function RawPurchaseCreateNewForm({
       noOfBlocks: undefined,
     },
   });
+  const { control, setValue, watch, getValues } = form;
 
   React.useEffect(() => {
     const fetchingData = async () => {
@@ -158,7 +169,6 @@ export default function RawPurchaseCreateNewForm({
         setSupplierNames(mappedSuppliers);
       } catch (error) {
         console.error("Error fetching supplier data:", error);
-        toast.error("Failed to fetch suppliers");
       } finally {
         setSupplierLoading(false);
       }
@@ -166,21 +176,83 @@ export default function RawPurchaseCreateNewForm({
     fetchingData();
   }, [supplierNames]);
 
+  const handleBlockCountChange = (value: string) => {
+    const newCount = Number(value);
+
+    if (newCount < blocks.length) {
+      setShowConfirmation(true);
+      setBlockCountToBeDeleted(newCount);
+    } else {
+      handleDynamicArrayCountChange({
+        value,
+        watch,
+        setValue,
+        getValues,
+        fieldName: "blocks",
+        createNewItem: () => ({
+          dimensions: {
+            weight: { value: 0, units: "tons" },
+            length: { value: 0, units: "cm" },
+            breadth: { value: 0, units: "cm" },
+            height: { value: 0, units: "cm" },
+          },
+        }),
+        customFieldSetters: {
+          blocks: (items, setValue) => {
+            setValue("noOfBlocks", items.length);
+            setBlocks(items);
+          },
+        },
+      }) as any;
+    }
+  };
+
+  const handleConfirmChange = () => {
+    if (blockCountToBeDeleted !== null) {
+      const updatedBlocks = blocks.slice(0, blockCountToBeDeleted);
+      setBlocks(updatedBlocks);
+      setValue("blocks", updatedBlocks);
+      setValue("noOfBlocks", updatedBlocks.length);
+      setBlockCountToBeDeleted(null);
+    }
+    setShowConfirmation(false);
+  };
+  const handleDeleteBlock = (index: number) => {
+    const updatedBlocks = blocks.filter((_, i) => i !== index);
+    setBlocks(updatedBlocks);
+    setValue("blocks", updatedBlocks);
+    setValue("noOfBlocks", updatedBlocks.length);
+  };
+
   function handleBlocksInputChange(value: string) {
     const count = parseInt(value, 10);
     if (!isNaN(count) && count > 0) {
-      const newBlocks = Array.from({ length: count }, (_, index) => ({
-        blockNumber: index + 1,
-        materialType: form.getValues("materialType") || "type1",
-        status: "inStock",
-        inStock: true,
-        dimensions: {
-          length: { value: parseFloat(globalLength) || 0, units: "inch" },
-          weight: { value: parseFloat(globalWeight) || 0, units: "tons" },
-          breadth: { value: parseFloat(globalBreadth) || 0, units: "inch" },
-          height: { value: parseFloat(globalHeight) || 0, units: "inch" },
-        },
-      }));
+      const length = parseFloat(globalLength) || 0;
+      const breadth = parseFloat(globalBreadth) || 0;
+      const height = parseFloat(globalHeight) || 0;
+
+      const newBlocks = Array.from({ length: count }, (_, index) => {
+        const { volume, weight } = calculateVolumeAndWeight(
+          length,
+          breadth,
+          height
+        );
+
+        return {
+          blockNumber: index + 1,
+          materialType: form.getValues("materialType") || "type1",
+          status: "inStock",
+          inStock: true,
+          dimensions: {
+            length: { value: length, units: "inch" },
+            breadth: { value: breadth, units: "inch" },
+            height: { value: height, units: "inch" },
+            volume: { value: volume, units: "m³" },
+            weight: { value: weight, units: "tons" },
+          },
+        };
+      });
+
       setBlocks(newBlocks);
       // form.setValue("blocks", newBlocks);
       form.setValue("noOfBlocks", count);
@@ -246,17 +318,55 @@ export default function RawPurchaseCreateNewForm({
       setIsLoading(false);
     }
   }
+  const calculateWeight = (length: number, breadth: number, height: number) => {
+    const volumeInCubicInches = length * breadth * height;
+    const volumeInCubicMeters = volumeInCubicInches * 0.000016387064;
+    const density = 3.5; // tons per m³
+    const weight = volumeInCubicMeters * density;
+    return Number(weight.toFixed(2));
+  };
 
+  function calculateVolumeAndWeight(
+    length: number,
+    breadth: number,
+    height: number
+  ) {
+    const volumeInCubicInches = length * breadth * height;
+    const volumeInCubicMeters = volumeInCubicInches * 0.0000163871;
+    const weightInTons = volumeInCubicMeters * 2.7; // Assuming density of granite
+
+    return {
+      volume: volumeInCubicMeters,
+      weight: weightInTons,
+    };
+  }
+
+  // Calculate total volume
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
-      const { length, breadth, height } = block.dimensions || {};
+      const { length, breadth, height } = block.dimensions;
       const volume =
-        ((length?.value || 0) * (breadth?.value || 0) * (height?.value || 0)) /
-        1000000;
+        length.value * breadth.value * height.value * 0.000016387064;
       return total + (volume || 0);
     }, 0);
     return {
       inM: totalVolumeInM,
+    };
+  }
+
+  // Calculate total weight
+  function calculateTotalWeight() {
+    const totalWeightInTons = blocks.reduce((total, block) => {
+      const { length, breadth, height } = block.dimensions;
+      const volume =
+        length.value * breadth.value * height.value * 0.000016387064; // m³
+      const density = 3.5; // Example density in tons/m³
+      const weight = volume * density;
+      return total + weight;
+    }, 0);
+
+    return {
+      inTons: totalWeightInTons,
     };
   }
 
@@ -283,12 +393,12 @@ export default function RawPurchaseCreateNewForm({
                       displayProperty="name"
                       placeholder="Select a Supplier Name"
                       onAddNew={() => {
-                    window.open(
-                      `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
-                      "_blank"
-                    );
-                  }}
-                  multiple={false}
+                        window.open(
+                          `/${orgId}/${factoryId}/factorymanagement/parties/supplier/createNew`,
+                          "_blank"
+                        );
+                      }}
+                      multiple={false}
                       addNewLabel="Add New Supplier"
                       // disabled={isLoading || supplierLoading}
                     />
@@ -322,14 +432,40 @@ export default function RawPurchaseCreateNewForm({
                               : "Purchase date"}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <CalendarComponent
+                        <PopoverContent
+                          className="w-full p-0 text-sm flex flex-col relative"
+                          align="start"
+                        >
+                          {/* <div className="absolute top-0 right-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      field.onChange(null);
+                      saveProgressSilently(getValues());
+                    }}
+                  >
+                    Clear
+                  </Button>
+                </div> */}
+                          <Calendar
+                            mode="single"
                             selected={
                               field.value ? new Date(field.value) : undefined
                             }
-                            onSelect={(date) =>
-                              field.onChange(date ? date.toISOString() : "")
-                            }
+                            startMonth={new Date(2010, 0)}
+                            endMonth={new Date(2025, 11)}
+                            onSelect={(date) => {
+                              field.onChange(date?.toISOString());
+                            }}
+                            captionLayout="dropdown"
+                            classNames={{
+                              caption: "flex justify-between items-center",
+                              caption_label: "text-sm font-medium hidden",
+                              dropdown: "border rounded p-0 text-xs",
+                              months: "flex flex-col",
+                            }}
+                            className="bg-white p-4 rounded-xl shadow-md"
                           />
                         </PopoverContent>
                       </Popover>
@@ -340,21 +476,21 @@ export default function RawPurchaseCreateNewForm({
               )}
             />
             <FormField
-                        control={form.control}
-                        name="paymentProof"
-                        render={() => (
-                          <FormItem>
-                            <FormLabel>Payment Proof</FormLabel>
-                            <FormControl>
-                              <FileUploadField
-                                name="paymentProof"
-                                storageKey="paymentProof"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+              control={form.control}
+              name="paymentProof"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Payment Proof</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="paymentProof"
+                      storageKey="paymentProof"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             {/* Invoice No */}
             <FormField
@@ -365,6 +501,7 @@ export default function RawPurchaseCreateNewForm({
                   <FormLabel>Invoice No.</FormLabel>
                   <FormControl>
                     <Input
+                      type="string"
                       placeholder="Enter Invoice No."
                       disabled={isLoading}
                       {...field}
@@ -386,6 +523,7 @@ export default function RawPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter Invoice Value"
                       type="number"
+                      min={0}
                       disabled={isLoading}
                       {...field}
                       onChange={(e) =>
@@ -439,6 +577,7 @@ export default function RawPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter rate per cubic meter"
                       type="number"
+                      min={0}
                       disabled={isLoading}
                       {...field}
                       onChange={(e) =>
@@ -481,29 +620,7 @@ export default function RawPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter volume quantity"
                       type="number"
-                      disabled={isLoading}
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(parseFloat(e.target.value) || undefined)
-                      }
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Weight */}
-            <FormField
-              name="weight"
-              control={form.control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Weight (tons)</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter weight"
-                      type="number"
+                      min={0}
                       disabled={isLoading}
                       {...field}
                       onChange={(e) =>
@@ -529,10 +646,17 @@ export default function RawPurchaseCreateNewForm({
                     <Input
                       placeholder="Enter number of blocks"
                       type="number"
+                      min="1"
                       disabled={isLoading}
                       onChange={(e) => {
-                        field.onChange(parseInt(e.target.value) || undefined);
-                        handleBlocksInputChange(e.target.value);
+                        const value = e.target.value;
+                        if (value === "") {
+                          field.onChange(1);
+                          handleBlockCountChange("1");
+                          return;
+                        }
+                        field.onChange(Number(value));
+                        handleBlockCountChange(value);
                       }}
                       value={field.value || ""}
                     />
@@ -542,17 +666,17 @@ export default function RawPurchaseCreateNewForm({
               )}
             />
           </div>
-
+          
           {/* Dimensions Inputs */}
           <div className="grid grid-cols-4 gap-3 mt-3">
             {[
               {
-                label: "Weight (tons)",
-                value: globalWeight,
-                setter: setGlobalWeight,
-                apply: applyWeightToAll,
-                setApply: setApplyWeightToAll,
-                key: "weight",
+                label: "materialtype",
+                value: globaltype,
+                setter: setGlobaltype,
+                apply: applyTypeToAll,
+                setApply: setApplyTypeToAll,
+                key: "type",
               },
               {
                 label: "Length (inch)",
@@ -584,7 +708,7 @@ export default function RawPurchaseCreateNewForm({
                   value={value}
                   onChange={(e) => setter(e.target.value)}
                   placeholder={label}
-                  type="number"
+                  type={key === "type" ? "text" : "number"} // Text for materialtype, number for others
                   disabled={isLoading}
                 />
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -594,16 +718,27 @@ export default function RawPurchaseCreateNewForm({
                     onChange={(e) => {
                       setApply(e.target.checked);
                       if (e.target.checked) {
-                        const updatedBlocks = blocks.map((block) => ({
-                          ...block,
-                          dimensions: {
-                            ...block.dimensions,
-                            [key]: {
-                              value: parseFloat(value) || 0,
-                              units: key === "weight" ? "tons" : "inch",
-                            },
-                          },
-                        }));
+                        const updatedBlocks = blocks.map((block) => {
+                          if (key === "type") {
+                            // Update materialType directly for materialtype
+                            return {
+                              ...block,
+                              materialType: value, // Apply text value to materialType
+                            };
+                          } else {
+                            // Update dimensions for length, breadth, height
+                            return {
+                              ...block,
+                              dimensions: {
+                                ...block.dimensions,
+                                [key]: {
+                                  value: parseFloat(value) || 0,
+                                  units: key === "weight" ? "tons" : "inch",
+                                },
+                              },
+                            };
+                          }
+                        });
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }
@@ -621,11 +756,11 @@ export default function RawPurchaseCreateNewForm({
                 <TableHead>#</TableHead>
                 <TableHead>Block Number</TableHead>
                 <TableHead>Material Type</TableHead>
-                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Length (inch)</TableHead>
                 <TableHead>Breadth (inch)</TableHead>
                 <TableHead>Height (inch)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
+                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -633,6 +768,8 @@ export default function RawPurchaseCreateNewForm({
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
+
+                  {/* Block Number */}
                   <TableCell>
                     <Input
                       type="number"
@@ -648,97 +785,162 @@ export default function RawPurchaseCreateNewForm({
                       disabled={isLoading}
                     />
                   </TableCell>
+
+                  {/* Material Type */}
                   <TableCell>
                     <Input
                       type="text"
-                      value={block?.materialType}
+                      value={block?.materialType || ""}
                       placeholder="Enter material type"
                       onChange={(e) => {
                         const updatedBlocks = [...blocks];
-                        updatedBlocks[index].materialType =
-                          e.target.value || "";
+                        updatedBlocks[index].materialType = e.target.value;
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
                       disabled={isLoading}
                     />
                   </TableCell>
+
+                  {/* Length */}
                   <TableCell>
                     <Input
                       type="number"
-                      value={block?.dimensions?.weight?.value}
-                      placeholder="Enter weight"
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].dimensions.weight = {
-                          value: parseFloat(e.target.value) || 0,
-                          units: "tons",
-                        };
-                        setBlocks(updatedBlocks);
-                        form.setValue("blocks", updatedBlocks);
-                      }}
-                      disabled={isLoading}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="number"
-                      value={block?.dimensions?.length?.value}
+                      min={0}
+                      value={block?.dimensions?.length?.value || ""}
                       placeholder="Enter length"
                       onChange={(e) => {
+                        const newLength = parseFloat(e.target.value) || 0;
                         const updatedBlocks = [...blocks];
+
                         updatedBlocks[index].dimensions.length = {
-                          value: parseFloat(e.target.value) || 0,
+                          value: newLength,
                           units: "inch",
                         };
+
+                        const { breadth, height } =
+                          updatedBlocks[index].dimensions;
+                        const { volume, weight } = calculateVolumeAndWeight(
+                          newLength,
+                          breadth?.value || 0,
+                          height?.value || 0
+                        );
+
+                        updatedBlocks[index].dimensions.volume = {
+                          value: volume,
+                          units: "m³",
+                        };
+                        updatedBlocks[index].dimensions.weight = {
+                          value: weight,
+                          units: "tons",
+                        };
+
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
                       disabled={isLoading}
                     />
                   </TableCell>
+
+                  {/* Breadth */}
                   <TableCell>
                     <Input
                       type="number"
-                      value={block?.dimensions?.breadth?.value}
+                      min={0}
+                      value={block?.dimensions?.breadth?.value || ""}
                       placeholder="Enter breadth"
                       onChange={(e) => {
+                        const newBreadth = parseFloat(e.target.value) || 0;
                         const updatedBlocks = [...blocks];
+
                         updatedBlocks[index].dimensions.breadth = {
-                          value: parseFloat(e.target.value) || 0,
+                          value: newBreadth,
                           units: "inch",
                         };
+
+                        const { length, height } =
+                          updatedBlocks[index].dimensions;
+                        const { volume, weight } = calculateVolumeAndWeight(
+                          length?.value || 0,
+                          newBreadth,
+                          height?.value || 0
+                        );
+
+                        updatedBlocks[index].dimensions.volume = {
+                          value: volume,
+                          units: "m³",
+                        };
+                        updatedBlocks[index].dimensions.weight = {
+                          value: weight,
+                          units: "tons",
+                        };
+
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
                       disabled={isLoading}
                     />
                   </TableCell>
+
+                  {/* Height */}
                   <TableCell>
                     <Input
                       type="number"
-                      value={block?.dimensions?.height?.value}
+                      min={0}
+                      value={block?.dimensions?.height?.value || ""}
                       placeholder="Enter height"
                       onChange={(e) => {
+                        const newHeight = parseFloat(e.target.value) || 0;
                         const updatedBlocks = [...blocks];
+
                         updatedBlocks[index].dimensions.height = {
-                          value: parseFloat(e.target.value) || 0,
+                          value: newHeight,
                           units: "inch",
                         };
+
+                        const { length, breadth } =
+                          updatedBlocks[index].dimensions;
+                        const { volume, weight } = calculateVolumeAndWeight(
+                          length?.value || 0,
+                          breadth?.value || 0,
+                          newHeight
+                        );
+
+                        updatedBlocks[index].dimensions.volume = {
+                          value: volume,
+                          units: "m³",
+                        };
+                        updatedBlocks[index].dimensions.weight = {
+                          value: weight,
+                          units: "tons",
+                        };
+
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }}
                       disabled={isLoading}
                     />
                   </TableCell>
+
+                  {/* Volume (m³) */}
                   <TableCell>
                     {(
-                      ((block?.dimensions?.length?.value || 0) *
-                        (block?.dimensions?.breadth?.value || 0) *
-                        (block?.dimensions?.height?.value || 0)) /
-                      1000000
+                      block.dimensions.length.value *
+                      block.dimensions.breadth.value *
+                      block.dimensions.height.value *
+                      0.000016387064
                     ).toFixed(2)}
                   </TableCell>
+                  {/* Weight (tons) */}
+                  <TableCell>
+                    {calculateWeight(
+                      block.dimensions.length.value,
+                      block.dimensions.breadth.value,
+                      block.dimensions.height.value
+                    )}
+                  </TableCell>
+
+                  {/* Action */}
                   <TableCell>
                     <Button
                       variant="destructive"
@@ -758,11 +960,17 @@ export default function RawPurchaseCreateNewForm({
                 </TableRow>
               ))}
             </TableBody>
+
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={8} className="text-right font-bold">
+                <TableCell colSpan={4} className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
+                <TableCell className="font-bold">
+                  Total Weight (tons):{" "}
+                  {calculateTotalWeight().inTons.toFixed(2)}
+                </TableCell>
+                <TableCell colSpan={3}></TableCell>
               </TableRow>
             </TableFooter>
           </Table>
@@ -770,6 +978,13 @@ export default function RawPurchaseCreateNewForm({
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit Raw Purchase"}
           </Button>
+          <ConfirmationDialog
+            isOpen={showConfirmation}
+            onClose={() => setShowConfirmation(false)}
+            onConfirm={handleConfirmChange}
+            title="Are you sure?"
+            description="You are reducing the number of blocks. This action cannot be undone."
+          />
         </form>
       </Form>
     </div>
