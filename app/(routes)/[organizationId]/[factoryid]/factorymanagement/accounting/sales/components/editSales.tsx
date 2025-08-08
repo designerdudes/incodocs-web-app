@@ -99,9 +99,8 @@ export default function EditSaleForm({
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const GlobalModal = useGlobalModal();
   const [customerLoading, setCustomerLoading] = React.useState(false);
-  const [customers, setCustomers] = React.useState<
-    { address: string; _id: string; name: string }[]
-  >([]);
+  const [customers, setCustomers] = React.useState<{ address: string; _id: string; name: string; }[]>([]);
+
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,6 +111,7 @@ export default function EditSaleForm({
   const [show, setShow] = React.useState(false);
   const type = searchParams.get("type");
   const [isWithGst, setIsGst] = useState(false);
+
   const [actual, setactual] = useState(false);
   const [search, setSearch] = React.useState("");
   const [selectedSlabs, setSelectedSlabs] = React.useState<string[]>([]);
@@ -169,7 +169,8 @@ export default function EditSaleForm({
         const mappedCustomers = customerData.map((customer: any) => ({
           _id: customer._id,
           name: customer.customerName,
-          address: customer.customerAddress, // <- include this
+          address: customer.customerAddress,
+
         }));
         setCustomers(mappedCustomers);
       } catch (error) {
@@ -180,7 +181,7 @@ export default function EditSaleForm({
     };
 
     fetchingCustomers();
-  }, [customers]);
+  }, [factoryId]); // Add factoryId as a dependency
 
   // Fetch existing lot data and reset form values
   useEffect(() => {
@@ -191,10 +192,6 @@ export default function EditSaleForm({
           `https://incodocs-server.onrender.com/transaction/sale/getbyid/${SlabId}`
         );
         const data = response;
-        setSlabsData(data.slabIds || []);
-        if (data.actual === true) {
-          setactual(true);
-        }
         if (data.gstPercentage !== undefined && data.gstPercentage !== null) {
           setIsGst(true);
         }
@@ -225,7 +222,7 @@ export default function EditSaleForm({
       }
     }
     fetchSlabData();
-  }, [SlabId]);
+  }, [SlabId, form]);
 
   const handleDeleteSlab = (slabId: string) => {
     setIsLoading(true);
@@ -363,7 +360,7 @@ export default function EditSaleForm({
                       }}
                       multiple={false}
                       addNewLabel="Add New Customer"
-                      // disabled={isLoading || customerLoading}
+                    // disabled={isLoading || customerLoading}
                     />
                   </FormControl>
                   <FormMessage />
@@ -533,120 +530,55 @@ export default function EditSaleForm({
                 </FormItem>
               )}
             />
-          </div>
-
-          {actual && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Slab Number</TableHead>
-                  <TableHead>Block Number</TableHead>
-                  <TableHead>Material Type</TableHead>
-                  <TableHead className="text-right">Length</TableHead>
-                  <TableHead className="text-right">Height</TableHead>
-                  <TableHead className="text-right">Remove</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {slabsData.map((slab: any) => (
-                  <TableRow key={slab._id}>
-                    <TableCell>{slab?.slabNumber || "N/A"}</TableCell>
-                    <TableCell>{slab?.blockNumber || "N/A"}</TableCell>
-                    <TableCell>
-                      {slab?.blockId?.lotId?.materialType || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {slab?.dimensions?.length?.value || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {slab?.dimensions?.height?.value || "N/A"}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteSlab(slab._id)}
+            <FormField
+              name="invoiceValue"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Invoice Value</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Invoice Value"
+                      type="number"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            {isWithGst && (
+              <FormField
+                name="gstPercentage"
+                control={form.control}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>GST Percentage</FormLabel>
+                    <FormControl>
+                      <Select
+                        value={field.value || ""}
+                        onValueChange={field.onChange}
                       >
-                        <Trash />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-          {actual && (
-            <div className="text-right">
-              <Button
-                type="button"
-                variant="default"
-                className="text-sm"
-                onClick={() => setShow(!show)}
-              >
-                {show ? (
-                  <>
-                    Hide <ChevronUp />
-                  </>
-                ) : (
-                  <>
-                    Add More Slabs <ChevronDown />
-                  </>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select GST Percentage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="0" value="0">0%</SelectItem>
+                          <SelectItem key="1" value="1">1%</SelectItem>
+                          <SelectItem key="5" value="5">5%</SelectItem>
+                          <SelectItem key="12" value="12">12%</SelectItem>
+                          <SelectItem key="18" value="18">18%</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </Button>
-            </div>
-          )}
-          {show && (
-            <div>
-              <div className=" relative mb-4 w-1/3 flex justify-between items-center">
-                <Input
-                  type="text"
-                  placeholder="Search by Slab, Block, or Material Type"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-                <Search size={14} className="absolute right-2 opacity-50" />
-              </div>
-              <Table>
-                {filteredSlabs.length < 1 ? (
-                  <TableCaption>No Slabs Available For Sale</TableCaption>
-                ) : (
-                  <TableCaption>List Of Your Slabs For Sale</TableCaption>
-                )}
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[50px]">Select</TableHead>
-                    <TableHead>Slab Number</TableHead>
-                    <TableHead>Block Number</TableHead>
-                    <TableHead>Material Type</TableHead>
-                    <TableHead className="text-right">Length</TableHead>
-                    <TableHead className="text-right">Height</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredSlabs.map((slab: any) => (
-                    <TableRow>
-                      <TableCell>
-                        <Checkbox
-                          checked={selectedSlabs.includes(slab._id)}
-                          onCheckedChange={() => toggleSlab(slab._id)}
-                        />
-                      </TableCell>
-                      <TableCell>{slab?.slabNumber || "N/A"}</TableCell>
-                      <TableCell>{slab?.blockNumber || "N/A"}</TableCell>
-                      <TableCell>
-                        {slab?.blockId?.lotId?.materialType || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {slab?.dimensions?.length?.value || "N/A"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {slab?.dimensions?.height?.value || "N/A"}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              />
+            )}
             </div>
           )}
           <Button type="submit" disabled={isLoading}>
