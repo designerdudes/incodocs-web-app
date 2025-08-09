@@ -43,6 +43,7 @@ import {
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 import { MdSearch } from "react-icons/md";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -293,17 +294,21 @@ export function SalesCreateNewForm({
                 <FormItem>
                   <FormLabel>GST Percentage</FormLabel>
                   <FormControl>
-                    <select
+                    <Select
                       disabled={isLoading}
-                      {...field}
-                      className="block w-full border-slate-500 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm py-3 bg-transparent"
+                        onValueChange={field.onChange}
                     >
-                      <option value="0">0%</option>
-                      <option value="1">1%</option>
-                      <option value="5">5%</option>
-                      <option value="12">12%</option>
-                      <option value="18">18%</option>
-                    </select>
+                     <SelectTrigger>
+                          <SelectValue placeholder="Select GST Percentage" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem key="0" value="0">0%</SelectItem>
+                          <SelectItem key="1" value="1">1%</SelectItem>
+                          <SelectItem key="5" value="5">5%</SelectItem>
+                          <SelectItem key="12" value="12">12%</SelectItem>
+                          <SelectItem key="18" value="18">18%</SelectItem>
+                        </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
