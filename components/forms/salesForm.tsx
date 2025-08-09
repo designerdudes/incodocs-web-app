@@ -43,7 +43,13 @@ import {
 } from "../ui/table";
 import { Checkbox } from "../ui/checkbox";
 import { MdSearch } from "react-icons/md";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface SalesCreateNewFormProps {
   gap: number;
@@ -164,7 +170,7 @@ export function SalesCreateNewForm({
     };
 
     fetchingCustomers();
-  }, [customers]);
+  }, [customers, factoryId]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -294,20 +300,27 @@ export function SalesCreateNewForm({
                 <FormItem>
                   <FormLabel>GST Percentage</FormLabel>
                   <FormControl>
-                    <Select
-                      disabled={isLoading}
-                        onValueChange={field.onChange}
-                    >
-                     <SelectTrigger>
-                          <SelectValue placeholder="Select GST Percentage" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem key="0" value="0">0%</SelectItem>
-                          <SelectItem key="1" value="1">1%</SelectItem>
-                          <SelectItem key="5" value="5">5%</SelectItem>
-                          <SelectItem key="12" value="12">12%</SelectItem>
-                          <SelectItem key="18" value="18">18%</SelectItem>
-                        </SelectContent>
+                    <Select disabled={isLoading} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select GST Percentage" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem key="0" value="0">
+                          0%
+                        </SelectItem>
+                        <SelectItem key="1" value="1">
+                          1%
+                        </SelectItem>
+                        <SelectItem key="5" value="5">
+                          5%
+                        </SelectItem>
+                        <SelectItem key="12" value="12">
+                          12%
+                        </SelectItem>
+                        <SelectItem key="18" value="18">
+                          18%
+                        </SelectItem>
+                      </SelectContent>
                     </Select>
                   </FormControl>
                   <FormMessage />
@@ -490,7 +503,7 @@ export function SalesCreateNewForm({
                 </TableHeader>
                 <TableBody>
                   {filteredSlabs.map((slab) => (
-                    <TableRow>
+                    <TableRow key={slab._id}>
                       <TableCell>
                         <Checkbox
                           checked={selectedSlabs.includes(slab._id)}
