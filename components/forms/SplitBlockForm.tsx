@@ -51,7 +51,7 @@ export default function SplitBlockForm({
   useEffect(() => {
     const calculatedVolume = subBlocks.reduce((sum, b) => {
       const { length, breadth, height } = b.dimensions;
-      return sum + length.value * breadth.value * height.value;
+      return sum + (length.value * breadth.value * height.value)/1000000;
     }, 0);
     setTotalVolume(calculatedVolume);
 

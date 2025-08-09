@@ -44,7 +44,7 @@ const saveProgressSilently = (data: any) => {
 // Function to calculate weight based on dimensions
 const calculateWeight = (length: number, breadth: number, height: number) => {
   const volumeInCubicInches = length * breadth * height;
-  const volumeInCubicMeters = volumeInCubicInches * 0.000016387064;
+  const volumeInCubicMeters = volumeInCubicInches/1000000;
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
   return Number(weight.toFixed(2));
@@ -316,7 +316,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
       const volume =
-        length.value * breadth.value * height.value * 0.000016387064;
+        (length.value * breadth.value * height.value) /1000000;
       return total + (volume || 0);
     }, 0);
     return {
@@ -329,7 +329,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     const totalWeightInTons = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
       const volume =
-        length.value * breadth.value * height.value * 0.000016387064; // m³
+        (length.value * breadth.value * height.value) / 1000000; // m³
       const density = 3.5; // Example density in tons/m³
       const weight = volume * density;
       return total + weight;
@@ -917,10 +917,10 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   
                   <TableCell>
                     {(
-                      block.dimensions.length.value *
+                      (block.dimensions.length.value *
                       block.dimensions.breadth.value *
-                      block.dimensions.height.value *
-                      0.000016387064
+                      block.dimensions.height.value) /
+1000000
                     ).toFixed(2)}
                   </TableCell>
                   <TableCell>
