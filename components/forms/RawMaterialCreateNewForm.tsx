@@ -42,15 +42,20 @@ const saveProgressSilently = (data: any) => {
 };
 
 // Function to calculate weight based on dimensions
-const calculateWeight = (length: number, breadth: number, height: number, units: "cm" | "inch") => {
-  let volumeInCubicMeters: number;
-  if (units === "inch") {
-    const volumeInCubicInches = length * breadth * height;
-    volumeInCubicMeters = volumeInCubicInches * 0.000016387064; // Convert cubic inches to cubic meters
-  } else {
-    const volumeInCubicCm = length * breadth * height;
-    volumeInCubicMeters = volumeInCubicCm * 0.000001; // Convert cubic cm to cubic meters
-  }
+const calculateWeight = (length: number, breadth: number, height: number) => {
+  const volumeInCubicInches = length * breadth * height;
+  const volumeInCubicMeters = volumeInCubicInches / 1000000;
+
+  // const calculateWeight = (length: number, breadth: number, height: number, units: "cm" | "inch") => {
+  //   let volumeInCubicMeters: number;
+  //   if (units === "inch") {
+  //     const volumeInCubicInches = length * breadth * height;
+  //     volumeInCubicMeters = volumeInCubicInches * 0.000016387064; // Convert cubic inches to cubic meters
+  //   } else {
+  //     const volumeInCubicCm = length * breadth * height;
+  //     volumeInCubicMeters = volumeInCubicCm * 0.000001; // Convert cubic cm to cubic meters
+  //   }
+
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
   return Number(weight.toFixed(2));
@@ -58,38 +63,80 @@ const calculateWeight = (length: number, breadth: number, height: number, units:
 
 // Define the form schema
 const formSchema = z.object({
-  lotName: z.string().min(3, { message: "Lot name must be at least 3 characters long" }).optional(),
-  materialType: z.string().min(3, { message: "Material type must be at least 3 characters long" }).optional(),
-  markerCost: z.number().min(0, { message: "Marker cost must be greater than or equal to zero" }).optional(),
-  transportCost: z.number().min(0, { message: "Transport cost must be greater than or equal to zero" }).optional(),
-  materialCost: z.number().min(0, { message: "Material cost must be greater than or equal to zero" }).optional(),
-  quarryName: z.string().min(3, { message: "Quarry name must be at least 3 characters long" }).optional(),
-  quarryCost: z.number().min(0, { message: "Quarry cost must be greater than or equal to zero" }).optional(),
-  commissionCost: z.number().min(0, { message: "Commission cost must be greater than or equal to zero" }).optional(),
-  markerOperatorName: z.string().min(1, { message: "Marker name is required" }).optional(),
-  noOfBlocks: z.number().min(1, { message: "Number of blocks must be greater than zero" }).optional(),
+  lotName: z
+    .string()
+    .min(3, { message: "Lot name must be at least 3 characters long" })
+    .optional(),
+  materialType: z
+    .string()
+    .min(3, { message: "Material type must be at least 3 characters long" })
+    .optional(),
+  markerCost: z
+    .number()
+    .min(0, { message: "Marker cost must be greater than or equal to zero" })
+    .optional(),
+  transportCost: z
+    .number()
+    .min(0, { message: "Transport cost must be greater than or equal to zero" })
+    .optional(),
+  materialCost: z
+    .number()
+    .min(0, { message: "Material cost must be greater than or equal to zero" })
+    .optional(),
+  quarryName: z
+    .string()
+    .min(3, { message: "Quarry name must be at least 3 characters long" })
+    .optional(),
+  quarryCost: z
+    .number()
+    .min(0, { message: "Quarry cost must be greater than or equal to zero" })
+    .optional(),
+  commissionCost: z
+    .number()
+    .min(0, {
+      message: "Commission cost must be greater than or equal to zero",
+    })
+    .optional(),
+  markerOperatorName: z
+    .string()
+    .min(1, { message: "Marker name is required" })
+    .optional(),
+  noOfBlocks: z
+    .number()
+    .min(1, { message: "Number of blocks must be greater than zero" })
+    .optional(),
   blocks: z
     .array(
       z.object({
-        materialType: z.string().min(1, { message: "Material type is required" }),
+        materialType: z
+          .string()
+          .min(1, { message: "Material type is required" }),
         inStock: z.boolean(),
         blockphoto: z.string().optional(),
         vehicleNumber: z.string().optional(),
         dimensions: z.object({
           weight: z.object({
-            value: z.number().min(0.1, { message: "Weight must be greater than zero" }),
+            value: z
+              .number()
+              .min(0.1, { message: "Weight must be greater than zero" }),
             units: z.literal("tons").default("tons"),
           }),
           length: z.object({
-            value: z.number().min(0.1, { message: "Length must be greater than zero" }),
+            value: z
+              .number()
+              .min(0.1, { message: "Length must be greater than zero" }),
             units: z.enum(["cm", "inch"]).default("inch"),
           }),
           breadth: z.object({
-            value: z.number().min(0.1, { message: "Breadth must be greater than zero" }),
+            value: z
+              .number()
+              .min(0.1, { message: "Breadth must be greater than zero" }),
             units: z.enum(["cm", "inch"]).default("inch"),
           }),
           height: z.object({
-            value: z.number().min(0.1, { message: "Height must be greater than zero" }),
+            value: z
+              .number()
+              .min(0.1, { message: "Height must be greater than zero" }),
             units: z.enum(["cm", "inch"]).default("inch"),
           }),
         }),
@@ -130,7 +177,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const [applyBreadthToAll, setApplyBreadthToAll] = useState<boolean>(false);
   const [applyHeightToAll, setApplyHeightToAll] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<number | null>(null);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
+    number | null
+  >(null);
 
   const [search, setSearch] = useState("");
   const [quarries, setQuarries] = useState<Quarry[]>([]);
@@ -183,8 +232,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         const calculatedWeight = calculateWeight(
           length.value,
           breadth.value,
-          height.value,
-          length.units
+          height.value
+          // length.units
         );
         setValue(`blocks.${index}.dimensions.weight.value`, calculatedWeight);
       }
@@ -310,8 +359,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume =
-        length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      const volume = (length.value * breadth.value * height.value) / 1000000;
+
+      // length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
       return total + (volume || 0);
     }, 0);
     return {
@@ -323,9 +373,10 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalWeight() {
     const totalWeightInTons = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume =
-        length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
-      const density = 3.5;
+      const volume = (length.value * breadth.value * height.value) / 1000000; // m³
+      const density = 3.5; // Example density in tons/m³
+      //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      // const density = 3.5;
       const weight = volume * density;
       return total + weight;
     }, 0);
@@ -824,7 +875,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                               value={block.materialType || ""}
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
-                                updatedBlocks[index].materialType = e.target.value;
+                                updatedBlocks[index].materialType =
+                                  e.target.value;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
@@ -938,18 +990,21 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   </TableCell>
                   <TableCell>
                     {(
-                      block.dimensions.length.value *
-                      block.dimensions.breadth.value *
-                      block.dimensions.height.value *
-                      (block.dimensions.length.units === "inch" ? 0.000016387064 : 0.000001)
-                    ).toFixed(2)}
+                      (block.dimensions.length.value *
+                        block.dimensions.breadth.value *
+                        block.dimensions.height.value) /
+                      1000000
+                    )
+                      // block.dimensions.height.value *
+                      // (block.dimensions.length.units === "inch" ? 0.000016387064 : 0.000001)
+                      .toFixed(2)}
                   </TableCell>
                   <TableCell>
                     {calculateWeight(
                       block.dimensions.length.value,
                       block.dimensions.breadth.value,
-                      block.dimensions.height.value,
-                      block.dimensions.length.units
+                      block.dimensions.height.value
+                      // block.dimensions.length.units
                     )}
                   </TableCell>
                   <TableCell>

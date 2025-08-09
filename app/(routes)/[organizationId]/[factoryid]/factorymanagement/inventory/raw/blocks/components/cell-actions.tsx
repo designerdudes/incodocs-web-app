@@ -88,9 +88,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     blockNumber={data.blockNumber}
                     factoryId={data.factoryId}
                     originalBlockVolume={
-                      data?.dimensions?.length?.value *
+                     ( data?.dimensions?.length?.value *
                       data?.dimensions?.breadth?.value *
-                      data?.dimensions?.height?.value
+                      data?.dimensions?.height?.value)/1000000
                     }
                     onSubmit={(subBlocks) => {
                       GlobalModal.onClose();
