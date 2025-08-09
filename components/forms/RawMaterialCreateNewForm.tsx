@@ -27,9 +27,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { fetchData, postData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { useEffect, useState, useRef } from "react";
 import { debounce } from "lodash";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 // Save progress to localStorage
 const saveProgressSilently = (data: any) => {
@@ -44,7 +44,18 @@ const saveProgressSilently = (data: any) => {
 // Function to calculate weight based on dimensions
 const calculateWeight = (length: number, breadth: number, height: number) => {
   const volumeInCubicInches = length * breadth * height;
-  const volumeInCubicMeters = volumeInCubicInches/1000000;
+  const volumeInCubicMeters = volumeInCubicInches / 1000000;
+
+  // const calculateWeight = (length: number, breadth: number, height: number, units: "cm" | "inch") => {
+  //   let volumeInCubicMeters: number;
+  //   if (units === "inch") {
+  //     const volumeInCubicInches = length * breadth * height;
+  //     volumeInCubicMeters = volumeInCubicInches * 0.000016387064; // Convert cubic inches to cubic meters
+  //   } else {
+  //     const volumeInCubicCm = length * breadth * height;
+  //     volumeInCubicMeters = volumeInCubicCm * 0.000001; // Convert cubic cm to cubic meters
+  //   }
+
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
   return Number(weight.toFixed(2));
@@ -66,11 +77,11 @@ const formSchema = z.object({
     .optional(),
   transportCost: z
     .number()
-    .min(1, { message: "Transport cost must be greater than or equal to zero" })
+    .min(0, { message: "Transport cost must be greater than or equal to zero" })
     .optional(),
   materialCost: z
     .number()
-    .min(1, { message: "Material cost must be greater than or equal to zero" })
+    .min(0, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
   quarryName: z
     .string()
@@ -78,11 +89,11 @@ const formSchema = z.object({
     .optional(),
   quarryCost: z
     .number()
-    .min(1, { message: "Quarry cost must be greater than or equal to zero" })
+    .min(0, { message: "Quarry cost must be greater than or equal to zero" })
     .optional(),
   commissionCost: z
     .number()
-    .min(1, {
+    .min(0, {
       message: "Commission cost must be greater than or equal to zero",
     })
     .optional(),
@@ -92,16 +103,17 @@ const formSchema = z.object({
     .optional(),
   noOfBlocks: z
     .number()
-    .min(1, { message: "Number of blocks must be greater than zero" }),
+    .min(1, { message: "Number of blocks must be greater than zero" })
+    .optional(),
   blocks: z
     .array(
       z.object({
         materialType: z
           .string()
-          .min(1, { message: "Material type is required" })
-          .optional(),
-        status: z.string().min(1, { message: "Status is required" }).optional(),
-        inStock: z.boolean().optional(),
+          .min(1, { message: "Material type is required" }),
+        inStock: z.boolean(),
+        blockphoto: z.string().optional(),
+        vehicleNumber: z.string().optional(),
         dimensions: z.object({
           weight: z.object({
             value: z
@@ -112,20 +124,20 @@ const formSchema = z.object({
           length: z.object({
             value: z
               .number()
-              .min(0, { message: "Length must be greater than zero" }),
-            units: z.literal("cm").default("cm"),
+              .min(0.1, { message: "Length must be greater than zero" }),
+            units: z.enum(["cm", "inch"]).default("inch"),
           }),
           breadth: z.object({
             value: z
               .number()
-              .min(0, { message: "Breadth must be greater than zero" }),
-            units: z.literal("cm").default("cm"),
+              .min(0.1, { message: "Breadth must be greater than zero" }),
+            units: z.enum(["cm", "inch"]).default("inch"),
           }),
           height: z.object({
             value: z
               .number()
-              .min(0, { message: "Height must be greater than zero" }),
-            units: z.literal("cm").default("cm"),
+              .min(0.1, { message: "Height must be greater than zero" }),
+            units: z.enum(["cm", "inch"]).default("inch"),
           }),
         }),
       })
@@ -187,18 +199,22 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       noOfBlocks: 1,
       blocks: [
         {
+          materialType: "type1",
+          inStock: true,
+          blockphoto: "",
+          vehicleNumber: "",
           dimensions: {
-            weight: { value: 0, units: "tons" },
-            length: { value: 0, units: "cm" },
-            breadth: { value: 0, units: "cm" },
-            height: { value: 0, units: "cm" },
+            weight: { value: 0.1, units: "tons" },
+            length: { value: 0.1, units: "inch" },
+            breadth: { value: 0.1, units: "inch" },
+            height: { value: 0.1, units: "inch" },
           },
         },
       ],
     },
   });
 
-  const { control, setValue, watch, getValues } = form;
+  const { control, setValue, watch, getValues, trigger } = form;
 
   // Sync blocks state with form on mount
   useEffect(() => {
@@ -217,6 +233,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
           length.value,
           breadth.value,
           height.value
+          // length.units
         );
         setValue(`blocks.${index}.dimensions.weight.value`, calculatedWeight);
       }
@@ -232,35 +249,37 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   }, [search, quarries, dropdownOpen]);
 
   // Handle block count changes
-  const handleBlockCountChange = (value: string) => {
-    const newCount = Number(value);
-
+  const handleBlockCountChange = async (value: string) => {
+    const newCount = Number(value) || 1;
     if (newCount < blocks.length) {
       setShowConfirmation(true);
       setBlockCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "blocks",
-        createNewItem: () => ({
-          dimensions: {
-            weight: { value: 0, units: "tons" },
-            length: { value: 0, units: "cm" },
-            breadth: { value: 0, units: "cm" },
-            height: { value: 0, units: "cm" },
-          },
-        }),
-        customFieldSetters: {
-          blocks: (items, setValue) => {
-            setValue("noOfBlocks", items.length);
-            setBlocks(items);
-          },
-        },
-        saveCallback: saveProgressSilently,
-      }) as any;
+      const currentBlocks = getValues("blocks") || [];
+      const newBlocks = Array.from({ length: newCount }, (_, index) =>
+        index < currentBlocks.length
+          ? currentBlocks[index]
+          : {
+              materialType: "type1",
+              inStock: true,
+              blockphoto: "",
+              vehicleNumber: "",
+              dimensions: {
+                weight: { value: 0.1, units: "tons" },
+                length: { value: 0.1, units: "inch" },
+                breadth: { value: 0.1, units: "inch" },
+                height: { value: 0.1, units: "inch" },
+              },
+            }
+      );
+      setBlocks(newBlocks);
+      // setValue("blocks", newBlocks);
+      setValue("noOfBlocks", newBlocks.length);
+      saveProgressSilently(getValues());
+      const isValid = await trigger("blocks");
+      if (!isValid) {
+        console.error("Block validation failed:", form.formState.errors);
+      }
     }
   };
 
@@ -289,16 +308,41 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   // Form submission
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+    const isValid = await trigger();
+    if (!isValid) {
+      console.error("Form validation failed:", form.formState.errors);
+      toast.error("Please fill all required fields correctly");
+      setIsLoading(false);
+      return;
+    }
     try {
-      await postData("/factory-management/inventory/addlotandblocks", {
+      const payload = {
         ...values,
+        materialType: values.materialType || "granite",
         materialCost: values.materialCost || 0,
         markerCost: values.markerCost || 0,
         transportCost: values.transportCost || 0,
+        quarryCost: values.quarryCost || 0,
+        commissionCost: values.commissionCost || 0,
+        markerOperatorName: values.markerOperatorName || "",
+        quarryName: values.quarryName || "",
         factoryId,
         organizationId,
         status: "active",
-      });
+        blocks: values.blocks.map((block) => ({
+          materialType: block.materialType || "type1",
+          blockphoto: block.blockphoto || "",
+          vehicleNumber: block.vehicleNumber || "",
+          inStock: block.inStock ?? true,
+          dimensions: {
+            weight: { value: block.dimensions.weight.value, units: "tons" },
+            length: { value: block.dimensions.length.value, units: "inch" },
+            breadth: { value: block.dimensions.breadth.value, units: "inch" },
+            height: { value: block.dimensions.height.value, units: "inch" },
+          },
+        })),
+      };
+      await postData("/factory-management/inventory/addlotandblocks", payload);
       toast.success("Lot created/updated successfully");
       router.push("./");
       setTimeout(() => localStorage.removeItem("rawMaterialFormData"), 3000);
@@ -315,8 +359,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume =
-        (length.value * breadth.value * height.value) /1000000;
+      const volume = (length.value * breadth.value * height.value) / 1000000;
+
+      // length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
       return total + (volume || 0);
     }, 0);
     return {
@@ -328,13 +373,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   function calculateTotalWeight() {
     const totalWeightInTons = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume =
-        (length.value * breadth.value * height.value) / 1000000; // m³
+      const volume = (length.value * breadth.value * height.value) / 1000000; // m³
       const density = 3.5; // Example density in tons/m³
+      //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      // const density = 3.5;
       const weight = volume * density;
       return total + weight;
     }, 0);
-
     return {
       inTons: totalWeightInTons,
     };
@@ -350,13 +395,11 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             `/quarry/getbyfactory/${factoryId}?search=${search}&page=${pageNo}&limit=50`
           );
           const data = res;
-
           if (pageNo === 1) {
             setQuarries(data.data || data);
           } else {
             setQuarries((prev) => [...prev, ...(data.data || data)]);
           }
-
           setHasMore((data?.data?.length || data.length) === 50);
         } catch (err) {
           console.error("Failed to fetch:", err);
@@ -364,8 +407,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
           setLoading(false);
         }
       },
-      500, // Reduced from 1000ms to 500ms for better responsiveness
-      { leading: false, trailing: true } // Only trigger after typing stops
+      500,
+      { leading: false, trailing: true }
     ),
     [factoryId]
   );
@@ -373,8 +416,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   // Trigger fetchQuarries and reset page on search change
   useEffect(() => {
     if (dropdownOpen && factoryId) {
-      setPage(1); // Reset page to 1 on search change
-      setQuarries([]); // Clear previous results
+      setPage(1);
+      setQuarries([]);
       fetchQuarries(search, 1);
     }
   }, [search, dropdownOpen, fetchQuarries]);
@@ -408,7 +451,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     setSearch(lesseeName);
     setValue("quarryName", lesseeName);
     setDropdownOpen(false);
-    setTimeout(() => inputRef.current?.focus(), 0); // Restore focus
+    setTimeout(() => inputRef.current?.focus(), 0);
     saveProgressSilently(getValues());
   };
 
@@ -428,6 +471,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       placeholder="Granite"
                       disabled={isLoading}
                       {...field}
+                      value={field.value ?? ""}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -524,6 +568,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       placeholder="Enter Operator Name"
                       disabled={isLoading}
                       {...field}
+                      value={field.value ?? ""}
                       onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
@@ -548,8 +593,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         const val = e.target.value;
                         setSearch(val);
                         field.onChange(val);
-                        setPage(1); // Reset page on search change
-                        setQuarries([]); // Clear previous results
+                        setPage(1);
+                        setQuarries([]);
                         fetchQuarries(val);
                         setDropdownOpen(true);
                       }}
@@ -662,15 +707,15 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
                       }
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const value = e.target.value;
                         if (value === "") {
                           field.onChange(1);
-                          handleBlockCountChange("1");
+                          await handleBlockCountChange("1");
                           return;
                         }
                         field.onChange(Number(value));
-                        handleBlockCountChange(value);
+                        await handleBlockCountChange(value);
                       }}
                       value={field.value ?? 1}
                       onBlur={() => saveProgressSilently(getValues())}
@@ -690,7 +735,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (cm)"
+                placeholder="Length (inch)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -707,7 +752,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           length: {
                             ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0,
+                            value: parseFloat(globalLength) || 0.1,
                           },
                         },
                       }));
@@ -728,7 +773,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (cm)"
+                placeholder="Breadth (inch)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -745,7 +790,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           breadth: {
                             ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0,
+                            value: parseFloat(globalBreadth) || 0.1,
                           },
                         },
                       }));
@@ -766,7 +811,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (cm)"
+                placeholder="Height (inch)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -783,7 +828,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           height: {
                             ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0,
+                            value: parseFloat(globalHeight) || 0.1,
                           },
                         },
                       }));
@@ -802,12 +847,14 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Length (cm)</TableHead>
-                <TableHead>Breadth (cm)</TableHead>
-                <TableHead>Height (cm)</TableHead>
+                <TableHead>Material Type</TableHead>
+                <TableHead>Length (inch)</TableHead>
+                <TableHead>Breadth (inch)</TableHead>
+                <TableHead>Height (inch)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Weight (tons)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
+                <TableHead>Block Photo</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -817,6 +864,33 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>
                     <FormField
+                      name={`blocks.${index}.materialType`}
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="text"
+                              placeholder="Enter material type"
+                              value={block.materialType || ""}
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].materialType =
+                                  e.target.value;
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
                       name={`blocks.${index}.dimensions.length.value`}
                       control={control}
                       render={({ field }) => (
@@ -824,8 +898,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0"
-                              step="1"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
                               onWheel={(e) =>
@@ -857,8 +931,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0"
-                              step="1"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.breadth.value}
                               placeholder="Enter breadth"
                               onWheel={(e) =>
@@ -890,8 +964,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0"
-                              step="1"
+                              min="0.1"
+                              step="0.1"
                               value={block.dimensions.height.value}
                               placeholder="Enter height"
                               onWheel={(e) =>
@@ -914,20 +988,23 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       )}
                     />
                   </TableCell>
-                  
                   <TableCell>
                     {(
                       (block.dimensions.length.value *
-                      block.dimensions.breadth.value *
-                      block.dimensions.height.value) /
-1000000
-                    ).toFixed(2)}
+                        block.dimensions.breadth.value *
+                        block.dimensions.height.value) /
+                      1000000
+                    )
+                      // block.dimensions.height.value *
+                      // (block.dimensions.length.units === "inch" ? 0.000016387064 : 0.000001)
+                      .toFixed(2)}
                   </TableCell>
                   <TableCell>
                     {calculateWeight(
                       block.dimensions.length.value,
                       block.dimensions.breadth.value,
                       block.dimensions.height.value
+                      // block.dimensions.length.units
                     )}
                   </TableCell>
                   <TableCell>
@@ -935,6 +1012,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       type="string"
                       placeholder="Vehicle Number"
                       disabled={isLoading}
+                      value={block.vehicleNumber || ""}
                       onChange={(e) => {
                         const updatedBlocks = [...blocks];
                         updatedBlocks[index].vehicleNumber = e.target.value;
@@ -942,6 +1020,31 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         setValue("blocks", updatedBlocks);
                         saveProgressSilently(getValues());
                       }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <FormField
+                      control={control}
+                      name={`blocks.${index}.blockphoto`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <FileUploadField
+                              name={field.name}
+                              value={field.value || ""}
+                              onChange={(value) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].blockphoto = value || "";
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              storageKey="blockphoto"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </TableCell>
                   <TableCell>
@@ -960,7 +1063,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             </TableBody>
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={4} className="text-right font-bold">
+                <TableCell colSpan={5} className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
                 <TableCell className="font-bold">

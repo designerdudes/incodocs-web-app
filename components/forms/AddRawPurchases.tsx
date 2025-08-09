@@ -42,6 +42,7 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 import ConfirmationDialog from "../ConfirmationDialog";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import { Calendar } from "../ui/calendar";
+import { setGlobal } from "next/dist/trace";
 
 interface RawPurchaseCreateNewFormProps {
   gap: number;
@@ -111,8 +112,10 @@ export default function RawPurchaseCreateNewForm({
   const [blocks, setBlocks] = React.useState<any[]>([]);
   const [globalWeight, setGlobalWeight] = React.useState<string>("");
   const [globalLength, setGlobalLength] = React.useState<string>("");
+  const [globaltype, setGlobaltype] = React.useState<string>("");
   const [globalBreadth, setGlobalBreadth] = React.useState<string>("");
   const [globalHeight, setGlobalHeight] = React.useState<string>("");
+  const [applyTypeToAll, setApplyTypeToAll] = React.useState<boolean>(false);
   const [applyWeightToAll, setApplyWeightToAll] =
     React.useState<boolean>(false);
   const [applyLengthToAll, setApplyLengthToAll] =
@@ -663,10 +666,18 @@ export default function RawPurchaseCreateNewForm({
               )}
             />
           </div>
-
+          
           {/* Dimensions Inputs */}
           <div className="grid grid-cols-4 gap-3 mt-3">
             {[
+              {
+                label: "materialtype",
+                value: globaltype,
+                setter: setGlobaltype,
+                apply: applyTypeToAll,
+                setApply: setApplyTypeToAll,
+                key: "type",
+              },
               {
                 label: "Length (inch)",
                 value: globalLength,
@@ -697,7 +708,7 @@ export default function RawPurchaseCreateNewForm({
                   value={value}
                   onChange={(e) => setter(e.target.value)}
                   placeholder={label}
-                  type="number"
+                  type={key === "type" ? "text" : "number"} // Text for materialtype, number for others
                   disabled={isLoading}
                 />
                 <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -707,16 +718,27 @@ export default function RawPurchaseCreateNewForm({
                     onChange={(e) => {
                       setApply(e.target.checked);
                       if (e.target.checked) {
-                        const updatedBlocks = blocks.map((block) => ({
-                          ...block,
-                          dimensions: {
-                            ...block.dimensions,
-                            [key]: {
-                              value: parseFloat(value) || 0,
-                              units: key === "weight" ? "tons" : "inch",
-                            },
-                          },
-                        }));
+                        const updatedBlocks = blocks.map((block) => {
+                          if (key === "type") {
+                            // Update materialType directly for materialtype
+                            return {
+                              ...block,
+                              materialType: value, // Apply text value to materialType
+                            };
+                          } else {
+                            // Update dimensions for length, breadth, height
+                            return {
+                              ...block,
+                              dimensions: {
+                                ...block.dimensions,
+                                [key]: {
+                                  value: parseFloat(value) || 0,
+                                  units: key === "weight" ? "tons" : "inch",
+                                },
+                              },
+                            };
+                          }
+                        });
                         setBlocks(updatedBlocks);
                         form.setValue("blocks", updatedBlocks);
                       }

@@ -18,6 +18,7 @@ import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 const formSchema = z.object({
   lotName: z
@@ -46,6 +47,7 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
+  blockphoto: z.string().optional(),
   markerOperatorName: z
     .string()
     .min(3, { message: "Marker operator must be at least 3 characters long" })
@@ -73,6 +75,7 @@ export default function EditLotForm({ params }: Props) {
       markerCost: "",
       transportCost: "",
       markerOperatorName: "",
+      blockphoto: "",
     },
   });
 
@@ -86,7 +89,7 @@ export default function EditLotForm({ params }: Props) {
         const response = await fetchData(
           `/factory-management/inventory/lot/getbyid/${lotId}`
         );
-        
+
         const data = response;
 
         // Reset form with fetched values
@@ -97,6 +100,7 @@ export default function EditLotForm({ params }: Props) {
           markerCost: data.markerCost || "",
           transportCost: data.transportCost || "",
           markerOperatorName: data.markerOperatorName || "",
+          blockphoto: data.blockphoto || "",
         });
       } catch (error) {
         console.error("Error fetching lot data:", error);
@@ -233,7 +237,7 @@ export default function EditLotForm({ params }: Props) {
                 <FormControl>
                   <Input
                     placeholder="Eg: 1000"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     type="number"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
@@ -255,7 +259,7 @@ export default function EditLotForm({ params }: Props) {
                   <Input
                     placeholder="Eg: 1000"
                     type="number"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
                   />
@@ -278,6 +282,24 @@ export default function EditLotForm({ params }: Props) {
                     type="text"
                     {...field}
                     onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="blockphoto"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Block Photo</FormLabel>
+                <FormControl>
+                  <FileUploadField
+                    name="blockphoto"
+                    storageKey="blockphoto"
+                    value={field.value}
+                    onChange={field.onChange}
                   />
                 </FormControl>
                 <FormMessage />
