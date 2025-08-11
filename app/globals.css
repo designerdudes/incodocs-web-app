@@ -4,33 +4,33 @@
 
 @layer base {
   :root {
-    --background: 240.00 71.43% 98.63%;
-    --foreground: 240.00 37.50% 6.27%;
+    --background: 240 71.43% 98.63%;
+    --foreground: 240 37.5% 6.27%;
 
-    --primary: 240.50 62.30% 62.55%;
-    --primary-foreground: 0.00 0.00% 100.00%;
+    --primary: 240.5 62.3% 62.55%;
+    --primary-foreground: 0 0% 100%;
 
-    --card: 240.00 71.43% 98.63%;
-    --card-foreground: 240.00 37.50% 6.27%;
+    --card: 240 71.43% 98.63%;
+    --card-foreground: 240 37.5% 6.27%;
 
-    --popover: 0.00 0.00% 100.00%;
-    --popover-foreground: 240.00 37.50% 6.27%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 37.5% 6.27%;
 
-    --secondary: 240.00 64.29% 94.51%;
+    --secondary: 240 64.29% 94.51%;
     --secondary-foreground: 226.15 37.14% 13.73%;
 
-    --muted: 240.00 57.89% 96.27%;
-    --muted-foreground: 0.00 0.00% 40.00%;
+    --muted: 240 57.89% 96.27%;
+    --muted-foreground: 0 0% 40%;
 
-    --accent: 240.00 57.89% 96.27%;
-    --accent-foreground: 240.50 62.30% 62.55%;
+    --accent: 240 57.89% 96.27%;
+    --accent-foreground: 240.5 62.3% 62.55%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 0.00 0.00% 90.20%;
-    --input: 0.00 0.00% 90.20%;
-    --ring: 240.50 62.30% 62.55%;
+    --border: 0 0% 90.2%;
+    --input: 0 0% 90.2%;
+    --ring: 240.5 62.3% 62.55%;
 
     --radius: 0.5rem;
 
@@ -59,50 +59,50 @@
 
   .dark {
     --background: 226.15 37.14% 13.73%;
---foreground: 240.00 64.29% 94.51%;
+    --foreground: 240 64.29% 94.51%;
 
---primary: 240.50 62.30% 62.55%;
---primary-foreground: 0.00 0.00% 100.00%;
+    --primary: 240.5 62.3% 62.55%;
+    --primary-foreground: 0 0% 100%;
 
---card: 226.15 37.14% 13.73%;
---card-foreground: 240.00 64.29% 94.51%;
+    --card: 226.15 37.14% 13.73%;
+    --card-foreground: 240 64.29% 94.51%;
 
---popover: 226.15 37.14% 13.73%;
---popover-foreground: 240.00 64.29% 94.51%;
+    --popover: 226.15 37.14% 13.73%;
+    --popover-foreground: 240 64.29% 94.51%;
 
---secondary: 240.00 37.50% 21.96%;
---secondary-foreground: 0.00 0.00% 100.00%;
+    --secondary: 240 37.5% 21.96%;
+    --secondary-foreground: 0 0% 100%;
 
---muted: 225.00 21.05% 22.35%;
---muted-foreground: 226.15 5.94% 57.06%;
+    --muted: 225 21.05% 22.35%;
+    --muted-foreground: 226.15 5.94% 57.06%;
 
---accent: 240.00 37.50% 21.96%;
---accent-foreground: 240.00 64.29% 94.51%;
+    --accent: 240 37.5% 21.96%;
+    --accent-foreground: 240 64.29% 94.51%;
 
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
 
---border: 0.00 0.00% 14.90%;
---input: 0.00 0.00% 14.90%;
---ring: 240.50 62.30% 62.55%;
+    --border: 0 0% 14.9%;
+    --input: 0 0% 14.9%;
+    --ring: 240.5 62.3% 62.55%;
 
---radius: 0.5rem;
+    --radius: 0.5rem;
 
---sidebar-background: 240 5.9% 10%;
+    --sidebar-background: 240 5.9% 10%;
 
---sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-foreground: 240 4.8% 95.9%;
 
---sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 224.3 76.3% 48%;
 
---sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 100%;
 
---sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent: 240 3.7% 15.9%;
 
---sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
 
---sidebar-border: 240 3.7% 15.9%;
+    --sidebar-border: 240 3.7% 15.9%;
 
---sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
   .theme {
     --animate-grid: grid 15s linear infinite;
@@ -126,8 +126,6 @@
   }
 }
 
-
-
 @layer utilities {
   @keyframes grid {
     0% {
@@ -140,4 +138,9 @@
   .animate-grid {
     animation: grid 35s linear infinite;
   }
+}
+
+/* the below line is to prevent global modal freezing */
+body {
+  pointer-events: auto !important;
 }
