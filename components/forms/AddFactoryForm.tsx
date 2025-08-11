@@ -13,13 +13,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
@@ -30,16 +23,19 @@ import toast from "react-hot-toast";
 // Factory Form Schema
 const formSchema = z.object({
   factoryName: z.string().min(1, { message: "Factory Name is required" }),
-prefix: z
-  .string()
-  .optional()
-  .refine(
-    (val) => !val || val.trim().length >= 2,
-    { message: "Prefix must be at least 2 characters if provided" }
-  ),
+  prefix: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || (val.trim().length >= 2 && val.trim().length <= 3),
+      {
+        message:
+          "Prefix must be at least 2 and not more than 3 characters if provided",
+      }
+    ),
   organizationId: z
-     .string()
-     .min(1, { message: "Organization must be selected" }),
+    .string()
+    .min(1, { message: "Organization must be selected" }),
   gstNo: z.string().min(1, { message: "GST number is required" }),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
@@ -70,9 +66,6 @@ export default function FactoryForm({
 }: FactoryFormProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  
-  
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -93,7 +86,6 @@ export default function FactoryForm({
   const router = useRouter();
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
     GlobalModal.title = "Confirm Factory Details";
     GlobalModal.description = "Please review the entered details:";
     GlobalModal.children = (
@@ -104,7 +96,7 @@ export default function FactoryForm({
         <p>
           <strong>Prefix:</strong> {values.prefix}
         </p>
-      
+
         <p>
           <strong>GST Number:</strong> {values.gstNo}
         </p>
@@ -132,18 +124,19 @@ export default function FactoryForm({
           </Button>
           <Button
             onClick={async () => {
+              setIsLoading(true);
               try {
                 await postData(
                   "/factory/add",
                   {
                     ...values,
                     status: "active",
-                  },
-                  {
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                    },
                   }
+                  // {
+                  //   headers: {
+                  //     Authorization: `Bearer ${token}`,
+                  //   },
+                  // }
                 );
                 setIsLoading(false);
                 GlobalModal.onClose();
@@ -155,8 +148,11 @@ export default function FactoryForm({
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.error("Error creating Factory");
+              } finally {
+                setIsLoading(false);
               }
             }}
+            disabled={isLoading}
           >
             Confirm
           </Button>
@@ -176,35 +172,35 @@ export default function FactoryForm({
             <FormItem>
               <FormLabel>Factory Name</FormLabel>
               <FormControl>
-                <Input placeholder="Eg: Factory A" {...field} disabled={isLoading} />
+                <Input
+                  placeholder="Eg: Factory A"
+                  {...field}
+                  disabled={isLoading}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-      <FormField
-  control={form.control}
-  name="prefix"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Prefix</FormLabel>
-      <FormControl>
-        <Input
-          placeholder="Eg: SAA"
-          {...field}
-          disabled={isLoading}
+        <FormField
+          control={form.control}
+          name="prefix"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prefix</FormLabel>
+              <FormControl>
+                <Input placeholder="Eg: SAA" {...field} disabled={isLoading} />
+              </FormControl>
+              {!field.value && (
+                <p className="text-xs text-muted-foreground">
+                  If left blank, a default prefix will be created using the
+                  first 3 letters of the factory name.
+                </p>
+              )}
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </FormControl>
-      {!field.value && (
-        <p className="text-xs text-muted-foreground">
-If left blank, a default prefix will be created using the first 3 letters of the factory name.
-
-        </p>
-      )}
-      <FormMessage />
-    </FormItem>
-  )}
-/>
 
         <FormField
           control={form.control}
@@ -240,7 +236,7 @@ If left blank, a default prefix will be created using the first 3 letters of the
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="address.pincode"
