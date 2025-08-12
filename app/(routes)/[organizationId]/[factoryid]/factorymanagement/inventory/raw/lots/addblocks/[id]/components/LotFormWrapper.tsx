@@ -7,6 +7,7 @@ import { AddBlockForm } from "@/components/forms/AddBlockForm";
 
 // Define the Zod schema (same as in AddBlockForm)
 const formSchema = z.object({
+   blockNumber:z.string().optional(),
   markerCost: z
     .number()
     .min(0, { message: "Marker cost must be greater than or equal to zero" })
@@ -19,6 +20,16 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Material cost must be greater than or equal to zero" })
     .optional(),
+    quarryCost: z
+            .number()
+            .min(0, { message: "Quarry cost must be greater than or equal to zero" })
+            .optional(),
+          commissionCost: z
+            .number()
+            .min(0, {
+              message: "Commission cost must be greater than or equal to zero",
+            })
+            .optional(),
   noOfBlocks: z
     .number()
     .min(1, { message: "Number of blocks must be greater than zero" }),
@@ -63,10 +74,13 @@ interface LotFormWrapperProps {
     _id: string;
     lotName: string;
     materialType: string;
+     blockNumber: number;
     blocksId: string[];
     transportCost: number;
     materialCost: number;
     markerCost: number;
+    quarryCost:number;
+    commissionCost:number;
     markerOperatorName: string;
     createdAt: string;
     updatedAt: string;

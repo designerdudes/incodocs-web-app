@@ -108,9 +108,8 @@ const formSchema = z.object({
   blocks: z
     .array(
       z.object({
-        materialType: z
-          .string()
-          .min(1, { message: "Material type is required" }),
+        blockNumber: z.number().optional(),
+        materialType: z.string().optional(),
         inStock: z.boolean(),
         blockphoto: z.string().optional(),
         vehicleNumber: z.string().optional(),
@@ -199,7 +198,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       noOfBlocks: 1,
       blocks: [
         {
-          materialType: "type1",
+          blockNumber: 0,
+          materialType: "",
           inStock: true,
           blockphoto: "",
           vehicleNumber: "",
@@ -260,7 +260,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         index < currentBlocks.length
           ? currentBlocks[index]
           : {
-              materialType: "type1",
+              blockNumber: "",
+              materialType: "",
               inStock: true,
               blockphoto: "",
               vehicleNumber: "",
@@ -330,7 +331,8 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         organizationId,
         status: "active",
         blocks: values.blocks.map((block) => ({
-          materialType: block.materialType || "type1",
+          blockNumber: block.blockNumber || "",
+          materialType: block.materialType || "",
           blockphoto: block.blockphoto || "",
           vehicleNumber: block.vehicleNumber || "",
           inStock: block.inStock ?? true,
@@ -460,6 +462,25 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
+            <FormField
+              name="lotName"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lot Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Granite"
+                      disabled={isLoading}
+                      {...field}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               name="materialType"
               control={control}
@@ -600,11 +621,13 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                       }}
                     />
                   </FormControl>
+
                   {dropdownOpen && (
                     <div
                       ref={dropdownRef}
                       className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded shadow max-h-60 overflow-y-auto"
                     >
+                      {/* Quarry list or "No results" */}
                       {quarries.length > 0 ? (
                         quarries.map((item) => (
                           <div
@@ -623,7 +646,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           {loading ? "Loading..." : "No results found"}
                         </div>
                       )}
-                      {hasMore && (
+
+                      {/* Load more if available */}
+                      {hasMore && quarries.length > 0 && (
                         <div
                           className="p-2 text-center text-blue-500 cursor-pointer"
                           onMouseDown={(e) => {
@@ -634,12 +659,28 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           Load more...
                         </div>
                       )}
+
+                      {/* Always show Add New Quarry option */}
+                      <div
+                        className="p-2 text-blue-500 hover:bg-gray-100 cursor-pointer border-t border-gray-200"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          window.open(
+                            `/${organizationId}/${factoryId}/factorymanagement/parties/quarry/createNew`,
+                            "_blank"
+                          );
+                        }}
+                      >
+                        + Add New Quarry
+                      </div>
                     </div>
                   )}
+
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               name="quarryCost"
               control={control}
@@ -735,7 +776,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
+                placeholder="Length (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -773,7 +814,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (inch)"
+                placeholder="Breadth (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -811,7 +852,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   e.target instanceof HTMLElement && e.target.blur()
                 }
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
+                placeholder="Height (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -847,10 +888,11 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
+                <TableHead>Block Number</TableHead>
                 <TableHead>Material Type</TableHead>
-                <TableHead>Length (inch)</TableHead>
-                <TableHead>Breadth (inch)</TableHead>
-                <TableHead>Height (inch)</TableHead>
+                <TableHead>Length (cm)</TableHead>
+                <TableHead>Breadth (cm)</TableHead>
+                <TableHead>Height (cm)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
                 <TableHead>Weight (tons)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
@@ -862,6 +904,33 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                    <FormField
+                      name={`blocks.${index}.blockNumber`}
+                      control={control}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="Enter Block Number"
+                              value={block.blockNumber || ""}
+                              onChange={(e) => {
+                                const updatedBlocks = [...blocks];
+                                updatedBlocks[index].blockNumber =
+                                  e.target.value;
+                                setBlocks(updatedBlocks);
+                                setValue("blocks", updatedBlocks);
+                                saveProgressSilently(getValues());
+                              }}
+                              disabled={isLoading}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TableCell>
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.materialType`}
@@ -898,7 +967,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="number"
-                              min="0.1"
+                              min="0"
                               step="0.1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
