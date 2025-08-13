@@ -65,9 +65,11 @@ export function DataTableCellActions({ row }: Props) {
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem onClick={() => router.push(viewPath)}>
+        <DropdownMenuItem asChild>
+          <a href={viewPath} target="_blank" rel="noopener noreferrer">
           <EyeIcon className="mr-2 h-4 w-4" />
           {isDraftPage ? "View Draft" : "View Shipment"}
+          </a>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
