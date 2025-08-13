@@ -33,11 +33,14 @@ interface LotData {
   _id: string;
   lotName: string;
   materialType: string;
+   blockNumber: number;
   blocksId: string[];
   transportCost: number;
   materialCost: number;
   markerCost: number;
   markerOperatorName: string;
+  quarryCost: number;
+  commissionCost: number;
   createdAt: string;
   updatedAt: string;
   blocks: Array<{
@@ -81,7 +84,6 @@ export default async function AddBlockFormPage({ params }: Props) {
   );
   const lotData: LotData = await lotResponse.json();
 
-
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">
       {/* Topbar */}
@@ -108,9 +110,7 @@ export default async function AddBlockFormPage({ params }: Props) {
 
       <div className="flex flex-col lg:flex-row gap-6 w-full">
         <div className="w-full lg:w-2/3">
-          <LotFormWrapper
-            lotData={lotData}
-          />
+          <LotFormWrapper lotData={lotData} />
         </div>
 
         {/* Lot Details Card */}
@@ -129,8 +129,12 @@ export default async function AddBlockFormPage({ params }: Props) {
               </TableHeader>
               <TableBody>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">Lot Name</TableCell>
+                  <TableCell className="whitespace-nowrap">Lot Id</TableCell>
                   <TableCell>{lotData?.lotName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">Lot Name</TableCell>
+                  <TableCell>{}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -148,19 +152,40 @@ export default async function AddBlockFormPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Transport Cost
                   </TableCell>
-                  <TableCell>{lotData?.transportCost}</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.transportCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Cost
                   </TableCell>
-                  <TableCell>{lotData?.materialCost}</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.materialCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Cost
                   </TableCell>
-                  <TableCell>{lotData?.markerCost}</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.markerCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -170,18 +195,44 @@ export default async function AddBlockFormPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Block Created At
+                    Qarry Transport cost
                   </TableCell>
                   <TableCell>
-                    {moment(lotData.createdAt).format("YYYY-MM-DD")}
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.quarryCost || 0)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Block Updated At
+                    Comission cost
                   </TableCell>
                   <TableCell>
-                    {moment(lotData.updatedAt).format("YYYY-MM-DD")}
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.commissionCost || 0)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Lot Created At
+                  </TableCell>
+                  <TableCell>
+                    {moment(lotData.createdAt).format("DD MMM YYYY")}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Lot Updated At
+                  </TableCell>
+                  <TableCell>
+                    {moment(lotData.updatedAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
               </TableBody>

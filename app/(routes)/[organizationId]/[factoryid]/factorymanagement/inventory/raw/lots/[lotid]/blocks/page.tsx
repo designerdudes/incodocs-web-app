@@ -127,7 +127,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Transport Cost:
+                    Transport Cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -160,7 +160,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow> */}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Material Cost:
+                    Material Cost
                   </TableCell>
                   <TableCell>{
                   new Intl.NumberFormat("en-IN", {
@@ -173,7 +173,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Marker Cost:
+                    Marker Cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -186,7 +186,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Marker Operator:
+                    Marker Operator
                   </TableCell>
                   <TableCell>{LotData?.markerOperatorName}</TableCell>
                 </TableRow>

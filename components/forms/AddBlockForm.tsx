@@ -34,6 +34,11 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 
 // Define the Zod schema
 const formSchema = z.object({
+  blockNumber:z.number().optional(),
+  materialType: z
+    .string()
+    .min(3, { message: "Material type must be at least 3 characters long" })
+    .optional(),
   markerCost: z
     .number()
     .min(1, { message: "Marker cost must be greater than or equal to zero" })
@@ -41,6 +46,16 @@ const formSchema = z.object({
   transportCost: z
     .number()
     .min(1, { message: "Transport cost must be greater than or equal to zero" })
+    .optional(),
+  quarryCost: z
+    .number()
+    .min(0, { message: "Quarry cost must be greater than or equal to zero" })
+    .optional(),
+  commissionCost: z
+    .number()
+    .min(0, {
+      message: "Commission cost must be greater than or equal to zero",
+    })
     .optional(),
   materialCost: z
     .number()
@@ -92,12 +107,15 @@ interface AddBlockFormProps {
   LotData: {
     _id: string;
     lotName: string;
+    blockNumber: number;
     materialType: string;
     blocksId: string[];
     transportCost: number;
     materialCost: number;
     markerCost: number;
     markerOperatorName: string;
+    quarryCost: number;
+    commissionCost: number;
     createdAt: string;
     updatedAt: string;
     blocks: FormData["blocks"];
@@ -124,7 +142,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
   const [applyHeightToAll, setApplyHeightToAll] = useState<boolean>(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [blocks, setBlocks] = useState<any[]>([]);
-  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<number | null>(null);
+  const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
+    number | null
+  >(null);
 
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
@@ -133,13 +153,19 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
   const prevMarkerCost = LotData?.markerCost || 0;
   const prevTransportCost = LotData?.transportCost || 0;
   const prevMaterialCost = LotData?.materialCost || 0;
+  const prevquarryCost = LotData?.quarryCost || 0;
+  const prevcommissionCost = LotData?.commissionCost || 0;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-       markerCost: 0 || undefined,
+      blockNumber:0,
+      materialType: "",
+      markerCost: 0 || undefined,
       transportCost: 0 || undefined,
       materialCost: 0 || undefined,
+      quarryCost: 0 || undefined,
+      commissionCost: 0 || undefined,
       noOfBlocks: 1,
       blocks: [
         {
@@ -263,12 +289,25 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
   function calculateTotalVolume() {
     const totalVolumeInM = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const volume =
-        (length.value * breadth.value * height.value) / 1_000_000;
+      const volume = (length.value * breadth.value * height.value) / 1_000_000;
       return total + (volume || 0);
     }, 0);
     return {
       inM: totalVolumeInM,
+    };
+  }
+  function calculateTotalWeight() {
+    const totalWeightInTons = blocks.reduce((total, block) => {
+      const { length, breadth, height } = block.dimensions;
+      const volume = (length.value * breadth.value * height.value) / 1000000; // m³
+      const density = 3.5; // Example density in tons/m³
+      //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      // const density = 3.5;
+      const weight = volume * density;
+      return total + weight;
+    }, 0);
+    return {
+      inTons: totalWeightInTons,
     };
   }
 
@@ -283,6 +322,44 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
+            <FormField
+              name="blockNumber"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Block Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="2341"
+                      disabled={isLoading}
+                      {...field}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="materialType"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Material Type</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Granite"
+                      disabled={isLoading}
+                      {...field}
+                      value={field.value ?? ""}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               name="materialCost"
               control={control}
@@ -373,6 +450,70 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                     <span className="text-gray-500 text-sm">
                       Total Transport cost: {prevTransportCost} + {field.value}{" "}
                       = {prevTransportCost + field.value}
+                    </span>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="quarryCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quarry Transport Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter Quarry Transport Cost"
+                      disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? undefined}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Transport cost: {prevquarryCost} + {field.value} ={" "}
+                      {prevquarryCost + field.value}
+                    </span>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="commissionCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Commission Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter Commission Cost"
+                      disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? undefined}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Transport cost: {prevcommissionCost} + {field.value}{" "}
+                      = {prevcommissionCost + field.value}
                     </span>
                   )}
                   <FormMessage />
@@ -535,11 +676,11 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>#</TableHead>
-                <TableHead>Length (inch)</TableHead>
-                <TableHead>Breadth (inch)</TableHead>
-                <TableHead>Height (inch)</TableHead>
-                <TableHead>Weight (tons)</TableHead>
+                <TableHead>Length (cm)</TableHead>
+                <TableHead>Breadth (cm)</TableHead>
+                <TableHead>Height (cm)</TableHead>
                 <TableHead>Volume (m³)</TableHead>
+                <TableHead>Weight (tons)</TableHead>
                 <TableHead>Vehicle Number</TableHead>
                 <TableHead>Block Photo</TableHead>
                 <TableHead>Action</TableHead>
@@ -635,7 +776,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0.1;
+                                  parseFloat(e.target.value) || 0;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
@@ -649,19 +790,19 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                     />
                   </TableCell>
                   <TableCell>
-                    {calculateWeight(
-                      block.dimensions.length.value,
-                      block.dimensions.breadth.value,
-                      block.dimensions.height.value
-                    )}
-                  </TableCell>
-                  <TableCell>
                     {(
                       (block.dimensions.length.value *
                         block.dimensions.breadth.value *
                         block.dimensions.height.value) /
                       1_000_000
                     ).toFixed(2)}
+                  </TableCell>
+                  <TableCell>
+                    {calculateWeight(
+                      block.dimensions.length.value,
+                      block.dimensions.breadth.value,
+                      block.dimensions.height.value
+                    )}
                   </TableCell>
                   <TableCell>
                     <FormField
@@ -676,7 +817,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                               value={block.vehicleNumber || ""}
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
-                                updatedBlocks[index].vehicleNumber = e.target.value;
+                                updatedBlocks[index].vehicleNumber =
+                                  e.target.value;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
@@ -733,6 +875,10 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                 <TableCell colSpan={8} className="text-right font-bold">
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
+                <TableCell className="font-bold">
+                                  Total Weight (tons):{" "}
+                                  {calculateTotalWeight().inTons.toFixed(2)}
+                                </TableCell>
                 <TableCell colSpan={2}></TableCell>
               </TableRow>
             </TableFooter>
