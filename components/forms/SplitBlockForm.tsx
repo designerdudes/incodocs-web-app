@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { fetchData, postData } from "@/axiosUtility/api";
 import EntityCombobox from "../ui/EntityCombobox";
 import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 type SubBlock = {
@@ -48,10 +49,18 @@ export default function SplitBlockForm({
   const [machines, setMachines] = useState([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>("");
   const router = useRouter();
+  const { organizationId } = useParams();
+  const [originalBlock, setOriginalBlock] = useState<{
+    length: number;
+    breadth: number;
+    height: number;
+    weight: number;
+  } | null>(null);
+
   useEffect(() => {
     const calculatedVolume = subBlocks.reduce((sum, b) => {
       const { length, breadth, height } = b.dimensions;
-      return sum + (length.value * breadth.value * height.value)/1000000;
+      return sum + (length.value * breadth.value * height.value) / 1000000;
     }, 0);
     setTotalVolume(calculatedVolume);
 
@@ -65,18 +74,47 @@ export default function SplitBlockForm({
   }, [subBlocks, originalBlockVolume]);
 
   useEffect(() => {
+    const fetchBlockData = async () => {
+      try {
+        const res = await fetchData(
+          `/factory-management/inventory/raw/get/${parentBlockId}`
+        );
+        // Assuming API returns dimensions inside res.dimensions
+        setOriginalBlock({
+          length: res.dimensions?.length?.value || 0,
+          breadth: res.dimensions?.breadth?.value || 0,
+          height: res.dimensions?.height?.value || 0,
+          weight: res.weight || 0,
+        });
+      } catch (error) {
+        console.error("Error fetching block data:", error);
+      }
+    };
+
+    if (parentBlockId) {
+      fetchBlockData();
+    }
+  }, [parentBlockId]);
+
+  useEffect(() => {
     const fetchmachine = async () => {
       const res = await fetchData(`/machine/getbyfactory/${factoryId}`);
+      const allowedTypes = ["Multi Cutter", "Single Cutter", "Rope Cutter"];
+
       const response = res
-        .filter((e: any) => e.typeCutting === "Rope Cutter")
+        .filter((e: any) => allowedTypes.includes(e.typeCutting))
         .map((e: any) => ({
-          label: e.machineName,
+          label: `${e.machineName} - ${e.typeCutting}`,
           value: e._id,
+          typeCutting: e.typeCutting,
         }));
+
+      console.log("Filtered machines", response);
       setMachines(response);
     };
+
     fetchmachine();
-  }, []);
+  }, [factoryId]);
 
   const handleCountChange = (value: number) => {
     setCount(value);
@@ -135,8 +173,29 @@ export default function SplitBlockForm({
 
   return (
     <div className="space-y-4">
+      {originalBlock && (
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <Label>Length (cm)</Label>
+            <Input type="number" value={originalBlock.length} disabled />
+          </div>
+          <div>
+            <Label>Breadth (cm)</Label>
+            <Input type="number" value={originalBlock.breadth} disabled />
+          </div>
+          <div>
+            <Label>Height (cm)</Label>
+            <Input type="number" value={originalBlock.height} disabled />
+          </div>
+          <div className="mt-2">
+            <Label>Total Weight (kg)</Label>
+            <Input type="number" value={originalBlock.weight} disabled />
+          </div>
+        </div>
+      )}
+
       <div>
-        <Label>No. of Sub-Blocks</Label>
+        <Label>Number of Sub-Blocks</Label>
         <Input
           min={2}
           value={count}
@@ -146,13 +205,17 @@ export default function SplitBlockForm({
 
       <EntityCombobox
         entities={machines}
-        multiple={false}
+        multiple={true}
         value={selectedMachineId}
         onChange={(value) => setSelectedMachineId(value as string)}
         displayProperty="label"
         valueProperty="value"
         placeholder="Select Machine"
-        onAddNew={() => router.push("/factorymanagement/machines/createnew")}
+        onAddNew={() =>
+          window.open(
+            `/${organizationId}/${factoryId}/factorymanagement/machines/createnew`
+          )
+        }
         addNewLabel="Add New"
       />
 

@@ -51,6 +51,7 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   BlocksData = res;
+  // console.log("wwwwwww",BlocksData)
 
   let LotData = null;
   const resp = await fetch(
@@ -193,14 +194,14 @@ export default async function BlocksPage({ params }: Props) {
                 {LotData?.quarryName && (
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Qarry Name
+                      Quarry Name
                     </TableCell>
                     <TableCell>{LotData?.quarryName}</TableCell>
                   </TableRow>
                 )}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Qarry Transport cost
+                    Quarry Transport cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {

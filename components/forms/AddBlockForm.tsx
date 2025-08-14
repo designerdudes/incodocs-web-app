@@ -322,7 +322,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-3 gap-3">
-            <FormField
+            {/* <FormField
               name="blockNumber"
               control={control}
               render={({ field }) => (
@@ -340,7 +340,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
             <FormField
               name="materialType"
               control={control}

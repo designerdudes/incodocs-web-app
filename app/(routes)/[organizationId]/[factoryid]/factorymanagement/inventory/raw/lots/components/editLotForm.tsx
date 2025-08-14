@@ -25,6 +25,8 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Lot name must be at least 3 characters long" })
     .optional(),
+  lotId: z
+    .string().optional(),
   materialType: z
     .string()
     .min(3, { message: "Material type must be at least 3 characters long" })
@@ -47,7 +49,19 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
-  blockphoto: z.string().optional(),
+  quarryCost: z
+       .union([
+      z.string().min(1, { message: "Marker cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
+  commissionCost: z
+       .union([
+      z.string().min(1, { message: "Marker cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
+  // blockphoto: z.string().optional(),
   markerOperatorName: z
     .string()
     .min(3, { message: "Marker operator must be at least 3 characters long" })
@@ -70,12 +84,15 @@ export default function EditLotForm({ params }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       lotName: "",
+      lotId:"",
       materialType: "",
       materialCost: "",
       markerCost: "",
       transportCost: "",
       markerOperatorName: "",
-      blockphoto: "",
+      quarryCost:"",
+      commissionCost:"",
+      // blockphoto: "",
     },
   });
 
@@ -95,12 +112,15 @@ export default function EditLotForm({ params }: Props) {
         // Reset form with fetched values
         form.reset({
           lotName: data.lotName || "",
+          lotId: data.lotId || "",
           materialType: data.materialType || "",
           materialCost: data.materialCost || "",
           markerCost: data.markerCost || "",
           transportCost: data.transportCost || "",
           markerOperatorName: data.markerOperatorName || "",
-          blockphoto: data.blockphoto || "",
+          quarryCost: data.quarryCost ||"",
+          commissionCost:data.commissionCost ||"",
+          // blockphoto: data.blockphoto || "",
         });
       } catch (error) {
         console.error("Error fetching lot data:", error);
@@ -120,10 +140,13 @@ export default function EditLotForm({ params }: Props) {
     GlobalModal.children = (
       <div className="space-y-4">
         <p>Lot Name: {values.lotName}</p>
+         <p>Lot Id: {values.lotId}</p>
         <p>Material Type: {values.materialType}</p>
         <p>Material Cost: {values.materialCost}</p>
         <p>Marker Cost: {values.markerCost}</p>
         <p>Transport Cost: {values.transportCost}</p>
+        <p>Quarry Cost: {values.quarryCost}</p>
+        <p>Commission Cost: {values.commissionCost}</p>
         <p>Marker Operator: {values.markerOperatorName}</p>
         <div className="flex justify-end space-x-2">
           <Button
@@ -182,6 +205,19 @@ export default function EditLotForm({ params }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Lot Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Eg: Lot ABC" type="text" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="lotName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lot Id</FormLabel>
                 <FormControl>
                   <Input placeholder="Eg: Lot ABC" type="text" {...field} />
                 </FormControl>
@@ -288,7 +324,7 @@ export default function EditLotForm({ params }: Props) {
               </FormItem>
             )}
           />
-          <FormField
+          {/* <FormField
             control={form.control}
             name="blockphoto"
             render={({ field }) => (
@@ -305,7 +341,57 @@ export default function EditLotForm({ params }: Props) {
                 <FormMessage />
               </FormItem>
             )}
-          />
+          /> */}
+          <FormField
+                        name="quarryCost"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Quarry Transport Cost</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter Quarry Transport Cost"
+                                disabled={isLoading}
+                                onWheel={(e) =>
+                                  e.target instanceof HTMLElement && e.target.blur()
+                                }
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value ? parseFloat(value) : undefined);
+                                }}
+                                value={field.value ?? undefined}                     
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        name="commissionCost"
+                        control={form.control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Commission Cost</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                placeholder="Enter Commission Cost"
+                                disabled={isLoading}
+                                onWheel={(e) =>
+                                  e.target instanceof HTMLElement && e.target.blur()
+                                }
+                                onChange={(e) => {
+                                  const value = e.target.value;
+                                  field.onChange(value ? parseFloat(value) : undefined);
+                                }}
+                                value={field.value ?? undefined}                      
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
         </div>
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
