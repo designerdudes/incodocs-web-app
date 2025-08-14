@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -64,11 +65,11 @@ export default async function SlabsPage({ params }: Props) {
   SlabData = resp;
 
   const slabs = Array.isArray(SlabData) ? SlabData : [];
-const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
-  const length = slab?.dimensions?.length?.value ?? 0;
-  const height = slab?.dimensions?.height?.value ?? 0;
-  return total + (length * height) / 144;
-}, 0);
+  const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
+    const length = slab?.dimensions?.length?.value ?? 0;
+    const height = slab?.dimensions?.height?.value ?? 0;
+    return total + (length * height) / 144;
+  }, 0);
 
   function calculateVolume(
     length: number,
@@ -82,17 +83,34 @@ const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
     return "";
   }
 
-  const volumeinInchs = calculateVolume(
+  const volumeInInches = calculateVolume(
     BlockData?.dimensions?.length?.value,
     BlockData?.dimensions?.breadth?.value,
     BlockData?.dimensions?.height?.value
   );
 
-  function convertInchCubeToCmCube(volumeinInchs: any) {
-    const conversionFactor = 16.387064; // 1 cubic inch = 16.387064 cubic centimeters
-    const inchToCm = volumeinInchs * conversionFactor;
-    return inchToCm.toFixed(2);
+
+
+  function convertInchCubeToMeterCube(volumeInInches: any) {
+    if (!volumeInInches || isNaN(volumeInInches)) return "0.000000";
+    const conversionFactor = 0.000016387064;
+    return (volumeInInches * conversionFactor).toFixed(6);
   }
+const calculateWeightTons = (
+  lengthCm: number,
+  breadthCm: number,
+  heightCm: number
+): number => {
+  // Convert cm³ to m³
+  const volumeM3 = (lengthCm * breadthCm * heightCm) / 1_000_000;
+
+  // Density in tons/m³
+  const density = 3.5;
+
+  // Weight in tons, rounded to 2 decimals
+  return Number((volumeM3 * density).toFixed(2));
+};
+
 
   function getCuttingDateTime(cuttingScheduledAt: any): Date | null {
     if (
@@ -152,6 +170,10 @@ const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
+                    <TableCell>Block Id</TableCell>
+                    <TableCell>{BlockData?.blockNumber}</TableCell>
+                  </TableRow>
+                  <TableRow>
                     <TableCell>Block Number</TableCell>
                     <TableCell>{BlockData?.blockNumber}</TableCell>
                   </TableRow>
@@ -165,16 +187,32 @@ const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
                   </TableRow>
                   <TableRow>
                     <TableCell>Status</TableCell>
-                    <TableCell>
+                    <TableCell
+                      className={cn(
+                        BlockData?.status === "inStock" &&
+                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80  rounded",
+                        BlockData?.status === "inCutting" &&
+                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80  rounded",
+                        BlockData?.status === "cut" &&
+                        "bg-green-100 text-green-800 hover:bg-green-200/80  rounded",
+                        (!BlockData?.status || BlockData?.status === "N/A") &&
+                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60  rounded"
+                      )}
+                    >
                       {BlockData?.status === "cut"
-                        ? "Ready for Polish"
+                        ? "Block Cut"
                         : BlockData?.status || "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Weight (tons)</TableCell>
                     <TableCell>
-                      {BlockData?.dimensions?.weight?.value || "N/A"}
+                      {BlockData?.dimensions?.weight?.value ||
+                        calculateWeightTons(
+                          BlockData?.dimensions?.length?.value || 0,
+                          BlockData?.dimensions?.breadth?.value || 0,
+                          BlockData?.dimensions?.height?.value || 0
+                        )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -196,9 +234,9 @@ const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Volume (cm³)</TableCell>
+                    <TableCell>Volume (m³)</TableCell>
                     <TableCell>
-                      {convertInchCubeToCmCube(volumeinInchs)}
+                      {convertInchCubeToMeterCube(volumeInInches)}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -244,8 +282,8 @@ const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
                     <TableCell>
                       {BlockData?.cuttingScheduledAt
                         ? moment(
-                            getCuttingDateTime(BlockData.cuttingScheduledAt)
-                          ).format("DD MMM YYYY, hh:mm A")
+                          getCuttingDateTime(BlockData.cuttingScheduledAt)
+                        ).format("DD MMM YYYY, hh:mm A")
                         : "N/A"}
                     </TableCell>
                   </TableRow>
