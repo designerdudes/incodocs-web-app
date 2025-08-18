@@ -51,6 +51,7 @@ export default async function BlocksPage({ params }: Props) {
   });
 
   BlocksData = res;
+  // console.log("wwwwwww",BlocksData)
 
   let LotData = null;
   const resp = await fetch(

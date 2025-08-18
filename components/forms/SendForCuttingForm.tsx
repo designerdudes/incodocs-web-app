@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -65,6 +65,7 @@ export default function SendForCuttingForm({ params }: Props) {
   const router = useRouter();
   const factoryId = params.data.factoryId;
   const BlockId = params.data._id;
+  const { organizationId } = useParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -135,29 +136,44 @@ export default function SendForCuttingForm({ params }: Props) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
         {/* Machine Select */}
         <FormField
-          control={form.control}
-          name="cuttingMachineId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Machine</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select machine" />
-                </SelectTrigger>
-                <SelectContent>
-                  {machines
-                    ?.filter((machine) => machine.typeCutting) // keep only machines with cutting type
-                    .map((machine) => (
-                      <SelectItem key={machine._id} value={machine._id}>
-                        {`${machine.machineName} - ${machine.typeCutting}`}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+  control={form.control}
+  name="cuttingMachineId"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Machine</FormLabel>
+      <Select
+        onValueChange={(value) => {
+          if (value === "add-new") {
+            window.open(`/${organizationId}/${factoryId}/factorymanagement/machines/createnew`);
+          } else {
+            field.onChange(value);
+          }
+        }}
+        value={field.value}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select machine" />
+        </SelectTrigger>
+        <SelectContent>
+          {machines
+            ?.filter((machine) => machine.typeCutting) // only machines with cutting type
+            .map((machine) => (
+              <SelectItem key={machine._id} value={machine._id}>
+                {`${machine.machineName} - ${machine.typeCutting}`}
+              </SelectItem>
+            ))}
+
+          {/* Special Add New Option */}
+          <SelectItem value="add-new" className="text-blue-600 font-semibold">
+            + Add New Machine
+          </SelectItem>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
         {/* Date Picker */}
         <FormField
