@@ -46,15 +46,7 @@ const calculateWeight = (length: number, breadth: number, height: number) => {
   const volumeInCubicInches = length * breadth * height;
   const volumeInCubicMeters = volumeInCubicInches / 1000000;
 
-  // const calculateWeight = (length: number, breadth: number, height: number, units: "cm" | "inch") => {
-  //   let volumeInCubicMeters: number;
-  //   if (units === "inch") {
-  //     const volumeInCubicInches = length * breadth * height;
-  //     volumeInCubicMeters = volumeInCubicInches * 0.000016387064; // Convert cubic inches to cubic meters
-  //   } else {
-  //     const volumeInCubicCm = length * breadth * height;
-  //     volumeInCubicMeters = volumeInCubicCm * 0.000001; // Convert cubic cm to cubic meters
-  //   }
+
 
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
