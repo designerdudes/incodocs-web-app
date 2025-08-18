@@ -74,7 +74,21 @@ export const columns: ColumnDef<Blocks>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Block Number
+                Block Id
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+        filterFn: "includesString", // Use the built-in filtering logic for partial matches
+    },
+ {
+        accessorKey: "blockNumber",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block Name
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),

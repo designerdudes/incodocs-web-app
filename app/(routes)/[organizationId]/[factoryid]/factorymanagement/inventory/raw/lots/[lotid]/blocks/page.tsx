@@ -254,7 +254,7 @@ export default async function BlocksPage({ params }: Props) {
 
         {/* Block's DataTable */}
 
-        <div className="w-3.5/5">
+        <div className="w-3/5">
           <DataTable
             bulkDeleteIdName="_id"
             bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
