@@ -67,6 +67,9 @@ export default async function BlocksPage({ params }: Props) {
   });
   LotData = resp;
 
+  console.log("this i slot data",LotData)
+  console.log("this i Block data",BlocksData)
+
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
       {/* Top Bar */}
@@ -110,6 +113,10 @@ export default async function BlocksPage({ params }: Props) {
               </TableHeader>
               <TableBody>
                 <TableRow>
+                  <TableCell className="whitespace-nowrap">Lot Id</TableCell>
+                  <TableCell>{LotData?.lotName}</TableCell>
+                </TableRow>
+                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
@@ -193,14 +200,14 @@ export default async function BlocksPage({ params }: Props) {
                 {LotData?.quarryName && (
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
-                      Qarry Name
+                      Quarry Name
                     </TableCell>
                     <TableCell>{LotData?.quarryName}</TableCell>
                   </TableRow>
                 )}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Qarry Transport cost
+                    Quarry Transport Cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -213,7 +220,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Comission cost
+                    Comission Cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {

@@ -69,6 +69,20 @@ export const columns: ColumnDef<SlabInterface>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
+        Slab Id
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.slabNumber}</div>,
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
+  {
+    accessorKey: "length",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
         Slab Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
@@ -141,22 +155,22 @@ export const columns: ColumnDef<SlabInterface>[] = [
     },
   },
   {
-        accessorKey: "status",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Slab Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.status}
-            </div>
-        ),
-    },
+    accessorKey: "status",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Slab Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.original.status}
+      </div>
+    ),
+  },
   {
     accessorKey: "squareft",
     header: "Total SQF",
