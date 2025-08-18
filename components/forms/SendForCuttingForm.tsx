@@ -177,35 +177,37 @@ export default function SendForCuttingForm({ params }: Props) {
 
         {/* Date Picker */}
         <FormField
-          control={form.control}
-          name="cuttingScheduledAt.date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col gap-2">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button variant="outline" className="w-full">
-                      {field.value
-                        ? format(new Date(field.value), "PPPP")
-                        : "Pick a date"}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date: Date | undefined) => {
-                      field.onChange(date?.toISOString().split("T")[0] || "");
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+  control={form.control}
+  name="cuttingScheduledAt.date"
+  render={({ field }) => (
+    <FormItem className="flex flex-col gap-2">
+      <FormLabel>Date</FormLabel>
+      <Popover>
+        <PopoverTrigger asChild>
+          <FormControl>
+            <Button variant="outline" className="w-full">
+              {field.value
+                ? format(new Date(field.value), "PPPP")
+                : "Pick a date"}
+              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+            </Button>
+          </FormControl>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0" align="start">
+          <CalendarComponent
+            selected={field.value ? new Date(field.value) : undefined}
+            onSelect={(date: Date | undefined) => {
+              field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+              // ✅ stores as "2025-08-18" (local), no 1-day shift issue
+            }}
+          />
+        </PopoverContent>
+      </Popover>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
         {/* Time Input */}
         <div className="flex gap-4">

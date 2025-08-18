@@ -190,13 +190,13 @@ const calculateWeightTons = (
                     <TableCell
                       className={cn(
                         BlockData?.status === "inStock" &&
-                        " text-blue-800 hover:bg-blue-200/80  rounded",
+                        " text-blue-800",
                         BlockData?.status === "inCutting" &&
-                        " text-orange-800 hover:bg-orange-200/80  rounded",
+                        " text-orange-800",
                         BlockData?.status === "cut" &&
-                        " text-green-600 hover:bg-green-200/80  rounded",
+                        " text-green-600 ",
                         (!BlockData?.status || BlockData?.status === "N/A") &&
-                        " text-gray-600 hover:bg-gray-200/60  rounded"
+                        " text-gray-600"
                       )}
                     >
                       {BlockData?.status === "cut"
