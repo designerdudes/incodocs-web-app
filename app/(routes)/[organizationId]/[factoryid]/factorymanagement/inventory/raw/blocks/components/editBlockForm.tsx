@@ -193,12 +193,12 @@ export default function EditBlockForm({ params }: Props) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
         <div className="grid grid-cols-2 gap-4">
-          <FormField
+          <FormField 
             control={form.control}
             name="dimensions.height.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Height (inches)</FormLabel>
+                <FormLabel>Height (cm)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 15"
@@ -217,7 +217,7 @@ export default function EditBlockForm({ params }: Props) {
             name="dimensions.length.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Length (inches)</FormLabel>
+                <FormLabel>Length (cm)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
@@ -239,7 +239,7 @@ export default function EditBlockForm({ params }: Props) {
             name="dimensions.breadth.value"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Breadth (inches)</FormLabel>
+                <FormLabel>Breadth (cm)</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 10"
@@ -254,7 +254,7 @@ export default function EditBlockForm({ params }: Props) {
             )}
           />
           <div>
-            <div className="text-sm font-medium">Weight (inches)</div>
+            <div className="text-sm font-medium">Weight (cm)</div>
             <div className="pt-5 text-sm">
               {(
                 (((length * breadth * height) / 1000000) * 350 * 10) /
