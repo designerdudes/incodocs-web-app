@@ -94,7 +94,7 @@ export default async function SlabsPage({ params }: Props) {
   function convertInchCubeToMeterCube(volumeInInches: any) {
     if (!volumeInInches || isNaN(volumeInInches)) return "0.000000";
     const conversionFactor = 0.000016387064;
-    return (volumeInInches * conversionFactor).toFixed(6);
+    return (volumeInInches * conversionFactor).toFixed(2);
   }
 const calculateWeightTons = (
   lengthCm: number,
@@ -190,13 +190,13 @@ const calculateWeightTons = (
                     <TableCell
                       className={cn(
                         BlockData?.status === "inStock" &&
-                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80  rounded",
+                        " text-blue-800 hover:bg-blue-200/80  rounded",
                         BlockData?.status === "inCutting" &&
-                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80  rounded",
+                        " text-orange-800 hover:bg-orange-200/80  rounded",
                         BlockData?.status === "cut" &&
-                        "bg-green-100 text-green-800 hover:bg-green-200/80  rounded",
+                        " text-green-600 hover:bg-green-200/80  rounded",
                         (!BlockData?.status || BlockData?.status === "N/A") &&
-                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60  rounded"
+                        " text-gray-600 hover:bg-gray-200/60  rounded"
                       )}
                     >
                       {BlockData?.status === "cut"

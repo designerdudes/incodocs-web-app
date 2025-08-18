@@ -3,6 +3,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Eye } from "lucide-react";
+import CellAction from "./cell-action";
 
 export interface SlabInterface {
   dimensions: {
@@ -182,4 +183,17 @@ export const columns: ColumnDef<SlabInterface>[] = [
       return <div>{totalSqFt.toFixed(2)}</div>;
     },
   },
+     {
+    
+            header: ({ column }) => (
+                <Button
+                    variant="ghost"
+                >
+                    Action
+                </Button>
+            ),
+    
+            id: "actions",
+            cell: ({ row }) => <CellAction data={row.original} />
+        },
 ];
