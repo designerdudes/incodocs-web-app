@@ -1,44 +1,65 @@
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
-import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { columns } from "../../../blocks/components/columns";
+import { Separator } from "@/components/ui/separator";
 import {
   Card,
-  CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardContent,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { cookies } from "next/headers";
 
 interface Props {
   params: {
-    id: any;
-    factoryid: any;
-    lotid: string;
+    blockid: string;
   };
 }
 
-export default async function BlocksPage({ params }: Props) {
-  let BlocksData = null;
+// Define the expected shape of LotData
+interface LotData {
+  _id: string;
+  lotName: string;
+  materialType: string;
+   blockNumber: number;
+  blocksId: string[];
+  transportCost: number;
+  materialCost: number;
+  markerCost: number;
+  markerOperatorName: string;
+  quarryCost: number;
+  commissionCost: number;
+  createdAt: string;
+  updatedAt: string;
+  blocks: Array<{
+    dimensions: {
+      weight: { value: number; units: string };
+      length: { value: number; units: string };
+      breadth: { value: number; units: string };
+      height: { value: number; units: string };
+    };
+  }>;
+}
+
+export default async function SlabsPage({ params }: Props) {
+  let BlockData = null;
+  let SlabData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
   const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/blocksbylot/get/${params?.lotid}`,
+    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
     {
       method: "GET",
       headers: {
@@ -46,35 +67,29 @@ export default async function BlocksPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
 
-  BlocksData = res;
-  // console.log("wwwwwww",BlocksData)
+  BlockData = res;
 
-  let LotData = null;
-  const resp = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${params?.lotid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
-  LotData = resp;
+  // Fetch lot data
+//   const resp = await fetch(
+//     `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
+//     {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: "Bearer " + token,
+//       },
+//     }
+//   ).then((response) => response.json());
 
-  // console.log("this i slot data",LotData)
-  // console.log("this i Block data",BlocksData)
+//   SlabData = resp;
+
 
   return (
-    <div className="w-full space-y-6 h-full flex p-6 flex-col">
-      {/* Top Bar */}
-      <div className="topbar w-full flex justify-between items-center">
+    <div className="w-full space-y-4 h-full flex p-6 flex-col">
+      {/* Topbar */}
+      <div className="topbar w-full flex items-center justify-between">
         <Link href="../">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
@@ -84,25 +99,27 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of Lot : ${BlocksData[0]?.lotName}`}
+            title={`Add New Block to ${BlockData?.blockNumber}`}
           />
-          <p className="text-muted-foreground text-sm mt-2">
-            This section allows you to send blocks from your inventory for
-            cutting. Select the block and initiate the cutting process as the
-            next step in its  preparation.
+          <p className="text-muted-foreground text-sm">
+            Add a new block to a lot by entering its details, ensuring accurate
+            inventory tracking and management.
           </p>
         </div>
       </div>
 
       <Separator orientation="horizontal" />
 
-      {/* Content Area */}
-      <div className="flex flex-1 gap-6">
+      <div className="flex flex-col lg:flex-row gap-6 w-full">
+        {/* <div className="w-full lg:w-2/3">
+          <LotFormWrapper BlockData={BlockData} />
+        </div> */}
+
         {/* Lot Details Card */}
-        <Card className="w-1.5/5">
+        <Card className="w-full lg:w-1/3">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
-            <CardDescription>{`Details of ${LotData?.lotName}`}</CardDescription>
+            <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -115,23 +132,23 @@ export default async function BlocksPage({ params }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
+                  <TableCell>{BlockData?.lotName}</TableCell>
                 </TableRow>
-                 <TableRow>
+                <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
+                  <TableCell>{}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Type
                   </TableCell>
-                  <TableCell>{LotData?.materialType}</TableCell>
+                  <TableCell>{BlockData?.materialType}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Total Blocks
                   </TableCell>
-                  <TableCell>{LotData?.blocksId?.length}</TableCell>
+                  <TableCell>{BlockData?.blocksId?.length}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -143,41 +160,21 @@ export default async function BlocksPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(LotData?.transportCost)}
+                    }).format(BlockData?.transportCost)}
                   </TableCell>
                 </TableRow>
-                {/* <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Photo
-                  </TableCell>
-                  <TableCell>
-                    {LotData.blockphoto ? (
-                      <a
-                        href={LotData.blockphoto}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="link" className="p-0 m-0">
-                          View Block Photo
-                        </Button>
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground">N/A</span>
-                    )}
-                  </TableCell>
-                </TableRow> */}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Material Cost
                   </TableCell>
-                  <TableCell>{
-                  new Intl.NumberFormat("en-IN", {
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
                       minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    }).format(LotData?.materialCost)
-                    }</TableCell>
+                      maximumFractionDigits: 0,
+                    }).format(BlockData?.materialCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -189,26 +186,18 @@ export default async function BlocksPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(LotData?.markerCost)}
+                    }).format(BlockData?.markerCost)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
                     Marker Operator
                   </TableCell>
-                  <TableCell>{LotData?.markerOperatorName}</TableCell>
+                  <TableCell>{BlockData?.markerOperatorName}</TableCell>
                 </TableRow>
-                {LotData?.quarryName && (
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Quarry Name
-                    </TableCell>
-                    <TableCell>{LotData?.quarryName}</TableCell>
-                  </TableRow>
-                )}
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Quarry Transport Cost
+                    Qarry Transport cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -216,12 +205,12 @@ export default async function BlocksPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(LotData?.quarryCost || 0)}
+                    }).format(BlockData?.quarryCost || 0)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Comission Cost
+                    Comission cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -229,7 +218,7 @@ export default async function BlocksPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(LotData?.commissionCost || 0)}
+                    }).format(BlockData?.commissionCost || 0)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -237,7 +226,7 @@ export default async function BlocksPage({ params }: Props) {
                     Lot Created At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.createdAt).format("DD MMM YYYY")}
+                    {moment(BlockData.createdAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -245,29 +234,13 @@ export default async function BlocksPage({ params }: Props) {
                     Lot Updated At
                   </TableCell>
                   <TableCell>
-                    {moment(LotData.updatedAt).format("DD MMM YYYY")}
+                    {moment(BlockData.updatedAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
           </CardContent>
         </Card>
-
-        {/* Block's DataTable */}
-
-        <div className="w-3/5">
-          <DataTable
-            bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-            bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-            deleteRoute="/factory-management/inventory/deletemultipleblocks"
-            searchKey="blockNumber"
-            columns={columns}
-            data={BlocksData as any}
-            token={token}
-          />
-        </div>
       </div>
     </div>
   );

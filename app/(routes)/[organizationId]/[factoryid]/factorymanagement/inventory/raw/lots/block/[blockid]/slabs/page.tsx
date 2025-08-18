@@ -89,28 +89,25 @@ export default async function SlabsPage({ params }: Props) {
     BlockData?.dimensions?.height?.value
   );
 
-
-
   function convertInchCubeToMeterCube(volumeInInches: any) {
     if (!volumeInInches || isNaN(volumeInInches)) return "0.000000";
     const conversionFactor = 0.000016387064;
     return (volumeInInches * conversionFactor).toFixed(2);
   }
-const calculateWeightTons = (
-  lengthCm: number,
-  breadthCm: number,
-  heightCm: number
-): number => {
-  // Convert cm³ to m³
-  const volumeM3 = (lengthCm * breadthCm * heightCm) / 1_000_000;
+  const calculateWeightTons = (
+    lengthCm: number,
+    breadthCm: number,
+    heightCm: number
+  ): number => {
+    // Convert cm³ to m³
+    const volumeM3 = (lengthCm * breadthCm * heightCm) / 1_000_000;
 
-  // Density in tons/m³
-  const density = 3.5;
+    // Density in tons/m³
+    const density = 3.5;
 
-  // Weight in tons, rounded to 2 decimals
-  return Number((volumeM3 * density).toFixed(2));
-};
-
+    // Weight in tons, rounded to 2 decimals
+    return Number((volumeM3 * density).toFixed(2));
+  };
 
   function getCuttingDateTime(cuttingScheduledAt: any): Date | null {
     if (
@@ -169,6 +166,7 @@ const calculateWeightTons = (
                   </TableRow>
                 </TableHeader>
                 <TableBody>
+                  {/* General block details */}
                   <TableRow>
                     <TableCell>Block Id</TableCell>
                     <TableCell>{BlockData?.blockNumber}</TableCell>
@@ -178,42 +176,17 @@ const calculateWeightTons = (
                     <TableCell>{BlockData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Number of slabs</TableCell>
-                    <TableCell>{BlockData?.SlabsId?.length}</TableCell>
-                  </TableRow>
-                  <TableRow>
                     <TableCell>Material Type</TableCell>
                     <TableCell>{BlockData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Status</TableCell>
-                    <TableCell
-                      className={cn(
-                        BlockData?.status === "inStock" &&
-                        " text-blue-800 hover:bg-blue-200/80  rounded",
-                        BlockData?.status === "inCutting" &&
-                        " text-orange-800 hover:bg-orange-200/80  rounded",
-                        BlockData?.status === "cut" &&
-                        " text-green-600 hover:bg-green-200/80  rounded",
-                        (!BlockData?.status || BlockData?.status === "N/A") &&
-                        " text-gray-600 hover:bg-gray-200/60  rounded"
-                      )}
-                    >
-                      {BlockData?.status === "cut"
-                        ? "Block Cut"
-                        : BlockData?.status || "N/A"}
-                    </TableCell>
+                    <TableCell>{BlockData?.status}</TableCell>
                   </TableRow>
-                  <TableRow>
-                    <TableCell>Weight (tons)</TableCell>
-                    <TableCell>
-                      {BlockData?.dimensions?.weight?.value ||
-                        calculateWeightTons(
-                          BlockData?.dimensions?.length?.value || 0,
-                          BlockData?.dimensions?.breadth?.value || 0,
-                          BlockData?.dimensions?.height?.value || 0
-                        )}
-                    </TableCell>
+
+                  {/* --- End-to-End Measurement --- */}
+                  <TableRow className="bg-gray-100 font-semibold">
+                    <TableCell colSpan={2}>End-to-End Measurement</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Length (cm)</TableCell>
@@ -234,11 +207,66 @@ const calculateWeightTons = (
                     </TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Volume (m³)</TableCell>
+                    <TableCell>Total Volume (m³)</TableCell>
                     <TableCell>
-                      {convertInchCubeToMeterCube(volumeInInches)}
+                      {convertInchCubeToMeterCube(
+                        (BlockData?.dimensions?.length?.value || 0) *
+                          (BlockData?.dimensions?.breadth?.value || 0) *
+                          (BlockData?.dimensions?.height?.value || 0)
+                      )}
                     </TableCell>
                   </TableRow>
+                  <TableRow>
+                    <TableCell>Total Weight (tons)</TableCell>
+                    <TableCell>
+                      {BlockData?.dimensions?.weight?.value ||
+                        calculateWeightTons(
+                          BlockData?.dimensions?.length?.value || 0,
+                          BlockData?.dimensions?.breadth?.value || 0,
+                          BlockData?.dimensions?.height?.value || 0
+                        )}
+                    </TableCell>
+                  </TableRow>
+
+                  {/* --- Net Measurement (from another API: NetData) --- */}
+                  <TableRow className="bg-gray-100 font-semibold">
+                    <TableCell colSpan={2}>Net Measurement</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Length (cm)</TableCell>
+                    {/* <TableCell>{NetData?.dimensions?.length?.value}</TableCell> */}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Breadth (cm)</TableCell>
+                    {/* <TableCell>{NetData?.dimensions?.breadth?.value}</TableCell> */}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Height (cm)</TableCell>
+                    {/* <TableCell>{NetData?.dimensions?.height?.value}</TableCell> */}
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total Volume (m³)</TableCell>
+                    <TableCell>
+                      {/* {convertInchCubeToMeterCube(
+            (NetData?.dimensions?.length?.value || 0) *
+              (NetData?.dimensions?.breadth?.value || 0) *
+              (NetData?.dimensions?.height?.value || 0)
+          )} */}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Total Weight (tons)</TableCell>
+                    <TableCell>
+                      {/* {NetData?.dimensions?.weight?.value ||
+            calculateWeightTons(
+              NetData?.dimensions?.length?.value || 0,
+              NetData?.dimensions?.breadth?.value || 0,
+              NetData?.dimensions?.height?.value || 0
+            )} */}
+                    </TableCell>
+                  </TableRow>
+
+                  {/* Created / Updated */}
                   <TableRow>
                     <TableCell>Block Created At</TableCell>
                     <TableCell>
@@ -282,8 +310,8 @@ const calculateWeightTons = (
                     <TableCell>
                       {BlockData?.cuttingScheduledAt
                         ? moment(
-                          getCuttingDateTime(BlockData.cuttingScheduledAt)
-                        ).format("DD MMM YYYY, hh:mm A")
+                            getCuttingDateTime(BlockData.cuttingScheduledAt)
+                          ).format("DD MMM YYYY, hh:mm A")
                         : "N/A"}
                     </TableCell>
                   </TableRow>

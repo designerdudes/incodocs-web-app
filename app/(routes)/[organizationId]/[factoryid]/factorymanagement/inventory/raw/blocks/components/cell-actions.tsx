@@ -14,6 +14,7 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
+  Plus,
   ScissorsIcon,
   TrashIcon,
 } from "lucide-react";
@@ -120,6 +121,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               Send For Cutting
             </DropdownMenuItem>
           )}
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(`./addNetMeasurment/${data._id}`);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Net Measurement
+          </DropdownMenuItem>
 
           {/* View Lot Details */}
           <DropdownMenuItem
