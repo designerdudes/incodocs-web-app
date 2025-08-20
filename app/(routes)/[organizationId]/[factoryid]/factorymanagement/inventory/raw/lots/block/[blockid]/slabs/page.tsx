@@ -71,29 +71,29 @@ export default async function SlabsPage({ params }: Props) {
     return total + (length * height) / 144;
   }, 0);
 
-  function calculateVolume(
-    length: number,
-    breadth: number,
-    height: number
-  ): string {
-    if (length && breadth && height) {
-      const volumeInch = length * breadth * height;
-      return volumeInch.toFixed(2);
-    }
-    return "";
+  function calculateVolumeCm(
+  length: number,
+  breadth: number,
+  height: number
+): number {
+  if (length && breadth && height) {
+    // return in cm³
+    return length * breadth * height;
   }
+  return 0;
+}
 
-  const volumeInInches = calculateVolume(
-    BlockData?.dimensions?.length?.value,
-    BlockData?.dimensions?.breadth?.value,
-    BlockData?.dimensions?.height?.value
-  );
+function convertCmCubeToMeterCube(volumeInCm: number): string {
+  if (!volumeInCm || isNaN(volumeInCm)) return "0.00";
+  return (volumeInCm / 1_000_000).toFixed(2); // cm³ → m³
+}
 
-  function convertInchCubeToMeterCube(volumeInInches: any) {
-    if (!volumeInInches || isNaN(volumeInInches)) return "0.000000";
-    const conversionFactor = 0.000016387064;
-    return (volumeInInches * conversionFactor).toFixed(2);
-  }
+
+const volumeInCm = calculateVolumeCm(
+  BlockData?.dimensions?.length?.value,
+  BlockData?.dimensions?.breadth?.value,
+  BlockData?.dimensions?.height?.value
+);
   const calculateWeightTons = (
     lengthCm: number,
     breadthCm: number,
@@ -208,13 +208,9 @@ export default async function SlabsPage({ params }: Props) {
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Volume (m³)</TableCell>
-                    <TableCell>
-                      {convertInchCubeToMeterCube(
-                        (BlockData?.dimensions?.length?.value || 0) *
-                          (BlockData?.dimensions?.breadth?.value || 0) *
-                          (BlockData?.dimensions?.height?.value || 0)
-                      )}
-                    </TableCell>
+<TableCell>
+  {convertCmCubeToMeterCube(volumeInCm)}
+</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Weight (tons)</TableCell>

@@ -116,6 +116,19 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     },
   },
   {
+    accessorKey: "machineName",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Machine Ownership
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.machineName || "N/A"}</div>,
+  },
+  {
     accessorKey: "status",
     header: ({ column }) => (
       <Button

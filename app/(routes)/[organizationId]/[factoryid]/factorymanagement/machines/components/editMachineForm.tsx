@@ -28,10 +28,13 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import CalendarComponent from "@/components/CalendarComponent";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Machine } from "./columns";
 import { Textarea } from "@/components/ui/textarea";
-
 
 // Zod Schemas
 export const machineSchema = z.object({
@@ -40,6 +43,7 @@ export const machineSchema = z.object({
   typeCutting: z.string().optional(),
   typePolish: z.string().optional(),
   machinePhoto: z.string().optional(),
+  ownership: z.string().optional(),
   isActive: z.boolean(),
   lastMaintenance: z.string().optional(),
   installedDate: z.string().optional(),
@@ -51,18 +55,19 @@ type MachineFormValues = z.infer<typeof machineSchema>;
 
 interface MachineFormProps {
   params: {
-        factoryid: string;
-        organizationId: string;
-        _id:Machine;
-        machineName: string
-        typeCutting: string
-        typePolish: string
-        machinePhoto:string
-        lastMaintenance: string
-        installedDate: string
-        machineCost: number
-        review:string
-    };
+    factoryid: string;
+    organizationId: string;
+    _id: Machine;
+    machineName: string;
+    typeCutting: string;
+    typePolish: string;
+    machinePhoto: string;
+    ownership: string;
+    lastMaintenance: string;
+    installedDate: string;
+    machineCost: number;
+    review: string;
+  };
 }
 
 export default function MachineFormPage({ params }: MachineFormProps) {
@@ -71,8 +76,9 @@ export default function MachineFormPage({ params }: MachineFormProps) {
   const GlobalModal = useGlobalModal();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  
-  const data  = params
+
+  const data = params;
+  // console.log("wwwwwww",data)
 
   const form = useForm<MachineFormValues>({
     resolver: zodResolver(machineSchema),
@@ -82,22 +88,23 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       typeCutting: "",
       typePolish: "",
       machinePhoto: data?.machinePhoto || "",
+      ownership: "",
       isActive: true,
       lastMaintenance: new Date().toISOString(),
       installedDate: new Date().toISOString(),
       machineCost: 0,
       review: "",
     },
-});
+  });
 
-        
-   useEffect(() => {
+  useEffect(() => {
     form.reset({
       factoryId: factoryId,
       machineName: data?.machineName || "",
       typeCutting: data?.typeCutting || "",
       typePolish: data?.typePolish || "",
       machinePhoto: data?.machinePhoto || "",
+      ownership: data?.ownership || "",
       isActive: true,
       lastMaintenance: data?.lastMaintenance || new Date().toISOString(),
       installedDate: data?.installedDate || new Date().toISOString(),
@@ -111,9 +118,9 @@ export default function MachineFormPage({ params }: MachineFormProps) {
     try {
       await putData(`/machine/update/${data._id}`, {
         ...values,
-       params
+        params,
       });
-      
+
       toast.success("Machine Added Successfully");
       router.push("../");
     } catch (error) {
@@ -125,171 +132,194 @@ export default function MachineFormPage({ params }: MachineFormProps) {
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className=" grid space-y-6 w-1/2"
-        >
-          <FormField
-            control={form.control}
-            name="machineName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Machine Name</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Eg: Alfah"
-                    {...field}
-                    disabled={isLoading}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="typeCutting"
-            render={() => (
-              <FormItem>
-                <FormLabel>Machine Type</FormLabel>
-                <Select
-                  onValueChange={(value) => {
-                    const [type, option] = value.split(":");
-                    if (type === "cutting") {
-                      form.setValue("typeCutting", option);
-                      form.setValue("typePolish", undefined); // clear other
-                    } else if (type === "polish") {
-                      form.setValue("typePolish", option);
-                      form.setValue("typeCutting", undefined); // clear other
-                    }
-                  }}
-                  value={
-                    form.watch("typeCutting")
-                      ? `cutting:${form.watch("typeCutting")}`
-                      : form.watch("typePolish")
-                      ? `polish:${form.watch("typePolish")}`
-                      : ""
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Machine Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cutting:Single Cutter">
-                      Cutting - Single Slab Cutter
-                    </SelectItem>
-                    <SelectItem value="cutting:Multi Cutter">
-                      Cutting - Multi Slab Cutter
-                    </SelectItem>
-                    <SelectItem value="cutting:Rope Cutter">
-                      Cutting - Rope Slab Cutter
-                    </SelectItem>
-
-                    <SelectItem value="polish:Auto Polishing">
-                      Polish - Auto Polishing
-                    </SelectItem>
-                    <SelectItem value="polish:Line Polishing">
-                      Polish - Line Polishing
-                    </SelectItem>
-                    <SelectItem value="polish:Hand Polishing">
-                      Polish - Hand Polishing
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="machinePhoto"
-            render={() => (
-              <FormItem>
-                <FormLabel>Machine Photo</FormLabel>
-                <FormControl>
-                  <FileUploadField
-                    name="machinePhoto"
-                    storageKey="machinePhoto"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          /> 
-          <FormField
-            control={form.control}
-            name="installedDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col gap-2">
-                <FormLabel>Installed Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button variant="outline" className="w-full">
-                        {field.value
-                          ? format(new Date(field.value as any), "PPPP")
-                          : "Pick a date"}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      selected={
-                        field.value ? new Date(field.value as any) : undefined
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <div className="grid grid-cols-3 gap-3">
+            <FormField
+              control={form.control}
+              name="machineName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Machine Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Eg: Alfah"
+                      {...field}
+                      disabled={isLoading}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="typeCutting"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Machine Type</FormLabel>
+                  <Select
+                    onValueChange={(value) => {
+                      const [type, option] = value.split(":");
+                      if (type === "cutting") {
+                        form.setValue("typeCutting", option);
+                        form.setValue("typePolish", undefined); // clear other
+                      } else if (type === "polish") {
+                        form.setValue("typePolish", option);
+                        form.setValue("typeCutting", undefined); // clear other
                       }
-                      onSelect={(date: Date | undefined) => {
-                        field.onChange(date?.toISOString());
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            name="machineCost"
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Machine Cost</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter Machine Cost"
-                    min={0}
-                    disabled={isLoading}
-                    className="w-[40%]" // Limit width to 40%
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
+                    }}
+                    value={
+                      form.watch("typeCutting")
+                        ? `cutting:${form.watch("typeCutting")}`
+                        : form.watch("typePolish")
+                        ? `polish:${form.watch("typePolish")}`
+                        : ""
                     }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-                      control={form.control}
-                      name="review"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Review / Description</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Enter description or review of the machine..."
-                              className="resize-none"
-                              rows={4}
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Machine Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cutting:Single Cutter">
+                        Cutting - Single Slab Cutter
+                      </SelectItem>
+                      <SelectItem value="cutting:Multi Cutter">
+                        Cutting - Multi Slab Cutter
+                      </SelectItem>
+                      <SelectItem value="cutting:Rope Cutter">
+                        Cutting - Rope Slab Cutter
+                      </SelectItem>
 
+                      <SelectItem value="polish:Auto Polishing">
+                        Polish - Auto Polishing
+                      </SelectItem>
+                      <SelectItem value="polish:Line Polishing">
+                        Polish - Line Polishing
+                      </SelectItem>
+                      <SelectItem value="polish:Hand Polishing">
+                        Polish - Hand Polishing
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ownership"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Machine Ownership</FormLabel>
+                  <Select
+                    onValueChange={(value) => field.onChange(value)}
+                    value={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Ownership Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="owned">Owned</SelectItem>
+                      <SelectItem value="rented">Rented</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="machinePhoto"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Machine Photo</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name={field.name}
+                      storageKey="machinePhoto"
+                      value={field.value} // <-- bind RHF value
+                      onChange={field.onChange} // <-- bind RHF onChange
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="installedDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col gap-2">
+                  <FormLabel>Installed Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button variant="outline" className="w-full">
+                          {field.value
+                            ? format(new Date(field.value as any), "PPPP")
+                            : "Pick a date"}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        selected={
+                          field.value ? new Date(field.value as any) : undefined
+                        }
+                        onSelect={(date: Date | undefined) => {
+                          field.onChange(date?.toISOString());
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="machineCost"
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Machine Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Machine Cost"
+                      min={0}
+                      disabled={isLoading}
+                      className="w-[40%]" // Limit width to 40%
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="review"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Review / Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter description or review of the machine..."
+                      className="resize-none"
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Saving..." : "Submit"}
           </Button>
@@ -298,5 +328,3 @@ export default function MachineFormPage({ params }: MachineFormProps) {
     </div>
   );
 }
-
-

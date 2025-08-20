@@ -39,6 +39,7 @@ export const machineSchema = z.object({
   typeCutting: z.string().optional(),
   typePolish: z.string().optional(),
   machinePhoto: z.string().optional(),
+  ownership: z.string().optional(),
   isActive: z.boolean(),
   lastMaintenance: z.string().optional(),
   installedDate: z.string().optional(),
@@ -70,6 +71,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       typeCutting: "",
       typePolish: "",
       machinePhoto: "",
+      ownership: "",
       isActive: true,
       lastMaintenance: new Date().toISOString(),
       installedDate: new Date().toISOString(),
@@ -168,6 +170,28 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                     <SelectItem value="polish:Hand Polishing">
                       Polish - Hand Polishing
                     </SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="ownership"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Machine Ownership</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(value)}
+                  value={field.value}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Ownership Type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="owned">Owned</SelectItem>
+                    <SelectItem value="rented">Rented</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
