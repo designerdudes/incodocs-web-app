@@ -132,7 +132,7 @@ const calculateWeightTons = (
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href={`../../${BlockData.lotId._id}/blocks`}>
+        <Link href={`../../${BlockData?.lotId?._id}/blocks`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -141,7 +141,7 @@ const calculateWeightTons = (
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block : ${BlockData.blockNumber} `}
+            title={` Details of Block : ${BlockData?.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Blocks with detailed insights into its current
