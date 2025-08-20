@@ -91,7 +91,7 @@ export default function SendForCuttingForm({ params }: Props) {
     fetchMachineData();
   }, [factoryId]);
 
-  const handleSubmit = (values: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
     const { date, time } = values.cuttingScheduledAt;
     const hours = Number(time?.hours ?? 0);
@@ -107,19 +107,27 @@ export default function SendForCuttingForm({ params }: Props) {
       status: values.status,
       cuttingMachineId: values.cuttingMachineId,
       cuttingScheduledAt: {
-        date: new Date(date).toISOString(), // backend expects date in ISO format
-        time: {
-          hours,
-          minutes,
-        },
+        date: new Date(date).toISOString(),
+        time: { hours, minutes },
       },
     };
+
     try {
-      const res = putData(
-        `/factory-management/inventory/raw/put/${BlockId}`,
-        payload
+      await putData(`/factory-management/inventory/raw/put/${BlockId}`, payload);
+
+      // ✅ Find machine name & type for toast
+      const selectedMachine = machines.find(
+        (m) => m._id === values.cuttingMachineId
       );
-      toast.success("Block sent for cutting");
+
+      if (selectedMachine) {
+        toast.success(
+          `Block sent for cutting on ${selectedMachine.machineName} - ${selectedMachine.typeCutting}`
+        );
+      } else {
+        toast.success("Block sent for cutting");
+      }
+
       window.location.reload();
     } catch (error) {
       toast.error("Failed to send Blocks");
@@ -136,78 +144,79 @@ export default function SendForCuttingForm({ params }: Props) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
         {/* Machine Select */}
         <FormField
-  control={form.control}
-  name="cuttingMachineId"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Machine</FormLabel>
-      <Select
-        onValueChange={(value) => {
-          if (value === "add-new") {
-            window.open(`/${organizationId}/${factoryId}/factorymanagement/machines/createnew`);
-          } else {
-            field.onChange(value);
-          }
-        }}
-        value={field.value}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder="Select machine" />
-        </SelectTrigger>
-        <SelectContent>
-          {machines
-            ?.filter((machine) => machine.typeCutting) // only machines with cutting type
-            .map((machine) => (
-              <SelectItem key={machine._id} value={machine._id}>
-                {`${machine.machineName} - ${machine.typeCutting}`}
-              </SelectItem>
-            ))}
+          control={form.control}
+          name="cuttingMachineId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Machine</FormLabel>
+              <Select
+                onValueChange={(value) => {
+                  if (value === "add-new") {
+                    window.open(
+                      `/${organizationId}/${factoryId}/factorymanagement/machines/createnew`
+                    );
+                  } else {
+                    field.onChange(value);
+                  }
+                }}
+                value={field.value}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select machine" />
+                </SelectTrigger>
+                <SelectContent>
+                  {machines
+                    ?.filter((machine) => machine.typeCutting)
+                    .map((machine) => (
+                      <SelectItem key={machine._id} value={machine._id}>
+                        {`${machine.machineName} - ${machine.typeCutting}`}
+                      </SelectItem>
+                    ))}
 
-          {/* Special Add New Option */}
-          <SelectItem value="add-new" className="text-blue-600 font-semibold">
-            + Add New Machine
-          </SelectItem>
-        </SelectContent>
-      </Select>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
+                  <SelectItem
+                    value="add-new"
+                    className="text-blue-600 font-semibold"
+                  >
+                    + Add New Machine
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Date Picker */}
         <FormField
-  control={form.control}
-  name="cuttingScheduledAt.date"
-  render={({ field }) => (
-    <FormItem className="flex flex-col gap-2">
-      <FormLabel>Date</FormLabel>
-      <Popover>
-        <PopoverTrigger asChild>
-          <FormControl>
-            <Button variant="outline" className="w-full">
-              {field.value
-                ? format(new Date(field.value), "PPPP")
-                : "Pick a date"}
-              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-            </Button>
-          </FormControl>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <CalendarComponent
-            selected={field.value ? new Date(field.value) : undefined}
-            onSelect={(date: Date | undefined) => {
-              field.onChange(date ? format(date, "yyyy-MM-dd") : "");
-              // ✅ stores as "2025-08-18" (local), no 1-day shift issue
-            }}
-          />
-        </PopoverContent>
-      </Popover>
-      <FormMessage />
-    </FormItem>
-  )}
-/>
-
+          control={form.control}
+          name="cuttingScheduledAt.date"
+          render={({ field }) => (
+            <FormItem className="flex flex-col gap-2">
+              <FormLabel>Date</FormLabel>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button variant="outline" className="w-full">
+                      {field.value
+                        ? format(new Date(field.value), "PPPP")
+                        : "Pick a date"}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date: Date | undefined) => {
+                      field.onChange(date ? format(date, "yyyy-MM-dd") : "");
+                    }}
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {/* Time Input */}
         <div className="flex gap-4">
@@ -222,11 +231,11 @@ export default function SendForCuttingForm({ params }: Props) {
                     placeholder="0"
                     min={0}
                     max={23}
-                    value={field.value ?? ""} // Convert undefined/null to empty string for display
+                    value={field.value ?? ""}
                     onChange={(e) => {
                       const value = e.target.value;
                       if (value === "") {
-                        field.onChange(null); // Set to null when input is cleared
+                        field.onChange(null);
                       } else {
                         const numValue = Number(value);
                         if (
@@ -234,7 +243,7 @@ export default function SendForCuttingForm({ params }: Props) {
                           numValue >= 0 &&
                           numValue <= 23
                         ) {
-                          field.onChange(numValue); // Set valid number
+                          field.onChange(numValue);
                         }
                       }
                     }}

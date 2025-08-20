@@ -25,7 +25,7 @@ const formSchema = z.object({
     .string()
     .min(3, { message: "Slab Id must be at least 3 characters long" })
     .optional(),
-      slabname: z
+  slabname: z
     .string()
     .min(3, { message: "Slab name must be at least 3 characters long" })
     .optional(),
@@ -39,19 +39,19 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
- slabphoto: z.string().optional(),
+  slabphoto: z.string().optional(),
   slabstatus: z
     .string()
     .min(3, { message: "Marker operator must be at least 3 characters long" })
     .optional(),
 
- 
+
 
 });
 
 interface Props {
   params: {
-    _id: string; // Lot ID
+    _id: string; // slab ID
   };
 }
 
@@ -65,24 +65,25 @@ export default function EditSLabForm({ params }: Props) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       slabid: "",
-      slabname:"",
+      slabname: "",
       length: "",
       height: "",
       slabphoto: "",
       slabstatus: "",
-     
+
     },
   });
 
-  const lotId = params._id;
+  const slabId = params._id;
 
+  console.log(slabId, 'llllllllllllllll')
   // Fetch existing lot data and reset form values
   useEffect(() => {
     async function fetchLotData() {
       try {
         setIsFetching(true);
         const response = await fetchData(
-          `/factory-management/inventory/lot/getbyid/${lotId}`
+          `/factory-management/inventory/finished/get/${slabId}`
         );
 
         const data = response;
@@ -90,12 +91,12 @@ export default function EditSLabForm({ params }: Props) {
         // Reset form with fetched values
         form.reset({
           slabid: data.lotName || "",
-           slabname: data.lotName || "",
-          length: data.materialType || "",
-          height: data.materialCost || "",
+          slabname: data.lotName || "",
+          length: data?.dimensions?.length?.value || "",
+          height:  data?.dimensions?.height?.value || "",
           slabphoto: data.blockphoto || "",
-          slabstatus: data.markerCost || "",
-        
+          slabstatus: data?.status|| "",
+
         });
       } catch (error) {
         console.error("Error fetching slab data:", error);
@@ -105,7 +106,7 @@ export default function EditSLabForm({ params }: Props) {
       }
     }
     fetchLotData();
-  }, [lotId, form]);
+  }, [slabId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
@@ -116,10 +117,10 @@ export default function EditSLabForm({ params }: Props) {
       <div className="space-y-4">
         <p>Lot Id: {values.slabid}</p>
         <p>Slab Name: {values.slabname}</p>
-         <p>Length: {values.length}</p>
+        <p>Length: {values.length}</p>
         <p>Height: {values.height}</p>
         <p>slabstatus: {values.slabstatus}</p>
-       
+
         <div className="flex justify-end space-x-2">
           <Button
             variant="outline"
@@ -134,7 +135,7 @@ export default function EditSLabForm({ params }: Props) {
             onClick={async () => {
               try {
                 await putData(
-                  `/factory-management/inventory/lot/update/${lotId}`,
+                  `/factory-management/inventory/lot/update/${slabId}`,
                   values
                 );
                 setIsLoading(false);
@@ -183,10 +184,10 @@ export default function EditSLabForm({ params }: Props) {
                 <FormMessage />
               </FormItem>
 
-              
+
             )}
           />
-           <FormField
+          <FormField
             control={form.control}
             name="slabname"
             render={({ field }) => (
@@ -197,8 +198,8 @@ export default function EditSLabForm({ params }: Props) {
                 </FormControl>
                 <FormMessage />
               </FormItem>
-              
-              
+
+
             )}
           />
           <FormField
@@ -221,7 +222,7 @@ export default function EditSLabForm({ params }: Props) {
           {/* Material Cost Field */}
           <FormField
             control={form.control}
-             name="height"
+            name="height"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Height</FormLabel>
@@ -239,7 +240,7 @@ export default function EditSLabForm({ params }: Props) {
             )}
           />
 
-       
+
 
           {/* Marker Cost Field */}
           <FormField
@@ -261,8 +262,8 @@ export default function EditSLabForm({ params }: Props) {
               </FormItem>
             )}
           />
-         
-           <FormField
+
+          <FormField
             control={form.control}
             name="slabphoto"
             render={({ field }) => (
@@ -281,14 +282,14 @@ export default function EditSLabForm({ params }: Props) {
             )}
           />
         </div>
-          <Button type="submit" disabled={isLoading} className="w-full">
+        <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
         </Button>
 
-       
-        
-         
+
+
+
       </form>
     </Form>
   );
