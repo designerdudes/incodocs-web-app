@@ -60,6 +60,14 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             <Plus className="mr-2 h-4 w-4" />
             Add Blocks
           </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              router.push(`./lots/${data._id}/addNetMeasurment`);
+            }}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Add Net Measurement
+          </DropdownMenuItem>
 
           {/* View Lot Details */}
           <DropdownMenuItem
