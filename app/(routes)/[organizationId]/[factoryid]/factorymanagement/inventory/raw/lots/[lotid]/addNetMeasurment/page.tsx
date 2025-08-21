@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { NetMeasurmentForm } from "./components/NetMeasurmentForm";
 
 interface Props {
   params: {
@@ -117,7 +118,7 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
-                 <TableRow>
+                <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
@@ -170,14 +171,14 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">
                     Material Cost
                   </TableCell>
-                  <TableCell>{
-                  new Intl.NumberFormat("en-IN", {
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
                       minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    }).format(LotData?.materialCost)
-                    }</TableCell>
+                      maximumFractionDigits: 0,
+                    }).format(LotData?.materialCost)}
+                  </TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
@@ -252,21 +253,8 @@ export default async function BlocksPage({ params }: Props) {
             </Table>
           </CardContent>
         </Card>
-
-        {/* Block's DataTable */}
-
-        <div className="w-3/5">
-          <DataTable
-            bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-            bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-            deleteRoute="/factory-management/inventory/deletemultipleblocks"
-            searchKey="blockNumber"
-            columns={columns}
-            data={BlocksData as any}
-            token={token}
-          />
+        <div className="w-full lg:w-2/3">
+          <NetMeasurmentForm LotData={LotData} BlocksData={BlocksData} />
         </div>
       </div>
     </div>

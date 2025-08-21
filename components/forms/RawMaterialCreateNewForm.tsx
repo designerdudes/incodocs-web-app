@@ -46,8 +46,6 @@ const calculateWeight = (length: number, breadth: number, height: number) => {
   const volumeInCubicInches = length * breadth * height;
   const volumeInCubicMeters = volumeInCubicInches / 1000000;
 
-
-
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
   return Number(weight.toFixed(2));
@@ -100,7 +98,7 @@ const formSchema = z.object({
   blocks: z
     .array(
       z.object({
-        blockNumber: z.number().optional(),
+        blockNumber: z.string().optional(),
         materialType: z.string().optional(),
         inStock: z.boolean(),
         blockphoto: z.string().optional(),
@@ -190,7 +188,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       noOfBlocks: 1,
       blocks: [
         {
-          blockNumber: 0,
+          blockNumber: "",
           materialType: "",
           inStock: true,
           blockphoto: "",
@@ -627,10 +625,12 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                             className="p-2 hover:bg-gray-100 cursor-pointer"
                             onMouseDown={(e) => {
                               e.preventDefault();
-                              handleQuarrySelect(item.lesseeName ?? "");
+                              handleQuarrySelect(
+                                `${item.lesseeName} - ${item.lesseeId}`
+                              );
                             }}
                           >
-                            {item.lesseeName}
+                            {`${item.lesseeName} - ${item.lesseeId}`}
                           </div>
                         ))
                       ) : (
@@ -904,7 +904,6 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              type="number"
                               placeholder="Enter Block Number"
                               value={block.blockNumber || ""}
                               onChange={(e) => {

@@ -14,9 +14,19 @@ import { DataTable } from "@/components/ui/data-table";
 import { cookies } from "next/headers";
 import { MachineLogColumns } from "../../components/MachineLogColumns";
 import { PolishSlabColumns, Slab } from "../../components/PolishSlabColumns";
-import { Block, CuttingBlocksColumns,} from "../../components/CuttingBlocksColumns";
+import {
+  Block,
+  CuttingBlocksColumns,
+} from "../../components/CuttingBlocksColumns";
 import { MachineDetailsColumns } from "../../components/MachineDetailsColumns";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import moment from "moment";
 
 export default async function ViewMachinePage({
@@ -89,7 +99,9 @@ export default async function ViewMachinePage({
       const length = slab?.slabId.dimensions?.length?.value ?? 0;
       const height = slab?.slabId.dimensions?.height?.value ?? 0;
       return acc + (length * height) / 144;
-    }, 0);
+    },
+    0
+  );
 
   return (
     <div className="w-full h-full flex flex-col p-8">
@@ -168,6 +180,19 @@ export default async function ViewMachinePage({
                           </TableCell>
                         </TableRow>
                         <TableRow>
+                          <TableCell className="whitespace-nowrap">
+                            Machine Ownership
+                          </TableCell>
+                          <TableCell>
+                            {MachineData.ownership
+                              ? MachineData.ownership === "owned"
+                                ? "Owned"
+                                : "Rented"
+                              : "N/A"}
+                          </TableCell>
+                        </TableRow>
+
+                        <TableRow>
                           <TableCell>Machine Photo</TableCell>
                           <TableCell>
                             {MachineData.machinePhoto ? (
@@ -200,9 +225,7 @@ export default async function ViewMachinePage({
                           <TableCell className="whitespace-nowrap">
                             Machine Cost
                           </TableCell>
-                          <TableCell>
-                            {MachineData?.machineCost}
-                            </TableCell>
+                          <TableCell>{MachineData?.machineCost}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
@@ -216,9 +239,7 @@ export default async function ViewMachinePage({
                           <TableCell className="whitespace-nowrap">
                             Total Processed
                           </TableCell>
-                          <TableCell>
-                            {MachineData?.totalProcessed}
-                            </TableCell>
+                          <TableCell>{MachineData?.totalProcessed}</TableCell>
                         </TableRow>
                         <TableRow>
                           <TableCell className="whitespace-nowrap">
@@ -244,9 +265,7 @@ export default async function ViewMachinePage({
                           <TableCell className="whitespace-nowrap">
                             Review
                           </TableCell>
-                          <TableCell>
-                            {MachineData?.review}
-                            </TableCell>
+                          <TableCell>{MachineData?.review}</TableCell>
                         </TableRow>
                       </TableBody>
                     </Table>

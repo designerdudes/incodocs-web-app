@@ -14,6 +14,7 @@ import {
   Edit,
   EyeIcon,
   MoreHorizontal,
+  Plus,
   ScissorsIcon,
   TrashIcon,
 } from "lucide-react";
@@ -120,7 +121,6 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               Send For Cutting
             </DropdownMenuItem>
           )}
-
           {/* View Lot Details */}
           <DropdownMenuItem
             onSelect={() => {
