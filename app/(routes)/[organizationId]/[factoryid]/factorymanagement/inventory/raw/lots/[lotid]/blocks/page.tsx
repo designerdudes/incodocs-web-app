@@ -7,20 +7,20 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { columns } from "../../../blocks/components/columns";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from "@/components/ui/table";
 import moment from "moment";
 
@@ -46,12 +46,9 @@ export default async function BlocksPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
 
   BlocksData = res;
-  // console.log("wwwwwww",BlocksData)
 
   let LotData = null;
   const resp = await fetch(
@@ -63,13 +60,10 @@ export default async function BlocksPage({ params }: Props) {
         Authorization: "Bearer " + token,
       },
     }
-  ).then((response) => {
-    return response.json();
-  });
+  ).then((response) => response.json());
+
   LotData = resp;
 
-  // console.log("this i slot data",LotData)
-  // console.log("this i Block data",BlocksData)
 
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
@@ -89,7 +83,7 @@ export default async function BlocksPage({ params }: Props) {
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for
             cutting. Select the block and initiate the cutting process as the
-            next step in its  preparation.
+            next step in its preparation.
           </p>
         </div>
       </div>
@@ -117,136 +111,93 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
-                 <TableRow>
+                <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
                   <TableCell>{LotData?.lotName}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Material Type
-                  </TableCell>
+                  <TableCell>Material Type</TableCell>
                   <TableCell>{LotData?.materialType}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Total Blocks
-                  </TableCell>
+                  <TableCell>Total Blocks</TableCell>
                   <TableCell>{LotData?.blocksId?.length}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Transport Cost
-                  </TableCell>
+                  <TableCell>Transport Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
                     }).format(LotData?.transportCost)}
                   </TableCell>
                 </TableRow>
-                {/* <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Block Photo
-                  </TableCell>
-                  <TableCell>
-                    {LotData.blockphoto ? (
-                      <a
-                        href={LotData.blockphoto}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="link" className="p-0 m-0">
-                          View Block Photo
-                        </Button>
-                      </a>
-                    ) : (
-                      <span className="text-muted-foreground">N/A</span>
-                    )}
-                  </TableCell>
-                </TableRow> */}
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Material Cost
-                  </TableCell>
-                  <TableCell>{
-                  new Intl.NumberFormat("en-IN", {
-                      style: "currency",
-                      currency: "INR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0
-                    }).format(LotData?.materialCost)
-                    }</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Marker Cost
-                  </TableCell>
+                  <TableCell>Material Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
+                    }).format(LotData?.materialCost)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Marker Cost</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
                     }).format(LotData?.markerCost)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Marker Operator
-                  </TableCell>
+                  <TableCell>Marker Operator</TableCell>
                   <TableCell>{LotData?.markerOperatorName}</TableCell>
                 </TableRow>
                 {LotData?.quarryName && (
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Quarry Name
-                    </TableCell>
+                    <TableCell>Quarry Name</TableCell>
                     <TableCell>{LotData?.quarryName}</TableCell>
                   </TableRow>
                 )}
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Quarry Transport Cost
-                  </TableCell>
+                  <TableCell>Quarry Transport Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
                     }).format(LotData?.quarryCost || 0)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Comission Cost
-                  </TableCell>
+                  <TableCell>Commission Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
                     }).format(LotData?.commissionCost || 0)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Lot Created At
-                  </TableCell>
+                  <TableCell>Lot Created At</TableCell>
                   <TableCell>
-                    {moment(LotData.createdAt).format("DD MMM YYYY")}
+                    {moment(LotData?.createdAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell className="whitespace-nowrap">
-                    Lot Updated At
-                  </TableCell>
+                  <TableCell>Lot Updated At</TableCell>
                   <TableCell>
-                    {moment(LotData.updatedAt).format("DD MMM YYYY")}
+                    {moment(LotData?.updatedAt).format("DD MMM YYYY")}
                   </TableCell>
+                </TableRow>
+             
+                <TableRow>
+                  <TableCell>End-to-End Measurement</TableCell>
+                  
+                </TableRow>
+                <TableRow>
+                  <TableCell> Net Measurement</TableCell>
+                 
                 </TableRow>
               </TableBody>
             </Table>
@@ -254,7 +205,6 @@ export default async function BlocksPage({ params }: Props) {
         </Card>
 
         {/* Block's DataTable */}
-
         <div className="w-3/5">
           <DataTable
             bulkDeleteIdName="_id"

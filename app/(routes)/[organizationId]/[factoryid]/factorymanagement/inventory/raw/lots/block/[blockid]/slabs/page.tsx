@@ -129,7 +129,7 @@ const volumeInCm = calculateVolumeCm(
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href={`../../${BlockData.lotId._id}/blocks`}>
+        <Link href={`../../${BlockData?.lotId?._id}/blocks`}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -138,7 +138,7 @@ const volumeInCm = calculateVolumeCm(
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={` Details of Block : ${BlockData.blockNumber} `}
+            title={` Details of Block : ${BlockData?.blockNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2">
             Efficiently track Blocks with detailed insights into its current
@@ -181,6 +181,21 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Status</TableCell>
+                    <TableCell
+                      className={cn(
+                        BlockData?.status === "inStock" &&
+                        " text-blue-800",
+                        BlockData?.status === "inCutting" &&
+                        " text-orange-800",
+                        BlockData?.status === "cut" &&
+                        " text-green-600 ",
+                        (!BlockData?.status || BlockData?.status === "N/A") &&
+                        " text-gray-600"
+                      )}
+                    >
+                      {BlockData?.status === "cut"
+                        ? "Block Cut"
+                        : BlockData?.status || "N/A"}
                     <TableCell>{BlockData?.status}</TableCell>
                   </TableRow>
 

@@ -206,4 +206,5 @@ export const columns: ColumnDef<Blocks>[] = [
         id: "actions",
         cell: ({ row }) => <CellAction data={row.original} />
     },
+    
 ]
