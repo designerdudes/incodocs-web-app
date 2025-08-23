@@ -118,7 +118,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
 
     try {
       await putData(
-        `/factory-management/inventory/updatelotnetmeasurement/${lotId}`,
+        `/factory-management/inventory/raw/put/${lotId}`,
         submissionData
       );
       toast.success("Net measurements saved");

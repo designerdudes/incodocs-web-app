@@ -9,6 +9,7 @@ import moment from "moment";
 export type LotManagement = {
   _id: string;
   lotName: string;
+  lotId:string;
   factoryId: string;
   organizationId: string;
   materialType: string;
@@ -44,6 +45,21 @@ export const columns: ColumnDef<LotManagement>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: "lotId", // Corrected key
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Lot Id
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original?.lotId}</div>
+    ),
   },
   {
     accessorKey: "lotName", // Corrected key

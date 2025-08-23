@@ -184,19 +184,19 @@ const volumeInCm = calculateVolumeCm(
                     <TableCell
                       className={cn(
                         BlockData?.status === "inStock" &&
-                        " text-blue-800",
+                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80  rounded",
                         BlockData?.status === "inCutting" &&
-                        " text-orange-800",
+                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80  rounded",
                         BlockData?.status === "cut" &&
-                        " text-green-600 ",
+                        "bg-green-100 text-green-800 hover:bg-green-200/80  rounded",
                         (!BlockData?.status || BlockData?.status === "N/A") &&
-                        " text-gray-600"
+                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60  rounded"
                       )}
                     >
                       {BlockData?.status === "cut"
                         ? "Block Cut"
                         : BlockData?.status || "N/A"}
-                    <TableCell>{BlockData?.status}</TableCell>
+                    </TableCell>
                   </TableRow>
 
                   {/* --- End-to-End Measurement --- */}

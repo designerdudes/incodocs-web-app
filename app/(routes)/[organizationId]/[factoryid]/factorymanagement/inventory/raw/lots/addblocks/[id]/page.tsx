@@ -41,6 +41,7 @@ interface LotData {
   markerOperatorName: string;
   quarryCost: number;
   commissionCost: number;
+  lotId:string;
   createdAt: string;
   updatedAt: string;
   blocks: Array<{
@@ -83,6 +84,7 @@ export default async function AddBlockFormPage({ params }: Props) {
     }
   );
   const lotData: LotData = await lotResponse.json();
+  // console.log("ssdds",lotData)
 
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">
@@ -130,11 +132,11 @@ export default async function AddBlockFormPage({ params }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
-                  <TableCell>{lotData?.lotName}</TableCell>
+                  <TableCell>{lotData?.lotId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
-                  <TableCell>{}</TableCell>
+                  <TableCell>{lotData?.lotName}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">

@@ -116,7 +116,7 @@ export default async function BlocksPage({ params }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
+                  <TableCell>{LotData?.lotId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
@@ -136,7 +136,7 @@ export default async function BlocksPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Transport Cost
+                    Block Loading Cost{" "}
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -144,7 +144,7 @@ export default async function BlocksPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(LotData?.transportCost)}
+                    }).format(LotData?.blockLoadingCost)}
                   </TableCell>
                 </TableRow>
                 {/* <TableRow>
