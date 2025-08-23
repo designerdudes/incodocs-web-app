@@ -21,12 +21,12 @@ import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
 // densities for materials (t/m³)
-const materialDensities: Record<string, number> = {
-  Granite: 2.75,
-  Marble: 2.7,
-  Limestone: 2.6,
-  "Black galaxy": 2.9,
-};
+// const materialDensities: Record<string, number> = {
+//   Granite: 2.75,
+//   Marble: 2.7,
+//   Limestone: 2.6,
+//   "Black galaxy": 2.9,
+// };
 
 // schema
 const formSchema = z.object({
@@ -37,7 +37,8 @@ const formSchema = z.object({
     materialType: z.string().optional(),
     lotName: z.string().optional(),
   }),
-  dimensions: z.object({
+  
+dimensions: z.object({
     length: z.object({
       value: z.coerce.number().min(0.1),
       units: z.literal("cm").default("cm"),
@@ -131,7 +132,7 @@ export default function EditBlockForm({ params }: Props) {
   const grossVolume = (dLength * dBreadth * dHeight) / 1_000_000;
   const netVolume = (nLength * nBreadth * nHeight) / 1_000_000;
 
-  const density = materialDensities[materialType] || 0;
+  const density = 3.5 ;
 
   // weights
   const grossWeight = (grossVolume * density).toFixed(2);
@@ -147,7 +148,7 @@ export default function EditBlockForm({ params }: Props) {
         );
 
         const data = response;
-        // console.log("wwwwwww",data)
+         console.log("eeeeeeewwwwwww",data)
 
         form.reset({
           blockNumber: data.blockNumber || "",

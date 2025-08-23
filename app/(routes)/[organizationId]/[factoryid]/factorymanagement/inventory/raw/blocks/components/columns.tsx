@@ -33,6 +33,7 @@ export type Blocks = {
 
     _id: string;
     lotId: string;
+    blockId:string;
     blockNumber: number;
     blockphoto: string;
     materialType: string;
@@ -68,7 +69,7 @@ export const columns: ColumnDef<Blocks>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "blockNumber",
+        accessorKey: "blockId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -78,7 +79,7 @@ export const columns: ColumnDef<Blocks>[] = [
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
-        cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+        cell: ({ row }) => <div>{row.original.blockId}</div>,
         filterFn: "includesString", // Use the built-in filtering logic for partial matches
     },
  {

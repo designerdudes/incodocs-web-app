@@ -78,7 +78,7 @@ export default async function BlocksPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight"
-            title={`Details of Lot : ${BlocksData[0]?.lotName}`}
+            title={`Details of Lot : ${BlocksData[0]?.lotId}`}
           />
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for
@@ -109,7 +109,7 @@ export default async function BlocksPage({ params }: Props) {
               <TableBody>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Id</TableCell>
-                  <TableCell>{LotData?.lotName}</TableCell>
+                  <TableCell>{LotData?.lotId}</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Lot Name</TableCell>
@@ -124,12 +124,12 @@ export default async function BlocksPage({ params }: Props) {
                   <TableCell>{LotData?.blocksId?.length}</TableCell>
                 </TableRow>
                 <TableRow>
-                  <TableCell>Transport Cost</TableCell>
+                  <TableCell>Block Loading Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
                       style: "currency",
                       currency: "INR",
-                    }).format(LotData?.transportCost)}
+                    }).format(LotData?.blockLoadingCost)}
                   </TableCell>
                 </TableRow>
                 <TableRow>

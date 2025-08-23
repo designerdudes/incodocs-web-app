@@ -65,7 +65,7 @@ const formSchema = z.object({
     .number()
     .min(0, { message: "Marker cost must be greater than or equal to zero" })
     .optional(),
-  transportCost: z
+  blockLoadingCost: z
     .number()
     .min(0, { message: "Transport cost must be greater than or equal to zero" })
     .optional(),
@@ -100,7 +100,7 @@ const formSchema = z.object({
       z.object({
         blockNumber: z.string().optional(),
         materialType: z.string().optional(),
-        inStock: z.boolean(),
+        inStock: z.boolean().optional(),
         blockphoto: z.string().optional(),
         vehicleNumber: z.string().optional(),
         dimensions: z.object({
@@ -312,7 +312,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         materialType: values.materialType || "granite",
         materialCost: values.materialCost || 0,
         markerCost: values.markerCost || 0,
-        transportCost: values.transportCost || 0,
+        blockLoadingCost: values.blockLoadingCost || 0,
         quarryCost: values.quarryCost || 0,
         commissionCost: values.commissionCost || 0,
         markerOperatorName: values.markerOperatorName || "",
@@ -543,14 +543,14 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               )}
             />
             <FormField
-              name="transportCost"
+              name="blockLoadingCost"
               control={control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transport Cost</FormLabel>
+                  <FormLabel>Block Loading Cost</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Enter transport cost"
+                      placeholder="Enter Block Loading Cost"
                       type="number"
                       disabled={isLoading}
                       onWheel={(e) =>

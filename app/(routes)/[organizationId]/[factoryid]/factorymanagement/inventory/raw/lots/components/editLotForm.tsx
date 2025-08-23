@@ -108,6 +108,7 @@ export default function EditLotForm({ params }: Props) {
         );
 
         const data = response;
+        console.log("dddddddddd",data)
 
         // Reset form with fetched values
         form.reset({
@@ -214,7 +215,7 @@ export default function EditLotForm({ params }: Props) {
           />
           <FormField
             control={form.control}
-            name="lotName"
+            name="lotId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Lot Id</FormLabel>
