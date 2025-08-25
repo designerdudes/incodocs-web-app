@@ -49,7 +49,7 @@ export default async function SlabsPage({ params }: Props) {
   ).then((response) => response.json());
 
   BlockData = res;
-  // console.log("ssssssssss",BlockData);
+  //  console.log("ssssssssssaaaa",BlockData);
 
   const resp = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
@@ -169,7 +169,7 @@ const volumeInCm = calculateVolumeCm(
                   {/* General block details */}
                   <TableRow>
                     <TableCell>Block Id</TableCell>
-                    <TableCell>{BlockData?.blockNumber}</TableCell>
+                    <TableCell>{BlockData?.blockId}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Block Number</TableCell>

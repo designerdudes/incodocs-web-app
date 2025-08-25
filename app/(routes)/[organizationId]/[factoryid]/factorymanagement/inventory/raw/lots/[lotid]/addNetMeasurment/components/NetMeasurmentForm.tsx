@@ -50,6 +50,7 @@ type FormData = z.infer<typeof formSchema>;
 interface AddBlockFormProps {
   LotData: any;
   BlocksData: any[]; // end-to-end data
+  
 }
 
 // ---------------- Helpers ----------------
@@ -74,7 +75,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
   // Map End-to-End (from BlocksData) and setup empty Net Measurement
  const mappedBlocks = (BlocksData || []).map((block: any) => ({
   blockNumber: block.blockNumber || `B-${block._id?.slice(-4)}`, // fallback if no number
-  endDimensions: {
+  dimensions: {
     length: block.dimensions?.length?.value || 0,
     breadth: block.dimensions?.breadth?.value || 0,
     height: block.dimensions?.height?.value || 0,
@@ -118,7 +119,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
 
     try {
       await putData(
-        `/factory-management/inventory/raw/put/${lotId}`,
+        `/factory-management/inventory/lot/update/${lotId}`,
         submissionData
       );
       toast.success("Net measurements saved");
@@ -140,9 +141,9 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
     mappedBlocks.forEach((b, i) => {
       // End-to-End
       const v1 = calculateVolume(
-        b.endDimensions.length,
-        b.endDimensions.breadth,
-        b.endDimensions.height
+        b.dimensions.length,
+        b.dimensions.breadth,
+        b.dimensions.height
       );
       endVol += v1;
       endWt += v1 * 3.5;
@@ -195,9 +196,9 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
             <TableBody>
               {mappedBlocks.map((block, index) => {
                 const endVol = calculateVolume(
-                  block.endDimensions.length,
-                  block.endDimensions.breadth,
-                  block.endDimensions.height
+                  block.dimensions.length,
+                  block.dimensions.breadth,
+                  block.dimensions.height
                 );
                 const endWt = endVol * 3.5;
 
@@ -219,9 +220,9 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                      <TableCell>{block.blockNumber}</TableCell>
 
                     {/* End-to-End (readonly) */}
-                    <TableCell>{block.endDimensions.length}</TableCell>
-                    <TableCell>{block.endDimensions.breadth}</TableCell>
-                    <TableCell>{block.endDimensions.height}</TableCell>
+                    <TableCell>{block.dimensions.length}</TableCell>
+                    <TableCell>{block.dimensions.breadth}</TableCell>
+                    <TableCell>{block.dimensions.height}</TableCell>
                     <TableCell>{endVol.toFixed(2)}</TableCell>
                     <TableCell>{endWt.toFixed(2)}</TableCell>
 
