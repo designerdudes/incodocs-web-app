@@ -245,35 +245,35 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Length (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.length?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.length?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Breadth (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.breadth?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.breadth?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Height (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.height?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.height?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Volume (m³)</TableCell>
                     <TableCell>
-                      {/* {convertInchCubeToMeterCube(
-            (NetData?.dimensions?.length?.value || 0) *
-              (NetData?.dimensions?.breadth?.value || 0) *
-              (NetData?.dimensions?.height?.value || 0)
-          )} */}
+                      {convertCmCubeToMeterCube(
+            (BlockData?.netDimensions?.length?.value || 0) *
+              (BlockData?.netDimensions?.breadth?.value || 0) *
+              (BlockData?.netDimensions?.height?.value || 0)
+          )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Weight (tons)</TableCell>
                     <TableCell>
-                      {/* {NetData?.dimensions?.weight?.value ||
+                      {BlockData?.netDimensions?.weight?.value ||
             calculateWeightTons(
-              NetData?.dimensions?.length?.value || 0,
-              NetData?.dimensions?.breadth?.value || 0,
-              NetData?.dimensions?.height?.value || 0
-            )} */}
+              BlockData?.netDimensions?.length?.value || 0,
+              BlockData?.netDimensions?.breadth?.value || 0,
+              BlockData?.netDimensions?.height?.value || 0
+            )}
                     </TableCell>
                   </TableRow>
 

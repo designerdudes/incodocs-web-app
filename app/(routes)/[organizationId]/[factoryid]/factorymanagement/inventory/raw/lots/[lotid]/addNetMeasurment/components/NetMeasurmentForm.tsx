@@ -24,22 +24,32 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useParams, useRouter } from "next/navigation";
 import { putData } from "@/axiosUtility/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // ---------------- Schema ----------------
 const formSchema = z.object({
   blocks: z.array(
     z.object({
+      id: z.string().min(1, "Block ID is required"),
       netDimensions: z.object({
-        length: z
-          .number({ required_error: "Length is required" })
-          .min(0.1, "Must be > 0"),
-        breadth: z
-          .number({ required_error: "Breadth is required" })
-          .min(0.1, "Must be > 0"),
-        height: z
-          .number({ required_error: "Height is required" })
-          .min(0.1, "Must be > 0"),
+        length: z.object({
+          value: z
+            .number({ required_error: "Length is required" })
+            .min(0.1, "Must be > 0"),
+          units: z.string().default("cm"),
+        }),
+        breadth: z.object({
+          value: z
+            .number({ required_error: "Breadth is required" })
+            .min(0.1, "Must be > 0"),
+          units: z.string().default("cm"),
+        }),
+        height: z.object({
+          value: z
+            .number({ required_error: "Height is required" })
+            .min(0.1, "Must be > 0"),
+          units: z.string().default("cm"),
+        }),
       }),
     })
   ),
@@ -50,12 +60,11 @@ type FormData = z.infer<typeof formSchema>;
 interface AddBlockFormProps {
   LotData: any;
   BlocksData: any[]; // end-to-end data
-  
 }
 
 // ---------------- Helpers ----------------
 function calculateVolume(l: number, b: number, h: number) {
-  return (l * b * h) / 1_000_000; // m³
+  return (l * b * h) / 1_000_000; // cm³ → m³
 }
 function calculateWeight(l: number, b: number, h: number) {
   const volume = calculateVolume(l, b, h);
@@ -63,6 +72,7 @@ function calculateWeight(l: number, b: number, h: number) {
   return volume * density;
 }
 
+// ---------------- Component ----------------
 // ---------------- Component ----------------
 export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
   const router = useRouter();
@@ -72,31 +82,35 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
   const organizationId = useParams().organizationId;
   const lotId = LotData?._id;
 
-  // Map End-to-End (from BlocksData) and setup empty Net Measurement
- const mappedBlocks = (BlocksData || []).map((block: any) => ({
-  blockNumber: block.blockNumber || `B-${block._id?.slice(-4)}`, // fallback if no number
-  dimensions: {
-    length: block.dimensions?.length?.value || 0,
-    breadth: block.dimensions?.breadth?.value || 0,
-    height: block.dimensions?.height?.value || 0,
-  },
-  netDimensions: {
-    length: 0,
-    breadth: 0,
-    height: 0,
-  },
-}));
+  // Map End-to-End + Existing NetMeasurement from BlocksData
+  const mappedBlocks = (BlocksData || []).map((block: any) => ({
+    id: block._id,
+    blockNumber: block.blockNumber || `B-${block._id?.slice(-4)}`, // fallback if no number
+    dimensions: {
+      length: block.dimensions?.length?.value || 0,
+      breadth: block.dimensions?.breadth?.value || 0,
+      height: block.dimensions?.height?.value || 0,
+    },
+    netDimensions: {
+      length: { value: block.netDimensions?.length?.value ?? 0, units: "cm" },
+      breadth: { value: block.netDimensions?.breadth?.value ?? 0, units: "cm" },
+      height: { value: block.netDimensions?.height?.value ?? 0, units: "cm" },
+    },
+  }));
 
+  // ✅ Use fetched netDimensions as defaultValues
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       blocks: mappedBlocks.map((b) => ({
+        id: b.id,
         netDimensions: b.netDimensions,
       })),
     },
   });
 
   const { control, getValues, setValue, trigger } = form;
+  
 
   // ---------- Submit ----------
   async function onSubmit(values: FormData) {
@@ -112,14 +126,15 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
       lotId,
       factoryId,
       organizationId,
-      netBlocks: values.blocks.map((block, i) => ({
-        ...block.netDimensions,
+      blocks: values.blocks.map((block) => ({
+        id: block.id,
+        netDimensions: block.netDimensions,
       })),
     };
 
     try {
       await putData(
-        `/factory-management/inventory/lot/update/${lotId}`,
+        `/factory-management/inventory/raw/updatemultiple-netdimensions`,
         submissionData
       );
       toast.success("Net measurements saved");
@@ -150,11 +165,15 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
 
       // Net (from form values)
       const n = getValues().blocks[i]?.netDimensions || {
-        length: 0,
-        breadth: 0,
-        height: 0,
+        length: { value: 0 },
+        breadth: { value: 0 },
+        height: { value: 0 },
       };
-      const v2 = calculateVolume(n.length, n.breadth, n.height);
+      const v2 = calculateVolume(
+        n.length.value,
+        n.breadth.value,
+        n.height.value
+      );
       netVol += v2;
       netWt += v2 * 3.5;
     });
@@ -203,21 +222,21 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                 const endWt = endVol * 3.5;
 
                 const net = getValues().blocks[index]?.netDimensions || {
-                  length: 0,
-                  breadth: 0,
-                  height: 0,
+                  length: { value: 0 },
+                  breadth: { value: 0 },
+                  height: { value: 0 },
                 };
                 const netVol = calculateVolume(
-                  net.length,
-                  net.breadth,
-                  net.height
+                  net.length.value,
+                  net.breadth.value,
+                  net.height.value
                 );
                 const netWt = netVol * 3.5;
 
                 return (
                   <TableRow key={index}>
                     <TableCell>{index + 1}</TableCell>
-                     <TableCell>{block.blockNumber}</TableCell>
+                    <TableCell>{block.blockNumber}</TableCell>
 
                     {/* End-to-End (readonly) */}
                     <TableCell>{block.dimensions.length}</TableCell>
@@ -229,7 +248,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                     {/* Net Measurement (editable) */}
                     <TableCell>
                       <FormField
-                        name={`blocks.${index}.netDimensions.length`}
+                        name={`blocks.${index}.netDimensions.length.value`}
                         control={control}
                         render={({ field }) => (
                           <FormItem>
@@ -238,18 +257,14 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={field.value || ""} // keep it controlled
+                                value={field.value || ""}
                                 onChange={(e) => {
-                                  const raw = e.target.value;
-                                  // remove leading zeros while typing
-                                  const cleaned =
-                                    raw === ""
-                                      ? ""
-                                      : raw.replace(/^0+(?=\d)/, "");
                                   const num =
-                                    cleaned === "" ? 0 : parseFloat(cleaned);
+                                    e.target.value === ""
+                                      ? 0
+                                      : parseFloat(e.target.value);
                                   setValue(
-                                    `blocks.${index}.netDimensions.length`,
+                                    `blocks.${index}.netDimensions.length.value`,
                                     num,
                                     { shouldValidate: true, shouldDirty: true }
                                   );
@@ -263,7 +278,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                     </TableCell>
                     <TableCell>
                       <FormField
-                        name={`blocks.${index}.netDimensions.breadth`}
+                        name={`blocks.${index}.netDimensions.breadth.value`}
                         control={control}
                         render={({ field }) => (
                           <FormItem>
@@ -272,18 +287,14 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={field.value || ""} // control the value
+                                value={field.value || ""}
                                 onChange={(e) => {
-                                  const raw = e.target.value;
-                                  const cleaned =
-                                    raw === ""
-                                      ? ""
-                                      : raw.replace(/^0+(?=\d)/, "");
                                   const num =
-                                    cleaned === "" ? 0 : parseFloat(cleaned);
-
+                                    e.target.value === ""
+                                      ? 0
+                                      : parseFloat(e.target.value);
                                   setValue(
-                                    `blocks.${index}.netDimensions.breadth`,
+                                    `blocks.${index}.netDimensions.breadth.value`,
                                     num,
                                     { shouldValidate: true, shouldDirty: true }
                                   );
@@ -298,7 +309,7 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
 
                     <TableCell>
                       <FormField
-                        name={`blocks.${index}.netDimensions.height`}
+                        name={`blocks.${index}.netDimensions.height.value`}
                         control={control}
                         render={({ field }) => (
                           <FormItem>
@@ -307,18 +318,14 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
                                 type="number"
                                 min="0"
                                 step="1"
-                                value={field.value || ""} // control the value
+                                value={field.value || ""}
                                 onChange={(e) => {
-                                  const raw = e.target.value;
-                                  const cleaned =
-                                    raw === ""
-                                      ? ""
-                                      : raw.replace(/^0+(?=\d)/, "");
                                   const num =
-                                    cleaned === "" ? 0 : parseFloat(cleaned);
-
+                                    e.target.value === ""
+                                      ? 0
+                                      : parseFloat(e.target.value);
                                   setValue(
-                                    `blocks.${index}.netDimensions.height`,
+                                    `blocks.${index}.netDimensions.height.value`,
                                     num,
                                     { shouldValidate: true, shouldDirty: true }
                                   );
