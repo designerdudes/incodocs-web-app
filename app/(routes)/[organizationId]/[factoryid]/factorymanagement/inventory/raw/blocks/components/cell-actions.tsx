@@ -26,6 +26,7 @@ import { deleteData } from "@/axiosUtility/api";
 import EditBlockForm from "./editBlockForm";
 import SendForCuttingForm from "@/components/forms/SendForCuttingForm";
 import SplitBlockForm from "@/components/forms/SplitBlockForm";
+import DressingBlockForm from "@/components/forms/dressingBlockForm";
 
 interface Props {
   data: any;
@@ -80,6 +81,35 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           {data.status === "inStock" && (
             <DropdownMenuItem
               onSelect={() => {
+                GlobalModal.title = `Dress Block - ${data.blockNumber}`;
+                GlobalModal.description =
+                  "This block appears larger than normal. Proceed to split?";
+                GlobalModal.children = (
+                  <DressingBlockForm
+                    parentBlockId={data._id}
+                    blockNumber={data.blockNumber}
+                    factoryId={data.factoryId}
+                    originalBlockVolume={
+                      (data?.dimensions?.length?.value *
+                        data?.dimensions?.breadth?.value *
+                        data?.dimensions?.height?.value) /
+                      1_000_000
+                    }
+                    onSubmit={() => {
+                      GlobalModal.onClose();
+                    }}
+                  />
+                );
+                GlobalModal.onOpen();
+              }}
+            >
+              <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+              Dressing Block Form
+            </DropdownMenuItem>
+          )}
+          {data.status === "inStock" && (
+            <DropdownMenuItem
+              onSelect={() => {
                 GlobalModal.title = `Split Block - ${data.blockNumber}`;
                 GlobalModal.description =
                   "This block appears larger than normal. Proceed to split?";
@@ -90,7 +120,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                     factoryId={data.factoryId}
                     originalBlockVolume={
                      ( data?.dimensions?.length?.value *
-                      data?.dimensions?.breadth?.value *
+                        data?.dimensions?.breadth?.value *
                       data?.dimensions?.height?.value)/1000000
                     }
                     onSubmit={(subBlocks) => {

@@ -49,7 +49,7 @@ export default async function SlabsPage({ params }: Props) {
   ).then((response) => response.json());
 
   BlockData = res;
-  // console.log("ssssssssss",BlockData);
+  //  console.log("ssssssssssaaaa",BlockData);
 
   const resp = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
@@ -169,7 +169,7 @@ const volumeInCm = calculateVolumeCm(
                   {/* General block details */}
                   <TableRow>
                     <TableCell>Block Id</TableCell>
-                    <TableCell>{BlockData?.blockNumber}</TableCell>
+                    <TableCell>{BlockData?.blockId}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Block Number</TableCell>
@@ -245,35 +245,35 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Length (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.length?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.length?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Breadth (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.breadth?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.breadth?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Height (cm)</TableCell>
-                    {/* <TableCell>{NetData?.dimensions?.height?.value}</TableCell> */}
+                    <TableCell>{BlockData?.netDimensions?.height?.value}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Volume (m³)</TableCell>
                     <TableCell>
-                      {/* {convertInchCubeToMeterCube(
-            (NetData?.dimensions?.length?.value || 0) *
-              (NetData?.dimensions?.breadth?.value || 0) *
-              (NetData?.dimensions?.height?.value || 0)
-          )} */}
+                      {convertCmCubeToMeterCube(
+            (BlockData?.netDimensions?.length?.value || 0) *
+              (BlockData?.netDimensions?.breadth?.value || 0) *
+              (BlockData?.netDimensions?.height?.value || 0)
+          )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Weight (tons)</TableCell>
                     <TableCell>
-                      {/* {NetData?.dimensions?.weight?.value ||
+                      {BlockData?.netDimensions?.weight?.value ||
             calculateWeightTons(
-              NetData?.dimensions?.length?.value || 0,
-              NetData?.dimensions?.breadth?.value || 0,
-              NetData?.dimensions?.height?.value || 0
-            )} */}
+              BlockData?.netDimensions?.length?.value || 0,
+              BlockData?.netDimensions?.breadth?.value || 0,
+              BlockData?.netDimensions?.height?.value || 0
+            )}
                     </TableCell>
                   </TableRow>
 
