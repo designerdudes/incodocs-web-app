@@ -12,11 +12,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -30,17 +29,18 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import CalendarComponent from "../CalendarComponent";
+import { TimePickerField } from "../TimePickerField";
 
+// ✅ Zod schema
 const formSchema = z.object({
   status: z.string(),
   cuttingMachineId: z.string().min(1, "Machine is required"),
   cuttingScheduledAt: z.object({
     date: z.string().refine((val) => !isNaN(Date.parse(val)), "Select date"),
-    time: z.object({
-      hours: z.number().max(23).optional(),
-      minutes: z.number().max(59).optional(),
-    }),
+    time: z.string().nonempty("Time is required"), // 👈 will hold "02:30 PM"
   }),
+  entryTime: z.string().nonempty("Entry time is required"),
+  exitTime: z.string().nonempty("Exit time is required"),
 });
 
 interface Props {
@@ -62,7 +62,6 @@ export default function SendForCuttingForm({ params }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const [machines, setMachines] = useState<Machine[]>([]);
   const GlobalModal = useGlobalModal();
-  const router = useRouter();
   const factoryId = params.data.factoryId;
   const BlockId = params.data._id;
   const { organizationId } = useParams();
@@ -72,10 +71,9 @@ export default function SendForCuttingForm({ params }: Props) {
     defaultValues: {
       status: "inCutting",
       cuttingMachineId: "",
-      cuttingScheduledAt: {
-        date: "",
-        time: { hours: 0, minutes: 0 },
-      },
+      cuttingScheduledAt: { date: "", time: "" },
+      entryTime: "",
+      exitTime: "",
     },
   });
 
@@ -91,11 +89,24 @@ export default function SendForCuttingForm({ params }: Props) {
     fetchMachineData();
   }, [factoryId]);
 
+  // helper: convert "hh:mm AM/PM" → { hours, minutes }
+  const parseTime = (timeStr: string) => {
+    if (!timeStr) return { hours: 0, minutes: 0 };
+    const [time, modifier] = timeStr.split(" ");
+    let [hours, minutes] = time.split(":").map(Number);
+
+    if (modifier === "PM" && hours < 12) hours += 12;
+    if (modifier === "AM" && hours === 12) hours = 0;
+
+    return { hours, minutes };
+  };
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
+
     const { date, time } = values.cuttingScheduledAt;
-    const hours = Number(time?.hours ?? 0);
-    const minutes = Number(time?.minutes ?? 0);
+    const { hours, minutes } = parseTime(time);
+
     const isoDateTime = new Date(
       `${date}T${String(hours).padStart(2, "0")}:${String(minutes).padStart(
         2,
@@ -108,14 +119,19 @@ export default function SendForCuttingForm({ params }: Props) {
       cuttingMachineId: values.cuttingMachineId,
       cuttingScheduledAt: {
         date: new Date(date).toISOString(),
-        time: { hours, minutes },
+        time: { hours, minutes }, // backend stays consistent
       },
+      entryTime: values.entryTime,
+      exitTime: values.exitTime,
     };
 
     try {
-      await putData(`/factory-management/inventory/raw/put/${BlockId}`, payload);
+      await putData(
+        `/factory-management/inventory/raw/put/${BlockId}`,
+        payload
+      );
 
-      // ✅ Find machine name & type for toast
+      // ✅ toast with machine info
       const selectedMachine = machines.find(
         (m) => m._id === values.cuttingMachineId
       );
@@ -135,8 +151,6 @@ export default function SendForCuttingForm({ params }: Props) {
       setIsLoading(false);
       GlobalModal.onClose();
     }
-
-    GlobalModal.onOpen();
   };
 
   return (
@@ -218,84 +232,25 @@ export default function SendForCuttingForm({ params }: Props) {
           )}
         />
 
-        {/* Time Input */}
+        {/* Time Picker */}
+        {/* <TimePickerField
+          control={form.control}
+          name="cuttingScheduledAt.time"
+          label="Cutting Time"
+        /> */}
+
+        {/* Entry & Exit Time */}
         <div className="flex gap-4">
-          <FormField
+          <TimePickerField
             control={form.control}
-            name="cuttingScheduledAt.time.hours"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hours</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="0"
-                    min={0}
-                    max={23}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        field.onChange(null);
-                      } else {
-                        const numValue = Number(value);
-                        if (
-                          !isNaN(numValue) &&
-                          numValue >= 0 &&
-                          numValue <= 23
-                        ) {
-                          field.onChange(numValue);
-                        }
-                      }
-                    }}
-                    onBlur={() => {
-                      if (field.value == null) {
-                        field.onChange(0);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            name="entryTime"
+            label="Entry Time"
           />
-          <FormField
+          {/* <TimePickerField
             control={form.control}
-            name="cuttingScheduledAt.time.minutes"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Minutes</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="0"
-                    min={0}
-                    max={59}
-                    value={field.value ?? ""}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (value === "") {
-                        field.onChange(null);
-                      } else {
-                        const numValue = Number(value);
-                        if (
-                          !isNaN(numValue) &&
-                          numValue >= 0 &&
-                          numValue <= 59
-                        ) {
-                          field.onChange(numValue);
-                        }
-                      }
-                    }}
-                    onBlur={() => {
-                      if (field.value == null) {
-                        field.onChange(0);
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            name="exitTime"
+            label="Exit Time"
+          /> */}
         </div>
 
         <Button type="submit" disabled={isLoading} className="w-full">
