@@ -199,7 +199,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
     pageIndex * pageSize,
     pageIndex * pageSize + pageSize
   );
-
+const [blockCountInput, setBlockCountInput] = useState("1");
   const [search, setSearch] = useState("");
   const [quarries, setQuarries] = useState<Quarry[]>([]);
   const [page, setPage] = useState(1);
@@ -769,39 +769,32 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                 </FormItem>
               )}
             />
-            <FormField
-              name="noOfBlocks"
-              control={control}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of Blocks</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Enter number of blocks"
-                      type="number"
-                      min="1"
-                      disabled={isLoading}
-                      onWheel={(e) =>
-                        e.target instanceof HTMLElement && e.target.blur()
-                      }
-                      onChange={async (e) => {
-                        const value = e.target.value;
-                        if (value === "") {
-                          field.onChange(1);
-                          await handleBlockCountChange("1");
-                          return;
-                        }
-                        field.onChange(Number(value));
-                        await handleBlockCountChange(value);
-                      }}
-                      value={field.value ?? 1}
-                      onBlur={() => saveProgressSilently(getValues())}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+           <FormField
+  control={control}
+  name="noOfBlocks"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Number of Blocks</FormLabel>
+      <FormControl>
+        <Input
+          type="number"
+          min={1}
+          placeholder="Enter number of blocks"
+          value={blockCountInput}
+          onChange={async (e) => {
+            const val = e.target.value;
+            setBlockCountInput(val);
+
+            const n = Math.max(1, parseInt(val || "1", 10));
+            field.onChange(n); // keep RHF in sync
+            await handleBlockCountChange(String(n)); // update rows
+          }}
+        />
+      </FormControl>
+    </FormItem>
+  )}
+/>
+
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
