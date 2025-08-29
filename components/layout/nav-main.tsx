@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -13,12 +13,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { useParams } from "next/navigation";
 import { sidebarTabs } from "@/lib/constants";
-import { ItemIndicator } from "@radix-ui/react-select";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -26,8 +23,7 @@ type NavItem = {
   title: string;
   url: string;
   icon?: any;
-  isActive?: boolean;
-  items?: NavItem[]; // Nested items
+  items?: NavItem[];
 };
 
 interface NavMainProps {
@@ -37,13 +33,13 @@ interface NavMainProps {
 
 export default function NavMain({ orgId, factoryId: propFactoryId }: NavMainProps) {
   const [factoryId, setFactoryId] = useState("");
-  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
     if (!propFactoryId) {
       const id = localStorage.getItem("activeFactoryId") || "";
       setFactoryId(id);
+    } else {
+      setFactoryId(propFactoryId);
     }
   }, [propFactoryId]);
 
@@ -54,7 +50,6 @@ export default function NavMain({ orgId, factoryId: propFactoryId }: NavMainProp
       let itemUrl = item.url;
 
       const needHome = item.url.includes("home");
-
       const needDashboard =
         item.url.includes("dashboard") && !item.url.includes("documentaion");
 
@@ -71,59 +66,53 @@ export default function NavMain({ orgId, factoryId: propFactoryId }: NavMainProp
 
       if (needHome) {
         itemUrl = `/dashboard`;
-      }
-
-      //  Prepend /orgId/factoryId for specific modules
-      else if (needsFactoryAndOrg && organisationId && factoryId) {
-        itemUrl = `/${organisationId}/${factoryId}${item.url.startsWith("/") ? item.url : "/" + item.url
-          }`;
-      }
-
-      //  Prepend /orgId for others like documentation/settings/teammanagement
-      else if ((needsOnlyOrg && organisationId) || needDashboard) {
-        itemUrl = `/${organisationId}${item.url.startsWith("/") ? item.url : "/" + item.url
-          }`;
-      }
-
-      //  Use as-is if already starts with /
-      else if (item.url.startsWith("/")) {
+      } else if (needsFactoryAndOrg && organisationId && factoryId) {
+        itemUrl = `/${organisationId}/${factoryId}${
+          item.url.startsWith("/") ? item.url : "/" + item.url
+        }`;
+      } else if ((needsOnlyOrg && organisationId) || needDashboard) {
+        itemUrl = `/${organisationId}${
+          item.url.startsWith("/") ? item.url : "/" + item.url
+        }`;
+      } else if (item.url.startsWith("/")) {
         itemUrl = item.url;
-      }
-
-      //  Otherwise treat as relative URL
-      else {
+      } else {
         itemUrl = `/${item.url}`;
       }
+
+      // independent state per collapsible
+      const [open, setOpen] = useState(false);
+
       return (
         <Collapsible
           key={item.title}
+          open={open}
+          onOpenChange={setOpen}
           asChild
-          defaultOpen={item.isActive}
           className="group/collapsible"
         >
-          <Link href={itemUrl}>
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
+          <SidebarMenuItem
+            onMouseEnter={() => setOpen(true)}
+            onMouseLeave={() => setOpen(false)}
+          >
+            <CollapsibleTrigger asChild>
+              <SidebarMenuButton tooltip={item.title} asChild>
+                <Link href={itemUrl} className="flex items-center w-full">
                   {item.icon && <item.icon />}
-                  <Link href={itemUrl}>
-                    <span>{item.title}</span>
-                  </Link>
+                  <span>{item.title}</span>
                   {item.items && (
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   )}
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              {item.items && (
-                <CollapsibleContent>
-                  <SidebarMenuSub>
-                    {RenderNavTabs(item.items, orgId)}{" "}
-                    {/* Recursive rendering */}
-                  </SidebarMenuSub>
-                </CollapsibleContent>
-              )}
-            </SidebarMenuItem>
-          </Link>
+                </Link>
+              </SidebarMenuButton>
+            </CollapsibleTrigger>
+
+            {item.items && (
+              <CollapsibleContent>
+                <SidebarMenuSub>{RenderNavTabs(item.items, orgId)}</SidebarMenuSub>
+              </CollapsibleContent>
+            )}
+          </SidebarMenuItem>
         </Collapsible>
       );
     });

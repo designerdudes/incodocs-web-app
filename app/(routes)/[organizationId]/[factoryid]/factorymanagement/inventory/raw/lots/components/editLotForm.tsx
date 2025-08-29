@@ -43,7 +43,7 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
-  transportCost: z
+  blockLoadingCost: z
     .union([
       z.string().min(1, { message: "Transport cost must be a valid number" }),
       z.number(),
@@ -88,7 +88,7 @@ export default function EditLotForm({ params }: Props) {
       materialType: "",
       materialCost: "",
       markerCost: "",
-      transportCost: "",
+      blockLoadingCost: "",
       markerOperatorName: "",
       quarryCost:"",
       commissionCost:"",
@@ -117,7 +117,7 @@ export default function EditLotForm({ params }: Props) {
           materialType: data.materialType || "",
           materialCost: data.materialCost || "",
           markerCost: data.markerCost || "",
-          transportCost: data.transportCost || "",
+          blockLoadingCost: data.blockLoadingCost || "",
           markerOperatorName: data.markerOperatorName || "",
           quarryCost: data.quarryCost ||"",
           commissionCost:data.commissionCost ||"",
@@ -145,7 +145,7 @@ export default function EditLotForm({ params }: Props) {
         <p>Material Type: {values.materialType}</p>
         <p>Material Cost: {values.materialCost}</p>
         <p>Marker Cost: {values.markerCost}</p>
-        <p>Transport Cost: {values.transportCost}</p>
+        <p>Transport Cost: {values.blockLoadingCost}</p>
         <p>Quarry Cost: {values.quarryCost}</p>
         <p>Commission Cost: {values.commissionCost}</p>
         <p>Marker Operator: {values.markerOperatorName}</p>
@@ -288,10 +288,10 @@ export default function EditLotForm({ params }: Props) {
           {/* Transport Cost Field */}
           <FormField
             control={form.control}
-            name="transportCost"
+            name="blockLoadingCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Transport Cost</FormLabel>
+                <FormLabel>Block Loading Cost</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 1000"

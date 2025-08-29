@@ -20,15 +20,20 @@ import { useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 
-// densities for materials (t/m³)
-// const materialDensities: Record<string, number> = {
-//   Granite: 2.75,
-//   Marble: 2.7,
-//   Limestone: 2.6,
-//   "Black galaxy": 2.9,
-// };
+// ✅ Schema aligned with backend
+const dimensionSchema = z.object({
+  value: z.coerce.number().min(0.1).optional(),
+  units: z.union([z.literal("cm"), z.literal("inch")]).default("cm"),
+});
 
-// schema
+const weightSchema = z
+  .object({
+    value: z.coerce.number().optional(),
+    units: z.union([z.literal("t"), z.literal("tons")]).default("t"),
+  })
+  .partial()
+  .optional();
+
 const formSchema = z.object({
   blockNumber: z.string().optional(),
   factoryId: z.string().optional(),
@@ -37,55 +42,26 @@ const formSchema = z.object({
     materialType: z.string().optional(),
     lotName: z.string().optional(),
   }),
-  
-dimensions: z.object({
-    length: z.object({
-      value: z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-    breadth: z.object({
-      value: z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-    height: z.object({
-      value:z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-   weight: z
-  .object({
-    value: z.coerce.number().optional(),
-    units: z.literal("t").default("t"),
-  })
-  .partial()
-  .optional(),
-  }).optional(),
-  netDimensions: z.object({
-    length: z.object({
-      value: z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-    breadth: z.object({
-      value: z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-    height: z.object({
-      value:z.coerce.number().min(0.1),
-      units: z.literal("cm").default("cm"),
-    }),
-   weight: z
-  .object({
-    value: z.coerce.number().optional(),
-    units: z.literal("t").default("t"),
-  })
-  .partial()
-  .optional(),
-  }).optional(),
+  dimensions: z
+    .object({
+      length: dimensionSchema,
+      breadth: dimensionSchema,
+      height: dimensionSchema,
+      weight: weightSchema,
+    })
+    .optional(),
+  netDimensions: z
+    .object({
+      length: dimensionSchema,
+      breadth: dimensionSchema,
+      height: dimensionSchema,
+      weight: weightSchema,
+    })
+    .optional(),
 });
 
 interface Props {
-  params: {
-    _id: string;
-  };
+  params: { _id: string };
 }
 
 export default function EditBlockForm({ params }: Props) {
@@ -126,9 +102,6 @@ export default function EditBlockForm({ params }: Props) {
   const nBreadth = form.watch("netDimensions.breadth.value") || 0;
   const nHeight = form.watch("netDimensions.height.value") || 0;
 
-  const materialType = form.watch("lotId.materialType") || "";
-
-  // volumes
   const grossVolume = (dLength * dBreadth * dHeight) / 1_000_000;
   const netVolume = (nLength * nBreadth * nHeight) / 1_000_000;
 
@@ -143,12 +116,9 @@ export default function EditBlockForm({ params }: Props) {
     async function fetchBlockData() {
       try {
         setIsFetching(true);
-        const response = await fetchData(
+        const data = await fetchData(
           `/factory-management/inventory/raw/get/${blockId}`
         );
-
-        const data = response;
-         console.log("eeeeeeewwwwwww",data)
 
         form.reset({
           blockNumber: data.blockNumber || "",
@@ -173,7 +143,8 @@ export default function EditBlockForm({ params }: Props) {
             },
             weight: {
               value: data.dimensions?.weight?.value || 0,
-              units: data.dimensions?.weight?.units || "t",
+              units:
+                data.dimensions?.weight?.units === "tons" ? "t" : "t",
             },
           },
           netDimensions: {
@@ -191,7 +162,8 @@ export default function EditBlockForm({ params }: Props) {
             },
             weight: {
               value: data.netDimensions?.weight?.value || 0,
-              units: data.netDimensions?.weight?.units || "t",
+              units:
+                data.netDimensions?.weight?.units === "tons" ? "t" : "t",
             },
           },
         });
@@ -207,8 +179,26 @@ export default function EditBlockForm({ params }: Props) {
   }, [blockId, form]);
 
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
-    //  console.log("Form submitted sssss✅", values);
     setIsLoading(true);
+
+    // ✅ Normalize units before sending
+    const payload = {
+      ...values,
+      dimensions: {
+        ...values.dimensions,
+        weight: {
+          value: values.dimensions?.weight?.value || grossWeight,
+          units: "t",
+        },
+      },
+      netDimensions: {
+        ...values.netDimensions,
+        weight: {
+          value: values.netDimensions?.weight?.value || netWeight,
+          units: "t",
+        },
+      },
+    };
 
     GlobalModal.title = "Confirm Block Update";
     GlobalModal.description = "Are you sure you want to update this block?";
@@ -217,10 +207,10 @@ export default function EditBlockForm({ params }: Props) {
         <p>Block Number: {values.blockNumber}</p>
         <p>Material Type: {values.lotId.materialType}</p>
         <p>
-          Gross → Volume: {grossVolume.toFixed(2)} m³ | Weight: {grossWeight} tons
+          Gross → Volume: {grossVolume.toFixed(2)} m³ | Weight: {grossWeight} t
         </p>
         <p>
-          Net → Volume: {netVolume.toFixed(2)} m³ | Weight: {netWeight} tons
+          Net → Volume: {netVolume.toFixed(2)} m³ | Weight: {netWeight} t
         </p>
         <div className="flex justify-end space-x-2">
           <Button
@@ -237,7 +227,7 @@ export default function EditBlockForm({ params }: Props) {
               try {
                 await putData(
                   `/factory-management/inventory/raw/put/${blockId}`,
-                  values
+                  payload
                 );
                 setIsLoading(false);
                 GlobalModal.onClose();
@@ -270,10 +260,12 @@ export default function EditBlockForm({ params }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit, (errors) => {
-      console.error("❌ Validation failed:", errors);
-    })} className="space-y-6">
-        {/* Block number */}
+      <form
+        onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+        })}
+        className="space-y-6"
+      >
+        {/* Block Number */}
         <FormField
           control={form.control}
           name="blockNumber"
@@ -288,7 +280,7 @@ export default function EditBlockForm({ params }: Props) {
           )}
         />
 
-        {/* Material Type (from lotId) */}
+        {/* Material Type */}
         <FormField
           control={form.control}
           name="lotId.materialType"
@@ -318,13 +310,15 @@ export default function EditBlockForm({ params }: Props) {
                       {dim.charAt(0).toUpperCase() + dim.slice(1)} (cm)
                     </FormLabel>
                     <FormControl>
-                     <Input
-  type="number"
-  value={field.value ?? ""}
-  onChange={(e) =>
-    field.onChange(e.target.value === "" ? "" : Number(e.target.value))
-  }
-/>
+                      <Input
+                        type="number"
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? "" : Number(e.target.value)
+                          )
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -333,7 +327,7 @@ export default function EditBlockForm({ params }: Props) {
             ))}
           </div>
           <div className="text-sm font-medium">
-            Volume: {grossVolume.toFixed(2)} m³ | Weight: {grossWeight} tons
+            Volume: {grossVolume.toFixed(2)} m³ | Weight: {grossWeight} t
           </div>
         </div>
 
@@ -353,12 +347,14 @@ export default function EditBlockForm({ params }: Props) {
                     </FormLabel>
                     <FormControl>
                       <Input
-  type="number"
-  value={field.value ?? ""}
-  onChange={(e) =>
-    field.onChange(e.target.value === "" ? "" : Number(e.target.value))
-  }
-/>
+                        type="number"
+                        value={field.value ?? ""}
+                        onChange={(e) =>
+                          field.onChange(
+                            e.target.value === "" ? "" : Number(e.target.value)
+                          )
+                        }
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -367,7 +363,7 @@ export default function EditBlockForm({ params }: Props) {
             ))}
           </div>
           <div className="text-sm font-medium">
-            Volume: {netVolume.toFixed(2)} m³ | Weight: {netWeight} tons
+            Volume: {netVolume.toFixed(2)} m³ | Weight: {netWeight} t
           </div>
         </div>
 

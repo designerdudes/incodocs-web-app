@@ -71,27 +71,22 @@ export default function DressingBlockForm({
     if (parentBlockId) fetchBlockData();
   }, [parentBlockId]);
 
-  // 📌 Fetch machines
+ 
   useEffect(() => {
     const fetchmachine = async () => {
       const res = await fetchData(`/machine/getbyfactory/${factoryId}`);
-      const allowedTypes = ["Multi Cutter", "Single Cutter", "Rope Cutter"];
-
       const response = res
-        .filter((e: any) => allowedTypes.includes(e.typeCutting))
+        .filter((e: any) => e.typeCutting === "Rope Cutter")
         .map((e: any) => ({
-          label: `${e.machineName} - ${e.typeCutting}`,
+          label: e.machineName,
           value: e._id,
-          typeCutting: e.typeCutting,
         }));
-
       setMachines(response);
     };
-
     fetchmachine();
-  }, [factoryId]);
+  }, []);
 
-  // 📌 Handle dressed block dimension changes
+  
   const handleDressedChange = (
     dimension: "length" | "breadth" | "height",
     value: number
