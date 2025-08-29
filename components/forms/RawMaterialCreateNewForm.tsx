@@ -19,6 +19,27 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+
 import { useForm } from "react-hook-form";
 import { Form } from "../ui/form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -169,6 +190,15 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
   const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
     number | null
   >(null);
+
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5); // default rows per page
+
+  // 👇 put it right here
+  const paginatedBlocks = blocks.slice(
+    pageIndex * pageSize,
+    pageIndex * pageSize + pageSize
+  );
 
   const [search, setSearch] = useState("");
   const [quarries, setQuarries] = useState<Quarry[]>([]);
@@ -889,8 +919,9 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
               </label>
             </div>
           </div>
+         <div className="w-full overflow-x-auto">
 
-          <Table className="w-full overflow-hidden overflow-x-scroll whitespace-nowrap">
+          <Table className="min-w-max ">
             <TableHeader>
               <TableRow>
                 <TableHead>S.No</TableHead>
@@ -907,9 +938,9 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
               </TableRow>
             </TableHeader>
             <TableBody className="whitespace-nowrap">
-              {blocks.map((block, index) => (
-                <TableRow key={index}>
-                  <TableCell>{index + 1}</TableCell>
+               {paginatedBlocks.map((block, index) => (
+    <TableRow key={index}>
+      <TableCell>{pageIndex * pageSize + index + 1}</TableCell>
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.blockNumber`}
@@ -924,7 +955,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].blockNumber =
                                   e.target.value;
-                                setBlocks(updatedBlocks);
+                                  setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
                               }}
@@ -951,7 +982,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].materialType =
                                   e.target.value;
-                                setBlocks(updatedBlocks);
+                                  setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
                               }}
@@ -1068,9 +1099,9 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                       (block?.dimensions?.length?.value *
                         block?.dimensions?.breadth?.value *
                         block?.dimensions?.height?.value) /
-                      1000000
-                    ) || 0
-                    ).toFixed(2)
+                        1000000
+                      ) || 0
+                      ).toFixed(2)
                       // block?.dimensions?.height?.value *
                       // (block?.dimensions?.length?.units === "inch" ? 0.000016387064 : 0.000001)
                     }
@@ -1152,6 +1183,98 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
 
 
           </Table>
+              </div>
+{/* Pagination */}
+<div className="flex items-center justify-between gap-8 h-[5%]">
+  <div className="flex items-center gap-3">
+    <Label className="max-sm:sr-only">Rows per page</Label>
+    <Select
+      value={pageSize.toString()}
+      onValueChange={(value) => {
+        setPageSize(Number(value));
+        setPageIndex(0); // reset to first page
+      }}
+    >
+      <SelectTrigger className="w-fit whitespace-nowrap">
+        <SelectValue placeholder="Select number of results" />
+      </SelectTrigger>
+      <SelectContent>
+        {[5, 10, 25, 50].map((size) => (
+          <SelectItem key={size} value={size.toString()}>
+            {size}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  </div>
+
+  <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
+    <p aria-live="polite">
+      <span className="text-foreground">
+        {blocks.length === 0
+          ? 0
+          : pageIndex * pageSize + 1}
+        -
+        {Math.min((pageIndex + 1) * pageSize, blocks.length)}
+      </span>{" "}
+      of{" "}
+      <span className="text-foreground">{blocks.length}</span>
+    </p>
+  </div>
+
+  <div>
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setPageIndex(0)}
+            disabled={pageIndex === 0}
+          >
+            <ChevronFirstIcon size={16} />
+          </Button>
+        </PaginationItem>
+        <PaginationItem>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
+            disabled={pageIndex === 0}
+          >
+            <ChevronLeftIcon size={16} />
+          </Button>
+        </PaginationItem>
+        <PaginationItem>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() =>
+              setPageIndex((prev) =>
+                Math.min(prev + 1, Math.ceil(blocks.length / pageSize) - 1)
+              )
+            }
+            disabled={pageIndex >= Math.ceil(blocks.length / pageSize) - 1}
+          >
+            <ChevronRightIcon size={16} />
+          </Button>
+        </PaginationItem>
+        <PaginationItem>
+          <Button
+            size="icon"
+            variant="outline"
+            onClick={() =>
+              setPageIndex(Math.ceil(blocks.length / pageSize) - 1)
+            }
+            disabled={pageIndex >= Math.ceil(blocks.length / pageSize) - 1}
+          >
+            <ChevronLastIcon size={16} />
+          </Button>
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
+  </div>
+</div>
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}
