@@ -890,7 +890,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
             </div>
           </div>
 
-          <Table>
+          <Table className="w-full overflow-hidden overflow-x-scroll whitespace-nowrap">
             <TableHeader>
               <TableRow>
                 <TableHead>S.No</TableHead>
@@ -906,7 +906,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody>
+            <TableBody className="whitespace-nowrap">
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
@@ -918,7 +918,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              placeholder="Enter Block Number"
+                              placeholder="Block Number"
                               value={block.blockNumber || ""}
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
@@ -945,7 +945,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                           <FormControl>
                             <Input
                               type="text"
-                              placeholder="Enter material type"
+                              placeholder="Material Type"
                               value={block.materialType || ""}
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
@@ -975,7 +975,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                               min={0}
                               step="1"
                               value={block.dimensions.length.value}
-                              placeholder="Enter length"
+                              placeholder="Length"
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
@@ -1008,7 +1008,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                               min={0}
                               step="1"
                               value={block.dimensions.breadth.value}
-                              placeholder="Enter breadth"
+                              placeholder="Breadth"
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
@@ -1041,7 +1041,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                               min={0}
                               step="1"
                               value={block.dimensions.height.value}
-                              placeholder="Enter height"
+                              placeholder="Height"
                               onWheel={(e) =>
                                 e.target instanceof HTMLElement &&
                                 e.target.blur()
@@ -1099,7 +1099,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
                       }}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="whitespace-nowrap">
                     <FormField
                       control={control}
                       name={`blocks.${index}.blockphoto`}
