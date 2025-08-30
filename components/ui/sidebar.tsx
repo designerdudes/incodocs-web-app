@@ -25,14 +25,26 @@ const SIDEBAR_WIDTH_MOBILE = "18rem"
 const SIDEBAR_WIDTH_ICON = "3rem"
 const SIDEBAR_KEYBOARD_SHORTCUT = "b"
 
+// NEW: Options for hover behavior
+type HoverOptions = {
+  /** Enable desktop hover-to-expand when collapsed (icon mode). */
+  hoverToExpand?: boolean
+  /** Delay before opening on hover (ms). */
+  hoverDelay?: number
+  /** Delay before collapsing after mouse leaves (ms). */
+  collapseDelay?: number
+}
+
 type SidebarContext = {
   state: "expanded" | "collapsed"
   open: boolean
-  setOpen: (open: boolean) => void
+  setOpen: (open: boolean | ((open: boolean) => boolean)) => void
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
   isMobile: boolean
   toggleSidebar: () => void
+  // NEW: expose hover options to descendants
+  hoverOptions: Required<HoverOptions>
 }
 
 const SidebarContext = React.createContext<SidebarContext | null>(null)
@@ -52,16 +64,25 @@ const SidebarProvider = React.forwardRef<
     defaultOpen?: boolean
     open?: boolean
     onOpenChange?: (open: boolean) => void
+    /** Enable hover-to-expand behavior on desktop. Defaults to true. */
+    hoverToExpand?: boolean
+    /** Delay before opening on hover (ms). Defaults to 120. */
+    hoverDelay?: number
+    /** Delay before collapsing after mouse leave (ms). Defaults to 180. */
+    collapseDelay?: number
   }
 >(
   (
     {
-      defaultOpen = true,
+      defaultOpen = false,
       open: openProp,
       onOpenChange: setOpenProp,
       className,
       style,
       children,
+      hoverToExpand = true,
+      hoverDelay = 120,
+      collapseDelay = 180,
       ...props
     },
     ref
@@ -75,7 +96,7 @@ const SidebarProvider = React.forwardRef<
     const open = openProp ?? _open
     const setOpen = React.useCallback(
       (value: boolean | ((value: boolean) => boolean)) => {
-        const openState = typeof value === "function" ? value(open) : value
+        const openState = typeof value === "function" ? (value as any)(open) : value
         if (setOpenProp) {
           setOpenProp(openState)
         } else {
@@ -83,7 +104,9 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        if (typeof document !== "undefined") {
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
+        }
       },
       [setOpenProp, open]
     )
@@ -112,7 +135,6 @@ const SidebarProvider = React.forwardRef<
     }, [toggleSidebar])
 
     // We add a state so that we can do data-state="expanded" or "collapsed".
-    // This makes it easier to style the sidebar with Tailwind classes.
     const state = open ? "expanded" : "collapsed"
 
     const contextValue = React.useMemo<SidebarContext>(
@@ -124,8 +146,13 @@ const SidebarProvider = React.forwardRef<
         openMobile,
         setOpenMobile,
         toggleSidebar,
+        hoverOptions: {
+          hoverToExpand: !!hoverToExpand,
+          hoverDelay,
+          collapseDelay,
+        },
       }),
-      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar]
+      [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar, hoverToExpand, hoverDelay, collapseDelay]
     )
 
     return (
@@ -174,7 +201,46 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    const { isMobile, state, openMobile, setOpenMobile, setOpen, open, hoverOptions } = useSidebar()
+
+    // --- NEW: Hover-to-expand logic (desktop only) ---
+    const hoverTimers = React.useRef<{ enter?: number; leave?: number }>({})
+    const hoveredOpenRef = React.useRef(false)
+
+    const clearTimers = () => {
+      if (hoverTimers.current.enter) {
+        window.clearTimeout(hoverTimers.current.enter)
+        hoverTimers.current.enter = undefined
+      }
+      if (hoverTimers.current.leave) {
+        window.clearTimeout(hoverTimers.current.leave)
+        hoverTimers.current.leave = undefined
+      }
+    }
+
+    const handleMouseEnter = () => {
+      if (isMobile || !hoverOptions.hoverToExpand) return
+      // Only auto-open on hover when currently collapsed
+      if (open) return
+      clearTimers()
+      hoverTimers.current.enter = window.setTimeout(() => {
+        setOpen(true)
+        hoveredOpenRef.current = true
+      }, hoverOptions.hoverDelay)
+    }
+
+    const handleMouseLeave = () => {
+      if (isMobile || !hoverOptions.hoverToExpand) return
+      clearTimers()
+      // Only auto-collapse if we auto-opened due to hover
+      if (!hoveredOpenRef.current) return
+      hoverTimers.current.leave = window.setTimeout(() => {
+        setOpen(false)
+        hoveredOpenRef.current = false
+      }, hoverOptions.collapseDelay)
+    }
+
+    React.useEffect(() => () => clearTimers(), [])
 
     if (collapsible === "none") {
       return (
@@ -232,6 +298,8 @@ const Sidebar = React.forwardRef<
           )}
         />
         <div
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
           className={cn(
             "duration-200 fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] ease-linear md:flex",
             side === "left"
@@ -578,7 +646,7 @@ const SidebarMenuButton = React.forwardRef<
     if (typeof tooltip === "string") {
       tooltip = {
         children: tooltip,
-      }
+      } as any
     }
 
     return (
@@ -588,7 +656,7 @@ const SidebarMenuButton = React.forwardRef<
           side="right"
           align="center"
           hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
+          {...(tooltip as any)}
         />
       </Tooltip>
     )
@@ -618,7 +686,7 @@ const SidebarMenuAction = React.forwardRef<
         "peer-data-[size=lg]/menu-button:top-2.5",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-        "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
+          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-sidebar-accent-foreground md:opacity-0",
         className
       )}
       {...props}

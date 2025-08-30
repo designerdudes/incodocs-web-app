@@ -15,7 +15,7 @@ import {
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -31,16 +31,14 @@ import { CalendarIcon } from "lucide-react";
 import CalendarComponent from "../CalendarComponent";
 import { TimePickerField } from "../TimePickerField";
 
-// ✅ Zod schema
+// ✅ Schema now expects a time string like "hh:mm:AM"
 const formSchema = z.object({
   status: z.string(),
   cuttingMachineId: z.string().min(1, "Machine is required"),
   cuttingScheduledAt: z.object({
     date: z.string().refine((val) => !isNaN(Date.parse(val)), "Select date"),
-    time: z.string().nonempty("Time is required"), // 👈 will hold "02:30 PM"
+    time: z.string().min(1, "Select time"), // string: "HH:MM:AM/PM"
   }),
-  entryTime: z.string().nonempty("Entry time is required"),
-  exitTime: z.string().nonempty("Exit time is required"),
 });
 
 interface Props {
@@ -65,15 +63,17 @@ export default function SendForCuttingForm({ params }: Props) {
   const factoryId = params.data.factoryId;
   const BlockId = params.data._id;
   const { organizationId } = useParams();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       status: "inCutting",
       cuttingMachineId: "",
-      cuttingScheduledAt: { date: "", time: "" },
-      entryTime: "",
-      exitTime: "",
+      cuttingScheduledAt: {
+        date: "",
+        time: "", // use "hh:mm:AM"
+      },
     },
   });
 
@@ -89,14 +89,15 @@ export default function SendForCuttingForm({ params }: Props) {
     fetchMachineData();
   }, [factoryId]);
 
-  // helper: convert "hh:mm AM/PM" → { hours, minutes }
+  // ✅ Convert "hh:mm:AM/PM" -> 24h hours + minutes
   const parseTime = (timeStr: string) => {
     if (!timeStr) return { hours: 0, minutes: 0 };
-    const [time, modifier] = timeStr.split(" ");
-    let [hours, minutes] = time.split(":").map(Number);
+    const [hh, mm, ampm] = timeStr.split(":");
+    let hours = Number(hh);
+    const minutes = Number(mm);
 
-    if (modifier === "PM" && hours < 12) hours += 12;
-    if (modifier === "AM" && hours === 12) hours = 0;
+    if (ampm === "PM" && hours < 12) hours += 12;
+    if (ampm === "AM" && hours === 12) hours = 0;
 
     return { hours, minutes };
   };
@@ -117,12 +118,7 @@ export default function SendForCuttingForm({ params }: Props) {
     const payload = {
       status: values.status,
       cuttingMachineId: values.cuttingMachineId,
-      cuttingScheduledAt: {
-        date: new Date(date).toISOString(),
-        time: { hours, minutes }, // backend stays consistent
-      },
-      entryTime: values.entryTime,
-      exitTime: values.exitTime,
+      cuttingScheduledAt: isoDateTime, // backend receives a single ISO datetime
     };
 
     try {
@@ -131,25 +127,25 @@ export default function SendForCuttingForm({ params }: Props) {
         payload
       );
 
-      // ✅ toast with machine info
       const selectedMachine = machines.find(
         (m) => m._id === values.cuttingMachineId
       );
 
-      if (selectedMachine) {
-        toast.success(
-          `Block sent for cutting on ${selectedMachine.machineName} - ${selectedMachine.typeCutting}`
-        );
-      } else {
-        toast.success("Block sent for cutting");
-      }
+      toast.success(
+        `Block sent for cutting${
+          selectedMachine
+            ? ` on ${selectedMachine.machineName} - ${selectedMachine.typeCutting}`
+            : ""
+        }`
+      );
 
-      window.location.reload();
+      GlobalModal.onClose();
+      router.refresh(); // ✅ refresh without full reload
     } catch (error) {
-      toast.error("Failed to send Blocks");
+      console.error(error);
+      toast.error("Failed to send block for cutting");
     } finally {
       setIsLoading(false);
-      GlobalModal.onClose();
     }
   };
 
@@ -233,25 +229,17 @@ export default function SendForCuttingForm({ params }: Props) {
         />
 
         {/* Time Picker */}
-        {/* <TimePickerField
+        <FormField
           control={form.control}
           name="cuttingScheduledAt.time"
-          label="Cutting Time"
-        /> */}
-
-        {/* Entry & Exit Time */}
-        <div className="flex gap-4">
-          <TimePickerField
-            control={form.control}
-            name="entryTime"
-            label="Entry Time"
-          />
-          {/* <TimePickerField
-            control={form.control}
-            name="exitTime"
-            label="Exit Time"
-          /> */}
-        </div>
+          render={({ field }) => (
+            <TimePickerField
+              control={form.control}
+              name={field.name}
+              label="Cutting Time"
+            />
+          )}
+        />
 
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
