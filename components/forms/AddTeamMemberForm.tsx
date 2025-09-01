@@ -40,14 +40,15 @@ const formSchema = z.object({
       .string()
       .min(6, { message: "Pincode must be at least 6 characters" }),
   }),
-  contactPerson: z.string().min(1, { message: "Contact person is required" }),
+  contactPerson: z.string().optional(),
+  ContactPersonMobileNumber:z.string().optional(),
   email: z.string().email({ message: "Invalid email format" }),
   mobileNumber: z.string().min(1, { message: "Enter phone number" }),
   alternateMobileNumber: z.string().optional(), // .min(1, { message: "Enter alternate phone number" }).optional(),
   password: z.string().min(6, { message: "Password is required" }),
   confirmPassword: z.string().min(6, { message: "Confirm Password is required" }),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "",
   path: ["confirmPassword"],
 });
 
@@ -103,6 +104,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
       password: "",
       confirmPassword: "",
       contactPerson: "",
+      ContactPersonMobileNumber:"",
       email: "",
       mobileNumber: "",
       alternateMobileNumber: "",
@@ -204,7 +206,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
               name="designation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>designation</FormLabel>
+                  <FormLabel>Designation</FormLabel>
                   <FormControl>
                     <Input placeholder="Eg: Software Engineer" {...field} />
                   </FormControl>
@@ -237,7 +239,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Pincode</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 100001" {...field} />
+                    <Input placeholder="Eg: 100001" {...field} maxLength={6} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -310,19 +312,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
             <h3 className="text-lg font-semibold md:col-span-2">
               Contact Information
             </h3>
-            <FormField
-              control={form.control}
-              name="contactPerson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Person</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Eg: Jane Smith" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
             {/* Email */}
             <FormField
               control={form.control}
@@ -350,7 +340,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 9876543210" {...field} />
+                    <Input placeholder="Eg: 9876543210" {...field} maxLength={10} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -365,7 +355,33 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Alternate Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 9123456789" {...field} />
+                    <Input placeholder="Eg: 9123456789" {...field} maxLength={10}/>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contactPerson"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Person</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Eg: Jane Smith" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ContactPersonMobileNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Contact Person Mobile Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Eg: 9123456789" {...field} maxLength={10}/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -256,6 +256,7 @@ export default function FactoryForm({
                   }}
                   min="0"
                   disabled={isLoading}
+                  maxLength={6}
                 />
               </FormControl>
               <FormMessage />
@@ -268,11 +269,11 @@ export default function FactoryForm({
             name="workersCuttingPay"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Workers Cutting Pay</FormLabel>
+                <FormLabel>Workers Cutting Pay per Sqft</FormLabel>
                 <FormControl>
                   <Input
                     // type="number"
-                    placeholder="Eg: 1500"
+                    placeholder="Eg: 12"
                     step="any"
                     value={field.value === 0 ? "" : field.value}
                     onChange={(e) => {
@@ -294,11 +295,11 @@ export default function FactoryForm({
             name="workersPolishingPay"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Workers Polishing Pay</FormLabel>
+                <FormLabel>Workers Polishing Pay per Sqft</FormLabel>
                 <FormControl>
                   <Input
                     // type="number"
-                    placeholder="Eg: 1200"
+                    placeholder="Eg: 10"
                     step="any"
                     value={field.value === 0 ? "" : field.value}
                     onChange={(e) => {

@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 const formSchema = z.object({
   name: z.string().min(1, { message: "Organization Name is required" }),
   description: z.string().optional(),
+  prefix: z.string().optional(),
+  GstNumber: z.string().optional(),
   address: z.object({
     location: z.string().min(1, { message: "Location is required" }),
     pincode: z
@@ -48,6 +50,8 @@ export default function EditOrganizationForm({ params }: Props) {
     defaultValues: {
       name: "",
       description: "",
+      prefix:"",
+      GstNumber:"",
       address: {
         location: "",
         pincode: "",
@@ -69,6 +73,8 @@ export default function EditOrganizationForm({ params }: Props) {
         form.reset({
           name: data.name || "",
           description: data.description || "",
+          prefix: data.prefix || "",
+          GstNumber:data.GstNumber || "",
           address: {
             location: data.address.location || "",
             pincode: data.address.pincode || "",
@@ -89,7 +95,8 @@ export default function EditOrganizationForm({ params }: Props) {
     setIsLoading(true);
 
     GlobalModal.title = "Confirm Organization Update";
-    GlobalModal.description = "Are you sure you want to update this Organization?";
+    GlobalModal.description =
+      "Are you sure you want to update this Organization?";
     GlobalModal.children = (
       <div className="space-y-4">
         <p>Organization Name: {values.name}</p>
@@ -173,6 +180,40 @@ export default function EditOrganizationForm({ params }: Props) {
         />
         <FormField
           control={form.control}
+          name="prefix"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prefix</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., NJA" {...field} />
+              </FormControl>
+              <FormMessage />
+              {!field.value && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  If left blank, a default prefix will be created using the
+                  first 3 letters of the organization name.
+                </p>
+              )}
+            </FormItem>
+          )}
+        />
+
+        {/* GST Number */}
+        <FormField
+          control={form.control}
+          name="GstNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>GST Number</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., AUG477DED" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="address.location"
           render={({ field }) => (
             <FormItem>
@@ -191,7 +232,7 @@ export default function EditOrganizationForm({ params }: Props) {
             <FormItem>
               <FormLabel>Pincode</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., 500008" {...field} />
+                <Input placeholder="e.g., 500008" {...field} maxLength={6} />
               </FormControl>
               <FormMessage />
             </FormItem>

@@ -10,7 +10,7 @@ import {
 } from "../ui/card";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { BrandName } from "@/lib/constants";
 import Link from "next/link";
@@ -24,6 +24,7 @@ export function LoginForm() {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
 
@@ -131,27 +132,38 @@ export function LoginForm() {
         </div>
         <div className="grid gap-2">
           <Label htmlFor="password">Password</Label>
-          <div>
+          <div className="relative">
             <Input
               disabled={loading}
               id="password"
               value={password}
               onChange={handlePasswordChange}
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="******"
+              className="pr-10" // space for eye icon
             />
-            {passwordError && (
-              <p className="text-red-700 text-xs mt-1">{passwordError}</p>
-            )}
-            <Link href="/forgot-password">
-              <Button
-                className="w-fit p-0 m-0 justify-start text-xs"
-                variant="link"
-              >
-                Forgot Password?
-              </Button>
-            </Link>
+
+            {/* Eye / EyeOff toggle */}
+            <button
+              type="button"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+
+          {passwordError && (
+            <p className="text-red-700 text-xs mt-1">{passwordError}</p>
+          )}
+          <Link href="/forgot-password">
+            <Button
+              className="w-fit p-0 m-0 justify-start text-xs"
+              variant="link"
+            >
+              Forgot Password?
+            </Button>
+          </Link>
         </div>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">

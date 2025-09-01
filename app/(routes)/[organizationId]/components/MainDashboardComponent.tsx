@@ -21,6 +21,18 @@ import { cn } from "@/lib/utils";
 import { Building, CircleXIcon, Search } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormControl,
+  FormMessage,
+} from "@/components/ui/form";
+
 interface Address {
   Prefix: string | number | readonly string[] | undefined;
   coordinates: {
@@ -37,6 +49,7 @@ interface Organization {
   name: string;
   Prefix: string;
   owner: string;
+  GstNumber: string;
   address: Address;
   description?: string;
   members: any[];
@@ -67,127 +80,138 @@ interface UserDataProps {
   userData: User | null;
 }
 
-// Form component for creating an organization
+/* -------------------- ✅ Validation Schema -------------------- */
+const orgSchema = z.object({
+  name: z.string().min(2, "Organization name must be at least 2 characters."),
+  description: z.string().optional(),
+  Prefix: z.string().optional(),
+  GstNumber: z
+    .string().optional(),
+  address: z.object({
+    location: z.string().optional(),
+    pincode: z
+      .string().optional(),
+    coordinates: z.object({
+      type: z.literal("Point").default("Point").optional(),
+      coordinates: z.tuple([z.number(), z.number()]).optional(),
+    }),
+  }).optional(),
+  owner: z.string().optional(),
+});
+
+type OrgSchemaType = z.infer<typeof orgSchema>;
+
+/* -------------------- ✅ Form Component -------------------- */
 const CreateOrgForm: React.FC<{
-  initialData: {
-    name: string;
-    description: string;
-    address: Address;
-    owner: string;
-  };
-  onSubmit: (data: {
-    name: string;
-    description: string;
-    address: Address;
-    owner: string;
-  }) => void;
+  initialData: OrgSchemaType;
+  onSubmit: (data: OrgSchemaType) => void;
   error: string | null;
   token: string;
   organizations: Organization[];
 }> = ({ initialData, onSubmit, error, token, organizations }) => {
-  const [formData, setFormData] = useState(initialData);
   const modal = useGlobalModal();
 
-  const handleSubmit = () => {
-    onSubmit(formData);
-  };
+  const form = useForm<OrgSchemaType>({
+    resolver: zodResolver(orgSchema),
+    defaultValues: initialData,
+  });
 
-  const openAddFactoryModal = () => {
-    if (organizations.length === 0) {
-      modal.title = "No Organizations Available";
-      modal.description =
-        "Please create an organization before adding a factory.";
-      modal.children = (
-        <div className="space-y-4">
-          <p className="text-sm text-gray-600">
-            You need at least one organization to add a factory.
-          </p>
-          <Button
-            onClick={() => {
-              modal.onClose();
-            }}
-          >
-            Close
-          </Button>
-        </div>
-      );
-      modal.onOpen();
-      return;
-    }
-
-    modal.title = "Add New Factory";
-    modal.description = "Fill in the details to add a new factory.";
-    modal.children = (
-      <FactoryForm
-        organizationId={organizations[0]._id}
-        token={token}
-        organizations={organizations.map((org) => ({
-          id: org._id,
-          name: org.name,
-        }))}
-      />
-    );
-    modal.onOpen();
+  const handleSubmit = (values: OrgSchemaType) => {
+    onSubmit(values);
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label htmlFor="name">Name</Label>
-        <Input
-          id="name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder="e.g., New Jabbal"
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {/* Name */}
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., New Jabbal" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label htmlFor="location">Address</Label>
-        <Input
-          id="location"
-          value={formData.address.location}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              address: { ...formData.address, location: e.target.value },
-            })
-          }
-          placeholder="e.g., 343 Example Street"
+
+        {/* Address Location */}
+        <FormField
+          control={form.control}
+          name="address.location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 343 Example Street" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label htmlFor="Prefix">Prefix</Label>
-        <Input
-          id="Prefix"
-          value={formData.address.Prefix}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              address: { ...formData.address, Prefix: e.target.value },
-            })
-          }
-          placeholder="e.g., NJ"
+
+        {/* Prefix */}
+        <FormField
+          control={form.control}
+          name="Prefix"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Prefix</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., NJA" {...field} />
+              </FormControl>
+              <FormMessage />
+              {!field.value && (
+                <p className="text-xs text-muted-foreground mt-1">
+                  If left blank, a default prefix will be created using the
+                  first 3 letters of the organization name.
+                </p>
+              )}
+            </FormItem>
+          )}
         />
-      </div>
-      <div>
-        <Label htmlFor="pincode">Pincode</Label>
-        <Input
-          id="pincode"
-          value={formData.address.pincode}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              address: { ...formData.address, pincode: e.target.value },
-            })
-          }
-          placeholder="e.g., 500008"
+
+        {/* GST Number */}
+        <FormField
+          control={form.control}
+          name="GstNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>GST Number</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., AUG477DED" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </div>
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      <div className="flex justify-center gap-4">
-        <Button onClick={handleSubmit}>Submit Organization</Button>
-      </div>
-    </div>
+
+        {/* Pincode */}
+        <FormField
+          control={form.control}
+          name="address.pincode"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Pincode</FormLabel>
+              <FormControl>
+                <Input placeholder="e.g., 500008" {...field} maxLength={6} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Server error */}
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        <div className="flex justify-center gap-4">
+          <Button type="submit">Submit Organization</Button>
+        </div>
+      </form>
+    </Form>
   );
 };
 
@@ -205,24 +229,20 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({
   const [organizations, setOrganizations] = useState(combinedOrgs || []);
   const [isOwner, setIsOwner] = useState(false);
 
-  const [newOrg, setNewOrg] = useState({
+  const [newOrg, setNewOrg] = useState<OrgSchemaType>({
     name: "",
     description: "",
+    Prefix: "",
     owner: userData?._id || "",
+    GstNumber: "",
     address: {
-      Prefix: "",
       location: "",
-      coordinates: { type: "Point", coordinates: [0, 0] as [number, number] },
+      coordinates: { type: "Point", coordinates: [0, 0] },
       pincode: "",
     },
   });
 
-  const handleCreateOrg = async (formData: {
-    name: string;
-    description: string;
-    address: Address;
-    owner: string;
-  }) => {
+  const handleCreateOrg = async (formData: OrgSchemaType) => {
     try {
       const response = await fetch(
         "https://incodocs-server.onrender.com/organizations/add",
@@ -234,7 +254,7 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({
           },
           body: JSON.stringify({
             ...formData,
-            Prefix: formData.address.Prefix, // Add top-level Prefix for backend
+            Prefix: formData.Prefix,
           }),
         }
       );
