@@ -28,8 +28,8 @@ export default async function Page(params: params) {
       },
     }
   ).then((response) => {
-    return response.json();
-  });
+      return response.json();
+    }).catch((err) => console.log(err));
   let shipmentData;
   shipmentData = res;
   return (
