@@ -24,6 +24,8 @@ import moment from "moment";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
+import { headers } from "next/headers";
+
 
 interface Props {
   params: {
@@ -36,6 +38,8 @@ export default async function SlabsPage({ params }: Props) {
   let SlabData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
+  const headersList = headers();
+  const referer = headersList.get("referer") || "/fallback"; // fallback if no referer
 
   const res = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
@@ -49,7 +53,6 @@ export default async function SlabsPage({ params }: Props) {
   ).then((response) => response.json());
 
   BlockData = res;
-  //  console.log("ssssssssssaaaa",BlockData);
 
   const resp = await fetch(
     `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
@@ -129,12 +132,19 @@ const volumeInCm = calculateVolumeCm(
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href={`../../${BlockData?.lotId?._id}/blocks`}>
+        {/* <Link href={`../../${BlockData?.lotId?._id}/blocks`}>
+          <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+          </Button>
+        </Link> */}
+        <Link href={referer}>
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
           </Button>
         </Link>
+        
         <div className="flex-1">
           <Heading
             className="leading-tight"

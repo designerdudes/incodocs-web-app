@@ -166,6 +166,14 @@ const rawInventoryCards = [
     showButton: false,
     buttonUrl: "/factorymanagement/inventory/raw/lots",
   },
+   {
+    title: "Total Blocks",
+    icon: <BlocksIcon className="w-6 h-6 text-green-500 self-end" />,
+    value: 50,
+    color: "bg-primary",
+    showButton: false,
+    buttonUrl: "/factorymanagement/inventory/raw/blocks",
+  },
 
   {
     title: "Slabs in Processing",
@@ -309,6 +317,10 @@ const sidebarTabs = {
                 {
                   title: "Lots",
                   url: "/factorymanagement/inventory/raw/lots",
+                },
+                {
+                  title: "Blocks",
+                  url: "/factorymanagement/inventory/raw/blocks",
                 },
                 {
                   title: "Processing",
