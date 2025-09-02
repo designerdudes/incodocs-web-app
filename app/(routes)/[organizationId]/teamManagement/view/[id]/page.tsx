@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -38,6 +38,7 @@ interface EmployeeData {
   email: string;
   mobileNumber: number;
   contactPerson: string;
+  teamMemberPhoto: string;
   alternateMobileNumber:number;
   role: string;
   designation: string;
@@ -159,6 +160,23 @@ export default function EmployeeViewPage ({ params }: Props) {
                   <TableCell className="whitespace-nowrap">Designation</TableCell>
                   <TableCell>{teamData?.designation}</TableCell>
                 </TableRow>
+                <TableRow>
+                          <TableCell>Team Member Photo</TableCell>
+                          <TableCell>
+                            {teamData.teamMemberPhoto ? (
+                              <a
+                                href={teamData.teamMemberPhoto}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-500 hover:underline"
+                              >
+                                <EyeIcon className="h-4 w-4 cursor-pointer" />
+                              </a>
+                            ) : (
+                              "N/A"
+                            )}
+                          </TableCell>
+                        </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">Location</TableCell>
                   <TableCell>{teamData?.address?.location}</TableCell>

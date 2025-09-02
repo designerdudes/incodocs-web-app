@@ -176,7 +176,7 @@ export interface Quarry {
   updatedAt?: Date;
 }
 
-export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
+export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [blocks, setBlocks] = useState<any[]>([]);
@@ -199,7 +199,7 @@ export function RawMaterialCreateNewForm({ }: RawMaterialCreateNewFormProps) {
     pageIndex * pageSize,
     pageIndex * pageSize + pageSize
   );
-const [blockCountInput, setBlockCountInput] = useState("1");
+  const [blockCountInput, setBlockCountInput] = useState("1");
   const [search, setSearch] = useState("");
   const [quarries, setQuarries] = useState<Quarry[]>([]);
   const [page, setPage] = useState(1);
@@ -280,18 +280,18 @@ const [blockCountInput, setBlockCountInput] = useState("1");
         index < currentBlocks.length
           ? currentBlocks[index]
           : {
-            blockNumber: "",
-            materialType: "",
-            inStock: true,
-            blockphoto: "",
-            vehicleNumber: "",
-            dimensions: {
-              weight: { value: 0, units: "tons" },
-              length: { value: undefined, units: "inch" },
-              breadth: { value: undefined, units: "inch" },
-              height: { value: undefined, units: "inch" },
-            },
-          }
+              blockNumber: "",
+              materialType: "",
+              inStock: true,
+              blockphoto: "",
+              vehicleNumber: "",
+              dimensions: {
+                weight: { value: 0, units: "tons" },
+                length: { value: undefined, units: "inch" },
+                breadth: { value: undefined, units: "inch" },
+                height: { value: undefined, units: "inch" },
+              },
+            }
       );
       setBlocks(newBlocks);
       // setValue("blocks", newBlocks);
@@ -395,9 +395,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
   function calculateTotalWeight() {
     const totalWeightInTons = blocks.reduce((total, block) => {
       const { length, breadth, height } = block.dimensions;
-      const l = length ?? 0
-      const b = breadth ?? 0
-      const h = height ?? 0
+      const l = length ?? 0;
+      const b = breadth ?? 0;
+      const h = height ?? 0;
       const volume = (l.value * b.value * h.value) / 1000000 || 0; // m³
       const density = 3.5; // Example density in tons/m³
       //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
@@ -540,7 +540,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                       }
                       onChange={(e) => {
                         const value = e.target.value;
-                        const numValue = value ? Math.max(0, parseFloat(value)) : undefined; // clamp to 0
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined; // clamp to 0
                         field.onChange(numValue);
                       }}
                       value={field.value ?? undefined}
@@ -569,7 +571,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                       }
                       onChange={(e) => {
                         const value = e.target.value;
-                        const numValue = value ? Math.max(0, parseFloat(value)) : undefined;
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined;
                         field.onChange(numValue);
                       }}
                       value={field.value ?? undefined}
@@ -597,7 +601,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                       }
                       onChange={(e) => {
                         const value = e.target.value;
-                        const numValue = value ? Math.max(0, parseFloat(value)) : undefined;
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined;
                         field.onChange(numValue);
                       }}
                       value={field.value ?? undefined}
@@ -730,7 +736,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                       }
                       onChange={(e) => {
                         const value = e.target.value;
-                        const numValue = value ? Math.max(0, parseFloat(value)) : undefined;
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined;
                         field.onChange(numValue);
                       }}
                       value={field.value ?? undefined}
@@ -758,7 +766,9 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                       }
                       onChange={(e) => {
                         const value = e.target.value;
-                        const numValue = value ? Math.max(0, parseFloat(value)) : undefined;
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined;
                         field.onChange(numValue);
                       }}
                       value={field.value ?? undefined}
@@ -769,32 +779,31 @@ const [blockCountInput, setBlockCountInput] = useState("1");
                 </FormItem>
               )}
             />
-           <FormField
-  control={control}
-  name="noOfBlocks"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Number of Blocks</FormLabel>
-      <FormControl>
-        <Input
-          type="number"
-          min={1}
-          placeholder="Enter number of blocks"
-          value={blockCountInput}
-          onChange={async (e) => {
-            const val = e.target.value;
-            setBlockCountInput(val);
+            <FormField
+              control={control}
+              name="noOfBlocks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Blocks</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Enter number of blocks"
+                      value={blockCountInput}
+                      onChange={async (e) => {
+                        const val = e.target.value;
+                        setBlockCountInput(val);
 
-            const n = Math.max(1, parseInt(val || "1", 10));
-            field.onChange(n); // keep RHF in sync
-            await handleBlockCountChange(String(n)); // update rows
-          }}
-        />
-      </FormControl>
-    </FormItem>
-  )}
-/>
-
+                        const n = Math.max(1, parseInt(val || "1", 10));
+                        field.onChange(n); // keep RHF in sync
+                        await handleBlockCountChange(String(n)); // update rows
+                      }}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
           </div>
           <div className="grid grid-cols-3 gap-3">
             <div>
@@ -912,362 +921,371 @@ const [blockCountInput, setBlockCountInput] = useState("1");
               </label>
             </div>
           </div>
-         <div className="w-full overflow-x-auto">
-
-          <Table className="min-w-max ">
-            <TableHeader>
-              <TableRow>
-                <TableHead>S.No</TableHead>
-                <TableHead>Block Number</TableHead>
-                <TableHead>Material Type</TableHead>
-                <TableHead>Length (cm)</TableHead>
-                <TableHead>Breadth (cm)</TableHead>
-                <TableHead>Height (cm)</TableHead>
-                <TableHead>Volume (m³)</TableHead>
-                <TableHead>Weight (tons)</TableHead>
-                <TableHead>Vehicle Number</TableHead>
-                <TableHead>Block Photo</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody className="whitespace-nowrap">
-               {paginatedBlocks.map((block, index) => (
-    <TableRow key={index}>
-      <TableCell>{pageIndex * pageSize + index + 1}</TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.blockNumber`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              placeholder="Block Number"
-                              value={block.blockNumber || ""}
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].blockNumber =
-                                  e.target.value;
+          <div className="w-full overflow-x-auto">
+            <Table className="min-w-max ">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>S.No</TableHead>
+                  <TableHead>Block Number</TableHead>
+                  <TableHead>Material Type</TableHead>
+                  <TableHead>Length (cm)</TableHead>
+                  <TableHead>Breadth (cm)</TableHead>
+                  <TableHead>Height (cm)</TableHead>
+                  <TableHead>Volume (m³)</TableHead>
+                  <TableHead>Weight (tons)</TableHead>
+                  <TableHead>Vehicle Number</TableHead>
+                  <TableHead>Block Photo</TableHead>
+                  <TableHead>Action</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody className="whitespace-nowrap">
+                {paginatedBlocks.map((block, index) => (
+                  <TableRow key={index}>
+                    <TableCell>{pageIndex * pageSize + index + 1}</TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`blocks.${index}.blockNumber`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                placeholder="Block Number"
+                                value={block.blockNumber || ""}
+                                onChange={(e) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[index].blockNumber =
+                                    e.target.value;
                                   setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.materialType`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="text"
-                              placeholder="Material Type"
-                              value={block.materialType || ""}
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].materialType =
-                                  e.target.value;
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`blocks.${index}.materialType`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="text"
+                                placeholder="Material Type"
+                                value={block.materialType || ""}
+                                onChange={(e) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[index].materialType =
+                                    e.target.value;
                                   setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.dimensions.length.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              step="1"
-                              value={block.dimensions.length.value}
-                              placeholder="Length"
-                              onWheel={(e) =>
-                                e.target instanceof HTMLElement &&
-                                e.target.blur()
-                              }
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || undefined;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.dimensions.breadth.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              step="1"
-                              value={block.dimensions.breadth.value}
-                              placeholder="Breadth"
-                              onWheel={(e) =>
-                                e.target instanceof HTMLElement &&
-                                e.target.blur()
-                              }
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.breadth.value =
-                                  parseFloat(e.target.value) || undefined;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <FormField
-                      name={`blocks.${index}.dimensions.height.value`}
-                      control={control}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              min={0}
-                              step="1"
-                              value={block.dimensions.height.value}
-                              placeholder="Height"
-                              onWheel={(e) =>
-                                e.target instanceof HTMLElement &&
-                                e.target.blur()
-                              }
-                              onChange={(e) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || undefined;
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              disabled={isLoading}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {((
-
-                      (block?.dimensions?.length?.value *
-                        block?.dimensions?.breadth?.value *
-                        block?.dimensions?.height?.value) /
-                        1000000
-                      ) || 0
-                      ).toFixed(2)
-                      // block?.dimensions?.height?.value *
-                      // (block?.dimensions?.length?.units === "inch" ? 0.000016387064 : 0.000001)
-                    }
-                  </TableCell>
-                  <TableCell>
-                    {calculateWeight(
-                      block?.dimensions?.length?.value,
-                      block?.dimensions?.breadth?.value,
-                      block?.dimensions?.height?.value
-                      // block.dimensions.length.units
-                    ) || 0
-                      .toFixed(2)}
-                  </TableCell>
-                  <TableCell>
-                    <Input
-                      type="string"
-                      placeholder="Vehicle Number"
-                      disabled={isLoading}
-                      value={block.vehicleNumber || ""}
-                      onChange={(e) => {
-                        const updatedBlocks = [...blocks];
-                        updatedBlocks[index].vehicleNumber = e.target.value;
-                        setBlocks(updatedBlocks);
-                        setValue("blocks", updatedBlocks);
-                        saveProgressSilently(getValues());
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell className="whitespace-nowrap">
-                    <FormField
-                      control={control}
-                      name={`blocks.${index}.blockphoto`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormControl>
-                            <FileUploadField
-                              name={field.name}
-                              value={field.value || ""}
-                              onChange={(value) => {
-                                const updatedBlocks = [...blocks];
-                                updatedBlocks[index].blockphoto = value || "";
-                                setBlocks(updatedBlocks);
-                                setValue("blocks", updatedBlocks);
-                                saveProgressSilently(getValues());
-                              }}
-                              storageKey="blockphoto"
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      type="button"
-                      onClick={() => handleDeleteBlock(index)}
-                      disabled={isLoading}
-                    >
-                      <Trash className="h-4 w-4" />
-                    </Button>
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`blocks.${index}.dimensions.length.value`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step="1"
+                                value={block.dimensions.length.value}
+                                placeholder="Length"
+                                onWheel={(e) =>
+                                  e.target instanceof HTMLElement &&
+                                  e.target.blur()
+                                }
+                                onChange={(e) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[index].dimensions.length.value =
+                                    parseFloat(e.target.value) || undefined;
+                                  setBlocks(updatedBlocks);
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`blocks.${index}.dimensions.breadth.value`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step="1"
+                                value={block.dimensions.breadth.value}
+                                placeholder="Breadth"
+                                onWheel={(e) =>
+                                  e.target instanceof HTMLElement &&
+                                  e.target.blur()
+                                }
+                                onChange={(e) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[
+                                    index
+                                  ].dimensions.breadth.value =
+                                    parseFloat(e.target.value) || undefined;
+                                  setBlocks(updatedBlocks);
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormField
+                        name={`blocks.${index}.dimensions.height.value`}
+                        control={control}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={0}
+                                step="1"
+                                value={block.dimensions.height.value}
+                                placeholder="Height"
+                                onWheel={(e) =>
+                                  e.target instanceof HTMLElement &&
+                                  e.target.blur()
+                                }
+                                onChange={(e) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[index].dimensions.height.value =
+                                    parseFloat(e.target.value) || undefined;
+                                  setBlocks(updatedBlocks);
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                disabled={isLoading}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      {
+                        (
+                          (block?.dimensions?.length?.value *
+                            block?.dimensions?.breadth?.value *
+                            block?.dimensions?.height?.value) /
+                            1000000 || 0
+                        ).toFixed(2)
+                        // block?.dimensions?.height?.value *
+                        // (block?.dimensions?.length?.units === "inch" ? 0.000016387064 : 0.000001)
+                      }
+                    </TableCell>
+                    <TableCell>
+                      {calculateWeight(
+                        block?.dimensions?.length?.value,
+                        block?.dimensions?.breadth?.value,
+                        block?.dimensions?.height?.value
+                        // block.dimensions.length.units
+                      ) || (0).toFixed(2)}
+                    </TableCell>
+                    <TableCell>
+                      <Input
+                        type="string"
+                        placeholder="Vehicle Number"
+                        disabled={isLoading}
+                        value={block.vehicleNumber || ""}
+                        onChange={(e) => {
+                          const updatedBlocks = [...blocks];
+                          updatedBlocks[index].vehicleNumber = e.target.value;
+                          setBlocks(updatedBlocks);
+                          setValue("blocks", updatedBlocks);
+                          saveProgressSilently(getValues());
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <FormField
+                        control={control}
+                        name={`blocks.${index}.blockphoto`}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <FileUploadField
+                                name={field.name}
+                                value={field.value || ""}
+                                onChange={(value) => {
+                                  const updatedBlocks = [...blocks];
+                                  updatedBlocks[index].blockphoto = value || "";
+                                  setBlocks(updatedBlocks);
+                                  setValue("blocks", updatedBlocks);
+                                  saveProgressSilently(getValues());
+                                }}
+                                storageKey="blockphoto"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        type="button"
+                        onClick={() => handleDeleteBlock(index)}
+                        disabled={isLoading}
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter>
+                <TableRow>
+                  <TableCell colSpan={9}></TableCell>{" "}
+                  {/* Empty cells to push content to the right */}
+                  <TableCell colSpan={2} className="text-right">
+                    <div className="flex flex-col items-end font-bold space-y-1">
+                      <span>
+                        Total Volume (m³):{" "}
+                        {calculateTotalVolume().inM.toFixed(2) || 0}
+                      </span>
+                      <span>
+                        Total Weight (tons):{" "}
+                        {calculateTotalWeight().inTons.toFixed(2) || 0}
+                      </span>
+                    </div>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-            <TableFooter>
-              <TableRow>
-                <TableCell colSpan={9}></TableCell> {/* Empty cells to push content to the right */}
-                <TableCell colSpan={2} className="text-right">
-                  <div className="flex flex-col items-end font-bold space-y-1">
-                    <span>Total Volume (m³): {calculateTotalVolume().inM.toFixed(2) || 0}</span>
-                    <span>Total Weight (tons): {calculateTotalWeight().inTons.toFixed(2) || 0}</span>
-                  </div>
-                </TableCell>
-              </TableRow>
-            </TableFooter>
+              </TableFooter>
+            </Table>
+          </div>
+          {/* Pagination */}
+          <div className="flex items-center justify-between gap-8 h-[5%]">
+            <div className="flex items-center gap-3">
+              <Label className="max-sm:sr-only">Rows per page</Label>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(value) => {
+                  setPageSize(Number(value));
+                  setPageIndex(0); // reset to first page
+                }}
+              >
+                <SelectTrigger className="w-fit whitespace-nowrap">
+                  <SelectValue placeholder="Select number of results" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 25, 50].map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
+            <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
+              <p aria-live="polite">
+                <span className="text-foreground">
+                  {blocks.length === 0 ? 0 : pageIndex * pageSize + 1}-
+                  {Math.min((pageIndex + 1) * pageSize, blocks.length)}
+                </span>{" "}
+                of <span className="text-foreground">{blocks.length}</span>
+              </p>
+            </div>
 
-          </Table>
-              </div>
-{/* Pagination */}
-<div className="flex items-center justify-between gap-8 h-[5%]">
-  <div className="flex items-center gap-3">
-    <Label className="max-sm:sr-only">Rows per page</Label>
-    <Select
-      value={pageSize.toString()}
-      onValueChange={(value) => {
-        setPageSize(Number(value));
-        setPageIndex(0); // reset to first page
-      }}
-    >
-      <SelectTrigger className="w-fit whitespace-nowrap">
-        <SelectValue placeholder="Select number of results" />
-      </SelectTrigger>
-      <SelectContent>
-        {[5, 10, 25, 50].map((size) => (
-          <SelectItem key={size} value={size.toString()}>
-            {size}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  </div>
-
-  <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
-    <p aria-live="polite">
-      <span className="text-foreground">
-        {blocks.length === 0
-          ? 0
-          : pageIndex * pageSize + 1}
-        -
-        {Math.min((pageIndex + 1) * pageSize, blocks.length)}
-      </span>{" "}
-      of{" "}
-      <span className="text-foreground">{blocks.length}</span>
-    </p>
-  </div>
-
-  <div>
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setPageIndex(0)}
-            disabled={pageIndex === 0}
-          >
-            <ChevronFirstIcon size={16} />
-          </Button>
-        </PaginationItem>
-        <PaginationItem>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
-            disabled={pageIndex === 0}
-          >
-            <ChevronLeftIcon size={16} />
-          </Button>
-        </PaginationItem>
-        <PaginationItem>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() =>
-              setPageIndex((prev) =>
-                Math.min(prev + 1, Math.ceil(blocks.length / pageSize) - 1)
-              )
-            }
-            disabled={pageIndex >= Math.ceil(blocks.length / pageSize) - 1}
-          >
-            <ChevronRightIcon size={16} />
-          </Button>
-        </PaginationItem>
-        <PaginationItem>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={() =>
-              setPageIndex(Math.ceil(blocks.length / pageSize) - 1)
-            }
-            disabled={pageIndex >= Math.ceil(blocks.length / pageSize) - 1}
-          >
-            <ChevronLastIcon size={16} />
-          </Button>
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
-  </div>
-</div>
+            <div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setPageIndex(0)}
+                      disabled={pageIndex === 0}
+                    >
+                      <ChevronFirstIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex((prev) => Math.max(prev - 1, 0))
+                      }
+                      disabled={pageIndex === 0}
+                    >
+                      <ChevronLeftIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex((prev) =>
+                          Math.min(
+                            prev + 1,
+                            Math.ceil(blocks.length / pageSize) - 1
+                          )
+                        )
+                      }
+                      disabled={
+                        pageIndex >= Math.ceil(blocks.length / pageSize) - 1
+                      }
+                    >
+                      <ChevronRightIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex(Math.ceil(blocks.length / pageSize) - 1)
+                      }
+                      disabled={
+                        pageIndex >= Math.ceil(blocks.length / pageSize) - 1
+                      }
+                    >
+                      <ChevronLastIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
 
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Submit"}

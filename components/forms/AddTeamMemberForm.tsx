@@ -25,31 +25,39 @@ import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { useEffect } from "react";
 import { Props } from "recharts/types/cartesian/YAxis";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import { Eye, EyeOff } from "lucide-react";
 
-const formSchema = z.object({
-  fullName: z.string().min(1, { message: "Name is required" }),
-  organizationId: z
-    .string()
-    .min(1, { message: "Organization must be selected" }),
-  employeeId: z.string().min(1, { message: "Employee ID is required" }),
-  designation: z.string().optional(),
-  // min(1, { message: "Position is required" }),
-  address: z.object({
-    location: z.string().min(1, { message: "Location is required" }),
-    pincode: z
+const formSchema = z
+  .object({
+    fullName: z.string().min(1, { message: "Name is required" }),
+    organizationId: z
       .string()
-      .min(6, { message: "Pincode must be at least 6 characters" }),
-  }),
-  contactPerson: z.string().min(1, { message: "Contact person is required" }),
-  email: z.string().email({ message: "Invalid email format" }),
-  mobileNumber: z.string().min(1, { message: "Enter phone number" }),
-  alternateMobileNumber: z.string().optional(), // .min(1, { message: "Enter alternate phone number" }).optional(),
-  password: z.string().min(6, { message: "Password is required" }),
-  confirmPassword: z.string().min(6, { message: "Confirm Password is required" }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+      .min(1, { message: "Organization must be selected" }),
+    employeeId: z.string().min(1, { message: "Employee ID is required" }),
+    designation: z.string().optional(),
+    // min(1, { message: "Position is required" }),
+    address: z.object({
+      location: z.string().min(1, { message: "Location is required" }),
+      pincode: z
+            .number()
+            .min(100000, { message: "Pincode must be at least 6 digits" }),
+    }),
+    contactPerson: z.string().optional(),
+    ContactPersonMobileNumber: z.number().optional(),
+    teamMemberPhoto: z.string().optional(),
+    email: z.string().email({ message: "Invalid email format" }),
+    mobileNumber: z.number().min(1, { message: "Enter phone number" }),
+    alternateMobileNumber: z.number().optional(), // .min(1, { message: "Enter alternate phone number" }).optional(),
+    password: z.string().min(6, { message: "Password is required" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Confirm Password is required" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "",
+    path: ["confirmPassword"],
+  });
 
 interface OrgData {
   OrgData: {
@@ -62,6 +70,8 @@ export default function TeamFormPage({ OrgData }: OrgData) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [errors, setErrors] = useState({
     password: "",
@@ -102,7 +112,9 @@ export default function TeamFormPage({ OrgData }: OrgData) {
       address: { location: "", pincode: "" },
       password: "",
       confirmPassword: "",
+      teamMemberPhoto: "",
       contactPerson: "",
+      ContactPersonMobileNumber: "",
       email: "",
       mobileNumber: "",
       alternateMobileNumber: "",
@@ -204,7 +216,7 @@ export default function TeamFormPage({ OrgData }: OrgData) {
               name="designation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>designation</FormLabel>
+                  <FormLabel>Designation</FormLabel>
                   <FormControl>
                     <Input placeholder="Eg: Software Engineer" {...field} />
                   </FormControl>
@@ -237,7 +249,17 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Pincode</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 100001" {...field} />
+                    <Input placeholder="Eg: 100001"
+                     {...field}
+                      onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      field.onChange(value);
+                    }
+                  }}
+                     maxLength={6} min="0"
+                    //  type="number"
+                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -251,19 +273,33 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Enter your password"
-                      {...field}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        field.onChange(e);
-                        setPassword(val);
-                        setErrors((prev) => ({
-                          ...prev,
-                          password: validatePassword(val),
-                        }));
-                      }}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        {...field}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(e);
+                          setPassword(val);
+                          setErrors((prev) => ({
+                            ...prev,
+                            password: validatePassword(val),
+                          }));
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   {errors.password && (
                     <p className="text-red-500 text-sm">{errors.password}</p>
@@ -280,20 +316,34 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Re-enter your password"
-                      {...field}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        field.onChange(e);
-                        setConfirmPassword(val);
-                        setErrors((prev) => ({
-                          ...prev,
-                          confirmPassword:
-                            val === password ? "" : "Passwords do not match",
-                        }));
-                      }}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Re-enter your password"
+                        {...field}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          field.onChange(e);
+                          setConfirmPassword(val);
+                          setErrors((prev) => ({
+                            ...prev,
+                            confirmPassword:
+                              val === password ? "" : "Passwords do not match",
+                          }));
+                        }}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   {errors.confirmPassword && (
                     <p className="text-red-500 text-sm">
@@ -304,25 +354,29 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="teamMemberPhoto"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Team Member Photo</FormLabel>
+                  <FormControl>
+                    <FileUploadField
+                      name="teamMemberPhoto"
+                      storageKey="teamMemberPhoto"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border p-4 rounded-md">
             <h3 className="text-lg font-semibold md:col-span-2">
               Contact Information
             </h3>
-            <FormField
-              control={form.control}
-              name="contactPerson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contact Person</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Eg: Jane Smith" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             {/* Email */}
             <FormField
               control={form.control}
@@ -350,7 +404,18 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 9876543210" {...field} />
+                    <Input
+                      placeholder="Eg: 9876543210"
+                      {...field}
+                      maxLength={10}
+                      minLength={10}
+                      onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      field.onChange(value);
+                    }
+                  }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -365,7 +430,54 @@ export default function TeamFormPage({ OrgData }: OrgData) {
                 <FormItem>
                   <FormLabel>Alternate Phone Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="Eg: 9123456789" {...field} />
+                    <Input
+                      placeholder="Eg: 9123456789"
+                      {...field}
+                      maxLength={10}
+                      minLength={10}
+                    onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      field.onChange(value);
+                    }
+                  }}                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="contactPerson"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Person</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Eg: Jane Smith" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="ContactPersonMobileNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel> Contact Person Mobile Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Eg: 9123456789"
+                      {...field}
+                      maxLength={10}
+                      minLength={10}
+                      onChange={(e) => {
+                    const value = Number(e.target.value);
+                    if (value >= 0) {
+                      field.onChange(value);
+                    }
+                  }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -173,20 +173,7 @@ setTimeout(() => {
               <FormItem>
                 <FormLabel>Pincode</FormLabel>
                 <FormControl>
-                  <Input placeholder="Eg: 500001" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="createdAt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Created At</FormLabel>
-                <FormControl>
-                  <Input type="text" placeholder="Eg: 2024-01-01" {...field} />
+                  <Input placeholder="Eg: 500001" {...field}  maxLength={6}/>
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -201,6 +188,8 @@ setTimeout(() => {
                 <FormControl>
                   <Input
                     type="number"
+                    placeholder="Eg: 12"
+                    min={0}
                     {...field}
                     value={field.value}
                     onChange={(e) =>
@@ -221,6 +210,8 @@ setTimeout(() => {
                 <FormControl>
                   <Input
                     type="number"
+                    placeholder="Eg: 12"
+                    min={0}
                     {...field}
                     value={field.value}
                     onChange={(e) =>

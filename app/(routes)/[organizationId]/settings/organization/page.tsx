@@ -23,6 +23,8 @@ export interface Organization {
   _id: string;
   name: string;
   description: string;
+  prefix: string;
+  GstNumber: string;
   address: {
     location: string;
     pincode: string;
@@ -118,7 +120,7 @@ export default async function OrganizationSettingsPage({
       {/* Organization Details */}
       {organization && (
         <div className="space-y-4 mr-6">
-          <Card className="w-full">
+          <Card className="w-1/2">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Organization Details</CardTitle>
               <CellAction data={organization} />
@@ -139,6 +141,14 @@ export default async function OrganizationSettingsPage({
                   <TableRow>
                     <TableCell>Description</TableCell>
                     <TableCell>{organization.description || "N/A"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Prefix</TableCell>
+                    <TableCell>{organization.prefix || "N/A"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>GST Number</TableCell>
+                    <TableCell>{organization.GstNumber || "N/A"}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Address</TableCell>
