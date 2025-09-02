@@ -110,7 +110,6 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
   });
 
   const { control, getValues, setValue, trigger } = form;
-  
 
   // ---------- Submit ----------
   async function onSubmit(values: FormData) {
@@ -184,10 +183,10 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <Table>
+          <Table >
             <TableHeader>
               <TableRow>
-                <TableHead rowSpan={2}>#</TableHead>
+                <TableHead rowSpan={2}>S.No</TableHead>
                 <TableHead rowSpan={2}>Block No.</TableHead>
 
                 <TableHead colSpan={5} className="text-center">
@@ -346,22 +345,49 @@ export function NetMeasurmentForm({ LotData, BlocksData }: AddBlockFormProps) {
             </TableBody>
 
             <TableFooter>
-              <TableRow>
-                <TableCell className="font-bold">Total</TableCell>
+              <TableRow className="bg-gray-50">
+                <TableCell className="font-bold text-left">Total</TableCell>
                 <TableCell colSpan={3}></TableCell>
-                <TableCell className="font-bold">
-                  {totals.endVol.toFixed(2)}
-                </TableCell>
-                <TableCell className="font-bold">
-                  {totals.endWt.toFixed(2)}
+
+                {/* End Measurements */}
+                <TableCell
+                  colSpan={2}
+                  className="text-right font-semibold"
+                >
+                  <div className="flex flex-col items-end">
+                    <span>
+                      Volume:{" "}
+                      <span className="font-bold">
+                        {totals.endVol.toFixed(2)} m³
+                      </span>
+                    </span>
+                    <span>
+                      Weight:{" "}
+                      <span className="font-bold">
+                        {totals.endWt.toFixed(2)} tons
+                      </span>
+                    </span>
+                  </div>
                 </TableCell>
 
                 <TableCell colSpan={3}></TableCell>
-                <TableCell className="font-bold">
-                  {totals.netVol.toFixed(2)}
-                </TableCell>
-                <TableCell className="font-bold">
-                  {totals.netWt.toFixed(2)}
+
+                {/* Net Measurements */}
+                <TableCell colSpan={2} className="text-right font-semibold">
+                  <div className="flex flex-col items-end">
+                    <span>
+                      Volume:{" "}
+                      <span className="font-bold">
+                        {totals.netVol.toFixed(2)} m³
+                      </span>
+                    </span>
+                    <span>
+                      Weight:{" "}
+                      <span className="font-bold">
+                        {totals.netWt.toFixed(2)} tons
+                      </span>
+                    </span>
+                  </div>
                 </TableCell>
               </TableRow>
             </TableFooter>

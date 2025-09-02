@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown, Eye } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CellAction from "./cellActions";
 
@@ -13,6 +13,7 @@ export type Employee = {
   mobileNumber: number;
   role: string;
   designation: string;
+  teamMemberPhoto:string;
   isVerified: boolean;
   address: {
     location: string;
@@ -100,6 +101,28 @@ export const columns: ColumnDef<Employee>[] = [
       <div className="capitalize">{row.original?.fullName}</div>
     ),
   },
+  {
+      accessorKey: "teamMemberPhoto",
+      header: () => <div>Team member Photo</div>,
+      cell: ({ row }) => {
+        const photo = row.original.teamMemberPhoto;
+  
+        return photo && photo !== "N/A" && !photo.startsWith("data:image") ? (
+          <div className="flex gap-2">
+            <Eye
+              className="h-4 w-4 cursor-pointer"
+              onClick={() => {
+                window.open(photo, "_blank");
+              }}
+              aria-label={`View photo for ${row.original.teamMemberPhoto || "Teammember"
+                }`}
+            />
+          </div>
+        ) : (
+          <div>N/A</div>
+        );
+      },
+    },
   {
     accessorKey: "phoneNumber",
     header: ({ column }) => (
