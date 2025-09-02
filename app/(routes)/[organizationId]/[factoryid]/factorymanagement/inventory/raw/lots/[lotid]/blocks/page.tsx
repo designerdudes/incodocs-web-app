@@ -6,7 +6,6 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { columns } from "../../../blocks/components/columns";
 import { 
   Card, 
   CardContent, 
@@ -23,6 +22,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import moment from "moment";
+import { columns } from "./columns";
 
 interface Props {
   params: {

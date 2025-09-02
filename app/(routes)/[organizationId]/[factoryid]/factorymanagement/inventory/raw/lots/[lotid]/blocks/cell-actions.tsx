@@ -23,11 +23,11 @@ import { Alert } from "@/components/forms/Alert";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
-import EditBlockForm from "./editBlockForm";
 import SendForCuttingForm from "@/components/forms/SendForCuttingForm";
 import SplitBlockForm from "@/components/forms/SplitBlockForm";
 import DressingBlockForm from "@/components/forms/dressingBlockForm";
 import Link from "next/link";
+import EditBlockForm from "./editBlockForm";
 import { useParams } from "next/navigation";
 
 
@@ -39,10 +39,9 @@ interface Props {
 export const CellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const params = useParams();
+   const params = useParams();
 
-  const { organizationId, factoryid } = params;
-  console.log(organizationId, factoryid, "params");
+  const { organizationId, factoryid} = params;
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
@@ -161,7 +160,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           )}
           {/* View Lot Details */}
           <DropdownMenuItem asChild>
- <Link
+  <Link
   href={`/${organizationId}/${factoryid}/factorymanagement/inventory/raw/lots/block/${data._id}/slabs`}
 >
   <EyeIcon className="mr-2 h-4 w-4" />

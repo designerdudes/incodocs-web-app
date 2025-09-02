@@ -6,8 +6,15 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
-// import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
+import { cookies } from "next/headers";
 
+// import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
+interface Props {
+  params: {
+    factoryid: string;
+    organizationId: string;
+  };
+}
 
 interface Blocks {
   _id: string
@@ -18,24 +25,25 @@ interface Blocks {
   createdAt: string
 }
 
-export default function Blocks() {
-  
-  const data: Blocks[] = [
+export default async function Blocks({ params }: Props) {
+const cookieStore = cookies();
+const token = cookieStore.get("AccessToken")?.value || "";
+const Blockres = await fetch(
+    `https://incodocs-server.onrender.com/factory-management/inventory/getblocksbyfactory/${params.factoryid}`,
     {
-      _id: "65f8fb0fc4417ea5a14fbd82",
-      materialType: "type A",
-      numberofslabs: "20",
-      blocknumber: "123",
-      instock: "20",
-      createdAt: "9-11-24"
-
-    },
-  ];
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  ).then((response) => response.json());
+  let BlockData = Blockres;
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
-        <Link href="../raw">
+        <Link href="./">
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Back</span>
@@ -44,7 +52,7 @@ export default function Blocks() {
         <div className="flex-1">
           <Heading className="leading-tight" title="Blocks" />
           <p className="text-muted-foreground text-sm">
-            The tracking of blockssssss through various stages of production.</p>
+            The tracking of blocks through various stages of production.</p>
         </div>
         {/* Move the interactivity to the client-side button component */}
         {/* <CreateNewLotButton /> */}
@@ -59,7 +67,7 @@ export default function Blocks() {
           deleteRoute="/category/ids"
           searchKey="name"
           columns={columns}
-          data={data as any}
+          data={BlockData as any}
         />
       </div>
     </div>
