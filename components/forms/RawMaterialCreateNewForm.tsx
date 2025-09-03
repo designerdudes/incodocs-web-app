@@ -780,40 +780,54 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               )}
             />
             <FormField
-              control={control}
-              name="noOfBlocks"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Number of Blocks</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="Enter number of blocks"
-                      value={blockCountInput}
-                      onChange={async (e) => {
-                        const val = e.target.value;
-                        setBlockCountInput(val);
+  control={control}
+  name="noOfBlocks"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Number of Blocks</FormLabel>
+      <FormControl>
+        <Input
+          type="number"
+          min={1}
+          placeholder="Enter number of blocks"
+          value={blockCountInput}
+          onChange={async (e) => {
+            let val = e.target.value;
 
-                        const n = Math.max(1, parseInt(val || "1", 10));
-                        field.onChange(n); // keep RHF in sync
-                        await handleBlockCountChange(String(n)); // update rows
-                      }}
-                    />
-                  </FormControl>
-                </FormItem>
-              )}
-            />
+            // Limit to 2 digits
+            if (val.length > 2) {
+              val = val.slice(0, 2);
+            }
+
+            setBlockCountInput(val);
+
+            const n = Math.max(1, parseInt(val || "1", 10));
+            field.onChange(n); // keep RHF in sync
+            await handleBlockCountChange(String(n)); // update rows
+          }}
+        />
+      </FormControl>
+    </FormItem>
+  )}
+/>
+
           </div>
           <div className="grid grid-cols-3 gap-3">
+            {/* Length */}
             <div>
               <Input
                 value={globalLength}
                 type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalLength(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalLength(val);
+                  }
+                }}
                 placeholder="Length (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
@@ -831,7 +845,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           length: {
                             ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0.1,
+                            value: Math.max(0, parseFloat(globalLength) || 0),
                           },
                         },
                       }));
@@ -844,14 +858,22 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 Apply Length to all rows
               </label>
             </div>
+
+            {/* Breadth */}
             <div>
               <Input
                 value={globalBreadth}
                 type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalBreadth(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalBreadth(val);
+                  }
+                }}
                 placeholder="Breadth (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
@@ -869,7 +891,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           breadth: {
                             ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0.1,
+                            value: Math.max(0, parseFloat(globalBreadth) || 0),
                           },
                         },
                       }));
@@ -882,14 +904,22 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                 Apply Breadth to all rows
               </label>
             </div>
+
+            {/* Height */}
             <div>
               <Input
-                type="number"
                 value={globalHeight}
+                type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalHeight(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalHeight(val);
+                  }
+                }}
                 placeholder="Height (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
@@ -907,7 +937,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                           ...block.dimensions,
                           height: {
                             ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0.1,
+                            value: Math.max(0, parseFloat(globalHeight) || 0),
                           },
                         },
                       }));
@@ -921,6 +951,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               </label>
             </div>
           </div>
+
           <div className="w-full overflow-x-auto">
             <Table className="min-w-max ">
               <TableHeader>
