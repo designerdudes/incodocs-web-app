@@ -31,8 +31,8 @@ export default function CreateNewFormPage() {
                 </div>
             </div>
             <Separator orientation="horizontal" />
-            <div className="container mx-auto">
-                <RawMaterialCreateNewForm gap={3} />
+            <div className="max-h-full ">
+                <RawMaterialCreateNewForm  />
             </div>
         </div>
     );

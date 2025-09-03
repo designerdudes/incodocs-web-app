@@ -64,8 +64,8 @@ const saveProgressSilently = (data: any) => {
 
 // Function to calculate weight based on dimensions
 const calculateWeight = (length: number, breadth: number, height: number) => {
-  const volumeInCubicInches = length * breadth * height;
-  const volumeInCubicMeters = volumeInCubicInches / 1000000;
+  const volumeInCubiccmes = length * breadth * height;
+  const volumeInCubicMeters = volumeInCubiccmes / 1000000;
 
   const density = 3.5; // tons per m³
   const weight = volumeInCubicMeters * density;
@@ -76,8 +76,7 @@ const calculateWeight = (length: number, breadth: number, height: number) => {
 const formSchema = z.object({
   lotName: z
     .string()
-    .min(2, { message: "Lot name must be at least 3 characters long" })
-    .optional(),
+    .min(2, { message: "Lot name must be at least 2 characters long" }),
   materialType: z
     .string()
     .min(3, { message: "Material type must be at least 2 characters long" })
@@ -93,6 +92,10 @@ const formSchema = z.object({
   materialCost: z
     .number()
     .min(0, { message: "Material cost must be greater than or equal to zero" })
+    .optional(),
+  permitCost: z
+    .number()
+    .min(0, { message: "Permit Cost must be greater than or equal to zero" })
     .optional(),
   quarryName: z
     .string()
@@ -135,19 +138,19 @@ const formSchema = z.object({
             value: z
               .number()
               .min(1, { message: "Length must be greater than zero" }),
-            units: z.enum(["cm", "inch"]).default("inch"),
+            units: z.enum(["cm", "cm"]).default("cm"),
           }),
           breadth: z.object({
             value: z
               .number()
               .min(1, { message: "Breadth must be greater than zero" }),
-            units: z.enum(["cm", "inch"]).default("inch"),
+            units: z.enum(["cm", "cm"]).default("cm"),
           }),
           height: z.object({
             value: z
               .number()
               .min(1, { message: "Height must be greater than zero" }),
-            units: z.enum(["cm", "inch"]).default("inch"),
+            units: z.enum(["cm", "cm"]).default("cm"),
           }),
         }),
       })
@@ -155,9 +158,7 @@ const formSchema = z.object({
     .min(1, { message: "At least one block is required" }),
 });
 
-interface RawMaterialCreateNewFormProps {
-  gap: number;
-}
+interface RawMaterialCreateNewFormProps {}
 
 export interface Quarry {
   _id: any;
@@ -225,9 +226,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
           vehicleNumber: "",
           dimensions: {
             weight: { value: 0, units: "tons" },
-            length: { value: undefined, units: "inch" },
-            breadth: { value: undefined, units: "inch" },
-            height: { value: undefined, units: "inch" },
+            length: { value: undefined, units: "cm" },
+            breadth: { value: undefined, units: "cm" },
+            height: { value: undefined, units: "cm" },
           },
         },
       ],
@@ -287,9 +288,9 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               vehicleNumber: "",
               dimensions: {
                 weight: { value: 0, units: "tons" },
-                length: { value: undefined, units: "inch" },
-                breadth: { value: undefined, units: "inch" },
-                height: { value: undefined, units: "inch" },
+                length: { value: undefined, units: "cm" },
+                breadth: { value: undefined, units: "cm" },
+                height: { value: undefined, units: "cm" },
               },
             }
       );
@@ -342,6 +343,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         materialType: values.materialType || "granite",
         materialCost: values.materialCost || 0,
         markerCost: values.markerCost || 0,
+        permitCost: values.permitCost || 0,
         blockLoadingCost: values.blockLoadingCost || 0,
         quarryCost: values.quarryCost || 0,
         commissionCost: values.commissionCost || 0,
@@ -350,27 +352,54 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
         factoryId,
         organizationId,
         status: "active",
-        blocks: values.blocks.map((block) => ({
-          blockNumber: block.blockNumber || "",
-          materialType: block.materialType || "",
-          blockphoto: block.blockphoto || "",
-          vehicleNumber: block.vehicleNumber || "",
-          inStock: block.inStock ?? true,
-          dimensions: {
-            weight: { value: block.dimensions.weight.value, units: "tons" },
-            length: { value: block.dimensions.length.value, units: "inch" },
-            breadth: { value: block.dimensions.breadth.value, units: "inch" },
-            height: { value: block.dimensions.height.value, units: "inch" },
-          },
-        })),
+        blocks:
+          values?.blocks?.map((block) => ({
+            blockNumber: block.blockNumber || "",
+            materialType: block.materialType || "",
+            blockphoto: block.blockphoto || "",
+            vehicleNumber: block.vehicleNumber || "",
+            inStock: block.inStock ?? true,
+            dimensions: {
+              weight: {
+                value: block?.dimensions?.weight?.value ?? 0,
+                units: "tons",
+              },
+              length: {
+                value: block?.dimensions?.length?.value ?? 0,
+                units: "cm",
+              },
+              breadth: {
+                value: block?.dimensions?.breadth?.value ?? 0,
+                units: "cm",
+              },
+              height: {
+                value: block?.dimensions?.height?.value ?? 0,
+                units: "cm",
+              },
+            },
+          })) || [],
       };
       await postData("/factory-management/inventory/addlotandblocks", payload);
       toast.success("Lot created/updated successfully");
       router.push("./");
       setTimeout(() => localStorage.removeItem("rawMaterialFormData"), 3000);
-    } catch (error) {
-      console.error("Error creating/updating Lot:", error);
-      toast.error("Error creating/updating Lot");
+      
+    } catch (error: any) {
+      console.log("Error creating/updating Lot sgdgdfsgdsgdsgds", error.response.data.message)
+       if (error.response && error.response.status === 400) {
+              if (
+                error.response.data.message ===
+                "Employee ID exists, please try a unique ID"
+              ) {
+                toast.error("Employee already exists, please use a unique ID.");
+              } else {
+                toast.error(error.response.data.message || "Bad Request");
+              }
+            } else {
+              toast.error("Error creating/updating employee");
+            }
+      // console.error("Error creating/updating Lot:", error);
+      toast.error("Error creating/updating Lot", error.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -383,7 +412,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       const { length, breadth, height } = block.dimensions;
       const volume = (length.value * breadth.value * height.value) / 1000000;
 
-      // length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      // length.value * breadth.value * height.value * (length.units === "cm" ? 0.000016387064 : 0.000001);
       return total + (volume || 0);
     }, 0);
     return {
@@ -400,7 +429,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       const h = height ?? 0;
       const volume = (l.value * b.value * h.value) / 1000000 || 0; // m³
       const density = 3.5; // Example density in tons/m³
-      //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      //   length.value * breadth.value * height.value * (length.units === "cm" ? 0.000016387064 : 0.000001);
       // const density = 3.5;
       const weight = volume * density;
       return total + weight;
@@ -484,7 +513,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
     <div className="space-y-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             <FormField
               name="lotName"
               control={control}
@@ -493,7 +522,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <FormLabel>Lot Name</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Eg:LotName"
+                      placeholder="Eg: LotName"
                       disabled={isLoading}
                       {...field}
                       value={field.value ?? ""}
@@ -512,7 +541,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <FormLabel>Material Type</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Eg:Granite"
+                      placeholder="Eg: Granite"
                       disabled={isLoading}
                       {...field}
                       value={field.value ?? ""}
@@ -563,6 +592,36 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   <FormControl>
                     <Input
                       placeholder="Enter marker cost"
+                      type="number"
+                      min={0}
+                      disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const numValue = value
+                          ? Math.max(0, parseFloat(value))
+                          : undefined;
+                        field.onChange(numValue);
+                      }}
+                      value={field.value ?? undefined}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              name="permitCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Permit Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter Permit Cost"
                       type="number"
                       min={0}
                       disabled={isLoading}
@@ -780,39 +839,39 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
               )}
             />
             <FormField
-  control={control}
-  name="noOfBlocks"
-  render={({ field }) => (
-    <FormItem>
-      <FormLabel>Number of Blocks</FormLabel>
-      <FormControl>
-        <Input
-          type="number"
-          min={1}
-          placeholder="Enter number of blocks"
-          value={blockCountInput}
-          onChange={async (e) => {
-            let val = e.target.value;
+              control={control}
+              name="noOfBlocks"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Number of Blocks</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="Enter number of blocks"
+                      value={blockCountInput}
+                      onChange={async (e) => {
+                        let val = e.target.value;
 
-            // Limit to 2 digits
-            if (val.length > 2) {
-              val = val.slice(0, 2);
-            }
+                        // Limit to 2 digits
+                        if (val.length > 2) {
+                          val = val.slice(0, 2);
+                        }
 
-            setBlockCountInput(val);
+                        setBlockCountInput(val);
 
-            const n = Math.max(1, parseInt(val || "1", 10));
-            field.onChange(n); // keep RHF in sync
-            await handleBlockCountChange(String(n)); // update rows
-          }}
-        />
-      </FormControl>
-    </FormItem>
-  )}
-/>
-
+                        const n = Math.max(1, parseInt(val || "1", 10));
+                        field.onChange(n); // keep RHF in sync
+                        await handleBlockCountChange(String(n)); // update rows
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-3">
             {/* Length */}
             <div>
               <Input
@@ -953,7 +1012,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
           </div>
 
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-max ">
+            <Table className="w-full ">
               <TableHeader>
                 <TableRow>
                   <TableHead>S.No</TableHead>
@@ -1136,7 +1195,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                             1000000 || 0
                         ).toFixed(2)
                         // block?.dimensions?.height?.value *
-                        // (block?.dimensions?.length?.units === "inch" ? 0.000016387064 : 0.000001)
+                        // (block?.dimensions?.length?.units === "cm" ? 0.000016387064 : 0.000001)
                       }
                     </TableCell>
                     <TableCell>
@@ -1169,18 +1228,21 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                         render={({ field }) => (
                           <FormItem>
                             <FormControl>
-                              <FileUploadField
-                                name={field.name}
-                                value={field.value || ""}
-                                onChange={(value) => {
-                                  const updatedBlocks = [...blocks];
-                                  updatedBlocks[index].blockphoto = value || "";
-                                  setBlocks(updatedBlocks);
-                                  setValue("blocks", updatedBlocks);
-                                  saveProgressSilently(getValues());
-                                }}
-                                storageKey="blockphoto"
-                              />
+                              <div className="flex items-center gap-2">
+                                <FileUploadField
+                                  name={field.name}
+                                  value={field.value || ""}
+                                  onChange={(value) => {
+                                    const updatedBlocks = [...blocks];
+                                    updatedBlocks[index].blockphoto =
+                                      value || "";
+                                    setBlocks(updatedBlocks);
+                                    setValue("blocks", updatedBlocks);
+                                    saveProgressSilently(getValues());
+                                  }}
+                                  storageKey="blockphoto"
+                                />
+                              </div>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -1201,7 +1263,7 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
                   </TableRow>
                 ))}
               </TableBody>
-              <TableFooter>
+              <TableFooter className="sticky bottom-0 bg-white z-10">
                 <TableRow>
                   <TableCell colSpan={9}></TableCell>{" "}
                   {/* Empty cells to push content to the right */}

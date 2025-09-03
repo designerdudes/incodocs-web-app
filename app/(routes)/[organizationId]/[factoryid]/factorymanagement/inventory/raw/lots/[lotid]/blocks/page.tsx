@@ -64,7 +64,6 @@ export default async function BlocksPage({ params }: Props) {
 
   LotData = resp;
 
-
   return (
     <div className="w-full space-y-6 h-full flex p-6 flex-col">
       {/* Top Bar */}
@@ -142,6 +141,15 @@ export default async function BlocksPage({ params }: Props) {
                   </TableCell>
                 </TableRow>
                 <TableRow>
+                  <TableCell>Permit Cost</TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                    }).format(LotData?.permitCost)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
                   <TableCell>Marker Cost</TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -208,9 +216,9 @@ export default async function BlocksPage({ params }: Props) {
         <div className="w-3/5">
           <DataTable
             bulkDeleteIdName="_id"
-            bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-            bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-            bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+            bulkDeleteTitle="Are you sure you want to delete the selected Blocks?"
+            bulkDeleteDescription="This will delete all the selected Blocks, and they will not be recoverable."
+            bulkDeleteToastMessage="Selected Blocks deleted successfully"
             deleteRoute="/factory-management/inventory/deletemultipleblocks"
             searchKey="blockNumber"
             columns={columns}
