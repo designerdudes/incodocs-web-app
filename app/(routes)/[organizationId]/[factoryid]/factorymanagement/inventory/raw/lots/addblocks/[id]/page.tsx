@@ -35,9 +35,10 @@ interface LotData {
   materialType: string;
    blockNumber: number;
   blocksId: string[];
-  transportCost: number;
+  blockLoadingCost: number;
   materialCost: number;
   markerCost: number;
+  permitCost:number;
   markerOperatorName: string;
   quarryCost: number;
   commissionCost: number;
@@ -152,7 +153,7 @@ export default async function AddBlockFormPage({ params }: Props) {
                 </TableRow>
                 <TableRow>
                   <TableCell className="whitespace-nowrap">
-                    Transport Cost
+                    Block Loading Cost
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("en-IN", {
@@ -160,7 +161,7 @@ export default async function AddBlockFormPage({ params }: Props) {
                       currency: "INR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
-                    }).format(lotData?.transportCost)}
+                    }).format(lotData?.blockLoadingCost)}
                   </TableCell>
                 </TableRow>
                 <TableRow>
@@ -174,6 +175,19 @@ export default async function AddBlockFormPage({ params }: Props) {
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
                     }).format(lotData?.materialCost)}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Permit Cost
+                  </TableCell>
+                  <TableCell>
+                    {new Intl.NumberFormat("en-IN", {
+                      style: "currency",
+                      currency: "INR",
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }).format(lotData?.permitCost)}
                   </TableCell>
                 </TableRow>
                 <TableRow>

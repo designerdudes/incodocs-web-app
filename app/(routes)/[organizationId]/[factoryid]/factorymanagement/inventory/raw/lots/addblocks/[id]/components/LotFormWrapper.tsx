@@ -12,7 +12,11 @@ const formSchema = z.object({
     .number()
     .min(0, { message: "Marker cost must be greater than or equal to zero" })
     .optional(),
-  transportCost: z
+ permitCost: z
+            .number()
+            .min(0, { message: "Permit Cost must be greater than or equal to zero" })
+            .optional(),
+  blockLoadingCost: z
     .number()
     .min(1, { message: "Transport cost must be greater than or equal to zero" })
     .optional(),
@@ -76,9 +80,10 @@ interface LotFormWrapperProps {
     materialType: string;
      blockNumber: number;
     blocksId: string[];
-    transportCost: number;
+    blockLoadingCost: number;
     materialCost: number;
     markerCost: number;
+    permitCost:number;
     quarryCost:number;
     commissionCost:number;
     markerOperatorName: string;
@@ -100,8 +105,9 @@ export default function LotFormWrapper({ lotData }: LotFormWrapperProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       markerCost:  undefined,
-      transportCost:  undefined,
+      blockLoadingCost:  undefined,
       materialCost: undefined,
+      permitCost:undefined,
       noOfBlocks: lotData?.blocks?.length || 1,
       blocks:
         lotData?.blocks?.length > 0

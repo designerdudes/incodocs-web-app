@@ -42,6 +42,12 @@ const formSchema = z.object({
       z.number(),
     ])
     .optional(),
+  permitCost: z
+    .union([
+      z.string().min(1, { message: "Marker cost must be a valid number" }),
+      z.number(),
+    ])
+    .optional(),
   blockLoadingCost: z
     .union([
       z.string().min(1, { message: "Transport cost must be a valid number" }),
@@ -87,6 +93,7 @@ export default function EditLotForm({ params }: Props) {
       materialType: "",
       materialCost: "",
       markerCost: "",
+      permitCost:"",
       blockLoadingCost: "",
       markerOperatorName: "",
       quarryCost: "",
@@ -107,7 +114,6 @@ export default function EditLotForm({ params }: Props) {
         );
 
         const data = response;
-        console.log("dddddddddd", data);
 
         // Reset form with fetched values
         form.reset({
@@ -115,6 +121,7 @@ export default function EditLotForm({ params }: Props) {
           lotId: data.lotId || "",
           materialType: data.materialType || "",
           materialCost: data.materialCost || "",
+          permitCost: data.permitCost || "",
           markerCost: data.markerCost || "",
           blockLoadingCost: data.blockLoadingCost || "",
           markerOperatorName: data.markerOperatorName || "",
@@ -144,6 +151,7 @@ export default function EditLotForm({ params }: Props) {
         <p>Material Type: {values.materialType}</p>
         <p>Material Cost: {values.materialCost}</p>
         <p>Marker Cost: {values.markerCost}</p>
+        <p>Permit Cost: {values.permitCost}</p>
         <p>Transport Cost: {values.blockLoadingCost}</p>
         <p>Quarry Cost: {values.quarryCost}</p>
         <p>Commission Cost: {values.commissionCost}</p>
@@ -270,6 +278,25 @@ export default function EditLotForm({ params }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Marker Cost</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: 1000"
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="permitCost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Permit Cost</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Eg: 1000"

@@ -34,7 +34,7 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 
 // Define the Zod schema
 const formSchema = z.object({
-  blockNumber:z.number().optional(),
+  blockNumber: z.number().optional(),
   materialType: z
     .string()
     .min(3, { message: "Material type must be at least 3 characters long" })
@@ -43,7 +43,7 @@ const formSchema = z.object({
     .number()
     .min(1, { message: "Marker cost must be greater than or equal to zero" })
     .optional(),
-  transportCost: z
+  blockLoadingCost: z
     .number()
     .min(1, { message: "Transport cost must be greater than or equal to zero" })
     .optional(),
@@ -56,6 +56,10 @@ const formSchema = z.object({
     .min(0, {
       message: "Commission cost must be greater than or equal to zero",
     })
+    .optional(),
+  permitCost: z
+    .number()
+    .min(0, { message: "Permit Cost must be greater than or equal to zero" })
     .optional(),
   materialCost: z
     .number()
@@ -110,8 +114,9 @@ interface AddBlockFormProps {
     blockNumber: number;
     materialType: string;
     blocksId: string[];
-    transportCost: number;
+    blockLoadingCost: number;
     materialCost: number;
+    permitCost: number;
     markerCost: number;
     markerOperatorName: string;
     quarryCost: number;
@@ -145,25 +150,28 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
   const [blockCountToBeDeleted, setBlockCountToBeDeleted] = useState<
     number | null
   >(null);
+  const [blockCountInput, setBlockCountInput] = useState("1");
 
   const factoryId = useParams().factoryid;
   const organizationId = useParams().organizationId;
   const lotId = LotData?._id;
 
   const prevMarkerCost = LotData?.markerCost || 0;
-  const prevTransportCost = LotData?.transportCost || 0;
+  const prevblockLoadingCost = LotData?.blockLoadingCost || 0;
   const prevMaterialCost = LotData?.materialCost || 0;
   const prevquarryCost = LotData?.quarryCost || 0;
   const prevcommissionCost = LotData?.commissionCost || 0;
+  const prevpermitCost = LotData?.permitCost || 0;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      blockNumber:0,
+      blockNumber: 0,
       materialType: "",
       markerCost: 0 || undefined,
-      transportCost: 0 || undefined,
+      blockLoadingCost: 0 || undefined,
       materialCost: 0 || undefined,
+      permitCost: 0 || undefined,
       quarryCost: 0 || undefined,
       commissionCost: 0 || undefined,
       noOfBlocks: 1,
@@ -370,6 +378,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                     <Input
                       placeholder="Enter material cost"
                       type="number"
+                      min={0}
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
@@ -401,6 +410,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormControl>
                     <Input
                       type="number"
+                      min={0}
                       placeholder="Enter marker cost"
                       disabled={isLoading}
                       onWheel={(e) =>
@@ -425,15 +435,16 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
               )}
             />
             <FormField
-              name="transportCost"
+              name="blockLoadingCost"
               control={control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transport Cost</FormLabel>
+                  <FormLabel>Block Loading Cost</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter transport cost"
+                      min={0}
+                      placeholder="Enter Block Loading Cost"
                       disabled={isLoading}
                       onWheel={(e) =>
                         e.target instanceof HTMLElement && e.target.blur()
@@ -448,8 +459,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   </FormControl>
                   {field.value && (
                     <span className="text-gray-500 text-sm">
-                      Total Transport cost: {prevTransportCost} + {field.value}{" "}
-                      = {prevTransportCost + field.value}
+                      Total Transport cost: {prevblockLoadingCost} +{" "}
+                      {field.value} = {prevblockLoadingCost + field.value}
                     </span>
                   )}
                   <FormMessage />
@@ -465,6 +476,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormControl>
                     <Input
                       type="number"
+                      min={0}
                       placeholder="Enter Quarry Transport Cost"
                       disabled={isLoading}
                       onWheel={(e) =>
@@ -480,8 +492,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   </FormControl>
                   {field.value && (
                     <span className="text-gray-500 text-sm">
-                      Total Transport cost: {prevquarryCost} + {field.value} ={" "}
-                      {prevquarryCost + field.value}
+                      Total Quarry Transport cost: {prevquarryCost} +{" "}
+                      {field.value} = {prevquarryCost + field.value}
                     </span>
                   )}
                   <FormMessage />
@@ -497,6 +509,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   <FormControl>
                     <Input
                       type="number"
+                      min={0}
                       placeholder="Enter Commission Cost"
                       disabled={isLoading}
                       onWheel={(e) =>
@@ -521,6 +534,39 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
               )}
             />
             <FormField
+              name="permitCost"
+              control={control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Permit Cost</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="Enter Permit Cost"
+                      disabled={isLoading}
+                      onWheel={(e) =>
+                        e.target instanceof HTMLElement && e.target.blur()
+                      }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        field.onChange(value ? parseFloat(value) : undefined);
+                      }}
+                      value={field.value ?? undefined}
+                      onBlur={() => saveProgressSilently(getValues())}
+                    />
+                  </FormControl>
+                  {field.value && (
+                    <span className="text-gray-500 text-sm">
+                      Total Permit cost: {prevpermitCost} + {field.value} ={" "}
+                      {prevpermitCost + field.value}
+                    </span>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
               name="noOfBlocks"
               control={control}
               render={({ field }) => (
@@ -530,23 +576,25 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                     <Input
                       placeholder="Enter number of blocks"
                       type="number"
-                      min="1"
-                      disabled={isLoading}
-                      onWheel={(e) =>
-                        e.target instanceof HTMLElement && e.target.blur()
-                      }
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "" || Number(value) < 1) {
-                          field.onChange(1);
-                          handleBlockCountChange("1");
-                          return;
+                      // disabled={isLoading}
+                      // onWheel={(e) =>
+                      //   e.target instanceof HTMLElement && e.target.blur()
+                      // }
+                      onChange={async (e) => {
+                        let val = e.target.value.slice(0, 2);
+                        field.onChange(val);
+                        if (val.length > 2) {
+                          val = val.slice(0, 2);
                         }
-                        field.onChange(Number(value));
-                        handleBlockCountChange(value);
+
+                        setBlockCountInput(val);
+
+                        const n = Math.max(1, parseInt(val || "1", 10));
+                        field.onChange(n); // keep RHF in sync
+                        await handleBlockCountChange(String(n)); // update rows
                       }}
-                      value={field.value ?? 1}
-                      onBlur={() => saveProgressSilently(getValues())}
+                      value={blockCountInput}
+                      // onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -560,11 +608,17 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
               <Input
                 value={globalLength}
                 type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalLength(e.target.value)}
-                placeholder="Length (inch)"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalLength(val);
+                  }
+                }}
+                placeholder="Length (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -574,14 +628,14 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   checked={applyLengthToAll}
                   onChange={(e) => {
                     setApplyLengthToAll(e.target.checked);
-                    if (e.target.checked && globalLength) {
+                    if (e.target.checked) {
                       const updatedBlocks = blocks.map((block) => ({
                         ...block,
                         dimensions: {
                           ...block.dimensions,
                           length: {
                             ...block.dimensions.length,
-                            value: parseFloat(globalLength) || 0.1,
+                            value: Math.max(0, parseFloat(globalLength) || 0),
                           },
                         },
                       }));
@@ -594,15 +648,23 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                 Apply Length to all rows
               </label>
             </div>
+
+            {/* Breadth */}
             <div>
               <Input
                 value={globalBreadth}
                 type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalBreadth(e.target.value)}
-                placeholder="Breadth (inch)"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalBreadth(val);
+                  }
+                }}
+                placeholder="Breadth (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -612,14 +674,14 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   checked={applyBreadthToAll}
                   onChange={(e) => {
                     setApplyBreadthToAll(e.target.checked);
-                    if (e.target.checked && globalBreadth) {
+                    if (e.target.checked) {
                       const updatedBlocks = blocks.map((block) => ({
                         ...block,
                         dimensions: {
                           ...block.dimensions,
                           breadth: {
                             ...block.dimensions.breadth,
-                            value: parseFloat(globalBreadth) || 0.1,
+                            value: Math.max(0, parseFloat(globalBreadth) || 0),
                           },
                         },
                       }));
@@ -632,15 +694,23 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                 Apply Breadth to all rows
               </label>
             </div>
+
+            {/* Height */}
             <div>
               <Input
-                type="number"
                 value={globalHeight}
+                type="number"
+                min="0"
                 onWheel={(e) =>
                   e.target instanceof HTMLElement && e.target.blur()
                 }
-                onChange={(e) => setGlobalHeight(e.target.value)}
-                placeholder="Height (inch)"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "" || parseFloat(val) >= 0) {
+                    setGlobalHeight(val);
+                  }
+                }}
+                placeholder="Height (cm)"
                 disabled={isLoading}
                 onBlur={() => saveProgressSilently(getValues())}
               />
@@ -650,14 +720,14 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   checked={applyHeightToAll}
                   onChange={(e) => {
                     setApplyHeightToAll(e.target.checked);
-                    if (e.target.checked && globalHeight) {
+                    if (e.target.checked) {
                       const updatedBlocks = blocks.map((block) => ({
                         ...block,
                         dimensions: {
                           ...block.dimensions,
                           height: {
                             ...block.dimensions.height,
-                            value: parseFloat(globalHeight) || 0.1,
+                            value: Math.max(0, parseFloat(globalHeight) || 0),
                           },
                         },
                       }));
@@ -675,7 +745,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>#</TableHead>
+                <TableHead>S.No</TableHead>
                 <TableHead>Length (cm)</TableHead>
                 <TableHead>Breadth (cm)</TableHead>
                 <TableHead>Height (cm)</TableHead>
@@ -764,7 +834,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              type="number"
+                              // type="number"
                               min="0"
                               step="1"
                               value={block.dimensions.height.value}
@@ -876,9 +946,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                   Total Volume (m³): {calculateTotalVolume().inM.toFixed(2)}
                 </TableCell>
                 <TableCell className="font-bold">
-                                  Total Weight (tons):{" "}
-                                  {calculateTotalWeight().inTons.toFixed(2)}
-                                </TableCell>
+                  Total Weight (tons):{" "}
+                  {calculateTotalWeight().inTons.toFixed(2)}
+                </TableCell>
                 <TableCell colSpan={2}></TableCell>
               </TableRow>
             </TableFooter>

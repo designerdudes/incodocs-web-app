@@ -78,64 +78,70 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
     toast.success("File deleted.");
   };
 
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <div className="flex items-center gap-2">
-        <Input
-          type="file"
-          accept={accept}
-          onChange={handleFileChange}
-          disabled={!!uploadedUrl}
-          className="text-sm"
-        />
+return (
+  <div className="flex items-center gap-2 ">
+    {/* File input + view/delete icons */}
+    <div className="flex items-center gap-2">
+      <Input
+        type="file"
+        accept={accept}
+        onChange={handleFileChange}
+        disabled={!!uploadedUrl}
+        className="text-sm"
+      />
 
-        {uploadedUrl && (
-          <>
-            <a
-              href={uploadedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              title="View File"
-              className="text-blue-600 hover:text-blue-800"
-            >
-              <EyeIcon className="h-4 w-4" />
-            </a>
-            <Button
-              variant="destructive"
-              size="sm"
-              type="button"
-              onClick={handleDelete}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </>
-        )}
-      </div>
-      {selectedFile ? (
-        <div
-          className="text-xs text-gray-500 max-w-[150px] truncate"
-          title={selectedFile.name}
-        >
-          Selected: {selectedFile.name}
-        </div>
-      ) : uploadedUrl ? (
-        <div
-          className="text-xs text-green-600 max-w-[150px] truncate"
-          title={uploadedUrl.split("-")[1]}
-        >
-          Uploaded: {uploadedUrl.split("-")[1]}
-        </div>
-      ) : null}
-      {!uploadedUrl && (
-        <Button
-          variant="secondary"
-          className="bg-blue-500 hover:bg-blue-600 text-white text-sm mt-1 w-fit"
-          onClick={handleUpload}
-          disabled={uploading || !selectedFile}
-        >
-          Upload
-        </Button>
+      {uploadedUrl && (
+        <>
+          <a
+            href={uploadedUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="View File"
+            className="text-blue-600 hover:text-blue-800"
+          >
+            <EyeIcon className="h-4 w-4" />
+          </a>
+          <Button
+            variant="destructive"
+            size="sm"
+            type="button"
+            onClick={handleDelete}
+          >
+            <Trash className="h-4 w-4" />
+          </Button>
+        </>
       )}
     </div>
-  );
+
+    {/* File name text */}
+    {selectedFile ? (
+      <div
+        className="text-xs text-gray-500 max-w-[150px] truncate"
+        title={selectedFile.name}
+      >
+        Selected: {selectedFile.name}
+      </div>
+    ) : uploadedUrl ? (
+      <div
+        className="text-xs text-green-600 max-w-[150px] truncate"
+        title={uploadedUrl.split("-")[1]}
+      >
+        Uploaded: {uploadedUrl.split("-")[1]}
+      </div>
+    ) : null}
+
+    {/* Upload button (side by side) */}
+    {!uploadedUrl && (
+      <Button
+        variant="secondary"
+        className="bg-blue-500 hover:bg-blue-600 text-white text-sm w-fit"
+        onClick={handleUpload}
+        disabled={uploading || !selectedFile}
+      >
+        Upload
+      </Button>
+    )}
+  </div>
+);
+
 };
