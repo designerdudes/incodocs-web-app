@@ -385,21 +385,20 @@ export function RawMaterialCreateNewForm({}: RawMaterialCreateNewFormProps) {
       setTimeout(() => localStorage.removeItem("rawMaterialFormData"), 3000);
       
     } catch (error: any) {
-      console.log("Error creating/updating Lot sgdgdfsgdsgdsgds", error.response.data.message)
        if (error.response && error.response.status === 400) {
               if (
                 error.response.data.message ===
-                "Employee ID exists, please try a unique ID"
+                "Lot ID exists, please try a unique ID"
               ) {
-                toast.error("Employee already exists, please use a unique ID.");
+                toast.error("Lot Name already exists, please use a unique ID.");
               } else {
                 toast.error(error.response.data.message || "Bad Request");
               }
             } else {
-              toast.error("Error creating/updating employee");
+              toast.error("Error creating/updating Lot");
             }
       // console.error("Error creating/updating Lot:", error);
-      toast.error("Error creating/updating Lot", error.response.data.message);
+      // toast.error("Error creating/updating Lot", error.response.data.message);
     } finally {
       setIsLoading(false);
     }
