@@ -138,7 +138,7 @@ export function RegisterForm() {
       if (error.response?.status === 409) {
         toast.error("Email or Mobile Number already exists");
       } else {
-        toast.error(error.response?.data?.error || "Something went wrong");
+        toast.error(error.response?.data?.error || "Something went wrong please try again");
       }
     } finally {
       setLoading(false);

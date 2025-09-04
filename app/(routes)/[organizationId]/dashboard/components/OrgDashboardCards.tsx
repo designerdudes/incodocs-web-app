@@ -1,14 +1,21 @@
 "use client";
 import StatsCard from "@/components/statsCard";
-import { Factory, FactoryIcon, Ship } from "lucide-react";
-import React from "react";
+import { Factory, Ship } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 interface Params {
   organizationId: string;
 }
 
 export function OrgDashboardCards({ organizationId }: Params) {
-  const activeFactory = localStorage.getItem("activeFactoryId") || "";
+  const [activeFactory, setActiveFactory] = useState("");
+
+  useEffect(() => {
+    // Runs only in browser
+    const storedFactoryId = localStorage.getItem("activeFactoryId") || "";
+    setActiveFactory(storedFactoryId);
+  }, []);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatsCard
@@ -24,7 +31,7 @@ export function OrgDashboardCards({ organizationId }: Params) {
         title="Total Factories"
         stat={0}
         statPrefix=""
-        href={`/${activeFactory}/factorymanagement`}
+        href={`/${activeFactory || organizationId}/factorymanagement`}
         factoryId={organizationId}
         desc="Total factories for your organization till date"
         icon={<Factory className="h-6 w-6 text-muted-foreground" />}
@@ -39,7 +46,7 @@ export function OrgDashboardCards({ organizationId }: Params) {
         icon={<Ship className="h-6 w-6 text-muted-foreground" />}
       />
       <StatsCard
-        title="Total Supliers"
+        title="Total Suppliers"
         stat={0}
         statPrefix=""
         href="/documentation/parties"
