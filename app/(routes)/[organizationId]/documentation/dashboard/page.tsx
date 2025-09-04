@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -21,9 +20,17 @@ import { HiOutlineDocumentCurrencyRupee } from "react-icons/hi2";
 import { HiOutlineUserGroup } from "react-icons/hi";
 
 
-export default function DocumentationPage() {
-  const params = useParams();
+interface Props {
+  params: {
+    organizationId: string;
+  };
+}
+
+export default function DocumentationPage({ params }: Props) {
+  // const params = useParams();
   const organizationId = params.organizationId;
+
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* Header */}

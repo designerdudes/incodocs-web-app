@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { columns } from "./components/columns";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -17,20 +18,8 @@ interface Props {
 export default async function TeamMemberPage({ params }: Props) {
   const { organizationId  } = params;
   const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(`https://incodocs-server.onrender.com/employers/getbyorg/${organizationId }`, 
-    {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + token,
-    },
-  }).then((response) => {
-    return response.json();
-  });
-
-  let teamData;
-  teamData = res;
+  const token = cookieStore.get("AccessToken")?.value;
+  const teamData = await fetchWithAuth(`https://incodocs-server.onrender.com/employers/getbyorg/${organizationId }`);
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
