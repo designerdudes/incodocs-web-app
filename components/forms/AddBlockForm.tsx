@@ -72,6 +72,8 @@ const formSchema = z.object({
   blocks: z
     .array(
       z.object({
+        blockNumber: z.string().optional(),
+         materialType: z.string().optional(),
         blockphoto: z.string().optional(),
         vehicleNumber: z.string().optional(),
         dimensions: z.object({
@@ -177,6 +179,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       noOfBlocks: 1,
       blocks: [
         {
+          blockNumber: "",
+          materialType: "",
           blockphoto: "",
           vehicleNumber: "",
           dimensions: {
@@ -211,6 +215,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
         index < currentBlocks.length
           ? currentBlocks[index]
           : {
+             blockNumber: "",
+              materialType: "",
               blockphoto: "",
               vehicleNumber: "",
               dimensions: {
@@ -268,6 +274,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       factoryId,
       organizationId,
       blocks: values.blocks.map((block) => ({
+        blockNumber: block.blockNumber || "",
+        materialType: block.materialType || "",
         blockphoto: block.blockphoto || "",
         vehicleNumber: block.vehicleNumber || "",
         dimensions: {
@@ -746,6 +754,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
             <TableHeader>
               <TableRow>
                 <TableHead>S.No</TableHead>
+                 <TableHead>Block Number</TableHead>
+                 <TableHead>Material Type</TableHead>
                 <TableHead>Length (cm)</TableHead>
                 <TableHead>Breadth (cm)</TableHead>
                 <TableHead>Height (cm)</TableHead>
@@ -760,6 +770,59 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
               {blocks.map((block, index) => (
                 <TableRow key={index}>
                   <TableCell>{index + 1}</TableCell>
+                  <TableCell>
+                  <FormField
+                                          name={`blocks.${index}.blockNumber`}
+                                          control={control}
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormControl>
+                                                <Input
+                                                  placeholder="Block Number"
+                                                  value={block.blockNumber || ""}
+                                                  onChange={(e) => {
+                                                    const updatedBlocks = [...blocks];
+                                                    updatedBlocks[index].blockNumber =
+                                                      e.target.value;
+                                                    setBlocks(updatedBlocks);
+                                                    setValue("blocks", updatedBlocks);
+                                                    saveProgressSilently(getValues());
+                                                  }}
+                                                  disabled={isLoading}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </TableCell>
+                                      <TableCell>
+                                        <FormField
+                                          name={`blocks.${index}.materialType`}
+                                          control={control}
+                                          render={({ field }) => (
+                                            <FormItem>
+                                              <FormControl>
+                                                <Input
+                                                  type="text"
+                                                  placeholder="Material Type"
+                                                  value={block.materialType || ""}
+                                                  onChange={(e) => {
+                                                    const updatedBlocks = [...blocks];
+                                                    updatedBlocks[index].materialType =
+                                                      e.target.value;
+                                                    setBlocks(updatedBlocks);
+                                                    setValue("blocks", updatedBlocks);
+                                                    saveProgressSilently(getValues());
+                                                  }}
+                                                  disabled={isLoading}
+                                                />
+                                              </FormControl>
+                                              <FormMessage />
+                                            </FormItem>
+                                          )}
+                                        />
+                                      </TableCell>
                   <TableCell>
                     <FormField
                       name={`blocks.${index}.dimensions.length.value`}
