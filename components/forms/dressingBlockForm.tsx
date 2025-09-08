@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { fetchData, postData } from "@/axiosUtility/api";
+import { fetchData, postData, putData } from "@/axiosUtility/api";
 import EntityCombobox from "../ui/EntityCombobox";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -26,7 +26,7 @@ export default function DressingBlockForm({
   const [machines, setMachines] = useState<any[]>([]);
   const [selectedMachineId, setSelectedMachineId] = useState<string>("");
   const { organizationId } = useParams();
-
+//  console.log("qqqqqqqqqqqqqqqqq",parentBlockId)
   // original block (readonly)
   const [originalBlock, setOriginalBlock] = useState<{
     length: number;
@@ -45,6 +45,10 @@ export default function DressingBlockForm({
     weight: number;
   }>({ length: 0, breadth: 0, height: 0, volume: 0, weight: 0 });
 
+  // ✅ New states
+  const [inTime, setInTime] = useState<string>(""); // date+time in ISO string
+  const [sendForDressing, setSendForDressing] = useState<boolean>(false);
+
   const density = 3.5;
 
   // 📌 Fetch parent block
@@ -60,7 +64,7 @@ export default function DressingBlockForm({
         const height = res.dimensions?.height?.value || 0;
 
         const volume = (length * breadth * height) / 1_000_000; // cm³ → m³
-        const weight = density * volume ; // tons → kg
+        const weight = density * volume; // tons → kg
 
         setOriginalBlock({ length, breadth, height, volume, weight });
       } catch (error) {
@@ -71,7 +75,6 @@ export default function DressingBlockForm({
     if (parentBlockId) fetchBlockData();
   }, [parentBlockId]);
 
- 
   useEffect(() => {
     const fetchmachine = async () => {
       const res = await fetchData(`/machine/getbyfactory/${factoryId}`);
@@ -86,7 +89,6 @@ export default function DressingBlockForm({
     fetchmachine();
   }, []);
 
-  
   const handleDressedChange = (
     dimension: "length" | "breadth" | "height",
     value: number
@@ -94,7 +96,7 @@ export default function DressingBlockForm({
     const updated = { ...dressedBlock, [dimension]: value };
 
     const volume = (updated.length * updated.breadth * updated.height) / 1_000_000;
-    const weight = density * volume ;
+    const weight = density * volume;
 
     updated.volume = volume;
     updated.weight = weight;
@@ -109,11 +111,13 @@ export default function DressingBlockForm({
     try {
       const body = {
         dressedBlock,
-        cuttingMachineId: selectedMachineId,
+        machineId: selectedMachineId,
+        sendForDressing, // ✅ new checkbox
+        inTime, // ✅ new datetime input
       };
 
-      await postData(
-        `/factory-management/inventory/raw/splitblock/${parentBlockId}`,
+      await putData(
+        `/factory-management/inventory/raw/sendblockfordressing/${parentBlockId}`,
         body
       );
       toast.success("Block dressed successfully");
@@ -155,45 +159,6 @@ export default function DressingBlockForm({
         </div>
       )}
 
-      {/* Dressed Block (Editable) */}
-      <div className="border p-3 rounded-lg bg-white">
-        <h3 className="font-semibold mb-2">Dressed Block</h3>
-        <div className="grid grid-cols-5 gap-4">
-          <div>
-            <Label>Length (cm)</Label>
-            <Input
-              type="number"
-              value={dressedBlock.length}
-              onChange={(e) => handleDressedChange("length", Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <Label>Breadth (cm)</Label>
-            <Input
-              type="number"
-              value={dressedBlock.breadth}
-              onChange={(e) => handleDressedChange("breadth", Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <Label>Height (cm)</Label>
-            <Input
-              type="number"
-              value={dressedBlock.height}
-              onChange={(e) => handleDressedChange("height", Number(e.target.value))}
-            />
-          </div>
-          <div>
-            <Label>Volume (m³)</Label>
-            <Input type="number" value={dressedBlock.volume.toFixed(2)} disabled />
-          </div>
-          <div>
-            <Label>Weight (kg)</Label>
-            <Input type="number" value={dressedBlock.weight.toFixed(2)} disabled />
-          </div>
-        </div>
-      </div>
-
       {/* Machine Selector */}
       <EntityCombobox
         entities={machines}
@@ -210,6 +175,27 @@ export default function DressingBlockForm({
         }
         addNewLabel="Add New"
       />
+
+      {/* ✅ New Fields */}
+      <div className="border p-3 rounded-lg bg-white space-y-3">
+        <div>
+          <Label>In Time (Date & Time)</Label>
+          <Input
+            type="datetime-local"
+            value={inTime}
+            onChange={(e) => setInTime(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <input
+            id="sendForDressing"
+            type="checkbox"
+            checked={sendForDressing}
+            onChange={(e) => setSendForDressing(e.target.checked)}
+          />
+          <Label htmlFor="sendForDressing">Send this block for dressing</Label>
+        </div>
+      </div>
 
       <Button
         className="mt-4 w-full"
