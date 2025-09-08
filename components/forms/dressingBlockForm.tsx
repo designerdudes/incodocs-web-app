@@ -89,20 +89,20 @@ export default function DressingBlockForm({
     fetchmachine();
   }, []);
 
-  const handleDressedChange = (
-    dimension: "length" | "breadth" | "height",
-    value: number
-  ) => {
-    const updated = { ...dressedBlock, [dimension]: value };
+  // const handleDressedChange = (
+  //   dimension: "length" | "breadth" | "height",
+  //   value: number
+  // ) => {
+  //   const updated = { ...dressedBlock, [dimension]: value };
 
-    const volume = (updated.length * updated.breadth * updated.height) / 1_000_000;
-    const weight = density * volume;
+  //   const volume = (updated.length * updated.breadth * updated.height) / 1_000_000;
+  //   const weight = density * volume;
 
-    updated.volume = volume;
-    updated.weight = weight;
+  //   updated.volume = volume;
+  //   updated.weight = weight;
 
-    setDressedBlock(updated);
-  };
+  //   setDressedBlock(updated);
+  // };
 
   // 📌 Submit
   const handleSubmit = async () => {
@@ -120,11 +120,11 @@ export default function DressingBlockForm({
         `/factory-management/inventory/raw/sendblockfordressing/${parentBlockId}`,
         body
       );
-      toast.success("Block dressed successfully");
+      toast.success("Block dressing successfully");
       onSubmit();
     } catch (error: any) {
-      console.error("Error while splitting block:", error);
-      toast.error(error?.response?.data?.message || "Failed to dress block");
+      console.error("Error while dressing block:", error);
+      toast.error(error?.response?.data?.message || "Failed to dressing");
     }
   };
 
