@@ -111,7 +111,7 @@ export default function MarkDressForm({
         `/factory-management/inventory/raw/markblockdressed/${parentBlockId}`,
         body
       );
-      toast.success("Block marked dressed successfully");
+      toast.success("Block  dressed successfully");
       onSubmit();
     } catch (error: any) {
       console.error("Error while marking dressed:", error);
@@ -125,7 +125,7 @@ export default function MarkDressForm({
       {originalBlock && (
         <div className="border p-3 rounded-lg bg-gray-100">
           <h3 className="font-semibold mb-2">Original Block</h3>
-          <div className="grid grid-cols-5 gap-4">
+          <div className="grid grid-cols-5 gap-5">
             <div>
               <Label>Length (cm)</Label>
               <Input type="number" value={originalBlock.length} disabled />
@@ -161,7 +161,7 @@ export default function MarkDressForm({
       {/* Dressed Block (Editable) */}
       <div className="border p-3 rounded-lg bg-white">
         <h3 className="font-semibold mb-2">Dressed Block Dimension</h3>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-5 gap-5">
           <div>
             <Label>Length (cm)</Label>
             <Input

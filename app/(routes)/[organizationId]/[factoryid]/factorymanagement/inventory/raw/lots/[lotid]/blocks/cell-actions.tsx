@@ -21,15 +21,12 @@ import { Alert } from "@/components/forms/Alert";
 import { deleteData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import SendForCuttingForm from "@/components/forms/SendForCuttingForm";
-import SplitBlockForm from "@/components/forms/SplitBlockForm";
 import DressingBlockForm from "@/components/forms/dressingBlockForm";
 import MarkDressForm from "@/components/forms/MarkDressForm";
 import EditBlockForm from "./editBlockForm";
 import Link from "next/link";
-
-// New forms for marking workflows
-// import MarkSplitForm from "@/components/forms/MarkSplitForm";
-// import MarkCutForm from "@/components/forms/MarkCutForm";
+import MarkSplitForm from "@/components/forms/MarkSplitForm";
+import SplitBlockForm from "@/components/forms/SplitBlockForm";
 
 interface Props {
   data: any;
@@ -79,7 +76,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       "view",
       "delete",
     ],
-    splitted: ["sendForCutting", "edit", "view", "delete"],
+    split: ["sendForCutting", "edit", "view", "delete"],
     inCutting: ["markCut", "view", "delete"],
     cut: ["view", "delete"],
   };
@@ -157,7 +154,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
                 />
-              );
+               );
               GlobalModal.onOpen();
             }}
           >
@@ -171,15 +168,15 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Mark Split - ${data.blockNumber}`;
-              // GlobalModal.children = (
-              //   <MarkSplitForm
-              //     parentBlockId={data._id}
-              //     blockNumber={data.blockNumber}
-              //     factoryId={data.factoryId}
-              //     onSubmit={() => GlobalModal.onClose()}
-              //     originalBlockVolume={0}
-              //   />
-              // );
+              GlobalModal.children = (
+                <MarkSplitForm
+                  parentBlockId={data._id}
+                  blockNumber={data.blockNumber}
+                  factoryId={data.factoryId}
+                  onSubmit={() => GlobalModal.onClose()}
+                  originalBlockVolume={0}
+                />
+              );
               GlobalModal.onOpen();
             }}
           >
