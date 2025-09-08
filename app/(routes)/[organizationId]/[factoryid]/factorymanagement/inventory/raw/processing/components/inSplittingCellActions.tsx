@@ -10,24 +10,22 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, Trash } from "lucide-react";
+import { EyeIcon, MoreHorizontal, ScissorsIcon, } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-// import CardWithForm from "./editTrimValues";
-import { Slab } from "./polishedColumns";
+import { Block } from "./incuttingcolumns";
 
 interface Props {
-    data: Slab;
+    data: Block;
 }
 
-export const PolishedCellAction: React.FC<Props> = ({ data }) => {
+const InSplittingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const deleteSlab = async () => {
-
+    const deleteLot = async () => {
         try {
-            const result = await deleteData(`/factory-management/inventory/finished/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+            const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
 
             toast.success('Slab Deleted Successfully')
             GlobalModal.onClose()
@@ -36,8 +34,6 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
             console.error('Error deleting data:', error);
         }
     }
-
-
     return (
         <div>
             {/* Dropdown Menu */}
@@ -51,40 +47,30 @@ export const PolishedCellAction: React.FC<Props> = ({ data }) => {
                 <DropdownMenuContent className="gap-2" align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-
-                    {/* <DropdownMenuItem
-                        // onSelect={() => {
-                        //     router.push(`./polishing/${data._id}/markpolish`);
-                        // }}
+                    {/* Mark cut */}
+                    <DropdownMenuItem
                         onSelect={() => {
-                            GlobalModal.title = `Edit triming Values`
-                            GlobalModal.children = <CardWithForm params={{
-                                id: data._id
-                            }} />
-                            GlobalModal.onOpen()
+                            router.push(`./processing/cutting/${data._id}/markcut`);
                         }}
-                        
+                        className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
                         <ScissorsIcon className="mr-2 h-4 w-4" />
-                        Edit Trim Values
-                    </DropdownMenuItem> */}
+                        Mark Cut
+                    </DropdownMenuItem>
 
                     {/* View Lot Details */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./finished/view/${data._id}`);
+                            router.push(`./processing/blocks/view/${data._id}`);
                         }}
                     >
                         <EyeIcon className="mr-2 h-4 w-4" />
-                        View Slab Details
+                        View Block Details
                     </DropdownMenuItem>
-
-
-
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>
     );
 };
 
-export default PolishedCellAction;
+export default InSplittingCellAction;

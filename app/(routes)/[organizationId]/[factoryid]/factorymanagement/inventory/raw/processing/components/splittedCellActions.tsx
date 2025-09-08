@@ -1,4 +1,6 @@
 "use client";
+import * as React from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,30 +10,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Edit,
+  EyeIcon,
+  MoreHorizontal,
+  ScissorsIcon,
+  Trash,
+} from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Edit2, Eye, MoreHorizontal, Trash } from "lucide-react";
-import React from "react";
-import { Alert } from "@/components/forms/Alert";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
-import { FinishedMaterial } from "../page";
-import SendForPolish from "./sendForPolsih";
-import { ScissorsIcon } from "lucide-react";
-import { MarkPaidForm } from "@/components/forms/MarkPaidForm";
+import { Slab } from "./inpolishingcolumns";
+import CardWithForm from "./editTrimValues";
 
 interface Props {
-  data: FinishedMaterial;
-  polish?: boolean;
+  data: Slab;
 }
 
-export const CellAction: React.FC<Props> = ({ data, polish }) => {
+export const SplittedCellAction: React.FC<Props> = ({ data }) => {
+  const router = useRouter();
   const GlobalModal = useGlobalModal();
   const deleteSlab = async () => {
     try {
       const result = await deleteData(
         `/factory-management/inventory/finished/delete/${data._id}`
       ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
+
       toast.success("Slab Deleted Successfully");
       GlobalModal.onClose();
       window.location.reload();
@@ -39,9 +43,10 @@ export const CellAction: React.FC<Props> = ({ data, polish }) => {
       console.error("Error deleting data:", error);
     }
   };
-  const router = useRouter();
+
   return (
     <div>
+      {/* Dropdown Menu */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -52,47 +57,35 @@ export const CellAction: React.FC<Props> = ({ data, polish }) => {
         <DropdownMenuContent className="gap-2" align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
+
           <DropdownMenuItem
+            // onSelect={() => {
+            //     router.push(`./polishing/${data._id}/markpolish`);
+            // }}
             onSelect={() => {
-              router.push(`./processing/view/${data._id}`);
-            }}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            View Product Details
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onSelect={() => {
-              GlobalModal.title = "Do you want to mark this slabs as paid?";
-              GlobalModal.description =
-                "Are you sure you want to mark this slab as paid?";
+              GlobalModal.title = `Edit Polish Values`;
               GlobalModal.children = (
-                <MarkPaidForm
-                  selectedSlabs={[{ slabId: data._id }]}
-                  polish={polish}
+                <CardWithForm
+                  params={{
+                    id: data._id,
+                  }}
                 />
               );
-
               GlobalModal.onOpen();
             }}
           >
-            <Edit2 className="mr-2 h-4 w-4" />
-            Mark Paid
+            <ScissorsIcon className="mr-2 h-4 w-4" />
+            Edit Polish Values
           </DropdownMenuItem>
 
+          {/* View Lot Details */}
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Delete Slab - ${data.slabNumber}`;
-              GlobalModal.description =
-                "Are you sure you want to delete this Slab?";
-              GlobalModal.children = (
-                <Alert onConfirm={deleteSlab} actionType={"delete"} />
-              );
-              GlobalModal.onOpen();
+              router.push(`./processing/slabs/view/${data._id}`);
             }}
-            className="focus:bg-destructive focus:text-destructive-foreground"
           >
-            <Trash className="mr-2 h-4 w-4" />
-            Delete Slab
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Slab Details
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -100,4 +93,4 @@ export const CellAction: React.FC<Props> = ({ data, polish }) => {
   );
 };
 
-export default CellAction;
+export default SplittedCellAction;

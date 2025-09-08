@@ -12,12 +12,12 @@ import { Readyforpolishcolumns } from "./components/readyforpolishcolumns";
 import { inPolishingolumns } from "./components/inpolishingcolumns";
 import { cookies } from "next/headers";
 import { Polishedcolumns } from "./components/polishedcolumns";
-import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllowanceColumns";
-import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
-import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
-import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
 import { Block } from "./components/incuttingcolumns";
 import TabsDataTable from "./components/tabsDataTable";
+import { indressingcolumns } from "./components/inDressingColumns";
+import { dressedcolumns } from "./components/dressedColumns";
+import { insplittingcolumns } from "./components/inSplittingColumns";
+import { splittedcolumns } from "./components/splittedColumns";
 
 export type FinishedMaterial = {
   _id: string; // Unique identifier
@@ -121,6 +121,21 @@ export default async function SlabsProcessingPage({ params }: Props) {
   let Slabdata = slabRes || [];
   // console.log("Slabdata", Slabdata);
 
+  const inDressing = Blockdata.filter(
+    (data: any) => data.status === "inDressing"
+  );
+  const Dressed = Blockdata.filter((data: any) =>
+   data.status === "dressed"
+  );
+
+  const inSplitting = Blockdata.filter(
+    (data: any) => data.status === "inSplitting"
+  );
+
+  const Splitted = Blockdata.filter((data: any) =>
+    data.status === "split"
+  );
+
   const inCutting = Blockdata.filter(
     (data: any) => data.status === "inCutting"
   );
@@ -132,10 +147,10 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
     : [];
-  // console.log(inPolishing);
   const Polished = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "polished")
     : [];
+
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">
@@ -354,6 +369,10 @@ export default async function SlabsProcessingPage({ params }: Props) {
           </TabsContent>
         </Tabs> */}
         <TabsDataTable
+          inDressing={inDressing}
+          Dressed={Dressed}
+          inSplitting={inSplitting}
+          Splitted={Splitted}
           inCutting={inCutting}
           readyForPolish={readyForPolish}
           inPolishing={inPolishing}
@@ -363,11 +382,11 @@ export default async function SlabsProcessingPage({ params }: Props) {
           Readyforpolishcolumns={Readyforpolishcolumns}
           inPolishingolumns={inPolishingolumns}
           Polishedcolumns={Polishedcolumns}
-          CuttingInchesWithAllowanceColumns={CuttingInchesWithAllowanceColumns}
-          CuttingInchesWithOutAllowanceColumns={CuttingInchesWithOutAllowanceColumns}
-          polishingInchesWithOutAllowanceColumns={polishingInchesWithOutAllowanceColumns}
-          polishingInchesWithAllowanceColumns={polishingInchesWithAllowanceColumns}
-        />
+          inDressingcolumns={indressingcolumns}
+          Dressedcolumns={dressedcolumns}
+          inSplittingcolumns={insplittingcolumns}
+          Splittedcolumns={splittedcolumns}        
+          />
       </div>
     </div>
   );

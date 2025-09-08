@@ -5,24 +5,36 @@ import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
 import { Block } from "./incuttingcolumns";
 import { useRouter, useSearchParams } from "next/navigation";
+import { indressingcolumns } from "./inDressingColumns";
+import { dressedcolumns } from "./dressedColumns";
+import { insplittingcolumns } from "./inSplittingColumns";
+import { splittedcolumns } from "./splittedColumns";
 
 interface Props {
+  inDressing: any;
+  Dressed: any;
+  inSplitting: any;
+  Splitted: any;
   inCutting: any;
   readyForPolish: any;
   inPolishing: any;
   Polished: any;
   slabsData: any;
+  inDressingcolumns: any;
+  Dressedcolumns: any;
+  inSplittingcolumns: any;
+  Splittedcolumns: any;
   incuttingcolumns: any;
   Readyforpolishcolumns: any;
   inPolishingolumns: any;
   Polishedcolumns: any;
-  CuttingInchesWithAllowanceColumns: any;
-  CuttingInchesWithOutAllowanceColumns: any;
-  polishingInchesWithOutAllowanceColumns: any;
-  polishingInchesWithAllowanceColumns: any;
 }
 
 function TabsDataTable({
+  inDressing,
+  Dressed,
+  inSplitting,
+  Splitted,
   inCutting,
   readyForPolish,
   inPolishing,
@@ -32,10 +44,6 @@ function TabsDataTable({
   Readyforpolishcolumns,
   inPolishingolumns,
   Polishedcolumns,
-  CuttingInchesWithAllowanceColumns,
-  CuttingInchesWithOutAllowanceColumns,
-  polishingInchesWithOutAllowanceColumns,
-  polishingInchesWithAllowanceColumns,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -49,11 +57,35 @@ function TabsDataTable({
 
   return (
     <Tabs
-      defaultValue={selectedTab || "inCutting"}
+      defaultValue={selectedTab || "inDressing"}
       onValueChange={(tab) => updateTabInUrl(tab)}
       className="w-full"
     >
       <TabsList className="gap-3">
+         <TabsTrigger className="gap-2" value="inDressing">
+          In Dressing
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {inDressing?.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger className="gap-2" value="Dressed">
+          Dressed
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {Dressed?.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger className="gap-2" value="inSplitting">
+          In Splitting
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {inSplitting?.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger className="gap-2" value="Splitted">
+          Splitted
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {Splitted?.length}
+          </Badge>
+        </TabsTrigger>
         <TabsTrigger className="gap-2" value="inCutting">
           In Cutting
           <Badge className="text-bg-primary-foreground" variant="outline">
@@ -66,12 +98,12 @@ function TabsDataTable({
             {readyForPolish?.length}
           </Badge>
         </TabsTrigger>
-        <TabsTrigger className="gap-2" value="CuttingData">
+        {/* <TabsTrigger className="gap-2" value="CuttingData">
           Cutting Data
           <Badge className="text-bg-primary-foreground" variant="outline">
             {slabsData?.length}
           </Badge>
-        </TabsTrigger>
+        </TabsTrigger> */}
         <TabsTrigger className="gap-2" value="inPolishing">
           In Polishing
           <Badge className="text-bg-primary-foreground" variant="outline">
@@ -84,15 +116,63 @@ function TabsDataTable({
             {Polished?.length}
           </Badge>
         </TabsTrigger>
-        <TabsList className="gap-6">
+        {/* <TabsList className="gap-6">
           <TabsTrigger className="gap-2" value="PolishingData">
             Polishing Data
             <Badge className="text-bg-primary-foreground" variant="outline">
               {slabsData?.length}
             </Badge>
           </TabsTrigger>
-        </TabsList>
+        </TabsList> */}
       </TabsList>
+      <TabsContent value="inDressing">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={indressingcolumns}
+          data={inDressing as any}
+        />
+      </TabsContent>
+      <TabsContent value="Dressed">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={dressedcolumns}
+          data={Dressed as any}
+        />
+      </TabsContent>
+      <TabsContent value="inSplitting">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={insplittingcolumns}
+          data={inSplitting as any}
+        />
+      </TabsContent>
+      <TabsContent value="Splitted">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={splittedcolumns}
+          data={Splitted as any}
+        />
+      </TabsContent>
       <TabsContent value="inCutting">
         <DataTable
           bulkDeleteIdName="_id"
@@ -153,7 +233,7 @@ function TabsDataTable({
           data={Polished}
         />
       </TabsContent>
-      <TabsContent value="CuttingData">
+      {/* <TabsContent value="CuttingData">
         <Tabs defaultValue="CuttingInchesWithAllowance" className="w-full">
           <div className="text-center mt-4">
             <TabsList className="gap-6">
@@ -240,7 +320,7 @@ function TabsDataTable({
             />
           </TabsContent>
         </Tabs>
-      </TabsContent>
+      </TabsContent> */}
     </Tabs>
   );
 }
