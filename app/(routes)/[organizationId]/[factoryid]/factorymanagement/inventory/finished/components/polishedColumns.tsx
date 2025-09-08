@@ -7,55 +7,36 @@ import { PolishedCellAction } from "./polishedCellAction";
 
 export type Slab = {
   _id: string;
-  blockId: {
-    lotId: any;
-    id: string;
-    materialType: string;
-  };
-  slabNumber: number; // Updated from slabID to slabNumber
-  blockNumber: number; // Changed to number for consistency
-  blockLotName?: string; // Optional if not in the provided structure
+  slabNumber: string;   // <- string, not number
+  blockNumber?: string; // <- optional since not always there
   factoryId: string;
-  materialType?: string; // Optional if not provided
-  productName: string; // Added to match structure
-  quantity: number; // Changed to number for consistency
+  productName: string;
+  status: string;
+  inStock: boolean;
   dimensions: {
-    thickness: {
-      value: number;
-      units: string;
-    };
-    length: {
-      value: number;
-      units: string;
-    };
-    breadth: {
-      value: number;
-      units: string;
-    };
-    height: {
-      value: number;
-      units: string;
-    };
+    length: { value: number; units: string };
+    height: { value: number; units: string };
   };
   trim: {
-    length: {
-      units: string;
-    };
-    height: {
-      units: string;
-    };
+    length: { value: number; units: string };
+    height: { value: number; units: string };
   };
-  isActive?: boolean; // Optional if not present
-  weight?: string; // Retained as optional for backward compatibility
-  height?: string; // Retained as optional for backward compatibility
-  breadth?: string; // Retained as optional for backward compatibility
-  length?: string; // Retained as optional for backward compatibility
-  volume?: string; // Retained as optional for backward compatibility
-  status: string;
-  inStock: boolean; // Added based on provided structure
+  polishedValues?: {
+    length: { value: number; units: string };
+    height: { value: number; units: string };
+  };
+  saleMarketMeasurements?: {
+    length: { value: number; units: string };
+    height: { value: number; units: string };
+  };
+  workersCuttingPay: number;
+  workersPolishingPay: number;
+  cuttingPaymentStatus: { status: string };
+  polishingPaymentStatus: { status: string };
   createdAt: string;
   updatedAt: string;
 };
+
 
 export const Polishedcolumns: ColumnDef<Slab>[] = [
   {
@@ -131,23 +112,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
   //         </div>
   //     ),
   // },
-  {
-    accessorKey: "materialType",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Material Type
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original?.blockId?.lotId?.materialType}
-      </div>
-    ),
-  },
+ 
   {
     accessorKey: "length",
     header: "Length (inch)",

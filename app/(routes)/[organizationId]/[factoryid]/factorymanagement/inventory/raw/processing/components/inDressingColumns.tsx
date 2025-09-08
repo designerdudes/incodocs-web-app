@@ -3,12 +3,34 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import { PolishedCellAction } from "./polishedCellAction"
-import { Slab } from "./polishedColumns"
+import InDressingCellAction from "./inDressingCellActions"
 
+export type Block = {
+    _id: string
+    slabID: string
+    blockNumber: string
+    factoryId:String
+    blockLotName: string
+    numberofSlabs: string
+    isActive: boolean
+    createdAt: string
+    updatedAt: string
+    weight: string
+    height: string
+    breadth: string
+    length: string
+    volume: string
+    status: string
+    SlabsId: []
+    lotId: {
+        _id: string
+        lotName: string
+        materialType: string
+    }
+    readyForPolishCount: number
+}
 
-
-export const SoldColumns: ColumnDef<Slab>[] = [
+export const indressingcolumns: ColumnDef<Block>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -32,24 +54,6 @@ export const SoldColumns: ColumnDef<Slab>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "slabNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Slab Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.slabNumber}
-            </div>
-        ),
-        filterFn: 'includesString',
-    },
-    {
         accessorKey: "blockNumber",
         header: ({ column }) => (
             <Button
@@ -62,70 +66,84 @@ export const SoldColumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blockNumber}
+                {row.original?.blockNumber}
+            </div>
+        ),
+        filterFn: 'includesString',
+
+    },
+    {
+        accessorKey: "lotName",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Block&apos;s Lot Name
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.lotId?.lotName}
+            </div>
+        ),
+        filterFn: 'includesString',
+        // ensures it filters by includes method (you can define custom filter functions)
+    },
+
+    {
+        accessorKey: "materialType",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Material Type
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.lotId?.materialType}
             </div>
         ),
     },
 
     // {
-    //     accessorKey: "status",
+    //     accessorKey: "numberofSlabs",
     //     header: ({ column }) => (
     //         <Button
     //             variant="ghost"
     //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
     //         >
-    //             Slab Status
+    //             Total Slabs
     //             <ArrowUpDown className="ml-2 h-4 w-4" />
     //         </Button>
     //     ),
     //     cell: ({ row }) => (
     //         <div className="capitalize">
-    //             {row.original.status}
-    //         </div>
-    //     ),
-    // },
-    // {
-    //     accessorKey: "materialType",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Material Type
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original?.blockId?.lotId?.materialType}
+    //             {row.original.numberofSlabs}
     //         </div>
     //     ),
     // },
     {
-        accessorKey: "length",
-        header: "Length (inch)",
-        cell: ({ row }) => <div>{row.original?.dimensions?.length?.value}</div>,
+        accessorKey: "status",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Blocks Status
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.status}
+            </div>
+        ),
     },
-    {
-        accessorKey: "height",
-        header: "Height (inch)",
-        cell: ({ row }) => <div>{row.original?.dimensions?.height?.value}</div>,
-    },
-{
-        accessorKey: "squareft",
-        header: "Total SQF",
-        cell: ({ row }) => {
-          const squareFt = ((row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144).toFixed(2);
-          return <div>{squareFt}</div>;
-        },
-        footer: ({ table }) => {
-          const totalSQF = table.getRowModel().rows.reduce((sum, row) => {
-            const sqf = (row.original.dimensions?.length?.value * row.original.dimensions?.height?.value) / 144;
-            return sum + sqf;
-          }, 0);
-          return <span className="font-medium text-gray-600">Total SQF: {totalSQF.toFixed(2)} </span>;
-        },
-      },
     {
 
         header: ({ column }) => (
@@ -137,7 +155,7 @@ export const SoldColumns: ColumnDef<Slab>[] = [
         ),
 
         id: "actions",
-        cell: ({ row }) => <PolishedCellAction data={row.original} />
-
+        cell: ({ row }) => <InDressingCellAction data={row.original} />
     },
 ]
+
