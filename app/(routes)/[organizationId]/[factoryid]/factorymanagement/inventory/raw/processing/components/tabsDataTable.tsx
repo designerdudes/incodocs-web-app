@@ -28,10 +28,6 @@ interface Props {
   Readyforpolishcolumns: any;
   inPolishingolumns: any;
   Polishedcolumns: any;
-  CuttingInchesWithAllowanceColumns: any;
-  CuttingInchesWithOutAllowanceColumns: any;
-  polishingInchesWithOutAllowanceColumns: any;
-  polishingInchesWithAllowanceColumns: any;
 }
 
 function TabsDataTable({
@@ -48,10 +44,6 @@ function TabsDataTable({
   Readyforpolishcolumns,
   inPolishingolumns,
   Polishedcolumns,
-  CuttingInchesWithAllowanceColumns,
-  CuttingInchesWithOutAllowanceColumns,
-  polishingInchesWithOutAllowanceColumns,
-  polishingInchesWithAllowanceColumns,
 }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();

@@ -12,10 +12,6 @@ import { Readyforpolishcolumns } from "./components/readyforpolishcolumns";
 import { inPolishingolumns } from "./components/inpolishingcolumns";
 import { cookies } from "next/headers";
 import { Polishedcolumns } from "./components/polishedcolumns";
-import { CuttingInchesWithAllowanceColumns } from "./components/cuttingWithAllowanceColumns";
-import { CuttingInchesWithOutAllowanceColumns } from "./components/cuttingWithOutAllowanceColumns";
-import { polishingInchesWithOutAllowanceColumns } from "./components/polishingWithOutAllowanceColumns";
-import { polishingInchesWithAllowanceColumns } from "./components/polishingWithAllowanceColumns";
 import { Block } from "./components/incuttingcolumns";
 import TabsDataTable from "./components/tabsDataTable";
 import { indressingcolumns } from "./components/inDressingColumns";
@@ -386,10 +382,6 @@ export default async function SlabsProcessingPage({ params }: Props) {
           Readyforpolishcolumns={Readyforpolishcolumns}
           inPolishingolumns={inPolishingolumns}
           Polishedcolumns={Polishedcolumns}
-          CuttingInchesWithAllowanceColumns={CuttingInchesWithAllowanceColumns}
-          CuttingInchesWithOutAllowanceColumns={CuttingInchesWithOutAllowanceColumns}
-          polishingInchesWithOutAllowanceColumns={polishingInchesWithOutAllowanceColumns}
-          polishingInchesWithAllowanceColumns={polishingInchesWithAllowanceColumns}
           inDressingcolumns={indressingcolumns}
           Dressedcolumns={dressedcolumns}
           inSplittingcolumns={insplittingcolumns}
