@@ -184,8 +184,8 @@ export default async function ViewMachinePage({
                             Machine Ownership
                           </TableCell>
                           <TableCell>
-                            {MachineData.ownership
-                              ? MachineData.ownership === "owned"
+                            {MachineData.machineOwnership
+                              ? MachineData.machineOwnership === "owned"
                                 ? "Owned"
                                 : "Rented"
                               : "N/A"}

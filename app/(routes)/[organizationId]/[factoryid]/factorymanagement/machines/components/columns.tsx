@@ -9,6 +9,7 @@ export interface Machine {
   _id: string;
   machineName: string;
   machineId: string;
+  machineOwnership:String;
   factoryId: string; // Assuming it's the ObjectId as a string
   typeCutting: "Single Cutter" | "Multi Cutter" | "Rope Cutter";
   typePolish: "Auto Polishing" | "Line Polishing" | "Hand Polishing";
@@ -116,7 +117,7 @@ export const MachineColumns: ColumnDef<Machine>[] = [
     },
   },
   {
-    accessorKey: "machineName",
+    accessorKey: "machineOwnership",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -126,7 +127,7 @@ export const MachineColumns: ColumnDef<Machine>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.machineName || "N/A"}</div>,
+    cell: ({ row }) => <div>{row.original.machineOwnership || "N/A"}</div>,
   },
   {
     accessorKey: "status",

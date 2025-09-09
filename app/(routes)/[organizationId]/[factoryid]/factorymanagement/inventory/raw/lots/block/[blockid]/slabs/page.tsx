@@ -25,7 +25,7 @@ import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 import { headers } from "next/headers";
-
+import { Badge } from "@/components/ui/badge";
 
 interface Props {
   params: {
@@ -75,28 +75,27 @@ export default async function SlabsPage({ params }: Props) {
   }, 0);
 
   function calculateVolumeCm(
-  length: number,
-  breadth: number,
-  height: number
-): number {
-  if (length && breadth && height) {
-    // return in cm³
-    return length * breadth * height;
+    length: number,
+    breadth: number,
+    height: number
+  ): number {
+    if (length && breadth && height) {
+      // return in cm³
+      return length * breadth * height;
+    }
+    return 0;
   }
-  return 0;
-}
 
-function convertCmCubeToMeterCube(volumeInCm: number): string {
-  if (!volumeInCm || isNaN(volumeInCm)) return "0.00";
-  return (volumeInCm / 1_000_000).toFixed(2); // cm³ → m³
-}
+  function convertCmCubeToMeterCube(volumeInCm: number): string {
+    if (!volumeInCm || isNaN(volumeInCm)) return "0.00";
+    return (volumeInCm / 1_000_000).toFixed(2); // cm³ → m³
+  }
 
-
-const volumeInCm = calculateVolumeCm(
-  BlockData?.dimensions?.length?.value,
-  BlockData?.dimensions?.breadth?.value,
-  BlockData?.dimensions?.height?.value
-);
+  const volumeInCm = calculateVolumeCm(
+    BlockData?.dimensions?.length?.value,
+    BlockData?.dimensions?.breadth?.value,
+    BlockData?.dimensions?.height?.value
+  );
   const calculateWeightTons = (
     lengthCm: number,
     breadthCm: number,
@@ -144,7 +143,7 @@ const volumeInCm = calculateVolumeCm(
             <span className="sr-only">Back</span>
           </Button>
         </Link>
-        
+
         <div className="flex-1">
           <Heading
             className="leading-tight"
@@ -191,21 +190,35 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Status</TableCell>
-                    <TableCell
-                      className={cn(
-                        BlockData?.status === "inStock" &&
-                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80  rounded",
-                        BlockData?.status === "inCutting" &&
-                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80  rounded",
-                        BlockData?.status === "cut" &&
-                        "bg-green-100 text-green-800 hover:bg-green-200/80  rounded",
-                        (!BlockData?.status || BlockData?.status === "N/A") &&
-                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60  rounded"
-                      )}
-                    >
-                      {BlockData?.status === "cut"
-                        ? "Block Cut"
-                        : BlockData?.status || "N/A"}
+                    <TableCell>
+                      <Badge
+                        className={cn(
+                          BlockData?.status === "inStock" &&
+                            "bg-blue-100 text-blue-800 hover:bg-blue-200/80",
+                          BlockData?.status === "inDressing" &&
+                            "bg-purple-100 text-purple-900 hover:bg-purple-200/80",
+                          BlockData?.status === "dressed" &&
+                            "bg-indigo-100 text-indigo-800 hover:bg-indigo-200/80",
+                          BlockData?.status === "inSplitting" &&
+                            "bg-red-100 text-red-800 hover:bg-red-200/80",
+                          BlockData?.status === "split" &&
+                            "bg-pink-100 text-pink-800 hover:bg-pink-200/80",
+                          BlockData?.status === "inCutting" &&
+                            "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
+                          BlockData?.status === "cut" &&
+                            "bg-green-100 text-green-800 hover:bg-green-200/80",
+                          BlockData?.status === "N/A" &&
+                            "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
+                        )}
+                      >
+                        {BlockData?.status === "cut"
+                          ? "Block Cut"
+                          : BlockData?.status === "split"
+                          ? "Block Split"
+                          : BlockData?.status === "dressed"
+                          ? "Block Dressed"
+                          : BlockData?.status}
+                      </Badge>
                     </TableCell>
                   </TableRow>
 
@@ -233,9 +246,9 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Volume (m³)</TableCell>
-<TableCell>
-  {convertCmCubeToMeterCube(volumeInCm)}
-</TableCell>
+                    <TableCell>
+                      {convertCmCubeToMeterCube(volumeInCm)}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Weight (tons)</TableCell>
@@ -255,35 +268,41 @@ const volumeInCm = calculateVolumeCm(
                   </TableRow>
                   <TableRow>
                     <TableCell>Length (cm)</TableCell>
-                    <TableCell>{BlockData?.netDimensions?.length?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.netDimensions?.length?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Breadth (cm)</TableCell>
-                    <TableCell>{BlockData?.netDimensions?.breadth?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.netDimensions?.breadth?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Height (cm)</TableCell>
-                    <TableCell>{BlockData?.netDimensions?.height?.value}</TableCell>
+                    <TableCell>
+                      {BlockData?.netDimensions?.height?.value}
+                    </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Volume (m³)</TableCell>
                     <TableCell>
                       {convertCmCubeToMeterCube(
-            (BlockData?.netDimensions?.length?.value || 0) *
-              (BlockData?.netDimensions?.breadth?.value || 0) *
-              (BlockData?.netDimensions?.height?.value || 0)
-          )}
+                        (BlockData?.netDimensions?.length?.value || 0) *
+                          (BlockData?.netDimensions?.breadth?.value || 0) *
+                          (BlockData?.netDimensions?.height?.value || 0)
+                      )}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Weight (tons)</TableCell>
                     <TableCell>
                       {BlockData?.netDimensions?.weight?.value ||
-            calculateWeightTons(
-              BlockData?.netDimensions?.length?.value || 0,
-              BlockData?.netDimensions?.breadth?.value || 0,
-              BlockData?.netDimensions?.height?.value || 0
-            )}
+                        calculateWeightTons(
+                          BlockData?.netDimensions?.length?.value || 0,
+                          BlockData?.netDimensions?.breadth?.value || 0,
+                          BlockData?.netDimensions?.height?.value || 0
+                        )}
                     </TableCell>
                   </TableRow>
 

@@ -27,6 +27,7 @@ import EditBlockForm from "./editBlockForm";
 import Link from "next/link";
 import MarkSplitForm from "@/components/forms/MarkSplitForm";
 import SplitBlockForm from "@/components/forms/SplitBlockForm";
+import CuttingBlockForm from "@/components/forms/CuttingBlockForm";
 
 interface Props {
   data: any;
@@ -37,7 +38,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   const GlobalModal = useGlobalModal();
   const params = useParams();
   const { organizationId, factoryid } = params;
-
+//  console.log("lllllllllllllllllll",data)
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
@@ -59,23 +60,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       "view",
       "delete",
     ],
-    inDressing: [
-      "markDressed",
-      "view",
-      "delete",
-    ],
-    dressed: [
-      "sendForSplitting",
-      "sendForCutting",
-      "edit",
-      "view",
-      "delete",
-    ],
-    inSplitting: [
-      "markSplit",
-      "view",
-      "delete",
-    ],
+    inDressing: ["markDressed", "view", "delete"],
+    dressed: ["sendForSplitting", "sendForCutting", "edit", "view", "delete"],
+    inSplitting: ["markSplit", "view", "delete"],
     split: ["sendForCutting", "edit", "view", "delete"],
     inCutting: ["markCut", "view", "delete"],
     cut: ["view", "delete"],
@@ -154,7 +141,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
                 />
-               );
+              );
               GlobalModal.onOpen();
             }}
           >
@@ -190,7 +177,16 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send For Cutting - ${data.blockNumber}`;
-              GlobalModal.children = <SendForCuttingForm params={{ data }} />;
+              GlobalModal.children = (
+                <CuttingBlockForm
+                  parentBlockId={data._id}
+                  blockNumber={data.blockNumber}
+                  factoryId={data.factoryId}
+                  netDimensions={data.netDimensions}
+                  onSubmit={() => GlobalModal.onClose()}
+                  originalBlockVolume={0}
+                />
+              );
               GlobalModal.onOpen();
             }}
           >
@@ -238,7 +234,9 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = "Edit Block Details";
-              GlobalModal.children = <EditBlockForm params={{ _id: data._id }} />;
+              GlobalModal.children = (
+                <EditBlockForm params={{ _id: data._id }} />
+              );
               GlobalModal.onOpen();
             }}
           >

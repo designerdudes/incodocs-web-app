@@ -42,6 +42,7 @@ export const machineSchema = z.object({
   machineName: z.string().min(1, "Machine Name is required"),
   typeCutting: z.string().optional(),
   typePolish: z.string().optional(),
+  machineOwnership:z.string().optional(),
   machinePhoto: z.string().optional(),
   ownership: z.string().optional(),
   isActive: z.boolean(),
@@ -59,6 +60,7 @@ interface MachineFormProps {
     organizationId: string;
     _id: Machine;
     machineName: string;
+    machineOwnership: string;
     typeCutting: string;
     typePolish: string;
     machinePhoto: string;
@@ -86,6 +88,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       factoryId: factoryId,
       machineName: "",
       typeCutting: "",
+      machineOwnership:"",
       typePolish: "",
       machinePhoto: data?.machinePhoto || "",
       ownership: "",
@@ -104,6 +107,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       typeCutting: data?.typeCutting || "",
       typePolish: data?.typePolish || "",
       machinePhoto: data?.machinePhoto || "",
+      machineOwnership:data?.machineOwnership ||"",
       ownership: data?.ownership || "",
       isActive: true,
       lastMaintenance: data?.lastMaintenance || new Date().toISOString(),
@@ -206,27 +210,29 @@ export default function MachineFormPage({ params }: MachineFormProps) {
               )}
             />
             <FormField
-              control={form.control}
-              name="ownership"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Machine Ownership</FormLabel>
-                  <Select
-                    onValueChange={(value) => field.onChange(value)}
-                    value={field.value}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Ownership Type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="owned">Owned</SelectItem>
-                      <SelectItem value="rented">Rented</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+  control={form.control}
+  name="machineOwnership"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>Machine Ownership</FormLabel>
+      <Select
+        onValueChange={field.onChange}
+        value={field.value || ""} 
+        defaultValue={field.value || ""}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select Ownership Type" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="owned">Owned</SelectItem>
+          <SelectItem value="rented">Rented</SelectItem>
+        </SelectContent>
+      </Select>
+      <FormMessage />
+    </FormItem>
+  )}
+/>
+
 
             <FormField
               control={form.control}
