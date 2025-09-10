@@ -50,7 +50,7 @@ const IncuttingCellAction: React.FC<Props> = ({ data }) => {
                     {/* Mark cut */}
                     <DropdownMenuItem
                         onSelect={() => {
-                            router.push(`./processing/cutting/${data._id}/markcut`);
+                            window.open(`./processing/cutting/${data._id}/markcut`);
                         }}
                         className="focus:bg-green-500 focus:text-destructive-foreground"
                     >
