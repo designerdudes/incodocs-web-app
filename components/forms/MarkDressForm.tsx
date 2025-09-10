@@ -108,7 +108,7 @@ export default function MarkDressForm({
       };
 
       await putData(
-        `/factory-management/inventory/raw/markblockdressed/${parentBlockId}`,
+        `/factory-management/inventory/raw/markdressed/${parentBlockId}`,
         body
       );
       toast.success("Block  dressed successfully");

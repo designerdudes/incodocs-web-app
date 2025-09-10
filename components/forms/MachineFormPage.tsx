@@ -39,6 +39,7 @@ export const machineSchema = z.object({
   typeCutting: z.string().optional(),
   typePolish: z.string().optional(),
   machinePhoto: z.string().optional(),
+  machineOwnership:z.string().optional(),
   ownership: z.string().optional(),
   isActive: z.boolean(),
   lastMaintenance: z.string().optional(),
@@ -70,6 +71,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       machineName: "",
       typeCutting: "",
       typePolish: "",
+      machineOwnership:"",
       machinePhoto: "",
       ownership: "",
       isActive: true,
@@ -178,7 +180,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
           />
           <FormField
             control={form.control}
-            name="ownership"
+            name="machineOwnership"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Machine Ownership</FormLabel>
