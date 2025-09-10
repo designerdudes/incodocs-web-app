@@ -6,6 +6,7 @@ import { ToastProvider } from "@/components/providers/toast-provider";
 import { useEffect, useState } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import NetworkStatusToast from "@/components/NetworkStatusToast";
+import Next13ProgressBar from "next13-progressbar";
 
 const inter = Lexend({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -30,6 +31,11 @@ export default function RootLayout({
     return (
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className}>
+          <Next13ProgressBar
+            height="3px"
+            color="rgba(99, 102, 241, 0.9)"
+            options={{ showSpinner: false, trickleSpeed: 100 }}
+          />
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
