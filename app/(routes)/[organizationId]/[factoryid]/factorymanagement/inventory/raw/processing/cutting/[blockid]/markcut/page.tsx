@@ -54,10 +54,10 @@ export default async function MarkCutPage(params: Props) {
                 {/* <CreateNewLotButton /> */}
             </div>
             <Separator orientation="horizontal" />
-            <div className="container mx-auto  py-1">
+            <div className="max-h-full ">
 
                 {BlockData ?
-                    <MarkCutAndCreateSlabsForm gap={3} BlockData={BlockData} />
+                    <MarkCutAndCreateSlabsForm  BlockData={BlockData} />
                     :
                     <div className="flex flex-col gap-1 items-center justify-center h-full">
 
