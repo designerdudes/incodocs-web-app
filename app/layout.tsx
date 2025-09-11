@@ -32,7 +32,7 @@ export default function RootLayout({
       <html lang="en" suppressHydrationWarning>
         <body className={inter.className}>
           <Next13ProgressBar
-            height="3px"
+            height="4px"
             color="rgba(99, 102, 241, 0.9)"
             options={{ showSpinner: false, trickleSpeed: 100 }}
           />

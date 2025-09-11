@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { columns } from "./columns";
+import { HorizontalCardAccordion } from "@/components/ui/horizontal-card-accordion";
 
 interface Props {
   params: {
@@ -92,6 +93,7 @@ export default async function BlocksPage({ params }: Props) {
       {/* Content Area */}
       <div className="flex flex-1 gap-6">
         {/* Lot Details Card */}
+        {/* <HorizontalCardAccordion title="Lot Details"> */}
         <Card className="w-1.5/5">
           <CardHeader>
             <CardTitle>Lot Details</CardTitle>
@@ -211,9 +213,10 @@ export default async function BlocksPage({ params }: Props) {
             </Table>
           </CardContent>
         </Card>
+        {/* </HorizontalCardAccordion> */}
 
         {/* Block's DataTable */}
-        <div className="w-3/5">
+        <div className="w-3.5/5">
           <DataTable
             bulkDeleteIdName="_id"
             bulkDeleteTitle="Are you sure you want to delete the selected Blocks?"

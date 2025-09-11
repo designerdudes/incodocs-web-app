@@ -61,6 +61,7 @@ function TabsDataTable({
       onValueChange={(tab) => updateTabInUrl(tab)}
       className="w-full"
     >
+      <div className="text-center mt-4">
       <TabsList className="gap-3">
          <TabsTrigger className="gap-2" value="inDressing">
           In Dressing
@@ -125,6 +126,7 @@ function TabsDataTable({
           </TabsTrigger>
         </TabsList> */}
       </TabsList>
+      </div>
       <TabsContent value="inDressing">
         <DataTable
           bulkDeleteIdName="_id"
