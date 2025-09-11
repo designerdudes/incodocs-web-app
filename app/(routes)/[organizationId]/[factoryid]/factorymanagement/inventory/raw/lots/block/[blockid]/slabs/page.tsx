@@ -158,7 +158,7 @@ export default async function SlabsPage({ params }: Props) {
 
       <Separator />
 
-      <div className="flex flex-col flex-1 py-2">
+      {/* <div className="flex flex-col flex-1 py-2"> */}
         <div className="flex flex-1 gap-6">
           {/* Block Details Card */}
           <Card className="w-2/5">
@@ -177,20 +177,20 @@ export default async function SlabsPage({ params }: Props) {
                 <TableBody>
                   {/* General block details */}
                   <TableRow>
-                    <TableCell>Block Id</TableCell>
+                    <TableCell className="whitespace-nowrap">Block Id</TableCell>
                     <TableCell>{BlockData?.blockId}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Block Number</TableCell>
+                    <TableCell className="whitespace-nowrap">Block Number</TableCell>
                     <TableCell>{BlockData?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Material Type</TableCell>
+                    <TableCell className="whitespace-nowrap">Material Type</TableCell>
                     <TableCell>{BlockData?.lotId?.materialType}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell>Status</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">Status</TableCell>
+                    <TableCell className="whitespace-nowrap">
                       <Badge
                         className={cn(
                           BlockData?.status === "inStock" &&
@@ -380,7 +380,7 @@ export default async function SlabsPage({ params }: Props) {
             </div>
           </div>
         </div>
-      </div>
+      {/* </div> */}
     </div>
   );
 }
