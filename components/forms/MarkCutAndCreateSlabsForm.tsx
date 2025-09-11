@@ -27,10 +27,35 @@ import { useRouter } from "next/navigation";
 import { Trash } from "lucide-react";
 import { putData } from "@/axiosUtility/api";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
-import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
+// import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput"; // Removed since we’ll inline the logic
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Label } from "../ui/label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
+import {
+  ChevronFirstIcon,
+  ChevronLastIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
 
 interface MarkCutAndCreateSlabsFormProps {
-  gap: number;
   BlockData: any;
 }
 
@@ -42,20 +67,23 @@ const formSchema = z.object({
   slabs: z
     .array(
       z.object({
+        lengthImage: z.string().url("Must be a valid URL").optional(),
+        heightImage: z.string().url("Must be a valid URL").optional(),
+        slabphoto: z.string().url("Must be a valid URL").optional(),
+        productName: z.string().min(1, "Product name required"),
         dimensions: z.object({
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
-              .min(0.1, { message: "Length must be greater than zero" }),
+              .min(0, { message: "Length must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
-              .min(0.1, { message: "Height must be greater than zero" }),
+              .min(0, { message: "Height must be greater than zero" }),
             units: z.literal("inch").default("inch"),
           }),
-          status: z.literal("readyForPolish").default("readyForPolish"),
         }),
       })
     )
@@ -64,7 +92,6 @@ const formSchema = z.object({
 
 export function MarkCutAndCreateSlabsForm({
   BlockData,
-  gap,
 }: MarkCutAndCreateSlabsFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = React.useState(false);
@@ -77,6 +104,22 @@ export function MarkCutAndCreateSlabsForm({
   const [slabCountToBeDeleted, setSlabCountToBeDeleted] = React.useState<
     number | null
   >(null);
+  const [slabCountInput, setslabCountInput] = React.useState("1");
+  const [pageIndex, setPageIndex] = React.useState(0);
+  const [pageSize, setPageSize] = React.useState(10); // default rows per page
+
+  const paginatedslabs = slabs.slice(
+    pageIndex * pageSize,
+    pageIndex * pageSize + pageSize
+  );
+
+  const assignedMachine = BlockData?.cutting?.machineId || null;
+ const inTimeRaw = BlockData?.cutting?.["in"] || "";
+const inTime = inTimeRaw
+  ? new Date(inTimeRaw).toISOString().slice(0, 16) // 👉 "2025-09-10T10:30"
+  : "";
+
+  const [outTime, setOutTime] = React.useState<string>("");
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -85,19 +128,20 @@ export function MarkCutAndCreateSlabsForm({
       numberofSlabs: BlockData?.numberofSlabs || 1,
       slabs: BlockData?.slabs || [
         {
+          lengthImage: "",
+          heightImage: "",
+          slabphoto: "",
+          productName: "", // Note: productName is required, so we might need a default value
           dimensions: {
-            length: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-            status: "readyForPolish",
+            length: { value: 0, units: "inch" }, // Default to valid value
+            height: { value: 0, units: "inch" }, // Default to valid value
           },
         },
       ],
     },
   });
 
-  
-
-  const { control, setValue, watch, getValues } = form;
+  const { control, setValue, watch, getValues, trigger } = form;
 
   // Sync slabs state with form on mount
   React.useEffect(() => {
@@ -107,49 +151,51 @@ export function MarkCutAndCreateSlabsForm({
     }
   }, [watch]);
 
-  // Save progress to localStorage
+  // Save progress
   const saveProgressSilently = (data: any) => {
     try {
       localStorage.setItem("slabsFormData", JSON.stringify(data));
       localStorage.setItem("lastSaved", new Date().toISOString());
     } catch (error) {
-      console.error("Failed to save progress to localStorage:", error);
+      console.error("Failed to save progress:", error);
     }
   };
 
-  // Handle slab count changes
-  const handleSlabCountChange = (value: string) => {
-    const newCount = Number(value);
-
+  // Handle slab count (inlined from RawMaterialCreateNewForm)
+  const handleSlabCountChange = async (value: string) => {
+    const newCount = Number(value) || 1;
     if (newCount < slabs.length) {
       setShowConfirmation(true);
       setSlabCountToBeDeleted(newCount);
     } else {
-      handleDynamicArrayCountChange({
-        value,
-        watch,
-        setValue,
-        getValues,
-        fieldName: "slabs",
-        createNewItem: () => ({
-          dimensions: {
-            length: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
-            status: "readyForPolish",
-          },
-        }),
-        customFieldSetters: {
-          slabs: (items, setValue) => {
-            setValue("numberofSlabs", items.length);
-            setSlabs(items);
-          },
-        },
-        saveCallback: saveProgressSilently,
-      });
+      const currentSlabs = getValues("slabs") || [];
+      const newSlabs = Array.from({ length: newCount }, (_, index) =>
+        index < currentSlabs.length
+          ? currentSlabs[index]
+          : {
+              lengthImage: "",
+              heightImage: "",
+              slabphoto: "",
+              productName: `Slab ${index + 1}`, // Default productName to avoid validation issues
+              dimensions: {
+                length: { value: 0, units: "inch" },
+                height: { value: 0, units: "inch" },
+              },
+            }
+      );
+      setSlabs(newSlabs);
+      setValue("numberofSlabs", newSlabs.length);
+      // setValue("slabs", newSlabs);
+      setPageIndex(0); // Reset to first page
+      saveProgressSilently(getValues());
+      const isValid = await trigger("slabs");
+      if (!isValid) {
+        console.error("Slab validation failed:", form.formState.errors);
+      }
     }
   };
 
-  // Handle confirmation for reducing slab count
+  // Confirm reduce
   const handleConfirmChange = () => {
     if (slabCountToBeDeleted !== null) {
       const updatedSlabs = slabs.slice(0, slabCountToBeDeleted);
@@ -158,41 +204,50 @@ export function MarkCutAndCreateSlabsForm({
       setValue("numberofSlabs", updatedSlabs.length);
       saveProgressSilently(getValues());
       setSlabCountToBeDeleted(null);
+      setPageIndex(0); // Reset to first page
     }
     setShowConfirmation(false);
   };
 
-  // Handle slab deletion
+  // Delete row
   const handleDeleteRow = (index: number) => {
     const updatedSlabs = slabs.filter((_, i) => i !== index);
     setSlabs(updatedSlabs);
     setValue("slabs", updatedSlabs);
     setValue("numberofSlabs", updatedSlabs.length);
     saveProgressSilently(getValues());
+    if (pageIndex * pageSize >= updatedSlabs.length && pageIndex > 0) {
+      setPageIndex(Math.max(0, Math.ceil(updatedSlabs.length / pageSize) - 1));
+    }
   };
 
-  // Apply global dimensions
+  // Apply global dims
   React.useEffect(() => {
     if (applyLengthToAll || applyHeightToAll) {
       const updatedSlabs = slabs.map((slab) => ({
+        ...slab,
         dimensions: {
-          ...slab.dimensions,
           length: applyLengthToAll
-            ? { value: parseFloat(globalLength) || 0.1, units: "inch" }
+            ? { value: parseFloat(globalLength) || 0, units: "inch" }
             : slab.dimensions.length,
           height: applyHeightToAll
-            ? { value: parseFloat(globalHeight) || 0.1, units: "inch" }
+            ? { value: parseFloat(globalHeight) || 0, units: "inch" }
             : slab.dimensions.height,
-          status: slab.dimensions.status,
         },
       }));
       setSlabs(updatedSlabs);
       setValue("slabs", updatedSlabs, { shouldValidate: true });
       saveProgressSilently(getValues());
     }
-  }, [globalLength, globalHeight, applyLengthToAll, applyHeightToAll, setValue]);
+  }, [
+    globalLength,
+    globalHeight,
+    applyLengthToAll,
+    applyHeightToAll,
+    setValue,
+  ]);
 
-  // Calculate square footage
+  // Calculate sqft
   function calculateSqft(length?: number, height?: number): string {
     const lengthInFeet = (length || 0) / 12;
     const heightInFeet = (height || 0) / 12;
@@ -200,44 +255,174 @@ export function MarkCutAndCreateSlabsForm({
     return area > 0 ? area.toFixed(2) : "0.00";
   }
 
-  // Calculate total square footage
   function calculateTotalSqft(): string {
     const totalSqft = slabs.reduce((sum, slab) => {
-      const lengthInFeet = (slab.dimensions.length.value || 0) / 12;
-      const heightInFeet = (slab.dimensions.height.value || 0) / 12;
+      const lengthInFeet = (slab?.dimensions?.length?.value || 0) / 12;
+      const heightInFeet = (slab?.dimensions?.height?.value || 0) / 12;
       return sum + lengthInFeet * heightInFeet;
     }, 0);
     return totalSqft.toFixed(2);
   }
 
-  // Form submission
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  // Submit
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
+    if (!assignedMachine) return;
     setIsLoading(true);
+
     try {
+      const body = {
+        machineId: assignedMachine._id,
+        inTime,
+        outTime,
+        slabs: values.slabs,
+      };
+
       await putData(
-        `/factory-management/inventory/updateblockaddslab/${BlockData._id}`,
-        {
-          ...values,
-          status: "cut",
-        }
+        `/factory-management/inventory/raw/markcut/${BlockData._id}`,
+        body
       );
-      toast.success("Block data updated successfully");
-      router.back();
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (error) {
-      toast.error("An error occurred while updating data");
+      toast.success("Slabs updated successfully");
+      router.refresh();
+    } catch (error: any) {
+      console.error("Error:", error);
+      toast.error(error?.response?.data?.message || "Failed to update slabs");
     } finally {
       setIsLoading(false);
     }
-  }
+  };
+
+  const length = BlockData?.netDimensions?.length?.value ?? 0;
+  const breadth = BlockData?.netDimensions?.breadth?.value ?? 0;
+  const height = BlockData?.netDimensions?.height?.value ?? 0;
+  const density = 3.5;
+  const Volume = (length * breadth * height) / 1_000_000;
+  const weight = Volume * density;
+
 
   return (
     <div className="space-y-6">
+      <div className="grid grid-cols-4 gap-3">
+        <Accordion type="single" collapsible defaultValue="item-1">
+          <AccordionItem value="item-1">
+            <AccordionTrigger>End to End Measurement</AccordionTrigger>
+            <AccordionContent>
+              {BlockData?.dimensions && (
+                <div className="border p-3 rounded-lg bg-gray-100">
+                  <h3 className="font-semibold mb-2">Original Block</h3>
+                  <div className="grid grid-cols-5 gap-2">
+                    <div>
+                      <Label>Length (cm)</Label>
+                      <Input
+                        type="number"
+                        value={BlockData?.dimensions?.length?.value ?? ""}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label>Breadth (cm)</Label>
+                      <Input
+                        type="number"
+                        value={BlockData?.dimensions?.breadth?.value ?? ""}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label>Height (cm)</Label>
+                      <Input
+                        type="number"
+                        value={BlockData?.dimensions?.height?.value ?? ""}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label>Volume (m³)</Label>
+                      <Input
+                        type="number"
+                        value={Volume ? Volume.toFixed(2) : ""}
+                        disabled
+                      />
+                    </div>
+                    <div>
+                      <Label>Weight (tons)</Label>
+                      <Input
+                        type="number"
+                        value={
+                          BlockData?.dimensions?.weight?.value?.toFixed(2) ?? ""
+                        }
+                        disabled
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        <Accordion type="single" collapsible defaultValue="item-2">
+          <AccordionItem value="item-2">
+            <AccordionTrigger>Net Measurement</AccordionTrigger>
+            <AccordionContent>
+              <div className="border p-3 rounded-lg bg-gray-100">
+                <h3 className="font-semibold mb-2">Net Dimensions Block</h3>
+                <div className="grid grid-cols-5 gap-2">
+                  <div>
+                    <Label>Length (cm)</Label>
+                    <Input type="number" value={length || ""} disabled />
+                  </div>
+                  <div>
+                    <Label>Breadth (cm)</Label>
+                    <Input type="number" value={breadth || ""} disabled />
+                  </div>
+                  <div>
+                    <Label>Height (cm)</Label>
+                    <Input type="number" value={height || ""} disabled />
+                  </div>
+                  <div>
+                    <Label>Volume (m³)</Label>
+                    <Input
+                      type="number"
+                      value={Volume ? Volume.toFixed(2) : ""}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label>Weight (tons)</Label>
+                    <Input
+                      type="number"
+                      value={weight ? weight.toFixed(2) : ""}
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+        {assignedMachine && (
+          <div className="border p-3 rounded-lg bg-gray-100 space-y-2">
+            <div>
+              <Label>Machine Used</Label>
+              <Input type="text" value={assignedMachine.machineName} disabled />
+            </div>
+            <div>
+              <Label>In Time (Date & Time)</Label>
+              <Input type="datetime-local" value={inTime} disabled />
+            </div>
+          </div>
+        )}
+        <div className="border p-3 rounded-lg bg-white space-y-3">
+          <Label>Out Time (Date & Time)</Label>
+          <Input
+            type="datetime-local"
+            value={outTime}
+            onChange={(e) => setOutTime(e.target.value)}
+          />
+        </div>
+      </div>
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className={`grid grid-cols-${gap} gap-3`}>
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6 ">
+          <div className="grid grid-cols-3 gap-4">
             <FormField
               name="numberofSlabs"
               control={control}
@@ -247,21 +432,19 @@ export function MarkCutAndCreateSlabsForm({
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter number of slabs"
-                      min="1"
+                      min={1}
                       disabled={isLoading}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === "" || Number(value) < 1) {
-                          field.onChange(1);
-                          handleSlabCountChange("1");
-                          return;
+                      value={slabCountInput}
+                      onChange={async (e) => {
+                        let val = e.target.value;
+                        if (val.length > 3) {
+                          val = val.slice(0, 3);
                         }
-                        field.onChange(Number(value));
-                        handleSlabCountChange(value);
+                        setslabCountInput(val);
+                        const n = Math.max(1, parseInt(val || "1", 10));
+                        field.onChange(n);
+                        await handleSlabCountChange(String(n));
                       }}
-                      value={field.value ?? 1}
-                      onBlur={() => saveProgressSilently(getValues())}
                     />
                   </FormControl>
                   <FormMessage />
@@ -269,155 +452,261 @@ export function MarkCutAndCreateSlabsForm({
               )}
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Input
                 placeholder="Length (inches)"
                 type="number"
-                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                min="0"
                 value={globalLength}
                 onChange={(e) => setGlobalLength(e.target.value)}
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
               />
-              <label className="text-sm font-medium flex items-center mt-2">
+              <label className="text-sm flex items-center mt-2">
                 <input
                   type="checkbox"
-                  className="mr-2"
                   checked={applyLengthToAll}
                   onChange={(e) => setApplyLengthToAll(e.target.checked)}
-                />{" "}
-                Apply Length (inches) to all rows
+                />
+                <span className="ml-2">Apply Length to all</span>
               </label>
             </div>
             <div>
               <Input
                 placeholder="Height (inches)"
                 type="number"
-                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                min="0"
                 value={globalHeight}
                 onChange={(e) => setGlobalHeight(e.target.value)}
-                disabled={isLoading}
-                onBlur={() => saveProgressSilently(getValues())}
               />
-              <label className="text-sm font-medium flex items-center mt-2">
+              <label className="text-sm flex items-center mt-2">
                 <input
                   type="checkbox"
-                  className="mr-2"
                   checked={applyHeightToAll}
                   onChange={(e) => setApplyHeightToAll(e.target.checked)}
-                />{" "}
-                Apply Height (inches) to all rows
+                />
+                <span className="ml-2">Apply Height to all</span>
               </label>
             </div>
           </div>
+
           {slabs.length > 0 && (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Length (inches)</TableHead>
-                  <TableHead>Height (inches)</TableHead>
+                  <TableHead>S.No</TableHead>
+                  <TableHead>Product</TableHead>
+                  <TableHead>Length (inch)</TableHead>
+                  <TableHead>Height (inch)</TableHead>
                   <TableHead>Area (sqft)</TableHead>
+                  <TableHead>Slab Photo</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {slabs.map((slab, index) => (
-                  <TableRow key={index}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell>
-                      <FormField
-                        name={`slabs.${index}.dimensions.length.value`}
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min="0.1"
-                                step="0.1"
-                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                placeholder="Enter length"
-                                value={slab.dimensions.length.value}
-                                onChange={(e) => {
-                                  const updatedSlabs = [...slabs];
-                                  updatedSlabs[index].dimensions.length.value =
-                                    parseFloat(e.target.value) || 0.1;
-                                  setSlabs(updatedSlabs);
-                                  setValue("slabs", updatedSlabs, {
-                                    shouldValidate: true,
-                                  });
-                                  saveProgressSilently(getValues());
-                                }}
-                                disabled={isLoading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
+                {paginatedslabs.map((slab, index) => {
+                  const globalIndex = pageIndex * pageSize + index;
+                  return (
+                    <TableRow key={globalIndex}>
+                      <TableCell>{globalIndex + 1}</TableCell>
+                      <TableCell>
+                        <Input
+                          placeholder="Product Name"
+                          value={slab?.productName}
+                          onChange={(e) => {
+                            const updated = [...slabs];
+                            updated[globalIndex].productName = e.target.value;
+                            setSlabs(updated);
+                            setValue("slabs", updated, {
+                              shouldValidate: true,
+                            });
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={slab?.dimensions?.length?.value}
+                          onChange={(e) => {
+                            const updated = [...slabs];
+                            updated[globalIndex].dimensions.length.value =
+                              parseFloat(e.target.value) || undefined;
+                            setSlabs(updated);
+                            setValue("slabs", updated);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={slab?.dimensions?.height?.value}
+                          onChange={(e) => {
+                            const updated = [...slabs];
+                            updated[globalIndex].dimensions.height.value =
+                              parseFloat(e.target.value) || undefined;
+                            setSlabs(updated);
+                            setValue("slabs", updated);
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {calculateSqft(
+                          slab?.dimensions?.length?.value,
+                          slab?.dimensions?.height?.value
                         )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <FormField
-                        name={`slabs.${index}.dimensions.height.value`}
-                        control={control}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min="0.1"
-                                step="0.1"
-                                className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                                placeholder="Enter height"
-                                value={slab.dimensions.height.value}
-                                onChange={(e) => {
-                                  const updatedSlabs = [...slabs];
-                                  updatedSlabs[index].dimensions.height.value =
-                                    parseFloat(e.target.value) || 0.1;
-                                  setSlabs(updatedSlabs);
-                                  setValue("slabs", updatedSlabs, {
-                                    shouldValidate: true,
-                                  });
-                                  saveProgressSilently(getValues());
-                                }}
-                                disabled={isLoading}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {calculateSqft(
-                        slab.dimensions.length.value,
-                        slab.dimensions.height.value
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="destructive"
-                        type="button"
-                        onClick={() => handleDeleteRow(index)}
-                        disabled={isLoading}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>
+                        <FormField
+                          control={control}
+                          name={`slabs.${globalIndex}.slabphoto`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormControl>
+                                <div className="flex items-center gap-2">
+                                  <FileUploadField
+                                    name={field.name}
+                                    value={field.value || ""}
+                                    onChange={(value) => {
+                                      const updated = [...slabs];
+                                      updated[globalIndex].slabphoto =
+                                        value || "";
+                                      setSlabs(updated);
+                                      setValue("slabs", updated, {
+                                        shouldValidate: true,
+                                      });
+                                      saveProgressSilently(getValues());
+                                    }}
+                                    storageKey="slabphoto"
+                                  />
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          type="button"
+                          onClick={() => handleDeleteRow(globalIndex)}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={5}>
+                  <TableCell colSpan={9} className="text-right">
                     Total Area (sqft): {calculateTotalSqft()}
                   </TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
           )}
+          <div className="flex items-center justify-between gap-8 h-[5%]">
+            <div className="flex items-center gap-3">
+              <Label className="max-sm:sr-only">Rows per page</Label>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={(value) => {
+                  const newPageSize = Number(value);
+                  setPageSize(newPageSize);
+                  setPageIndex(0);
+                  console.log("New pageSize:", newPageSize);
+                }}
+              >
+                <SelectTrigger className="w-fit whitespace-nowrap">
+                  <SelectValue placeholder="Select number of results" />
+                </SelectTrigger>
+                <SelectContent>
+                  {[5, 10, 25, 50, 100].map((size) => (
+                    <SelectItem key={size} value={size.toString()}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="text-muted-foreground flex grow justify-end text-sm whitespace-nowrap">
+              <p aria-live="polite">
+                <span className="text-foreground">
+                  {slabs.length === 0 ? 0 : pageIndex * pageSize + 1}-
+                  {Math.min((pageIndex + 1) * pageSize, slabs.length)}
+                </span>{" "}
+                of <span className="text-foreground">{slabs.length}</span>
+              </p>
+            </div>
+
+            <div>
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() => setPageIndex(0)}
+                      disabled={pageIndex === 0}
+                    >
+                      <ChevronFirstIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex((prev) => Math.max(prev - 1, 0))
+                      }
+                      disabled={pageIndex === 0}
+                    >
+                      <ChevronLeftIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex((prev) =>
+                          Math.min(
+                            prev + 1,
+                            Math.ceil(slabs.length / pageSize) - 1
+                          )
+                        )
+                      }
+                      disabled={
+                        pageIndex >= Math.ceil(slabs.length / pageSize) - 1
+                      }
+                    >
+                      <ChevronRightIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                  <PaginationItem>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      onClick={() =>
+                        setPageIndex(Math.ceil(slabs.length / pageSize) - 1)
+                      }
+                      disabled={
+                        pageIndex >= Math.ceil(slabs.length / pageSize) - 1
+                      }
+                    >
+                      <ChevronLastIcon size={16} />
+                    </Button>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Submitting..." : "Update Slabs"}
           </Button>

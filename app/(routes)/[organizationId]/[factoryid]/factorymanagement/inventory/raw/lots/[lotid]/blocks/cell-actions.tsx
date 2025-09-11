@@ -20,7 +20,6 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { Alert } from "@/components/forms/Alert";
 import { deleteData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
-import SendForCuttingForm from "@/components/forms/SendForCuttingForm";
 import DressingBlockForm from "@/components/forms/dressingBlockForm";
 import MarkDressForm from "@/components/forms/MarkDressForm";
 import EditBlockForm from "./editBlockForm";
@@ -28,6 +27,7 @@ import Link from "next/link";
 import MarkSplitForm from "@/components/forms/MarkSplitForm";
 import SplitBlockForm from "@/components/forms/SplitBlockForm";
 import CuttingBlockForm from "@/components/forms/CuttingBlockForm";
+import { MarkCutAndCreateSlabsForm } from "@/components/forms/MarkCutAndCreateSlabsForm";
 
 interface Props {
   data: any;
@@ -38,7 +38,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   const GlobalModal = useGlobalModal();
   const params = useParams();
   const { organizationId, factoryid } = params;
-//  console.log("lllllllllllllllllll",data)
+  //  console.log("lllllllllllllllllll",data)
   const deleteLot = async () => {
     try {
       await deleteData(`/factory-management/inventory/raw/delete/${data._id}`);
@@ -199,17 +199,10 @@ export const CellAction: React.FC<Props> = ({ data }) => {
         {canShow("markCut") && (
           <DropdownMenuItem
             onSelect={() => {
-              GlobalModal.title = `Mark Cut - ${data.blockNumber}`;
-              // GlobalModal.children = (
-              //   <MarkCutForm
-              //     parentBlockId={data._id}
-              //     blockNumber={data.blockNumber}
-              //     factoryId={data.factoryId}
-              //     onSubmit={() => GlobalModal.onClose()}
-              //     originalBlockVolume={0}
-              //   />
-              // );
-              GlobalModal.onOpen();
+              window.open(
+                `/${organizationId}/${factoryid}/factorymanagement/inventory/raw/processing/cutting/${data._id}/markcut`,
+                "_blank"
+              );
             }}
           >
             <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
