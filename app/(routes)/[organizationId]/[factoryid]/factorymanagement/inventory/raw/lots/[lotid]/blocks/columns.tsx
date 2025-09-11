@@ -140,16 +140,16 @@ export const columns: ColumnDef<Blocks>[] = [
               "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
             currentStatus === "cut" &&
               "bg-green-100 text-green-800 hover:bg-green-200/80",
-            currentStatus === "N/A" &&
-              "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
+            currentStatus === "cracked" &&
+              "bg-yellow-100 text-yellow-700 hover:bg-gray-200/60"
           )}
         >
           {currentStatus === "cut"
-            ? "Block Cut"
+            ? " Cut"
             : currentStatus === "split"
-            ? "Block Split"
+            ? " Split"
             : currentStatus === "dressed"
-            ? "Block Dressed"
+            ? " Dressed"
             : currentStatus}
         </Badge>
       );

@@ -3,12 +3,12 @@ import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { DataTable } from "@/components/ui/data-table";
-import { Block } from "./incuttingcolumns";
 import { useRouter, useSearchParams } from "next/navigation";
 import { indressingcolumns } from "./inDressingColumns";
 import { dressedcolumns } from "./dressedColumns";
 import { insplittingcolumns } from "./inSplittingColumns";
 import { splittedcolumns } from "./splittedColumns";
+import { Blocks } from "./incuttingcolumns";
 
 interface Props {
   inDressing: any;
@@ -194,7 +194,7 @@ function TabsDataTable({
           deleteRoute="/factory-management/inventory/deletemultipleblocks"
           searchKey="blockNumber"
           columns={Readyforpolishcolumns}
-          data={readyForPolish.map((block: Block) => ({
+          data={readyForPolish.map((block: Blocks) => ({
             ...block,
             readyForPolishCount: block.SlabsId.filter(
               (slab: any) => slab.status === "readyForPolish"

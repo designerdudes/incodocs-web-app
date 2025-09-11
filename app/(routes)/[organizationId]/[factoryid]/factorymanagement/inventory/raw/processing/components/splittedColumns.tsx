@@ -8,7 +8,40 @@ import { Slab } from "./inpolishingcolumns"
 import DressedCellAction from "./dressedCellActions"
 import SplittedCellAction from "./splittedCellActions"
 
-export const splittedcolumns: ColumnDef<Slab>[] = [
+export type Blocks = {
+  dimensions: {
+    weight: {
+      value: number;
+      units: string;
+    };
+    length: {
+      value: number;
+      units: string;
+    };
+    breadth: {
+      value: number;
+      units: string;
+    };
+    height: {
+      value: number;
+      units: string;
+    };
+  };
+
+  _id: string;
+  lotId: string;
+  blockId: string;
+  blockNumber: number;
+  lotName:string;
+  blockphoto: string;
+  materialType: string;
+  SlabsId: { _id: string; slabNumber: number }[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+export const splittedcolumns: ColumnDef<Blocks>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -32,58 +65,38 @@ export const splittedcolumns: ColumnDef<Slab>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "slabNumber",
+        accessorKey: "blockId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Slab Number
+                Block Id
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.slabNumber}
+                {row.original?.blockId}
             </div>
         ),
         filterFn: 'includesString',
-    },
-    {
-        accessorKey: "blockNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.blockNumber}
-            </div>
-        ),
-    },
 
-    {
-        accessorKey: "status",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Slab Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.status}
-            </div>
-        ),
     },
+     {
+    accessorKey: "blockNumber",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Block Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
     {
         accessorKey: "materialType",
         header: ({ column }) => (
@@ -97,8 +110,24 @@ export const splittedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockId?.lotId?.materialType}
-
+                {row.original?.materialType}
+            </div>
+        ),
+    },
+    {
+        accessorKey: "status",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Blocks Status
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.status}
             </div>
         ),
     },

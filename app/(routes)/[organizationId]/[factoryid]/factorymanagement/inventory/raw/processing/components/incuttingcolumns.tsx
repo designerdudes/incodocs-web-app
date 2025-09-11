@@ -5,32 +5,40 @@ import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import IncuttingCellAction from "./incuttingcell-actions"
 
-export type Block = {
-    _id: string
-    slabID: string
-    blockNumber: string
-    factoryId:String
-    blockLotName: string
-    numberofSlabs: string
-    isActive: boolean
-    createdAt: string
-    updatedAt: string
-    weight: string
-    height: string
-    breadth: string
-    length: string
-    volume: string
-    status: string
-    SlabsId: []
-    lotId: {
-        _id: string
-        lotName: string
-        materialType: string
-    }
-    readyForPolishCount: number
-}
+export type Blocks = {
+  dimensions: {
+    weight: {
+      value: number;
+      units: string;
+    };
+    length: {
+      value: number;
+      units: string;
+    };
+    breadth: {
+      value: number;
+      units: string;
+    };
+    height: {
+      value: number;
+      units: string;
+    };
+  };
 
-export const incuttingcolumns: ColumnDef<Block>[] = [
+  _id: string;
+  lotId: string;
+  blockId: string;
+  blockNumber: number;
+  lotName:string;
+  blockphoto: string;
+  materialType: string;
+  SlabsId: { _id: string; slabNumber: number }[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+export const incuttingcolumns: ColumnDef<Blocks>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -54,44 +62,38 @@ export const incuttingcolumns: ColumnDef<Block>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "blockNumber",
+        accessorKey: "blockId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Block Number
+                Block Id
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockNumber}
+                {row.original?.blockId}
             </div>
         ),
         filterFn: 'includesString',
 
     },
-    {
-        accessorKey: "lotName",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block&apos;s Lot Name
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.lotId?.lotName}
-            </div>
-        ),
-        filterFn: 'includesString',
-        // ensures it filters by includes method (you can define custom filter functions)
-    },
-
+     {
+    accessorKey: "blockNumber",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Block Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
     {
         accessorKey: "materialType",
         header: ({ column }) => (
@@ -105,28 +107,10 @@ export const incuttingcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.lotId?.materialType}
+                {row.original?.materialType}
             </div>
         ),
     },
-
-    // {
-    //     accessorKey: "numberofSlabs",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Total Slabs
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.numberofSlabs}
-    //         </div>
-    //     ),
-    // },
     {
         accessorKey: "status",
         header: ({ column }) => (

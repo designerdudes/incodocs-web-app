@@ -27,7 +27,7 @@ import Link from "next/link";
 import MarkSplitForm from "@/components/forms/MarkSplitForm";
 import SplitBlockForm from "@/components/forms/SplitBlockForm";
 import CuttingBlockForm from "@/components/forms/CuttingBlockForm";
-import { MarkCutAndCreateSlabsForm } from "@/components/forms/MarkCutAndCreateSlabsForm";
+import MarkCrackedForm from "@/components/forms/MarkCrackedForm";
 
 interface Props {
   data: any;
@@ -56,6 +56,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
       "sendForDressing",
       "sendForSplitting",
       "sendForCutting",
+      "cracked",
       "edit",
       "view",
       "delete",
@@ -66,6 +67,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     split: ["sendForCutting", "edit", "view", "delete"],
     inCutting: ["markCut", "view", "delete"],
     cut: ["view", "delete"],
+    cracked:["view","delete"]
   };
 
   const allowed = workflowMap[data.status] || [];
@@ -115,7 +117,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <MarkDressForm
                   parentBlockId={data._id}
                   blockNumber={data.blockNumber}
-                  factoryId={data.factoryId}
+                  // factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
                 />
@@ -136,7 +138,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               GlobalModal.children = (
                 <SplitBlockForm
                   parentBlockId={data._id}
-                  blockNumber={data.blockNumber}
+                  // blockNumber={data.blockNumber}
                   factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
@@ -207,6 +209,23 @@ export const CellAction: React.FC<Props> = ({ data }) => {
           >
             <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
             Mark Cut
+          </DropdownMenuItem>
+        )}
+         {canShow("cracked") && (
+          <DropdownMenuItem
+            onSelect={() => {
+              GlobalModal.title = `Send For Cracked - ${data.blockNumber}`;
+              GlobalModal.children = (
+                <MarkCrackedForm    
+                  blockData={data}
+                  // onSubmit={() => GlobalModal.onClose()}
+                />
+              );
+              GlobalModal.onOpen();
+            }}
+          >
+            <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+            Send For Cracked
           </DropdownMenuItem>
         )}
 

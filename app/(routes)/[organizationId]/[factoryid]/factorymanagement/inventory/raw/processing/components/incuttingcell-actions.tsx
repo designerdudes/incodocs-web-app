@@ -14,26 +14,14 @@ import { EyeIcon, MoreHorizontal, ScissorsIcon, } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from 'react-hot-toast';
 import { deleteData } from '@/axiosUtility/api';
-import { Block } from "./incuttingcolumns";
 
 interface Props {
-    data: Block;
+    data: any;
 }
 
 const IncuttingCellAction: React.FC<Props> = ({ data }) => {
     const router = useRouter();
     const GlobalModal = useGlobalModal();
-    const deleteLot = async () => {
-        try {
-            const result = await deleteData(`/factory-management/inventory/raw/delete/${data._id}`); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-            toast.success('Slab Deleted Successfully')
-            GlobalModal.onClose()
-            window.location.reload()
-        } catch (error) {
-            console.error('Error deleting data:', error);
-        }
-    }
     return (
         <div>
             {/* Dropdown Menu */}
