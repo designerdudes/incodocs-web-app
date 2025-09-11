@@ -19,9 +19,15 @@ import EditLotForm from "./editLotForm";
 
 interface Props {
   data: LotManagement;
+  openRowId: string | null;
+  setOpenRowId: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export const CellAction: React.FC<Props> = ({ data }) => {
+export const CellAction: React.FC<Props> = ({
+  data,
+  openRowId,
+  setOpenRowId,
+}) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
 
@@ -39,7 +45,12 @@ export const CellAction: React.FC<Props> = ({ data }) => {
   };
   return (
     <div>
-      <DropdownMenu>
+      <DropdownMenu
+        open={openRowId === data._id}
+        onOpenChange={(isOpen) => {
+          setOpenRowId(isOpen ? data._id : null);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="h-8 w-8 p-0">
             <span className="sr-only">Open menu</span>

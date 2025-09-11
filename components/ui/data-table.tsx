@@ -57,6 +57,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import MarkMultipleSlabsPolishForm from "./MarkMultipleSlabsPolishForm";
 import { MarkPaidForm } from "../forms/MarkPaidForm";
 import { MarkPolishingPaidForm } from "../forms/MarkPolishingPaidForm";
+import { TableMeta } from "@tanstack/react-table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -77,6 +78,13 @@ interface DataTableProps<TData, TValue> {
   bulkPolisToastMessage?: string;
   organizationId?: string;
   token?: string; // Add token prop
+}
+
+declare module "@tanstack/react-table" {
+  interface TableMeta<TData extends unknown> {
+    openRowId: string | null;
+    setOpenRowId: React.Dispatch<React.SetStateAction<string | null>>;
+  }
 }
 
 export function DataTable<TData, TValue>({
@@ -104,6 +112,7 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
+  const [openRowId, setOpenRowId] = React.useState<string | null>(null);
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const table = useReactTable({
@@ -122,6 +131,10 @@ export function DataTable<TData, TValue>({
       columnFilters,
       rowSelection,
       columnVisibility,
+    },
+    meta: {
+      openRowId,
+      setOpenRowId,
     },
   });
 

@@ -126,6 +126,15 @@ export const columns: ColumnDef<LotManagement>[] = [
     header: ({ column }) => <Button variant="ghost">Action</Button>,
 
     id: "actions",
-    cell: ({ row }) => <CellAction data={row.original} />,
+    cell: ({ row, table }) => {
+      const { openRowId, setOpenRowId } = table.options.meta!;
+      return (
+        <CellAction
+          data={row.original}
+          openRowId={openRowId}
+          setOpenRowId={setOpenRowId}
+        />
+      );
+    },
   },
 ];
