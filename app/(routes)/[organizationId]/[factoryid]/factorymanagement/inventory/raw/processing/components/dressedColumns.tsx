@@ -6,9 +6,41 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { PolishedCellAction } from "./polishedcell-action"
 import { Slab } from "./inpolishingcolumns"
 import DressedCellAction from "./dressedCellActions"
+export type Blocks = {
+  dimensions: {
+    weight: {
+      value: number;
+      units: string;
+    };
+    length: {
+      value: number;
+      units: string;
+    };
+    breadth: {
+      value: number;
+      units: string;
+    };
+    height: {
+      value: number;
+      units: string;
+    };
+  };
 
-export const dressedcolumns: ColumnDef<Slab>[] = [
-    {
+  _id: string;
+  lotId: string;
+  blockId: string;
+  blockNumber: number;
+  blockphoto: string;
+  materialType: string;
+  SlabsId: { _id: string; slabNumber: number }[];
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+};
+
+export const dressedcolumns: ColumnDef<Blocks>[] = [
+   {
         id: "select",
         header: ({ table }) => (
             <Checkbox
@@ -31,58 +63,38 @@ export const dressedcolumns: ColumnDef<Slab>[] = [
         enableHiding: false,
     },
     {
-        accessorKey: "slabNumber",
+        accessorKey: "blockId",
         header: ({ column }) => (
             <Button
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Slab Number
+                Block Id
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.slabNumber}
+                {row.original?.blockId}
             </div>
         ),
         filterFn: 'includesString',
-    },
-    {
-        accessorKey: "blockNumber",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block Number
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.blockNumber}
-            </div>
-        ),
-    },
 
-    {
-        accessorKey: "status",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Slab Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.status}
-            </div>
-        ),
     },
+     {
+    accessorKey: "blockNumber",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Block Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+    filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
     {
         accessorKey: "materialType",
         header: ({ column }) => (
@@ -96,8 +108,24 @@ export const dressedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.blockId?.lotId?.materialType}
-
+                {row.original?.materialType}
+            </div>
+        ),
+    },
+    {
+        accessorKey: "status",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Blocks Status
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original?.status}
             </div>
         ),
     },

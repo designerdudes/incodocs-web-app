@@ -12,7 +12,6 @@ import { Readyforpolishcolumns } from "./components/readyforpolishcolumns";
 import { inPolishingolumns } from "./components/inpolishingcolumns";
 import { cookies } from "next/headers";
 import { Polishedcolumns } from "./components/polishedcolumns";
-import { Block } from "./components/incuttingcolumns";
 import TabsDataTable from "./components/tabsDataTable";
 import { indressingcolumns } from "./components/inDressingColumns";
 import { dressedcolumns } from "./components/dressedColumns";

@@ -10,7 +10,6 @@ interface MarkDressFormFormProps {
   parentBlockId: string;
   blockNumber: string;
   originalBlockVolume: number;
-  factoryId: string;
   onSubmit: () => void;
 }
 
@@ -18,7 +17,6 @@ export default function MarkDressForm({
   parentBlockId,
   blockNumber,
   originalBlockVolume,
-  factoryId,
   onSubmit,
 }: MarkDressFormFormProps) {
   const [assignedMachine, setAssignedMachine] = useState<{

@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 
 interface splitBlockFormProps {
   parentBlockId: string;
-  blockNumber: string;
   originalBlockVolume: number;
   factoryId: string;
   onSubmit: () => void;
@@ -18,7 +17,6 @@ interface splitBlockFormProps {
 
 export default function SplitBlockForm({
   parentBlockId,
-  blockNumber,
   originalBlockVolume,
   factoryId,
   onSubmit,

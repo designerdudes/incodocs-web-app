@@ -16,34 +16,24 @@ import {
   MoreHorizontal,
   ScissorsIcon,
   Trash,
+  TrashIcon,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
 import { Slab } from "./inpolishingcolumns";
 import CardWithForm from "./editTrimValues";
+import CuttingBlockForm from "@/components/forms/CuttingBlockForm";
+import { Alert } from "@/components/forms/Alert";
+import EditBlockForm from "../../lots/[lotid]/blocks/editBlockForm";
 
 interface Props {
-  data: Slab;
+  data: any;
 }
 
 export const SplittedCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const deleteSlab = async () => {
-    try {
-      const result = await deleteData(
-        `/factory-management/inventory/finished/delete/${data._id}`
-      ); // Replace 'your-delete-endpoint' with the actual DELETE endpoint
-
-      toast.success("Slab Deleted Successfully");
-      GlobalModal.onClose();
-      window.location.reload();
-    } catch (error) {
-      console.error("Error deleting data:", error);
-    }
-  };
-
   return (
     <div>
       {/* Dropdown Menu */}
@@ -58,35 +48,34 @@ export const SplittedCellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-          <DropdownMenuItem
-            // onSelect={() => {
-            //     router.push(`./polishing/${data._id}/markpolish`);
-            // }}
-            onSelect={() => {
-              GlobalModal.title = `Edit Polish Values`;
-              GlobalModal.children = (
-                <CardWithForm
-                  params={{
-                    id: data._id,
-                  }}
-                />
-              );
-              GlobalModal.onOpen();
-            }}
-          >
-            <ScissorsIcon className="mr-2 h-4 w-4" />
-            Edit Polish Values
-          </DropdownMenuItem>
+         <DropdownMenuItem
+                     onSelect={() => {
+                       GlobalModal.title = `Send For Cutting - ${data.blockNumber}`;
+                       GlobalModal.children = (
+                         <CuttingBlockForm
+                           parentBlockId={data._id}
+                           blockNumber={data.blockNumber}
+                           factoryId={data.factoryId}
+                           netDimensions={data.netDimensions}
+                           onSubmit={() => GlobalModal.onClose()}
+                           originalBlockVolume={0}
+                         />
+                       );
+                       GlobalModal.onOpen();
+                     }}
+                   >
+                     <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+                     Send For Cutting
+                   </DropdownMenuItem>
 
-          {/* View Lot Details */}
-          <DropdownMenuItem
-            onSelect={() => {
-              router.push(`./processing/slabs/view/${data._id}`);
-            }}
-          >
-            <EyeIcon className="mr-2 h-4 w-4" />
-            View Slab Details
-          </DropdownMenuItem>
+           <DropdownMenuItem
+                      onSelect={() => {
+                        router.push(`./processing/blocks/view/${data._id}`);
+                      }}
+                    >
+                      <EyeIcon className="mr-2 h-4 w-4" />
+                      View Block Details
+                    </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
