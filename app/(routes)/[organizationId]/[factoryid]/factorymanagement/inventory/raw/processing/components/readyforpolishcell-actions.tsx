@@ -18,8 +18,8 @@ import {
   ScissorsIcon,
 } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
-import { Block } from "./incuttingcolumns";
 import SendForPolish from "./sendForPolsih";
+import { Blocks } from "./inDressingColumns";
 interface Slab {
   _id: string;
   slabNumber: number;
@@ -29,14 +29,14 @@ interface Slab {
   updatedAt: string;
 }
 interface Props {
-  data: Block;
+  data: Blocks;
 }
 
 export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
-  const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
-console.log(data._id)
+  //   const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
+  // console.log(data._id)
 
   return (
     <div>
@@ -61,7 +61,7 @@ console.log(data._id)
             <Plus className="mr-2 h-4 w-4" />
             Add Slabs
           </DropdownMenuItem>
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
               GlobalModal.description = `There are ${readyForPolishSlabs.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
@@ -82,7 +82,7 @@ console.log(data._id)
           >
             <ScissorsIcon className="mr-2 h-4 w-4" />
             Send For Polish
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
 
           {/* View Lot Details */}
           <DropdownMenuItem
