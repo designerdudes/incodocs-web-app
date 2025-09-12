@@ -1,59 +1,91 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Input } from "@/components/ui/input";
+
+import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { fetchData, putData } from "@/axiosUtility/api";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import toast from "react-hot-toast";
+import { fetchData, putData } from "@/axiosUtility/api";
+import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/shipment/createnew/components/FileUploadField";
+import { Input } from "../ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-interface MarkDressFormFormProps {
+
+interface MarkDressFormProps {
   parentBlockId: string;
   blockNumber: string;
   originalBlockVolume: number;
+   netDimensions: {
+    length?: { value: number; units: string };
+    breadth?: { value: number; units: string };
+    height?: { value: number; units: string };
+    weight?: { value?: number; units: string };
+  };
   onSubmit: () => void;
+}
+
+interface FormValues {
+  length: number;
+  breadth: number;
+  height: number;
+  outTime: string;
+  dressedPhoto: string | null;
 }
 
 export default function MarkDressForm({
   parentBlockId,
+  netDimensions,
   blockNumber,
   originalBlockVolume,
   onSubmit,
-}: MarkDressFormFormProps) {
+}: MarkDressFormProps) {
+  const density = 3.5;
+  const [inTime, setInTime] = useState<string>(""); 
+    const [outTime, setOutTime] = useState<string>("");
+
   const [assignedMachine, setAssignedMachine] = useState<{
     id: string;
     name: string;
   } | null>(null);
-
   const [originalBlock, setOriginalBlock] = useState<any>(null);
 
-  const [dressDimensions, setDressDimensions] = useState({
-    length: 0,
-    breadth: 0,
-    height: 0,
-    volume: 0,
-    weight: 0,
+  const form = useForm<FormValues>({
+    defaultValues: {
+      length: 0,
+      breadth: 0,
+      height: 0,
+      outTime: "",
+      dressedPhoto: null,
+    },
   });
 
-  const [inTime, setInTime] = useState<string>(""); // ⬅️ NEW
-  const [outTime, setOutTime] = useState<string>("");
+  const { handleSubmit, control, setValue, watch } = form;
+  const watchedFields = watch(["length", "breadth", "height"]);
 
-  const density = 3.5;
+  const volume = (watchedFields[0] * watchedFields[1] * watchedFields[2]) / 1_000_000;
+  const weight = volume * density;
 
-  // 📌 fetch block + assigned machine
-  useEffect(() => {
-    const fetchBlockData = async () => {
-      try {
-        const res = await fetchData(
-          `/factory-management/inventory/raw/get/${parentBlockId}`
-        );
+useEffect(() => {
+  const fetchBlockData = async () => {
+    try {
+      const res = await fetchData(
+        `/factory-management/inventory/raw/get/${parentBlockId}`
+      );
 
-        // original dimensions
-        const length = res.dimensions?.length?.value || 0;
-        const breadth = res.dimensions?.breadth?.value || 0;
-        const height = res.dimensions?.height?.value || 0;
-
-        const volume = (length * breadth * height) / 1_000_000;
-        const weight = density * volume;
+      const length = res.dimensions?.length?.value || 0;
+      const breadth = res.dimensions?.breadth?.value || 0;
+      const height = res.dimensions?.height?.value || 0;
+      const vol = (length * breadth * height) / 1_000_000;
+      const wgt = density * vol;
 
         setOriginalBlock({ length, breadth, height, volume, weight });
 
@@ -80,168 +112,178 @@ export default function MarkDressForm({
     if (parentBlockId) fetchBlockData();
   }, [parentBlockId]);
 
-  const handleDressedChange = (
-    dimension: "length" | "breadth" | "height",
-    value: number
-  ) => {
-    const updated = { ...dressDimensions, [dimension]: value };
-    const volume =
-      (updated.length * updated.breadth * updated.height) / 1_000_000;
-    const weight = density * volume;
-
-    updated.volume = volume;
-    updated.weight = weight;
-
-    setDressDimensions(updated);
-  };
-
-  const handleSubmit = async () => {
-    if (!assignedMachine) return;
+  const onFormSubmit = async (data: FormValues) => {
+    if (!assignedMachine) return ;
 
     try {
-      const body = {
-        dressDimensions,
+      await putData(`/factory-management/inventory/raw/markdressed/${parentBlockId}`, {
+        dressDimensions: { length: data.length, breadth: data.breadth, height: data.height, volume, weight },
         machineId: assignedMachine.id,
-        outTime,
-      };
-
-      await putData(
-        `/factory-management/inventory/raw/markdressed/${parentBlockId}`,
-        body
-      );
-      toast.success("Block  dressed successfully");
+        outTime: data.outTime,
+        dressedPhoto: data.dressedPhoto,
+      });
+      toast.success("Block dressed successfully");
       onSubmit();
     } catch (error: any) {
-      console.error("Error while marking dressed:", error);
+      console.error("Mark dressed failed", error);
       toast.error(error?.response?.data?.message || "Failed to mark dressed");
     }
   };
 
+  const netLength = netDimensions?.length?.value ?? 0;
+  const netBreadth = netDimensions?.breadth?.value ?? 0;
+  const netHeight = netDimensions?.height?.value ?? 0;
+  const netVolume = (netLength * netBreadth * netHeight) / 1_000_000;
+  const netWeight = netVolume * density;
+
   return (
-    <div className="space-y-6">
-      {/* Original Block (Read Only) */}
-      {originalBlock && (
-        <div className="border p-3 rounded-lg bg-gray-100">
-          <h3 className="font-semibold mb-2">Original Block</h3>
-          <div className="grid grid-cols-5 gap-5">
-            <div>
-              <Label>Length (cm)</Label>
-              <Input type="number" value={originalBlock.length} disabled />
-            </div>
-            <div>
-              <Label>Breadth (cm)</Label>
-              <Input type="number" value={originalBlock.breadth} disabled />
-            </div>
-            <div>
-              <Label>Height (cm)</Label>
-              <Input type="number" value={originalBlock.height} disabled />
-            </div>
-            <div>
-              <Label>Volume (m³)</Label>
-              <Input
-                type="number"
-                value={originalBlock.volume.toFixed(2)}
-                disabled
-              />
-            </div>
-            <div>
-              <Label>Weight (t)</Label>
-              <Input
-                type="number"
-                value={originalBlock.weight.toFixed(2)}
-                disabled
-              />
-            </div>
-          </div>
-        </div>
-      )}
+    <Form {...form}>
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+      <Accordion type="single" collapsible>
+        <AccordionItem value="item-1">
+          <AccordionTrigger>End to End Measurement</AccordionTrigger>
+          <AccordionContent>
+            {originalBlock && (
+              <div className="border p-3 rounded-lg bg-gray-100">
+                <h3 className="font-semibold mb-2">Original Block</h3>
+                <div className="grid grid-cols-5 gap-4">
+                  <div><Label>Length (cm)</Label><Input type="number" value={originalBlock.length} disabled /></div>
+                  <div><Label>Breadth (cm)</Label><Input type="number" value={originalBlock.breadth} disabled /></div>
+                  <div><Label>Height (cm)</Label><Input type="number" value={originalBlock.height} disabled /></div>
+                  <div><Label>Volume (m³)</Label><Input type="number" value={originalBlock.volume.toFixed(2)} disabled /></div>
+                  <div><Label>Weight (tons)</Label><Input type="number" value={originalBlock.weight.toFixed(2)} disabled /></div>
+                </div>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
 
-      {/* Dressed Block (Editable) */}
-      <div className="border p-3 rounded-lg bg-white">
-        <h3 className="font-semibold mb-2">Dressed Block Dimension</h3>
-        <div className="grid grid-cols-5 gap-5">
-          <div>
-            <Label>Length (cm)</Label>
-            <Input
-              type="number"
-              value={dressDimensions.length}
-              onChange={(e) =>
-                handleDressedChange("length", Number(e.target.value))
-              }
-            />
-          </div>
-          <div>
-            <Label>Breadth (cm)</Label>
-            <Input
-              type="number"
-              value={dressDimensions.breadth}
-              onChange={(e) =>
-                handleDressedChange("breadth", Number(e.target.value))
-              }
-            />
-          </div>
-          <div>
-            <Label>Height (cm)</Label>
-            <Input
-              type="number"
-              value={dressDimensions.height}
-              onChange={(e) =>
-                handleDressedChange("height", Number(e.target.value))
-              }
-            />
-          </div>
-          <div>
-            <Label>Volume (m³)</Label>
-            <Input
-              type="number"
-              value={dressDimensions.volume.toFixed(2)}
-              disabled
-            />
-          </div>
-          <div>
-            <Label>Weight (t)</Label>
-            <Input
-              type="number"
-              value={dressDimensions.weight.toFixed(2)}
-              disabled
-            />
-          </div>
-        </div>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>Net Measurement</AccordionTrigger>
+          <AccordionContent>
+            <div className="border p-3 rounded-lg bg-gray-100">
+              <h3 className="font-semibold mb-2">Net Dimensions Block</h3>
+              <div className="grid grid-cols-5 gap-4">
+                <div><Label>Length (cm)</Label><Input type="number" value={netLength} disabled /></div>
+                <div><Label>Breadth (cm)</Label><Input type="number" value={netBreadth} disabled /></div>
+                <div><Label>Height (cm)</Label><Input type="number" value={netHeight} disabled /></div>
+                <div><Label>Volume (m³)</Label><Input type="number" value={netVolume.toFixed(2)} disabled /></div>
+                <div><Label>Weight (tons)</Label><Input type="number" value={netWeight.toFixed(2)} disabled /></div>
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+       <AccordionItem value="item-3">
+  <AccordionTrigger>Assigned Machine</AccordionTrigger>
+  <AccordionContent>
+    <div className="border p-3 rounded-lg bg-gray-100 space-y-3">
+      <div>
+        <Label>Machine Used</Label>
+        <Input type="text" value={assignedMachine?.name || "Not Assigned"} disabled />
       </div>
+      <div>
+        <Label>In Time (Date & Time)</Label>
+        <Input type="datetime-local" value={inTime || ""} disabled />
+      </div>
+    </div>
+  </AccordionContent>
+</AccordionItem>
 
-      {/* Machine & In Time */}
-      {assignedMachine && (
-        <div className="border p-3 rounded-lg bg-gray-100 space-y-3">
-          <div>
-            <Label>Machine Used</Label>
-            <Input type="text" value={assignedMachine.name} disabled />
-          </div>
-          <div>
-            <Label>In Time (Date & Time)</Label>
-            <Input type="datetime-local" value={inTime} disabled />
-          </div>
-        </div>
-      )}
+
+      </Accordion>
+
+      {/* Dressed Block Fields */}
+     <div className="border p-3 rounded-lg bg-white">
+  <h3 className="font-semibold mb-2">Dressed Block Dimension</h3>
+  <div className="grid grid-cols-5 gap-5">
+    {/* Length */}
+    <div>
+      <Label>Length (cm)</Label>
+      <Input
+        type="number"
+        value={watch("length")}
+        onChange={(e) => setValue("length", Number(e.target.value))}
+      />
+    </div>
+
+    {/* Breadth */}
+    <div>
+      <Label>Breadth (cm)</Label>
+      <Input
+        type="number"
+        value={watch("breadth")}
+        onChange={(e) => setValue("breadth", Number(e.target.value))}
+      />
+    </div>
+
+    {/* Height */}
+    <div>
+      <Label>Height (cm)</Label>
+      <Input
+        type="number"
+        value={watch("height")}
+        onChange={(e) => setValue("height", Number(e.target.value))}
+      />
+    </div>
+
+    {/* Volume */}
+    <div>
+      <Label>Volume (m³)</Label>
+      <Input
+        type="number"
+        value={((watch("length") * watch("breadth") * watch("height")) / 1_000_000).toFixed(2)}
+        disabled
+      />
+    </div>
+
+    {/* Weight */}
+    <div>
+      <Label>Weight (t)</Label>
+      <Input
+        type="number"
+        value={(((watch("length") * watch("breadth") * watch("height")) / 1_000_000) * density).toFixed(2)}
+        disabled
+      />
+    </div>
+  </div>
+</div>
+
+      {/* Cracked Photo Upload */}
+      <div className="border p-3 rounded-lg bg-white">
+        <Label>Dressed Photo</Label>
+        <Controller
+          name="dressedPhoto"
+          control={control}
+          render={({ field }) => (
+            <FileUploadField
+              storageKey="dressedPhoto"
+              value={field.value}
+              onChange={field.onChange}
+              name="dressedPhoto"
+            />
+          )}
+        />
+      </div>
 
       {/* Out Time */}
       <div className="border p-3 rounded-lg bg-white space-y-3">
-        <div>
-          <Label>Out Time (Date & Time)</Label>
-          <Input
-            type="datetime-local"
-            value={outTime}
-            onChange={(e) => setOutTime(e.target.value)}
-          />
-        </div>
+        <Controller
+          name="outTime"
+          control={control}
+          render={({ field }) => (
+            <>
+              <Label>Out Time (Date & Time)</Label>
+              <Input type="datetime-local" {...field} />
+            </>
+          )}
+        />
       </div>
 
-      <Button
-        className="mt-4 w-full"
-        onClick={handleSubmit}
-        disabled={!assignedMachine}
-      >
+      <Button type="submit" className="mt-4 w-full">
         Mark Dressed
       </Button>
-    </div>
+    </form>
+    </Form>
   );
 }

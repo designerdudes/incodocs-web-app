@@ -95,6 +95,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <DressingBlockForm
                   parentBlockId={data._id}
                   blockNumber={data.blockNumber}
+                  netDimensions={data.netDimensions}
                   factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
@@ -116,6 +117,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               GlobalModal.children = (
                 <MarkDressForm
                   parentBlockId={data._id}
+                  netDimensions={data.netDimensions}
                   blockNumber={data.blockNumber}
                   // factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
@@ -139,6 +141,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
                 <SplitBlockForm
                   parentBlockId={data._id}
                   // blockNumber={data.blockNumber}
+                  netDimensions={data.netDimensions}
                   factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
@@ -160,6 +163,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
               GlobalModal.children = (
                 <MarkSplitForm
                   parentBlockId={data._id}
+                  netDimensions={data.netDimensions}
                   blockNumber={data.blockNumber}
                   factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}

@@ -93,6 +93,7 @@ export default function CuttingBlockForm({
           label: `${e.machineName} - ${e.typeCutting} - ${e.status}`,
           value: e._id,
           typeCutting: e.typeCutting,
+           disabled: e.status === "busy",
         }));
 
       setMachines(response);
