@@ -3,12 +3,12 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Edit, EyeIcon, MoreHorizontal, ScissorsIcon, TrashIcon } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
@@ -18,7 +18,7 @@ import MarkDressForm from "@/components/forms/MarkDressForm";
 import { Alert } from "@/components/forms/Alert";
 
 interface Props {
-    data: any;
+  data: any;
 }
 
 const InDressingCellAction: React.FC<Props> = ({ data }) => {
@@ -46,7 +46,9 @@ const InDressingCellAction: React.FC<Props> = ({ data }) => {
               GlobalModal.children = (
                 <MarkDressForm
                   parentBlockId={data._id}
+                  netDimensions={data.netDimensions}
                   blockNumber={data.blockNumber}
+                  // factoryId={data.factoryId}
                   onSubmit={() => GlobalModal.onClose()}
                   originalBlockVolume={0}
                 />
