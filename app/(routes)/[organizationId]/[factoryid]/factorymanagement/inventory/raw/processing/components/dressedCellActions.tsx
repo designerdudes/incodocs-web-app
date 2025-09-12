@@ -50,63 +50,64 @@ export const DressedCellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuSeparator />
 
           <DropdownMenuItem
-                      onSelect={() => {
-                        GlobalModal.title = `Send For Splitting - ${data.blockNumber}`;
-                        GlobalModal.children = (
-                          <SplitBlockForm
-                            parentBlockId={data._id}
-                            // blockNumber={data.blockNumber}
-                            factoryId={data.factoryId}
-                            onSubmit={() => GlobalModal.onClose()}
-                            originalBlockVolume={0}
-                          />
-                        );
-                        GlobalModal.onOpen();
-                      }}
-                    >
-                      <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
-                      Send For Splitting
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                                onSelect={() => {
-                                  GlobalModal.title = `Send For Cutting - ${data.blockNumber}`;
-                                  GlobalModal.children = (
-                                    <CuttingBlockForm
-                                      parentBlockId={data._id}
-                                      blockNumber={data.blockNumber}
-                                      factoryId={data.factoryId}
-                                      netDimensions={data.netDimensions}
-                                      onSubmit={() => GlobalModal.onClose()}
-                                      originalBlockVolume={0}
-                                    />
-                                  );
-                                  GlobalModal.onOpen();
-                                }}
-                              >
-                                <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
-                                Send For Cutting
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                          onSelect={() => {
-                                            GlobalModal.title = "Edit Block Details";
-                                            GlobalModal.children = (
-                                              <EditBlockForm params={{ _id: data._id }} />
-                                            );
-                                            GlobalModal.onOpen();
-                                          }}
-                                        >
-                                          <Edit className="mr-2 h-4 w-4" />
-                                          Edit Block Details
-                                        </DropdownMenuItem>
+            onSelect={() => {
+              GlobalModal.title = `Send For Splitting - ${data.blockNumber}`;
+              GlobalModal.children = (
+                <SplitBlockForm
+                  parentBlockId={data._id}
+                  // blockNumber={data.blockNumber}
+                  netDimensions={data.netDimensions}
+                  factoryId={data.factoryId}
+                  onSubmit={() => GlobalModal.onClose()}
+                  originalBlockVolume={0}
+                />
+              );
+              GlobalModal.onOpen();
+            }}
+          >
+            <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+            Send For Splitting
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              GlobalModal.title = `Send For Cutting - ${data.blockNumber}`;
+              GlobalModal.children = (
+                <CuttingBlockForm
+                  parentBlockId={data._id}
+                  blockNumber={data.blockNumber}
+                  factoryId={data.factoryId}
+                  netDimensions={data.netDimensions}
+                  onSubmit={() => GlobalModal.onClose()}
+                  originalBlockVolume={0}
+                />
+              );
+              GlobalModal.onOpen();
+            }}
+          >
+            <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
+            Send For Cutting
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onSelect={() => {
+              GlobalModal.title = "Edit Block Details";
+              GlobalModal.children = (
+                <EditBlockForm params={{ _id: data._id }} />
+              );
+              GlobalModal.onOpen();
+            }}
+          >
+            <Edit className="mr-2 h-4 w-4" />
+            Edit Block Details
+          </DropdownMenuItem>
 
           <DropdownMenuItem
-                      onSelect={() => {
-                        router.push(`./processing/blocks/view/${data._id}`);
-                      }}
-                    >
-                      <EyeIcon className="mr-2 h-4 w-4" />
-                      View Block Details
-                    </DropdownMenuItem>
+            onSelect={() => {
+              router.push(`./processing/blocks/view/${data._id}`);
+            }}
+          >
+            <EyeIcon className="mr-2 h-4 w-4" />
+            View Block Details
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
