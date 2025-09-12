@@ -4,9 +4,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
-import { Block } from "./incuttingcolumns"
+import { Blocks } from "./incuttingcolumns"
 
-export const Readyforpolishcolumns: ColumnDef<Block>[] = [
+export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -60,7 +60,7 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.lotId?.lotName}
+                {row.original.lotId}
             </div>
         ),
         filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
@@ -78,27 +78,27 @@ export const Readyforpolishcolumns: ColumnDef<Block>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.lotId?.materialType}
+                {row.original?.lotId}
             </div>
         ),
     },
-    {
-        accessorKey: "readyForPolishCount",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Ready for Polish Slabs
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original.readyForPolishCount}
-            </div>
-        ),
-    },
+    // {
+    //     accessorKey: "readyForPolishCount",
+    //     header: ({ column }) => (
+    //         <Button
+    //             variant="ghost"
+    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+    //         >
+    //             Ready for Polish Slabs
+    //             <ArrowUpDown className="ml-2 h-4 w-4" />
+    //         </Button>
+    //     ),
+    //     cell: ({ row }) => (
+    //         <div className="capitalize">
+    //             {row.original.readyForPolishCount}
+    //         </div>
+    //     ),
+    // },
     {
         accessorKey: "status",
         header: ({ column }) => (
