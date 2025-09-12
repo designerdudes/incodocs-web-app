@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 interface Entity {
   _id: string;
+  disabled?: boolean; // <-- added support for disabled
   [key: string]: any;
 }
 
@@ -34,6 +35,7 @@ interface EntityComboboxProps {
   multiple?: boolean;
   disabled?: boolean;
   className?: string;
+  renderOption?:string;
 }
 
 export function EntityCombobox({
@@ -119,10 +121,24 @@ export function EntityCombobox({
                   <CommandItem
                     key={entity[valueProperty]}
                     value={getDisplayValue(entity)}
-                    onSelect={() => handleSelect(entity[valueProperty])}
+                    disabled={entity.disabled} // ✅ respects disabled
+                    onSelect={() => {
+                      if (!entity.disabled) {
+                        handleSelect(entity[valueProperty]);
+                      }
+                    }}
                     title={getDisplayValue(entity)}
+                    className={cn(
+                      entity.disabled &&
+                        "opacity-50 cursor-not-allowed pointer-events-none"
+                    )}
                   >
-                    {getDisplayValue(entity)}
+                    <span>{getDisplayValue(entity)}</span>
+                    {entity.disabled && (
+                      <span className="ml-2 text-xs text-red-500">
+                        (Busy)
+                      </span>
+                    )}
                     <Check
                       className={cn(
                         "ml-auto h-4 w-4",

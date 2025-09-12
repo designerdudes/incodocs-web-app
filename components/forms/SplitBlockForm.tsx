@@ -7,17 +7,30 @@ import { fetchData, postData, putData } from "@/axiosUtility/api";
 import EntityCombobox from "../ui/EntityCombobox";
 import { useParams } from "next/navigation";
 import toast from "react-hot-toast";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface splitBlockFormProps {
   parentBlockId: string;
   originalBlockVolume: number;
   factoryId: string;
+   netDimensions: {
+    length?: { value: number; units: string };
+    breadth?: { value: number; units: string };
+    height?: { value: number; units: string };
+    weight?: { value?: number; units: string };
+  };
   onSubmit: () => void;
 }
 
 export default function SplitBlockForm({
   parentBlockId,
   originalBlockVolume,
+  netDimensions,
   factoryId,
   onSubmit,
 }: splitBlockFormProps) {
@@ -34,16 +47,7 @@ export default function SplitBlockForm({
     weight: number;
   } | null>(null);
 
-  // dressed block (editable)
-  //   const [dressedBlock, setDressedBlock] = useState<{
-  //     length: number;
-  //     breadth: number;
-  //     height: number;
-  //     volume: number;
-  //     weight: number;
-  //   }>({ length: 0, breadth: 0, height: 0, volume: 0, weight: 0 });
-
-  // ✅ New states
+ 
   const [inTime, setInTime] = useState<string>(""); // date+time in ISO string
   const [sendForSplitting, setSendForSplitting] = useState<boolean>(false);
 
@@ -80,9 +84,10 @@ export default function SplitBlockForm({
       const response = res
         .filter((e: any) => allowedTypes.includes(e.typeCutting))
         .map((e: any) => ({
-          label: `${e.machineName} - ${e.typeCutting}`,
+          label: `${e.machineName} - ${e.typeCutting} - ${e.status}`,
           value: e._id,
           typeCutting: e.typeCutting,
+          disabled: e.status === "busy",
         }));
 
       setMachines(response);
@@ -90,31 +95,13 @@ export default function SplitBlockForm({
     fetchmachine();
   }, []);
 
-  //   const handleDressedChange = (
-  //     dimension: "length" | "breadth" | "height",
-  //     value: number
-  //   ) => {
-  //     const updated = { ...dressedBlock, [dimension]: value };
-
-  //     const volume = (updated.length * updated.breadth * updated.height) / 1_000_000;
-  //     const weight = density * volume;
-
-  //     updated.volume = volume;
-  //     updated.weight = weight;
-
-  //     setDressedBlock(updated);
-  //   };
-
-  // 📌 Submit
   const handleSubmit = async () => {
-    // if (!dressedBlock || !selectedMachineId) return;
-
+   
     try {
       const body = {
-        // dressedBlock,
         machineId: selectedMachineId,
-        sendForSplitting, // ✅ new checkbox
-        inTime, // ✅ new datetime input
+        sendForSplitting, 
+        inTime, 
       };
 
       await putData(
@@ -128,45 +115,100 @@ export default function SplitBlockForm({
       toast.error(error?.response?.data?.msg || "Failed to Splitting ");
     }
   };
+  
+  const netLength = netDimensions?.length?.value ?? 0;
+  const netBreadth = netDimensions?.breadth?.value ?? 0;
+  const netHeight = netDimensions?.height?.value ?? 0;
+  const netVolume = (netLength * netBreadth * netHeight) / 1_000_000; // m³
+  const netWeight = netVolume * density; // tons
 
   return (
     <div className="space-y-6">
-      {/* Original Block (Read Only) */}
-      {originalBlock && (
-        <div className="border p-3 rounded-lg bg-gray-100">
-          <h3 className="font-semibold mb-2">Original Block</h3>
-          <div className="grid grid-cols-5 gap-4">
-            <div>
-              <Label>Length (cm)</Label>
-              <Input type="number" value={originalBlock.length} disabled />
+      <Accordion type="single" collapsible>
+      
+      <AccordionItem value="item-1">
+          <AccordionTrigger>End to End Measurement</AccordionTrigger>
+          <AccordionContent>
+            {originalBlock && (
+              <div className="border p-3 rounded-lg bg-gray-100">
+                <h3 className="font-semibold mb-2">Original Block</h3>
+                <div className="grid grid-cols-5 gap-4">
+                  <div>
+                    <Label>Length (cm)</Label>
+                    <Input
+                      type="number"
+                      value={originalBlock.length}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label>Breadth (cm)</Label>
+                    <Input
+                      type="number"
+                      value={originalBlock.breadth}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label>Height (cm)</Label>
+                    <Input
+                      type="number"
+                      value={originalBlock.height}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label>Volume (m³)</Label>
+                    <Input
+                      type="number"
+                      value={originalBlock.volume.toFixed(2)}
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <Label>Weight (tons)</Label>
+                    <Input
+                      type="number"
+                      value={originalBlock.weight.toFixed(2)}
+                      disabled
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="item-2">
+          <AccordionTrigger>Net Measurement</AccordionTrigger>
+          <AccordionContent>
+            <div className="border p-3 rounded-lg bg-gray-100">
+              <h3 className="font-semibold mb-2">Net Dimensions Block</h3>
+              <div className="grid grid-cols-5 gap-4">
+                <div>
+                  <Label>Length (cm)</Label>
+                  <Input type="number" value={netLength} disabled />
+                </div>
+                <div>
+                  <Label>Breadth (cm)</Label>
+                  <Input type="number" value={netBreadth} disabled />
+                </div>
+                <div>
+                  <Label>Height (cm)</Label>
+                  <Input type="number" value={netHeight} disabled />
+                </div>
+                <div>
+                  <Label>Volume (m³)</Label>
+                  <Input type="number" value={netVolume.toFixed(2)} disabled />
+                </div>
+                <div>
+                  <Label>Weight (tons)</Label>
+                  <Input type="number" value={netWeight.toFixed(2)} disabled />
+                </div>
+              </div>
             </div>
-            <div>
-              <Label>Breadth (cm)</Label>
-              <Input type="number" value={originalBlock.breadth} disabled />
-            </div>
-            <div>
-              <Label>Height (cm)</Label>
-              <Input type="number" value={originalBlock.height} disabled />
-            </div>
-            <div>
-              <Label>Volume (m³)</Label>
-              <Input
-                type="number"
-                value={originalBlock.volume.toFixed(2)}
-                disabled
-              />
-            </div>
-            <div>
-              <Label>Weight (kg)</Label>
-              <Input
-                type="number"
-                value={originalBlock.weight.toFixed(2)}
-                disabled
-              />
-            </div>
-          </div>
-        </div>
-      )}
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Machine Selector */}
       <EntityCombobox
@@ -211,7 +253,7 @@ export default function SplitBlockForm({
       <Button
         className="mt-4 w-full"
         onClick={handleSubmit}
-        disabled={!selectedMachineId}
+        disabled={!selectedMachineId || !sendForSplitting}
       >
         Split Block
       </Button>
