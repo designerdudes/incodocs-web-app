@@ -95,14 +95,14 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           </DropdownMenuItem>
 
           {/* Edit Lot Details */}
-          <DropdownMenuItem
+          {/* <DropdownMenuItem
             onSelect={() => {
               router.push(`./processing/edit/${data._id}`);
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Block Details
-          </DropdownMenuItem>
+          </DropdownMenuItem> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

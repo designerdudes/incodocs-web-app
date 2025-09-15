@@ -23,7 +23,7 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 const formSchema = z.object({
   lotName: z
     .string()
-    .min(3, { message: "Lot name must be at least 3 characters long" })
+    .min(2, { message: "Lot name must be at least 2 characters long" })
     .optional(),
   lotId: z.string().optional(),
   materialType: z

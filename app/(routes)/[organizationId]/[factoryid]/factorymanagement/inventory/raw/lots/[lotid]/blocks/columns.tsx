@@ -87,7 +87,7 @@ export const columns: ColumnDef<Blocks>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Block Name
+        Block Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),

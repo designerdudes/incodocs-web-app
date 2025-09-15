@@ -35,10 +35,7 @@ import { FileUploadField } from "@/app/(routes)/[organizationId]/documentation/s
 // Define the Zod schema
 const formSchema = z.object({
   blockNumber: z.number().optional(),
-  materialType: z
-    .string()
-    .min(3, { message: "Material type must be at least 3 characters long" })
-    .optional(),
+  materialType: z.string().optional(),
   markerCost: z
     .number()
     .min(1, { message: "Marker cost must be greater than or equal to zero" })
@@ -80,20 +77,20 @@ const formSchema = z.object({
           length: z.object({
             value: z
               .number({ required_error: "Length is required" })
-              .min(0.1, { message: "Length must be greater than zero" }),
-            units: z.string().default("inch"),
+              .min(0, { message: "Length must be greater than zero" }),
+            units: z.string().default("cm"),
           }),
           breadth: z.object({
             value: z
               .number({ required_error: "Breadth is required" })
-              .min(0.1, { message: "Breadth must be greater than zero" }),
-            units: z.string().default("inch"),
+              .min(0, { message: "Breadth must be greater than zero" }),
+            units: z.string().default("cm"),
           }),
           height: z.object({
             value: z
               .number({ required_error: "Height is required" })
-              .min(0.1, { message: "Height must be greater than zero" }),
-            units: z.string().default("inch"),
+              .min(0, { message: "Height must be greater than zero" }),
+            units: z.string().default("cm"),
           }),
         }),
       })
@@ -184,9 +181,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
           blockphoto: "",
           vehicleNumber: "",
           dimensions: {
-            length: { value: 0, units: "inch" },
-            breadth: { value: 0, units: "inch" },
-            height: { value: 0, units: "inch" },
+            length: { value: 0, units: "cm" },
+            breadth: { value: 0, units: "cm" },
+            height: { value: 0, units: "cm" },
           },
         },
       ],
@@ -220,9 +217,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
               blockphoto: "",
               vehicleNumber: "",
               dimensions: {
-                length: { value: 0, units: "inch" },
-                breadth: { value: 0, units: "inch" },
-                height: { value: 0, units: "inch" },
+                length: { value: 0, units: "cm" },
+                breadth: { value: 0, units: "cm" },
+                height: { value: 0, units: "cm" },
               },
             }
       );
@@ -279,9 +276,9 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
         blockphoto: block.blockphoto || "",
         vehicleNumber: block.vehicleNumber || "",
         dimensions: {
-          length: { value: block.dimensions.length.value, units: "inch" },
-          breadth: { value: block.dimensions.breadth.value, units: "inch" },
-          height: { value: block.dimensions.height.value, units: "inch" },
+          length: { value: block.dimensions.length.value, units: "cm" },
+          breadth: { value: block.dimensions.breadth.value, units: "cm" },
+          height: { value: block.dimensions.height.value, units: "cm" },
         },
       })),
     };
@@ -317,7 +314,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
       const { length, breadth, height } = block.dimensions;
       const volume = (length.value * breadth.value * height.value) / 1000000; // m³
       const density = 3.5; // Example density in tons/m³
-      //   length.value * breadth.value * height.value * (length.units === "inch" ? 0.000016387064 : 0.000001);
+      //   length.value * breadth.value * height.value * (length.units === "cm" ? 0.000016387064 : 0.000001);
       // const density = 3.5;
       const weight = volume * density;
       return total + weight;
@@ -831,8 +828,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
-                              min="0"
+                              type="number"
+                              min={0}
                               step="1"
                               value={block.dimensions.length.value}
                               placeholder="Enter length"
@@ -843,7 +840,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.length.value =
-                                  parseFloat(e.target.value) || 0.1;
+                                  parseFloat(e.target.value) || undefined;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
@@ -864,8 +861,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
-                              min="0"
+                              type="number"
+                              min={0}
                               step="1"
                               value={block.dimensions.breadth.value}
                               placeholder="Enter breadth"
@@ -876,7 +873,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.breadth.value =
-                                  parseFloat(e.target.value) || 0.1;
+                                  parseFloat(e.target.value) || undefined;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
@@ -897,8 +894,8 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                         <FormItem>
                           <FormControl>
                             <Input
-                              // type="number"
-                              min="0"
+                              type="number"
+                              min={0}
                               step="1"
                               value={block.dimensions.height.value}
                               placeholder="Enter height"
@@ -909,7 +906,7 @@ export function AddBlockForm({ LotData }: AddBlockFormProps) {
                               onChange={(e) => {
                                 const updatedBlocks = [...blocks];
                                 updatedBlocks[index].dimensions.height.value =
-                                  parseFloat(e.target.value) || 0;
+                                  parseFloat(e.target.value) || undefined;
                                 setBlocks(updatedBlocks);
                                 setValue("blocks", updatedBlocks);
                                 saveProgressSilently(getValues());
