@@ -229,7 +229,7 @@ export const CellAction: React.FC<Props> = ({ data }) => {
             }}
           >
             <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
-            Send For Cracked
+            Mark Cracked
           </DropdownMenuItem>
         )}
 

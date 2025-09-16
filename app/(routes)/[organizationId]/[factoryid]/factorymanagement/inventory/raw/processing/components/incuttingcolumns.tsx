@@ -26,10 +26,11 @@ export type Blocks = {
   };
 
   _id: string;
-  lotId: string;
   blockId: string;
   blockNumber: number;
-  lotName:string;
+   lotId: {
+       lotName:string;
+   };
   blockphoto: string;
   materialType: string;
   SlabsId: { _id: string; slabNumber: number }[];
@@ -87,12 +88,26 @@ export const incuttingcolumns: ColumnDef<Blocks>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Block Name
+        Block Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div>{row.original.blockNumber}</div>,
     filterFn: "includesString", // Use the built-in filtering logic for partial matches
+  },
+  {
+    accessorKey: "lotName",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Lot Name
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => <div>{row.original.lotId?.lotName}</div>,
+    filterFn: "includesString", 
   },
     {
         accessorKey: "materialType",
