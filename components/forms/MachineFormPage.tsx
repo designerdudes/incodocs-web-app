@@ -192,8 +192,8 @@ export default function MachineFormPage({ params }: MachineFormProps) {
                     <SelectValue placeholder="Select Ownership Type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="owned">Owned</SelectItem>
-                    <SelectItem value="rented">Rented</SelectItem>
+                    <SelectItem value="Own">Owned</SelectItem>
+                    <SelectItem value="Rented">Rented</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
