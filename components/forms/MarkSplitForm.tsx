@@ -55,7 +55,8 @@ export default function MarkSplitForm({
       volume: number;
       weight: number;
       isSplittable: boolean;
-      photo?: string; // ✅ New photo field
+      photo?: string;
+      splitDirection: "length" | "breadth" | "height" | "";
     }[]
   >([
     {
@@ -66,12 +67,13 @@ export default function MarkSplitForm({
       weight: 0,
       isSplittable: false,
       photo: "",
+      splitDirection: "",
     },
   ]);
 
   const [inTime, setInTime] = useState<string>("");
   const [outTime, setOutTime] = useState<string>("");
-  const { control, setValue, watch } = form;
+  const { control } = form;
   const [totalVolume, setTotalVolume] = useState(0);
   const [totalWeight, setTotalWeight] = useState(0);
   const [volumeError, setVolumeError] = useState<string | null>(null);
@@ -162,8 +164,26 @@ export default function MarkSplitForm({
         if (field === "photo") {
           return { ...block, photo: value as string };
         }
+        if (field === "splitDirection") {
+          return { ...block, splitDirection: value as "length" | "breadth" | "height" | "" };
+        }
 
-        const updated = { ...block, [field]: value as number };
+        // Clamp values to not exceed parent net dimensions
+        let newValue = value as number;
+        if (field === "length" && newValue > (netDimensions.length?.value ?? Infinity)) {
+          newValue = netDimensions.length?.value ?? newValue;
+          toast.error("Length cannot exceed parent block length");
+        }
+        if (field === "breadth" && newValue > (netDimensions.breadth?.value ?? Infinity)) {
+          newValue = netDimensions.breadth?.value ?? newValue;
+          toast.error("Breadth cannot exceed parent block breadth");
+        }
+        if (field === "height" && newValue > (netDimensions.height?.value ?? Infinity)) {
+          newValue = netDimensions.height?.value ?? newValue;
+          toast.error("Height cannot exceed parent block height");
+        }
+
+        const updated = { ...block, [field]: newValue as number };
         const volume =
           (updated.length * updated.breadth * updated.height) / 1_000_000;
         const weight = density * volume;
@@ -184,6 +204,7 @@ export default function MarkSplitForm({
         weight: 0,
         isSplittable: false,
         photo: "",
+        splitDirection: "",
       },
     ]);
 
@@ -204,7 +225,8 @@ export default function MarkSplitForm({
             weight: { value: b.weight, units: "tons" },
           },
           isSplittable: b.isSplittable,
-          photo: b.photo, // ✅ photo included
+          photo: b.photo,
+          splitDirection: b.splitDirection, // ✅ send to backend
         })),
         machineId: assignedMachine.id,
         outTime,
@@ -238,6 +260,7 @@ export default function MarkSplitForm({
         }}
         className="space-y-6"
       >
+        {/* Accordions for Original/Net/Machine */}
         <Accordion type="single" collapsible>
           <AccordionItem value="item-1">
             <AccordionTrigger>End to End Measurement</AccordionTrigger>
@@ -356,16 +379,49 @@ export default function MarkSplitForm({
         <div className="space-y-4">
           <h3 className="font-semibold">Split blocks</h3>
           {blocks.map((block, index) => (
-            <div
-              key={index}
-              className="border p-3 rounded-lg space-y-3 relative"
-            >
+            <div key={index} className="border p-3 rounded-lg space-y-3 relative">
+              {/* Splitting Direction */}
+              <div>
+                <Label>Split From</Label>
+                <div className="flex gap-4 mt-1">
+                  {["length", "breadth", "height"].map((dir) => (
+                    <label key={dir} className="flex items-center gap-1">
+                      <input
+                        type="radio"
+                        name={`splitDirection-${index}`}
+                        checked={block.splitDirection === dir}
+                        onChange={() => {
+                          handleBlockChange(index, "splitDirection", dir);
+
+                          // Auto-fill logic
+                          if (dir === "length") {
+                            handleBlockChange(index, "breadth", netBreadth);
+                            handleBlockChange(index, "height", netHeight);
+                          }
+                          if (dir === "breadth") {
+                            handleBlockChange(index, "length", netLength);
+                            handleBlockChange(index, "height", netHeight);
+                          }
+                          if (dir === "height") {
+                            handleBlockChange(index, "length", netLength);
+                            handleBlockChange(index, "breadth", netBreadth);
+                          }
+                        }}
+                      />
+                      {dir.charAt(0).toUpperCase() + dir.slice(1)}
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Dimensions */}
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label>Length (cm)</Label>
                   <Input
                     type="number"
                     value={block.length}
+                    disabled={block.splitDirection !== "length"}
                     onChange={(e) =>
                       handleBlockChange(index, "length", +e.target.value)
                     }
@@ -376,6 +432,7 @@ export default function MarkSplitForm({
                   <Input
                     type="number"
                     value={block.breadth}
+                    disabled={block.splitDirection !== "breadth"}
                     onChange={(e) =>
                       handleBlockChange(index, "breadth", +e.target.value)
                     }
@@ -386,6 +443,7 @@ export default function MarkSplitForm({
                   <Input
                     type="number"
                     value={block.height}
+                    disabled={block.splitDirection !== "height"}
                     onChange={(e) =>
                       handleBlockChange(index, "height", +e.target.value)
                     }
@@ -430,7 +488,7 @@ export default function MarkSplitForm({
                 {blocks.length > 1 && (
                   <Trash
                     type="button"
-                    className="mr-2 h-4 w-4 cursor-pointer  hover:fill-red-500 transition-colors duration-200"
+                    className="mr-2 h-4 w-4 cursor-pointer hover:fill-red-500 transition-colors duration-200"
                     onClick={() => removeSubBlock(index)}
                   />
                 )}
