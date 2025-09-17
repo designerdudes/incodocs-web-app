@@ -85,11 +85,11 @@ export default async function ProductPage({ params }: Props) {
     ).then((response) => response.json());
     const ProductsData = res;
 
-    console.log("gggg");
+    // console.log("gggg");
     
-    console.log(
-        ProductsData
-    );
+    // console.log(
+    //     ProductsData
+    // );
     
 
     return (
