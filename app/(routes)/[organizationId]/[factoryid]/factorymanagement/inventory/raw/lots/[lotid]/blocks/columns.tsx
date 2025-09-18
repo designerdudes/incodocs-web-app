@@ -186,10 +186,10 @@ export const columns: ColumnDef<Blocks>[] = [
             End-to-End Dimensions
           </h4>
           <ul className="list-disc list-inside text-gray-700">
-            <li>📏 Length: {formatValue(block.dimensions?.length)}</li>
-            <li>📐 Breadth: {formatValue(block.dimensions?.breadth)}</li>
-            <li>📏 Height: {formatValue(block.dimensions?.height)}</li>
-            <li>⚖️ Weight: {formatValue(block.dimensions?.weight, "t")}</li>
+            <li> Length: {formatValue(block.dimensions?.length)}</li>
+            <li> Breadth: {formatValue(block.dimensions?.breadth)}</li>
+            <li> Height: {formatValue(block.dimensions?.height)}</li>
+            <li> Weight: {formatValue(block.dimensions?.weight, "t")}</li>
           </ul>
         </div>
 
@@ -199,48 +199,48 @@ export const columns: ColumnDef<Blocks>[] = [
             Net Dimensions
           </h4>
           <ul className="list-disc list-inside text-gray-700">
-            <li>📏 Length: {formatValue(block.netDimensions?.length)}</li>
-            <li>📐 Breadth: {formatValue(block.netDimensions?.breadth)}</li>
-            <li>📏 Height: {formatValue(block.netDimensions?.height)}</li>
-            <li>⚖️ Weight: {formatValue(block.netDimensions?.weight, "t")}</li>
+            <li> Length: {formatValue(block.netDimensions?.length)}</li>
+            <li> Breadth: {formatValue(block.netDimensions?.breadth)}</li>
+            <li> Height: {formatValue(block.netDimensions?.height)}</li>
+            <li> Weight: {formatValue(block.netDimensions?.weight, "t")}</li>
           </ul>
         </div>
 
         {/* ✅ Dress Dimensions (only if available) */}
-        {block.dressDimensions && (
+        { block.status === "dressed" && block.dressDimensions && (
           <div>
             <h4 className="font-semibold text-gray-800 mb-1">
               Dress Dimensions
             </h4>
             <ul className="list-disc list-inside text-gray-700">
-              <li>📏 Length: {formatValue(block.dressDimensions.length)}</li>
-              <li>📐 Breadth: {formatValue(block.dressDimensions.breadth)}</li>
-              <li>📏 Height: {formatValue(block.dressDimensions.height)}</li>
-              <li>⚖️ Weight: {formatValue(block.dressDimensions.weight, "t")}</li>
+              <li> Length: {formatValue(block.dressDimensions.length)}</li>
+              <li> Breadth: {formatValue(block.dressDimensions.breadth)}</li>
+              <li> Height: {formatValue(block.dressDimensions.height)}</li>
+              <li> Weight: {formatValue(block.dressDimensions.weight, "t")}</li>
               {/* {block.dressDimensions.volume && (
-                <li>📦 Volume: {block.dressDimensions.volume} m³</li>
+                <li> Volume: {block.dressDimensions.volume} m³</li>
               )} */}
             </ul>
           </div>
         )}
 
         {/* ✅ Split Dimensions (only if available) */}
-        {block.splitDimensions && (
+        {/* { block.status === "split" && block.splitDimensions && (
           <div>
             <h4 className="font-semibold text-gray-800 mb-1">
               Split Dimensions
             </h4>
             <ul className="list-disc list-inside text-gray-700">
-              <li>📏 Length: {formatValue(block.splitDimensions.length)}</li>
-              <li>📐 Breadth: {formatValue(block.splitDimensions.breadth)}</li>
-              <li>📏 Height: {formatValue(block.splitDimensions.height)}</li>
-              <li>⚖️ Weight: {formatValue(block.splitDimensions.weight, "t")}</li>
-              {/* {block.splitDimensions.volume && (
-                <li>📦 Volume: {block.splitDimensions.volume} m³</li>
-              )} */}
+              <li> Length: {formatValue(block.splitDimensions.length)}</li>
+              <li> Breadth: {formatValue(block.splitDimensions.breadth)}</li>
+              <li> Height: {formatValue(block.splitDimensions.height)}</li>
+              <li> Weight: {formatValue(block.splitDimensions.weight, "t")}</li>
+              {block.splitDimensions.volume && (
+                <li> Volume: {block.splitDimensions.volume} m³</li>
+              )}
             </ul>
           </div>
-        )}
+        )} */}
       </div>
     );
 
