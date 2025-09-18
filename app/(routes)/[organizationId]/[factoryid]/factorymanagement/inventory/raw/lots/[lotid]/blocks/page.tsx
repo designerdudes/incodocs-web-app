@@ -50,7 +50,7 @@ export default async function BlocksPage({ params }: Props) {
   ).then((response) => response.json());
 
   BlocksData = res;
-  console.log("dddddddddd",BlocksData)
+  // console.log("dddddddddd",BlocksData)
 
   let LotData = null;
   const resp = await fetch(

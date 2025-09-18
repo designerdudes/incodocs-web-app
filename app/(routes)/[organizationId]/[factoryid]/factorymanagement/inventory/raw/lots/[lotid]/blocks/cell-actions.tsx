@@ -67,7 +67,8 @@ export const CellAction: React.FC<Props> = ({ data }) => {
     split: ["sendForCutting", "edit", "view", "delete"],
     inCutting: ["markCut", "view", "delete"],
     cut: ["view", "delete"],
-    cracked:["view","delete"]
+    cracked:["view","delete"],
+    readyForCutting : ["sendForCutting", "edit", "view", "delete"]
   };
 
   const allowed = workflowMap[data.status] || [];
