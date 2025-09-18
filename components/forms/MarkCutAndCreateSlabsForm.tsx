@@ -67,9 +67,9 @@ const formSchema = z.object({
   slabs: z
     .array(
       z.object({
-        lengthImage: z.string().url("Must be a valid URL").optional(),
-        heightImage: z.string().url("Must be a valid URL").optional(),
-        slabphoto: z.string().url("Must be a valid URL").optional(),
+        lengthImage: z.string().optional(),
+        heightImage: z.string().optional(),
+        slabphoto: z.string().optional(),
         productName: z.string().min(1, "Product name required"),
         dimensions: z.object({
           length: z.object({

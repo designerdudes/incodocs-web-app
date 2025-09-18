@@ -8,6 +8,7 @@ import { RegisterForm } from "@/components/forms/RegisterForm";
 import { TermsOfUse } from "./components/TermsOfUse";
 import { PrivacyPolicy } from "./components/PrivacyPolicy";
 import { TextHoverEffect } from "@/components/ui/text-hover-effect";
+import LogoComponent from "@/components/logo";
 
 export const metadata: Metadata = {
   title: "Create an Account | StoneDocs",
@@ -31,12 +32,17 @@ export default function AuthenticationPage() {
           <div className="absolute inset-0 bg-primary" />
           <div className="relative z-20 flex items-center text-lg font-bold">
 
-            <Image
+            {/* <Image
               src={"/assets/logos/SymbolWhite.svg"}
               width={35}
               height={35}
               alt="Logo"
               className="mr-2 dark:invert"
+            /> */}
+            <LogoComponent
+              width={60}
+              height={40}
+              className="w-8 h-8 object-contain mr-3"
             />
             {BrandName}
           </div>

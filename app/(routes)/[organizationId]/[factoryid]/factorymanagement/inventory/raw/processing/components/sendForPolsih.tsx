@@ -24,10 +24,10 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
     useEffect(() => {
         const fetchSlabData = async () => {
             try {
-                const GetData = await fetchData(`/factory-management/inventory/raw/get/${blockId}`);
+                const GetData = await fetchData(`/factory-management/inventory/slabsbyblock/get/${blockId}`);
                 setBlockData(GetData);
+                // console.log("All Slabs:sssssss", GetData);
                 if (Array.isArray(GetData?.SlabsId)) {
-                    // console.log("All Slabs:", GetData.SlabsId);
 
                     const filteredSlabs = GetData.SlabsId.filter(
                         (slab: { status?: string }) => slab.status === "readyForPolish"
@@ -108,44 +108,48 @@ const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => 
 
     return (
         <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="space-y-2">
-                <Label>Total Slabs in Block</Label>
-                <p className="text-gray-600">{BlockData?.SlabsId.length || 0}</p>
-            </div>
+  <div className="space-y-2">
+    <Label>Total Slabs in Block</Label>
+    <p className="text-gray-600">{BlockData?.length || 0}</p>
+  </div>
 
             {/* Display slabs with checkboxes */}
             <div className="space-y-2">
                 <Label>Select Slabs to Send for Polishing</Label>
 
-                {/* Select All checkbox - Positioned just below the label */}
-                {readyForPolishSlabs.length > 0 && (
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="checkbox"
-                            id="select-all"
-                            checked={selectAll}
-                            onChange={() => setSelectAll(!selectAll)} // Toggle selectAll state
-                        />
-                        <label htmlFor="select-all" className="font-medium">Select All Slabs</label>
-                    </div>
-                )}
+    {/* Select All checkbox */}
+    {Array.isArray(readyForPolishSlabs) && readyForPolishSlabs.length > 0 && (
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          id="select-all"
+          checked={selectAll}
+          onChange={() => setSelectAll(!selectAll)} // Toggle selectAll state
+        />
+        <label htmlFor="select-all" className="font-medium">
+          Select All Slabs
+        </label>
+      </div>
+    )}
 
-                {readyForPolishSlabs.length > 0 ? (
-                    readyForPolishSlabs.map((slab, index) => (
-                        <div key={slab._id} className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
-                                id={`slab-${slab.slabNumber}`}
-                                checked={selectedSlabs.includes(slab.slabNumber)}
-                                onChange={() => toggleSlabSelection(slab.slabNumber)}
-                            />
-                            <label htmlFor={`slab-${slab.slabNumber}`}>Slab {slab.slabNumber || index + 1}</label>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-gray-500">No slabs are ready for polishing.</p>
-                )}
-            </div>
+    {Array.isArray(readyForPolishSlabs) && readyForPolishSlabs.length > 0 ? (
+      readyForPolishSlabs.map((slab, index) => (
+        <div key={slab._id ?? index} className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            id={`slab-${index}`}
+            checked={selectedSlabs.includes(slab.slabNumber ?? index + 1)}
+            onChange={() => toggleSlabSelection(slab.slabNumber ?? index + 1)}
+          />
+          <label htmlFor={`slab-${index}`}>
+            Slab {slab.slabNumber ?? index + 1}
+          </label>
+        </div>
+      ))
+    ) : (
+      <p className="text-gray-500">No slabs are ready for polishing.</p>
+    )}
+  </div>
 
             <div className={cn("flex gap-2 justify-end")}>
                 <Button

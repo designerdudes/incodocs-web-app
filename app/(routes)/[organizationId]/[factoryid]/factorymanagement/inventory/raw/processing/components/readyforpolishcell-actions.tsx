@@ -36,7 +36,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
   //   const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
-  // console.log(data._id)
+  //  console.log(data,"dddddddddddd")
 
   return (
     <div>
@@ -61,10 +61,10 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
             <Plus className="mr-2 h-4 w-4" />
             Add Slabs
           </DropdownMenuItem>
-          {/* <DropdownMenuItem
+          <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
-              GlobalModal.description = `There are ${readyForPolishSlabs.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
+              GlobalModal.description = `There are ${SendForPolish.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
               GlobalModal.children = (
                 <SendForPolish
                   blockId={data._id}
@@ -82,7 +82,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           >
             <ScissorsIcon className="mr-2 h-4 w-4" />
             Send For Polish
-          </DropdownMenuItem> */}
+          </DropdownMenuItem>
 
           {/* View Lot Details */}
           <DropdownMenuItem
@@ -95,14 +95,14 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           </DropdownMenuItem>
 
           {/* Edit Lot Details */}
-          {/* <DropdownMenuItem
+          <DropdownMenuItem
             onSelect={() => {
               router.push(`./processing/edit/${data._id}`);
             }}
           >
             <Edit className="mr-2 h-4 w-4" />
             Edit Block Details
-          </DropdownMenuItem> */}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
