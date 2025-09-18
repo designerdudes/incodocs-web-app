@@ -9,6 +9,7 @@ import { dressedcolumns } from "./dressedColumns";
 import { insplittingcolumns } from "./inSplittingColumns";
 import { splittedcolumns } from "./splittedColumns";
 import { Blocks } from "./incuttingcolumns";
+import { readyForCuttingcolumns } from "./readyForCuttingcolumn";
 
 interface Props {
   inDressing: any;
@@ -24,6 +25,7 @@ interface Props {
   Dressedcolumns: any;
   inSplittingcolumns: any;
   Splittedcolumns: any;
+  ReadyForCutting: any;
   incuttingcolumns: any;
   Readyforpolishcolumns: any;
   inPolishingolumns: any;
@@ -35,6 +37,7 @@ function TabsDataTable({
   Dressed,
   inSplitting,
   Splitted,
+  ReadyForCutting,
   inCutting,
   readyForPolish,
   inPolishing,
@@ -81,10 +84,16 @@ function TabsDataTable({
             {inSplitting?.length}
           </Badge>
         </TabsTrigger>
-        <TabsTrigger className="gap-2" value="Splitted">
+        <TabsTrigger className="gap-2" value="split">
           Splitted
           <Badge className="text-bg-primary-foreground" variant="outline">
             {Splitted?.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger className="gap-2" value="readyForCutting">
+          Ready For Cutting
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {ReadyForCutting?.length}
           </Badge>
         </TabsTrigger>
         <TabsTrigger className="gap-2" value="inCutting">
@@ -163,7 +172,7 @@ function TabsDataTable({
           data={inSplitting as any}
         />
       </TabsContent>
-      <TabsContent value="Splitted">
+      <TabsContent value="split">
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
@@ -173,6 +182,18 @@ function TabsDataTable({
           searchKey="blockNumber"
           columns={splittedcolumns}
           data={Splitted as any}
+        />
+      </TabsContent>
+      <TabsContent value="readyForCutting">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={readyForCuttingcolumns}
+          data={ReadyForCutting as any}
         />
       </TabsContent>
       <TabsContent value="inCutting">

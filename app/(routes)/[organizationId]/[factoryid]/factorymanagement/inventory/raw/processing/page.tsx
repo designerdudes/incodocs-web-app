@@ -131,8 +131,11 @@ export default async function SlabsProcessingPage({ params }: Props) {
     (data: any) => data.status === "inSplitting"
   );
 
-  const Splitted = Blockdata.filter((data: any) =>
+  const split = Blockdata.filter((data: any) =>
     data.status === "split"
+  );
+   const readyForCutting = Blockdata.filter((data: any) =>
+    data.status === "readyForCutting"
   );
 
   const inCutting = Blockdata.filter(
@@ -370,7 +373,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
           inDressing={inDressing}
           Dressed={Dressed}
           inSplitting={inSplitting}
-          Splitted={Splitted}
+          Splitted={split}
+          ReadyForCutting= {readyForCutting}
           inCutting={inCutting}
           readyForPolish={readyForPolish}
           inPolishing={inPolishing}
