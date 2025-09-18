@@ -117,34 +117,48 @@ export const columns: ColumnDef<Blocks>[] = [
     {
         accessorKey: "status",
         header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Block Status
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Block Status
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
         ),
         cell: ({ row }) => {
-            const currentStatus = row.original?.status || "N/A";
-            return (
-                <Badge
-                    className={cn(
-                        currentStatus === "inStock" &&
-                        "bg-blue-100 text-blue-800 hover:bg-blue-200/80",
-                        currentStatus === "inCutting" &&
-                        "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
-                        currentStatus === "cut" &&
-                        "bg-green-100 text-green-800 hover:bg-green-200/80",
-                        currentStatus === "N/A" &&
-                        "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
-                    )}
-                >
-                    {currentStatus === "cut" ? "Block Cut" : currentStatus}
-                </Badge>
-            );
+          const currentStatus = row.original?.status || "N/A";
+          return (
+            <Badge
+              className={cn(
+                currentStatus === "inStock" &&
+                  "bg-blue-100 text-blue-800 hover:bg-blue-200/80",
+                currentStatus === "inDressing" &&
+                  "bg-purple-100 text-purple-900 hover:bg-purple-200/80",
+                currentStatus === "dressed" &&
+                  "bg-indigo-100 text-indigo-800 hover:bg-indigo-200/80",
+                currentStatus === "inSplitting" &&
+                  "bg-red-100 text-red-800 hover:bg-red-200/80",
+                currentStatus === "split" &&
+                  "bg-pink-100 text-pink-800 hover:bg-pink-200/80",
+                currentStatus === "inCutting" &&
+                  "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
+                currentStatus === "cut" &&
+                  "bg-green-100 text-green-800 hover:bg-green-200/80",
+                currentStatus === "cracked" &&
+                  "bg-yellow-100 text-yellow-700 hover:bg-gray-200/60"
+              )}
+            >
+              {currentStatus === "cut"
+                ? " Cut"
+                : currentStatus === "split"
+                ? " Split"
+                : currentStatus === "dressed"
+                ? " Dressed"
+                : currentStatus}
+            </Badge>
+          );
         },
-    },
+      },
     {
         accessorKey: "blockphoto", // ✅ Correct key
         header: ({ column }) => (
