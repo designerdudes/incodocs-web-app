@@ -147,7 +147,9 @@ export const columns: ColumnDef<Remittance>[] = [
   },
   {
     accessorKey: "invoiceNumber",
-    header: "Invoice Number",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Invoice No" />
+    ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -159,7 +161,9 @@ export const columns: ColumnDef<Remittance>[] = [
   },
   {
     accessorKey: "consignee",
-    header: "Consignee Name",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Consignee" />
+    ),
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -226,7 +230,7 @@ export const columns: ColumnDef<Remittance>[] = [
   },
   {
     accessorKey: "inwardRemittanceValue",
-    header: ({ column }) => <ColumnHeader column={column} title="Invoice Value" />,
+    header: ({ column }) => <ColumnHeader column={column} title="Remittance Value" />,
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
@@ -251,7 +255,7 @@ export const columns: ColumnDef<Remittance>[] = [
         <span className="truncate font-medium">
           {
 
-            row.original.differenceAmount !== undefined
+            (row.original.invoiceValue ?? 0) - (row.original.inwardRemittanceValue ?? 0) > 0
               ? new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "USD",

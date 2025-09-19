@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
 import { useParams } from "next/navigation";
 import { columns } from "./components/columns";
+import DownloadInvRemittance from "./components/remittanceDownloadBtn";
 
 
 interface params {
@@ -129,6 +130,7 @@ export default async function Page(params: params) {
                 {/* <Link href={`./remittance/createnew`}>
             <Button className="bg-primary text-white">Add New Remittance</Button>
         </Link> */}
+                <DownloadInvRemittance remittanceData={remittanceData} />
                 <a
                     href="./remittance/createnew"
                     target="_blank"
