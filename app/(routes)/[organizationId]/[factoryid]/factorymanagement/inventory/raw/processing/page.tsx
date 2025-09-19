@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { incuttingcolumns } from "./components/incuttingcolumns";
 import { Readyforpolishcolumns } from "./components/readyforpolishcolumns";
-import { inPolishingolumns } from "./components/inpolishingcolumns";
+import { inPolishingcolumns } from "./components/inpolishingcolumns";
 import { cookies } from "next/headers";
 import { Polishedcolumns } from "./components/polishedcolumns";
 import TabsDataTable from "./components/tabsDataTable";
@@ -118,7 +118,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const slabsData = res;
   let Blockdata = blockRes || [];
   let Slabdata = slabRes || [];
-  // console.log("Slabdata", Slabdata);
+  // console.log("Slabdatasss", Slabdata);
 
   const inDressing = Blockdata.filter(
     (data: any) => data.status === "inDressing"
@@ -131,8 +131,11 @@ export default async function SlabsProcessingPage({ params }: Props) {
     (data: any) => data.status === "inSplitting"
   );
 
-  const Splitted = Blockdata.filter((data: any) =>
+  const split = Blockdata.filter((data: any) =>
     data.status === "split"
+  );
+   const readyForCutting = Blockdata.filter((data: any) =>
+    data.status === "readyForCutting"
   );
 
   const inCutting = Blockdata.filter(
@@ -370,7 +373,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
           inDressing={inDressing}
           Dressed={Dressed}
           inSplitting={inSplitting}
-          Splitted={Splitted}
+          Splitted={split}
+          ReadyForCutting= {readyForCutting}
           inCutting={inCutting}
           readyForPolish={readyForPolish}
           inPolishing={inPolishing}
@@ -378,7 +382,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
           slabsData={slabsData}
           incuttingcolumns={incuttingcolumns}
           Readyforpolishcolumns={Readyforpolishcolumns}
-          inPolishingolumns={inPolishingolumns}
+          inPolishingcolumns={inPolishingcolumns}
           Polishedcolumns={Polishedcolumns}
           inDressingcolumns={indressingcolumns}
           Dressedcolumns={dressedcolumns}

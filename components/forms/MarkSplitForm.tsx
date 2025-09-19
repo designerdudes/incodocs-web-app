@@ -4,7 +4,6 @@ import { useForm, FormProvider, Controller } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { fetchData, putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import {
@@ -36,10 +35,10 @@ export default function MarkSplitForm({
   blockNumber,
   netDimensions,
   factoryId,
-  originalBlockVolume,
   onSubmit,
 }: MarkSplitFormProps) {
   const form = useForm();
+  const { control } = form;
 
   const [assignedMachine, setAssignedMachine] = useState<{
     id: string;
@@ -54,7 +53,7 @@ export default function MarkSplitForm({
       height: number;
       volume: number;
       weight: number;
-      isSplittable: boolean;
+      isSplittable: boolean | null; // ✅ can be null until user chooses Yes/No
       photo?: string;
       splitDirection: "length" | "breadth" | "height" | "";
     }[]
@@ -65,7 +64,7 @@ export default function MarkSplitForm({
       height: 0,
       volume: 0,
       weight: 0,
-      isSplittable: false,
+      isSplittable: null,
       photo: "",
       splitDirection: "",
     },
@@ -73,7 +72,6 @@ export default function MarkSplitForm({
 
   const [inTime, setInTime] = useState<string>("");
   const [outTime, setOutTime] = useState<string>("");
-  const { control } = form;
   const [totalVolume, setTotalVolume] = useState(0);
   const [totalWeight, setTotalWeight] = useState(0);
   const [volumeError, setVolumeError] = useState<string | null>(null);
@@ -149,47 +147,81 @@ export default function MarkSplitForm({
   }, [blocks, originalBlock]);
 
   // 📌 Update sub-block dimensions
-  const handleBlockChange = (
+ const handleBlockChange = (
     index: number,
     field: string,
     value: number | boolean | string
   ) => {
-    setBlocks((prev) =>
-      prev.map((block, i) => {
-        if (i !== index) return block;
+    setBlocks((prev) => {
+      const newBlocks = [...prev];
+      let block = { ...newBlocks[index] };
 
-        if (field === "isSplittable") {
-          return { ...block, isSplittable: value as boolean };
+      if (field === "isSplittable") {
+        block.isSplittable = value as boolean;
+      } else if (field === "photo") {
+        block.photo = value as string;
+      } else if (field === "splitDirection") {
+        block.splitDirection = value as
+          | "length"
+          | "breadth"
+          | "height"
+          | "";
+        // Auto-fill with original dimensions
+        if (value === "length") {
+          block.breadth = originalBlock?.breadth || 0;
+          block.height = originalBlock?.height || 0;
         }
-        if (field === "photo") {
-          return { ...block, photo: value as string };
+        if (value === "breadth") {
+          block.length = originalBlock?.length || 0;
+          block.height = originalBlock?.height || 0;
         }
-        if (field === "splitDirection") {
-          return { ...block, splitDirection: value as "length" | "breadth" | "height" | "" };
+        if (value === "height") {
+          block.length = originalBlock?.length || 0;
+          block.breadth = originalBlock?.breadth || 0;
         }
-
-        // Clamp values to not exceed parent net dimensions
+      } else {
+        // clamp to original dimension
         let newValue = value as number;
-        if (field === "length" && newValue > (netDimensions.length?.value ?? Infinity)) {
-          newValue = netDimensions.length?.value ?? newValue;
-          toast.error("Length cannot exceed parent block length");
+        const max =
+          field === "length"
+            ? originalBlock?.length
+            : field === "breadth"
+            ? originalBlock?.breadth
+            : field === "height"
+            ? originalBlock?.height
+            : Infinity;
+        if (newValue > max) {
+          toast.error(`${field} cannot exceed original block ${field}`);
+          newValue = max;
         }
-        if (field === "breadth" && newValue > (netDimensions.breadth?.value ?? Infinity)) {
-          newValue = netDimensions.breadth?.value ?? newValue;
-          toast.error("Breadth cannot exceed parent block breadth");
-        }
-        if (field === "height" && newValue > (netDimensions.height?.value ?? Infinity)) {
-          newValue = netDimensions.height?.value ?? newValue;
-          toast.error("Height cannot exceed parent block height");
-        }
+        block = { ...block, [field]: newValue };
+      }
 
-        const updated = { ...block, [field]: newValue as number };
-        const volume =
-          (updated.length * updated.breadth * updated.height) / 1_000_000;
-        const weight = density * volume;
-        return { ...updated, volume, weight };
-      })
-    );
+      // special subtraction auto-fill for the 2nd block onwards
+      if (
+        block.splitDirection &&
+        index > 0 &&
+        originalBlock &&
+        ["length", "breadth", "height"].includes(block.splitDirection)
+      ) {
+        const dir = block.splitDirection;
+        const firstValue = newBlocks[0][dir];
+        const remaining = (originalBlock as any)[dir] - firstValue;
+        if ((block as any)[dir] === 0 || (block as any)[dir] > remaining) {
+          (block as any)[dir] = remaining >= 0 ? remaining : 0;
+        }
+      }
+
+      // recalc volume/weight
+      const volume =
+        (block.length * block.breadth * block.height) / 1_000_000;
+      const weight = density * volume;
+      block.volume = volume;
+      block.weight = weight;
+
+      newBlocks[index] = block;
+      return newBlocks;
+    });
   };
 
   // 📌 Add/Remove sub-blocks
@@ -202,7 +234,7 @@ export default function MarkSplitForm({
         height: 0,
         volume: 0,
         weight: 0,
-        isSplittable: false,
+        isSplittable: null,
         photo: "",
         splitDirection: "",
       },
@@ -226,7 +258,7 @@ export default function MarkSplitForm({
           },
           isSplittable: b.isSplittable,
           photo: b.photo,
-          splitDirection: b.splitDirection, // ✅ send to backend
+          splitDirection: b.splitDirection,
         })),
         machineId: assignedMachine.id,
         outTime,
@@ -456,7 +488,10 @@ export default function MarkSplitForm({
                 <p>Weight: {block.weight.toFixed(2)} tons</p>
               </div>
 
-              {/* ✅ Block Photo Upload */}
+              {/* Block Photo */}
+              {/* ... unchanged photo upload ... */}
+
+              {/* ✅ Is Splittable - Yes/No Radio */}
               <div>
                 <Label>Block Photo</Label>
                 <Controller
@@ -471,28 +506,42 @@ export default function MarkSplitForm({
                     />
                   )}
                 />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`splittable-${index}`}
-                    checked={block.isSplittable}
-                    onCheckedChange={(val) =>
-                      handleBlockChange(index, "isSplittable", !!val)
-                    }
-                  />
-                  <Label htmlFor={`splittable-${index}`}>Is Splittable?</Label>
+                <Label>Is Splittable?</Label>
+                <div className="flex gap-6 mt-2">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`isSplittable-${index}`}
+                      value="yes"
+                      checked={block.isSplittable === true}
+                      onChange={() =>
+                        handleBlockChange(index, "isSplittable", true)
+                      }
+                    />
+                    Yes
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name={`isSplittable-${index}`}
+                      value="no"
+                      checked={block.isSplittable === false}
+                      onChange={() =>
+                        handleBlockChange(index, "isSplittable", false)
+                      }
+                    />
+                    No
+                  </label>
                 </div>
-
-                {blocks.length > 1 && (
-                  <Trash
-                    type="button"
-                    className="mr-2 h-4 w-4 cursor-pointer hover:fill-red-500 transition-colors duration-200"
-                    onClick={() => removeSubBlock(index)}
-                  />
-                )}
               </div>
+
+              {blocks.length > 1 && (
+                <Trash
+                  type="button"
+                    className="mr-2 h-4 w-4 cursor-pointer hover:fill-red-500 transition-colors duration-200"
+                  onClick={() => removeSubBlock(index)}
+                />
+              )}
             </div>
           ))}
 
@@ -534,7 +583,12 @@ export default function MarkSplitForm({
         <Button
           type="submit"
           className="mt-4 w-full"
-          disabled={!!volumeError || !!weightError || !assignedMachine}
+          disabled={
+            !!volumeError ||
+            !!weightError ||
+            !assignedMachine ||
+            blocks.some((b) => b.isSplittable === null) // ✅ ensure user selects Yes/No
+          }
         >
           Mark Split
         </Button>

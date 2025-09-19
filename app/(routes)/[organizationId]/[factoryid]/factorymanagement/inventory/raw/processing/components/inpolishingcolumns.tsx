@@ -56,7 +56,7 @@ export type Slab = {
   updatedAt: string;
 };
 
-export const inPolishingolumns: ColumnDef<Slab>[] = [
+export const inPolishingcolumns: ColumnDef<Slab>[] = [
   {
     id: "select",
     header: ({ table }) => (

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
-import SplittedCellAction from "./splittedCellActions"
+import ReadyForCuttingCellAction from "./readyForCuttingCellAction"
 
 export type Blocks = {
   dimensions: {
@@ -39,7 +39,7 @@ export type Blocks = {
   updatedAt: string;
   __v: number;
 };
-export const splittedcolumns: ColumnDef<Blocks>[] = [
+export const readyForCuttingcolumns: ColumnDef<Blocks>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -154,7 +154,7 @@ export const splittedcolumns: ColumnDef<Blocks>[] = [
         ),
 
         id: "actions",
-        cell: ({ row }) => <SplittedCellAction data={row.original} />
+        cell: ({ row }) => <ReadyForCuttingCellAction data={row.original} />
 
     },
 ]

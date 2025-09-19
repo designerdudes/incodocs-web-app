@@ -29,7 +29,8 @@ export interface SlabInterface {
   _id: string;
   blockId: string;
   factoryId: string;
-  slabNumber: number;
+  productName: number;
+  slabId:String;
   slabphoto: string;
   blockNumber: number;
   status: string;
@@ -64,7 +65,7 @@ export const columns: ColumnDef<SlabInterface>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "slabNumber",
+    accessorKey: "slabId",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -74,11 +75,11 @@ export const columns: ColumnDef<SlabInterface>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.slabNumber}</div>,
+    cell: ({ row }) => <div>{row.original?.slabId}</div>,
     filterFn: "includesString", // Use the built-in filtering logic for partial matches
   },
   {
-    accessorKey: "length",
+    accessorKey: "productName",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -88,7 +89,7 @@ export const columns: ColumnDef<SlabInterface>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.slabNumber}</div>,
+    cell: ({ row }) => <div>{row.original.productName}</div>,
     filterFn: "includesString", // Use the built-in filtering logic for partial matches
   },
   {
