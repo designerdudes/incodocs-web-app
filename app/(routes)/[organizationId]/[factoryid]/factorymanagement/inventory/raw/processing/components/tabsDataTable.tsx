@@ -28,7 +28,7 @@ interface Props {
   ReadyForCutting: any;
   incuttingcolumns: any;
   Readyforpolishcolumns: any;
-  inPolishingolumns: any;
+  inPolishingcolumns: any;
   Polishedcolumns: any;
 }
 
@@ -45,7 +45,7 @@ function TabsDataTable({
   slabsData,
   incuttingcolumns,
   Readyforpolishcolumns,
-  inPolishingolumns,
+  inPolishingcolumns,
   Polishedcolumns,
 }: Props) {
   const router = useRouter();
@@ -234,14 +234,14 @@ function TabsDataTable({
           bulkDeleteToastMessage="Selected slabs deleted successfully"
           deleteRoute="/factory-management/inventory/deletemultipleslabs"
           searchKey="slabNumber"
-          columns={inPolishingolumns}
+          columns={inPolishingcolumns}
           data={inPolishing}
-          tab="inPolishing"
-          bulkPolishTitle="Are you sure you want to mark these slabs as polished?"
-          bulkPOlishDescription="This will mark the selected slabs as polished, and they will not be recoverable."
-          bulkPolishIdName="_id"
-          updateRoute="/factory-management/inventory/addtrim-multipleslabs"
-          bulkPolisToastMessage=" selected slabs marked as polished"
+          // tab="inPolishing"
+          // bulkPolishTitle="Are you sure you want to mark these slabs as polished?"
+          // bulkPOlishDescription="This will mark the selected slabs as polished, and they will not be recoverable."
+          // bulkPolishIdName="_id"
+          // updateRoute="/factory-management/inventory/addtrim-multipleslabs"
+          // bulkPolisToastMessage=" selected slabs marked as polished"
         />
       </TabsContent>
       <TabsContent value="Polished">

@@ -223,24 +223,6 @@ export const columns: ColumnDef<Blocks>[] = [
             </ul>
           </div>
         )}
-
-        {/* ✅ Split Dimensions (only if available) */}
-        {/* { block.status === "split" && block.splitDimensions && (
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-1">
-              Split Dimensions
-            </h4>
-            <ul className="list-disc list-inside text-gray-700">
-              <li> Length: {formatValue(block.splitDimensions.length)}</li>
-              <li> Breadth: {formatValue(block.splitDimensions.breadth)}</li>
-              <li> Height: {formatValue(block.splitDimensions.height)}</li>
-              <li> Weight: {formatValue(block.splitDimensions.weight, "t")}</li>
-              {block.splitDimensions.volume && (
-                <li> Volume: {block.splitDimensions.volume} m³</li>
-              )}
-            </ul>
-          </div>
-        )} */}
       </div>
     );
 
@@ -299,6 +281,8 @@ export const columns: ColumnDef<Blocks>[] = [
               "bg-pink-100 text-pink-800 hover:bg-pink-200/80",
             currentStatus === "inCutting" &&
               "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
+               currentStatus === "readyForCutting" &&
+              "bg-amber-100 text-amber-800 hover:bg-amber-200/80",
             currentStatus === "cut" &&
               "bg-green-100 text-green-800 hover:bg-green-200/80",
             currentStatus === "cracked" &&
