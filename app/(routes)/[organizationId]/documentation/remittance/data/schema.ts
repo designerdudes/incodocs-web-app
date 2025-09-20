@@ -57,7 +57,7 @@ export interface Remittance {
     updatedAt?: string;
     __v?: number;
   };
-  consignee?: string | {
+  consigneeId?: string | {
     _id: string;
     name: string;
     address?: string;

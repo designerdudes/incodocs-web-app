@@ -21,6 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Download } from "lucide-react";
 
 type DownloadInvRemittance = {
     _id: string;
@@ -208,7 +209,9 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData }) => {
         <div className="flex items-center gap-4">
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button variant="default">Download Remittance</Button>
+                    <Button variant="outline">Download Remittances
+                        <Download className="w-6 h-6" />
+                    </Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>

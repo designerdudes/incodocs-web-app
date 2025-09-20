@@ -34,9 +34,9 @@ const multiColumnFilterFn: FilterFn<Remittance> = (
   filterValue
 ) => {
   const consigneeName =
-    typeof row.original?.consignee === "string"
-      ? row.original?.consignee
-      : row.original?.consignee?.name || "";
+    typeof row.original?.consigneeId === "string"
+      ? row.original?.consigneeId
+      : row.original?.consigneeId?.name || "";
 
   const searchableRowContent = [
     row.original.inwardRemittanceNumber,
@@ -167,9 +167,9 @@ export const columns: ColumnDef<Remittance>[] = [
     cell: ({ row }) => (
       <div className="flex space-x-2">
         <span className="truncate font-medium">
-          {typeof row.original?.consignee === "string"
-            ? row.original.consignee
-            : row.original?.consignee?.name || "N/A"}
+          {typeof row.original?.consigneeId === "string"
+            ? row.original.consigneeId
+            : row.original?.consigneeId?.name || "N/A"}
         </span>
       </div>
     ),
@@ -185,7 +185,13 @@ export const columns: ColumnDef<Remittance>[] = [
       return (
         <div className="flex space-x-2">
           {invoiceCopy && invoiceCopy.length > 0 ? (
-            <Button variant={"link"}>View</Button>
+            <Button
+              onClick={
+                () => {
+                  window.open(row.original.invoiceCopy)
+                }
+              }
+              variant={"link"}>View</Button>
           ) : (
             <span className="truncate font-medium">N/A</span>
           )}
@@ -203,7 +209,13 @@ export const columns: ColumnDef<Remittance>[] = [
       return (
         <div className="flex space-x-2">
           {invoiceCopy && invoiceCopy.length > 0 ? (
-            <Button variant={"link"}>View</Button>
+            <Button
+              onClick={
+                () => {
+                  window.open(row.original.invoiceCopy)
+                }
+              }
+              variant={"link"}>View</Button>
           ) : (
             <span className="truncate font-medium">N/A</span>
           )}

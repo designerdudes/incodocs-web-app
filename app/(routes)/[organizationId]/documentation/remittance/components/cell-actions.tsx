@@ -68,29 +68,21 @@ export function DataTableCellActions({ row }: Props) {
         <DropdownMenuItem asChild>
           <a href={viewPath} target="_blank" rel="noopener noreferrer">
             <EyeIcon className="mr-2 h-4 w-4" />
-            {isDraftPage ? "View Draft" : "View Shipment"}
+            {isDraftPage ? "View Draft" : "View All Consignee Remittances"}
           </a>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <a href={editPath} target="_blank" rel="noopener noreferrer">
             <Pencil className="mr-2 h-4 w-4" />
-            {isDraftPage ? "Edit Draft" : "Edit Shipment"}
+            {isDraftPage ? "Edit Draft" : "Update Remittance"}
           </a>
         </DropdownMenuItem>
 
-        {/* Only display logs for non-draft pages */}
-        {!isDraftPage && (
-          <ShipmentLogs
-            isView={false}
-            logs={(data as any).shipmentLogs}
-          />
-        )}
-
         <DropdownMenuItem
           onSelect={() => {
-            GlobalModal.title = `Delete ${isDraftPage ? "Draft" : "Shipment"}`;
-            GlobalModal.description = `Are you sure you want to delete this ${isDraftPage ? "draft" : "shipment"
+            GlobalModal.title = `Delete ${isDraftPage ? "Draft" : "Remittance"}`;
+            GlobalModal.description = `Are you sure you want to delete this ${isDraftPage ? "draft" : "Remittance"
               }?`;
             GlobalModal.children = <Alert onConfirm={deleteEntity} actionType="delete" />;
             GlobalModal.onOpen();
@@ -98,7 +90,7 @@ export function DataTableCellActions({ row }: Props) {
           className="focus:bg-destructive focus:text-destructive-foreground"
         >
           <Trash className="mr-2 h-4 w-4" />
-          Delete {isDraftPage ? "Draft" : "Shipment"}
+          Delete {isDraftPage ? "Draft" : "Remittance"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
