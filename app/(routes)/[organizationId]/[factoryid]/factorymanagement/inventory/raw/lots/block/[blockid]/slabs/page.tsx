@@ -225,13 +225,16 @@ export default async function SlabsPage({ params }: Props) {
                           "bg-gray-100 text-gray-600 hover:bg-gray-200/60"
                       )}
                     >
-                      {BlockData?.status === "cut"
-                        ? "Block Cut"
-                        : BlockData?.status === "split"
-                        ? "Block Split"
-                        : BlockData?.status === "dressed"
-                        ? "Block Dressed"
-                        : BlockData?.status}
+                     {BlockData?.status === "inStock" ? " In Stock": 
+                       BlockData?.status === "inDressing"? " In Dressing": 
+                       BlockData?.status === "dressed"? " Dressed": 
+                       BlockData?.status === "inSplitting" ? " In Splitting": 
+                       BlockData?.status === "split"? " Split": 
+                       BlockData?.status === "inCutting"? " In Cutting":
+                       BlockData?.status === "readyForCutting" ? " Ready For Cutting": 
+                       BlockData?.status === "cut"? " Cut": 
+                       BlockData?.status === "cracked"? " Cracked":
+                       BlockData?.status}
                     </Badge>
                   </TableCell>
                 </TableRow>

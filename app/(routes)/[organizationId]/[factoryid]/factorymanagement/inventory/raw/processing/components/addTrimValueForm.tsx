@@ -20,7 +20,7 @@ import { Slab } from "./inpolishingcolumns";
 import toast from "react-hot-toast";
 
 const formSchema = z.object({
-  trim: z.object({
+  polishedValues: z.object({
     height: z.object({
       value: z.preprocess(
         (val) => (val ? parseFloat(val as string) : undefined),
@@ -36,9 +36,9 @@ const formSchema = z.object({
       units: z.literal("inch"),
     }),
   }),
+  outTime: z.string().nonempty("Out Time is required"),
   status: z.literal("polished"),
 });
-
 
 interface Props {
   params: { id: string };
@@ -50,10 +50,11 @@ function CardWithForm(params: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      trim: {
+      polishedValues: {
         height: { value: 0, units: "inch" },
         length: { value: 0, units: "inch" },
       },
+      outTime: new Date().toISOString().slice(0, 16), // auto-fill as datetime-local format
       status: "polished",
     },
   });
@@ -87,10 +88,16 @@ function CardWithForm(params: Props) {
           <strong>Block Number:</strong> {slabData?.blockNumber}
         </p>
         <p>
-          <strong>Height (inches):</strong> {values.trim.height.value}
+          <strong>Height (inches):</strong>{" "}
+          {values.polishedValues.height.value}
         </p>
         <p>
-          <strong>Length (inches):</strong> {values.trim.length.value}
+          <strong>Length (inches):</strong>{" "}
+          {values.polishedValues.length.value}
+        </p>
+        <p>
+          <strong>Out Time:</strong>{" "}
+          {new Date(values.outTime).toLocaleString()}
         </p>
         <div className="flex justify-end space-x-2">
           <Button
@@ -105,20 +112,25 @@ function CardWithForm(params: Props) {
           <Button
             onClick={async () => {
               try {
-                const response = await putData(
-                  `/factory-management/inventory/addtrim/${params.params.id}`,
-                  values
+                const payload = {
+                  ...values,
+                  outTime: new Date(values.outTime).toISOString(),
+                };
+
+                await putData(
+                  `/factory-management/inventory/finished/markpolished/${params.params.id}`,
+                  payload
                 );
 
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.success("Trim values added successfully");
+                toast.success("Slab marked as Polished successfully");
               } catch (error) {
                 setIsLoading(false);
                 GlobalModal.onClose();
-                toast.error("Error updating trim values");
+                toast.error("Error marking slab as polished");
               }
-              window.location.reload();
+               window.location.reload();
             }}
           >
             Confirm
@@ -136,7 +148,7 @@ function CardWithForm(params: Props) {
           {/* Height */}
           <FormField
             control={form.control}
-            name="trim.height.value"
+            name="polishedValues.height.value"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Height (inches)</FormLabel>
@@ -144,8 +156,8 @@ function CardWithForm(params: Props) {
                   <Input
                     placeholder="Eg: 54"
                     type="number"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="any" // Allows decimal values
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    step="any"
                     {...field}
                     value={field.value || ""}
                     onChange={(e) => {
@@ -164,7 +176,7 @@ function CardWithForm(params: Props) {
           {/* Length */}
           <FormField
             control={form.control}
-            name="trim.length.value"
+            name="polishedValues.length.value"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Length (inches)</FormLabel>
@@ -172,8 +184,8 @@ function CardWithForm(params: Props) {
                   <Input
                     placeholder="Eg: 120"
                     type="number"
-                      className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="any" // Allows decimal values
+                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    step="any"
                     {...field}
                     value={field.value || ""}
                     onChange={(e) => {
@@ -190,6 +202,27 @@ function CardWithForm(params: Props) {
             )}
           />
         </div>
+
+        {/* Out Time */}
+        <FormField
+          control={form.control}
+          name="outTime"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Out Time</FormLabel>
+              <FormControl>
+                <Input
+                  type="datetime-local"
+                  {...field}
+                  value={field.value || ""}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {/* Submit Button */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}

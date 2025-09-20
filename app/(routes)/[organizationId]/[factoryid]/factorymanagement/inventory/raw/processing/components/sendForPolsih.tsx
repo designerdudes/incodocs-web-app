@@ -16,21 +16,23 @@ interface SendForPolishProps {
   onConfirm: (selectedSlabs: string[]) => void;
 }
 interface Slab {
- _id: string;
+  _id: string;
   slabNumber?: number;
   status?: string;
 }
 
-const SendForPolish: React.FC<SendForPolishProps> = ({ blockId, onConfirm }) => {
+const SendForPolish: React.FC<SendForPolishProps> = ({
+  blockId,
+  onConfirm,
+}) => {
   const GlobalModal = useGlobalModal();
   const [isLoading, setIsLoading] = useState(false);
   const [BlockData, setBlockData] = useState<any>(null);
   const [selectedSlabs, setSelectedSlabs] = useState<string[]>([]);
   const [readyForPolishSlabs, setReadyForPolishSlabs] = useState<any[]>([]);
   const [selectAll, setSelectAll] = useState(false);
-const params = useParams();
+  const params = useParams();
   const { organizationId, factoryid } = params;
-
 
   // ✅ New state for machine + inTime
   const [machines, setMachines] = useState<any[]>([]);
@@ -66,27 +68,30 @@ const params = useParams();
 
   // ✅ Fetch machines
   useEffect(() => {
-  const fetchRopeCutters = async () => {
+  const fetchPolishingMachines = async () => {
     const res = await fetchData(`/machine/getbyfactory/${factoryid}`, {
       data: {
-        status: "idle", 
+        status: "idle",
       },
     });
+      
+    const allowedTypes = ["Auto Polishing", "Line Polishing", "Hand Polishing"];
 
     const response = res
-      .filter((e: any) => e.typeCutting === "Rope Cutter")
+      .filter((e: any) => allowedTypes.includes(e.typePolish))
       .map((e: any) => ({
-        label: `${e.machineName} - ${e.typeCutting} - ${e.status} `,
+        label: `${e.machineName} - ${e.typePolish} - ${e.status}`,
         value: e._id,
-        typeCutting: e.typeCutting,
-        disabled: e.status === "busy", 
+        typePolish: e.typePolish,
+        disabled: e.status === "busy",
       }));
 
     setMachines(response);
   };
 
-  fetchRopeCutters();
+  fetchPolishingMachines();
 }, [factoryid]);
+
 
   // Handle Select All state
   useEffect(() => {
@@ -123,17 +128,19 @@ const params = useParams();
     setIsLoading(true);
 
     try {
-      const payload = {
-        slabIds: selectedSlabs,
-        machineId: selectedMachineId,
-        inTime: new Date(inTime).toISOString(),
-        status: "inPolishing",
-      };
+      for (const slabId of selectedSlabs) {
+        const payload = {
+          slabIds: [slabId],
+          machineId: selectedMachineId,
+          inTime: new Date(inTime).toISOString(),
+          status: "inPolishing",
+        };
 
-      await putData(
-        `/factory-management/inventory/addtrim-multipleslabs`,
-        payload
-      );
+        await putData(
+          `/factory-management/inventory/finished/sendmultipleslabsforpolishing`,
+          payload
+        );
+      }
 
       toast.success("Slabs sent for polishing successfully.");
       onConfirm(selectedSlabs);
@@ -147,7 +154,7 @@ const params = useParams();
       }
     } finally {
       setIsLoading(false);
-      window.location.reload();
+       window.location.reload();
     }
   };
 
@@ -208,15 +215,20 @@ const params = useParams();
         <div>
           <Label>Machine</Label>
           <EntityCombobox
-                      entities={machines}
-                      multiple={false}
-                      value={selectedMachineId}
-                      onChange={(value) => setSelectedMachineId(value as string)}
-                      displayProperty="label"
-                      valueProperty="value"
-                      placeholder="Select Machine" onAddNew={() => window.open(
-                          `/${organizationId}/${factoryid}/factorymanagement/machines/createnew`
-                      )} addNewLabel={"Add New"}/>
+            entities={machines}
+            multiple={false}
+            value={selectedMachineId}
+            onChange={(value) => setSelectedMachineId(value as string)}
+            displayProperty="label"
+            valueProperty="value"
+            placeholder="Select Machine"
+            onAddNew={() =>
+              window.open(
+                `/${organizationId}/${factoryid}/factorymanagement/machines/createnew`
+              )
+            }
+            addNewLabel={"Add New"}
+          />
         </div>
 
         <div>
@@ -239,7 +251,11 @@ const params = useParams();
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={isLoading} className="bg-blue-500 text-white">
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="bg-blue-500 text-white"
+        >
           {isLoading ? "Processing..." : "Send for Polishing"}
         </Button>
       </div>
