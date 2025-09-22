@@ -3,14 +3,12 @@ import { ColumnDef, FilterFn } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import moment from "moment";
-import { DataTableCellActions } from "./cell-actions";
 import { Copy, ChevronDown } from "lucide-react";
 import { Remittance } from "../data/schema";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 // import ViewAllComponent from "./viewAllComponent";
-
 import {
   Popover,
   PopoverContent,
@@ -22,6 +20,7 @@ import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { ColumnHeader } from "./column-header";
+import { DataTableCellActions } from "./cell-actions";
 
 // Extend TableMeta to include updateData
 interface CustomTableMeta<TData> {
@@ -62,7 +61,7 @@ const statusFilterFn: FilterFn<Remittance> = (
 
 
 // Separate component for status cell
-const StatusCell: React.FC<{
+export const StatusCell: React.FC<{
   row: any;
   table: any;
 }> = ({ row, table }) => {

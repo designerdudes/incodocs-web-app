@@ -132,7 +132,7 @@ export default async function Page(params: params) {
         </Link> */}
                 <DownloadInvRemittance remittanceData={remittanceData} />
                 <a
-                    href="./remittance/createnew"
+                    href="./remittance/addnew"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
