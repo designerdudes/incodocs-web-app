@@ -140,9 +140,9 @@ export function DataTable<TData, TValue>({
 
   const modal = useGlobalModal();
 
-  const selectedIdsForMarkPaid = table
-    .getFilteredSelectedRowModel()
-    .rows.map((row: any) => row.original[bulkDeleteIdName as string]);
+  // const selectedIdsForMarkPaid = table
+  //   ?.getFilteredSelectedRowModel()
+  //   ?.rows.map((row: any) => row.original[bulkDeleteIdName as string]);
 
   const handleBulkDelete = async () => {
     const selectedIds = table
@@ -178,7 +178,7 @@ export function DataTable<TData, TValue>({
       console.error("Error deleting data:", error);
       toast.error(
         error.message ||
-          "Error deleting products. Please check the API endpoint."
+        "Error deleting products. Please check the API endpoint."
       );
     } finally {
       setIsLoading(false);
@@ -332,9 +332,9 @@ export function DataTable<TData, TValue>({
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   );
                 })}
@@ -350,11 +350,10 @@ export function DataTable<TData, TValue>({
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell
-                      className={`h-fit py-2 text-sm ${
-                        cell.column.id === "actions"
-                          ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10"
-                          : ""
-                      }`}
+                      className={`h-fit py-2 text-sm ${cell.column.id === "actions"
+                        ? "sticky bg-[#f9f9fe] hover:bg-accent right-0 shadow-left z-10"
+                        : ""
+                        }`}
                       key={cell.id}
                     >
                       {flexRender(
@@ -382,18 +381,17 @@ export function DataTable<TData, TValue>({
                 {footerGroup.headers.map((header) => (
                   <TableCell
                     key={header.id}
-                    className={`font-medium pb-4 ${
-                      header.column.id === "actions"
-                        ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10"
-                        : ""
-                    }`}
+                    className={`font-medium pb-4 ${header.column.id === "actions"
+                      ? "sticky right-0 bg-[#f9f9fe] hover:bg-accent shadow-left z-10"
+                      : ""
+                      }`}
                   >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.footer,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.footer,
+                        header.getContext()
+                      )}
                   </TableCell>
                 ))}
               </TableRow>
@@ -478,11 +476,11 @@ export function DataTable<TData, TValue>({
                     "Are you sure you want to mark these slabs as paid?";
                   modal.children = (
                     <MarkPaidForm
-                      // table={table}
-                      // bulkPolishIdName={bulkPolishIdName}
-                      selectedSlabs={selectedIdsForMarkPaid}
-                      // updateRoute={updateRoute}
-                      // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
+                    // table={table}
+                    // bulkPolishIdName={bulkPolishIdName}
+                    // selectedSlabs={selectedIdsForMarkPaid}
+                    // updateRoute={updateRoute}
+                    // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
                     />
                   );
                   modal.onOpen();
@@ -506,11 +504,11 @@ export function DataTable<TData, TValue>({
                     "Are you sure you want to mark these slabs as paid?";
                   modal.children = (
                     <MarkPolishingPaidForm
-                      // table={table}
-                      // bulkPolishIdName={bulkPolishIdName}
-                      selectedSlabs={selectedIdsForMarkPaid}
-                      // updateRoute={updateRoute}
-                      // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
+                    // table={table}
+                    // bulkPolishIdName={bulkPolishIdName}
+                    // selectedSlabs={selectedIdsForMarkPaid}
+                    // updateRoute={updateRoute}
+                    // bulkPolisToastMessage={bulkPolisToastMessage} slabs={[]}
                     />
                   );
                   modal.onOpen();
