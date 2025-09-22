@@ -17,7 +17,6 @@ import { Alert } from "@/components/forms/Alert";
 import toast from "react-hot-toast";
 import { Row } from "@tanstack/react-table";
 import { Remittance } from "../data/schema";
-import { ShipmentLogs } from "@/components/shipmentLogs";
 
 interface Props {
   row: Row<Remittance>;
@@ -28,30 +27,24 @@ export function DataTableCellActions({ row }: Props) {
   const pathname = usePathname();
   const GlobalModal = useGlobalModal();
 
-  const isDraftPage = pathname.includes("/draft");
-  const data = row.original;
+
+  const data = row.original as any;
   const id = data._id; // Use the same ID for draft or shipment
 
   const deleteEntity = async () => {
     if (!id) return toast.error("ID is missing");
     try {
-      const endpoint = isDraftPage
-        ? `/shipmentdrafts/delete/${id}`
-        : `/shipment/delete/${id}`;
+      const endpoint = `/remittance/delete/${id}`;
       await deleteData(endpoint);
-      toast.success(`${isDraftPage ? "Draft" : "Shipment"} deleted successfully`);
-      router.refresh();
+      toast.success(`Remittance deleted successfully`);
+
     } catch {
-      toast.error(`Failed to delete ${isDraftPage ? "draft" : "shipment"}`);
+      toast.error(`Failed to delete Remittance`);
     }
   };
 
-  const viewPath = isDraftPage
-    ? `./drafts/view/${id}`
-    : `./shipment/view/${id}`;
-  const editPath = isDraftPage
-    ? `./drafts/edit/${id}`
-    : `./shipment/edit/${id}`;
+  const viewPath = `./remittance/view/${data?.consigneeId?._id}`;
+  const editPath = `./remittance/edit/${id}`;
 
   return (
     <DropdownMenu>
@@ -64,33 +57,32 @@ export function DataTableCellActions({ row }: Props) {
       <DropdownMenuContent align="end" className="gap-2">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-
-        <DropdownMenuItem asChild>
-          <a href={viewPath} target="_blank" rel="noopener noreferrer">
-            <EyeIcon className="mr-2 h-4 w-4" />
-            {isDraftPage ? "View Draft" : "View All Consignee Remittances"}
-          </a>
-        </DropdownMenuItem>
+        {!pathname.includes('remittance/view') &&
+          <DropdownMenuItem asChild>
+            <a href={viewPath}>
+              <EyeIcon className="mr-2 h-4 w-4" />
+              {"View All Consignee Remittances"}
+            </a>
+          </DropdownMenuItem>}
 
         <DropdownMenuItem asChild>
           <a href={editPath} target="_blank" rel="noopener noreferrer">
             <Pencil className="mr-2 h-4 w-4" />
-            {isDraftPage ? "Edit Draft" : "Update Remittance"}
+            {"Update Remittance"}
           </a>
         </DropdownMenuItem>
 
         <DropdownMenuItem
           onSelect={() => {
-            GlobalModal.title = `Delete ${isDraftPage ? "Draft" : "Remittance"}`;
-            GlobalModal.description = `Are you sure you want to delete this ${isDraftPage ? "draft" : "Remittance"
-              }?`;
+            GlobalModal.title = `Delete Remittance`;
+            GlobalModal.description = `Are you sure you want to delete this Remittance`;
             GlobalModal.children = <Alert onConfirm={deleteEntity} actionType="delete" />;
             GlobalModal.onOpen();
           }}
           className="focus:bg-destructive focus:text-destructive-foreground"
         >
           <Trash className="mr-2 h-4 w-4" />
-          Delete {isDraftPage ? "Draft" : "Remittance"}
+          Delete Remittance
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

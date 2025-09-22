@@ -40,6 +40,13 @@ type DownloadInvRemittance = {
 
 interface Props {
     remittanceData: DownloadInvRemittance[];
+    consigneeData?: {
+        _id: string,
+        name: string,
+        address: string,
+        mobileNo: string,
+        email: string,
+    }
 }
 
 // Helper to convert image URL → base64 for jsPDF
@@ -55,7 +62,7 @@ const getBase64FromUrl = async (url: string): Promise<string> => {
     });
 };
 
-const DownloadInvRemittance: React.FC<Props> = ({ remittanceData }) => {
+const DownloadInvRemittance: React.FC<Props> = ({ remittanceData, consigneeData }) => {
     const [open, setOpen] = useState(false);
     const [consigneeNames, setConsigneeNames] = useState(
         remittanceData.map((r) => r.consigneeId?.name || "").filter((v, i, a) => v && a.indexOf(v) === i)
@@ -83,10 +90,10 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData }) => {
     const generatePDF = async () => {
         const filteredData = remittanceData.filter(
             (r) =>
-                r.consigneeId?.name?.toLowerCase() === consigneeName.toLowerCase()
+                r.consigneeId?.name?.toLowerCase() === (consigneeData ? consigneeData.name.toLowerCase() : consigneeName.toLowerCase())
         );
 
-        if (filteredData.length === 0) {
+        if (!consigneeData && filteredData.length === 0) {
             alert("No data found for this consignee");
             return;
         }
@@ -130,7 +137,7 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData }) => {
 
         doc.setFontSize(10);
         doc.text(
-            `Consignee: ${consigneeName}`,
+            `Consignee: ${consigneeData ? consigneeData.name : consigneeName}`,
             14,
             40
         );
@@ -267,53 +274,60 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData }) => {
             { align: "center", maxWidth: pageWidth - 20 }
         );
 
-        doc.save(`${consigneeName}-remittance-statement.pdf`);
+        doc.save(`${consigneeData ? consigneeData?.name : consigneeName}-remittance-statement.pdf`);
         setOpen(false);
     };
     return (
         <div className="flex items-center gap-4">
-            <Dialog open={open} onOpenChange={setOpen}>
-                <DialogTrigger asChild>
-                    <Button variant="outline">Download Remittances
-                        <Download className="w-6 h-6" />
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Download Remittance Statement</DialogTitle>
-                        <DialogDescription>
-                            Enter consignee name to generate statement
-                        </DialogDescription>
-                    </DialogHeader>
+            {consigneeData ?
+                <Button onClick={generatePDF} variant="outline">Download Remittances
+                    <Download className="w-6 h-6" />
+                </Button>
+                :
 
-                    <Select
-                        value={selectedConsigneeName}
-                        onValueChange={(value) => {
-                            setSelectedConsigneeName(value);
-                            setConsigneeName(value);
-                        }}
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline">Download Remittances
+                            <Download className="w-6 h-6" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Download Remittance Statement</DialogTitle>
+                            <DialogDescription>
+                                Enter consignee name to generate statement
+                            </DialogDescription>
+                        </DialogHeader>
 
-                        disabled={consigneeNames.length === 0}
-                    >
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Consignee Name" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {consigneeNames.map((name) => (
-                                <SelectItem key={name} value={name}>
-                                    {name}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                        <Select
+                            value={selectedConsigneeName}
+                            onValueChange={(value) => {
+                                setSelectedConsigneeName(value);
+                                setConsigneeName(value);
+                            }}
+
+                            disabled={consigneeNames.length === 0}
+                        >
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Consignee Name" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {consigneeNames.map((name) => (
+                                    <SelectItem key={name} value={name}>
+                                        {name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
 
 
 
-                    <DialogFooter>
-                        <Button onClick={generatePDF}>Download</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                        <DialogFooter>
+                            <Button onClick={generatePDF}>Download</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            }
         </div>
     );
 };
