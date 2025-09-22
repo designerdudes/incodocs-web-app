@@ -289,13 +289,16 @@ export const columns: ColumnDef<Blocks>[] = [
               "bg-yellow-100 text-yellow-700 hover:bg-gray-200/60"
           )}
         >
-          {currentStatus === "cut"
-            ? " Cut"
-            : currentStatus === "split"
-            ? " Split"
-            : currentStatus === "dressed"
-            ? " Dressed"
-            : currentStatus}
+          {currentStatus === "inStock" ? " In Stock": 
+          currentStatus === "inDressing"? " In Dressing": 
+          currentStatus === "dressed"? " Dressed": 
+          currentStatus === "inSplitting" ? " In Splitting": 
+          currentStatus === "split"? " Split": 
+          currentStatus === "inCutting"? " In Cutting":
+          currentStatus === "readyForCutting" ? " Ready For Cutting": 
+          currentStatus === "cut"? " Cut": 
+          currentStatus === "cracked"? " Cracked":
+          currentStatus}
         </Badge>
       );
     },

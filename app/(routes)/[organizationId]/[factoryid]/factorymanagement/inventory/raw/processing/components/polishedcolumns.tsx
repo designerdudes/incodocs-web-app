@@ -29,8 +29,26 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         enableSorting: false,
         enableHiding: false,
     },
+     {
+        accessorKey: "slabId",
+        header: ({ column }) => (
+            <Button
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                Slab Id
+                <ArrowUpDown className="ml-2 h-4 w-4" />
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {row.original.slabId}
+            </div>
+        ),
+        filterFn: 'includesString',
+    },
     {
-        accessorKey: "slabNumber",
+        accessorKey: "productName",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -42,7 +60,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.slabNumber}
+                {row.original.productName}
             </div>
         ),
         filterFn: 'includesString',
@@ -64,7 +82,42 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
             </div>
         ),
     },
-
+{
+    accessorKey: "Length",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Length
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.original?.dimensions?.length?.value}{" "}
+        {row.original?.dimensions?.length?.units}
+      </div>
+    ),
+  },
+  {
+    accessorKey: "Height",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Height
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">
+        {row.original?.dimensions?.height?.value}{" "}
+        {row.original?.dimensions?.height?.units}
+      </div>
+    ),
+  },
     {
         accessorKey: "status",
         header: ({ column }) => (

@@ -4,6 +4,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown, Eye } from "lucide-react";
 import CellAction from "./cell-action";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 export interface SlabInterface {
   dimensions: {
@@ -156,22 +158,48 @@ export const columns: ColumnDef<SlabInterface>[] = [
       );
     },
   },
-  {
+ {
     accessorKey: "status",
     header: ({ column }) => (
       <Button
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Slab Status
+        Block Status
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">
-        {row.original.status}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const currentStatus = row.original?.status || "N/A";
+      return (
+        <Badge
+          className={cn(
+            currentStatus === "readyForPolish" &&
+              "bg-blue-100 text-blue-800 hover:bg-blue-200/80",
+            currentStatus === "inPolishing" &&
+              "bg-orange-100 text-orange-800 hover:bg-orange-200/80",
+              currentStatus === "polished" &&
+              "bg-purple-100 text-purple-900 hover:bg-purple-200/80",
+            currentStatus === "sold" &&
+              "bg-green-100 text-green-800 hover:bg-green-200/80",
+            currentStatus === "cracked" &&
+              "bg-yellow-100 text-yellow-700 hover:bg-gray-200/60"
+          )}
+        >
+          {currentStatus === "readyForPolish"
+            ? " Ready For Polish"
+            : currentStatus === "inPolishing"
+            ? " In Polishing"
+            : currentStatus === "polished"
+            ? " Polished"
+            : currentStatus === "sold"
+            ? " Sold"
+            : currentStatus === "cracked"
+            ? " Cracked"
+            : currentStatus}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: "squareft",

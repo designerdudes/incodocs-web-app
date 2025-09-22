@@ -145,7 +145,7 @@ export default async function ViewFinishedPage({ params }: Props) {
         <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full">
           <div className="flex-1">
             <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-              <Card x-chunk="dashboard-07-chunk-0">
+              <Card className="1.5/5">
                 <CardHeader>
                   <CardTitle>Cutting Inches With Allowance</CardTitle>
                   <CardDescription>{ }</CardDescription>

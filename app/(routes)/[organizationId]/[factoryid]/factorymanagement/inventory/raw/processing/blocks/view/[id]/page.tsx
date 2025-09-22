@@ -90,9 +90,8 @@ export default async function BlocksPage({ params }: Props) {
           </p>
         </div>
       </div>
-      <div className="flex-1">
-        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card x-chunk="dashboard-07-chunk-0">
+      <div className="flex flex-1 gap-6">
+          <Card className="w-1.5/5">
             <CardHeader>
               <CardTitle>Block Details</CardTitle>
               <CardDescription>{`Details of ${BlockData?.blockNumber}`}</CardDescription>
@@ -183,7 +182,7 @@ export default async function BlocksPage({ params }: Props) {
             </CardContent>
           </Card>
           {/* Slabs DataTable */}
-          <div className="container mx-auto">
+          <div className="w-3.5/5">
             <DataTable
               bulkDeleteIdName="_id"
               bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
@@ -196,7 +195,6 @@ export default async function BlocksPage({ params }: Props) {
             />
           </div>
         </div>
-      </div>
     </div>
   );
 }

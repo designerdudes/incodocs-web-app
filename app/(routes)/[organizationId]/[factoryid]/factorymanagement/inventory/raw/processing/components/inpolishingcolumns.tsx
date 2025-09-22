@@ -45,6 +45,7 @@ export type Slab = {
     };
   };
   isActive?: boolean;
+  slabId:string;
   weight?: string;
   height?: string;
   breadth?: string;
@@ -82,7 +83,23 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "slabNumber",
+    accessorKey: "slabId",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Slab Id
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original.slabId}</div>
+    ),
+    filterFn: "includesString",
+  },
+  {
+    accessorKey: "productName",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -93,7 +110,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.slabNumber}</div>
+      <div className="capitalize">{row.original.productName}</div>
     ),
     filterFn: "includesString",
   },
