@@ -7,13 +7,13 @@ import InPolishingCellAction from "./inpolishingcell-actions";
 
 export type Slab = {
   _id: string;
-  slabNumber: number;
+  slabNumber: string;
   blockId: {
     lotId: any;
     id: string;
     materialType: string;
+    blockNumber: string;
   };
-  blockNumber: number;
   blockLotName?: string;
   factoryId: string;
   productName: string;
@@ -99,7 +99,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
     filterFn: "includesString",
   },
   {
-    accessorKey: "productName",
+    accessorKey: "slabNumber",
     header: ({ column }) => (
       <Button
         variant="ghost"
@@ -110,7 +110,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.productName}</div>
+      <div className="capitalize">{row.original.slabNumber}</div>
     ),
     filterFn: "includesString",
   },
@@ -126,7 +126,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.blockNumber}</div>
+      <div className="capitalize">{row.original?.blockId?.blockNumber}</div>
     ),
   },
   {

@@ -48,7 +48,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         filterFn: 'includesString',
     },
     {
-        accessorKey: "productName",
+        accessorKey: "slabNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -60,13 +60,13 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.productName}
+                {row.original.slabNumber}
             </div>
         ),
         filterFn: 'includesString',
     },
     {
-        accessorKey: "blockNumber",
+        accessorKey: "blockId?.blockNumber",
         header: ({ column }) => (
             <Button
                 variant="ghost"
@@ -78,7 +78,7 @@ export const Polishedcolumns: ColumnDef<Slab>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blockNumber}
+                {row.original.blockId?.blockNumber}
             </div>
         ),
     },
