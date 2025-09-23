@@ -9,6 +9,7 @@ import { dressedcolumns } from "./dressedColumns";
 import { insplittingcolumns } from "./inSplittingColumns";
 import { splittedcolumns } from "./splittedColumns";
 import { Blocks } from "./incuttingcolumns";
+import { readyForCuttingcolumns } from "./readyForCuttingcolumn";
 
 interface Props {
   inDressing: any;
@@ -24,9 +25,10 @@ interface Props {
   Dressedcolumns: any;
   inSplittingcolumns: any;
   Splittedcolumns: any;
+  ReadyForCutting: any;
   incuttingcolumns: any;
   Readyforpolishcolumns: any;
-  inPolishingolumns: any;
+  inPolishingcolumns: any;
   Polishedcolumns: any;
 }
 
@@ -35,6 +37,7 @@ function TabsDataTable({
   Dressed,
   inSplitting,
   Splitted,
+  ReadyForCutting,
   inCutting,
   readyForPolish,
   inPolishing,
@@ -42,7 +45,7 @@ function TabsDataTable({
   slabsData,
   incuttingcolumns,
   Readyforpolishcolumns,
-  inPolishingolumns,
+  inPolishingcolumns,
   Polishedcolumns,
 }: Props) {
   const router = useRouter();
@@ -81,10 +84,16 @@ function TabsDataTable({
             {inSplitting?.length}
           </Badge>
         </TabsTrigger>
-        <TabsTrigger className="gap-2" value="Splitted">
+        <TabsTrigger className="gap-2" value="split">
           Splitted
           <Badge className="text-bg-primary-foreground" variant="outline">
             {Splitted?.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger className="gap-2" value="readyForCutting">
+          Ready For Cutting
+          <Badge className="text-bg-primary-foreground" variant="outline">
+            {ReadyForCutting?.length}
           </Badge>
         </TabsTrigger>
         <TabsTrigger className="gap-2" value="inCutting">
@@ -163,7 +172,7 @@ function TabsDataTable({
           data={inSplitting as any}
         />
       </TabsContent>
-      <TabsContent value="Splitted">
+      <TabsContent value="split">
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
@@ -173,6 +182,18 @@ function TabsDataTable({
           searchKey="blockNumber"
           columns={splittedcolumns}
           data={Splitted as any}
+        />
+      </TabsContent>
+      <TabsContent value="readyForCutting">
+        <DataTable
+          bulkDeleteIdName="_id"
+          bulkDeleteTitle="Are you sure you want to delete the selected blocks?"
+          bulkDeleteDescription="This will delete the selected blocks, and they will not be recoverable."
+          bulkDeleteToastMessage="Selected blocks deleted successfully"
+          deleteRoute="/factory-management/inventory/deletemultipleblocks"
+          searchKey="blockNumber"
+          columns={readyForCuttingcolumns}
+          data={ReadyForCutting as any}
         />
       </TabsContent>
       <TabsContent value="inCutting">
@@ -213,14 +234,14 @@ function TabsDataTable({
           bulkDeleteToastMessage="Selected slabs deleted successfully"
           deleteRoute="/factory-management/inventory/deletemultipleslabs"
           searchKey="slabNumber"
-          columns={inPolishingolumns}
+          columns={inPolishingcolumns}
           data={inPolishing}
-          tab="inPolishing"
-          bulkPolishTitle="Are you sure you want to mark these slabs as polished?"
-          bulkPOlishDescription="This will mark the selected slabs as polished, and they will not be recoverable."
-          bulkPolishIdName="_id"
-          updateRoute="/factory-management/inventory/addtrim-multipleslabs"
-          bulkPolisToastMessage=" selected slabs marked as polished"
+          // tab="inPolishing"
+          // bulkPolishTitle="Are you sure you want to mark these slabs as polished?"
+          // bulkPOlishDescription="This will mark the selected slabs as polished, and they will not be recoverable."
+          // bulkPolishIdName="_id"
+          // updateRoute="/factory-management/inventory/addtrim-multipleslabs"
+          // bulkPolisToastMessage=" selected slabs marked as polished"
         />
       </TabsContent>
       <TabsContent value="Polished">

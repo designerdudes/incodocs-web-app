@@ -36,7 +36,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const GlobalModal = useGlobalModal();
   //   const readyForPolishSlabs = data.SlabsId.filter((slab: Slab) => slab.status === "readyForPolish");
-  //  console.log(data,"dddddddddddd")
+  //  console.log("eeeeeeeeeeee",data)
 
   return (
     <div>
@@ -64,7 +64,7 @@ export const ReadyforpolishCellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuItem
             onSelect={() => {
               GlobalModal.title = `Send Slabs for Polishing of Block: ${data.blockNumber}`;
-              GlobalModal.description = `There are ${SendForPolish.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
+              GlobalModal.description = `There are ${data?.SlabsId.length} slabs in this block. Select the number of slabs you want to send for polishing.`;
               GlobalModal.children = (
                 <SendForPolish
                   blockId={data._id}

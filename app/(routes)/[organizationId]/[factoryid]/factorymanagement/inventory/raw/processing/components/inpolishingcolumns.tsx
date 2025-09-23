@@ -7,13 +7,13 @@ import InPolishingCellAction from "./inpolishingcell-actions";
 
 export type Slab = {
   _id: string;
-  slabNumber: number;
+  slabNumber: string;
   blockId: {
     lotId: any;
     id: string;
     materialType: string;
+    blockNumber: string;
   };
-  blockNumber: number;
   blockLotName?: string;
   factoryId: string;
   productName: string;
@@ -45,6 +45,7 @@ export type Slab = {
     };
   };
   isActive?: boolean;
+  slabId:string;
   weight?: string;
   height?: string;
   breadth?: string;
@@ -56,7 +57,7 @@ export type Slab = {
   updatedAt: string;
 };
 
-export const inPolishingolumns: ColumnDef<Slab>[] = [
+export const inPolishingcolumns: ColumnDef<Slab>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -80,6 +81,22 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
     ),
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: "slabId",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Slab Id
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div className="capitalize">{row.original.slabId}</div>
+    ),
+    filterFn: "includesString",
   },
   {
     accessorKey: "slabNumber",
@@ -109,7 +126,7 @@ export const inPolishingolumns: ColumnDef<Slab>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.blockNumber}</div>
+      <div className="capitalize">{row.original?.blockId?.blockNumber}</div>
     ),
   },
   {

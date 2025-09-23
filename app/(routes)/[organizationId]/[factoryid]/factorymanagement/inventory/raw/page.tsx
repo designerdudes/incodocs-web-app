@@ -15,7 +15,7 @@ interface Props {
   };
 }
 
-export default async function page({ params }: Props) {
+export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
@@ -29,26 +29,36 @@ export default async function page({ params }: Props) {
     `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
   );
 
-  const lotsData = Lotres;
-  const slabData = Slabres;
+  const lotsData = Array.isArray(Lotres) ? Lotres : [];
+  const slabData = Array.isArray(Slabres) ? Slabres : [];
 
-  // Update cards with specific values and dynamic factoryId URL
+  // Compute totals
+  const totalLots = lotsData.length;
+  const totalBlocks = lotsData.reduce(
+    (sum, lot) => sum + (lot.blocksId?.length || 0),
+    0
+  );
+  const totalSlabs = slabData.length;
+
+  // Update cards with specific values
   const rawInventoryCards = BaseInventoryCards.map((card) => ({
     ...card,
     value:
       card.title === "Total Lots"
-        ? lotsData.length || 0
-        : card.title === "Slabs in Processing"
-          ? slabData.length || 0
-          : card.value,
-    // Prepend factoryId to the buttonUrl to create the full route
-    // buttonUrl: `/${params.factoryid}${card.buttonUrl}`,
+        ? totalLots
+        : card.title === "Total Blocks"
+        ? totalBlocks
+        : card.title === "Processing"
+        ? totalSlabs
+        : card.value,
     desc:
       card.title === "Total Lots"
         ? "Number of lots currently available in inventory."
-        : card.title === "Slabs in Processing"
-          ? "Slabs that are currently under processing."
-          : "",
+        : card.title === "Total Blocks"
+        ? "Total blocks across all lots."
+        : card.title === "Processing"
+        ? "Blocks And Slabs that are currently under processing."
+        : "",
   }));
 
   return (
@@ -75,9 +85,9 @@ export default async function page({ params }: Props) {
             title={card.title}
             stat={card.value}
             icon={card.icon}
-            desc=""
-            href={`/${params.factoryid}/${card.buttonUrl}`} // Pass the correct button URL with factoryId
-            factoryId={params.organizationId} // Correctly pass factoryId here
+            desc={card.desc}
+            href={`/${params.factoryid}/${card.buttonUrl}`} // route with factoryid
+            factoryId={params.organizationId} // keep this if StatsCard expects organizationId
           />
         ))}
       </div>

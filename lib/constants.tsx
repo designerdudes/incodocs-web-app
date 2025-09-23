@@ -176,7 +176,7 @@ const rawInventoryCards = [
   },
 
   {
-    title: "Slabs in Processing",
+    title: "Processing",
     icon: <FcProcess className="w-6 h-6 text-indigo-500 self-end" />,
     value: 30,
     color: "bg-primary",

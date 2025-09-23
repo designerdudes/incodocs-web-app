@@ -75,7 +75,7 @@ export default async function SlabsPage({ params }: Props) {
       </div>
       <div className="flex-1">
         <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
-          <Card x-chunk="dashboard-07-chunk-0">
+          <Card className="w-3/5">
             <CardHeader>
               <CardTitle>Slab Details</CardTitle>
               <CardDescription>{`Details of Slab: ${SlabData?.slabNumber}`}</CardDescription>
@@ -99,7 +99,7 @@ export default async function SlabsPage({ params }: Props) {
                     <TableCell className="whitespace-nowrap">
                       Block Number
                     </TableCell>
-                    <TableCell>{SlabData?.blockNumber}</TableCell>
+                    <TableCell>{SlabData?.blockId?.blockNumber}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell className="whitespace-nowrap">
@@ -134,7 +134,7 @@ export default async function SlabsPage({ params }: Props) {
                       Polish Length (inch)
                     </TableCell>
                     <TableCell>
-                      {SlabData?.trim?.length?.value ?? "N/A"}
+                      {SlabData?.polishedValues?.length?.value ?? "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -142,7 +142,7 @@ export default async function SlabsPage({ params }: Props) {
                       Polish Height (inch)
                     </TableCell>
                     <TableCell>
-                      {SlabData?.trim?.height?.value ?? "N/A"}
+                      {SlabData?.polishedValues?.height?.value ?? "N/A"}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -167,50 +167,58 @@ export default async function SlabsPage({ params }: Props) {
               </Table>
             </CardContent>
             {/* Polishing Details Section */}
-            <CardHeader>
-              <CardTitle>Polishing Details</CardTitle>
-              <CardDescription>
-                Polishing information for this slab
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Field</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">Machine</TableCell>
-                    <TableCell>
-                      {SlabData?.polishingMachineId?.machineName
-                        ? `${SlabData.polishingMachineId.machineName} - ${SlabData.polishingMachineId.typePolish}`
-                        : "N/A"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Polishing Date and Time
-                    </TableCell>
-                    <TableCell>
-                      {SlabData?.polishingScheduledAt
-                        ? moment(
-                            `${
-                              SlabData.polishingScheduledAt.date.split("T")[0]
-                            }T${String(
-                              SlabData.polishingScheduledAt.time.hours
-                            ).padStart(2, "0")}:${String(
-                              SlabData.polishingScheduledAt.time.minutes
-                            ).padStart(2, "0")}:00Z`
-                          ).format("DD MMM YYYY, hh:mm A")
-                        : "N/A"}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
+            {/* Polishing Details Section */}
+<CardHeader>
+  <CardTitle>Polishing Details</CardTitle>
+  <CardDescription>
+    Polishing information for this slab
+  </CardDescription>
+</CardHeader>
+<CardContent>
+  <Table>
+    <TableHeader>
+      <TableRow>
+        <TableHead>Field</TableHead>
+        <TableHead>Details</TableHead>
+      </TableRow>
+    </TableHeader>
+    <TableBody>
+      <TableRow>
+        <TableCell className="whitespace-nowrap">Machine</TableCell>
+        <TableCell>
+          {SlabData?.polishing?.machineId?.machineName
+            ? SlabData.polishing.machineId?.machineName
+            : "N/A"}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="whitespace-nowrap">Polish In Time</TableCell>
+        <TableCell>
+          {SlabData?.polishing?.in
+            ? moment(SlabData.polishing.in).format("DD MMM YYYY, hh:mm A")
+            : "N/A"}
+        </TableCell>
+      </TableRow>
+      <TableRow>
+        <TableCell className="whitespace-nowrap">Polish Out Time</TableCell>
+        <TableCell>
+          {SlabData?.polishing?.out
+            ? moment(SlabData.polishing.out).format("DD MMM YYYY, hh:mm A")
+            : "N/A"}
+        </TableCell>
+      </TableRow>
+      {/* <TableRow>
+        <TableCell className="whitespace-nowrap">Components</TableCell>
+        <TableCell>
+          {SlabData?.polishing?.components?.length > 0
+            ? SlabData.polishing.components.join(", ")
+            : "N/A"}
+        </TableCell>
+      </TableRow> */}
+    </TableBody>
+  </Table>
+</CardContent>
+
           </Card>
         </div>
       </div>
