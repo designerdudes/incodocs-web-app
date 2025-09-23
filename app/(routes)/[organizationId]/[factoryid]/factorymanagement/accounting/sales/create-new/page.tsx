@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { SalesCreateNewForm } from "@/components/forms/salesForm";
 import { useSearchParams } from "next/navigation";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface PageProps {
   params: {
@@ -18,18 +19,9 @@ export default async function CreateNewFormPage({ params }: PageProps) {
   const cookieStore = cookies();
 
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/getslabsbyfactory/${factoryid}`
+  );
 
   const slabsData = res;
   const Polished = Array.isArray(slabsData)

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { Separator } from "@/components/ui/separator";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -32,18 +33,11 @@ export default async function ExpensePage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/expense/getbyid/${params.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/expense/getbyid/${params.id}`
   );
 
-  const expenseData = await res.json();
+  const expenseData = res;
 
   // Display data after fetching
   return (

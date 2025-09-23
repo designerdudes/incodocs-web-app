@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import CellAction from "./components/cell-actions";
 import AddFactoryButton from "./components/AddFactoryButton";
 import { Separator } from "@/components/ui/separator";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export interface Factory {
   _id: string;
@@ -32,19 +33,11 @@ export default async function FactoryPage({ params  }: FactoryPageProps, ) {
   let factories: Factory[] = [];
   if (params?.organizationId && token) {
     try {
-      const res = await fetch(`https://incodocs-server.onrender.com/factory/getbyorg/${params?.organizationId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        cache: "no-store", // Ensure fresh data in server component
-      });
+      const res = await fetchWithAuth<any>(
+        `/factory/getbyorg/${params?.organizationId}`
+      );
 
-      if (!res.ok) {
-        throw new Error(`Failed to fetch factories: ${res.statusText}`);
-      }
-      factories = await res.json();
+      factories = res;
     } catch (error) {
       console.error("Error fetching factories:", error);
     }

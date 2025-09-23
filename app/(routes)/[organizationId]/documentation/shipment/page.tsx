@@ -8,6 +8,7 @@ import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
 import { useParams } from "next/navigation";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface params {
   params: {
@@ -18,18 +19,9 @@ interface params {
 export default async function Page(params: params) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/shipment/getbyorg/${params.params.organizationId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-      return response.json();
-    }).catch((err) => console.log(err));
+  const res = await fetchWithAuth<any>(
+    `/shipment/getbyorg/${params.params.organizationId}`
+  );
   let shipmentData;
   shipmentData = res;
   return (

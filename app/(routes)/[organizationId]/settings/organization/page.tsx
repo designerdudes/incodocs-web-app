@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import CellAction from "./components/cell-action";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Organization data type based on API response
 export interface Organization {
@@ -63,21 +64,10 @@ export default async function OrganizationSettingsPage({
   // Fetch organization data
   if (organizationId && token) {
     try {
-      const organizationRes = await fetch(
-        `https://incodocs-server.onrender.com/organizations/get/${organizationId}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const organizationRes = await fetchWithAuth<any>(
+        `/organizations/get/${organizationId}`
       );
-
-      if (!organizationRes.ok) {
-        throw new Error("Failed to fetch organization data");
-      }
-      organization = await organizationRes.json();
+      organization = organizationRes;
     } catch (err) {
       console.error("Error fetching organization:", err);
       error = "Failed to load organization data. Please try again later.";

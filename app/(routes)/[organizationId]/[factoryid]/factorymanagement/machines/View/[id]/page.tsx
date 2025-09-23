@@ -28,6 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function ViewMachinePage({
   params,
@@ -38,28 +39,14 @@ export default async function ViewMachinePage({
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/machine/getone/${_id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/machine/getone/${_id}`
   );
 
-  const MachineData = await res.json();
+  const MachineData = res;
 
-  const logsRes = await fetch(
-    `https://incodocs-server.onrender.com/machine/log/getbymachine/${_id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const logsRes = await fetchWithAuth<any>(
+    `/machine/log/getbymachine/${_id}`
   );
 
   const machineLogs = await logsRes.json();

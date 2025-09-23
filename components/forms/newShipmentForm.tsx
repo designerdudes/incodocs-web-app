@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { postData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
 import { UploadCloud } from "lucide-react";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // const formSchema = z.object({
 //     bookingDetails: z.object({
@@ -260,17 +261,14 @@ export function NewShipmentForm() {
     formData.append("file", file);
 
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
         method: "POST",
         body: formData,
       });
 
       // Ensure the response is OK before parsing JSON
-      if (!response.ok) {
-        throw new Error(`File upload failed: ${response.statusText}`);
-      }
 
-      const result = await response.json(); // Parse once
+      const result = response; // Parse once
       console.log("✅ File Upload Response:", result);
 
       return result.filePath || undefined; // Ensure correct key

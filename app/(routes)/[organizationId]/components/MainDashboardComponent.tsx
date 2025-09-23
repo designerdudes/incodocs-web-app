@@ -32,6 +32,7 @@ import {
   FormControl,
   FormMessage,
 } from "@/components/ui/form";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Address {
   Prefix: string | number | readonly string[] | undefined;
@@ -244,24 +245,11 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({
 
   const handleCreateOrg = async (formData: OrgSchemaType) => {
     try {
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/organizations/add",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ...formData,
-            Prefix: formData.Prefix,
-          }),
-        }
+      const response = await fetchWithAuth<any>(
+        "/organizations/add"
       );
-      if (!response.ok) {
-        throw new Error("Failed to create organization");
-      }
-      const createdOrg = await response.json();
+
+      const createdOrg = response;
       setOrganizations((prev: any) => [...prev, createdOrg]);
       setCreateOrgError(null);
       modal.onClose();

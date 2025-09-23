@@ -11,6 +11,11 @@ export async function fetchWithAuth<T>(
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value;
 
+    const baseUrl = "https://incodocs-server.onrender.com";
+    url = `${baseUrl}${
+      url.trim().startsWith("/") ? url.trim() : `/${url.trim()}`
+    }`;
+
     if (!token) {
       throw new Error("No access token found. Please login again.");
     }

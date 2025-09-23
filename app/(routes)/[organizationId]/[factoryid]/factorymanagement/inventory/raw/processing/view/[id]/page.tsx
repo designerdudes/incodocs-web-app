@@ -21,6 +21,7 @@ import {
 import moment from "moment";
 import { cookies } from "next/headers";
 import Heading from "@/components/ui/heading";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -64,19 +65,11 @@ export default async function ViewFinishedPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/finished/get/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/finished/get/${params?.id}`
   );
 
-
-  const FinishedMaterial = await res.json();
+  const FinishedMaterial = res;
 
   // console.log(FinishedMaterial);
   const adjustedDimensions = FinishedMaterial?.dimensions
@@ -85,7 +78,6 @@ export default async function ViewFinishedPage({ params }: Props) {
       FinishedMaterial.dimensions.height.value
     )
     : null;
-
 
   function calculateDimensions(
     length: number,

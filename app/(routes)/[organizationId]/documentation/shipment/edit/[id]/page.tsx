@@ -23,6 +23,7 @@ import { Icons } from "@/components/ui/icons";
 import { debounce } from "lodash";
 import Cookies from "js-cookie";
 import React from "react";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface ShipmentApiResponse {
   shipment: {
@@ -998,12 +999,8 @@ export default function EditShipmentPage({ params }: Props) {
         };
         console.log("Request headers:", headers);
 
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
-          {
-            method: "GET",
-            headers,
-          }
+        const response = await fetchWithAuth<any>(
+          `/shipment/getbyid/${params.id}`
         );
 
         console.log("API Response Status:", response.status);
@@ -1042,7 +1039,7 @@ export default function EditShipmentPage({ params }: Props) {
           );
         }
 
-        const data: ShipmentApiResponse = await response.json();
+        const data: ShipmentApiResponse = response;
         console.log("Raw API response:", JSON.stringify(data, null, 2));
 
         if (!data.shipment) {

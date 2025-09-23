@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 import EditCustomerForm from "../../components/EditCustomerForm";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function EditProductPage({
   params,
@@ -14,15 +15,8 @@ export default async function EditProductPage({
 }) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/accounting/customer/getsingle/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/accounting/customer/getsingle/${params?.id}`
   );
   const CustomerData = await res.json();
 

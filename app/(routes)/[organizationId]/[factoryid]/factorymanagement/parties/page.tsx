@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import React from "react";
 import PartiesDataTable from "./components/partiesDataTable";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export interface Quarry {
   _id: any;
@@ -74,17 +75,10 @@ export default async function quarry({ params }: Props) {
   let quarry;
   let quarryData = [];
   try {
-    quarry = await fetch(
-      `https://incodocs-server.onrender.com/quarry/getbyfactory/${factoryId}?limit=0`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
+    quarry = await fetchWithAuth<any>(
+      `/quarry/getbyfactory/${factoryId}?limit=0`
     );
-    quarryData = await quarry.json();
+    quarryData = quarry;
   } catch (error) {
     console.error("Error fetching quarry data:", error);
   }
@@ -92,17 +86,10 @@ export default async function quarry({ params }: Props) {
   let supplier;
   let supplierData = [];
   try {
-    supplier = await fetch(
-      `https://incodocs-server.onrender.com/accounting/supplier/getbyfactory/${factoryId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
+    supplier = await fetchWithAuth<any>(
+      `/accounting/supplier/getbyfactory/${factoryId}`
     );
-    supplierData = await supplier.json();
+    supplierData = supplier;
   } catch (error) {
     console.error("Error fetching supplier data:", error);
   }
@@ -110,17 +97,10 @@ export default async function quarry({ params }: Props) {
   let customer;
   let customerData = [];
   try {
-    customer = await fetch(
-      `https://incodocs-server.onrender.com/accounting/customer/getbyfactory/${factoryId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
+    customer = await fetchWithAuth<any>(
+      `/accounting/customer/getbyfactory/${factoryId}`
     );
-    customerData = await customer.json();
+    customerData = customer;
   } catch (error) {
     console.error("Error fetching customer data:", error);
   }

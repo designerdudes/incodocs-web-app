@@ -6,25 +6,18 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 import EditMachineForm from "../../components/editMachineForm";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
+export default async function EditProductPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const res = await fetchWithAuth<any>(`/machine/getone/${params?.id}`);
+  const MachineData = res;
 
-
-
-export default async function EditProductPage( {params}: { params: { id: string } }) {
-    const cookieStore = cookies();
-    const token = cookieStore.get("AccessToken")?.value || "";
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/machine/getone/${params?.id}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    );
-      const MachineData = await res.json();        
-    
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">
             <div className="topbar w-full flex items-center justify-between">

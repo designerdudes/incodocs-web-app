@@ -38,6 +38,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { FileUploadField } from "../../shipment/createnew/components/FileUploadField";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Zod Schema
 const formSchema = z.object({
@@ -138,7 +139,9 @@ export default function EditTransporterForm({ params }: Props) {
       try {
         setIsFetching(true);
         setFetchError(null);
-        const data = await fetchData(`/shipment/transporter/getone/${transporterId}`);
+        const data = await fetchData(
+          `/shipment/transporter/getone/${transporterId}`
+        );
         console.log("Fetched transporter data:", data);
 
         const transporter = data?.findTransporter;
@@ -191,16 +194,17 @@ export default function EditTransporterForm({ params }: Props) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+      const response = await fetchWithAuth<any>(
+        "/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
-      setValue(`documents.${index}.fileUrl`, data.storageLink, { shouldDirty: true });
+      const data = response;
+      setValue(`documents.${index}.fileUrl`, data.storageLink, {
+        shouldDirty: true,
+      });
       setValue(`documents.${index}.fileName`, file.name, { shouldDirty: true });
       toast.success("File uploaded successfully!");
       saveProgress(getValues());
@@ -315,7 +319,10 @@ export default function EditTransporterForm({ params }: Props) {
                     review: doc.review,
                   })),
                 };
-                await putData(`/shipment/transporter/put/${transporterId}`, payload);
+                await putData(
+                  `/shipment/transporter/put/${transporterId}`,
+                  payload
+                );
                 setIsLoading(false);
                 GlobalModal.onClose();
                 toast.success("Transporter updated successfully");

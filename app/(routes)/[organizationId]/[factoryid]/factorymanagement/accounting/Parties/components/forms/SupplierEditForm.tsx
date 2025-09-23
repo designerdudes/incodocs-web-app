@@ -18,6 +18,7 @@ import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 const formSchema = z.object({
   supplierName: z
@@ -68,11 +69,10 @@ export default function EditSupplierForm({ params }: EditSupplierFormProps) {
     async function fetchSupplierData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/accounting/suplier/getsingle/${supplierId}`
+        const response = await fetchWithAuth<any>(
+          `/accounting/suplier/getsingle/${supplierId}`
         );
-        if (!response.ok) throw new Error("Failed to fetch supplier data");
-        const data = await response.json();
+        const data = response;
         form.reset({
           supplierName: data.supplierName || "",
           gstNo: data.gstNo || "",

@@ -38,6 +38,7 @@ import CalendarComponent from "@/components/CalendarComponent";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { FileUploadField } from "../../../createnew/components/FileUploadField";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface ShippingDetailsProps {
   shipmentId: string;
@@ -175,18 +176,16 @@ export function ShippingDetails({
         size: file.size,
       });
 
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      const responseText = await response.text();
+      // const responseText = await response.text();
+      const responseText = response;
       console.log("Raw API response text:", responseText);
 
       if (!response.ok) {
@@ -288,12 +287,8 @@ export function ShippingDetails({
         }
 
         // Fetch Forwarders
-        const forwarderResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgId}`,
-          {
-            method: "GET",
-            headers,
-          }
+        const forwarderResponse = await fetchWithAuth<any>(
+          `/shipment/forwarder/getbyorg/${orgId}`
         );
 
         if (!forwarderResponse.ok) {
@@ -310,16 +305,12 @@ export function ShippingDetails({
           );
         }
 
-        const forwarderData = await forwarderResponse.json();
+        const forwarderData = forwarderResponse;
         setForwarders(Array.isArray(forwarderData) ? forwarderData : []);
 
         // Fetch Transporters
-        const transporterResponse = await fetch(
-          `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgId}`,
-          {
-            method: "GET",
-            headers,
-          }
+        const transporterResponse = await fetchWithAuth<any>(
+          `/shipment/transporter/getbyorg/${orgId}`
         );
 
         if (!transporterResponse.ok) {
@@ -335,7 +326,7 @@ export function ShippingDetails({
               `Failed to fetch transporters: ${transporterResponse.status}`
           );
         }
-        const transporterData = await transporterResponse.json();
+        const transporterData = transporterResponse;
         setTransporters(Array.isArray(transporterData) ? transporterData : []);
       } catch (error: any) {
         console.error("Error fetching data:", error);
@@ -359,31 +350,9 @@ export function ShippingDetails({
             return;
           }
 
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${orgId}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-            .then((res) => {
-              if (!res.ok) {
-                if (res.status === 401) {
-                  toast.error("Session expired. Please log in again.");
-                  Cookies.remove("AccessToken");
-                  router.push("/login");
-                }
-                throw new Error(`Failed to fetch forwarders: ${res.status}`);
-              }
-              return res.json();
-            })
-            .then((data) => setForwarders(Array.isArray(data) ? data : []))
-            .catch((error) => {
-              console.error("Error refreshing forwarders:", error);
-            });
+          fetchWithAuth<any>(`/shipment/forwarder/getbyorg/${orgId}`).then(
+            (data) => setForwarders(Array.isArray(data) ? data : [])
+          );
         }}
       />
     );
@@ -404,31 +373,9 @@ export function ShippingDetails({
             return;
           }
 
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${orgId}`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          )
-            .then((res) => {
-              if (!res.ok) {
-                if (res.status === 401) {
-                  toast.error("Session expired. Please log in again.");
-                  Cookies.remove("AccessToken");
-                  router.push("/login");
-                }
-                throw new Error(`Failed to fetch transporters: ${res.status}`);
-              }
-              return res.json();
-            })
-            .then((data) => setTransporters(Array.isArray(data) ? data : []))
-            .catch((error) => {
-              console.error("Error refreshing transporters:", error);
-            });
+          fetchWithAuth<any>(`/shipment/transporter/getbyorg/${orgId}`).then(
+            (data) => setTransporters(Array.isArray(data) ? data : [])
+          );
         }}
       />
     );

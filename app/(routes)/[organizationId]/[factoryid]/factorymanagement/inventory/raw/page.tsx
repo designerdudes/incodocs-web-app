@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import { rawInventoryCards as BaseInventoryCards } from "@/lib/constants";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -19,30 +20,14 @@ export default async function Page({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch Lots Data
-  const Lotres = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    }
-  ).then((response) => response.json());
+  const Lotres = await fetchWithAuth<any>(
+    `/factory-management/inventory/factory-lot/get/${params.factoryid}`
+  );
 
   // Fetch Slabs Data
-  const Slabres = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    }
-  ).then((response) => response.json());
+  const Slabres = await fetchWithAuth<any>(
+    `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
+  );
 
   const lotsData = Array.isArray(Lotres) ? Lotres : [];
   const slabData = Array.isArray(Slabres) ? Slabres : [];

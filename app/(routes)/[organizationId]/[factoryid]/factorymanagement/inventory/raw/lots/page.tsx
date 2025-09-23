@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Lots {
   _id: string;
@@ -31,18 +32,9 @@ export default async function LotManagement({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/factory-lot/get/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
+  const res = await fetchWithAuth(
+    `/factory-management/inventory/factory-lot/get/${params?.factoryid}`
+  );
 
   let lotsData;
   lotsData = res;

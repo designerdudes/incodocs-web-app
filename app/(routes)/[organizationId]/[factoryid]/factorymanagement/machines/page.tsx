@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import { MachineColumns } from "./components/columns";
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export interface Machine {
   _id: any;
@@ -33,22 +33,14 @@ interface Props {
 }
 
 export default async function machines({ params }: Props) {
-    const cookieStore = cookies();
-    const token = cookieStore.get("AccessToken")?.value || "";
-    const factoryId = params.factoryid
-    // Fetch data (unchanged)
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/machine/getbyfactory/${factoryId}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    ) ;
-    const MachineData = await res.json();
-
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const factoryId = params.factoryid;
+  // Fetch data (unchanged)
+  const res = await fetchWithAuth<any>(
+    `/machine/getbyfactory/${factoryId}`
+  );
+  const MachineData = res;
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">

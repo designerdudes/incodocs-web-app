@@ -39,6 +39,7 @@ import toast from "react-hot-toast";
 import { FileUploadField } from "./FileUploadField";
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Form data types
 interface Invoice {
@@ -331,11 +332,7 @@ export function ShippingDetails({
         currentUser={currentUser}
         orgId={organizationId}
         onSuccess={() => {
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organizationId}`
-          )
-            .then((res) => res.json())
-            .then((data) => setForwarders(data));
+          fetchWithAuth<any>(`/shipment/forwarder/getbyorg/${organizationId}`);
         }}
       />
     );
@@ -349,11 +346,9 @@ export function ShippingDetails({
         currentUser={currentUser}
         orgId={organizationId}
         onSuccess={() => {
-          fetch(
-            `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organizationId}`
-          )
-            .then((res) => res.json())
-            .then((data) => setTransporters(data));
+          fetchWithAuth<any>(
+            "/shipment/transporter/getbyorg/${organizationId}"
+          ).then((data) => setTransporters(data));
         }}
       />
     );
@@ -391,7 +386,6 @@ export function ShippingDetails({
                   // onAddNew={openForwarderForm}
                   addNewLabel="Add New Forwarder"
                   className="truncate w-full"
-                  
                 />
               </FormControl>
               <FormMessage />

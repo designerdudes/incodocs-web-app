@@ -32,6 +32,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import CalendarComponent from "@/components/CalendarComponent";
 import CustomBrokerForm from "@/components/forms/CustomBrokerForm";
 import { FileUploadField } from "../../../createnew/components/FileUploadField";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface ShippingBillDetailsProps {
   shipmentId: string;
@@ -218,15 +219,11 @@ export function ShippingBillDetails({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = response;
       setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
     } catch (error) {

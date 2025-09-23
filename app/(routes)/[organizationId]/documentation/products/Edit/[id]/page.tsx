@@ -6,9 +6,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import EditProductsForm from "../../components/EditProductsForm";
 import { cookies } from "next/headers";
-
-
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function EditProductPage( {params}: { params: { id: string } }) {
 
@@ -36,19 +34,12 @@ export default async function EditProductPage( {params}: { params: { id: string 
                 _id: 123456
             }
 
-    const cookieStore = cookies();
-      const token = cookieStore.get("AccessToken")?.value || "";
-      const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/productdetails/get/${params?.id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-          },
-        }
-      );
-      const productData = await res.json();
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const res = await fetchWithAuth<any>(
+    `/shipment/productdetails/get/${params?.id}`
+  );
+  const productData = res;
 
       console.log("productData", productData);
         

@@ -42,6 +42,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Icons } from "@/components/ui/icons";
 import { FileUploadField } from "../../shipment/createnew/components/FileUploadField";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Zod Schema
 const formSchema = z.object({
@@ -206,15 +207,14 @@ export default function EditSupplierForm({ params }: Props) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
+      const response = await fetchWithAuth<any>(
+        "/shipmentdocsfile/upload",
         {
           method: "POST",
           body: formData,
         }
       );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
+      const data = response;
       setValue(`documents.${index}.fileUrl`, data.storageLink, {
         shouldDirty: true,
       });
@@ -630,7 +630,6 @@ export default function EditSupplierForm({ params }: Props) {
                               </FormItem>
                             )}
                           />
-
                         </TableCell>
                         <TableCell>
                           <FormField

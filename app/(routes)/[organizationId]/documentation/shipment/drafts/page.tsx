@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import ShipmentDataTable from "@/components/shipmentDataTable";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface params {
   params: {
@@ -15,22 +16,14 @@ interface params {
 }
 
 export default async function DraftsPage(params: params) {
-  
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
   let draftData = [];
   try {
-    const res = await fetch(
-      `https://incodocs-server.onrender.com/shipmentdrafts/getbyorg/${params.params.organizationId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-      }
+    const res = await fetchWithAuth<any>(
+      `/shipmentdrafts/getbyorg/${params.params.organizationId}`
     );
-    const response = await res.json();
+    const response = res;
     console.log("Drafts API Response:", response); // Log raw API response
     draftData = response.data || response || []; // Handle various response structures
     console.log("Processed draftData:", draftData); // Log processed data
@@ -55,7 +48,6 @@ export default async function DraftsPage(params: params) {
             Manage and review your draft shipment records.
           </p>
         </div>
-        
       </div>
       <Separator className="my-2" />
       <div className="h-[92%]">
@@ -65,7 +57,6 @@ export default async function DraftsPage(params: params) {
           </div>
         ) : (
           <ShipmentDataTable
-          
             bulkDeleteIdName="_id"
             bulkDeleteTitle="Are you sure you want to delete the selected draft shipments?"
             bulkDeleteDescription="This will delete all the selected draft shipments, and they will not be recoverable."

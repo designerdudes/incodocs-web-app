@@ -23,6 +23,7 @@ import moment from "moment";
 import { DataTable } from "@/components/ui/data-table";
 import { finishedblockcolumn } from "./component/finishedblockcolumn";
 import { Separator } from "@/components/ui/separator";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -35,18 +36,11 @@ export default async function SlabsPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/transaction/purchase/slabgetbyid/${SlabDataId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/transaction/purchase/slabgetbyid/${SlabDataId}`
   );
 
-  const SlabData = await res.json();
+  const SlabData = res;
   const purchase = SlabData?.getPurchase;
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
@@ -178,5 +172,5 @@ export default async function SlabsPage({ params }: Props) {
         </div>
       </div>
     </div>
-  )
+  );
 }

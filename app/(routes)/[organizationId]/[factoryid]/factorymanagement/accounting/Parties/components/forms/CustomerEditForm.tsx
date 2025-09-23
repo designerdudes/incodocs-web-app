@@ -18,6 +18,7 @@ import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 const formSchema = z.object({
   customerName: z.string().min(3, { message: "Customer name must be at least 3 characters long" }),
@@ -60,11 +61,10 @@ export default function EditCustomerForm({ params }: EditCustomerFormProps) {
     async function fetchCustomerData() {
       try {
         setIsFetching(true);
-        const response = await fetch(
-          `https://incodocs-server.onrender.com/accounting/customer/getsingle/${customerId}`
+        const response = await fetchWithAuth<any>(
+          `/accounting/customer/getsingle/${customerId}`
         );
-        if (!response.ok) throw new Error("Failed to fetch customer data");
-        const data = await response.json();
+        const data = response;
         form.reset({
           customerName: data.customerName || "",
           gstNo: data.gstNo || "",

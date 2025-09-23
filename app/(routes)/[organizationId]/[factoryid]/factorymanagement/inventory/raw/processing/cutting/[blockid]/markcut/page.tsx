@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Heading from "@/components/ui/heading";
@@ -7,7 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { MarkCutAndCreateSlabsForm } from "@/components/forms/MarkCutAndCreateSlabsForm";
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
     params: {
@@ -16,22 +15,14 @@ interface Props {
 }
 
 export default async function MarkCutPage(params: Props) {
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
 
-    const cookieStore = cookies();
-    const token = cookieStore.get('AccessToken')?.value || ""
-
-    const res = await fetch(`https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params.params.blockid}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        }
-    }).then(response => {
-        return response.json()
-    })
-    let BlockData = null
-    BlockData = res
-
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/raw/get/${params.params.blockid}`
+  );
+  let BlockData = null;
+  BlockData = res;
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">

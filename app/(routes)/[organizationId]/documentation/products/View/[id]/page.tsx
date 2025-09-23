@@ -21,6 +21,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Product {
   _id: string;
@@ -209,21 +210,8 @@ interface ProductResponse {
 async function getProductData(id: string): Promise<ProductResponse> {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/shipment/productdetails/get/${id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
 
-  if (!res.ok) {
-    throw new Error("Failed to fetch product data");
-  }
+  const res = await fetchWithAuth<any>(`/shipment/productdetails/get/${id}`);
 
   const productData = await res.json();
   return productData;

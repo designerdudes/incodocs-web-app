@@ -17,6 +17,7 @@ import { Icons } from "@/components/ui/icons";
 import { useRouter } from "next/navigation";
 import { putData } from "@/axiosUtility/api";
 import toast from "react-hot-toast";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Form Schema
 const formSchema = z.object({
@@ -71,15 +72,15 @@ export default function EditFactoryForm({ params }: Props) {
         },
     });
 
-    useEffect(() => {
-        async function fetchEmployeeData() {
-            try {
-                setIsFetching(true);
-                const response = await fetch(
-                    `https://incodocs-server.onrender.com/employers/getone/${EmployeeId}`
-                );
-                if (!response.ok) throw new Error("Failed to fetch Employee data");
-                const data = await response.json();
+  useEffect(() => {
+    async function fetchEmployeeData() {
+      try {
+        setIsFetching(true);
+        const response = await fetchWithAuth<any>(
+          `/employers/getone/${EmployeeId}`
+        );
+
+        const data = response;
 
                 form.reset({
                     teamMemberName: data.teamMemberName,

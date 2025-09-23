@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 import { expensecolumns } from './components/expenseColumns';
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 
 
@@ -25,22 +26,11 @@ export type expense = {
 export default async function Page() {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-    const res = await fetch(
-        "https://incodocs-server.onrender.com/expense/getall",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token,
-          },
-        }
-      ).then((response) => {
-        return response.json();
-      });
-      let expenseData;
-      expenseData = res;
-      
-
+  const res = await fetchWithAuth<expense[]>(
+    "/expense/getall"
+  );
+  let expenseData;
+  expenseData = res;
 
     return (
         <div className="w-auto space-y-2 h-full flex p-6 flex-col">

@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -68,18 +69,9 @@ export default function EmployeeViewPage ({ params }: Props) {
           .find((row) => row.startsWith("AccessToken="))
           ?.split("=")[1];
 
-        const res = await fetch(
-          `https://incodocs-server.onrender.com/user/populate/${id}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await fetchWithAuth<any>(`/user/populate/${id}`);
 
-        const data = await res.json();
+        const data = res;
         setTeamData(data);
       } catch (error) {
         console.error("Error fetching data:", error);

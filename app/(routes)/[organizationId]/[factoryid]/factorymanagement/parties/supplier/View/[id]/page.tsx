@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function ViewSupplierPage({
   params,
@@ -23,16 +24,8 @@ export default async function ViewSupplierPage({
   const _id = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/accounting/suplier/getsingle/${_id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    }
+  const res = await fetchWithAuth<any>(
+    `/accounting/suplier/getsingle/${_id}`
   );
 
   const SupplierData = await res.json();

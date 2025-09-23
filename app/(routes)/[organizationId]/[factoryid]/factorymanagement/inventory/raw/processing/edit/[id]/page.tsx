@@ -6,7 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import EditSlabForm from "@/components/forms/EditSlabForm";
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -18,16 +18,9 @@ export default async function EditPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/raw/get/${params.id}`
+  );
 
   let BlockData = res;
 

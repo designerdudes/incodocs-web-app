@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from "../ui/dialog";
 import FactoryForm from "../forms/AddFactoryForm";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Params {
   organizationId: string;
@@ -68,22 +69,10 @@ export default async function AppSidebar({ params }: { params: Params }) {
   // Fetch factories
   let factories = [];
   try {
-    const factoriesRes = await fetch(
-      `https://incodocs-server.onrender.com/factory/getbyorg/${organizationId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const factoriesRes = await fetchWithAuth<any>(
+      `/factory/getbyorg/${organizationId}`
     );
-
-    if (!factoriesRes.ok) {
-      throw new Error("Failed to fetch factories");
-    }
-
-    factories = await factoriesRes.json();
+    factories = factoriesRes;
   } catch (error) {
     console.error("Error fetching factories:", error);
     factories = [];
@@ -92,19 +81,9 @@ export default async function AppSidebar({ params }: { params: Params }) {
   // Fetch current user data
   let userData = { name: "Guest", email: "guest@example.com", avatar: "" };
   try {
-    const userRes = await fetch(
-      `https://incodocs-server.onrender.com/user/currentUser`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (userRes.ok) {
-      const user = await userRes.json();
+    const userRes = await fetchWithAuth<any>(`/user/currentUser`);
+    if (userRes) {
+      const user = userRes;
       userData = {
         name: user.fullName || "Guest",
         email: user.email || "guest@example.com",

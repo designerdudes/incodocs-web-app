@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import { cookies } from "next/headers";
 import { ProductsColumns } from "./components/columns";
 import { log } from "console";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 export interface Product {
   _id: string;
   productType?: string;
@@ -68,22 +69,15 @@ interface Props {
 }
 
 export default async function ProductPage({ params }: Props) {
-    const cookieStore = cookies();
-    const token = cookieStore.get("AccessToken")?.value || "";
-    const orgId = params.organizationId
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const orgId = params.organizationId;
 
-    // Fetch data (unchanged)
-    const res = await fetch(
-        `https://incodocs-server.onrender.com/shipment/productdetails/getbyorg/${orgId}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    ).then((response) => response.json());
-    const ProductsData = res;
+  // Fetch data (unchanged)
+  const res = await fetchWithAuth<any>(
+    `/shipment/productdetails/getbyorg/${orgId}`
+  );
+  const ProductsData = res;
 
     // console.log("gggg");
     

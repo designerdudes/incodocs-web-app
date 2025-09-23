@@ -41,13 +41,13 @@ export default async function DashboardPage({ params }: { params: Params }) {
 
   // 1. Get factory details
   const factory = await fetchWithAuth<Factory>(
-    `https://incodocs-server.onrender.com/factory/${factoryId}`
+    `/factory/${factoryId}`
   );
   const orgId = factory.organization;
 
   // 2. Get all factories for the organization
   const factories = await fetchWithAuth<Factory[]>(
-    `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`
+    `/factory/getbyorg/${orgId}`
   );
 
   return (

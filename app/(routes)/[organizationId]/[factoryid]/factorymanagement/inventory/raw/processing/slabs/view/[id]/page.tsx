@@ -20,6 +20,7 @@ import {
   Table,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -35,16 +36,9 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch slab data
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/finished/get/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/finished/get/${params?.id}`
+  );
 
   SlabData = res;
 
