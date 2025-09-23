@@ -48,7 +48,7 @@ export const SplittedCellAction: React.FC<Props> = ({ data }) => {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuSeparator />
 
-         <DropdownMenuItem
+         {/* <DropdownMenuItem
                      onSelect={() => {
                        GlobalModal.title = `Send For Cutting - ${data.blockNumber}`;
                        GlobalModal.children = (
@@ -66,7 +66,7 @@ export const SplittedCellAction: React.FC<Props> = ({ data }) => {
                    >
                      <ScissorsIcon className="mr-2 h-4 w-4 rotate-45" />
                      Send For Cutting
-                   </DropdownMenuItem>
+                   </DropdownMenuItem> */}
 
            <DropdownMenuItem
                       onSelect={() => {

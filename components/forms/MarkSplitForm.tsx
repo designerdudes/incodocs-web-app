@@ -48,17 +48,20 @@ export default function MarkSplitForm({
 
   const [blocks, setBlocks] = useState<
     {
+      blockNumber: string;
       length: number;
       breadth: number;
       height: number;
       volume: number;
       weight: number;
-      isSplittable: boolean | null; // ✅ can be null until user chooses Yes/No
+      isSplittable: boolean | null;
       photo?: string;
       splitDirection: "length" | "breadth" | "height" | "";
+      splitDimension?: number;
     }[]
   >([
     {
+      blockNumber: "1",
       length: 0,
       breadth: 0,
       height: 0,
@@ -67,6 +70,19 @@ export default function MarkSplitForm({
       isSplittable: null,
       photo: "",
       splitDirection: "",
+      splitDimension: 0,
+    },
+    {
+      blockNumber: "2",
+      length: 0,
+      breadth: 0,
+      height: 0,
+      volume: 0,
+      weight: 0,
+      isSplittable: null,
+      photo: "",
+      splitDirection: "",
+      splitDimension: 0,
     },
   ]);
 
@@ -79,7 +95,7 @@ export default function MarkSplitForm({
 
   const density = 3.5; // tons per m³
 
-  // 📌 Fetch block + machine details
+  // Fetch block + machine details
   useEffect(() => {
     const fetchBlockData = async () => {
       try {
@@ -113,7 +129,7 @@ export default function MarkSplitForm({
     if (parentBlockId) fetchBlockData();
   }, [parentBlockId]);
 
-  // 📌 Update totals + validation
+  // Update totals + validation
   useEffect(() => {
     const totalVol = blocks.reduce((sum, b) => sum + (b.volume || 0), 0);
     const totalWgt = blocks.reduce((sum, b) => sum + (b.weight || 0), 0);
@@ -146,8 +162,7 @@ export default function MarkSplitForm({
     }
   }, [blocks, originalBlock]);
 
-  // 📌 Update sub-block dimensions
- const handleBlockChange = (
+  const handleBlockChange = (
     index: number,
     field: string,
     value: number | boolean | string
@@ -161,26 +176,13 @@ export default function MarkSplitForm({
       } else if (field === "photo") {
         block.photo = value as string;
       } else if (field === "splitDirection") {
-        block.splitDirection = value as
-          | "length"
-          | "breadth"
-          | "height"
-          | "";
-        // Auto-fill with original dimensions
-        if (value === "length") {
-          block.breadth = originalBlock?.breadth || 0;
-          block.height = originalBlock?.height || 0;
-        }
-        if (value === "breadth") {
-          block.length = originalBlock?.length || 0;
-          block.height = originalBlock?.height || 0;
-        }
-        if (value === "height") {
-          block.length = originalBlock?.length || 0;
-          block.breadth = originalBlock?.breadth || 0;
-        }
+        block.splitDirection = value as "length" | "breadth" | "height" | "";
+        block.splitDimension = 0;
+      } else if (field === "splitDimension") {
+        block.splitDimension = value as number;
+      } else if (field === "blockNumber") {
+        block.blockNumber = value as string;
       } else {
-        // clamp to original dimension
         let newValue = value as number;
         const max =
           field === "length"
@@ -197,24 +199,8 @@ export default function MarkSplitForm({
         block = { ...block, [field]: newValue };
       }
 
-      // special subtraction auto-fill for the 2nd block onwards
-      if (
-        block.splitDirection &&
-        index > 0 &&
-        originalBlock &&
-        ["length", "breadth", "height"].includes(block.splitDirection)
-      ) {
-        const dir = block.splitDirection;
-        const firstValue = newBlocks[0][dir];
-        const remaining = (originalBlock as any)[dir] - firstValue;
-        if ((block as any)[dir] === 0 || (block as any)[dir] > remaining) {
-          (block as any)[dir] = remaining >= 0 ? remaining : 0;
-        }
-      }
-
-      // recalc volume/weight
-      const volume =
-        (block.length * block.breadth * block.height) / 1_000_000;
+      // Recalculate volume & weight
+      const volume = (block.length * block.breadth * block.height) / 1_000_000;
       const weight = density * volume;
       block.volume = volume;
       block.weight = weight;
@@ -224,32 +210,46 @@ export default function MarkSplitForm({
     });
   };
 
-  // 📌 Add/Remove sub-blocks
-  const addSubBlock = () =>
-    setBlocks((prev) => [
-      ...prev,
-      {
-        length: 0,
-        breadth: 0,
-        height: 0,
-        volume: 0,
-        weight: 0,
-        isSplittable: null,
-        photo: "",
-        splitDirection: "",
-      },
-    ]);
+  const handleSplitDimensionChange = (
+    dir: "length" | "breadth" | "height",
+    value: number
+  ) => {
+    if (!originalBlock) return;
 
-  const removeSubBlock = (index: number) =>
-    setBlocks((prev) => prev.filter((_, i) => i !== index));
+    const splitValue = value;
+    setBlocks((prev) => {
+      const updated = [...prev];
+      const parent = originalBlock as any;
 
-  // 📌 Submit
+      // First child block
+      updated[0][dir] = splitValue;
+      updated[0].volume =
+        (updated[0].length * updated[0].breadth * updated[0].height) /
+        1_000_000;
+      updated[0].weight = updated[0].volume * density;
+
+      // Second child block
+      updated[1][dir] =
+        parent[dir] - splitValue >= 0 ? parent[dir] - splitValue : 0;
+      updated[1].volume =
+        (updated[1].length * updated[1].breadth * updated[1].height) /
+        1_000_000;
+      updated[1].weight = updated[1].volume * density;
+
+      // Update splitDimension
+      updated[0].splitDimension = splitValue;
+
+      return updated;
+    });
+  };
+
   const handleSubmit = async () => {
     if (!assignedMachine) return;
 
     try {
       const body = {
         blocks: blocks.map((b) => ({
+          blockNumber: b.blockNumber,
           dimensions: {
             length: { value: b.length, units: "cm" },
             breadth: { value: b.breadth, units: "cm" },
@@ -275,6 +275,55 @@ export default function MarkSplitForm({
       console.error("Error while splitting:", error);
       toast.error(error?.response?.data?.message || "Failed to split block");
     }
+  };
+  const handleSplitDirectionChange = (dir: "length" | "breadth" | "height") => {
+    if (!originalBlock) return;
+    const parent = originalBlock;
+
+    setBlocks((prev) => {
+      const updated = [...prev];
+
+      // Reset splitDimension
+      updated[0].splitDimension = 0;
+
+      // Set split direction
+      updated[0].splitDirection = dir;
+      updated[1].splitDirection = dir;
+
+      // Auto-fill other dimensions
+      if (dir === "length") {
+        updated[0].breadth = updated[1].breadth =
+          netDimensions?.breadth?.value || parent.breadth;
+        updated[0].height = updated[1].height =
+          netDimensions?.height?.value || parent.height;
+        updated[0].length = 0;
+        updated[1].length = parent.length;
+      }
+      if (dir === "breadth") {
+        updated[0].length = updated[1].length =
+          netDimensions?.length?.value || parent.length;
+        updated[0].height = updated[1].height =
+          netDimensions?.height?.value || parent.height;
+        updated[0].breadth = 0;
+        updated[1].breadth = parent.breadth;
+      }
+      if (dir === "height") {
+        updated[0].length = updated[1].length =
+          netDimensions?.length?.value || parent.length;
+        updated[0].breadth = updated[1].breadth =
+          netDimensions?.breadth?.value || parent.breadth;
+        updated[0].height = 0;
+        updated[1].height = parent.height;
+      }
+
+      // Recalculate volume & weight
+      updated.forEach((b) => {
+        b.volume = (b.length * b.breadth * b.height) / 1_000_000;
+        b.weight = b.volume * density;
+      });
+
+      return updated;
+    });
   };
 
   const netLength = netDimensions?.length?.value ?? 0;
@@ -409,42 +458,70 @@ export default function MarkSplitForm({
 
         {/* Split blocks */}
         <div className="space-y-4">
-          <h3 className="font-semibold">Split blocks</h3>
+          <h3 className="font-semibold">Split Blocks</h3>
           {blocks.map((block, index) => (
-            <div key={index} className="border p-3 rounded-lg space-y-3 relative">
-              {/* Splitting Direction */}
+            <div
+              key={index}
+              className="border p-3 rounded-lg space-y-3 relative"
+            >
               <div>
-                <Label>Split From</Label>
-                <div className="flex gap-4 mt-1">
-                  {["length", "breadth", "height"].map((dir) => (
-                    <label key={dir} className="flex items-center gap-1">
-                      <input
-                        type="radio"
-                        name={`splitDirection-${index}`}
-                        checked={block.splitDirection === dir}
-                        onChange={() => {
-                          handleBlockChange(index, "splitDirection", dir);
-
-                          // Auto-fill logic
-                          if (dir === "length") {
-                            handleBlockChange(index, "breadth", netBreadth);
-                            handleBlockChange(index, "height", netHeight);
-                          }
-                          if (dir === "breadth") {
-                            handleBlockChange(index, "length", netLength);
-                            handleBlockChange(index, "height", netHeight);
-                          }
-                          if (dir === "height") {
-                            handleBlockChange(index, "length", netLength);
-                            handleBlockChange(index, "breadth", netBreadth);
-                          }
-                        }}
-                      />
-                      {dir.charAt(0).toUpperCase() + dir.slice(1)}
-                    </label>
-                  ))}
-                </div>
+                <Label>Block Number</Label>
+                <Input
+                  type="text"
+                  value={block.blockNumber}
+                  onChange={(e) =>
+                    handleBlockChange(index, "blockNumber", e.target.value)
+                  }
+                />
               </div>
+
+              {/* Split Direction */}
+              {index === 0 && (
+                <>
+                  <div>
+                    <Label>Split Direction</Label>
+                    <div className="flex gap-4 mt-1">
+                      {(["length", "breadth", "height"] as const).map((dir) => (
+                        <label key={dir} className="flex items-center gap-1">
+                          <input
+                            type="radio"
+                            name={`splitDirection`}
+                            checked={blocks[0].splitDirection === dir}
+                            onChange={() => handleSplitDirectionChange(dir)}
+                          />
+                          {dir.charAt(0).toUpperCase() + dir.slice(1)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {block.splitDirection && (
+                    <div>
+                      <Label>
+                        Split Dimension in {block.splitDirection} (cm)
+                      </Label>
+                      <Input
+                        type="number"
+                        value={block.splitDimension || ""}
+                        onChange={(e) =>
+                          handleSplitDimensionChange(
+                            block.splitDirection as
+                              | "length"
+                              | "breadth"
+                              | "height",
+                            +e.target.value
+                          )
+                        }
+                        placeholder="Enter how much to split off"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        Auto-calculates two child blocks. You can adjust values
+                        manually.
+                      </p>
+                    </div>
+                  )}
+                </>
+              )}
 
               {/* Dimensions */}
               <div className="grid grid-cols-3 gap-3">
@@ -453,7 +530,6 @@ export default function MarkSplitForm({
                   <Input
                     type="number"
                     value={block.length}
-                    disabled={block.splitDirection !== "length"}
                     onChange={(e) =>
                       handleBlockChange(index, "length", +e.target.value)
                     }
@@ -464,7 +540,6 @@ export default function MarkSplitForm({
                   <Input
                     type="number"
                     value={block.breadth}
-                    disabled={block.splitDirection !== "breadth"}
                     onChange={(e) =>
                       handleBlockChange(index, "breadth", +e.target.value)
                     }
@@ -475,7 +550,6 @@ export default function MarkSplitForm({
                   <Input
                     type="number"
                     value={block.height}
-                    disabled={block.splitDirection !== "height"}
                     onChange={(e) =>
                       handleBlockChange(index, "height", +e.target.value)
                     }
@@ -489,23 +563,24 @@ export default function MarkSplitForm({
               </div>
 
               {/* Block Photo */}
-              {/* ... unchanged photo upload ... */}
-
-              {/* ✅ Is Splittable - Yes/No Radio */}
               <div>
                 <Label>Block Photo</Label>
                 <Controller
-                  name="blockPhoto"
+                  name={`blockPhoto-${index}`}
                   control={control}
                   render={({ field }) => (
                     <FileUploadField
-                      storageKey="blockPhoto"
+                      storageKey={`blockPhoto-${index}`}
                       value={block.photo}
                       onChange={field.onChange}
-                      name="blockPhoto"
+                      name={`blockPhoto-${index}`}
                     />
                   )}
                 />
+              </div>
+
+              {/* Is Splittable */}
+              <div>
                 <Label>Is Splittable?</Label>
                 <div className="flex gap-6 mt-2">
                   <label className="flex items-center gap-2">
@@ -535,19 +610,17 @@ export default function MarkSplitForm({
                 </div>
               </div>
 
-              {blocks.length > 1 && (
+              {blocks.length > 2 && index > 1 && (
                 <Trash
                   type="button"
-                    className="mr-2 h-4 w-4 cursor-pointer hover:fill-red-500 transition-colors duration-200"
-                  onClick={() => removeSubBlock(index)}
+                  className="mr-2 h-4 w-4 cursor-pointer hover:fill-red-500 transition-colors duration-200"
+                  onClick={() =>
+                    setBlocks((prev) => prev.filter((_, i) => i !== index))
+                  }
                 />
               )}
             </div>
           ))}
-
-          <Button type="button" onClick={addSubBlock} className="w-full">
-            + Add Another Sub Block
-          </Button>
         </div>
 
         {/* Totals + Error Messages */}

@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { ReadyforpolishCellAction } from "./readyforpolishcell-actions"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import moment from "moment"
 
 export type Blocks = {
   dimensions: {
@@ -181,12 +184,50 @@ export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.status === "cut" ? "Ready for Polish" : row.original?.status || "N/A"}
-            </div>
-        ),
+         cell: ({ row }) => {
+      const currentStatus = row.original?.status || "N/A";
+      return (
+        <Badge
+          className={cn(
+             currentStatus === "cut" &&
+              "bg-green-100 text-green-800 hover:bg-green-200/80",
+          )}
+        >
+          { currentStatus === "cut"? " Cut":  currentStatus}
+        </Badge>
+      );
     },
+    },
+    {
+        accessorKey: "createdAt",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Created Date
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div>{moment(row.original.createdAt).format("DD MMM YYYY")}</div>
+        ),
+      },
+      {
+        accessorKey: "updatedAt",
+        header: ({ column }) => (
+          <Button
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Updated Date
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+        ),
+        cell: ({ row }) => (
+          <div>{moment(row.original.updatedAt).format("DD MMM YYYY")}</div>
+        ),
+      },
     {
 
         header: ({ column }) => (

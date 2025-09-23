@@ -85,9 +85,6 @@ function CardWithForm(params: Props) {
           <strong>Slab Number:</strong> {slabData?.slabNumber}
         </p>
         <p>
-          <strong>Block Number:</strong> {slabData?.blockNumber}
-        </p>
-        <p>
           <strong>Height (inches):</strong>{" "}
           {values.polishedValues.height.value}
         </p>

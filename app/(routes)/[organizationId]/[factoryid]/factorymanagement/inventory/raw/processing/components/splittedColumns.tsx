@@ -4,6 +4,10 @@ import { ColumnDef } from "@tanstack/react-table"
 import { ArrowUpDown } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import SplittedCellAction from "./splittedCellActions"
+import moment from "moment"
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+
 
 export type Blocks = {
   dimensions: {
@@ -137,12 +141,51 @@ export const splittedcolumns: ColumnDef<Blocks>[] = [
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
-        cell: ({ row }) => (
-            <div className="capitalize">
-                {row.original?.status}
-            </div>
-        ),
+       cell: ({ row }) => {
+const currentStatus = row.original?.status || "N/A";
+return(
+    <Badge
+        className={cn(
+              currentStatus === "split" &&
+              "bg-pink-100 text-pink-800 hover:bg-pink-200/80",
+              )}
+        >
+            {
+              currentStatus === "split"? " Split":  currentStatus  
+            }
+    </Badge>
+)}
     },
+     {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Created Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original.createdAt).format("DD MMM YYYY")}</div>
+    ),
+  },
+   {
+    accessorKey: "updatedAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Updated Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original.updatedAt).format("DD MMM YYYY")}</div>
+    ),
+  },
     {
 
         header: ({ column }) => (

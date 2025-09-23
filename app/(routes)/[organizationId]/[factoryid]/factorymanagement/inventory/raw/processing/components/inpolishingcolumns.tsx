@@ -4,6 +4,9 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import InPolishingCellAction from "./inpolishingcell-actions";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import moment from "moment";
 
 export type Slab = {
   _id: string;
@@ -36,6 +39,16 @@ export type Slab = {
       units: string;
     };
   };
+  polishedValues: {
+    length: {
+      value: number;
+      units: string;
+    };
+    height: {
+      value: number;
+      units: string;
+    };
+  };
   trim: {
     length: {
       units: string;
@@ -45,7 +58,7 @@ export type Slab = {
     };
   };
   isActive?: boolean;
-  slabId:string;
+  slabId: string;
   weight?: string;
   height?: string;
   breadth?: string;
@@ -93,9 +106,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original.slabId}</div>
-    ),
+    cell: ({ row }) => <div className="capitalize">{row.original.slabId}</div>,
     filterFn: "includesString",
   },
   {
@@ -105,7 +116,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Slab Number
+        Block-Slab Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
@@ -113,21 +124,6 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
       <div className="capitalize">{row.original.slabNumber}</div>
     ),
     filterFn: "includesString",
-  },
-  {
-    accessorKey: "blockNumber",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Block Number
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => (
-      <div className="capitalize">{row.original?.blockId?.blockNumber}</div>
-    ),
   },
   {
     accessorKey: "Length",
@@ -166,19 +162,6 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
     ),
   },
   {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Slab Status
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
-    cell: ({ row }) => <div className="capitalize">{row.original.status}</div>,
-  },
-  {
     accessorKey: "materialType",
     header: ({ column }) => (
       <Button
@@ -195,6 +178,62 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
       </div>
     ),
   },
+  {
+    accessorKey: "status",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Slab Status
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const currentStatus = row.original?.status || "N/A";
+      return (
+        <Badge
+          className={cn(
+            currentStatus === "inPolishing" &&
+              "bg-orange-100 text-orange-800 hover:bg-orange-200/80"
+          )}
+        >
+          {currentStatus === "inPolishing" ? " In Polishing" : currentStatus}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: "createdAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Created Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original.createdAt).format("DD MMM YYYY")}</div>
+    ),
+  },
+  {
+    accessorKey: "updatedAt",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Updated Date
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => (
+      <div>{moment(row.original.updatedAt).format("DD MMM YYYY")}</div>
+    ),
+  },
+
   {
     header: ({ column }) => <Button variant="ghost">Action</Button>,
 
