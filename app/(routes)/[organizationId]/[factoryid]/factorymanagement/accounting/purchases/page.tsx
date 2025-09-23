@@ -14,6 +14,7 @@ import { rawPurchaseColumns } from "./components/rawPurchaseColumns";
 import { FinishedPurchaseWithGstColumns } from "./components/finishedPurchaseWithGstColumn";
 import { FinishedPurchaseColumns } from "./components/finishedPurchaseColumns";
 import AddPurchases from "./components/purchasesDropdown";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export type RawPurchaseWithGST = {
   _id: string;
@@ -28,7 +29,7 @@ export type RawPurchaseWithGST = {
   purchaseDate: string;
   gstPercentage: number;
   ratePerCubicVolume: string;
-  paymentProof:string;
+  paymentProof: string;
 };
 
 export type ActualRawPurchase = {
@@ -88,33 +89,21 @@ export default async function Purchases({ params }: Props) {
   const token = cookies().get("AccessToken")?.value || "";
 
   const [rawWithGst, actualRaw, slabWithGst, actualSlab] = await Promise.all([
-    fetch(
-      `https://incodocs-server.onrender.com/transaction/purchase/getgstrawbyfactory/${params.factoryid}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    ).then((res) => res.json()),
+    fetchWithAuth<any>(
+      `/transaction/purchase/getgstrawbyfactory/${params.factoryid}`
+    ),
 
-    fetch(
-      `https://incodocs-server.onrender.com/transaction/purchase/getrawbyfactory/${params.factoryid}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    ).then((res) => res.json()),
+    fetchWithAuth<any>(
+      `/transaction/purchase/getrawbyfactory/${params.factoryid}`
+    ),
 
-    fetch(
-      `https://incodocs-server.onrender.com/transaction/purchase/getgstslabbyfactory/${params.factoryid}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    ).then((res) => res.json()),
+    fetchWithAuth<any>(
+      `/transaction/purchase/getgstslabbyfactory/${params.factoryid}`
+    ),
 
-    fetch(
-      `https://incodocs-server.onrender.com/transaction/purchase/getslabbyfactory/${params.factoryid}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    ).then((res) => res.json()),
+    fetchWithAuth<any>(
+      `/transaction/purchase/getslabbyfactory/${params.factoryid}`
+    ),
   ]);
 
   return (

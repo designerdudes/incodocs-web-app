@@ -6,22 +6,14 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import AddTeamMemberForm from "@/components/forms/AddTeamMemberForm";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
 
 export default async function CreateNewFormPage() {
-     const cookieStore = cookies();
-      const token = cookieStore.get("AccessToken")?.value || "";
-      const OrgData = await fetch(`https://incodocs-server.onrender.com/organizations/token`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }).then((response) => {
-        return response.json();
-      });
-
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const OrgData = await fetchWithAuth<any>(`/organizations/token`);
 
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">

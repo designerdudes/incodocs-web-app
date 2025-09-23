@@ -24,6 +24,7 @@ import {
 import moment from "moment";
 import { columns } from "./columns";
 import { HorizontalCardAccordion } from "@/components/ui/horizontal-card-accordion";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -38,31 +39,17 @@ export default async function BlocksPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/blocksbylot/get/${params?.lotid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/blocksbylot/get/${params?.lotid}`
+  );
 
   BlocksData = res;
   // console.log("dddddddddd",BlocksData)
 
   let LotData = null;
-  const resp = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${params?.lotid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const resp = await fetchWithAuth<any>(
+    `/factory-management/inventory/lot/getbyid/${params?.lotid}`
+  );
 
   LotData = resp;
 

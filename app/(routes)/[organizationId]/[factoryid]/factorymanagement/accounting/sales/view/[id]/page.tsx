@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import moment from "moment";
 import { Separator } from "@/components/ui/separator";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -35,17 +36,11 @@ export default async function SlabsPage({
 }) {
   const SlabData = params.id;
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/transaction/sale/getbyid/${SlabData}`,
-    {
-      headers: {
-        Authorization: `Bearer ${cookies().get("AccessToken")?.value}`,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/transaction/sale/getbyid/${SlabData}`
   );
 
-  const customerData = await res.json();
-
+  const customerData = res;
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">
       <div className="topbar w-full flex justify-between items-center">

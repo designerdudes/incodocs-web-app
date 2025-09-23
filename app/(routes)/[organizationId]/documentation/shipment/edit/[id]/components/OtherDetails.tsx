@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/table";
 import CalendarComponent from "@/components/CalendarComponent";
 import { FileUploadField } from "../../../createnew/components/FileUploadField";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface OtherDetailsProps {
   shipmentId: string;
@@ -59,15 +60,11 @@ export function OtherDetails({ shipmentId, saveProgress }: OtherDetailsProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      if (!response.ok) throw new Error("File upload failed");
-      const data = await response.json();
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = response;
       setValue(fieldName, data.storageLink, { shouldDirty: true });
       toast.success("File uploaded successfully!");
       console.log("Updated otherDetails:", watch("otherDetails"));

@@ -38,7 +38,7 @@ import { FileUploadField } from "./FileUploadField";
 import { Path } from "react-hook-form";
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api";
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Define interfaces for TypeScript
 interface BillOfLading {
@@ -181,14 +181,11 @@ export function BillOfLadingDetails({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await response.json();
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = response;
       const storageUrl = data.url;
       setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());

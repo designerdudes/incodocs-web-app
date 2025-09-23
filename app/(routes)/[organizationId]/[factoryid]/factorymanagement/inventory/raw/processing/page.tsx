@@ -17,6 +17,7 @@ import { indressingcolumns } from "./components/inDressingColumns";
 import { dressedcolumns } from "./components/dressedColumns";
 import { insplittingcolumns } from "./components/inSplittingColumns";
 import { splittedcolumns } from "./components/splittedColumns";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export type FinishedMaterial = {
   _id: string; // Unique identifier
@@ -76,44 +77,17 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch the data for blocks and slabs
-  const blockRes = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
+  const blockRes = await fetchWithAuth<any>(
+    `/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`
+  );
 
-  const slabRes = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
+  const slabRes = await fetchWithAuth<any>(
+    `/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`
+  );
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid} `,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => {
-    return response.json();
-  });
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/getslabsbyfactory/${params.factoryid} `
+  );
 
   const slabsData = res;
   let Blockdata = blockRes || [];
@@ -383,8 +357,8 @@ export default async function SlabsProcessingPage({ params }: Props) {
           inDressingcolumns={indressingcolumns}
           Dressedcolumns={dressedcolumns}
           inSplittingcolumns={insplittingcolumns}
-          Splittedcolumns={splittedcolumns}        
-          />
+          Splittedcolumns={splittedcolumns}
+        />
       </div>
     </div>
   );

@@ -33,6 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "../ui/table";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface PurchaseCreateNewFormProps {
   gap: number;
@@ -183,13 +184,10 @@ export function PurchaseCreateNewForm({ gap }: PurchaseCreateNewFormProps) {
     const fetchSuppliers = async () => {
       setSupplierLoading(true);
       try {
-        const response = await fetch(
-          "https://incodocs-server.onrender.com/accounting/supplier/getall"
+        const response = await fetchWithAuth<any>(
+          "/accounting/supplier/getall"
         );
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        const supplierData = await response.json();
+        const supplierData = response;
         const mappedSuppliers = supplierData.map((supplier: any) => ({
           _id: supplier._id,
           name: supplier.supplierName,

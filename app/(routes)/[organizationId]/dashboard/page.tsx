@@ -16,6 +16,7 @@ import StatsOverviewCard from "@/components/dashboard/statsOverviewCard";
 import { FinancialCard } from "@/components/dashboard/FinancialCard";
 import { FactoriesCard } from "@/components/dashboard/factoriesCards";
 import OrgDashboardCards from "./components/OrgDashboardCards";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Address {
   coordinates: {
@@ -53,18 +54,11 @@ export default async function DashboardPage({ params }: { params: Params }) {
   const token = cookieStore.get("AccessToken")?.value;
   try {
     // Fetch all factories for the organization
-    const factoriesRes = await fetch(
-      `https://incodocs-server.onrender.com/factory/getbyorg/${organizationId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      }
+    const factoriesRes = await fetchWithAuth<any>(
+      `/factory/getbyorg/${organizationId}`
     );
 
-    const factories: Factory[] = await factoriesRes.json();
+    const factories: Factory[] = factoriesRes;
 
     return (
       <main className="flex  flex-col p-10 gap-4 bg-gradient-to-r from-gray-100 to-white">

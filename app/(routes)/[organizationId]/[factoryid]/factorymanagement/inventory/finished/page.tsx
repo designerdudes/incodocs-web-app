@@ -56,26 +56,11 @@ export default async function FinishedMaterialPage({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
 
-    const res = await fetch(
-      `https://incodocs-server.onrender.com/factory-management/inventory/getslabsbyfactory/${params.factoryid}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        cache: "no-store", // ensures fresh data in server components
-      }
+    const res = await fetchWithAuth<FinishedMaterial[]>(
+      `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
     );
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(
-        `Request failed: ${res.status} ${res.statusText} - ${errorText}`
-      );
-    }
-
-    slabsData = await res.json();
+    slabsData = res;
 
     Polished = Array.isArray(slabsData)
       ? slabsData.filter(

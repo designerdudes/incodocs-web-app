@@ -16,6 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 const formSchema = z.object({
     customerName: z.string().min(1, { message: "Customer Name is required" }),
@@ -53,20 +54,22 @@ function CustomerForm({ onSuccess }: CustomerFormProps) {
     setIsLoading(true);
     console.log("Form values:", values);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/accounting/customer/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: values.customerName,
-          gstNo: values.gstNo,
-          mobileNumber: values.mobileNumber,
-          state: values.state,
-          address: values.address,
-          organizationId: "674b0a687d4f4b21c6c980ba",
-        }),
-      });
-      if (!response.ok) throw new Error("Failed to create customer");
-      const data = await response.json();
+      const response = await fetchWithAuth(
+        "/accounting/customer/create",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: values.customerName,
+            gstNo: values.gstNo,
+            mobileNumber: values.mobileNumber,
+            state: values.state,
+            address: values.address,
+            organizationId: "674b0a687d4f4b21c6c980ba",
+          }),
+        }
+      );
+      const data =  response;
       console.log("API response:", data); // Add this line
       setIsLoading(false);
       GlobalModal.onClose();

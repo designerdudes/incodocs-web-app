@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Columns } from "./components/columns";
 import { GstColumns } from "./components/GstColumns";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export type Sales = {
   organizationId: string;
@@ -42,32 +43,16 @@ export default async function SalesPage({ params }: Props) {
   const factoryId = params.factoryid;
 
   // Fetch With GST Sales
-  const gstRes = await fetch(
-    ` https://incodocs-server.onrender.com/transaction/sale/getgstsalebyfactory/${factoryId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      cache: "no-store",
-    }
+  const gstRes = await fetchWithAuth<Sales[]>(
+    ` /transaction/sale/getgstsalebyfactory/${factoryId}`
   );
 
-  const withoutGstRes = await fetch(
-    ` https://incodocs-server.onrender.com/transaction/sale/getsalebyfactory/${factoryId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-      cache: "no-store",
-    }
+  const withoutGstRes = await fetchWithAuth<Sales[]>(
+    ` /transaction/sale/getsalebyfactory/${factoryId}`
   );
 
-  const withGstSales: Sales[] = await gstRes.json();
-  const withoutGstSales: Sales[] = await withoutGstRes.json();
+  const withGstSales: Sales[] = gstRes;
+  const withoutGstSales: Sales[] = withoutGstRes;
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

@@ -32,6 +32,7 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { Path } from "react-hook-form";
 import { handleDynamicArrayCountChange } from "@/lib/utils/CommonInput";
 import CalendarComponent from "@/components/CalendarComponent";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // Define interfaces for TypeScript
 interface OtherDetail {
@@ -142,11 +143,14 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch("https://incodocs-server.onrender.com/shipmentdocsfile/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await response.json();
+      const response = await fetchWithAuth<any>(
+        "/shipmentdocsfile/upload",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+      const data = response;
       const storageUrl = data.url;
       setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());

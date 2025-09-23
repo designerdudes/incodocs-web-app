@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function ViewQuarryPage({
   params,
@@ -24,24 +25,11 @@ export default async function ViewQuarryPage({
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/quarry/getsingle/${_id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store", // Optional: ensure fresh data
-    }
+  const res = await fetchWithAuth<any>(
+    `/quarry/getsingle/${_id}`
   );
 
-  if (!res.ok) {
-    // You can also redirect or show an error UI here
-    throw new Error("Failed to fetch quarry data.");
-  }
-
-  const QuarryData = await res.json();
+  const QuarryData = res;
 
   return (
     <div className="w-full h-full flex flex-col p-8">

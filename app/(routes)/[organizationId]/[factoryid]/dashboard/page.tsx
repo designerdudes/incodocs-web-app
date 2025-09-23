@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { cookies } from "next/headers";
 import { FiBriefcase, FiFileText, FiSettings } from "react-icons/fi"; // Importing Icons
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -19,17 +20,10 @@ interface Props {
 export default async function Home({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory/getSingle/${params?.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth(
+    `/factory/getSingle/${params?.factoryid}`
   );
-  const currentFactoryData = await res.json();
+  const currentFactoryData = res;
 
   console.log("Factory ID from Params:", params);
 

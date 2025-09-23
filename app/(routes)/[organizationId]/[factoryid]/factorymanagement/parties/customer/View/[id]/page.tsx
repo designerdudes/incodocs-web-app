@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function ViewCustomerPage({
   params,
@@ -23,23 +24,11 @@ export default async function ViewCustomerPage({
   const _id = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/accounting/customer/getsingle/${_id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    }
+  const res = await fetchWithAuth<any>(
+    `/accounting/customer/getsingle/${_id}`
   );
 
-  const CustomerData = await res.json();
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch customer data.");
-  }
+  const CustomerData = res;
 
   return (
     <div className="w-full h-full flex flex-col p-8">

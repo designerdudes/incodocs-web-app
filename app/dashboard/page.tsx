@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 // import MainDashboardComponent from '../(routes)/[organizationId]/components/MainDashboardComponent';
 import UserData from '../(routes)/[organizationId]/components/UserData';
 import MainDashboardComponent from '../(routes)/[organizationId]/components/MainDashboardComponent';
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function Page() {
   // Get the access token from cookies
@@ -18,19 +19,9 @@ export default async function Page() {
 
   // Fetch user data
   try {
-    const res = await fetch('https://incodocs-server.onrender.com/user/currentUser', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const res = await fetchWithAuth<any>("/user/currentUser");
 
-    if (!res.ok) {
-      throw new Error('Failed to fetch user data');
-    }
-
-    const userData = await res.json();
+    const userData = res;
 
     return <MainDashboardComponent token={token} userData={userData} />;
   } catch (error) {

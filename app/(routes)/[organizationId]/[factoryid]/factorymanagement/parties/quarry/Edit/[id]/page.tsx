@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import { cookies } from "next/headers";
 import EditQuarryForm from "../../components/EditQuarryForm";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 export default async function EditProductPage({
   params,
@@ -14,17 +15,10 @@ export default async function EditProductPage({
 }) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/quarry/getsingle/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/quarry/getsingle/${params?.id}`
   );
-  const QuarryData = await res.json();
+  const QuarryData = res;
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">

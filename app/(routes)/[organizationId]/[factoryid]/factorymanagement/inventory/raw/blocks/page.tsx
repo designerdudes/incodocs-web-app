@@ -7,6 +7,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { columns } from "./components/columns";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 // import CreateNewLotButton from "./components/CreateNewLotButton"; // Import the client-side button component
 interface Props {
@@ -26,18 +27,11 @@ interface Blocks {
 }
 
 export default async function Blocks({ params }: Props) {
-const cookieStore = cookies();
-const token = cookieStore.get("AccessToken")?.value || "";
-const Blockres = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/getblocksbyfactory/${params.factoryid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  ).then((response) => response.json());
+  const cookieStore = cookies();
+  const token = cookieStore.get("AccessToken")?.value || "";
+  const Blockres = await fetchWithAuth(
+    `/factory-management/inventory/getblocksbyfactory/${params.factoryid}`
+  );
   let BlockData = Blockres;
 
   return (

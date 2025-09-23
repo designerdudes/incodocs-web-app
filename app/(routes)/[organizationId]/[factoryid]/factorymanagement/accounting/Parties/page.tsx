@@ -10,6 +10,7 @@ import { cookies } from "next/headers";
 import { suppliercolumns } from "./components/supplierColumn";
 import { customercolumns } from "./components/customerColumn";
 import PartiesDropdown from "./components/Partiesdropdown";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -23,29 +24,15 @@ export default async function PartiesPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch supplier data
-  const supplierRes = await fetch(
-    "https://incodocs-server.onrender.com/accounting/suplier/getall", // Fixed typo: "suplier" -> "supplier"
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const supplierRes = await fetchWithAuth<any>(
+    "/accounting/suplier/getall" // Fixed typo: "suplier" -> "supplier"
+  );
   const suppliers = supplierRes || []; // Ensure it's an array
 
   // Fetch customer data
-  const customerRes = await fetch(
-    "https://incodocs-server.onrender.com/accounting/customer/getall",
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const customerRes = await fetchWithAuth<any>(
+    "/accounting/customer/getall"
+  );
   const customers = customerRes || []; // Ensure it's an array
 
   return (

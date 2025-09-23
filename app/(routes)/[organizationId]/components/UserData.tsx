@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import FactoryForm from "@/components/forms/AddFactoryForm";
-
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Address {
   coordinates: {
@@ -199,21 +199,10 @@ const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
     owner: string;
   }) => {
     try {
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/organizations/add",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
+      const response = await fetchWithAuth<any>(
+        "/organizations/add"
       );
-      if (!response.ok) {
-        throw new Error("Failed to create organization");
-      }
-      const createdOrg = await response.json();
+      const createdOrg = response;
       setOrganizations((prev) => [...prev, createdOrg]);
       setCreateOrgError(null);
       modal.onClose();
@@ -272,18 +261,10 @@ const UserData: React.FC<UserDataProps> = ({ token, userData }) => {
 
   const handleCardClick = async (orgId: string) => {
     try {
-      const factoryResponse = await fetch(
-        `https://incodocs-server.onrender.com/factory/getbyorg/${orgId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const factoryResponse = await fetchWithAuth<any>(
+        `/factory/getbyorg/${orgId}`
       );
-      if (!factoryResponse.ok) {
-        throw new Error("Failed to fetch factory data");
-      }
-      const factoryData = await factoryResponse.json();
+      const factoryData = factoryResponse;
       const factories = factoryData;
       console.log("factories", factories);
       if (factories.length === 0) {

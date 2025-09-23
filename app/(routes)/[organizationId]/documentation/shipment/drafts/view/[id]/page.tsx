@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { DocColumns } from "../../../view/[id]/Components/DocumentColumns";
 import ViewShipment from "../../../view/[id]/Components/ViewShipment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -42,25 +43,9 @@ export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/shipmentdrafts/getbyid/${params.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
+  const res = await fetchWithAuth<any>(`/shipmentdrafts/getbyid/${params.id}`);
 
-  if (!res.ok) {
-    console.error("API error:", res.status, res.statusText);
-    return <div>Error loading draft data: {res.statusText}</div>;
-  }
-
-  const responseData = await res.json();
-  console.log("Raw API response:", responseData);
-
+  const responseData = res;
   // Handle both possible response structures
   const draftData =
     responseData?.shipmentDraft ||

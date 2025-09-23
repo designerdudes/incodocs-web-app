@@ -21,6 +21,7 @@ import {
 import moment from "moment";
 import { cookies } from "next/headers";
 import LotFormWrapper from "./components/LotFormWrapper";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -74,17 +75,10 @@ export default async function AddBlockFormPage({ params }: Props) {
   // const blockData = await blockResponse.json();
 
   // Fetch lot data
-  const lotResponse = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/lot/getbyid/${lotId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const lotResponse = await fetchWithAuth<LotData>(
+    `/factory-management/inventory/lot/getbyid/${lotId}`
   );
-  const lotData: LotData = await lotResponse.json();
+  const lotData: LotData = lotResponse;
   // console.log("ssdds",lotData)
 
   return (

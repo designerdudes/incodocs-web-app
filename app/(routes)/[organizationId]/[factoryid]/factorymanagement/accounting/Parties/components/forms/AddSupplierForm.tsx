@@ -16,6 +16,7 @@ import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icons } from "@/components/ui/icons";
 import toast from "react-hot-toast";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 const formSchema = z.object({
     supplierName: z.string().min(1, { message: "Supplier Name is required" }),
@@ -53,7 +54,7 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
     setIsLoading(true);
     console.log(values);
     try {
-      const response = await fetch("https://incodocs-server.onrender.com/accounting/suplier/create", {
+      const response = await fetchWithAuth("/accounting/suplier/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -65,8 +66,6 @@ function SupplierForm({ onSuccess }: SupplierFormProps) {
           organizationId: "674b0a687d4f4b21c6c980ba", // Adjust as needed
         }),
       });
-      if (!response.ok) throw new Error("Failed to create supplier");
-      await response.json();
       setIsLoading(false);
       GlobalModal.onClose();
       toast.success("Supplier created successfully");

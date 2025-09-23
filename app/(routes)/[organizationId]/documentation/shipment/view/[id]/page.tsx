@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { DocColumns } from "./Components/DocumentColumns";
 import { ShipmentLogs } from "@/components/shipmentLogs";
 import ViewShipment from "./Components/ViewShipment";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -43,21 +44,9 @@ export default async function Page({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/shipment/getbyid/${params.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
+  const res = await fetchWithAuth<any>(`/shipment/getbyid/${params.id}`);
 
-  if (!res.ok) {
-    return <div>Error loading shipment data</div>;
-  }
-  const responseData = await res.json();
+  const responseData = res;
   const shipmentData = responseData?.shipment || {};
   const shipmentLogs = responseData?.shipmentLogs || {};
   // console.log("shipmentData", shipmentLogs);

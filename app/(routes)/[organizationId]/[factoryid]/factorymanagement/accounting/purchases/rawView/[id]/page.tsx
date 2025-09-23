@@ -23,6 +23,7 @@ import moment from "moment";
 import { DataTable } from "@/components/ui/data-table";
 import { rawblockcolumns } from "./component/rawblockcolumn";
 import { Separator } from "@/components/ui/separator";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -36,18 +37,11 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
   // console.log("this us dddddddd",BlockDataId)
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/transaction/purchase/rawgetbyid/${BlockDataId}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const res = await fetchWithAuth<any>(
+    `/transaction/purchase/rawgetbyid/${BlockDataId}`
   );
 
-  const { getPurchase: BlockData } = await res.json();
+  const { getPurchase: BlockData } = res;
   // console.log("ffffffffffffffdd",BlockData)
   const calculateVolumeInCm = (
     length: number,

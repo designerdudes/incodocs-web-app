@@ -14,6 +14,7 @@ import { suppliercolumns } from "./components/supplierColumn";
 import { consigneecolumns } from "./components/consigneeColumn";
 import { cbNamecolumns } from "./components/CbNameColumn";
 import AddParties from "./components/PartiesDropdown";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -29,16 +30,9 @@ export default async function PartiesPage({ params }: Props) {
   let GetCurrentUser;
   let currentUser;
   try {
-    GetCurrentUser = await fetch(
-      `https://incodocs-server.onrender.com/user/currentUser`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    GetCurrentUser = await fetchWithAuth<any>(
+      `/user/currentUser`
+    );
     currentUser = GetCurrentUser._id;
   } catch (error) {
     console.error("Error fetching current user:", error);
@@ -47,16 +41,9 @@ export default async function PartiesPage({ params }: Props) {
   let shippingLineRes;
   let shippingLine;
   try {
-    shippingLineRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/shippingline/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    shippingLineRes = await fetchWithAuth<any>(
+      `/shipment/shippingline/getbyorg/${organisationID}`
+    );
     shippingLine = shippingLineRes;
   } catch (error) {
     console.error("Error fetching shipping lines:", error);
@@ -65,16 +52,9 @@ export default async function PartiesPage({ params }: Props) {
   let ForwarderRes;
   let forwarder;
   try {
-    ForwarderRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/forwarder/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    ForwarderRes = await fetchWithAuth<any>(
+      `/shipment/forwarder/getbyorg/${organisationID}`
+    );
     forwarder = ForwarderRes;
   } catch (error) {
     console.error("Error fetching forwarders:", error);
@@ -83,16 +63,9 @@ export default async function PartiesPage({ params }: Props) {
   let transporterRes;
   let transporter;
   try {
-    transporterRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/transporter/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    transporterRes = await fetchWithAuth<any>(
+      `/shipment/transporter/getbyorg/${organisationID}`
+    );
     transporter = transporterRes;
   } catch (error) {
     console.error("Error fetching transporters:", error);
@@ -101,16 +74,9 @@ export default async function PartiesPage({ params }: Props) {
   let supplierRes;
   let supplier;
   try {
-    supplierRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    supplierRes = await fetchWithAuth<any>(
+      `/shipment/supplier/getbyorg/${organisationID}`
+    );
     supplier = supplierRes;
   } catch (error) {
     console.error("Error fetching suppliers:", error);
@@ -119,16 +85,9 @@ export default async function PartiesPage({ params }: Props) {
   let consigneeRes;
   let consignee;
   try {
-    consigneeRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/consignee/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    consigneeRes = await fetchWithAuth<any>(
+      `/shipment/consignee/getbyorg/${organisationID}`
+    );
     consignee = consigneeRes;
   } catch (error) {
     console.error("Error fetching consignees:", error);
@@ -137,16 +96,9 @@ export default async function PartiesPage({ params }: Props) {
   let cbNameRes;
   let cbName;
   try {
-    cbNameRes = await fetch(
-      `https://incodocs-server.onrender.com/shipment/cbname/getbyorg/${organisationID}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      }
-    ).then((response) => response.json());
+    cbNameRes = await fetchWithAuth<any>(
+      `/shipment/cbname/getbyorg/${organisationID}`
+    );
     cbName = cbNameRes;
   } catch (error) {
     console.error("Error fetching Cb Names:", error);

@@ -26,6 +26,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { columns } from "./columns";
 import { headers } from "next/headers";
 import { Badge } from "@/components/ui/badge";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
@@ -41,29 +42,15 @@ export default async function SlabsPage({ params }: Props) {
   const headersList = headers();
   const referer = headersList.get("referer") || "/fallback"; // fallback if no referer
 
-  const res = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/raw/get/${params?.blockid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const res = await fetchWithAuth<any>(
+    `/factory-management/inventory/raw/get/${params?.blockid}`
+  );
 
   BlockData = res;
 
-  const resp = await fetch(
-    `https://incodocs-server.onrender.com/factory-management/inventory/slabsbyblock/get/${params?.blockid}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  ).then((response) => response.json());
+  const resp = await fetchWithAuth<any>(
+    `/factory-management/inventory/slabsbyblock/get/${params?.blockid}`
+  );
 
   SlabData = resp;
 

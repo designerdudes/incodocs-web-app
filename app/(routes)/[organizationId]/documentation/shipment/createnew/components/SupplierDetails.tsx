@@ -68,6 +68,7 @@ interface FormData {
 }
 import CalendarComponent from "@/components/CalendarComponent";
 import { fetchData } from "@/axiosUtility/api";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface SupplierDetailsProps {
   saveProgress: (data: any) => void;
@@ -255,14 +256,11 @@ export function SupplierDetails({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const response = await fetch(
-        "https://incodocs-server.onrender.com/shipmentdocsfile/upload",
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await response.json();
+      const response = await fetchWithAuth<any>("/shipmentdocsfile/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = response;
       const storageUrl = data.url;
       setValue(fieldName as any, storageUrl);
       saveProgressSilently(getValues());
@@ -282,10 +280,10 @@ export function SupplierDetails({
         currentUser={currentUser}
         onSuccess={async () => {
           try {
-            const res = await fetch(
-              `https://incodocs-server.onrender.com/shipment/supplier/getbyorg/${organizationId}`
+            const res = await fetchWithAuth<any>(
+              `/shipment/supplier/getbyorg/${organizationId}`
             );
-            const data = await res.json();
+            const data = res;
             const mappedSuppliers = data.map((supplier: any) => ({
               _id: supplier._id,
               name: supplier.supplierName,
