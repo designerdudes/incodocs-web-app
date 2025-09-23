@@ -71,6 +71,7 @@ const formSchema = z.object({
         heightImage: z.string().optional(),
         slabphoto: z.string().optional(),
         productName: z.string().min(1, "Product name required"),
+        slabNumber: z.string().min(1, "Slab name required"),
         dimensions: z.object({
           length: z.object({
             value: z
@@ -130,6 +131,7 @@ const inTime = inTimeRaw
         {
           lengthImage: "",
           heightImage: "",
+          slabNumber:"",
           slabphoto: "",
           productName: "", // Note: productName is required, so we might need a default value
           dimensions: {
@@ -176,7 +178,8 @@ const inTime = inTimeRaw
               lengthImage: "",
               heightImage: "",
               slabphoto: "",
-              productName: `Slab ${index + 1}`, // Default productName to avoid validation issues
+              slabNumber:"",
+              productName: `Slab ${index + 1}`,
               dimensions: {
                 length: { value: 0, units: "inch" },
                 height: { value: 0, units: "inch" },
@@ -282,7 +285,7 @@ const inTime = inTimeRaw
         body
       );
       toast.success("Slabs updated successfully");
-      router.refresh();
+      router.push("./");
     } catch (error: any) {
       console.error("Error:", error);
       toast.error(error?.response?.data?.message || "Failed to update slabs");
@@ -496,6 +499,7 @@ const inTime = inTimeRaw
                 <TableRow>
                   <TableHead>S.No</TableHead>
                   <TableHead>Product</TableHead>
+                  <TableHead>slabNumber</TableHead>
                   <TableHead>Length (inch)</TableHead>
                   <TableHead>Height (inch)</TableHead>
                   <TableHead>Area (sqft)</TableHead>
@@ -516,6 +520,20 @@ const inTime = inTimeRaw
                           onChange={(e) => {
                             const updated = [...slabs];
                             updated[globalIndex].productName = e.target.value;
+                            setSlabs(updated);
+                            setValue("slabs", updated, {
+                              shouldValidate: true,
+                            });
+                          }}
+                        />
+                      </TableCell>
+                       <TableCell>
+                        <Input
+                          placeholder="Slab Number"
+                          value={slab?.slabNumber}
+                          onChange={(e) => {
+                            const updated = [...slabs];
+                            updated[globalIndex].slabNumber = e.target.value;
                             setSlabs(updated);
                             setValue("slabs", updated, {
                               shouldValidate: true,
@@ -707,7 +725,7 @@ const inTime = inTimeRaw
             </div>
           </div>
 
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading || !outTime}>
             {isLoading ? "Submitting..." : "Update Slabs"}
           </Button>
 
