@@ -12,12 +12,15 @@ export async function fetchWithAuth<T>(
     const token = cookieStore.get("AccessToken")?.value;
 
     const baseUrl = "https://incodocs-server.onrender.com";
+    url = `${baseUrl}${
+      url.trim().startsWith("/") ? url.trim() : `/${url.trim()}`
+    }`;
 
     if (!token) {
       throw new Error("No access token found. Please login again.");
     }
 
-    const res = await fetch(`${baseUrl}${url}`, {
+    const res = await fetch(url, {
       method: options.method || "GET",
       headers: {
         "Content-Type": "application/json",
