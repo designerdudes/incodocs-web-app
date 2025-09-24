@@ -14,7 +14,7 @@ import { EyeIcon, MoreHorizontal, ScissorsIcon } from "lucide-react";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import toast from "react-hot-toast";
 import { deleteData } from "@/axiosUtility/api";
-import CardWithForm from "./addTrimValueForm";
+import MarkPolishForm from "./markPolishForm";
 import { Slab } from "./inpolishingcolumns";
 
 interface Props {
@@ -59,7 +59,7 @@ export const InPolishingCellAction: React.FC<Props> = ({ data }) => {
             onSelect={() => {
               GlobalModal.title = "Mark Polish";
               GlobalModal.description = `Enter Polished Values of Slab: ${data.slabId}`;
-              GlobalModal.children = <CardWithForm params={{ id: data._id }} />;
+              GlobalModal.children = <MarkPolishForm params={{ id: data._id }} />;
               GlobalModal.onOpen();
             }}
             className="focus:bg-green-500 focus:text-destructive-foreground"

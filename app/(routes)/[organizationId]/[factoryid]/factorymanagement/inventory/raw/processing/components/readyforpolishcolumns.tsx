@@ -98,7 +98,7 @@ export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original.blockNumber}
+                {row.original.blockNumber || "N/A"}
             </div>
         ),
         filterFn: 'includesString',
@@ -110,13 +110,13 @@ export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
                 variant="ghost"
                 onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-                Block Number
+                Lot Number
                 <ArrowUpDown className="ml-2 h-4 w-4" />
             </Button>
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original. lotId?.lotName}
+                {row.original. lotId?.lotName ||  "N/A"}
             </div>
         ),
         filterFn: 'includesString', // ensures it filters by includes method (you can define custom filter functions)
@@ -134,7 +134,7 @@ export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
         ),
         cell: ({ row }) => (
             <div className="capitalize">
-                {row.original?.materialType}
+                {row.original?.materialType ||"N/A"}
             </div>
         ),
     },
@@ -155,24 +155,6 @@ export const Readyforpolishcolumns: ColumnDef<Blocks>[] = [
     </div>
   ),
 },
-
-    // {
-    //     accessorKey: "readyForPolishCount",
-    //     header: ({ column }) => (
-    //         <Button
-    //             variant="ghost"
-    //             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-    //         >
-    //             Ready for Polish Slabs
-    //             <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         </Button>
-    //     ),
-    //     cell: ({ row }) => (
-    //         <div className="capitalize">
-    //             {row.original.readyForPolishCount}
-    //         </div>
-    //     ),
-    // },
     {
         accessorKey: "status",
         header: ({ column }) => (
