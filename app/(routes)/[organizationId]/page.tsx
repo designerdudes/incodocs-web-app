@@ -40,15 +40,22 @@ export default async function DashboardPage({ params }: { params: Params }) {
   const { factoryId } = params;
 
   // 1. Get factory details
-  const factory = await fetchWithAuth<Factory>(
-    `/factory/${factoryId}`
-  );
-  const orgId = factory.organization;
+  let orgId: string | undefined;
+  try {
+    var factory = await fetchWithAuth<Factory>(`/factory/${factoryId}`);
+    orgId = factory.organization;
+  } catch (error) {
+    console.error("Error fetching factory details:", error);
+  }
 
   // 2. Get all factories for the organization
-  const factories = await fetchWithAuth<Factory[]>(
-    `/factory/getbyorg/${orgId}`
-  );
+  let factories: Factory[] = [];
+  try {
+    factories = await fetchWithAuth<Factory[]>(`/factory/getbyorg/${orgId}`);
+  } catch (error) {
+    console.error("Error fetching factories:", error);
+    factories = [];
+  }
 
   return (
     <main className="flex h-full flex-col p-10 min-h-screen bg-gradient-to-r from-gray-100 to-white">
@@ -80,8 +87,7 @@ export default async function DashboardPage({ params }: { params: Params }) {
                   Factory ID: {factory._id}
                 </CardDescription>
                 <p className="text-sm text-gray-700">
-                  Address: {factory.address.location},{" "}
-                  {factory.address.pincode}
+                  Address: {factory.address.location}, {factory.address.pincode}
                 </p>
                 <p className="text-sm text-gray-700">
                   Coordinates:{" "}
