@@ -20,14 +20,24 @@ export default async function Page({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch Lots Data
-  const Lotres = await fetchWithAuth<any>(
-    `/factory-management/inventory/factory-lot/get/${params.factoryid}`
-  );
+  try {
+    var Lotres = await fetchWithAuth<any>(
+      `/factory-management/inventory/factory-lot/get/${params.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch lot");
+    Lotres = [];
+  }
 
   // Fetch Slabs Data
-  const Slabres = await fetchWithAuth<any>(
-    `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
-  );
+  try {
+    var Slabres = await fetchWithAuth<any>(
+      `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+    Slabres = [];
+  }
 
   const lotsData = Array.isArray(Lotres) ? Lotres : [];
   const slabData = Array.isArray(Slabres) ? Slabres : [];

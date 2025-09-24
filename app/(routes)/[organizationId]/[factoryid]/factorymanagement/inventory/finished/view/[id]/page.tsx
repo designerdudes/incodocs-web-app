@@ -66,17 +66,21 @@ export default async function ViewFinishedPage({ params }: Props) {
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<FinishedMaterial>(
-    `/factory-management/inventory/finished/get/${params?.id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    }
-  );
+  let res;
+  try {
+    res = await fetchWithAuth<FinishedMaterial>(
+      `/factory-management/inventory/finished/get/${params?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      }
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+  }
   const FinishedMaterial = res;
 
   // console.log(FinishedMaterial);
@@ -118,12 +122,12 @@ export default async function ViewFinishedPage({ params }: Props) {
         <div className="flex-1">
           <Heading
             className="leading-tight "
-             title={` Details of Slab : ${FinishedMaterial.slabNumber} `}
+            title={` Details of Slab : ${FinishedMaterial?.slabNumber} `}
           />
           <p className="text-muted-foreground text-sm mt-2 ">
-            View Finished product materials with detailed insights
-            into quantity, specifications, and status, ensuring efficient
-            tracking and streamlined operations.
+            View Finished product materials with detailed insights into
+            quantity, specifications, and status, ensuring efficient tracking
+            and streamlined operations.
           </p>
         </div>
         {/* <div className="hidden items-center gap-2 md:ml-auto md:flex">
@@ -141,7 +145,7 @@ export default async function ViewFinishedPage({ params }: Props) {
       {/* New parent div to hold both sections */}
       <div className="flex flex-col md:flex-row gap-10 lg:gap-8 w-full  pb-5">
         <div className="flex-1">
-        <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+          <div className="grid-cols-2 grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
             <Card x-chunk="dashboard-07-chunk-0">
               <CardHeader>
                 <CardTitle>Cutting Inches With Allowance</CardTitle>
@@ -166,7 +170,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableCell className="whitespace-nowrap">
                         Slab Number
                       </TableCell>
-                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                      <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
@@ -190,7 +194,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                          (FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -200,7 +205,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                          (FinishedMaterial?.dimensions?.height?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -210,8 +216,9 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          ((FinishedMaterial?.dimensions?.length?.value *
-                            FinishedMaterial?.dimensions?.height?.value) /
+                          (((FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                            (FinishedMaterial?.dimensions?.height?.value ??
+                              0)) /
                             144) *
                           3.75
                         ).toFixed(2)}
@@ -222,7 +229,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Created At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.createdAt).format(
+                        {moment(FinishedMaterial?.createdAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -232,7 +239,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Updated At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.updatedAt).format(
+                        {moment(FinishedMaterial?.updatedAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -268,7 +275,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableCell className="whitespace-nowrap">
                         Slab Number
                       </TableCell>
-                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                      <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
@@ -307,8 +314,9 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          ((FinishedMaterial?.dimensions?.length?.value *
-                            FinishedMaterial?.dimensions?.height?.value) /
+                          (((FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                            (FinishedMaterial?.dimensions?.height?.value ??
+                              0)) /
                             144) *
                           3.75
                         ).toFixed(2)}
@@ -319,7 +327,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Created At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.createdAt).format(
+                        {moment(FinishedMaterial?.createdAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -329,7 +337,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Updated At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.updatedAt).format(
+                        {moment(FinishedMaterial?.updatedAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -365,14 +373,14 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableCell className="whitespace-nowrap">
                         Slab Number
                       </TableCell>
-                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                      <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
                         Trim Length(inch)
                       </TableCell>
                       <TableCell>
-                        {FinishedMaterial.trim?.length?.value}
+                        {FinishedMaterial?.trim?.length?.value}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -380,7 +388,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Trim Height(inch)
                       </TableCell>
                       <TableCell>
-                        {FinishedMaterial.trim?.height?.value}
+                        {FinishedMaterial?.trim?.height?.value}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -405,7 +413,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                          (FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -415,7 +424,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                          (FinishedMaterial?.dimensions?.height?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -425,7 +435,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Created At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.createdAt).format(
+                        {moment(FinishedMaterial?.createdAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -436,8 +446,9 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          ((FinishedMaterial?.dimensions?.length?.value *
-                            FinishedMaterial?.dimensions?.height?.value) /
+                          (((FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                            (FinishedMaterial?.dimensions?.height?.value ??
+                              0)) /
                             144) *
                           3.75
                         ).toFixed(2)}
@@ -448,7 +459,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Updated At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.updatedAt).format(
+                        {moment(FinishedMaterial?.updatedAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -482,14 +493,14 @@ export default async function ViewFinishedPage({ params }: Props) {
                       <TableCell className="whitespace-nowrap">
                         Slab Number
                       </TableCell>
-                      <TableCell>{FinishedMaterial.slabNumber}</TableCell>
+                      <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
                         Trim Length(inch)
                       </TableCell>
                       <TableCell>
-                        {FinishedMaterial.trim?.length?.value}
+                        {FinishedMaterial?.trim?.length?.value}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -497,7 +508,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Trim Height(inch)
                       </TableCell>
                       <TableCell>
-                        {FinishedMaterial.trim?.height?.value}
+                        {FinishedMaterial?.trim?.height?.value}
                       </TableCell>
                     </TableRow>
                     <TableRow>
@@ -522,7 +533,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.length?.value * 2.54
+                          (FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -532,7 +544,8 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          FinishedMaterial?.dimensions?.height?.value * 2.54
+                          (FinishedMaterial?.dimensions?.height?.value ?? 0) *
+                          2.54
                         ).toFixed(2)}
                       </TableCell>
                     </TableRow>
@@ -542,8 +555,9 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>
                         {(
-                          ((FinishedMaterial?.dimensions?.length?.value *
-                            FinishedMaterial?.dimensions?.height?.value) /
+                          (((FinishedMaterial?.dimensions?.length?.value ?? 0) *
+                            (FinishedMaterial?.dimensions?.height?.value ??
+                              0)) /
                             144) *
                           3.75
                         ).toFixed(2)}
@@ -554,7 +568,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Created At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.createdAt).format(
+                        {moment(FinishedMaterial?.createdAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>
@@ -564,7 +578,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Category Updated At
                       </TableCell>
                       <TableCell>
-                        {moment(FinishedMaterial.updatedAt).format(
+                        {moment(FinishedMaterial?.updatedAt).format(
                           "DD-MMM-YYYY"
                         )}
                       </TableCell>

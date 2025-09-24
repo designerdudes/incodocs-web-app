@@ -6,20 +6,20 @@ import { Separator } from "@/components/ui/separator";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import moment from "moment";
 import { columns } from "./columns";
@@ -38,18 +38,27 @@ export default async function BlocksPage({ params }: Props) {
   let BlocksData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/blocksbylot/get/${params?.lotid}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/blocksbylot/get/${params?.lotid}`
+    );
+  } catch (error) {
+    console.log("Error while fetching blocks data", error);
+    res = [];
+  }
 
   BlocksData = res;
   // console.log("dddddddddd",BlocksData)
 
   let LotData = null;
-  const resp = await fetchWithAuth<any>(
-    `/factory-management/inventory/lot/getbyid/${params?.lotid}`
-  );
+  try {
+    var resp = await fetchWithAuth<any>(
+      `/factory-management/inventory/lot/getbyid/${params?.lotid}`
+    );
+  } catch (error) {
+    console.log("Error while fetching lot data", error);
+    resp = null;
+  }
 
   LotData = resp;
 
@@ -64,10 +73,20 @@ export default async function BlocksPage({ params }: Props) {
           </Button>
         </Link>
         <div className="flex-1">
-          <Heading
-            className="leading-tight"
-            title={`Details of Lot : ${BlocksData[0]?.lotId}`}
-          />
+          <div className="flex items-center gap-3 relative group w-fit">
+            <Heading
+              className="leading-tight"
+              title={`Details of Lot : ${LotData?.lotName ?? LotData?.lotId}`}
+            />
+            <span
+              className="absolute top-1/2 left-full ml-2 -translate-y-1/2 
+                   hidden group-hover:block 
+                   bg-gray-700 text-xs text-white px-2 py-1 rounded"
+            >
+              {LotData?.lotName && LotData?.lotId}
+            </span>
+          </div>
+
           <p className="text-muted-foreground text-sm mt-2">
             This section allows you to send blocks from your inventory for
             cutting. Select the block and initiate the cutting process as the
@@ -188,14 +207,12 @@ export default async function BlocksPage({ params }: Props) {
                     {moment(LotData?.updatedAt).format("DD MMM YYYY")}
                   </TableCell>
                 </TableRow>
-             
+
                 <TableRow>
                   <TableCell>End-to-End Measurement</TableCell>
-                  
                 </TableRow>
                 <TableRow>
                   <TableCell> Net Measurement</TableCell>
-                 
                 </TableRow>
               </TableBody>
             </Table>

@@ -37,9 +37,14 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
   // console.log("this us dddddddd",BlockDataId)
 
-  const res = await fetchWithAuth<any>(
-    `/transaction/purchase/rawgetbyid/${BlockDataId}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/transaction/purchase/rawgetbyid/${BlockDataId}`
+    );
+  } catch (error) {
+    console.log("failed to fetch purchase");
+    res = null;
+  }
 
   const { getPurchase: BlockData } = res;
   // console.log("ffffffffffffffdd",BlockData)
@@ -82,116 +87,116 @@ export default async function SlabsPage({ params }: Props) {
       <Separator orientation="horizontal" />
 
       <div className="flex flex-5 gap-6">
-          <Card className="w-2/5">
-            <CardHeader>
-              <CardTitle>Raw Purchase Details</CardTitle>
-              <CardDescription>{`Details of invoice ${BlockData.invoiceNo}`}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Field</TableHead>
-                    <TableHead>Details</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell>Factory</TableCell>
-                    <TableCell>{BlockData.factoryId?.factoryName}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Supplier Name</TableCell>
-                    <TableCell>{BlockData.supplierId?.supplierName}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Number of Blocks</TableCell>
-                    <TableCell>{BlockData.noOfBlocks}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Invoice No.</TableCell>
-                    <TableCell>{BlockData.invoiceNo}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Invoice Value</TableCell>
-                    <TableCell>{BlockData.invoiceValue}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Volume Quantity</TableCell>
-                    <TableCell>{BlockData.volumeQuantity}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Weight (tons)</TableCell>
-                    <TableCell>{BlockData.weight}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Rate per Cubic Volume</TableCell>
-                    <TableCell>{BlockData.ratePerCubicVolume}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Volume (cm³)</TableCell>
-                    <TableCell>{volumeCm}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>GST Percentage</TableCell>
-                    <TableCell>{BlockData.gstPercentage}%</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="whitespace-nowrap">
-                      Payment Proof
-                    </TableCell>
-                    <TableCell>
-                      {BlockData.paymentProof ? (
-                        <a
-                          href={BlockData.paymentProof}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Button variant="link" className="p-0 m-0">
-                            View Payment Proof
-                          </Button>
-                        </a>
-                      ) : (
-                        <span className="text-muted-foreground">N/A</span>
-                      )}
-                    </TableCell>
-                  </TableRow>
+        <Card className="w-2/5">
+          <CardHeader>
+            <CardTitle>Raw Purchase Details</CardTitle>
+            <CardDescription>{`Details of invoice ${BlockData.invoiceNo}`}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Field</TableHead>
+                  <TableHead>Details</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Factory</TableCell>
+                  <TableCell>{BlockData.factoryId?.factoryName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Supplier Name</TableCell>
+                  <TableCell>{BlockData.supplierId?.supplierName}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Number of Blocks</TableCell>
+                  <TableCell>{BlockData.noOfBlocks}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Invoice No.</TableCell>
+                  <TableCell>{BlockData.invoiceNo}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Invoice Value</TableCell>
+                  <TableCell>{BlockData.invoiceValue}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Volume Quantity</TableCell>
+                  <TableCell>{BlockData.volumeQuantity}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Weight (tons)</TableCell>
+                  <TableCell>{BlockData.weight}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Rate per Cubic Volume</TableCell>
+                  <TableCell>{BlockData.ratePerCubicVolume}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Volume (cm³)</TableCell>
+                  <TableCell>{volumeCm}</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>GST Percentage</TableCell>
+                  <TableCell>{BlockData.gstPercentage}%</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="whitespace-nowrap">
+                    Payment Proof
+                  </TableCell>
+                  <TableCell>
+                    {BlockData.paymentProof ? (
+                      <a
+                        href={BlockData.paymentProof}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Button variant="link" className="p-0 m-0">
+                          View Payment Proof
+                        </Button>
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground">N/A</span>
+                    )}
+                  </TableCell>
+                </TableRow>
 
-                  <TableRow>
-                    <TableCell>Purchase Date</TableCell>
-                    <TableCell>
-                      {moment(BlockData.purchaseDate).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Created At</TableCell>
-                    <TableCell>
-                      {moment(BlockData.createdAt).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Updated At</TableCell>
-                    <TableCell>
-                      {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-          <div className="w-3/5">
-                    <DataTable
-                      // bulkDeleteIdName="_id"
-                      // bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
-                      // bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
-                      // bulkDeleteToastMessage="Selected Raw Material deleted successfully"
-                      // deleteRoute="/factory-management/inventory/deletemultipleblocks"
-                      searchKey="blockNumber"
-                      columns={rawblockcolumns}
-                      data={BlockData.blockIds}
-                      token={token}
-                    />
-                  </div>
+                <TableRow>
+                  <TableCell>Purchase Date</TableCell>
+                  <TableCell>
+                    {moment(BlockData.purchaseDate).format("YYYY-MM-DD")}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Created At</TableCell>
+                  <TableCell>
+                    {moment(BlockData.createdAt).format("YYYY-MM-DD")}
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Updated At</TableCell>
+                  <TableCell>
+                    {moment(BlockData.updatedAt).format("YYYY-MM-DD")}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+        <div className="w-3/5">
+          <DataTable
+            // bulkDeleteIdName="_id"
+            // bulkDeleteTitle="Are you sure you want to delete the selected Slabs?"
+            // bulkDeleteDescription="This will delete all the selected Slabs, and they will not be recoverable."
+            // bulkDeleteToastMessage="Selected Raw Material deleted successfully"
+            // deleteRoute="/factory-management/inventory/deletemultipleblocks"
+            searchKey="blockNumber"
+            columns={rawblockcolumns}
+            data={BlockData.blockIds}
+            token={token}
+          />
+        </div>
       </div>
     </div>
   );

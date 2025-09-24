@@ -18,16 +18,19 @@ interface Props {
 }
 
 export default async function Home({ params }: Props) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth(
-    `/factory/getSingle/${params?.factoryid}`
-  );
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth(`/factory/getSingle/${params?.factoryid}`);
+  } catch (error) {
+    console.log("Error while fetching factory data", error);
+    res = null;
+  }
   const currentFactoryData = res;
 
-  console.log("Factory ID from Params:", params);
+  // console.log("Factory ID from Params:", params);
 
-  console.log("Current Factory Data:", currentFactoryData);
+  // console.log("Current Factory Data:", currentFactoryData);
 
   return (
     <main className="flex h-full flex-col p-10 bg-gradient-to-r from-gray-100 to-white">

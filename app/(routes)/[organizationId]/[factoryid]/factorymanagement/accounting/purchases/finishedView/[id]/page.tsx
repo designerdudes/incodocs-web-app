@@ -36,9 +36,14 @@ export default async function SlabsPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetchWithAuth<any>(
-    `/transaction/purchase/slabgetbyid/${SlabDataId}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/transaction/purchase/slabgetbyid/${SlabDataId}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slab");
+    res = null;
+  }
 
   const SlabData = res;
   const purchase = SlabData?.getPurchase;

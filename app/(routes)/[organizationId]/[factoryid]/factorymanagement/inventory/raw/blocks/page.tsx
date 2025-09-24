@@ -18,20 +18,25 @@ interface Props {
 }
 
 interface Blocks {
-  _id: string
-  blocknumber: string
-  materialType: string
-  numberofslabs: string
-  instock: string
-  createdAt: string
+  _id: string;
+  blocknumber: string;
+  materialType: string;
+  numberofslabs: string;
+  instock: string;
+  createdAt: string;
 }
 
 export default async function Blocks({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const Blockres = await fetchWithAuth(
-    `/factory-management/inventory/getblocksbyfactory/${params.factoryid}`
-  );
+  try {
+    var Blockres = await fetchWithAuth<any>(
+      `/factory-management/inventory/getblocksbyfactory/${params.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch blocks");
+    Blockres = [];
+  }
   let BlockData = Blockres;
 
   return (
@@ -46,7 +51,8 @@ export default async function Blocks({ params }: Props) {
         <div className="flex-1">
           <Heading className="leading-tight" title="Blocks" />
           <p className="text-muted-foreground text-sm">
-            The tracking of blocks through various stages of production.</p>
+            The tracking of blocks through various stages of production.
+          </p>
         </div>
         {/* Move the interactivity to the client-side button component */}
         {/* <CreateNewLotButton /> */}
