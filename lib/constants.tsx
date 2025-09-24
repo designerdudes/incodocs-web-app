@@ -389,7 +389,7 @@ const sidebarTabs = {
           url: "/documentation/parties",
         },
         {
-          title: "remittance",
+          title: "Remittance",
           url: "/documentation/remittance",
         },
       ],
