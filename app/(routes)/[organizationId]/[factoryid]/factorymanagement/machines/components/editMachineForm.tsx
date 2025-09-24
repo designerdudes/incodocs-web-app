@@ -133,6 +133,7 @@ export default function MachineFormPage({ params }: MachineFormProps) {
       setIsLoading(false);
     }
   };
+  
   return (
     <div className="space-y-6">
       <Form {...form}>
