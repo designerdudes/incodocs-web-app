@@ -11,6 +11,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useGlobalModal } from "@/hooks/GlobalModal";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,13 +28,6 @@ import toast from "react-hot-toast";
 
 const formSchema = z.object({
   polishedValues: z.object({
-    height: z.object({
-      value: z.preprocess(
-        (val) => (val ? parseFloat(val as string) : undefined),
-        z.number().min(0.1, { message: "Height must be greater than zero" })
-      ),
-      units: z.literal("inch"),
-    }),
     length: z.object({
       value: z.preprocess(
         (val) => (val ? parseFloat(val as string) : undefined),
@@ -35,7 +35,15 @@ const formSchema = z.object({
       ),
       units: z.literal("inch"),
     }),
+    height: z.object({
+      value: z.preprocess(
+        (val) => (val ? parseFloat(val as string) : undefined),
+        z.number().min(0.1, { message: "Height must be greater than zero" })
+      ),
+      units: z.literal("inch"),
+    }),
   }),
+  slabNumber: z.string().optional(),
   outTime: z.string().nonempty("Out Time is required"),
   status: z.literal("polished"),
 });
@@ -44,17 +52,24 @@ interface Props {
   params: { id: string };
 }
 
-function CardWithForm(params: Props) {
+function MarkPolishForm(params: Props) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [slabData, setSlabData] = React.useState<Slab>();
+  const [inTime, setInTime] = React.useState<string>("");
+  const [assignedMachine, setAssignedMachine] = React.useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       polishedValues: {
-        height: { value: 0, units: "inch" },
         length: { value: 0, units: "inch" },
+        height: { value: 0, units: "inch" },
       },
-      outTime: new Date().toISOString().slice(0, 16), // auto-fill as datetime-local format
+      slabNumber: "",
+      outTime: new Date().toISOString().slice(0, 16),
       status: "polished",
     },
   });
@@ -66,12 +81,32 @@ function CardWithForm(params: Props) {
           `/factory-management/inventory/finished/get/${params.params.id}`
         );
         setSlabData(GetData);
+
+        // ✅ set slab number in form
+        if (GetData?.slabNumber) {
+          form.setValue("slabNumber", GetData.slabNumber);
+        }
+
+        // ✅ Populate machine + inTime from backend
+        if (GetData?.polishing) {
+          if (GetData.polishing.machineId) {
+            setAssignedMachine({
+              id: GetData.polishing.machineId._id,
+              name: GetData.polishing.machineId.machineName,
+            });
+          }
+          if (GetData.polishing.in) {
+            setInTime(
+              new Date(GetData.polishing.in).toISOString().slice(0, 16)
+            );
+          }
+        }
       } catch (error) {
         console.error("Error fetching slab data:", error);
       }
     };
     fetchSlabData();
-  }, [params.params.id]);
+  }, [params.params.id, form]);
 
   const GlobalModal = useGlobalModal();
 
@@ -82,15 +117,22 @@ function CardWithForm(params: Props) {
     GlobalModal.children = (
       <div className="space-y-4">
         <p>
-          <strong>Slab Number:</strong> {slabData?.slabNumber}
+          <strong>Slab Number:</strong> {values.slabNumber || "N/A"}
         </p>
         <p>
-          <strong>Height (inches):</strong>{" "}
-          {values.polishedValues.height.value}
+          <strong>Machine:</strong> {assignedMachine?.name || "Not Assigned"}
+        </p>
+        <p>
+          <strong>In Time:</strong>{" "}
+          {inTime ? new Date(inTime).toLocaleString() : "Not Available"}
         </p>
         <p>
           <strong>Length (inches):</strong>{" "}
           {values.polishedValues.length.value}
+        </p>
+        <p>
+          <strong>Height (inches):</strong>{" "}
+          {values.polishedValues.height.value}
         </p>
         <p>
           <strong>Out Time:</strong>{" "}
@@ -127,7 +169,7 @@ function CardWithForm(params: Props) {
                 GlobalModal.onClose();
                 toast.error("Error marking slab as polished");
               }
-               window.location.reload();
+              window.location.reload();
             }}
           >
             Confirm
@@ -141,36 +183,35 @@ function CardWithForm(params: Props) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-4">
-        <div className="grid grid-cols-2 gap-4">
-          {/* Height */}
-          <FormField
-            control={form.control}
-            name="polishedValues.height.value"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Height (inches)</FormLabel>
-                <FormControl>
+        {/* Slab Number display */}
+        <div className="min-w-[100px] font-semibold text-sm">
+          Slab Number {form.watch("slabNumber") || "N/A"}
+        </div>
+
+        <Accordion type="single" collapsible>
+          <AccordionItem value="item-1">
+            <AccordionTrigger>Assigned Machine</AccordionTrigger>
+            <AccordionContent>
+              <div className="border p-3 rounded-lg bg-gray-100 space-y-3">
+                <div>
+                  <Label>Machine Used</Label>
                   <Input
-                    placeholder="Eg: 54"
-                    type="number"
-                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    step="any"
-                    {...field}
-                    value={field.value || ""}
-                    onChange={(e) => {
-                      const value = Number(e.target.value);
-                      if (value >= 0) {
-                        field.onChange(value);
-                      }
-                    }}
-                    min="0"
+                    type="text"
+                    value={assignedMachine?.name || "Not Assigned"}
+                    disabled
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {/* Length */}
+                </div>
+                <div>
+                  <Label>In Time (Date & Time)</Label>
+                  <Input type="datetime-local" value={inTime || ""} disabled />
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+
+        {/* Length + Height */}
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="polishedValues.length.value"
@@ -181,15 +222,37 @@ function CardWithForm(params: Props) {
                   <Input
                     placeholder="Eg: 120"
                     type="number"
-                    className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     step="any"
                     {...field}
                     value={field.value || ""}
                     onChange={(e) => {
                       const value = Number(e.target.value);
-                      if (value >= 0) {
-                        field.onChange(value);
-                      }
+                      if (value >= 0) field.onChange(value);
+                    }}
+                    min="0"
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="polishedValues.height.value"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Height (inches)</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder="Eg: 54"
+                    type="number"
+                    step="any"
+                    {...field}
+                    value={field.value || ""}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      if (value >= 0) field.onChange(value);
                     }}
                     min="0"
                   />
@@ -220,7 +283,7 @@ function CardWithForm(params: Props) {
           )}
         />
 
-        {/* Submit Button */}
+        {/* Submit */}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading && <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />}
           Submit
@@ -230,4 +293,4 @@ function CardWithForm(params: Props) {
   );
 }
 
-export default CardWithForm;
+export default MarkPolishForm;

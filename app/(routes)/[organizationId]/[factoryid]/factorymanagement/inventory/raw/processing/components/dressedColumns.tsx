@@ -97,7 +97,7 @@ export const dressedcolumns: ColumnDef<Blocks>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.blockNumber}</div>,
+    cell: ({ row }) => <div>{row.original.blockNumber || "N/A"}</div>,
     filterFn: "includesString", // Use the built-in filtering logic for partial matches
   },
   {
@@ -111,7 +111,7 @@ export const dressedcolumns: ColumnDef<Blocks>[] = [
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div>{row.original.lotId?.lotName}</div>,
+    cell: ({ row }) => <div>{row.original.lotId?.lotName || "N/A"}</div>,
     filterFn: "includesString",
   },
   {
@@ -126,7 +126,7 @@ export const dressedcolumns: ColumnDef<Blocks>[] = [
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original?.materialType}</div>
+      <div className="capitalize">{row.original?.materialType || "N/A"}</div>
     ),
   },
   {

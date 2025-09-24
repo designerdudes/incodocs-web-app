@@ -116,12 +116,12 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Block-Slab Number
+        Slab Number
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
-      <div className="capitalize">{row.original.slabNumber}</div>
+      <div className="capitalize">{row.original.slabNumber || "N/A"}</div>
     ),
     filterFn: "includesString",
   },
@@ -132,14 +132,13 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Length
+        Length(inch)
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div className="capitalize">
         {row.original?.dimensions?.length?.value}{" "}
-        {row.original?.dimensions?.length?.units}
       </div>
     ),
   },
@@ -150,14 +149,13 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
       >
-        Height
+        Height(inch)
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => (
       <div className="capitalize">
         {row.original?.dimensions?.height?.value}{" "}
-        {row.original?.dimensions?.height?.units}
       </div>
     ),
   },
@@ -174,7 +172,7 @@ export const inPolishingcolumns: ColumnDef<Slab>[] = [
     ),
     cell: ({ row }) => (
       <div className="capitalize">
-        {row.original?.blockId?.lotId?.materialType}
+        {row.original?.blockId?.lotId?.materialType|| "N/A"}
       </div>
     ),
   },
