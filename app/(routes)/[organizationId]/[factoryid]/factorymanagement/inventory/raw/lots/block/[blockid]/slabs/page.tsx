@@ -49,18 +49,24 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
   const headersList = headers();
   const referer = headersList.get("referer") || "/fallback"; // fallback if no referer
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/raw/get/${params?.blockid}`
-  );
-
-  BlockData = res;
-
-  const resp = await fetchWithAuth<any>(
-    `/factory-management/inventory/slabsbyblock/get/${params?.blockid}`
-  );
-
-  SlabData = resp;
+  try {
+    const res = await fetchWithAuth<any>(
+      `/factory-management/inventory/raw/get/${params?.blockid}`
+    );
+    BlockData = res;
+  } catch (error) {
+    console.error("Error fetching block data:", error);
+    BlockData = null;
+  }
+  try {
+    const resp = await fetchWithAuth<any>(
+      `/factory-management/inventory/slabsbyblock/get/${params?.blockid}`
+    );
+    SlabData = resp ?? [];
+  } catch (error) {
+    console.error("Error fetching block data:", error);
+    SlabData = [];
+  }
 
   const slabs = Array.isArray(SlabData) ? SlabData : [];
   const totalSlabSqft = slabs.reduce((total: number, slab: any) => {
