@@ -68,7 +68,7 @@ export function DataTableCellActions({ row }: Props) {
         <DropdownMenuItem asChild>
           <a href={editPath} target="_blank" rel="noopener noreferrer">
             <Pencil className="mr-2 h-4 w-4" />
-            {"Update Remittance"}
+            {"Edit Remittance"}
           </a>
         </DropdownMenuItem>
 

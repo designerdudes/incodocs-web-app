@@ -109,7 +109,7 @@ export default async function Page(params: params) {
             "__v": 0
         },
     ]
-    console.log("remittance data", res);
+    // console.log("remittance data", res);
     remittanceData = res;
 
     return (
