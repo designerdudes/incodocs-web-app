@@ -11,6 +11,7 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import { DollarSign } from "lucide-react"; 
 import { FiBriefcase, FiFileText, FiGrid } from "react-icons/fi";
 import { MdAccountBalance } from "react-icons/md";
 import { TbFileExport } from "react-icons/tb";
@@ -105,6 +106,26 @@ export default function DocumentationPage({ params }: Props) {
                 updates on delivery status and progress. Ensure timely
                 deliveries by monitoring all stages of shipment from dispatch to
                 arrival.
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href={`/${organizationId}/documentation/remittance`} passHref>
+          <Card className="bg-white dark:bg-card flex flex-col h-full">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-lg font-medium">Remittance</CardTitle>
+               <DollarSign className="w-6 h-6 text-muted-foreground" />
+            </CardHeader>
+            <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
+              <CardDescription className="text-base text-gray-600">
+                Manage and monitor remittances with clarity and accuracy,
+                ensuring smooth financial tracking across your organization.
+              </CardDescription>
+              <p className="text-sm text-gray-700">
+                Record and update remittance details such as payment references,
+                amounts, dates, and associated parties. Stay organized with
+                real-time updates, allowing for transparent tracking and
+                streamlined reconciliation.
               </p>
             </CardContent>
           </Card>
