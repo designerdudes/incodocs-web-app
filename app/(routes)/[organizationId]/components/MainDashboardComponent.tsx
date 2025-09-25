@@ -245,9 +245,10 @@ const MainDashboardComponent: React.FC<UserDataProps> = ({
 
   const handleCreateOrg = async (formData: OrgSchemaType) => {
     try {
-      const response = await fetchWithAuth<any>(
-        "/organizations/add"
-      );
+      const response = await fetchWithAuth<any>("/organizations/add", {
+        method: "POST",
+        body: formData as any,
+      });
 
       const createdOrg = response;
       setOrganizations((prev: any) => [...prev, createdOrg]);
