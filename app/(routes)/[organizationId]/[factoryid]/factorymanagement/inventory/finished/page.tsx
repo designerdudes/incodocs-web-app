@@ -118,17 +118,17 @@ export default async function FinishedMaterialPage({ params }: Props) {
               <TabsTrigger className="gap-2" value="PolishingData">
                 Polishing Data
                 <Badge className="text-bg-primary-foreground" variant="outline">
-                  {slabsData?.length}
+                  {Polished?.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger className="gap-2" value="Polished">
-                Polished Slab Data
+                Polished Slab
                 <Badge className="text-bg-primary-foreground" variant="outline">
                   {Polished?.length}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger className="gap-2" value="Sold">
-                Sold Slab Data
+                Sold Slab 
                 <Badge className="text-bg-primary-foreground" variant="outline">
                   {Sold?.length}
                 </Badge>
@@ -211,7 +211,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey="slabNumber"
                   columns={polishingInchesWithAllowanceColumns}
-                  data={slabsData}
+                  data={Polished}
                   tab="polishingInchesWithAllowance"
                 />
               </TabsContent>
@@ -224,7 +224,7 @@ export default async function FinishedMaterialPage({ params }: Props) {
                   deleteRoute="/factory-management/inventory/deletemultipleslabs"
                   searchKey="slabNumber"
                   columns={polishingInchesWithOutAllowanceColumns}
-                  data={slabsData}
+                  data={Polished}
                 />
               </TabsContent>
             </Tabs>
