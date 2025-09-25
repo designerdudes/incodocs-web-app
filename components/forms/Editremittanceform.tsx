@@ -66,10 +66,6 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
     const router = useRouter();
     const [initialData, setInitialData] = useState<InwardRemittanceFormValues | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    console.log("This is orgId", orgId)
-    console.log("This is remittanceId", remittanceId)
-
-    console.log("This is params in form", params)
 
 
     const form = useForm<InwardRemittanceFormValues>({
@@ -137,7 +133,7 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
         <div className="space-y-6">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-4 gap-3">
                         <FormField control={form.control} name="inwardRemittanceNumber" render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Inward Remittance Number</FormLabel>
@@ -185,7 +181,6 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
                                             placeholder="Inward Remittance Value"
                                             min={0}
                                             disabled={isLoading}
-                                            className="w-[40%]" // Limit width to 40%
                                             {...field}
                                             onChange={(e) =>
                                                 field.onChange(parseFloat(e.target.value) || 0)
@@ -245,7 +240,6 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
                                             placeholder="Invoice Value"
                                             min={0}
                                             disabled={isLoading}
-                                            className="w-[40%]" // Limit width to 40%
                                             {...field}
                                             onChange={(e) =>
                                                 field.onChange(parseFloat(e.target.value) || 0)
@@ -360,7 +354,6 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
                                         placeholder="Difference Amount"
                                         min={0}
                                         disabled={isLoading}
-                                        className="w-[40%]" // Limit width to 40%
                                         {...field}
                                         onChange={(e) =>
                                             field.onChange(parseFloat(e.target.value) || 0)
@@ -370,7 +363,7 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
                             </FormItem>
                         )} />
                         <FormField control={form.control} name="notes" render={({ field }) => (
-                            <FormItem className="md:col-span-3">
+                            <FormItem className="md:col-span-2">
                                 <FormLabel>Notes</FormLabel>
                                 <FormControl><Textarea {...field} placeholder="Enter any additional notes" disabled={isLoading} /></FormControl>
                                 <FormMessage />

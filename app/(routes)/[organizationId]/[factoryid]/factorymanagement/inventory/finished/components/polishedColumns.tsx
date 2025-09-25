@@ -17,10 +17,10 @@ export type Slab = {
     length: { value: number; units: string };
     height: { value: number; units: string };
   };
-  trim: {
-    length: { value: number; units: string };
-    height: { value: number; units: string };
-  };
+  // trim: {
+  //   length: { value: number; units: string };
+  //   height: { value: number; units: string };
+  // };
   polishedValues?: {
     length: { value: number; units: string };
     height: { value: number; units: string };
