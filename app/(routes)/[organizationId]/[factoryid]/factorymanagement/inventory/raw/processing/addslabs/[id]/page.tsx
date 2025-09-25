@@ -9,20 +9,25 @@ import { AddSlabForm } from "@/components/forms/AddSlabForm";
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
-    params: {
-      id: string;
-      factoryid: string;
-    };
+  params: {
+    id: string;
+    factoryid: string;
+  };
 }
-  
+
 export default async function AddSlabPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/raw/get/${params.id}`
-  );
-  let BlockData = null;
+  let BlockData;
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/raw/get/${params.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch block");
+    BlockData = null;
+  }
   BlockData = res;
 
   return (

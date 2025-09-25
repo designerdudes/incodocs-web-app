@@ -22,12 +22,15 @@ export default async function ViewQuarryPage({
   params: { id: string };
 }) {
   const _id = params.id;
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetchWithAuth<any>(
-    `/quarry/getsingle/${_id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(`/quarry/getsingle/${_id}`);
+  } catch (error) {
+    console.log("failed to fetch quarry");
+    res = null;
+  }
 
   const QuarryData = res;
 

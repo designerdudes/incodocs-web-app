@@ -41,10 +41,14 @@ interface Props {
 }
 
 export default async function Page({ params }: Props) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(`/shipment/getbyid/${params.id}`);
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth<any>(`/shipment/getbyid/${params.id}`);
+  } catch (error) {
+    console.log("failed to fetch shipment");
+    res = null;
+  }
 
   const responseData = res;
   const shipmentData = responseData?.shipment || {};

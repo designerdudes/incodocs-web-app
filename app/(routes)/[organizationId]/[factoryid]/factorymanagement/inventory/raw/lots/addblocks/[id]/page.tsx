@@ -34,16 +34,16 @@ interface LotData {
   _id: string;
   lotName: string;
   materialType: string;
-   blockNumber: number;
+  blockNumber: number;
   blocksId: string[];
   blockLoadingCost: number;
   materialCost: number;
   markerCost: number;
-  permitCost:number;
+  permitCost: number;
   markerOperatorName: string;
   quarryCost: number;
   commissionCost: number;
-  lotId:string;
+  lotId: string;
   createdAt: string;
   updatedAt: string;
   blocks: Array<{
@@ -75,11 +75,35 @@ export default async function AddBlockFormPage({ params }: Props) {
   // const blockData = await blockResponse.json();
 
   // Fetch lot data
-  const lotResponse = await fetchWithAuth<LotData>(
-    `/factory-management/inventory/lot/getbyid/${lotId}`
-  );
-  const lotData: LotData = lotResponse;
-  // console.log("ssdds",lotData)
+  let lotData: LotData;
+
+  try {
+    const lotResponse = await fetchWithAuth<LotData>(
+      `/factory-management/inventory/lot/getbyid/${lotId}`
+    );
+    lotData = lotResponse;
+  } catch (error) {
+    console.error("Failed to fetch lot data:", error);
+    // Provide a fallback object so TypeScript is happy
+    lotData = {
+      _id: "",
+      lotName: "",
+      materialType: "",
+      blockNumber: 0,
+      blocksId: [],
+      blockLoadingCost: 0,
+      materialCost: 0,
+      markerCost: 0,
+      permitCost: 0,
+      markerOperatorName: "",
+      quarryCost: 0,
+      commissionCost: 0,
+      lotId: "",
+      createdAt: "",
+      updatedAt: "",
+      blocks: [],
+    };
+  }
 
   return (
     <div className="w-full space-y-4 h-full flex p-6 flex-col">

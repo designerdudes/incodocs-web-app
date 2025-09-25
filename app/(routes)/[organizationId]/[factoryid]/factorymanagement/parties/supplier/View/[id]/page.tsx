@@ -22,13 +22,16 @@ export default async function ViewSupplierPage({
   params: { id: string };
 }) {
   const _id = params.id;
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/accounting/suplier/getsingle/${_id}`
-  );
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth<any>(`/accounting/suplier/getsingle/${_id}`);
+  } catch (error) {
+    console.log("failed to fetch supplier");
+    res = null;
+  }
 
-  const SupplierData = await res.json();
+  const SupplierData = res;
 
   if (!res.ok) {
     throw new Error("Failed to fetch supplier data.");

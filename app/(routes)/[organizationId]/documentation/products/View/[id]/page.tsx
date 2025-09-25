@@ -211,9 +211,14 @@ async function getProductData(id: string): Promise<ProductResponse> {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetchWithAuth<any>(`/shipment/productdetails/get/${id}`);
+  try{
+    var res = await fetchWithAuth<any>(`/shipment/productdetails/get/${id}`);
+  }catch(error){
+    console.log('failed to fetch product details')
+    res=null
+  }
 
-  const productData = await res.json();
+  const productData =  res
   return productData;
 }
 

@@ -17,11 +17,15 @@ interface Props {
 export default async function MarkCutPage(params: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/raw/get/${params.params.blockid}`
-  );
   let BlockData = null;
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/raw/get/${params.params.blockid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch");
+    res = null;
+  }
   BlockData = res;
 
     return (

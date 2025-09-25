@@ -77,17 +77,32 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch the data for blocks and slabs
-  const blockRes = await fetchWithAuth<any>(
-    `/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`
-  );
+  try {
+    var blockRes = await fetchWithAuth<any>(
+      `/factory-management/inventory/getblocksbyfactory/${params?.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch blocks");
+    blockRes = [];
+  }
 
-  const slabRes = await fetchWithAuth<any>(
-    `/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`
-  );
+  try {
+    var slabRes = await fetchWithAuth<any>(
+      `/factory-management/inventory/getslabsbyfactory/${params?.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+    slabRes = [];
+  }
 
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/getslabsbyfactory/${params.factoryid} `
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/getslabsbyfactory/${params.factoryid} `
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+    res = [];
+  }
 
   const slabsData = res;
   let Blockdata = blockRes || [];
@@ -97,19 +112,15 @@ export default async function SlabsProcessingPage({ params }: Props) {
   const inDressing = Blockdata.filter(
     (data: any) => data.status === "inDressing"
   );
-  const Dressed = Blockdata.filter((data: any) =>
-   data.status === "dressed"
-  );
+  const Dressed = Blockdata.filter((data: any) => data.status === "dressed");
 
   const inSplitting = Blockdata.filter(
     (data: any) => data.status === "inSplitting"
   );
 
-  const split = Blockdata.filter((data: any) =>
-    data.status === "split"
-  );
-   const readyForCutting = Blockdata.filter((data: any) =>
-    data.status === "readyForCutting"
+  const split = Blockdata.filter((data: any) => data.status === "split");
+  const readyForCutting = Blockdata.filter(
+    (data: any) => data.status === "readyForCutting"
   );
 
   const inCutting = Blockdata.filter(
@@ -117,7 +128,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
   );
   const readyForPolish = Blockdata.filter((data: any) =>
     data.SlabsId.some((slab: any) => slab.status === "readyForPolish")
-);
+  );
 
   const inPolishing = Array.isArray(Slabdata)
     ? Slabdata.filter((data: any) => data.status === "inPolishing")
@@ -348,7 +359,7 @@ export default async function SlabsProcessingPage({ params }: Props) {
           Dressed={Dressed}
           inSplitting={inSplitting}
           Splitted={split}
-          ReadyForCutting= {readyForCutting}
+          ReadyForCutting={readyForCutting}
           inCutting={inCutting}
           readyForPolish={readyForPolish}
           inPolishing={inPolishing}

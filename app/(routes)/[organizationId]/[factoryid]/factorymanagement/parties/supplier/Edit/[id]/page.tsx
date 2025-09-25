@@ -13,12 +13,17 @@ export default async function EditProductPage({
 }: {
   params: { id: string };
 }) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/accounting/suplier/getsingle/${params?.id}`
-  );
-  const SupplierData = await res.json();
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth<any>(
+      `/accounting/suplier/getsingle/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch supplier");
+    res = null;
+  }
+  const SupplierData = res;
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">

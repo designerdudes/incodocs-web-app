@@ -17,12 +17,17 @@ interface params {
 }
 
 export default async function Page(params: params) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/shipment/getbyorg/${params.params.organizationId}`
-  );
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
   let shipmentData;
+  try{
+    var res = await fetchWithAuth<any>(
+      `/shipment/getbyorg/${params.params.organizationId}`
+    );
+  }catch(error){
+    console.log('failed to fetch shipments')
+    res=[]
+  }
   shipmentData = res;
   return (
     <div className="flex flex-col p-6 h-[92%]">

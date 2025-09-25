@@ -24,9 +24,12 @@ export default async function ViewCustomerPage({
   const _id = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/accounting/customer/getsingle/${_id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(`/accounting/customer/getsingle/${_id}`);
+  } catch (error) {
+    console.log("failed to fetch customer");
+    res = null;
+  }
 
   const CustomerData = res;
 

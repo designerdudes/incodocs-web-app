@@ -15,7 +15,12 @@ export default async function EditProductPage({
 }) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(`/machine/getone/${params?.id}`);
+  try {
+    var res = await fetchWithAuth<any>(`/machine/getone/${params?.id}`);
+  } catch (error) {
+    console.log("failed to fetch machine");
+    res = null;
+  }
   const MachineData = res;
 
     return (

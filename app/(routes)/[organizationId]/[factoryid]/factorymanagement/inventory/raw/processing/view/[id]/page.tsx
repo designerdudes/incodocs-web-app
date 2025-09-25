@@ -62,12 +62,16 @@ export default async function ViewFinishedPage({ params }: Props) {
   const FinishedMaterialID = params.id;
   // console.log(params.id);
    
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/finished/get/${params?.id}`
-  );
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/finished/get/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slab");
+    res = null;
+  }
 
   const FinishedMaterial = res;
 

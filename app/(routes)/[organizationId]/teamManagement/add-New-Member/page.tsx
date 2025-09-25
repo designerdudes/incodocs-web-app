@@ -11,9 +11,15 @@ import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 // console.log(Button, Heading, AddTeamMemberForm); // Debug undefined components
 
 export default async function CreateNewFormPage() {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const OrgData = await fetchWithAuth<any>(`/organizations/token`);
+//   const cookieStore = cookies();
+//   const token = cookieStore.get("AccessToken")?.value || "";
+try{
+
+    var OrgData = await fetchWithAuth<any>(`/organizations/token`);
+}catch(error){
+    console.log('failed to fetch organization')
+    OrgData=[]
+}
 
     return (
         <div className="w-full space-y-2 h-full flex p-6 flex-col">

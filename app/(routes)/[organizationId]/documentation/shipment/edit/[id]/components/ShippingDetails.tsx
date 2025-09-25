@@ -350,9 +350,9 @@ export function ShippingDetails({
             return;
           }
 
-          fetchWithAuth<any>(`/shipment/forwarder/getbyorg/${orgId}`).then(
-            (data) => setForwarders(Array.isArray(data) ? data : [])
-          );
+          fetchWithAuth<any>(`/shipment/forwarder/getbyorg/${orgId}`)
+            .then((data) => setForwarders(Array.isArray(data) ? data : []))
+            .catch((e) => setForwarders([]));
         }}
       />
     );
@@ -373,9 +373,9 @@ export function ShippingDetails({
             return;
           }
 
-          fetchWithAuth<any>(`/shipment/transporter/getbyorg/${orgId}`).then(
-            (data) => setTransporters(Array.isArray(data) ? data : [])
-          );
+          fetchWithAuth<any>(`/shipment/transporter/getbyorg/${orgId}`)
+            .then((data) => setTransporters(Array.isArray(data) ? data : []))
+            .catch((e) => setTransporters([]));
         }}
       />
     );

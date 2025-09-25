@@ -17,10 +17,14 @@ interface Props {
 export default async function EditPage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/raw/get/${params.id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/raw/get/${params.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch block");
+    res = null;
+  }
 
   let BlockData = res;
 

@@ -74,9 +74,14 @@ export default async function ProductPage({ params }: Props) {
   const orgId = params.organizationId;
 
   // Fetch data (unchanged)
-  const res = await fetchWithAuth<any>(
-    `/shipment/productdetails/getbyorg/${orgId}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/shipment/productdetails/getbyorg/${orgId}`
+    );
+  } catch (error) {
+    console.log("failed to fetch product details");
+    res = [];
+  }
   const ProductsData = res;
 
     // console.log("gggg");

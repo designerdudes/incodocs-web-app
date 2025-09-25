@@ -36,9 +36,15 @@ export default async function EditProductPage( {params}: { params: { id: string 
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/shipment/productdetails/get/${params?.id}`
-  );
+  try{
+
+      var res = await fetchWithAuth<any>(
+          `/shipment/productdetails/get/${params?.id}`
+        );
+    }catch(errror){
+        console.log('failed to fetch productdetails')
+        res=null
+    }
   const productData = res;
 
       console.log("productData", productData);
