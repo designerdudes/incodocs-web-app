@@ -31,10 +31,14 @@ interface Props {
 export default async function LotManagement({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth(
-    `/factory-management/inventory/factory-lot/get/${params?.factoryid}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/factory-lot/get/${params?.factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch lots");
+    res = [];
+  }
 
   let lotsData;
   lotsData = res;
@@ -62,7 +66,7 @@ export default async function LotManagement({ params }: Props) {
         {/* <CreateNewLotButton /> */}
       </div>
       <Separator className="my-2" />
-      <div >
+      <div>
         <DataTable
           bulkDeleteIdName="_id"
           bulkDeleteTitle="Are you sure you want to delete the selected Lots?"

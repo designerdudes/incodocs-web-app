@@ -20,7 +20,7 @@ export type Sales = {
     customerName: string;
   };
   customerGSTN: string;
-  invoiceNo:string;
+  invoiceNo: string;
   noOfSlabs: number;
   length: string;
   height: string;
@@ -43,13 +43,22 @@ export default async function SalesPage({ params }: Props) {
   const factoryId = params.factoryid;
 
   // Fetch With GST Sales
-  const gstRes = await fetchWithAuth<Sales[]>(
-    ` /transaction/sale/getgstsalebyfactory/${factoryId}`
-  );
-
-  const withoutGstRes = await fetchWithAuth<Sales[]>(
-    ` /transaction/sale/getsalebyfactory/${factoryId}`
-  );
+  try {
+    var gstRes = await fetchWithAuth<Sales[]>(
+      ` /transaction/sale/getgstsalebyfactory/${factoryId}`
+    );
+  } catch (error) {
+    console.log("failed to fetch sales");
+    gstRes = [];
+  }
+  try {
+    var withoutGstRes = await fetchWithAuth<Sales[]>(
+      ` /transaction/sale/getsalebyfactory/${factoryId}`
+    );
+  } catch (error) {
+    console.log("failed to fetch sales");
+    withoutGstRes = [];
+  }
 
   const withGstSales: Sales[] = gstRes;
   const withoutGstSales: Sales[] = withoutGstRes;
@@ -97,7 +106,7 @@ export default async function SalesPage({ params }: Props) {
               bulkDeleteTitle="Are you sure you want to delete the selected sales?"
               bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
               bulkDeleteToastMessage="Selected sales deleted successfully"
-              deleteRoute='/transaction/sale/deletemany'
+              deleteRoute="/transaction/sale/deletemany"
               searchKey="customerName"
               columns={GstColumns}
               data={withGstSales}
@@ -111,7 +120,7 @@ export default async function SalesPage({ params }: Props) {
               bulkDeleteDescription="This will delete the selected sales, and they will not be recoverable."
               bulkDeleteToastMessage="Selected sales deleted successfully"
               searchKey="customerName"
-              deleteRoute='/transaction/sale/deletemany'
+              deleteRoute="/transaction/sale/deletemany"
               columns={Columns}
               data={withoutGstSales}
             />

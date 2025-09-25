@@ -36,9 +36,12 @@ export default async function SlabsPage({
 }) {
   const SlabData = params.id;
 
-  const res = await fetchWithAuth<any>(
-    `/transaction/sale/getbyid/${SlabData}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(`/transaction/sale/getbyid/${SlabData}`);
+  } catch (error) {
+    console.log("failed to fetch sales");
+    res = null;
+  }
 
   const customerData = res;
   return (

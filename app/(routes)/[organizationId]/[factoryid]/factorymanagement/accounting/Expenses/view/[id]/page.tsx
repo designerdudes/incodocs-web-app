@@ -32,10 +32,12 @@ interface Props {
 export default async function ExpensePage({ params }: Props) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/expense/getbyid/${params.id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(`/expense/getbyid/${params.id}`);
+  } catch (error) {
+    console.log("Error while fetching expense data", error);
+    res = null;
+  }
 
   const expenseData = res;
 
@@ -126,7 +128,9 @@ export default async function ExpensePage({ params }: Props) {
                     <TableCell>{expenseData.sgst}</TableCell>
                   </TableRow>
                   <TableRow>
-                    <TableCell className="whitespace-nowrap">Invoice Value</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      Invoice Value
+                    </TableCell>
                     <TableCell>{expenseData.invoiceValue}</TableCell>
                   </TableRow>
 

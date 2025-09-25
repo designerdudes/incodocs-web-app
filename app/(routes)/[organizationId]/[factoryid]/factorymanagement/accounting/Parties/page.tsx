@@ -24,15 +24,23 @@ export default async function PartiesPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch supplier data
-  const supplierRes = await fetchWithAuth<any>(
-    "/accounting/suplier/getall" // Fixed typo: "suplier" -> "supplier"
-  );
+  try {
+    var supplierRes = await fetchWithAuth<any>(
+      "/accounting/suplier/getall" // Fixed typo: "suplier" -> "supplier"
+    );
+  } catch (error) {
+    console.log("Error while fetching supplier data", error);
+    supplierRes = [];
+  }
   const suppliers = supplierRes || []; // Ensure it's an array
 
   // Fetch customer data
-  const customerRes = await fetchWithAuth<any>(
-    "/accounting/customer/getall"
-  );
+  try {
+    var customerRes = await fetchWithAuth<any>("/accounting/customer/getall");
+  } catch (error) {
+    console.log("Error while fetching customer data", error);
+    customerRes = [];
+  }
   const customers = customerRes || []; // Ensure it's an array
 
   return (

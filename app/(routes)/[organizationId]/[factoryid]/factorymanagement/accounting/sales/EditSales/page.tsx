@@ -19,9 +19,14 @@ export default async function EditSalePage({ params }: PageProps) {
   const cookieStore = cookies();
 
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/getslabsbyfactory/${factoryid}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/getslabsbyfactory/${factoryid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+    res = [];
+  }
 
   const slabsData = res;
   const Polished = Array.isArray(slabsData)

@@ -38,18 +38,26 @@ export default async function BlocksPage({ params }: Props) {
   let BlocksData = null;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/blocksbylot/get/${params?.lotid}`
-  );
-
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/blocksbylot/get/${params?.lotid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch blocks");
+    res = [];
+  }
   BlocksData = res;
   // console.log("wwwwwww",BlocksData)
 
   let LotData = null;
-  const resp = await fetchWithAuth<any>(
-    `/factory-management/inventory/lot/getbyid/${params?.lotid}`
-  );
+  try {
+    var resp = await fetchWithAuth<any>(
+      `/factory-management/inventory/lot/getbyid/${params?.lotid}`
+    );
+  } catch (error) {
+    console.log("failed to fetch lots");
+    resp = null;
+  }
   LotData = resp;
 
   // console.log("this i slot data",LotData)

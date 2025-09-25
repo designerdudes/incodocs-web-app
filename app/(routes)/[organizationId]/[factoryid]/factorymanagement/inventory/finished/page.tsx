@@ -40,7 +40,6 @@ export type FinishedMaterial = {
   updatedAt: string;
 };
 
-
 interface Props {
   params: {
     factoryid: string;
@@ -55,11 +54,14 @@ export default async function FinishedMaterialPage({ params }: Props) {
   try {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
-
-    const res = await fetchWithAuth<FinishedMaterial[]>(
-      `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
-    );
-
+    try {
+      var res = await fetchWithAuth<FinishedMaterial[]>(
+        `/factory-management/inventory/getslabsbyfactory/${params.factoryid}`
+      );
+    } catch (error) {
+      console.log("failed to fetch sales");
+      res = [];
+    }
     slabsData = res;
 
     Polished = Array.isArray(slabsData)
