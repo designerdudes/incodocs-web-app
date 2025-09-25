@@ -58,7 +58,7 @@ export default async function EditInwardRemittance({ params }: EditRemittancePag
       <Separator orientation="horizontal" />
 
       {/* Form */}
-      <div className="container mx-auto">
+      <div className="max-h-full ">
         <EditInwardRemittanceForm params = {EditData} />
       </div>
     </div>

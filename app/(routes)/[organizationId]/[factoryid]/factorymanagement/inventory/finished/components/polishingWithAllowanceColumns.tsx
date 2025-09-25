@@ -12,15 +12,15 @@ function calculateAdjustedDimensions(
   length: number,
   height: number,
   workersPolishingPay: number,
-  trimLength?: number,
-  trimHeight?: number
+  polishedValuesLength?: number,
+  polishedValuesHeight?: number
 ) {
   // Use default values of 0 if trimLength or trimHeight are missing
-  const validTrimLength = trimLength || 0;
-  const validTrimHeight = trimHeight || 0;
+  const validpolishedValuesLength = polishedValuesLength || 0;
+  const validpolishedValuesHeight = polishedValuesHeight || 0;
 
-  const adjustedLengthWithAllowance = length - validTrimLength + 6; // Length adjustment
-  const adjustedHeightWithAllowance = height - validTrimHeight + 2; // Height adjustment
+  const adjustedLengthWithAllowance = length - validpolishedValuesLength + 6; // Length adjustment
+  const adjustedHeightWithAllowance = height - validpolishedValuesHeight + 2; // Height adjustment
   const adjustedLength = adjustedLengthWithAllowance - 4;
   const adjustedHeight = adjustedHeightWithAllowance - 2;
 
@@ -118,7 +118,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
       cell: ({ row }) => (
         <div>
           {row.original?.dimensions?.length?.value -
-            row.original?.trim?.length?.value || ""}
+            row.original?.polishedValues?.length?.value || ""}
         </div>
       ),
     },
@@ -128,7 +128,7 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
       cell: ({ row }) => (
         <div>
           {row.original?.dimensions?.height?.value -
-            row.original?.trim?.height?.value || ""}
+            row.original?.polishedValues?.height?.value || ""}
         </div>
       ),
     },
@@ -140,10 +140,10 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
-        return <div>{row.original?.trim?.length?.value}</div>;
+        return <div>{row.original?.polishedValues?.length?.value}</div>;
       },
     },
     {
@@ -154,10 +154,10 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
-        return <div>{row.original?.trim?.height?.value}</div>;
+        return <div>{row.original?.polishedValues?.height?.value}</div>;
       },
     },
     {
@@ -168,13 +168,13 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
         return (
           <div>
-            {row.original?.trim?.length?.value
-              ? `${(row.original.trim.length.value * 2.54).toFixed(2)}`
+            {row.original?.polishedValues?.length?.value
+              ? `${(row.original.polishedValues.length.value * 2.54).toFixed(2)}`
               : ""}
           </div>
         );
@@ -188,14 +188,14 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
         return (
           <div>
             {" "}
-            {row.original?.trim?.height?.value
-              ? `${(row.original.trim.height.value * 2.54).toFixed(2)}`
+            {row.original?.polishedValues?.height?.value
+              ? `${(row.original.polishedValues.height.value * 2.54).toFixed(2)}`
               : ""}
           </div>
         );
@@ -209,8 +209,8 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
         return <div>{squareFt}</div>;
       },
@@ -220,8 +220,8 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
             row.original?.dimensions?.length?.value,
             row.original?.dimensions?.height?.value,
             row.original?.workersPolishingPay,
-            row.original?.trim?.length?.value,
-            row.original?.trim?.height?.value
+            row.original?.polishedValues?.length?.value,
+            row.original?.polishedValues?.height?.value
           );
           return sum + parseFloat(squareFt || "0");
         }, 0);
@@ -241,8 +241,8 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
           row.original?.dimensions?.length?.value,
           row.original?.dimensions?.height?.value,
           row.original?.workersPolishingPay,
-          row.original?.trim?.length?.value,
-          row.original?.trim?.height?.value
+          row.original?.polishedValues?.length?.value,
+          row.original?.polishedValues?.height?.value
         );
         return <div>{amount}</div>;
       },
@@ -252,8 +252,8 @@ export const polishingInchesWithAllowanceColumns: ColumnDef<FinishedMaterial>[] 
             row.original?.dimensions?.length?.value,
             row.original?.dimensions?.height?.value,
             row.original?.workersPolishingPay,
-            row.original?.trim?.length?.value,
-            row.original?.trim?.height?.value
+            row.original?.polishedValues?.length?.value,
+            row.original?.polishedValues?.height?.value
           );
           return sum + parseFloat(amount || "0");
         }, 0);

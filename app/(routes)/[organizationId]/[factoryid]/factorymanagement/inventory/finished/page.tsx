@@ -28,7 +28,7 @@ export type FinishedMaterial = {
     length: { value: number; units: string };
     height: { value: number; units: string };
   };
-  trim: {
+  polishedValues: {
     length: { value: number; units: string };
     height: { value: number; units: string };
   };
