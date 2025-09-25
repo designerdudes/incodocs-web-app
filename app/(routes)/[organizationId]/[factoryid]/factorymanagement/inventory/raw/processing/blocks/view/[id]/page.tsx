@@ -37,17 +37,25 @@ export default async function BlocksPage({ params }: Props) {
 
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/raw/get/${params?.id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/raw/get/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch blocks");
+    res = null;
+  }
 
   BlockData = res;
   // console.log(BlockData)
-
-  const resp = await fetchWithAuth<any>(
-    `/factory-management/inventory/slabsbyblock/get/${params?.id}`
-  );
+  try {
+    var resp = await fetchWithAuth<any>(
+      `/factory-management/inventory/slabsbyblock/get/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch slabs");
+    resp = [];
+  }
 
   SlabData = resp;
   // console.log(SlabData)

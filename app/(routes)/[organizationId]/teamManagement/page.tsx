@@ -11,15 +11,22 @@ import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
   params: {
-    organizationId : string;
+    organizationId: string;
   };
 }
 
 export default async function TeamMemberPage({ params }: Props) {
-  const { organizationId  } = params;
+  const { organizationId } = params;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value;
-  const teamData = await fetchWithAuth(`https://incodocs-server.onrender.com/employers/getbyorg/${organizationId }`);
+  try {
+    var teamData = await fetchWithAuth<any>(
+      `/employers/getbyorg/${organizationId}`
+    );
+  } catch (errror) {
+    console.log("failed to fetch employees");
+    teamData = [];
+  }
 
   return (
     <div className="w-auto space-y-2 h-full flex p-6 flex-col">

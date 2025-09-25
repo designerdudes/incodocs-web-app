@@ -37,9 +37,12 @@ export default async function machines({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
   const factoryId = params.factoryid;
   // Fetch data (unchanged)
-  const res = await fetchWithAuth<any>(
-    `/machine/getbyfactory/${factoryId}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(`/machine/getbyfactory/${factoryId}`);
+  } catch (error) {
+    console.log("failed to fetch machines");
+    res = null;
+  }
   const MachineData = res;
 
     return (

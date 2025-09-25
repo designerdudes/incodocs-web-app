@@ -36,9 +36,14 @@ export default async function SlabsPage({ params }: Props) {
   const token = cookieStore.get("AccessToken")?.value || "";
 
   // Fetch slab data
-  const res = await fetchWithAuth<any>(
-    `/factory-management/inventory/finished/get/${params?.id}`
-  );
+  try {
+    var res = await fetchWithAuth<any>(
+      `/factory-management/inventory/finished/get/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch");
+    res = null;
+  }
 
   SlabData = res;
 

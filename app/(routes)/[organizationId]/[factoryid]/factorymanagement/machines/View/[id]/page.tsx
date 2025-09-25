@@ -38,18 +38,21 @@ export default async function ViewMachinePage({
   const _id = params.id;
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-
-  const res = await fetchWithAuth<any>(
-    `/machine/getone/${_id}`
-  );
-
+  try {
+    var res = await fetchWithAuth<any>(`/machine/getone/${_id}`);
+  } catch (error) {
+    console.log("failed to fetch machine");
+    res = null;
+  }
   const MachineData = res;
+  try {
+    var logsRes = await fetchWithAuth<any>(`/machine/log/getbymachine/${_id}`);
+  } catch (error) {
+    console.log("failed to fetch");
+    logsRes = [];
+  }
 
-  const logsRes = await fetchWithAuth<any>(
-    `/machine/log/getbymachine/${_id}`
-  );
-
-  const machineLogs = await logsRes.json();
+  const machineLogs = logsRes;
 
   const isCutting = !!MachineData.typeCutting;
   const isPolishing = !!MachineData.typePolish;

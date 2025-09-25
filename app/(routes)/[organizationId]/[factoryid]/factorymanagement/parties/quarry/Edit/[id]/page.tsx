@@ -13,11 +13,14 @@ export default async function EditProductPage({
 }: {
   params: { id: string };
 }) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/quarry/getsingle/${params?.id}`
-  );
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
+  try {
+    var res = await fetchWithAuth<any>(`/quarry/getsingle/${params?.id}`);
+  } catch (error) {
+    console.log("failed to fetch quarry");
+    res = null;
+  }
   const QuarryData = res;
 
   return (

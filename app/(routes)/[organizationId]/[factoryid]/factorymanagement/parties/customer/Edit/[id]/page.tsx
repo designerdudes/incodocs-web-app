@@ -15,10 +15,15 @@ export default async function EditProductPage({
 }) {
   const cookieStore = cookies();
   const token = cookieStore.get("AccessToken")?.value || "";
-  const res = await fetchWithAuth<any>(
-    `/accounting/customer/getsingle/${params?.id}`
-  );
-  const CustomerData = await res.json();
+  try {
+    var res = await fetchWithAuth<any>(
+      `/accounting/customer/getsingle/${params?.id}`
+    );
+  } catch (error) {
+    console.log("failed to fetch customer");
+    res = null;
+  }
+  const CustomerData = res;
 
   return (
     <div className="w-full space-y-2 h-full flex p-6 flex-col">

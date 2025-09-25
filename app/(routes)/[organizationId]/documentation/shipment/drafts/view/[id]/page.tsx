@@ -40,16 +40,23 @@ interface Props {
 }
 
 export default async function Page({ params }: Props) {
-  const cookieStore = cookies();
-  const token = cookieStore.get("AccessToken")?.value || "";
+  // const cookieStore = cookies();
+  // const token = cookieStore.get("AccessToken")?.value || "";
 
-  const res = await fetchWithAuth<any>(`/shipmentdrafts/getbyid/${params.id}`);
+  try {
+    var res = await fetchWithAuth<any>(`/shipmentdrafts/getbyid/${params.id}`);
+  } catch (error) {
+    console.log("failed to fetch drafts");
+    res = null;
+  }
 
   const responseData = res;
   // Handle both possible response structures
   const draftData =
     responseData?.shipmentDraft ||
-    responseData?.shipmentDrafts?.find((draft: any) => draft._id === params.id) ||
+    responseData?.shipmentDrafts?.find(
+      (draft: any) => draft._id === params.id
+    ) ||
     {};
 
   console.log("Extracted draft data:", draftData);
