@@ -116,11 +116,11 @@ export default async function FinishedMaterialPage({ params }: Props) {
                 </Badge>
               </TabsTrigger>
               <TabsTrigger className="gap-2" value="PolishingData">
-                Pilishing Data
+                Polishing Data
+                <Badge className="text-bg-primary-foreground" variant="outline">
+                  {slabsData?.length}
+                </Badge>
               </TabsTrigger>
-              <Badge className="text-bg-primary-foreground" variant="outline">
-                {slabsData?.length}
-              </Badge>
               <TabsTrigger className="gap-2" value="Polished">
                 Polished Slab Data
                 <Badge className="text-bg-primary-foreground" variant="outline">
@@ -129,10 +129,10 @@ export default async function FinishedMaterialPage({ params }: Props) {
               </TabsTrigger>
               <TabsTrigger className="gap-2" value="Sold">
                 Sold Slab Data
+                <Badge className="text-bg-primary-foreground" variant="outline">
+                  {Sold?.length}
+                </Badge>
               </TabsTrigger>
-              <Badge className="text-bg-primary-foreground" variant="outline">
-                {Sold?.length}
-              </Badge>
             </TabsList>
           </div>
           <TabsContent value="CuttingData">
