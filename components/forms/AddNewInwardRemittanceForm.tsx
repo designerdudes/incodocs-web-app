@@ -33,20 +33,20 @@ import { CalendarIcon } from "lucide-react";
 import CalendarComponent from "../CalendarComponent";
 
 const inwardRemittanceFormSchema = z.object({
-  inwardRemittanceNumber: z.string().min(1, { message: "Inward Remittance Number is required" }),
+  inwardRemittanceNumber: z.string().optional(),
   inwardRemittanceDate: z.string().min(1, { message: "Date is required" }),
-  inwardRemittanceValue: z.string().optional(),
+  inwardRemittanceValue: z.string().min(1,{message: "Inward Ramitance Value Is Required"}),
   inwardRemittanceCopy: z.string().optional(),
   invoiceNumber: z.string().optional(),
   invoiceValue: z.string().optional(),
-  invoiceDate: z.string().min(1, { message: "Invoice Date is required" }),
+  invoiceDate: z.string().optional(),
   invoiceCopy: z.string().optional(),
   method: z.enum(["bank_transfer", "cash", "cheque", "other"], {
     errorMap: () => ({ message: "Payment Method is required" }),
   }),
   differenceAmount: z.number().optional(),
   notes: z.string().optional(),
-  consigneeId: z.string().optional(),
+  consigneeId: z.string().min(1,{ message: "Select Consignee ID"}),
   organizationId: z.string(),
 });
 type InwardRemittanceFormValues = z.infer<typeof inwardRemittanceFormSchema>;
@@ -93,7 +93,7 @@ const AddNewInwardRemittanceForm: React.FC<AddNewInwardRemittanceFormProps> = ({
       invoiceDate: "",
       invoiceCopy: "",
       differenceAmount: undefined,
-      method: "bank_transfer",
+      method: "",
       notes: "",
       consigneeId: undefined,
       organizationId: params.organizationId,
@@ -129,7 +129,7 @@ const AddNewInwardRemittanceForm: React.FC<AddNewInwardRemittanceFormProps> = ({
         className="space-y-8 w-full"
         autoComplete="off"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <FormField
             control={form.control}
             name="inwardRemittanceNumber"
@@ -411,27 +411,26 @@ const AddNewInwardRemittanceForm: React.FC<AddNewInwardRemittanceFormProps> = ({
               </FormItem>
             )}
           />
-        </div>
+        
         <FormField
           control={form.control}
           name="notes"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="md:col-span-3">
               <FormLabel>Notes</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Enter any additional notes"
-                  className="resize-none"
                   {...field}
                   disabled={isLoading}
-                  rows={4}
                 />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div className="flex justify-end">
+        </div>
+        <div className="flex justify-start">
           <Button type="submit" disabled={isLoading}>
             {isLoading ? "Saving..." : "Save Inward Remittance"}
           </Button>

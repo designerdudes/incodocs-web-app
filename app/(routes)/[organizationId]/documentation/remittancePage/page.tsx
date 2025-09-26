@@ -13,6 +13,7 @@ import {
 import { TbFileExport } from "react-icons/tb";
 import { LiaShippingFastSolid } from "react-icons/lia";
 import { Separator } from "@/components/ui/separator";
+import { BiExport } from "react-icons/bi";
 
 interface Props {
   params: {
@@ -49,12 +50,10 @@ export default function DocumentationPage({ params }: Props) {
         >
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="flex items-center gap-2">
-                <TbFileExport className="w-7 h-7 text-blue-600" />
                 <CardTitle className="text-lg font-medium">
                   Inward Remittance
                 </CardTitle>
-              </div>
+                <TbFileExport className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
@@ -79,12 +78,10 @@ export default function DocumentationPage({ params }: Props) {
         >
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div className="flex items-center gap-2">
-                <LiaShippingFastSolid className="w-7 h-7 text-green-600" />
                 <CardTitle className="text-lg font-medium">
                   Outward Remittance
                 </CardTitle>
-              </div>
+                <BiExport className="w-6 h-6 text-muted-foreground" />
             </CardHeader>
             <CardContent className="space-y-3 flex-1 flex flex-col justify-between">
               <CardDescription className="text-base text-gray-600">
