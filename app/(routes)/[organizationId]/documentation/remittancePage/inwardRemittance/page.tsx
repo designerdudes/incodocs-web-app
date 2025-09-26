@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import Heading from "@/components/ui/heading";
@@ -20,7 +21,6 @@ interface params {
 export default async function Page(params: params) {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
-    console.log("org id", params.params.organizationId);
     //fetching remittance data from api
     const response = await fetch(
         `http://localhost:4080/remittance/getall/${params.params.organizationId}`,
@@ -35,7 +35,6 @@ export default async function Page(params: params) {
     );
     if (!response?.ok) {
         // Handle error
-        console.log("failed to fetch remittance data");
         throw new Error("Failed to fetch remittance data");
     }
 
@@ -115,7 +114,7 @@ export default async function Page(params: params) {
     return (
         <div className="flex flex-col p-6 h-[92%]">
             <div className="flex justify-between h-[8%] items-center gap-2">
-                <Link href={`/${params?.params?.organizationId}/documentation/dashboard`}>
+                <Link href={`/${params?.params?.organizationId}/documentation/remittancePage`}>
                     <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
                         <ChevronLeft className="h-4 w-4" />
                         <span className="sr-only">Back</span>
