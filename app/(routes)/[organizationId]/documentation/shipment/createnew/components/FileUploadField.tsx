@@ -13,6 +13,7 @@ interface FileUploadFieldProps {
   storageKey: string;
   accept?: string;
   value?: string | null; // ✅ added
+  module?: string;
   onChange?: (value: string | null) => void; // ✅ added
 }
 
@@ -21,6 +22,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
   storageKey,
   accept = ".pdf,.jpg,.jpeg,.png",
   value,
+  module,
   onChange,
 }) => {
   const { control, setValue } = useFormContext();
@@ -52,6 +54,7 @@ export const FileUploadField: React.FC<FileUploadFieldProps> = ({
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
+      formData.append("module", module ?? "general");
 
       const response = await postData("/shipmentdocsfile/upload", formData);
       const url = response?.url;

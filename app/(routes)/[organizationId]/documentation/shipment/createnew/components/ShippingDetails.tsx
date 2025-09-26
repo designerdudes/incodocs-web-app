@@ -469,6 +469,7 @@ export function ShippingDetails({
                               `shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl` as any
                             }
                             storageKey={`shippingDetails.forwarderInvoices[${index}].uploadInvoiceUrl`}
+                            module="shipment"
                           />
                         )}
                       />
