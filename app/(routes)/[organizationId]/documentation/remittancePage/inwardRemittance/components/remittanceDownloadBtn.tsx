@@ -188,7 +188,7 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData, consigneeData 
                     "Remittance No",
                     "Invoice Value",
                     "Remittance Value",
-                    "Difference Amount",
+                    "Balance Amount",
                     "Remittance Date",
                     "Status",
                     "Method",
@@ -253,8 +253,9 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData, consigneeData 
             14,
             doc.lastAutoTable.finalY + 18
         );
+        doc.setFontSize(15);
         doc.text(
-            `Total Difference Amount: ${new Intl.NumberFormat("en-IN", {
+            `Total Balance Amount: ${new Intl.NumberFormat("en-IN", {
                 style: "currency",
                 currency: "USD",
                 minimumFractionDigits: 0,

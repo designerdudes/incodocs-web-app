@@ -110,7 +110,7 @@ export default function DocumentationPage({ params }: Props) {
             </CardContent>
           </Card>
         </Link>
-        <Link href={`/${organizationId}/documentation/remittance`} passHref>
+        <Link href={`/${organizationId}/documentation/remittancePage`} passHref>
           <Card className="bg-white dark:bg-card flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-lg font-medium">Remittance</CardTitle>
