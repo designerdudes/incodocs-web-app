@@ -281,14 +281,14 @@ const DownloadInvRemittance: React.FC<Props> = ({ remittanceData, consigneeData 
     return (
         <div className="flex items-center gap-4">
             {consigneeData ?
-                <Button onClick={generatePDF} variant="outline">Download InwardRemittances
+                <Button onClick={generatePDF} variant="outline">Download OutwardRemittances
                     <Download className="w-6 h-6" />
                 </Button>
                 :
 
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline">Download InwardRemittances
+                        <Button variant="outline">Download OutwardRemittances
                             <Download className="w-6 h-6" />
                         </Button>
                     </DialogTrigger>

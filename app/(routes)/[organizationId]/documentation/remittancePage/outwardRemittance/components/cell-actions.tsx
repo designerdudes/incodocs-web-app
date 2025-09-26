@@ -43,8 +43,8 @@ export function DataTableCellActions({ row }: Props) {
     }
   };
 
-  const viewPath = `./inwardRemittance/view/${data?.consigneeId?._id}`;
-  const editPath = `./inwardRemittance/edit/${id}`;
+  const viewPath = `./outwardRemittance/view/${data?.consigneeId?._id}`;
+  const editPath = `./outwardRemittance/edit/${id}`;
 
   return (
     <DropdownMenu>
@@ -57,7 +57,7 @@ export function DataTableCellActions({ row }: Props) {
       <DropdownMenuContent align="end" className="gap-2">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {!pathname.includes('remittance/view') &&
+        {!pathname.includes('outwardRemittance/view') &&
           <DropdownMenuItem asChild>
             <a href={viewPath}>
               <EyeIcon className="mr-2 h-4 w-4" />

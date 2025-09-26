@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 import { ShipmentLogs } from "@/components/shipmentLogs";
-import DownloadInvRemittance from "../../components/remittanceDownloadBtn";
+ import DownloadInvRemittance from "../../components/remittanceDownloadBtn";
 import { columns } from "../../components/columns";
 
 interface Props {
@@ -82,10 +82,10 @@ export default async function Page({ params }: Props) {
                     <div className="flex-1">
                         <Heading
                             className="leading-tight"
-                            title={`${responseData[0]?.consigneeId?.name} - Inward Remittances`}
+                            title={`${responseData[0]?.consigneeId?.name} - Outward Remittances`}
                         />
                         <p className="text-muted-foreground text-sm mt-2">
-                            View all inward remittances related to your consignee - {responseData[0]?.consigneeId?.name}
+                            View all outward remittances related to your consignee - {responseData[0]?.consigneeId?.name}
                         </p>
                     </div>
                     <div className="flex gap-2">
