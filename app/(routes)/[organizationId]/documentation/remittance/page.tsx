@@ -45,7 +45,7 @@ export default function DocumentationPage({ params }: Props) {
       <Separator className="my-4"/>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <Link
-          href={`/${organizationId}/documentation/remittancePage/inwardRemittance`}
+          href={`/${organizationId}/documentation/remittance/inwardRemittance`}
           passHref
         >
           <Card className="bg-white dark:bg-card flex flex-col h-full">
@@ -73,7 +73,7 @@ export default function DocumentationPage({ params }: Props) {
         </Link>
 
         <Link
-          href={`/${organizationId}/documentation/remittancePage/outwardRemittance`}
+          href={`/${organizationId}/documentation/remittance/outwardRemittance`}
           passHref
         >
           <Card className="bg-white dark:bg-card flex flex-col h-full">
