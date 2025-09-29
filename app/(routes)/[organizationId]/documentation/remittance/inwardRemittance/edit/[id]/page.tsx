@@ -23,7 +23,7 @@ export default async function EditInwardRemittance({ params }: EditRemittancePag
   let EditData = null;
 
   try {
-    var res = await fetchWithAuth<any>(`/remittance/getbyid/${id}`, 
+    var res = await fetchWithAuth<any>(`/remittance/inward/getbyid/${id}`, 
     );
   } catch (err) {
     console.error("Failed to fetch remittance data:", err);

@@ -113,7 +113,7 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
     const onSubmit = async (values: InwardRemittanceFormValues) => {
         setIsLoading(true);
         try {
-            await putData(`/remittance/update/${remittanceId}`, {
+            await putData(`/remittance/inward/update/${remittanceId}`, {
                 ...values,
                 organizationId: orgId,
                 // inwardRemittanceValue: Number(values.inwardRemittanceValue),
@@ -121,7 +121,7 @@ export default function EditInwardRemittanceForm({ params }: EditInwardRemittanc
                 // differenceAmount: Number(values.differenceAmount) || 0,
             });
             toast.success("Inward Remittance updated successfully");
-            router.push(`/${orgId}/documentation/remittance`);
+            router.push(`/${orgId}/documentation/remittance/inwardRemittance`);
         } catch (err: any) {
             toast.error(err?.response?.data?.message || "Something went wrong");
         } finally {

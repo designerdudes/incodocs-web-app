@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { ShipmentLogs } from "@/components/shipmentLogs";
 import DownloadInvRemittance from "../../components/remittanceDownloadBtn";
 import { columns } from "../../components/columns";
+import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
 
 interface Props {
     params: {
@@ -37,24 +38,17 @@ export default async function Page({ params }: Props) {
     const cookieStore = cookies();
     const token = cookieStore.get("AccessToken")?.value || "";
 
+  try{
+    
+      var res = await fetchWithAuth<any>(
+          `/remittance/inward/getbyconsignee/${params.id}?orgId=${params.organizationId}`,
+      )
+  }catch(error){
+    console.error("failed to fetch Data");
+    res = [];
+  }
 
-    const res = await fetch(
-        `http://localhost:4080/remittance/getbyconsignee/${params.id}?orgId=${params.organizationId}`,
-        {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + token,
-            },
-        }
-    )
-
-
-    if (!res.ok) {
-        return <div>Error loading remittance data</div>;
-    }
-
-    const responseData = await res.json();
+    const responseData =  res;
 
     const totalInvoiceValue = responseData.reduce(
         (sum: number, remittance: any) => sum + (remittance.invoiceValue || 0),
