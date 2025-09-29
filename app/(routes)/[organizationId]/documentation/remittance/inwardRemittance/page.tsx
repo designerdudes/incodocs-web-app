@@ -38,7 +38,7 @@ export default async function Page(params: params) {
     <div className="flex flex-col p-6 h-[92%]">
       <div className="flex justify-between h-[8%] items-center gap-2">
         <Link
-          href={`/${params?.params?.organizationId}/documentation/remittancePage`}
+          href={`/${params?.params?.organizationId}/documentation/remittance`}
         >
           <Button variant="outline" size="icon" className="w-8 h-8 mr-4">
             <ChevronLeft className="h-4 w-4" />
