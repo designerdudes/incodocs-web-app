@@ -23,7 +23,7 @@ export default async function Page(params: params) {
   //fetching remittance data from api
   try {
     var response = await fetchWithAuth<any>(
-      `/remittance/getall/${params.params.organizationId}`
+      `/remittance/inward/getall/${params.params.organizationId}`
     );
   } catch (error) {
     console.log("failed to fetch inward remittance");

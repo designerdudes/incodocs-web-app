@@ -103,7 +103,7 @@ const AddNewInwardRemittanceForm: React.FC<AddNewInwardRemittanceFormProps> = ({
     try {
       setIsLoading(true);
       await postData(
-        `/remittance/create`,
+        `/remittance/inward/create`,
         {
           ...data,
           organizationId: params.organizationId,
@@ -113,7 +113,7 @@ const AddNewInwardRemittanceForm: React.FC<AddNewInwardRemittanceFormProps> = ({
         }
       );
       toast.success("Inward Remittance added successfully");
-      router.push(`/${params.organizationId}/documentation/remittance`);
+      router.push(`/${params.organizationId}/documentation/remittance/inwardRemittance`);
     } catch (error: any) {
       console.log(error);
       toast.error(error?.response?.data?.message || "Something went wrong");
