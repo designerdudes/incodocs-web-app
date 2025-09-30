@@ -37,7 +37,7 @@ export function DataTableCellActions({ row }: Props) {
       const endpoint = `/remittance/inward/delete/${id}`;
       await deleteData(endpoint);
       toast.success(`Remittance deleted successfully`);
-
+      window.location.reload();
     } catch {
       toast.error(`Failed to delete Remittance`);
     }

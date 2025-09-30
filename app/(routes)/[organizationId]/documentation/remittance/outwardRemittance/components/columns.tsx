@@ -1,52 +1,28 @@
 "use client";
 import { ColumnDef, FilterFn } from "@tanstack/react-table";
 import { Checkbox } from "@/components/ui/checkbox";
-
 import moment from "moment";
-import { Copy, ChevronDown } from "lucide-react";
-import { Remittance } from "../data/schema";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-// import ViewAllComponent from "./viewAllComponent";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { putData } from "@/axiosUtility/api";
-import toast from "react-hot-toast";
-import ConfirmationDialog from "@/components/ConfirmationDialog";
 import { ColumnHeader } from "./column-header";
 import { DataTableCellActions } from "./cell-actions";
+import { Remittance } from "../data/schema";
+import { useState } from "react";
+import { Eye } from "lucide-react";
 
-// Extend TableMeta to include updateData
-interface CustomTableMeta<TData> {
-  updateData: (rowIndex: number, columnId: string, value: unknown) => void;
-}
-
+// Multi-column filter (search)
 const multiColumnFilterFn: FilterFn<Remittance> = (
   row,
   columnId,
   filterValue
 ) => {
-  const consigneeName =
-    typeof row.original?.consigneeId === "string"
-      ? row.original?.consigneeId
-      : row.original?.consigneeId?.name || "";
-
-  const searchableRowContent = [
-    row.original.inwardRemittanceNumber,
-    row.original.invoiceNumber,
-    consigneeName,
-  ]
+  const rowContent = Object.values(row.original || {})
     .join(" ")
     .toLowerCase();
-
   const searchTerm = (filterValue ?? "").toLowerCase();
-  return searchableRowContent.includes(searchTerm);
+  return rowContent.includes(searchTerm);
 };
 
 const statusFilterFn: FilterFn<Remittance> = (
@@ -120,209 +96,121 @@ export const columns: ColumnDef<Remittance>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+
   {
-    accessorKey: "inwardRemittanceNumber",
+    accessorKey: "customerName",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Remittance No." />
+      <ColumnHeader column={column} title="Customer Name" />
     ),
     cell: ({ row }) => (
-      <div className="flex items-center space-x-2">
-        <span className="truncate font-medium">
-          {row.original.inwardRemittanceNumber || "N/A"}
-        </span>
-        {row.original.inwardRemittanceNumber && (
-          <Copy
-            className="h-3 w-3 text-gray-500 cursor-pointer hover:text-blue-700"
-            onClick={() => {
-              if (row.original.inwardRemittanceNumber) {
-                navigator.clipboard.writeText(row.original.inwardRemittanceNumber);
-              }
-            }}
-          />
-        )}
-      </div>
+      <span className="truncate font-medium">
+        {row.original.customerName || "N/A"}
+      </span>
     ),
     filterFn: multiColumnFilterFn,
   },
+
   {
-    accessorKey: "invoiceNumber",
+    accessorKey: "paymentDate",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Invoice No" />
+      <ColumnHeader column={column} title="Payment Date" />
     ),
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original?.invoiceNumber || "N/A"}
-        </span>
-      </div>
+      <span className="truncate font-medium">
+        {row.original.paymentDate
+          ? moment(row.original.paymentDate).format("MMM Do YY")
+          : "N/A"}
+      </span>
     ),
-    filterFn: multiColumnFilterFn,
   },
-  {
-    accessorKey: "consignee",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Consignee" />
-    ),
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {typeof row.original?.consigneeId === "string"
-            ? row.original.consigneeId
-            : row.original?.consigneeId?.name || "N/A"}
-        </span>
-      </div>
-    ),
-    size: 300,
-  },
-  {
-    accessorKey: "invoiceCopy",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Invoice Copy" />
-    ),
-    cell: ({ row }) => {
-      const invoiceCopy = row.original?.invoiceCopy || [];
-      return (
-        <div className="flex space-x-2">
-          {invoiceCopy && invoiceCopy.length > 0 ? (
+   {
+        accessorKey: "amount", // ✅ Correct key
+        header: ({ column }) => (
             <Button
-              onClick={
-                () => {
-                  window.open(row.original.invoiceCopy)
+                variant="ghost"
+                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            >
+                 Amount
+            </Button>
+        ),
+        cell: ({ row }) => (
+            <div className="capitalize">
+                {
+                    new Intl.NumberFormat("en-IN", {
+                        style: "currency",
+                        currency: "INR",
+                        minimumFractionDigits: 0,
+
+                    }).format(row?.original?.amount as any)
+
                 }
-              }
-              variant={"link"}>View</Button>
-          ) : (
-            <span className="truncate font-medium">N/A</span>
-          )}
-        </div>
-      );
+            </div>
+        ),
     },
-  },
-  {
-    accessorKey: "inwardRemittanceCopy",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Remittance Copy" />
-    ),
-    cell: ({ row }) => {
-      const invoiceCopy = row.original?.inwardRemittanceCopy || [];
-      return (
-        <div className="flex space-x-2">
-          {invoiceCopy && invoiceCopy.length > 0 ? (
-            <Button
-              onClick={
-                () => {
-                  window.open(row.original.invoiceCopy)
-                }
-              }
-              variant={"link"}>View</Button>
-          ) : (
-            <span className="truncate font-medium">N/A</span>
-          )}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "invoiceValue",
-    header: ({ column }) => <ColumnHeader column={column} title="Invoice Value" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.invoiceValue
-            ? new Intl.NumberFormat("en-IN", {
-              style: "currency",
-              currency: "USD",
-            }).format(row.original.invoiceValue)
-            : "N/A"}
 
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "inwardRemittanceValue",
-    header: ({ column }) => <ColumnHeader column={column} title="Remittance Value" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.inwardRemittanceValue
-            ? new Intl.NumberFormat("en-IN", {
-              style: "currency",
-              currency: "USD",
-            }).format(row.original.inwardRemittanceValue)
-            : "N/A"}
+  // {
+  //   accessorKey: "amount",
+  //   header: ({ column }) => <ColumnHeader column={column} title="Amount" />,
+  //   cell: ({ row }) => (
+  //     <span className="truncate font-medium">
+  //       {row.original.amount
+  //         ? new Intl.NumberFormat("en-IN", {
+  //             style: "currency",
+  //             currency: "INR",
+  //           }).format(row.original?.amount)
+  //         : "N/A"}
+  //     </span>
+  //   ),
+  // },
 
-        </span>
-      </div>
-    ),
-  },
-
-
-  {
-    accessorKey: "differenceAmount",
-    header: ({ column }) => <ColumnHeader column={column} title="Difference Amount" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {
-
-            (row.original.invoiceValue ?? 0) - (row.original.inwardRemittanceValue ?? 0) > 0
-              ? new Intl.NumberFormat("en-IN", {
-                style: "currency",
-                currency: "USD",
-              }).format((row.original?.invoiceValue ?? 0) - (row.original?.inwardRemittanceValue ?? 0))
-              : "N/A"}
-        </span>
-      </div>
-    ),
-  },
-  {
-    accessorKey: "invoiceDate",
-    header: ({ column }) => <ColumnHeader column={column} title="Invoice Date" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.invoiceDate
-            ? moment(row.original.invoiceDate).format("MMM Do YY")
-            : "N/A"}
-        </span>
-      </div>
-    ),
-  },
-
-  {
-    accessorKey: "inwardRemittanceDate",
-    header: ({ column }) => <ColumnHeader column={column} title="Remittance Date" />,
-    cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.inwardRemittanceDate
-            ? moment(row.original.inwardRemittanceDate).format("MMM Do YY")
-            : "N/A"}
-        </span>
-      </div>
-    ),
-  },
-
-  {
-    accessorKey: "status",
-    header: ({ column }) => <ColumnHeader column={column} title="Status" />,
-    cell: ({ row, table }) => <StatusCell row={row} table={table} />,
-    filterFn: statusFilterFn,
-    size: 300,
-  },
   {
     accessorKey: "method",
     header: ({ column }) => <ColumnHeader column={column} title="Method" />,
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.method !== undefined
-            ? row.original.method.split("_").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")
-            : "N/A"}
-        </span>
-      </div>
+      <span className="truncate font-medium capitalize">
+        {row.original.method || "N/A"}
+      </span>
     ),
+  },
+
+  {
+    accessorKey: "bankName",
+    header: ({ column }) => <ColumnHeader column={column} title="Bank Name" />,
+    cell: ({ row }) => (
+      <span className="truncate font-medium">
+        {row.original.bankName || "N/A"}
+      </span>
+    ),
+  },
+   
+  {
+    accessorKey: "paymentProofUrl",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Payment Proof" />
+    ),
+    cell: ({ row }) =>
+      row.original.paymentProofUrl ? (
+        <Button
+          onClick={() => window.open(row.original.paymentProofUrl, "_blank")}
+          variant="link"
+        >
+          View
+        </Button>
+      ) : (
+        <span className="truncate font-medium">N/A</span>
+      ),
+  },
+{
+    accessorKey: "description",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Description" />
+    ),
+    cell: ({ row }) => (
+      <span className="truncate font-medium">
+        {row.original.description || "N/A"}
+      </span>
+    ),
+    size: 250,
   },
   {
     accessorKey: "createdBy",
@@ -338,7 +226,7 @@ export const columns: ColumnDef<Remittance>[] = [
             {row.original.createdBy?.fullName?.charAt(0) || "U"}
           </AvatarFallback>
         </Avatar>
-        <div className="flex flex-col space-y-1 leading-none">
+        <div className="flex flex-col leading-none">
           <span className="capitalize">
             {row.original.createdBy?.fullName || "Unknown"}
           </span>
@@ -350,19 +238,19 @@ export const columns: ColumnDef<Remittance>[] = [
     ),
     size: 280,
   },
+
   {
     accessorKey: "createdAt",
     header: ({ column }) => <ColumnHeader column={column} title="Created At" />,
     cell: ({ row }) => (
-      <div className="flex space-x-2">
-        <span className="truncate font-medium">
-          {row.original.createdAt
-            ? moment(row.original.createdAt).format("MMM Do YY")
-            : "N/A"}
-        </span>
-      </div>
+      <span className="truncate font-medium">
+        {row.original.createdAt
+          ? moment(row.original.createdAt).format("MMM Do YY")
+          : "N/A"}
+      </span>
     ),
   },
+
   {
     id: "actions",
     header: ({ column }) => <ColumnHeader column={column} title="Action" />,

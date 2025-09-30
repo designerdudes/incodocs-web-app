@@ -4,7 +4,7 @@ import Heading from "@/components/ui/heading";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
-import AddNewInwardRemittanceForm from "@/components/forms/AddNewInwardRemittanceForm";
+import AddNewOutwardRemittanceForm from "@/components/forms/AddNewOutwardRemittanceForm";
 
 
 
@@ -21,16 +21,16 @@ export default function AddNewInwardRemittance() {
                 <div className="flex-1">
                     <Heading
                         className="leading-tight"
-                        title="Add New Inward Remittance"
+                        title="Add New Outward Remittance"
                     />
                     <p className="text-muted-foreground text-sm">
-                        Complete the form below to add a new inward remittance
+                        Complete the form below to add a new outward remittance
                     </p>
                 </div>
             </div>
             <Separator orientation="horizontal" />
             <div className="max-h-full ">
-                <AddNewInwardRemittanceForm />
+                <AddNewOutwardRemittanceForm />
             </div>
         </div>
     );

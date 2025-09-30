@@ -37,15 +37,12 @@ export const remittanceSchema = z.object({
 
 export interface Remittance {
   _id?: string;
-  inwardRemittanceNumber?: string;
-  inwardRemittanceDate?: string;
-  inwardRemittanceValue?: number;
-  inwardRemittanceCopy?: string;
-  invoiceNumber?: string;
-  invoiceValue?: number;
-  invoiceDate?: string;
-  invoiceCopy?: string;
-  differenceAmount?: number;
+  customerName: String,
+  bankName: String,
+  paymentDate:Date,
+  paymentProofUrl?:string,
+  amount: Number,
+  description: String,
   method?: "bank_transfer" | "cash" | "check" | "other";
   organizationId?: {
     _id?: string;
@@ -53,17 +50,6 @@ export interface Remittance {
     address?: string;
     email?: string;
     mobileNo?: number;
-    createdAt?: string;
-    updatedAt?: string;
-    __v?: number;
-  };
-  consigneeId?: string | {
-    _id: string;
-    name: string;
-    address?: string;
-    telephoneNo?: number;
-    email?: string;
-    organizationId?: string;
     createdAt?: string;
     updatedAt?: string;
     __v?: number;

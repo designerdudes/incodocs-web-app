@@ -34,10 +34,10 @@ export function DataTableCellActions({ row }: Props) {
   const deleteEntity = async () => {
     if (!id) return toast.error("ID is missing");
     try {
-      const endpoint = `/remittance/delete/${id}`;
+      const endpoint = `/remittance/outward/delete/${id}`;
       await deleteData(endpoint);
       toast.success(`Remittance deleted successfully`);
-
+      window.location.reload();
     } catch {
       toast.error(`Failed to delete Remittance`);
     }
