@@ -420,6 +420,7 @@ export function CommercialInvoiceDetails({
                                 "clearanceCommercialInvoiceUrl"
                               )}
                               storageKey={`clearanceCommercialInvoiceUrl`}
+                              module="Shipment/Clearance Commercial Invoice/Invoices"
                             />
                           </FormControl>
                           <FormMessage />
@@ -465,6 +466,7 @@ export function CommercialInvoiceDetails({
                                 "actualCommercialInvoiceUrl"
                               )}
                               storageKey={`actualCommercialInvoiceUrl`}
+                              module="Shipment/Actual Commercial Invoice/Invoices"
                             />
                           </FormControl>
                           <FormMessage />
@@ -506,6 +508,7 @@ export function CommercialInvoiceDetails({
                                 "saberInvoiceUrl"
                               )}
                               storageKey={`saberInvoiceUrl`}
+                              module="Shipment/SABER Invoice/Invoices"
                             />
                           </FormControl>
                           <FormMessage />
@@ -544,6 +547,7 @@ export function CommercialInvoiceDetails({
                                 "packingListUrl"
                               )}
                               storageKey={`packingListUr`}
+                              module="Shipment/Packing List"
                             />
                           </FormControl>
                           <FormMessage />

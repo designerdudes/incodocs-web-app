@@ -265,7 +265,8 @@ function Transporterform({
                 <FormItem>
                   <FormLabel>MSME Certificate</FormLabel>
                   <FormControl>
-                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                    <FileUploadField name="addmsme" storageKey="addmsme" 
+                    module="documentation/parties/Transporters"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -279,7 +280,8 @@ function Transporterform({
                 <FormItem>
                   <FormLabel>PAN File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="panfile" storageKey="panfile" />
+                    <FileUploadField name="panfile" storageKey="panfile"
+                    module="documentation/parties/Transporters" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -293,7 +295,8 @@ function Transporterform({
                 <FormItem>
                   <FormLabel>TAN File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="panfile" storageKey="panfile" />
+                    <FileUploadField name="panfile" storageKey="panfile"
+                    module="documentation/parties/Transporters" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -306,7 +309,8 @@ function Transporterform({
                 <FormItem>
                   <FormLabel>GST File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                    <FileUploadField name="gstfile" storageKey="gstfile" 
+                    module="documentation/parties/Transporters"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -454,6 +458,7 @@ function Transporterform({
                                 <FileUploadField
                                   name={`documents.${index}.fileUrl`}
                                   storageKey="documents_fileUrl"
+                                  module="documentation/parties/Transporters"
                                 />
                               </FormControl>
                               <FormMessage />

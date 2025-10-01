@@ -339,6 +339,7 @@ export function BillOfLadingDetails({
                             <FileUploadField
                               name={getFieldName<FormData>(index, "uploadBLUrl")}
                               storageKey={`uploadBLUrl`}
+                              module="Shipment/BL"
                             />
                           </FormControl>
                           <FormMessage />

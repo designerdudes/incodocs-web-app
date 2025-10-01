@@ -281,7 +281,8 @@ export default function CustomBrokerForm({
                 <FormItem>
                   <FormLabel>MSME Certificate</FormLabel>
                   <FormControl>
-                    <FileUploadField name="addmsme" storageKey="addmsme" />
+                    <FileUploadField name="addmsme" storageKey="addmsme"
+                    module="documentation/parties/Custom Broker" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -295,7 +296,9 @@ export default function CustomBrokerForm({
                 <FormItem>
                   <FormLabel>PAN File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="panfile" storageKey="panfile" />
+                    <FileUploadField name="panfile" storageKey="panfile"
+                    module="documentation/parties/Custom Broker" />
+                     
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -309,7 +312,9 @@ export default function CustomBrokerForm({
                 <FormItem>
                   <FormLabel>TAN File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="panfile" storageKey="panfile" />
+                    <FileUploadField name="panfile" storageKey="panfile" 
+                    module="documentation/parties/Custom Broker" />
+                    
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -322,7 +327,9 @@ export default function CustomBrokerForm({
                 <FormItem>
                   <FormLabel>GST File</FormLabel>
                   <FormControl>
-                    <FileUploadField name="gstfile" storageKey="gstfile" />
+                    <FileUploadField name="gstfile" storageKey="gstfile"
+                    module="documentation/parties/Custom Broker" />
+                     
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -472,7 +479,9 @@ export default function CustomBrokerForm({
                                 <FileUploadField
                                   name={`documents.${index}.fileUrl`}
                                   storageKey="documents_fileUrl"
-                                />
+                    module="documentation/parties/Custom Broker" />
+
+                            
                               </FormControl>
                               <FormMessage />
                             </FormItem>

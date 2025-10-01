@@ -270,6 +270,7 @@ export function OtherDetails({ saveProgress }: SaveDetailsProps) {
                             <FileUploadField
                               name={getFieldName<FormData>(index, "uploadCopyOfCertificate")}
                               storageKey={`uploadCopyOfCertificate}`}
+                              module="Shipment/Document"
                             />
                           </FormControl>
                           <FormMessage />
