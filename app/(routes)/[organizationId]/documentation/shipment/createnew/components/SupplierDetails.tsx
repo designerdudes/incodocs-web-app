@@ -462,6 +462,7 @@ export function SupplierDetails({
                                         `invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`
                                       )}
                                       storageKey={`invoices[${invoiceIndex}].clearanceSupplierInvoiceUrl`}
+                                      module="Shipment/Supplier/Invoices"
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -620,6 +621,7 @@ export function SupplierDetails({
                 <FileUploadField
                   name="supplierDetails.actual.actualSupplierInvoiceUrl"
                   storageKey="supplierDetails_actualSupplierInvoice"
+                  module="Shipment/ActualSupplier/Invoices"
                 />
               </FormControl>
               <FormMessage />
@@ -656,6 +658,7 @@ export function SupplierDetails({
                 <FileUploadField
                   name="supplierDetails.actual.shippingBillUrl"
                   storageKey="supplierDetails.actual.shippingBillUrl"
+                  module="Shipment/Shipping Bill/Invoices"
                 />
               </FormControl>
               <FormMessage />

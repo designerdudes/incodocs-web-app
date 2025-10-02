@@ -410,6 +410,7 @@ export function ShippingBillDetails({
                             <FileUploadField
                               name={getFieldName(index, "shippingBillUrl")}
                               storageKey={`shippingBillUrl`}
+                              module="Shipment/Shipping Bill/Invoices"
                             />
                           </FormControl>
                           <FormMessage />
