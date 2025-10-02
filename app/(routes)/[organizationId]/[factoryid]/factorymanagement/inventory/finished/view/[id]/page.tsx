@@ -86,9 +86,9 @@ export default async function ViewFinishedPage({ params }: Props) {
   // console.log(FinishedMaterial);
   const adjustedDimensions = FinishedMaterial?.dimensions
     ? calculateDimensions(
-        FinishedMaterial.dimensions.length.value,
-        FinishedMaterial.dimensions.height.value
-      )
+      FinishedMaterial.dimensions.length.value,
+      FinishedMaterial.dimensions.height.value
+    )
     : null;
 
   function calculateDimensions(
@@ -149,7 +149,7 @@ export default async function ViewFinishedPage({ params }: Props) {
             <Card x-chunk="dashboard-07-chunk-0">
               <CardHeader>
                 <CardTitle>Cutting Inches With Allowance</CardTitle>
-                <CardDescription>{}</CardDescription>
+                <CardDescription>{ }</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -254,7 +254,7 @@ export default async function ViewFinishedPage({ params }: Props) {
             <Card x-chunk="dashboard-07-chunk-0">
               <CardHeader>
                 <CardTitle>Cutting Inches WithOut Allowance</CardTitle>
-                <CardDescription>{}</CardDescription>
+                <CardDescription>{ }</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -352,7 +352,7 @@ export default async function ViewFinishedPage({ params }: Props) {
             <Card x-chunk="dashboard-07-chunk-0">
               <CardHeader>
                 <CardTitle>Polishing Inches With Allowance</CardTitle>
-                <CardDescription>{}</CardDescription>
+                <CardDescription>{ }</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -374,22 +374,6 @@ export default async function ViewFinishedPage({ params }: Props) {
                         Slab Number
                       </TableCell>
                       <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="whitespace-nowrap">
-                        Trim Length(inch)
-                      </TableCell>
-                      <TableCell>
-                        {FinishedMaterial?.trim?.length?.value}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="whitespace-nowrap">
-                        Trim Height(inch)
-                      </TableCell>
-                      <TableCell>
-                        {FinishedMaterial?.trim?.height?.value}
-                      </TableCell>
                     </TableRow>
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
@@ -472,7 +456,7 @@ export default async function ViewFinishedPage({ params }: Props) {
             <Card x-chunk="dashboard-07-chunk-0">
               <CardHeader>
                 <CardTitle>Polishing Inches WithOut Allowance</CardTitle>
-                <CardDescription>{}</CardDescription>
+                <CardDescription>{ }</CardDescription>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -495,22 +479,7 @@ export default async function ViewFinishedPage({ params }: Props) {
                       </TableCell>
                       <TableCell>{FinishedMaterial?.slabNumber}</TableCell>
                     </TableRow>
-                    <TableRow>
-                      <TableCell className="whitespace-nowrap">
-                        Trim Length(inch)
-                      </TableCell>
-                      <TableCell>
-                        {FinishedMaterial?.trim?.length?.value}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="whitespace-nowrap">
-                        Trim Height(inch)
-                      </TableCell>
-                      <TableCell>
-                        {FinishedMaterial?.trim?.height?.value}
-                      </TableCell>
-                    </TableRow>
+
                     <TableRow>
                       <TableCell className="whitespace-nowrap">
                         Length (inch)
