@@ -34,16 +34,16 @@ export function DataTableCellActions({ row }: Props) {
   const deleteEntity = async () => {
     if (!id) return toast.error("ID is missing");
     try {
-      const endpoint = `/remittance/delete/${id}`;
+      const endpoint = `/remittance/outward/delete/${id}`;
       await deleteData(endpoint);
       toast.success(`Remittance deleted successfully`);
-
+      window.location.reload();
     } catch {
       toast.error(`Failed to delete Remittance`);
     }
   };
 
-  const viewPath = `./outwardRemittance/view/${data?.consigneeId?._id}`;
+  const viewPath = `./outwardRemittance/view/${id}`;
   const editPath = `./outwardRemittance/edit/${id}`;
 
   return (
@@ -57,13 +57,13 @@ export function DataTableCellActions({ row }: Props) {
       <DropdownMenuContent align="end" className="gap-2">
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {!pathname.includes('outwardRemittance/view') &&
+        
           <DropdownMenuItem asChild>
             <a href={viewPath}>
               <EyeIcon className="mr-2 h-4 w-4" />
-              {"View All Consignee Remittances"}
+              {"View Details"}
             </a>
-          </DropdownMenuItem>}
+          </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
           <a href={editPath} target="_blank" rel="noopener noreferrer">

@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import EditInwardRemittanceForm from "@/components/forms/Editremittanceform";
 import { cookies } from "next/headers";
 import { fetchWithAuth } from "@/lib/utils/fetchWithAuth";
+import EditOutwardRemittanceForm from "@/components/forms/EditOutwardRemittance";
 
 interface EditRemittancePageProps {
   params: {
@@ -23,7 +24,7 @@ export default async function EditInwardRemittance({ params }: EditRemittancePag
   let EditData = null;
 
  try {
-     var res = await fetchWithAuth<any>(`/remittance/getbyid/${id}`, 
+     var res = await fetchWithAuth<any>(`/remittance/outward/getbyid/${id}`, 
      );
    } catch (err) {
      console.error("Failed to fetch remittance data:", err);
@@ -53,7 +54,7 @@ export default async function EditInwardRemittance({ params }: EditRemittancePag
 
       {/* Form */}
       <div className="max-h-full ">
-        <EditInwardRemittanceForm params = {EditData} />
+        <EditOutwardRemittanceForm params = {EditData} />
       </div>
     </div>
   );

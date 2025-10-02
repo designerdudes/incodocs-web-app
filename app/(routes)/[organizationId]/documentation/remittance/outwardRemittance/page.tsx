@@ -26,7 +26,7 @@ export default async function Page(params: params) {
     try{
 
         var response = await fetchWithAuth<any>(
-            `/remittance/getall/${params.params.organizationId}`,
+            `/remittance/outward/getall/${params.params.organizationId}`,
         );
     }catch(error){
         console.log("fail to fetch Outward Remittance Data");
