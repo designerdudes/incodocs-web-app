@@ -79,14 +79,14 @@ export default async function Page({ params }: Props) {
           <div className="flex-1">
             <Heading
               className="leading-tight"
-              title={`${responseData?.customerName} - Outward Remittances`}
+              title={`Outward Remittances - ${responseData?.customerName}`}
             />
             <p className="text-muted-foreground text-sm mt-2">
-              View all outward remittances - {responseData?.customerName}
+              View outward remittances - {responseData?.customerName}
             </p>
           </div>
           <div className="flex gap-2">
-            {/* <DownloadInvRemittance remittanceData={responseData} consigneeData={responseData[0]?.consigneeId} /> */}
+            {/* <DownloadInvRemittance remittanceData={responseData} customerData={responseData[0]?.customerName} /> */}
           </div>
         </div>
       </div>
