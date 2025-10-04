@@ -56,7 +56,7 @@ export default async function Page(params: params) {
                 {/* <Link href={`./remittance/createnew`}>
             <Button className="bg-primary text-white">Add New Remittance</Button>
         </Link> */}
-                <DownloadInvRemittance remittanceData={remittanceData} />
+                {/* <DownloadInvRemittance remittanceData={remittanceData} /> */}
                 <a
                     href="./outwardRemittance/addnew"
                     target="_blank"
